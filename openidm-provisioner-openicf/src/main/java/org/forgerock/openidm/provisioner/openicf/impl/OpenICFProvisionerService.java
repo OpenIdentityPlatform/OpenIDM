@@ -348,10 +348,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             syncFailureHandler = syncFailureHandlerFactory.create(jsonConfiguration.get("syncFailureHandler"));
 
-            if (connectorReference.getConnectorLocation().isLocal()
-                    && connectorInfoProvider.findConnectorInfo(connectorReference) == null) {
-                // Not possible to satisfy the connector reference, bail out
-                throw new InvalidException("Connector not found: " + connectorReference.getConnectorKey());
+            if (connectorInfoProvider.findConnectorInfo(connectorReference) == null) {
+                if (connectorReference.getConnectorLocation().isLocal()) {
+                    // Not possible to satisfy the connector reference, bail out
+                    throw new InvalidException("Connector not found: " + connectorReference.getConnectorKey());
+                } else {
+                    // Connector may become available later
+                    logger.warn("Remote OpenICF Connector {} could not be located, may not yet be connected to " +
+                            "the remote connector server.", connectorReference);
+                }
             }
 
             connectorFacadeCallback = new ConnectorFacadeCallback() {
