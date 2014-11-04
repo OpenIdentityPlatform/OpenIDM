@@ -1380,7 +1380,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
                 facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
 
-                JsonValue result = new JsonValue(new HashMap<String, Object>());
+                JsonValue result = before.getContent().copy();
                 result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
                 if (null != uid.getRevision()) {
                     result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
