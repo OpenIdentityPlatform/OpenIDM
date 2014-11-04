@@ -880,30 +880,32 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         ConnectorReference connectorReference =
                                 ConnectorUtil.getConnectorReference(config);
                         ConnectorInfo ci = findConnectorInfo(connectorReference);
-                        if (null != ci) {
-                            properties =
-                                    ci.createDefaultAPIConfiguration().getConfigurationProperties();
+                        if (null == ci) {
+                            throw new JsonValueException(config);
                         }
+                        properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
                     } catch (JsonValueException jve) {
                         throw jve;
                     } catch (Exception e) {
                         logger.error("Failed to parse the config of {}-{}: {}", new Object[] {
                             pidOrFactory, instanceAlias, e.getMessage()}, e);
+                        throw new JsonValueException(config, e);
                     }
-                    if (null != properties) {
-                        JsonPointer configurationProperties =
-                                new JsonPointer(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES);
-                        result = new ArrayList<JsonPointer>(properties.getPropertyNames().size());
-                        for (String name : properties.getPropertyNames()) {
-                            ConfigurationProperty property = properties.getProperty(name);
-                            if (property.isConfidential()
-                                    || property.getType().equals(GuardedString.class)
-                                    || property.getType().equals(GuardedByteArray.class)) {
-                                result.add(configurationProperties.child(name));
-                            }
-                        }
-                    } else {
+
+                    if (null == properties) {
                         throw new WaitForMetaData(pidOrFactory);
+                    }
+
+                    JsonPointer configurationProperties =
+                            new JsonPointer(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES);
+                    result = new ArrayList<JsonPointer>(properties.getPropertyNames().size());
+                    for (String name : properties.getPropertyNames()) {
+                        ConfigurationProperty property = properties.getProperty(name);
+                        if (property.isConfidential()
+                                || property.getType().equals(GuardedString.class)
+                                || property.getType().equals(GuardedByteArray.class)) {
+                            result.add(configurationProperties.child(name));
+                        }
                     }
                 } else {
                     throw new WaitForMetaData("Wait for the MetaDataProvider service newBuilder");
