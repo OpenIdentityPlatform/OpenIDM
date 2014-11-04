@@ -1,3 +1,6 @@
+<div class="title-bar no-bottom-border">
+    <h1>{{mapping.name}}</h1>
+</div>
 <div id="mappingConfigHolder">
     <div class="mapping-config-body">
         <div class="mapping-body">
@@ -19,29 +22,30 @@
                 <p>{{targetType}}</p>
             </div>
         </div>
+        <div>
+            <div id="stoppingSync">
+                <h3>{{t "templates.mapping.stoppingSync"}} {{t "templates.mapping.pleaseStandBy"}}...</h3>
+            </div>
+        </div>
         <div class="mapping-bottom-bar">
-            <div class="inline" id="{{mapping.name}}_label">{{mapping.name}}</div>
+            <div id="syncStatus" class="sync-status">
+                <i class="fa fa-caret-right"></i>
+                <span id="syncLabel">{{syncLabel}}</span>
+                <span id="syncMessage">{{syncStatus}}</span>
+            </div>
             <div class="float-right">
-                {{t "templates.mapping.syncStatus"}}: <span id="syncStatus" class="syncStatus"><a href="#">{{syncStatus}}</a></span>
                 <button id="syncNowButton" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
                 <span class="fa fa-clock-o"></span>
                 {{t "templates.mapping.syncNow"}}
                 </button>
                 <button id="stopSyncButton" type="button" title="{{t "templates.mapping.stopSync"}}" class="button" style="display:none;">
                 <span class="fa fa-clock-o"></span>
-                {{t "templates.mapping.stopSync"}}
+                Cancel
                 </button>
             </div>
         </div>
+        <div id="syncStatusDetails" style="display:none;"></div>
     </div>
 </div>
-<div style="text-align:center;">
-    <div class="reconProgressContainer" style="margin-top:10px;display:none;cursor: pointer;">
-        <div id="syncNowProgress"><div class="progress-label"></div></div>
-    </div>
-    <div id="stoppingSync" style="margin-top:10px;display:none;">
-        <h3>{{t "templates.mapping.stoppingSync"}} {{t "templates.mapping.pleaseStandBy"}}...</h3>
-    </div>
-</div>
-<div><pre id="syncStatusDetails" style="display:none;"></pre></div>
+
 <div id="mappingContent"></div>

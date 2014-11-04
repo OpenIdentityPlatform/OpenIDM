@@ -50,8 +50,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/ScriptDialog",
     "./util/AutoCompleteUtils",
     "./util/Scheduler",
-    "./util/ReconProgress",
     "./util/MappingUtils",
+    "./util/ReconDetailsView",
 
     "./objectTypes/ObjectTypesDialog",
 

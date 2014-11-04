@@ -1,89 +1,192 @@
-#reconContainer {
-    #reconTabs {
-        position: relative;
-        div.actionContainer { 
-            display: none;
-            position: absolute;
-            z-index: 2;
-            background: white;
-            width: 882px;
-            top: 50px;
-            padding: 5px 0;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-
-        div ul {
-            width:  100%;
-            height: 40px;  
-            li {
-                display: block;
-                width: 25%;
-                float: left;
-                text-align: center;    
-            }
-        }
-    }
+#stoppingSync {
+  display:none;
 }
 
-.reconProgressContainer {
-    position: relative;
-    width: 600px;
-    margin: 0 auto;
-    min-height: 30px;
-
-}
-#analyzeNowProgress {
-    display:none;
-}
-.progress-label {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    top: 4px;
-    font-weight: bold;
-    text-shadow: 1px 1px 0 #fff;
-}
-.ui-jqgrid .ui-pg-input {
-    height: 16px;
-    padding: 0px 10px;
+.sync-container {
+  float:left;
+  height:28px;
+  background-color:#f5f5f5;
 }
 
-.ui-jqgrid .ui-pg-selbox {
-    width: 50px;
-    font-size: 1em;
-    height: 20px;
-    padding: 0;
-    margin: 0;
+.sync-container-left {
+  border-right:1px solid #ccc;
 }
 
-.ui-jqgrid .jqgrow .attrTabBtn {
-    max-height: 100px;
-    overflow-y: auto;
+.sync-loading-bar.ui-progressbar{
+  display:inline-block;
+  width:100%;
+}
+
+.sync-status {
+  float:left;
+  margin-left:15px;
+  padding-top: 6px;
+  font-size: 13px;
+
+  .sync-title {
+    font-weight:bold;
+  }
+
+  .fa {
+    width:11px;
+    font-size:20px;
+    position:relative;
+    top:3px;
+    margin-right:10px;
+  }
+
+}
+
+#syncLabel {
+  font-weight:bold;
+}
+
+#syncStatusDetails {
+  cursor:default;
+}
+
+/**
+  Recon Details
+*/
+
+.sync-details-container {
+  padding: 15px 43px 15px 40px;
+
+  .no-sync-details {
+    width:100%;
+    text-align:center;
+  }
+
+  .boxed-stats {
+    border: 1px solid #e3e3e3;
+    border-right: 0px;
+    height: 60px;
+    width: 270px;
     display: inline-block;
+    padding: 10px;
+
+    p {
+      padding-bottom:0px;
+    }
+
+    .header {
+      color:#B1B7B7;
+      font-weight:bold;
+      font-size:10px;
+    }
+
+    .display-number {
+      margin-top:5px;
+      margin-bottom:5px;
+      font-size:28px;
+      font-weight:bold;
+    }
+
+    .subtitle {
+      font-size:10px;
+    }
+  }
+
+  .boxed-stats.end {
+    border-right:1px solid #e3e3e3;
+  }
+
+  .sync-results {
+    width:100%;
+  }
+
 }
 
-tr.ui-search-toolbar th {
-    vertical-align: middle;
+.sync-results {
+  .success-display {
+    color: #70a796;
+  }
+
+  .failure-display {
+    color: #ca3127;
+  }
+
+  .time-display {
+    color: #88b5a7;
+  }
+
+  .warning-display {
+    color:#e6bf24;
+  }
 }
 
-#analysisGridContainer {
-    margin-top: 10px;
+.sync-detail-list {
+  height:300px;
+  width:875px;
+  margin-top:15px;
+
+  .sync-item {
+    height:40px;
+    width:100%;
+
+    .fa-circle{
+      font-size: 12px;
+      padding: 15px;
+    }
+
+    .item-title {
+      display: inline-block;
+      width: 100px;
+      margin-right: 100px;
+    }
+
+    .fa-info-circle {
+      float: right;
+      margin-right: 15px;
+      margin-top: 12px;
+      font-size: 16px;
+      color:#a3a3a3;
+      cursor:pointer;
+    }
+
+    .fa-info-circle:hover {
+      color:#5a646d;
+    }
+  }
+
+  .sync-item.odd {
+    background-color: #f7f7f7;
+  }
 }
 
-.objectRepresentationHeader{
-    font-weight: bold;
-    margin-bottom: 5px;
+/*
+  Tooltip styles
+*/
+
+.recon-tooltip {
+  background-color:#ffffff;
+  background-image:none;
+  height:150px;
+  width:250px;
+  border: 0px solid #dbdbdb;
 }
 
-.objectRepresentation{
-    margin-left: 15px;
+.recon-tooltip:after, .recon-tooltip:before {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
 }
 
-#analysisGrid td {
-    padding: 5px;
-}
+.recon-tooltip:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: #ffffff;
+  border-width: 30px;
+  margin-top: -30px;
 
-.analysisGridRowAlt {
-    background: #eee;
+}
+.recon-tooltip:before {
+  border-color: rgba(219, 219, 219, 0);
+  border-left-color: #dbdbdb;
+  border-width: 33px;
+  margin-top: -33px;
 }
