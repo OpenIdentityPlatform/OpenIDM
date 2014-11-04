@@ -580,6 +580,8 @@ class ObjectMapping {
             queryScope.put("existingTarget", existingTarget.asMap());
             try {
                 result = new JsonValue(defaultMapping.exec(queryScope));
+            } catch (ScriptThrownException ste) {
+                throw toSynchronizationException(ste, name, "defaultMapping");
             } catch (ScriptException se) {
                 LOGGER.debug("{} defaultMapping script encountered exception", name, se);
                 throw new SynchronizationException(se);
@@ -810,6 +812,8 @@ class ObjectMapping {
             scope.put("global", reconContext.getStatistics().asMap());
             try {
                 resultScript.exec(scope);
+            } catch (ScriptThrownException ste) {
+                throw toSynchronizationException(ste, name, "result");
             } catch (ScriptException se) {
                 LOGGER.debug("{} result script encountered exception", name, se);
                 throw new SynchronizationException(se);
@@ -1238,6 +1242,19 @@ class ObjectMapping {
         ExplicitSyncOperation linkOp = new ExplicitSyncOperation();
         linkOp.init(sourceObject, targetObject, situation, action, reconId);
         linkOp.sync();
+    }
+    
+    /**
+     * Returns a {@link SynchronizationException} that represents the supplied {@link ScriptThrownException}.
+
+     * @param ste a ScriptThrownException
+     * @param type
+     * @return
+     */
+    private SynchronizationException toSynchronizationException(ScriptThrownException ste, String name, String type) {
+        String errorMessage = name + " " + type + " script encountered exception";
+        LOGGER.debug(errorMessage, ste);
+        return new SynchronizationException(ste.toResourceException(ResourceException.INTERNAL_ERROR, errorMessage));
     }
 
     /**
@@ -1696,6 +1713,8 @@ class ObjectMapping {
                             throw new SynchronizationException("Expecting boolean value from validSource");
                         }
                         result = (Boolean) o;
+                    } catch (ScriptThrownException ste) {
+                        throw toSynchronizationException(ste, name, "validSource");
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validSource script encountered exception", name, se);
                         throw new SynchronizationException(se);
@@ -1728,6 +1747,8 @@ class ObjectMapping {
                             throw new SynchronizationException("Expecting boolean value from validTarget");
                         }
                         result = (Boolean) o;
+                    } catch (ScriptThrownException ste) {
+                        throw toSynchronizationException(ste, name, "validTarget");
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validTarget script encountered exception", name, se);
                         throw new SynchronizationException(se);
@@ -1782,14 +1803,10 @@ class ObjectMapping {
                 try {
                     script.exec(scope);
                 } catch (ScriptThrownException se) {
-                    LOGGER.debug("{} script encountered exception", name + " " + type, se);
-                    throw new SynchronizationException(
-                            se.toResourceException(ResourceException.INTERNAL_ERROR,
-                                    name + " " + type + " script encountered exception"));
+                    throw toSynchronizationException(se, name, type);
                 } catch (ScriptException se) {
                     LOGGER.debug("{} script encountered exception", name + " " + type, se);
-                    throw new SynchronizationException(
-                            new InternalErrorException(name + " " + type + " script encountered exception", se));
+                    throw new SynchronizationException(new InternalErrorException(name + " " + type + " script encountered exception", se));
                 }
             }
         }
@@ -2130,6 +2147,8 @@ class ObjectMapping {
                         throw new SynchronizationException("Expected correlationQuery script to yield a Map");
                     }
                     result = new JsonValue(queryTargetObjectSet((Map)query)).get(QueryResult.FIELD_RESULT).required();
+                } catch (ScriptThrownException ste) {
+                    throw toSynchronizationException(ste, name, "correlationQuery");
                 } catch (ScriptException se) {
                     LOGGER.debug("{} correlationQuery script encountered exception", name, se);
                     throw new SynchronizationException(se);
