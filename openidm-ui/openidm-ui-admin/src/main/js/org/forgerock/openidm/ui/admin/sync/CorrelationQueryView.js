@@ -29,16 +29,14 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/util/ScriptEditor",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
 ], function(AdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,
-            ScriptEditor,
-            uiUtils,
-            configDelegate) {
+            InlineScriptEditor,
+            BrowserStorageDelegate) {
 
     var CorrelationQueryView = AdminAbstractView.extend({
             template: "templates/admin/sync/CorrelationQueryTemplate.html",
@@ -55,12 +53,14 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                 "change .queryType": "changeQueryType"
             },
             data: {},
-            dataModel: {},
+            model: {
+                scriptData: null
+            },
 
             /**
              * The properties following "reRender" are only passed is when the expression tree is requires re-rendering.
              *
-             * @param args {
+             * @param args
              *      sync
              *      mapping
              *      mappingName
@@ -69,15 +69,16 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
              *      script
              *      isAny
              *      selected
-             *  }
+             *
              */
             render: function(args) {
                 var hasEmptyGroups,
                     expressionTree;
 
-                this.dataModel.sync = args.sync;
-                this.dataModel.mapping = args.mapping;
-                this.dataModel.mappingName = args.mappingName;
+                this.model.sync = args.sync;
+                this.model.mapping = args.mapping;
+                this.model.mappingName = args.mappingName;
+                this.model.startSync = args.startSync;
 
                 this.data.expressionTree = {"any" : []};
 
@@ -87,25 +88,25 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                     this.data.isAny = args.isAny;
                 }
 
-                this.data.fieldNames = _.chain(this.dataModel.mapping.properties)
+                this.data.fieldNames = _.chain(this.model.mapping.properties)
                     .pluck("target")
                     .sortBy(function (name) { return name; })
                     .value();
 
                 // This is the first load and there is a correlationQuery property
-                if (!args.reRender && _.has(this.dataModel.mapping, "correlationQuery")) {
-                    if (_.has(this.dataModel.mapping.correlationQuery, "expressionTree")) {
-                        this.data.expressionTree = expressionTree = this.dataModel.mapping.correlationQuery.expressionTree;
+                if (!args.reRender && _.has(this.model.mapping, "correlationQuery")) {
+                    if (_.has(this.model.mapping.correlationQuery, "expressionTree")) {
+                        this.data.expressionTree = expressionTree = this.model.mapping.correlationQuery.expressionTree;
 
-                    } else if (_.has(this.dataModel.mapping.correlationQuery, "type")) {
-                        this.dataModel.scriptData = this.dataModel.mapping.correlationQuery;
+                    } else if (_.has(this.model.mapping.correlationQuery, "type")) {
+                        this.model.scriptData = this.model.mapping.correlationQuery;
                     }
 
                 } else if (args.reRender && args.selected === "expression") {
                     this.data.expressionTree = expressionTree = args.expressionTree;
 
                 } else if (args.reRender && args.selected === "script") {
-                    this.dataModel.scriptData = args.script;
+                    this.model.scriptData = args.script;
                 }
 
                 this.parentRender(function () {
@@ -127,47 +128,44 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                         return returnVal;
                     }
 
-                    this.dataModel.scriptEditor = ScriptEditor.generateScriptEditor({
+                    this.model.scriptEditor = InlineScriptEditor.generateScriptEditor({
                         "element": $(".queryScript"),
-                        "eventName": " ",
-                        "deleteElement": false,
-                        "deleteCallback": _.bind(function() {
-                            this.dataModel.scriptEditor.clearScriptHook();
-                            this.showHideWarning();
-                        }, this),
-                        "scriptData": this.dataModel.scriptData,
-                        "saveCallback": _.bind(this.showHideWarning, this)
-                    });
+                        "eventName": "",
+                        "noValidation": true,
+                        "scriptData": this.model.scriptData,
+                        "onChange" :  _.bind(this.showHideWarning, this),
+                        "onBlur" :  _.bind(this.showHideWarning, this)
+                    }, _.bind(function() {
+                        // There is a correlationQuery
+                        if (args.reRender || _.has(this.model.mapping, "correlationQuery")) {
+                            if (_.has(this.model.mapping.correlationQuery, "expressionTree") || args.selected === "expression") {
+                                hasEmptyGroups = emptyGroups(expressionTree);
+                                this.$el.find("#expressionTreeQueryRadio").prop("checked", true);
+                                this.$el.find(".queryScript").hide();
 
-                    // There is a correlationQuery
-                    if (args.reRender || _.has(this.dataModel.mapping, "correlationQuery")) {
-                        if (_.has(this.dataModel.mapping.correlationQuery, "expressionTree") || args.selected === "expression") {
-                            hasEmptyGroups = emptyGroups(expressionTree);
-                            this.$el.find("#expressionTreeQueryRadio").prop("checked", true);
-                            this.$el.find(".queryScript").hide();
+                            } else if (_.has(this.model.mapping.correlationQuery, "type") || args.selected === "script") {
+                                this.$el.find("#scriptQueryRadio").prop("checked", true);
+                                this.$el.find(".expressionTree").hide();
+                            }
 
-                        } else if (_.has(this.dataModel.mapping.correlationQuery, "type") || args.selected === "script") {
-                            this.$el.find("#scriptQueryRadio").prop("checked", true);
+                            // This is the fall through in case there is no correlation query for an initial render or a re-render
+                        } else {
+                            this.$el.find("#noCorrelationQueryRadio").prop("checked", true).change();
                             this.$el.find(".expressionTree").hide();
+                            this.$el.find(".queryScript").hide();
                         }
 
-                        // This is the fall through in case there is no correlation query for an initial render or a re-render
-                    } else {
-                        this.$el.find("#noCorrelationQueryRadio").prop("checked", true).change();
-                        this.$el.find(".expressionTree").hide();
-                        this.$el.find(".queryScript").hide();
-                    }
-
-                    this.$el.find(".expressionTree .expressionMenu").menu().hide();
-                    this.$el.find(".expressionTree .remove:first").prop('disabled', true);
-                    this.showHideWarning();
+                        this.$el.find(".expressionTree .expressionMenu").menu().hide();
+                        this.$el.find(".expressionTree .remove:first").prop('disabled', true);
+                        this.showHideWarning();
+                    }, this));
                 });
             },
 
             showHideWarning: function() {
                 // If the no correlation radio is selected or the script is selected and has a script hook or the expression is selected and has a field
                 if (this.$el.find("#noCorrelationQueryRadio").prop("checked") ||
-                    (this.$el.find("#scriptQueryRadio").prop("checked") && this.dataModel.scriptEditor.getScriptHook().script !== null) ||
+                    (this.$el.find("#scriptQueryRadio").prop("checked") && this.model.scriptEditor.generateScript() !== null) ||
                     (this.$el.find("#expressionTreeQueryRadio").prop("checked") && this.$el.find(".expressionTree li[field]").length > 0)) {
 
                     this.$el.find(".saveCorrelationQuery").prop('disabled', false);
@@ -181,11 +179,12 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
 
             renderExpressionTree: function() {
                 this.render({
-                    sync: this.dataModel.sync,
-                    mapping: this.dataModel.mapping,
-                    mappingName: this.dataModel.mappingName,
+                    sync: this.model.sync,
+                    mapping: this.model.mapping,
+                    mappingName: this.model.mappingName,
+                    startSync: this.model.startSync,
                     expressionTree: this.data.expressionTree,
-                    script: this.dataModel.scriptEditor.getScriptHook().script,
+                    script: this.model.scriptEditor.generateScript(),
                     isAny: _.has(this.data.expressionTree, "any") || false,
                     reRender: true,
                     selected: this.$el.find(".queryType:checked").val()
@@ -209,38 +208,61 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             saveQuery: function (e) {
                 e.preventDefault();
 
-                var query = {};
+                var query = {},
+                    btns = {};
 
                 switch (this.$el.find(".queryType:checked").val()) {
                     case "none":
-                        if (_.has(this.dataModel.mapping, "correlationQuery")) {
-                            delete this.dataModel.mapping.correlationQuery;
+                        if (_.has(this.model.mapping, "correlationQuery")) {
+                            delete this.model.mapping.correlationQuery;
                         }
                         break;
 
                     case "expression":
-                        this.dataModel.mapping.correlationQuery = {
+                        this.model.mapping.correlationQuery = {
                             expressionTree: this.data.expressionTree,
-                            mapping: this.dataModel.mappingName,
+                            mapping: this.model.mappingName,
                             type: "text/javascript",
                             file: "ui/correlateTreeToQueryFilter.js"
                         };
                         break;
 
                     case "script":
-                        this.dataModel.mapping.correlationQuery = this.dataModel.scriptEditor.getScriptHook().script;
+                        this.model.mapping.correlationQuery = this.model.scriptEditor.generateScript();
                         break;
                 }
 
-                _.each(this.dataModel.sync.mappings, function(map, key) {
-                    if (map.name === this.dataModel.mappingName) {
-                        this.dataModel.sync.mappings[key] = this.dataModel.mapping;
+                _.each(this.model.sync.mappings, function(map, key) {
+                    if (map.name === this.model.mappingName) {
+                        this.model.sync.mappings[key] = this.model.mapping;
                     }
                 }, this);
 
-                ConfigDelegate.updateEntity("sync", this.dataModel.sync).then(function() {
+                ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "correlationQuerySaveSuccess");
-                });
+                    BrowserStorageDelegate.set("currentMapping", this.model.mapping);
+
+                    btns[$.t("templates.correlation.dontRunReconcile")] = function() {
+                        $("#jqConfirm").dialog("close");
+                    };
+                    btns[$.t("templates.correlation.runReconcile")] = _.bind(function() {
+                        this.model.startSync();
+                        $("#jqConfirm").dialog("close");
+                    }, this);
+
+                    $("<div id='jqConfirm'>" + $.t("templates.correlation.note") + "</div>")
+                        .dialog({
+                            title: $.t("templates.correlation.runReconcile"),
+                            modal: true,
+                            resizable: false,
+                            width: "550px",
+                            buttons: btns,
+                            close: function() {
+                                $('#jqConfirm').dialog('destroy').remove();
+                            }
+                        });
+
+                }, this));
             },
 
             showExpressionMenu: function (e) {

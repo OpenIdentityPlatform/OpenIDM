@@ -1,11 +1,12 @@
 <div>
     <input type="radio" name="queryType" id="noCorrelationQueryRadio" class="queryType" value="none" checked="checked">
-    <span class="queryTypeTitle">{{t "templates.correlation.noQuery"}}</span>
+    <label for="noCorrelationQueryRadio" class="queryTypeTitle">{{t "templates.correlation.noQuery"}}</label>
 </div>
 
 <div>
     <input type="radio" name="queryType" id="expressionTreeQueryRadio" value="expression" class="queryType">
-    <span class="queryTypeTitle">{{t "templates.correlation.expressionBuilder"}}</span>
+    <label for="expressionTreeQueryRadio" class="queryTypeTitle">{{t "templates.correlation.expressionBuilder"}}</label>
+
     <div class="expressionTree queryContainer">
         <p>{{t "templates.correlation.query.correlationDescription"}}</p>
 
@@ -66,7 +67,7 @@
 
 <div>
     <input type="radio" name="queryType" id="scriptQueryRadio" value="script" class="queryType">
-    <span class="queryTypeTitle">{{t "templates.correlation.script"}}</span>
+    <label for="scriptQueryRadio" class="queryTypeTitle">{{t "templates.correlation.script"}}</label>
     <div class="queryScript queryContainer"></div>
 </div>
 

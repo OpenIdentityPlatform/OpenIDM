@@ -27,7 +27,7 @@
     border: 1px #ddd solid;
     padding-left: 0;
     padding-right: 0;
-    padding-bottom: 0;
+    padding-bottom: 10px;
     background-color: white;
     margin-top: 15px;
 
@@ -63,6 +63,15 @@
     .queryTypeTitle {
       font-weight: bold;
       margin: 0 0 0 4px;
+      display: inline;
+      float: none;
+      font-size: inherit;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+
+    input[type="radio"] {
+      cursor: pointer;
     }
 
     .queryContainer {
@@ -137,18 +146,15 @@
     }
 
     .queryScript {
-      .event-hook-body {
-        .scriptEditorLabel{
-          display: none;
-        }
 
-        .group-field-block {
+      .event-hook-piece {
+        label {
+          display: block;
           margin: 0;
           padding: 0;
-        }
-
-        .event-hook-empty {
-          margin: 0;
+          float: none;
+          text-align: left;
+          font-size: inherit;
         }
       }
     }

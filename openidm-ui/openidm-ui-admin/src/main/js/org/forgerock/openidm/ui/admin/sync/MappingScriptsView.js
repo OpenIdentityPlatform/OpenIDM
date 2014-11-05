@@ -30,13 +30,15 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptEditor",
-    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
 ], function(AdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,
             ScriptEditor,
-            InlineScriptEditor) {
+            InlineScriptEditor,
+            BrowserStorageDelegate) {
     var MappingScriptsView = AdminAbstractView.extend({
         template: "templates/admin/sync/MappingScriptsTemplate.html",
         baseTemplate: "templates/admin/AdminBaseTemplate.html",
@@ -57,14 +59,14 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
                 "element": this.$el.find(".scriptContainer .scriptEditor").last(),
                 "eventName": event.val(),
                 "deleteCallback": _.bind(function(script) {
-                    this.model.scripts.push(script.eventName);
+                    this.model.availableScripts.push(script.eventName);
                     delete this.model.scriptEditors[script.eventName];
                     this.updateScripts();
                 }, this),
                 "scriptData": defaultScript
             });
 
-            this.model.scripts.splice(this.model.scripts.indexOf(event.val()), 1);
+            this.model.availableScripts.splice(this.model.availableScripts.indexOf(event.val()), 1);
             this.updateScripts();
             event.remove();
         },
@@ -79,6 +81,8 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
         },
 
         init: function() {
+            this.model.availableScripts = _.clone(this.model.scripts);
+
             if (this.model.scripts.length > 1) {
                 this.updateScripts();
                 this.loadDefaultScripts();
@@ -107,13 +111,13 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
         updateScripts: function() {
             this.$el.find(".scriptEvents").empty();
 
-            _.chain(this.model.scripts)
+            _.chain(this.model.availableScripts)
                 .sortBy()
                 .each(function(script) {
                     this.$el.find(".scriptEvents").append("<option value='" + script + "'>" + script + "</option>");
                 }, this);
 
-            if (this.model.scripts.length === 0) {
+            if (this.model.availableScripts.length === 0) {
                 this.$el.find(".addScript").prop('disabled', true);
                 this.$el.find(".scriptEvents").prop('disabled', true);
                 this.$el.find(".allAdded").show();
@@ -146,7 +150,7 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
 
             // Remove any mapping instances of scripts that are not added
             if (!this.model.singleScript) {
-                _.each(this.model.scripts, function(script) {
+                _.each(this.model.availableScripts, function(script) {
                     if (_.has(this.model.mapping, script)) {
                         delete this.model.mapping[script];
                     }
@@ -163,6 +167,7 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
             // Save the Sync object
             ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.successMessage);
+                BrowserStorageDelegate.set("currentMapping", this.model.mapping);
             }, this));
         }
     });

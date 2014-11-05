@@ -239,6 +239,10 @@
             "script": "Script",
             "warning": "Warning",
             "specify": "You must specify a script or an expression.",
+            "note": "It is recommended that you run a Reconciliation after modifying the association rules.",
+            "dontRunReconcile": "Do not Reconcile",
+            "runReconcile": "Reconcile Now",
+            "queryFilters": "Query Filters",
             "query": {
                 "correlationDescription": "List the fields which will be used to match existing items in your source to items in your target:",
                 "correlationAny": "Any of the below fields",
