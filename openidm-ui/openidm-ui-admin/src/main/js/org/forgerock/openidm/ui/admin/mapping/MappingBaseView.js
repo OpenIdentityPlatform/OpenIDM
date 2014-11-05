@@ -139,9 +139,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         render: function(args, callback) {
             var syncConfig,
                 cleanName;
-
+            
             this.route = { url: window.location.hash.replace(/^#/, '') };
-
+                
             //because there are relatively slow queries being called which would slow down the interface if they were called each time
             //decide here whether we want to render all of this view or only the child
             //if this.data.mapping does not exist we know this view has not been loaded
@@ -259,7 +259,10 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             var total,
                 processed;
 
-            event.preventDefault();
+            if (event) {
+                event.preventDefault();
+            }
+
             this.data.reconAvailable = false;
             this.setSyncInProgress();
 

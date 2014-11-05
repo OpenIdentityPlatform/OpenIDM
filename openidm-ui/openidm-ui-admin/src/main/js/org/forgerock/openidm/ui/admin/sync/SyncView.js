@@ -70,8 +70,28 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             var schedules = [], seconds = "";
             this.sync = MappingBaseView.data.syncConfig;
             this.mapping = MappingBaseView.currentMapping();
-            this.data.mappingName = this.mappingName = args[0];
 
+            this.data.mappingName = this.mappingName = args[0];
+            this.data.hideRecon = true;
+            this.data.hideSituational = true;
+            _.each(SituationalScriptsView.model.scripts, function(script) {
+                if (_.has(SituationalScriptsView.model, "mapping")) {
+                    if (_.has(SituationalScriptsView.model.mapping, script)) {
+                        this.data.hideSituational = false;
+                    }
+                } else if (_.has(this.mapping, script)) {
+                    this.data.hideSituational = false;
+                }
+            }, this);
+            _.each(ReconScriptsView.model.scripts, function(script) {
+                if (_.has(ReconScriptsView.model, "mapping")) {
+                    if (_.has(ReconScriptsView.model.mapping, script)) {
+                        this.data.hideRecon = false;
+                    }
+                } else if (_.has(this.mapping, script)) {
+                    this.data.hideRecon = false;
+                }
+            }, this);
             this.parentRender(_.bind(function() {
                 SituationalScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
                 ReconScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});

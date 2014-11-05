@@ -15,13 +15,13 @@
         </fieldset>
 
         <fieldset>
-            <legend><span>{{t "templates.sync.situationalScripts"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-            <div class="group-body" id="situationalQueries"></div>
+            <legend><span>{{t "templates.sync.situationalScripts"}}</span><i class="fa fa-lg {{#if hideSituational}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
+            <div class="group-body" id="situationalQueries" {{#if hideSituational}}style="display: none;"{{/if}}></div>
         </fieldset>
 
         <fieldset>
-            <legend><span>{{t "templates.sync.reconciliationScript"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-            <div class="group-body" id="reconQueryView"></div>
+            <legend><span>{{t "templates.sync.reconciliationScript"}}</span><i class="fa fa-lg {{#if hideRecon}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
+            <div class="group-body" id="reconQueryView" {{#if hideRecon}}style="display: none;"{{/if}}></div>
         </fieldset>
 
         <fieldset id="syncWidget">

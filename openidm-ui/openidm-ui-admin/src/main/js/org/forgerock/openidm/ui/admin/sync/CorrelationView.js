@@ -63,15 +63,30 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
             this.dataModel.mapping = MappingBaseView.currentMapping();
             this.dataModel.mappingName = this.mappingName = args[0];
 
+            this.data.hideObjectFilters = true;
+            _.each(ObjectFiltersView.model.scripts, function(script) {
+                if (_.has(ObjectFiltersView.model, "mapping")) {
+                    if (_.has(ObjectFiltersView.model.mapping, script)) {
+                        this.data.hideObjectFilters = false;
+                    }
+                } else if (_.has(this.dataModel.mapping, script)) {
+                    this.data.hideObjectFilters = false;
+                }
+            }, this);
+
             this.parentRender(_.bind(function () {
                 AnalysisView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
-                CorrelationQueryView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
+                CorrelationQueryView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName, startSync: this.sync});
                 ObjectFiltersView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
                 MappingBaseView.moveSubmenu();
                 if(callback){
                     callback();
                 }
             }, this));
+        },
+
+        sync: function () {
+            MappingBaseView.syncNow();
         }
     });
 
