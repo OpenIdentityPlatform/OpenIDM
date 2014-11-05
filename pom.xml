@@ -243,7 +243,7 @@
         <orientdb.version>1.7.8</orientdb.version>
         <orientdb.studio.version>1.7.8</orientdb.studio.version>
         <jackson.version>1.9.12</jackson.version>
-        <fasterxml.jackson.version>2.1.5</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.4.3</fasterxml.jackson.version>
         <!--fasterxml.jackson.version>2.2.1</fasterxml.jackson.version-->
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
@@ -550,7 +550,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.1</version>
+                <version>3.3.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
@@ -811,6 +811,11 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${fasterxml.jackson.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
