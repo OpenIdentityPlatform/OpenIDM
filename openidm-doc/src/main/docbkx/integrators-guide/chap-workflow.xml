@@ -1812,6 +1812,22 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
    the use cases is integrated with the default UI.
   </para>
   <para>
+   These use cases use OrientDB as a repository by default. Alternative
+   repository configuration files are provided in
+   <filename>/path/to/openidm/samples/usecase/db</filename>. If you want to use
+   one of these alternative repositories, remove the
+   <filename>repo.orientdb.json</filename> file from the <literal>conf/</literal>
+   directory of the use case you are testing (for example,
+   <filename>samples/usecase/usecase1/conf/repo.orientdb.json</filename>) and
+   copy the appropriate JDBC repository configuration file
+   (<filename>repo.jdbc.json</filename>) into that <literal>conf/</literal>
+   directory. For more information on using an alternative repository, see
+   <link xlink:show="new" xlink:href="install-guide#chap-repository"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a
+   Repository For Production</citetitle></link> in the <citetitle>Installation
+   Guide</citetitle>.
+  </para>
+  <para>
    The use cases can be run independently, but rely on the data set that is
    imported during use case 1 - so you <emphasis>must</emphasis> run use case 1
    before running any of the other use cases.
