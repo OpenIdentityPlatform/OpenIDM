@@ -61,15 +61,33 @@ define("org/forgerock/openidm/ui/admin/util/ReconDetailsView", [
         millisecondsToTime: function(milli) {
             var milliseconds = 0,
                 seconds = 0,
-                minutes = 0;
+                minutes = 0,
+                hours = 0;
 
             if(milli !== -1) {
-                milliseconds = milli % 1000;
-                seconds = Math.floor((milli / 1000) % 60);
-                minutes = Math.floor((milli / (60 * 1000)) % 60);
+                milliseconds = parseInt((milli%1000), 10);
+                seconds = parseInt((milli/1000)%60, 10);
+                minutes = parseInt((milli/(1000*60))%60, 10);
+                hours = parseInt((milli/(1000*60*60))%24, 10);
+
+                hours = (hours < 10) ? "0" + hours : hours;
+                minutes = (minutes < 10) ? "0" + minutes : minutes;
+                seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+                if(milliseconds < 10) {
+                    milliseconds = milliseconds + "00";
+                } else if (milliseconds < 100) {
+                    milliseconds = milliseconds + "0";
+                }
+
+            } else {
+                milliseconds = "000";
+                seconds = "00";
+                minutes = "00";
+                hours = "00";
             }
 
-            return minutes + ":" + seconds + "." + milliseconds;
+            return hours +":" +minutes + ":" + seconds + "." + milliseconds;
         }
 
     });
