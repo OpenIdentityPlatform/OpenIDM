@@ -858,7 +858,7 @@ class ObjectMapping {
                 if (!reconContext.getReconHandler().allowEmptySourceSet()) {
                     LOGGER.warn("Cannot perform reconciliation with an empty source object set, unless explicitly configured to allow it.");
                     reconContext.getStatistics().reconEnd();
-                    logReconEnd(reconContext, rootContext, context);
+                    logReconEndFailure(reconContext, rootContext, context);
                     return;
                 }
             }
@@ -914,10 +914,14 @@ class ObjectMapping {
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
             doResults(reconContext);
             reconContext.setStage(ReconStage.COMPLETED_SUCCESS);
-            logReconEnd(reconContext, rootContext, context);
+            logReconEndSuccess(reconContext, rootContext, context);
         } catch (InterruptedException ex) {
             reconContext.checkCanceled();
             throw new SynchronizationException("Interrupted execution of reconciliation", ex);
+        } catch (Exception e) {
+            reconContext.getStatistics().reconEnd();
+            logReconEndFailure(reconContext, context.asContext(RootContext.class), context);
+            throw new SynchronizationException("Synchronization failed", e);
         } finally {
             ObjectSetContext.pop(); // pop the TriggerContext
             if (!reconContext.getStatistics().hasEnded()) {
@@ -1207,26 +1211,71 @@ class ObjectMapping {
         logEntry("audit/sync", entry);
     }
 
+    /**
+     * Record the start of a new reconciliation.
+     *
+     * @param reconContext
+     * @param rootContext
+     * @param context
+     * @throws SynchronizationException
+     */
     private void logReconStart(ReconciliationContext reconContext, Context rootContext, ServerContext context)
             throws SynchronizationException {
-        ReconEntry reconStartEntry = new ReconEntry(null, name, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START,
-                dateUtil, reconContext.getReconAction(), reconContext.getReconId());
+        ReconEntry reconStartEntry = new ReconEntry(null, name, rootContext,
+                AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START, dateUtil, reconContext.getReconAction(),
+                reconContext.getReconId());
         reconStartEntry.timestamp = new Date();
         reconStartEntry.message = "Reconciliation initiated by "
                 + context.asContext(SecurityContext.class).getAuthenticationId();
         logReconEntry(reconStartEntry);
     }
 
-    private void logReconEnd(ReconciliationContext reconContext, Context rootContext, ServerContext context)
+    /**
+     * Record the successful completion of a reconciliation.
+     *
+     * @param reconContext
+     * @param rootContext
+     * @param context
+     * @throws SynchronizationException
+     */
+    private void logReconEndSuccess(ReconciliationContext reconContext, Context rootContext, ServerContext context)
             throws SynchronizationException {
-        ReconEntry reconEndEntry = new ReconEntry(null, name, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END,
+        logReconEnd(reconContext, rootContext, Status.SUCCESS, "Reconciliation completed.");
+    }
+
+    /**
+     * Record the premature failure of a reconciliation.
+     *
+     * @param reconContext
+     * @param rootContext
+     * @param context
+     * @throws SynchronizationException
+     */
+    private void logReconEndFailure(ReconciliationContext reconContext, Context rootContext, ServerContext context)
+            throws SynchronizationException {
+        logReconEnd(reconContext, rootContext, Status.FAILURE, "Reconciliation failed.");
+    }
+
+    /**
+     * Record a final entry for a reconciliation.
+     *
+     * @param reconContext
+     * @param rootContext
+     * @param status
+     * @param loggerMessage
+     * @throws SynchronizationException
+     */
+    private void logReconEnd(ReconciliationContext reconContext, Context rootContext, Status status,
+            String loggerMessage) throws SynchronizationException {
+        ReconEntry reconEntry = new ReconEntry(null, name, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END,
                 dateUtil, reconContext.getReconAction(), reconContext.getReconId());
-        reconEndEntry.timestamp = new Date();
+        reconEntry.setStatus(status);
+        reconEntry.timestamp = new Date();
         String simpleSummary = reconContext.getStatistics().simpleSummary();
-        reconEndEntry.message = simpleSummary;
-        reconEndEntry.messageDetail = new JsonValue(reconContext.getSummary());
-        logReconEntry(reconEndEntry);
-        LOGGER.info("Reconciliation completed. " + simpleSummary);
+        reconEntry.message = simpleSummary;
+        reconEntry.messageDetail = new JsonValue(reconContext.getSummary());
+        logReconEntry(reconEntry);
+        LOGGER.info(loggerMessage + " " + simpleSummary);
     }
 
     /**
