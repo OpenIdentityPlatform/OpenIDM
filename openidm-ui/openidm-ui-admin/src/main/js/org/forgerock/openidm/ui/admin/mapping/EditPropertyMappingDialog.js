@@ -262,6 +262,8 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
 
             this.data.mappingName = params[0];
             this.property = params[1];
+            this.transform_script_editor = undefined;
+            this.conditional_script_editor = undefined;
 
             currentProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
             this.data.currentProperties = currentProperties;
