@@ -23,6 +23,12 @@ Furthermore we have the following special users:
 - systemadmin: user representing the human interaction of the populated systems (“Business” and “Project”)
 - superadmin: user representing the manager of the managers
 
+The samples use OrientDB as a backend by default. There are other repository configuration files
+provided in the samples/usecase/db folder. If you want to use one of the alternative repositories
+remove the repo.orientdb.json file from the conf folder of the usecase you want to test (e.g. samples/usecase/usecase1/conf)
+and then copy the appropriate repo.jdbc.json to the same folder.
+For more information on how to configure an alternative OpenIDM repository, see http://openidm.forgerock.org/doc/install-guide/#chap-repository
+
 List of use cases
 
 Usecase1 - Initial reconciliation
