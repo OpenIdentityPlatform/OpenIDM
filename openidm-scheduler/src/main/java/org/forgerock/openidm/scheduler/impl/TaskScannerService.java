@@ -185,10 +185,14 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 }
 
                 if ("cancel".equalsIgnoreCase(action)) {
-                    foundRun.cancel();
+                    if (foundRun.isCompleted()) {
+                        result.put("status", "FAILURE");
+                    } else {
+                        foundRun.cancel();
+                        result.put("status", "SUCCESS");
+                    }
                     result.put("_id", foundRun.getTaskScanID());
                     result.put("action", action);
-                    result.put("status", "SUCCESS");
                 } else {
                     throw new BadRequestException("Action '" + action + "' on Task '" + request.getResourceName() + "' not supported " + params);
                 }
