@@ -1,7 +1,12 @@
 dn: dc=fakead,dc=com
 objectClass: domain
 objectClass: top
-dc: organization
+dc: com
+
+dn: dc=fakead,dc=com
+objectClass: domain
+objectClass: top
+dc: fakead
 
 dn: ou=People,dc=fakead,dc=com
 ou: People
