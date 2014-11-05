@@ -234,6 +234,7 @@ To try the example, follow these steps.
 
 You can log in to the OpenIDM UI (https://localhost:8443/openidmui) with any of
 the users that were created in the repository by the reconciliation operation.
-Consult the values from "sample_HR_DB.mysql" to retrieve their clear text
-passwords. Users can update their profiles or passwords. Any changes will be
-automatically synchronized back to the MySQL database.
+Consult the values from the sample3/tools/ResetDatabaseScript.groovy script to
+retrieve the clear text passwords of each of these users. Users can update their
+profiles or passwords. Any changes will be automatically synchronized back to
+the MySQL database.
