@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/admin/util/ReconDetailsView", [
                 minutes = Math.floor((milli / (60 * 1000)) % 60);
             }
 
-            return minutes + ":" + seconds + ":" + milliseconds;
+            return minutes + ":" + seconds + "." + milliseconds;
         }
 
     });
