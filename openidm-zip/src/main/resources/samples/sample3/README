@@ -114,42 +114,33 @@ To try the example, follow these steps.
 
     8. Retrieve the list of users from OpenIDM's internal repository:
 
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/?_queryId=query-all&fields=_openidm_id,userName,sn,givenName&_prettyPrint=true"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&_prettyPrint=true"
     {
-      "result" : [ {
-        "_id" : "5b8c0ea8-3f11-4588-97af-723a76c8ef40",
-        "_rev" : "0",
-        "userName" : "rowley",
-        "sn" : "Birkin",
-        "givenName" : "Rowley"
-      }, {
-        "_id" : "7de6b0f6-2930-43fc-8e66-c6dd79e37160",
-        "_rev" : "0",
-        "userName" : "john",
-        "sn" : "Smith",
-        "givenName" : "John"
-      }, {
-        "_id" : "6fc473c4-9837-43f0-af6f-6fb4aa13a666",
-        "_rev" : "0",
-        "userName" : "louis",
-        "sn" : "Balfour",
-        "givenName" : "Louis"
-      }, {
-        "_id" : "163237fd-934d-4160-878d-c59f32a3eec9",
-        "_rev" : "0",
-        "userName" : "jdoe",
-        "sn" : "Doe",
-        "givenName" : "John"
-      }, {
-        "_id" : "3bbc3706-b6e2-4013-960a-6d1beed582e1",
-        "_rev" : "0",
-        "userName" : "bob",
-        "sn" : "Fleming",
-        "givenName" : "Bob"
-      } ],
-      "resultCount" : 5,
-      "pagedResultsCookie" : null,
-      "remainingPagedResults" : -1
+      "remainingPagedResults": -1,
+      "pagedResultsCookie": null,
+      "resultCount": 5,
+      "result": [
+        {
+          "_rev": "0",
+          "_id": "9ee75d24-899c-4221-97a0-0aca298febd6"
+        },
+        {
+          "_rev": "0",
+          "_id": "25be1c4c-0c2a-48b6-96f6-58d2e4d2357d"
+        },
+        {
+          "_rev": "0",
+          "_id": "2850c77b-f51a-4fb2-8cc4-4c1d03108ac2"
+        },
+        {
+          "_rev": "0",
+          "_id": "126d74e1-1c03-4774-b18d-bd4d1dfdf884"
+        },
+        {
+          "_rev": "0",
+          "_id": "46570045-0644-45c6-af10-c88ad3df93cc"
+        }
+      ]
     }
 
     9. Query for an individual user (by userName):
