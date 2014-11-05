@@ -748,15 +748,11 @@ openidm.scheduler.execute.persistent.schedules=true
   </para>
   <para>
    The following example defines a scheduled scanning task that triggers a
-   sunset script. This sample configuration file is provided in the OpenIDM
-   delivery as
+   sunset script. The schedule configuration file is provided in
    <filename>openidm/samples/taskscanner/conf/schedule-taskscan_sunset.json</filename>.
    To use this sample file, copy it to the <filename>openidm/conf</filename>
-   directory. The sample file calls a script (<filename>script/sunset.js</filename>)
-   which must be copied from <filename>openidm/samples/taskscanner/script/sunset.js</filename>
-   to the <filename>openidm/script</filename> directory.
+   directory.
   </para>
-  
   <programlisting language="javascript">{
     "enabled" : true,
     "type" : "cron",
@@ -769,9 +765,10 @@ openidm.scheduler.execute.persistent.schedules=true
         "numberOfThreads" : 5,
         "scan" : {
             "_queryId" : "scan-tasks",
+            "object" : "managed/user",
             "property" : "sunset/date",
             "condition" : {
-                "before" : "${Time.now}"
+                "before": "${Time.now}"
             },
             "taskState" : {
                 "started" : "sunset/task-started",
@@ -789,7 +786,13 @@ openidm.scheduler.execute.persistent.schedules=true
         }
     }
 }</programlisting>
-
+  <para>
+   The schedule configuration calls a script (<filename>script/sunset.js</filename>).
+   To test the sample, copy this script file from
+   <filename>openidm/samples/taskscanner/script/sunset.js</filename> to the
+   <filename>openidm/script</filename> directory. The remaining properties in
+   the schedule configuration are as follows:
+  </para>
  <variablelist>
   <para>
    The <literal>"invokeContext"</literal> parameter takes the following
@@ -839,21 +842,45 @@ openidm.scheduler.execute.persistent.schedules=true
     </para>
     <variablelist>
      <varlistentry>
-      <term><literal>"object"</literal></term>
+      <term><literal>"_queryId"</literal></term>
       <listitem>
        <para>
-        Defines the object type against which the query should be performed.
+        Specifies the predefined query that is performed to identify the entries
+        for which this task should be run.
+       </para>
+       <para>
+        The query that is referenced here must be defined in the database
+        configuration file (<filename>conf/repo.orientdb.json</filename> or
+        <filename>conf/repo.jdbc.json</filename>). A sample query for a
+        scanned task (<literal>"scan-tasks"</literal>) is defined in the
+        JDBC repository configuration file as follows:
+       </para>
+       <screen>"scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}
+ obj INNER JOIN ${_dbSchema}.${_propTable}
+ prop ON obj.id = prop.${_mainTable}_id
+ LEFT OUTER JOIN ${_dbSchema}.${_propTable}
+ complete ON obj.id = complete.${_mainTable}_id
+ AND complete.propkey=${taskState.completed}
+ INNER JOIN ${_dbSchema}.objecttypes objtype
+ ON objtype.id = obj.objecttypes_id
+ WHERE ( prop.propkey=${property} AND prop.propvalue &lt; ${condition.before}
+ AND objtype.objecttype = ${_resource} )
+ AND ( complete.propvalue is NULL )",</screen>
+       <para>
+        Note that this query identifies records for which the value of the
+        specified <literal>property</literal> is smaller than the condition.
+        The sample query supports only time-based conditions, with the time
+        specified in ISO 8601 format (Zulu time). You can write any query to
+        target the records that you require.
        </para>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><literal>"_queryId"</literal></term>
+      <term><literal>"object"</literal></term>
       <listitem>
        <para>
-        Specifies the query that is performed. The queries that can be set here
-        are defined in the database configuration file (either
-        <filename>conf/repo.orientdb.json</filename> or
-        <filename>conf/repo.jdbc.json</filename>).
+        Defines the managed object type against which the query should be
+        performed, as defined  in the <filename>managed.json</filename> file.
        </para>
       </listitem>
      </varlistentry>
@@ -861,10 +888,11 @@ openidm.scheduler.execute.persistent.schedules=true
       <term><literal>"property"</literal></term>
       <listitem>
        <para>
-        Defines the property against which the query is performed. In the
-        previous example, the <literal>"property" : "sunset/date"</literal>
-        indicates a JSON pointer that maps to the object attribute, and can be
-        understood as <literal>sunset: {"date" : "<replaceable>date</replaceable>"}</literal>.
+        Defines the property of the managed object, against which the query is
+        performed. In the previous example, the
+        <literal>"property" : "sunset/date"</literal> indicates a JSON pointer
+        that maps to the object attribute, and can be understood as
+        <literal>sunset: {"date" : "<replaceable>date</replaceable>"}</literal>.
         For more information about JSON pointer syntax, see
         <link xlink:show="new"
         xlink:href="http://tools.ietf.org/html/rfc6901">RFC 6901</link>.
@@ -883,30 +911,37 @@ openidm.scheduler.execute.persistent.schedules=true
      <varlistentry>
       <term><literal>"condition"</literal> (optional)</term>
       <listitem>
-       <para>Indicates the conditions that must be matched for the defined 
-       property.</para>
-       <para>In the previous example, the scanner scans for users for whom the 
-       property <literal>sunset/date</literal> is set to a value prior to the 
-       current timestamp at the time the script is executed.</para>
-       <para>You can use these fields to define any condition. For example, if 
-       you wanted to limit the scanned objects to a specified location, say, 
-       London, you could formulate a query to compare against object locations 
-       and then set the condition to be:</para>
+       <para>
+        Indicates the conditions that must be matched for the defined property.
+       </para>
+       <para>
+        In the previous example, the scanner scans for users for whom the
+        property <literal>sunset/date</literal> is prior to the current
+        timestamp (at the time the script is executed).
+       </para>
+       <para>
+        You can use these fields to define any condition. For example, if you
+        wanted to limit the scanned objects to a specified location, say,
+        London, you could formulate a query to compare against object locations
+        and then set the condition to be:
+       </para>
        <programlisting language="javascript">
             "condition" : {
                 "location" : "London"
             },</programlisting>
             
-        <para>For time-based conditions, the <literal>"condition"</literal> 
-        property supports macro syntax, based on the <literal>Time.now</literal> 
-        object (which fetches the current time). You can specify any date/time 
-        in relation to the current time, using the <literal>+</literal> or 
-        <literal>-</literal> operator, and a duration modifier. For example: 
-        <literal>"before": "${Time.now + 1d}"</literal> would return all user 
-        objects whose <literal>sunset/date</literal> is before tomorrow 
-        (current time plus one day). You must include space characters around the 
-        operator (<literal>+</literal> or <literal>-</literal>). The duration 
-        modifier supports the following unit specifiers:</para>
+        <para>
+         For time-based conditions, the <literal>"condition"</literal> property
+         supports macro syntax, based on the <literal>Time.now</literal>
+         object (which fetches the current time). You can specify any date/time
+         in relation to the current time, using the <literal>+</literal> or
+         <literal>-</literal> operator, and a duration modifier. For example:
+         <literal>"${Time.now + 1d}"</literal> would return all user
+         objects whose <literal>sunset/date</literal> is the following day
+         (current time plus one day). You must include space characters around
+         the operator (<literal>+</literal> or <literal>-</literal>). The
+         duration modifier supports the following unit specifiers:
+        </para>
         <simplelist>
          <member><literal>s</literal> - second</member>
          <member><literal>m</literal> - minute</member>
@@ -920,8 +955,11 @@ openidm.scheduler.execute.persistent.schedules=true
      <varlistentry>
       <term><literal>"taskState"</literal></term>
       <listitem>
-       <para>Indicates the fields that are used to track the status of the 
-       task.</para>
+       <para>
+        Indicates the names of the fields in which the start message and the
+        completed message are stored. These fields are used to track the status
+        of the task.
+       </para>
        <simplelist>
         <member><literal>"started"</literal> specifies the field that stores 
         the timestamp for when the task begins.</member>
