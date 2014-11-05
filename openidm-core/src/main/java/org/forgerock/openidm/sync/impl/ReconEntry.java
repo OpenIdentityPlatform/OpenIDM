@@ -96,6 +96,15 @@ class ReconEntry extends LogEntry {
     }
 
     /**
+     * Set the result status.
+     *
+     * @param status
+     */
+    public void setStatus(ObjectMapping.Status status) {
+        this.status = status;
+    }
+
+    /**
      * Construct a specific type reconciliation audit log entry from the given {@link SyncOperation} and mapping name.
      *
      * @param op the sync operation
