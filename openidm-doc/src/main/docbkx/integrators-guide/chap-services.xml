@@ -710,4 +710,112 @@ OpenIDM ready
   </caution>
  </section>
 
+ <section xml:id='linux-service'>
+  <title>Running OpenIDM as a Service on Linux Systems</title>
+
+  <para>
+   OpenIDM provides a script that generates an initialization script
+   to run OpenIDM as a service on Linux systems. You can start the
+   script as the root user, or configure it to start during the boot process.
+  </para>
+  <!--ref http://www.catb.org/jargon/html/R/rc-file.html -->
+  <para>
+   When OpenIDM runs as a service, logs are written to the directory in
+   which OpenIDM was installed.
+  </para>
+  <procedure>
+   <para>
+    To run OpenIDM as a service, take the following steps:
+   </para>
+   <step>
+    <para>
+     If you have not already done so, install and set up OpenIDM, as
+     described in the following chapter: <link xlink:show="new"
+     xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#chap-install"><citetitle>Installing OpenIDM
+     Services</citetitle></link>.
+    </para>
+   </step>
+   <step>
+    <para>
+     Run the RC script.
+    </para>
+    <screen><userinput>$ cd /path/to/openidm/bin
+$ ./create-openidm-rc.sh</userinput></screen>
+    <!-- I've left out the output as I think it's misleading, ref OPENIDM-2502 -->
+   </step>
+   <step>
+    <para>
+     As a user with administrative privileges, copy the <literal>openidm</literal>
+     script to the <literal>/etc/init.d</literal> directory.
+    </para>
+    <screen><userinput>$ sudo cp openidm /etc/init.d/</userinput></screen>
+   </step>
+   <step>
+    <para>
+     If you run Linux with SELinux enabled, change the file context of the
+     newly copied script with the following command:
+     <screen>$ sudo restorecon /etc/init.d/openidm
+     </screen>
+    </para>
+    <para>
+     You can verify the change to SELinux contexts with the
+     <literal>ls -Z /etc/init.d</literal> command. For consistency, change the
+     user context to match other scripts in the same directory with the
+     <literal>sudo chcon -u system_u /etc/init.d/openidm</literal> command.
+    </para>
+   </step>
+   <step>
+    <stepalternatives>
+     <step>
+      <para>
+       On Red Hat-based systems, run the following commands to add OpenIDM to the
+       list of RC services, in appropriate runlevels:
+      </para>
+      <screen>$ sudo chkconfig --add openidm</screen>
+      <screen>$ sudo chkconfig openidm on</screen>
+     </step>
+     <step>
+      <para>
+       On Debian/Ubuntu systems, run the following command. Note the output, as
+       Debian/Ubuntu adds start and kill scripts to appropriate runlevels.
+      </para>
+      <screen><userinput>$ sudo update-rc.d openidm defaults</userinput>
+       <computeroutput> Adding system startup for /etc/init.d/openidm ...
+        /etc/rc0.d/K20openidm -> ../init.d/openidm
+        /etc/rc1.d/K20openidm -> ../init.d/openidm
+        /etc/rc6.d/K20openidm -> ../init.d/openidm
+        /etc/rc2.d/S20openidm -> ../init.d/openidm
+        /etc/rc3.d/S20openidm -> ../init.d/openidm
+        /etc/rc4.d/S20openidm -> ../init.d/openidm
+        /etc/rc5.d/S20openidm -> ../init.d/openidm
+       </computeroutput></screen>
+      <para>
+       When you run the command, you may get the following warning message:
+       <literal>update-rc.d: warning: /etc/init.d/openidm missing LSB
+       information</literal>. You can safely ignore that message.
+      </para>
+     </step>
+    </stepalternatives>
+   </step>
+   <step>
+    <para>
+     As an administrative user, start the OpenIDM service.
+    </para>
+    <screen>$ sudo /etc/init.d/openidm start</screen>
+    <para>
+     Alternatively, reboot the system to start the OpenIDM service
+     automatically.
+    </para>
+   </step>
+   <step performance="optional">
+    <para>
+     The following commands stops and restarts the service:
+    </para>
+    <screen>$ sudo /etc/init.d/openidm stop</screen>
+    <screen>$ sudo /etc/init.d/openidm restart</screen>
+   </step>
+  </procedure>
+ </section>
+
 </chapter>
