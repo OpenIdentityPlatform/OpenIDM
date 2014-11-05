@@ -132,13 +132,13 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
     obj.getIconList = function() {
         var deferred = $.Deferred();
 
-        ConfigDelegate.readEntity("ui/icon-list").then(function(result){
+        ConfigDelegate.readEntity("ui/iconlist").then(function(result){
                 deferred.resolve(result.icons);
             },
             _.bind(function(){
                 deferred.resolve(this.iconListDefaults.icons);
 
-                ConfigDelegate.createEntity("ui/icon-list", obj.iconListDefaults);
+                ConfigDelegate.createEntity("ui/iconlist", obj.iconListDefaults);
             },this));
 
         return deferred;
