@@ -30,8 +30,9 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(AbstractView, conf, constants, eventManager, uiUtils, ConfigDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
+], function(AbstractView, conf, constants, eventManager, uiUtils, ConfigDelegate, BrowserStorageDelegate) {
     var SituationPolicyDialog = AbstractView.extend({
         template: "templates/admin/sync/SituationPolicyDialogTemplate.html",
         el: "#dialogs",
@@ -74,6 +75,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog", [
                         }, this);
 
                         ConfigDelegate.updateEntity("sync", data).then(function() {
+                            BrowserStorageDelegate.set("currentMapping", data);
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncPolicySaveSuccess");
                         });
 
