@@ -286,8 +286,8 @@ var results = openidm.query("system/ScriptedSQL/account", params)
    </programlisting>
 
    <para>
-    The query filter is specified in common filter notation, with the following
-    operations.
+    The query filter is specified in common filter notation. The following
+    provide examples of query filter operations:
    </para>
 
    <bridgehead>Attribute Operations</bridgehead>
