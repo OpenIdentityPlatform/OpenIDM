@@ -3965,9 +3965,9 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
   </para>
 
   <para>
-   This sample configures OpenIDM and OpenDJ on one system, with a URL of
-   <literal>openidm.example.com</literal>. It configures OpenAM on a separate
-   second system, with a URL of <literal>openam.example.com</literal>.
+   This sample configures OpenIDM on one system, with a URL of
+   <literal>openidm.example.com</literal>. It configures OpenAM and OpenDJ on
+   a separate second system, with a URL of <literal>openam.example.com</literal>.
   </para>
 
   <!--TODO: update if/when OpenAM 11 is updated to work with this sample,
@@ -4016,11 +4016,18 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
       <filename>openam.war</filename>.
      </para>
      <para>
-      Configure the OpenAM Java EE container to use a secure port such as 8443.
+      Configure the OpenAM JVM on a secure port such as 8443.
      </para>
      <para>
       When installing OpenAM, configure it to use the OpenDJ data store
-      installed on <literal>openidm.example.com</literal>.
+      installed on <literal>openam.example.com</literal>.
+     </para>
+     <para>
+      As described in the following procedure, <link xlink:show="new"
+      xlink:href="http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/install-guide/index.html#configure-openam-custom">
+      <citetitle>To Custom Configure OpenAM</citetitle></link>, Make sure the
+      trust store used by the JVM running OpenAM has the necessary certificates
+      installed.
      </para>
      <para>
       This sample assumes that you will configure OpenAM-based Single Sign-On
@@ -4034,8 +4041,9 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
      <note>
       <para>
        When you configure OpenAM for this sample, you do not need to install a
-       Java EE agent. This sample uses the
-       <literal>OPENAM_SESSION</literal> module to protect OpenIDM.
+       Java EE agent. This sample uses the <literal>OPENAM_SESSION</literal>
+       module to protect OpenIDM. That module is included in the
+       <literal>/path/to/openam/conf/authentication.json</literal> file.
       </para>
      </note>
     </listitem>
@@ -4185,12 +4193,12 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
       </para>
 
       <para>
-       You should make sure that the following settings are consistent with the
-       way you've configured OpenDJ and OpenAM.
+       Make sure that the following settings are consistent with the
+       way you have configured OpenDJ and OpenAM.
       </para>
 
       <para>
-       To that end, change the <literal>"localhost"</literal> entry to the
+       Change the <literal>"localhost"</literal> entry to the
        URL where OpenDJ is installed. In this case, that URL is
        <literal>openidm.example.com</literal>. Depending on whether you want to
        set up communications over a regular or secure LDAP port, you might
@@ -4201,7 +4209,7 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
      <programlisting language="javascript">{
   "name" : "ldap",
   "configurationProperties" : {
-      "host" : "openidm.example.com",
+      "host" : "openam.example.com",
       "port" : 636,
       "ssl" : true,
       "principal" : "cn=Directory Manager",
