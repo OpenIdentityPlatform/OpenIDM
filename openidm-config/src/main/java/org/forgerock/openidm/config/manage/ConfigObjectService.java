@@ -198,9 +198,16 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         if (properties != null) {
                             alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
                         }
-                        
-                        configEntry.put("pid", ConfigBootstrapHelper.unqualifyPid(conf.getPid()));
-                        configEntry.put("factoryPid", ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid()));
+                        String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
+                        String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
+                        // If there is an alias for factory config is available, make a nicer ID then the internal PID
+                        String id = factoryPid != null && alias != null
+                                ? factoryPid + "/" + alias
+                                : pid;
+
+                        configEntry.put("_id", id);
+                        configEntry.put("pid", pid);
+                        configEntry.put("factoryPid", factoryPid);
                         configList.add(configEntry);
                     }
                 }
