@@ -30,18 +30,44 @@
                 <span>{{syncDetails.situationSummary.SOURCE_MISSING}}</span>
                 <i data-title="{{t "templates.mapping.reconAnalysis.sourceMissingMessage"}}" class="fa fa-info-circle"></i>
             </div>
+            <div class="sync-item even">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.missing"}}</span>
+                <span>{{syncDetails.situationSummary.MISSING}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.missingMessage"}}" class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item even">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.foundAlreadyLinked"}}</span>
+                <span>{{syncDetails.situationSummary.FOUND_ALREADY_LINKED}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.foundAlreadyLinkedMessage"}}" class="fa fa-info-circle"></i>
+            </div>
             <div class="sync-item odd">
                 <i class="fa failure-display fa-circle"></i>
                 <span class="item-title">{{t "templates.mapping.reconAnalysis.unqualified"}}</span>
                 <span>{{syncDetails.situationSummary.UNQUALIFIED}}</span>
                 <i data-title='{{t "templates.mapping.reconAnalysis.unqualifiedMessage"}}' class="fa fa-info-circle"></i>
             </div>
+            <div class="sync-item odd">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.unassigned"}}</span>
+                <span>{{syncDetails.situationSummary.UNASSIGNED}}</span>
+                <i data-title='{{t "templates.mapping.reconAnalysis.unassignedMessage"}}' class="fa fa-info-circle"></i>
+            </div>
+
             <div class="sync-item even">
                 <i class="fa warning-display fa-circle"></i>
                 <span class="item-title">{{t "templates.mapping.reconAnalysis.targetIgnored"}}</span>
                 <span>{{syncDetails.situationSummary.TARGET_IGNORED}}</span>
                 <i data-title='{{t "templates.mapping.reconAnalysis.targetIgnoredMessage"}}' class="fa fa-info-circle"></i>
             </div>
+            <div class="sync-item even">
+                <i class="fa warning-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.sourceIgnored"}}</span>
+                <span>{{syncDetails.situationSummary.SOURCE_IGNORED}}</span>
+                <i data-title='{{t "templates.mapping.reconAnalysis.sourceIgnoredMessage"}}' class="fa fa-info-circle"></i>
+            </div>
+
             <div class="sync-item odd">
                 <i class="fa success-display fa-circle"></i>
                 <span class="item-title">{{t "templates.mapping.reconAnalysis.confirmed"}}</span>
