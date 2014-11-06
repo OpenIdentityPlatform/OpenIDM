@@ -759,6 +759,22 @@
             </includes>
             <outputDirectory>/openidm/samples/google-connector</outputDirectory>
         </fileSet>
+        <!-- salesforce connector-->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.salesforce-salesforce.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/salesforce-connector/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
+        </fileSet>
     </fileSets>
     <!-- sample6 -->
     <files>

@@ -1,0 +1,98 @@
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+ -------------------------------------------------------------------------------------------------
+                                    Salesforce Connector Sample
+ -------------------------------------------------------------------------------------------------
+
+ This sample will demonstrate a recon and sync between Salesforce and OrientDB. To get started you
+ need access to a Salesforce account that has an app with OAuth enabled to allow us to retrieved a
+ consumer key and a consumer secret. That app must have a callback url in the form,
+    Protocol://hostname:portNumber/admin/oauth.html
+ The "admin/oauth.html" is important to have so that OpenIDM can do that OAuth flow correctly.
+
+ -------------------------------------------------------------------------------------------------
+                      Getting the Consumer Key and Consumer Secret From Salesforce
+ -------------------------------------------------------------------------------------------------
+
+ From your Salesforce account you will need to have the following handy:
+    1) Consumer Key
+    2) Consumer Secret
+
+ Your Salesforce account should have a few users in it to demonstrate reconciliation and sync.
+
+
+ ------------------------------------------------------------------------------------------------------
+                                Running the Salesforce Connector Sample
+ ------------------------------------------------------------------------------------------------------
+
+ 1) Start the Salesforce sample with the following command,
+
+        ./startup.sh -p samples/salesforce-connector
+
+ 1) Go to the administration view in OpenIDM by going to the following URL:
+
+        https://localhost:8443/admin
+
+ 2) You should now see the Salesforce connector icon with the connector disabled at this point. We will
+ need to use the Consumer Key and Consumer Secret that was retrieved in the section above to complete
+ the OAuth 2.0 flow so that we can activate the connector.
+    a) Click on the Salesforce icon in the Connectors section to edit the connector
+    b) In the section General Details, there is a drop down menu for Connector Type
+        - use that drop down menu and select the Salesforce Connector
+    c) Under the Base Connector Details we will have to set 3 things:
+        1) Login URL : click the circle fill box to enable this as a Sandbox environment
+        2) Enter in the Consumer Key in the Consumer Key input field.
+        3) Enter in the Consumer Secret in the Consumer Secret input field.
+        4) At the bottom of the page click Update.
+        5) You will be asked by Salesforce to give consent to grants you set up in your app.
+
+ After you have given consent to OpenIDM to retrieve users from your Salesforce account we can start
+ a recon between Salesforce Users store and Managed Users.
+
+ 3) Select the Mappings tab on the OpenIDM UI to view the mappings that are available.
+    -For this sample there two mappings one from Salesforce Users to Managed Users and going back from
+    Managed Users to Salesforce.
+
+ 4) Select the mapping that shows Salesforce as the source and Managed as the target.
+ 5) Click on the Reconcile Now button to preform the recon. If you click on the arrow on the left hand side by the
+ completed sync message you will see details of the sync.
+ 6) To take a close look at the users that you brought in from Salesforce click on the User view button in the
+ upper right hand side of the admin user view page.
+ 7) Click the Users tab from the navigation bar to view the users.
+
+ Now that we are confident that we pulled in the users from Salesforce we want to test the mapping we created
+ from Managed User to Salesforce User. We can do this by updating one of the user by selecting them while we
+ are in the User view table.
+
+ 8) Select a user from the table, this will show the user profile attributes with values.
+ 9) For this sample we will just modify a first name of the entry we are looking at and click update.
+
+ If you go back to your user view inside of Salesforce you will see that user now reflects the changed you
+ made through the OpenIDM UI console.
+
+
+ In summary, this sample has made the various CRUD operations as part of the recon and sync operations that took place.
+ You can modify this sample to sync more than the four attributes provided in the sample. This sample is just a starting
+ place for using the Salesforce connector with OpenIDM.
