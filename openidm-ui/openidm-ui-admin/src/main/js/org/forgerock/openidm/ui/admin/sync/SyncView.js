@@ -34,7 +34,8 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
     "org/forgerock/openidm/ui/admin/util/Scheduler",
     "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog",
     "org/forgerock/openidm/ui/admin/sync/SituationalScriptsView",
-    "org/forgerock/openidm/ui/admin/sync/ReconScriptsView"
+    "org/forgerock/openidm/ui/admin/sync/ReconScriptsView",
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
 ], function(AdminAbstractView,
             MappingBaseView,
             eventManager,
@@ -44,7 +45,8 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             Scheduler,
             SituationPolicyDialog,
             SituationalScriptsView,
-            ReconScriptsView) {
+            ReconScriptsView,
+            BrowserStorageDelegate) {
 
     var SyncView = AdminAbstractView.extend({
         template: "templates/admin/sync/SyncTemplate.html",
@@ -182,6 +184,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             }, this);
 
             ConfigDelegate.updateEntity("sync", this.sync).then(function() {
+                BrowserStorageDelegate.set("currentMapping", this.sync);
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncLiveSyncSaveSuccess");
             });
         },
