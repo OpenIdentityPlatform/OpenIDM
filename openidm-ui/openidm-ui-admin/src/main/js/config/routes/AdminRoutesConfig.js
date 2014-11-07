@@ -24,7 +24,8 @@
 
 /*global define*/
 define("config/routes/AdminRoutesConfig", [
-], function() {
+    "config/routes/CommonRoutesConfig"
+], function(commonRoutes) {
 
     var obj = {
         "resourcesView" : {
@@ -123,6 +124,6 @@ define("config/routes/AdminRoutesConfig", [
     };
 
     obj.landingPage = obj.resourcesView;
-
+    commonRoutes["default"].role = "ui-admin";
     return obj;
 });

@@ -40,11 +40,11 @@ define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
         return authnDelegate.login(params.userName, params.password, {
-                "forbidden": { 
+                "forbidden": {
                     status: "403"
                 },
-                "unauthorized": { 
-                    status: "401", 
+                "unauthorized": {
+                    status: "401",
                     message: "authenticationFailed"
                 }
             }).then(function(user) {
@@ -66,10 +66,10 @@ define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
         return authnDelegate.getProfile({
-            "forbidden": { 
+            "forbidden": {
                 status: "403"
             },
-            "unauthorized": { 
+            "unauthorized": {
                 status: "401"
             }
         }).then(function(user) {
