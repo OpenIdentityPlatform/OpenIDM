@@ -60,7 +60,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
         },
         loadData: function(args, callback){
             this.dataModel.sync = MappingBaseView.data.syncConfig;
-            this.dataModel.mapping = MappingBaseView.currentMapping();
+            this.dataModel.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
             this.dataModel.mappingName = this.mappingName = args[0];
 
             this.data.hideObjectFilters = true;
