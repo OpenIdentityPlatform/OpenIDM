@@ -6,8 +6,17 @@
   float: right;
 }
 
-#objectTypesForm button {
+#objectTypesForm button,
+.ui-dialog-buttonset button {
   margin-left:10px !important;
+  .linear-gradient(top, @color-active, darken(@color-active, 10%)) !important;
+  border: 1px solid darken(@color-active, 10%);
+}
+
+#objectTypesForm button:hover,
+.ui-dialog-buttonset button:hover {
+  .linear-gradient(top, lighten(@color-active, @button-hover-lightness), @color-active) !important;
+  border: 1px solid darken(@color-active, 10%);
 }
 
 #objectTypesForm {
