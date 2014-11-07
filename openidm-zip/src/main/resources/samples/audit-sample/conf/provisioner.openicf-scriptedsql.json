@@ -222,7 +222,7 @@
                     "nativeName" : "actionid",
                     "nativeType" : "string"
                 },
-                "exception" : {
+                "exception/detailMessage" : {
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "exceptiondetail",
