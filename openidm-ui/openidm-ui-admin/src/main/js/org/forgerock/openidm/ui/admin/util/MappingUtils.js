@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global $, define, _, Handlebars */
 
 /**
  * @author huck.elliott
@@ -38,6 +38,28 @@ define("org/forgerock/openidm/ui/admin/util/MappingUtils", [
         var defaultNumProps = 4;
         
         return browserStorageDelegate.get(mapping + "_numRepresentativeProps",true) || defaultNumProps;
+    };
+
+    obj.buildObjectRepresentation = function(objToRep, props){
+        var propVals = [];
+        
+        _.each(props, _.bind(function(prop, i){
+            var txt,
+                objRepEl = $("<span>"),
+                wrapper = $("<div>");
+            if(objToRep[prop]){
+                objRepEl.text(Handlebars.Utils.escapeExpression(objToRep[prop])).attr("title", prop);
+            }
+            if(i === 0){
+                objRepEl.addClass("objectRepresentationHeader");
+            } else {
+                objRepEl.addClass("objectRepresentation");
+            }
+            wrapper.append(objRepEl);
+            propVals.push(wrapper.html());
+        }, this));
+        
+        return propVals.join("<br/>");
     };
 
     return obj;

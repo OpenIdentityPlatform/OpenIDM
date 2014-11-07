@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
 
     var obj = new AbstractDelegate(constants.host + "/openidm/sync");
 
-    /*obj.performAction = function (reconId, mapping, action, sourceId, targetId) {
+    obj.performAction = function (reconId, mapping, action, sourceId, targetId) {
         var params = {
                 _action: "performAction",
                 reconId: reconId,
@@ -78,7 +78,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
                             "url" : qry.result[i]._id,
                             "type": "DELETE",
                             "headers": {
-                                "If-None-Match": "*"
+                                "If-Match": qry.result[i]._rev
                             }
                         }));
                     }
@@ -87,123 +87,6 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
                 });
         }
     };
-    
-    obj.addToOrphanarium = function (id, orgId) {
-        var promise = $.Deferred();
-
-        if (!id) {
-            promise.resolve();
-            return promise;
-        }
-
-        obj.serviceCall({
-            "serviceUrl": constants.host + "/openidm/repo/orphanarium/",
-            "url": encodeURIComponent(id),
-            "type": "GET",
-            "errorsHandlers": {
-                "missing": {
-                    status: 404
-                }                
-            }
-        }).then(
-            function (orphan) {
-                if (_.indexOf(orphan.orgs, orgId) === -1) {
-
-                    obj.serviceCall({
-                        "serviceUrl": constants.host + "/openidm/repo/orphanarium/",
-                        "url": encodeURIComponent(id),
-                        "type": "PUT",
-                        "headers": {
-                            "If-Match": "*"
-                        },
-                        "data": JSON.stringify({"orgs": _.union(orphan.orgs, orgId)})
-                    }).then(function () {
-                        promise.resolve(); 
-                    });
-
-                } else {
-                    // must have already been in the orphanarium
-                    promise.resolve(); 
-                }
-            },
-            function () {
-
-                obj.serviceCall({
-                    "serviceUrl": constants.host + "/openidm/repo/orphanarium/",
-                    "url": encodeURIComponent(id),
-                    "type": "PUT",
-                    "headers": {
-                        "If-None-Match": "*"
-                    },
-                    "data": JSON.stringify({"orgs": [orgId]})
-                }).then(function () {
-                    promise.resolve(); 
-                });
-
-            }            
-        );
-
-
-        return promise;
-    };
-    
-    obj.removeFromOrphanarium = function (id, orgId) {
-        var promise = $.Deferred();
-
-        if (!id) {
-            promise.resolve();
-            return promise;
-        }
-
-        obj.serviceCall({
-            "serviceUrl": constants.host + "/openidm/repo/orphanarium/",
-            "url": encodeURIComponent(id),
-            "type": "GET",
-            "errorsHandlers": {
-                "missing": {
-                    status: 404
-                }                
-            }
-        }).then(
-            function (orphan) {
-                if (orphan.orgs.length > 1 && _.indexOf(orphan.orgs, orgId) !== -1) {
-
-                    obj.serviceCall({
-                        "serviceUrl": constants.host + "/openidm/repo/orphanarium/",
-                        "url": encodeURIComponent(id),
-                        "type": "PUT",
-                        "headers": {
-                            "If-Match": "*"
-                        },
-                        "data": JSON.stringify({"orgs": _.filter(orphan.orgs, function (o) { return o !== orgId; })})
-                    }).then(function () {
-                        promise.resolve(); 
-                    });
-
-                } else if (orphan.orgs.length === 0 || orphan.orgs[0] === orgId) {
-
-                    obj.serviceCall({
-                        "serviceUrl": constants.host + "/openidm/repo/orphanarium/",
-                        "url": encodeURIComponent(id),
-                        "type": "DELETE",
-                        "headers": {
-                            "If-Match": "*"
-                        }
-                    }).then(function () {
-                        promise.resolve(); 
-                    });
-
-                } else {
-                    promise.resolve(); 
-                }
-            },
-            function () {
-                promise.resolve();  
-            });
-
-
-        return promise;
-    };*/
 
 
     obj.conditionAction = function (sourceObject, p) {

@@ -731,7 +731,17 @@
                 "view": "View",
                 "allSituations": "ALL SITUATIONS",
                 "clickToAnalyze": " to start analyzing relationships between Source and Target data.",
-                "enterSearchTerms": "Enter Search Terms"
+                "enterSearchTerms": "Enter Search Terms",
+                "changeAssociation": "Change Source to Target Association",
+                "noResultsFound": "No Results Found",
+                "infoFromSource": "Information from Source",
+                "searchTarget": "Search Target",
+                "linkToSourceObject": "Link To Source Object",
+                "newLinkCreated": "A new Link has been created with this source object. No further action can be taken on this record until after the next &quot;Reconcile Now&quot; event has occurred.",
+                "newLinksWarning": "__count__ records have changed since last Sync.",
+                "oneNewLinkWarning": "1 record has changed since last Sync",
+                "forResultsToTakeEffect": " for the result of these changes to take effect.",
+                "existingLink": "Existing Link"
             },
             "reconAnalysis": {
                 "inProgress" : "In Progress: ",

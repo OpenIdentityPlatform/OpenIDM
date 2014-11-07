@@ -33,21 +33,83 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/util/MappingUtils"
-], function(AdminAbstractView, MappingBaseView, eventManager, constants, reconDelegate, dateUtil, syncDelegate, configDelegate, mappingUtils) {
+    "org/forgerock/openidm/ui/admin/util/MappingUtils",
+    "org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog"
+], function(AdminAbstractView, MappingBaseView, eventManager, constants, reconDelegate, dateUtil, syncDelegate, configDelegate, mappingUtils, changeAssociationDialog) {
     var AnalysisView = AdminAbstractView.extend({
         template: "templates/admin/sync/AnalysisTemplate.html",
         element: "#analysisView",
         noBaseTemplate: true,
         events: {
             "change #situationSelection": "changeSituationView",
-            "click #doSyncButton": "syncNow"
+            "click #doSyncButton": "syncNow",
+            "click #changeAssociation": "changeAssociation"
         },
         data: {},
         syncNow: function(e){
             e.preventDefault();
             $(e.target).closest("button").prop('disabled',true);
             MappingBaseView.syncNow(e);
+        },
+        changeAssociation: function(e){
+            var args,
+                selectedRow = this.getSelectedRow(),
+                sourceObj = selectedRow.sourceObject,
+                targetObj = selectedRow.targetObject,
+                translateObj = _.bind(function(obj, isSource){
+                    if(isSource){
+                        obj = syncDelegate.translateToTarget(obj, this.mapping);
+                    }
+                    return mappingUtils.buildObjectRepresentation(obj, this.data.targetProps);
+                }, this);
+            
+            e.preventDefault();
+            
+            args = {
+                    sourceObj: sourceObj,
+                    sourceObjRep : translateObj(_.pick(sourceObj, this.data.sourceProps), true),
+                    targetObj: targetObj,
+                    targetObjRep: translateObj(_.pick(targetObj, this.data.targetProps)),
+                    targetProps: $.extend({},this.data.targetProps),
+                    ambiguousTargetObjectIds: selectedRow.ambiguousTargetObjectIds,
+                    recon: $.extend({},this.data.recon),
+                    reloadAnalysisGrid: _.bind(function(){
+                        this.renderReconResults(this.$el.find("#situationSelection").val().split(","));
+                    }, this)
+            };
+            
+            changeAssociationDialog.render(args);
+        },
+        getSelectedRow: function () {
+            var grid = this.$el.find(".recon-grid"),
+                selRow = grid.jqGrid("getGridParam", "selrow");
+            
+            return grid.data("rowData")[selRow -1];
+        },
+        checkNewLinks: function(rows){
+            var count = this.data.newLinkIds.length,
+                warningText;
+            _.chain(rows)
+                .map(_.bind(function(row){
+                    if(row.sourceObject){
+                        row._id = row.sourceObject._id;
+                    } else {
+                        row._id = "";
+                    }
+                }, this));
+            
+            if(count){
+                if(count === 1){
+                    warningText = $.t("templates.mapping.analysis.oneNewLinkWarning");
+                } else {
+                    warningText = $.t("templates.mapping.analysis.newLinksWarning", { "count": count});
+                }
+                $('#newLinksWarning').show().find("span#newLinksWarningText").html(warningText);
+            } else {
+                $('#newLinksWarning').hide();
+            }
+            
+            return rows;
         },
         renderReconResults:  function (selectedSituation) {
                 var _this = this,
@@ -60,7 +122,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                             $("table.recon-grid", container).jqGrid({
                                 jsonReader : {
                                     repeatitems: false,
-                                    root: function (obj) { return obj.result[0].rows; },
+                                    root: function (obj) { return _this.checkNewLinks(obj.result[0].rows); },
                                     page: function (obj) { return obj.result[0].page; },
                                     total: function (obj) { return Math.ceil(parseInt(totalRecords, 10)/obj.result[0].limit); },
                                     records: function (obj) { return totalRecords; }
@@ -72,13 +134,14 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                                 "&sourceProps="+ this.data.sourceProps.join(",") +
                                                 "&targetProps="+ this.data.targetProps.join(",") +
                                                 "&reconId="+ recon._id +
-                                                "&situations=" + situations.join(","),
+                                                "&situations=" + situations.join(",") + 
+                                                "&mapping=" + this.mapping.name,
                                 datatype: "json",
                                 rowNum: 10,
                                 rowList: [10,20,50],
-                                multiselect: false,
-                                multiboxonly: false,
-                                hoverrows: false,
+                                multiselect: true,
+                                multiboxonly: true,
+                                hoverrows: true,
                                 altRows:true,
                                 altclass: "analysisGridRowAlt",
                                 loadError : function(xhr,st,err) { 
@@ -94,7 +157,9 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                 },
                                 loadComplete: function(data){
                                     $(this).data("rowData",data.result[0].rows);
-                                    $("td.ui-search-input input").attr("placeholder",$.t("templates.mapping.analysis.enterSearchTerms"));
+                                    _this.$el.find("td.ui-search-input input").attr("placeholder",$.t("templates.mapping.analysis.enterSearchTerms"));
+                                    $("table.recon-grid", container).find(".cbox").prop("disabled",true);
+                                    $("table.recon-grid", container).find(".newLinkWarning").tooltip();
                                 },
                                 beforeRequest: function(){
                                     var params = $("table.recon-grid", container).jqGrid('getGridParam','postData');
@@ -107,15 +172,34 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                         $("div.recon-pager div", container).show();
                                     }
                                 },
+                                onSelectRow: function(id){
+                                    var rowData = $("table.recon-grid", container).jqGrid("getRowData", id),
+                                        disableButton = !rowData.sourceObject.length || _.contains(_this.data.newLinkIds,rowData._id);
+
+                                    _this.$el.find("#changeAssociation").prop('disabled',disableButton);
+                                },
                                 colModel: [
+                                    {"name":"sourceObject", "hidden": true},
+                                    {"name":"_id", "hidden": true},
+                                    {"name":"hasLink", "hidden": true},
                                     {"name": "sourceObjectDisplay", "jsonmap": "sourceObject", "label": $.t("templates.mapping.source"), "sortable": false,
-                                        formatter : function (sourceObject) {
-                                            var translatedObject;
+                                        formatter : function (sourceObject, opts, reconRecord) {
+                                            var translatedObject,
+                                                txt;
+                                            
                                             if (sourceObject) {
                                                 translatedObject= syncDelegate.translateToTarget(sourceObject, _this.mapping);
-                                                return  _this.buildObjectRepresentation(translatedObject, _this.data.targetProps);
-                                            } else if ($(this).attr("id") === "validGrid") {
-                                                return "<span class='errorMessage'>" + $.t("salesforce.sync.analysisGridOutOfSync") + "</span>";
+                                                txt =  mappingUtils.buildObjectRepresentation(translatedObject, _this.data.targetProps);
+                                                
+                                                if (_.contains(_this.data.newLinkIds,sourceObject._id)) {
+                                                    txt = "<span class='newLinkWarning errorMessage fa fa-exclamation-triangle' title='" + $.t("templates.mapping.analysis.newLinkCreated") + "'></span> " + txt;
+                                                }
+                                                
+                                                if(reconRecord.hasLink){
+                                                    txt = "<span class='float-right fa fa-chain fa-lg linkIcon' title='" + $.t("templates.mapping.analysis.existingLink") + "'></span>" + txt;
+                                                }
+                                                
+                                                return txt;
                                             } else {
                                                 return "Not Found";
                                             }
@@ -123,8 +207,12 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                     },
                                     {"name": "targetObjectDisplay", "jsonmap": "targetObject","label": $.t("templates.mapping.target"), "sortable": false, 
                                         formatter : function (targetObject, opts, reconRecord) {
-                                            if (targetObject) {
-                                                return  _this.buildObjectRepresentation(targetObject, _this.data.targetProps);
+                                            if(reconRecord.sourceObject && _.contains(_this.data.newLinkIds, reconRecord.sourceObject._id)){
+                                                return mappingUtils.buildObjectRepresentation(_.filter(_this.data.newLinks, function(link){ 
+                                                    return link.sourceObjectId.replace(_this.mapping.source + "/","") === reconRecord.sourceObject._id; 
+                                                })[0].targetObject, _this.data.targetProps);
+                                            } else if (targetObject) {
+                                                return  mappingUtils.buildObjectRepresentation(targetObject, _this.data.targetProps);
                                             } else if (reconRecord.ambiguousTargetObjectIds.length) {
                                                 return "Multiple Matches Found";
                                             } else {
@@ -154,41 +242,27 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                 if (recon.started) {
                     this.data.last_started = dateUtil.formatDate(recon.started,"MMMM dd, yyyy HH:mm");
                 }
-
-                this.parentRender(_.bind(function () {
-                    if(selectedSituation){
-                        $("#situationSelection",this.$el).val(selectedSituation.join(","));
-                    }
-                    renderGrid($("#analysisGridContainer", this.$el));
+                
+                reconDelegate.getNewLinksFromRecon(this.data.recon._id, this.data.recon.ended).then(_.bind(function(newLinks){
+                    this.data.newLinks = newLinks;
+                    this.data.newLinkIds = _.chain(newLinks)
+                                            .pluck("sourceObjectId")
+                                            .map(_.bind(function(sObjId){
+                                                return sObjId.replace(this.mapping.source + "/","");
+                                            }, this))
+                                            .value();
+                    this.parentRender(_.bind(function () {
+                        if(selectedSituation){
+                            $("#situationSelection",this.$el).val(selectedSituation.join(","));
+                        }
+                        renderGrid($("#analysisGridContainer", this.$el));
+                    }, this));
                 }, this));
 
         },
-        buildObjectRepresentation: function(objToRep, props){
-            var propVals = [];
-            
-            _.each(props, _.bind(function(prop, i){
-                var txt,
-                    objRepEl = $("<span>"),
-                    wrapper = $("<div>");
-                if(objToRep[prop]){
-                    objRepEl.text(Handlebars.Utils.escapeExpression(objToRep[prop])).attr("title", prop);
-                }
-                if(i === 0){
-                    objRepEl.addClass("objectRepresentationHeader");
-                } else {
-                    objRepEl.addClass("objectRepresentation");
-                }
-                wrapper.append(objRepEl);
-                propVals.push(wrapper.html());
-            }, this));
-            
-            return propVals.join("<br/>");
-        },
-
-
         render: function(args, callback) {
             this.data.recon = MappingBaseView.data.recon;
-            this.mapping = MappingBaseView.currentMapping();
+            this.mapping = args.mapping;
             this.data.numRepresentativeProps = mappingUtils.numRepresentativeProps(this.mapping.name);
             this.data.sourceProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps);
             this.data.targetProps = _.pluck(this.mapping.properties,"target").slice(0,this.data.numRepresentativeProps);
