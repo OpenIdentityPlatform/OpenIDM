@@ -1,0 +1,41 @@
+<form id="changeAssociationForm" class="form">
+
+    {{#if sourceObj}}
+    <input type="hidden" name="sourceId" value="{{sourceObj._id}}">
+    {{{sourceObjRep}}}
+    <hr/>
+    <fieldset>
+        <input id="targetSearchInput" placeholder="{{t 'templates.mapping.analysis.enterSearchTerms'}}" value="{{searchCriteria}}"/>
+        <button class="button" id="targetSearchBtn">{{t 'templates.mapping.analysis.searchTarget'}}</button>
+    </fieldset>
+    {{/if}}
+
+    {{#if results}}
+
+        <ul id="search_results">
+        {{#each results}}
+        <li>
+            <span style="display:none;">
+                <input type="radio" name="found" value="{{_id}}" id="found_{{_id}}">
+            </span>
+            <span class="searchResultLabel">
+                {{{objRep}}}
+            </span>
+        </li>
+        {{/each}}
+        </ul>
+
+        <button class="button float-right" id="linkObjectBtn" style="display:none;" title="{{t 'templates.mapping.analysis.linkToSourceObject'}}"><span class="fa fa-chain"> </span> {{t 'templates.mapping.analysis.linkToSourceObject'}}</button>
+    
+    {{else}}
+
+        {{#if searching}}
+        <ul id="search_results">
+            <li>
+                {{t "templates.mapping.analysis.noResultsFound" }}
+            </li>
+        </ul>
+        {{/if}}
+
+    {{/if}}
+</form>

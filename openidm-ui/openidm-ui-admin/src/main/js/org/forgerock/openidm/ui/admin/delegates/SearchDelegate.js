@@ -13,12 +13,13 @@ define("org/forgerock/openidm/ui/admin/delegates/SearchDelegate", [
 
     var obj = new AbstractDelegate(constants.host + "/openidm");
     
-    obj.searchResults = function (resource, props, searchString) {
-        var maxPageSize = 10,
+    obj.searchResults = function (resource, props, searchString, comparisonOperator) {
+        var operator = (comparisonOperator) ? comparisonOperator : "sw",
+            maxPageSize = 10,
             conditions = _(props)
                             .reject(function(p){ return !p; })
                             .map(function(p){
-                                return p + ' sw "' + encodeURIComponent(searchString) + '"';
+                                return p + ' ' + operator + ' "' + encodeURIComponent(searchString) + '"';
                             })
                             .value();
             

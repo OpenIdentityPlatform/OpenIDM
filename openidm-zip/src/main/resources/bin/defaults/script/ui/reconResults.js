@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-(function (source, target, sourceProps, targetProps, reconId, situations, page, limit, searching, sourceCriteria, targetCriteria, orderBy, orderByDir) {
+(function (mapping, source, target, sourceProps, targetProps, reconId, situations, page, limit, searching, sourceCriteria, targetCriteria, orderBy, orderByDir) {
 
     var _ = require('lib/lodash'),
         reconAudit,
@@ -51,7 +51,8 @@
                                 .value();
             
             return conditions.join(" or (") + new Array(conditions.length).join(")");
-        };
+        },
+        recon = openidm.read("recon/" + reconId);
     
     limit = parseInt(limit || 20);
     limit = (limit > 50) ? 50 : limit; // restrict limit to 50 records maximum
@@ -64,6 +65,7 @@
             "_queryId": queryId,
             "reconId": reconId,
             "situations": situations ? situations : '',
+            "completed": recon.ended,
             "_pageSize": limit,
             "_pagedResultsOffset": offset,
             "orderBy": orderBy,
@@ -99,6 +101,7 @@
                 "reconId": reconId,
                 "situations": situations ? situations : '',
                 "filteredIds":  filteredIds.join(","),
+                "completed": recon.ended,
                 "_pageSize": limit,
                 "_pagedResultsOffset": offset,
                 "orderBy": orderBy,
@@ -151,6 +154,11 @@
         if (reconAudit.result[i].targetObjectId !== null && reconAudit.result[i].targetObjectId !== undefined) {
             reconAudit.result[i].targetObject = targetDataMap[reconAudit.result[i].targetObjectId.replace(target + "/", "")];
         }
+        if (reconAudit.result[i].sourceObjectId !== null && reconAudit.result[i].sourceObjectId !== undefined && reconAudit.result[i].targetObjectId !== null && reconAudit.result[i].targetObjectId !== undefined) {
+            if(openidm.query("repo/link", {'_queryFilter' : 'linkType eq "' + mapping + '" and firstId eq "' + reconAudit.result[i].sourceObject._id + '" and secondId eq "' + reconAudit.result[i].targetObject._id + '"'}).result.length > 0){
+                reconAudit.result[i].hasLink = true;
+            }
+        }
         result.push(reconAudit.result[i]);
     }
 
@@ -163,6 +171,7 @@
             }
         ];
 }(
+    request.additionalParameters.mapping,
     request.additionalParameters.source,
     request.additionalParameters.target,
     request.additionalParameters.sourceProps,

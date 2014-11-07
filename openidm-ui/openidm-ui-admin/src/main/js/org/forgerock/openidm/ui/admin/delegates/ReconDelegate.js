@@ -164,5 +164,42 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
         });
     };
 
+    obj.getNewLinksFromRecon = function(reconId, endDate){
+        var newLinks = [],
+            prom = $.Deferred(),
+            linkPromArray = [],
+            queryFilter = 'reconId eq "' + reconId + '" and !(entryType eq "summary") and timestamp gt "' + endDate + '"',
+            getTargetObj = _.bind(function(link){
+                return this.serviceCall({
+                    "type": "GET",
+                    "serviceUrl": "/openidm/" + link.targetObjectId,
+                    "url":  "" 
+                }).then(function(targetObject){
+                    newLinks.push({ sourceObjectId: link.sourceObjectId , targetObject: targetObject });
+                    return;
+                });
+            }, this);
+        
+        this.serviceCall({
+            "type": "GET",
+            "serviceUrl": "/openidm/repo/audit/recon",
+            "url":  "?_queryFilter=" + encodeURIComponent(queryFilter) 
+        }).then(function(qry){
+            if(qry.result.length){
+                _.each(qry.result, function(link){
+                    linkPromArray.push(getTargetObj(link));
+                });
+                
+                $.when.apply($,linkPromArray).then(function(){
+                    prom.resolve(newLinks);
+                });
+            } else {
+                return prom.resolve(newLinks);
+            }
+        });
+        
+        return prom;
+    };
+    
     return obj;
 });
