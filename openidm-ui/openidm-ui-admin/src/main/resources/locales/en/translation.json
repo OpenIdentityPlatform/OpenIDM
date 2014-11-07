@@ -641,6 +641,7 @@
             }
         },
         "mapping": {
+            "backToMapping" : "Back to Mappings",
             "mappings": "Mappings",
             "source": "Source",
             "target": "Target",

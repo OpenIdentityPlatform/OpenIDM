@@ -44,7 +44,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             "click .mapping-config-body": "mappingDetail"
         },
         mappingDetail: function(e){
-            if(!$(e.target).closest("button").hasClass("delete-button") && !$(e.target).hasClass("mapping-icon")){
+            if(!$(e.target).closest("button").hasClass("delete-button")){
                 e.preventDefault();
 
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [$(e.target).closest(".mapping-config-body").attr("mapping")]});
