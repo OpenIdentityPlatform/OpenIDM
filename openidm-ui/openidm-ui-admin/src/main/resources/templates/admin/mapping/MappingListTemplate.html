@@ -7,11 +7,14 @@
 </div>
 
 {{#if mappingConfig.length}}
-<div id="mappingConfigHolder">
+<div id="mappingConfigHolder" class="mapping-listing">
     {{#each mappingConfig}}
     <div class="mapping-config-body" mapping="{{name}}">
+        <div class="mapping-config-header">
+            {{name}}
+        </div>
         <div class="mapping-body">
-            <a href="{{sourceConnector.url}}"><img class="mapping-icon left-icon" src="{{sourceIcon}}" alt="{{sourceConnector.displayName}}" /></a>
+            <img class="mapping-icon left-icon" src="{{sourceIcon}}" alt="{{sourceConnector.displayName}}" />
             <div class="mapping-source">
                 <p class="mapping-header">{{t "templates.mapping.source"}}</p>
                 <p class="mapping-title">{{source}}</p>
@@ -22,7 +25,7 @@
                     <i class="fa fa-arrow-right"></i>
                 </div>
             </div>
-            <a href="{{targetConnector.url}}"><img class="mapping-icon left-icon" src="{{targetIcon}}" alt="{{targetConnector.displayName}}" /></a>
+            <img class="mapping-icon left-icon" src="{{targetIcon}}" alt="{{targetConnector.displayName}}" />
             <div class="mapping-target">
                 <p class="mapping-header">{{t "templates.mapping.target"}}</p>
                 <p class="mapping-title">{{target}}</p>
@@ -30,9 +33,11 @@
             </div>
         </div>
         <div class="mapping-bottom-bar">
-            <div class="inline">{{name}}</div>
+            <div class="sync-status">
+                <span class="sync-label">{{t "templates.mapping.syncStatus"}}:</span>
+                <span id="{{name}}_syncStatus"></span>
+            </div>
             <div class="float-right">
-                {{t "templates.mapping.syncStatus"}}: <span id="{{name}}_syncStatus" class="syncStatus"></span>
                 <button type="button"  name="" class="button icon-button delete-button"><span>{{t "common.form.delete"}}</span><i class="fa fa-lg fa-times-circle-o"></i></button>
                 <button type="button"  name="" class="button icon-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button>
             </div>

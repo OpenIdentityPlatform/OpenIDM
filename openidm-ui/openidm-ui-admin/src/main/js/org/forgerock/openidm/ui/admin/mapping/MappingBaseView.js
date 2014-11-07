@@ -43,7 +43,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
         events: {
-            "click .mapping-body": "mappingList",
             "click #syncNowButton": "syncNow",
             "click #stopSyncButton": "stopSync",
             "click #syncStatus": "toggleSyncDetails"
@@ -52,14 +51,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         model: {
             syncDetails: null,
             syncOpen: false
-        },
-        mappingList: function(e){
-            if(!$(e.target).closest("button").hasClass("button") && !$(e.target).parent().hasClass("syncStatus") && !$(e.target).hasClass("mapping-icon")){
-                e.preventDefault();
-
-                delete this.data.mapping;
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
-            }
         },
         toggleSyncDetails: function(event){
             event.preventDefault();

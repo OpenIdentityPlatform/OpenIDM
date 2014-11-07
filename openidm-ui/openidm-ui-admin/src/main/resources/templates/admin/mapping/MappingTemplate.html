@@ -1,8 +1,11 @@
-<div class="title-bar no-bottom-border">
-    <h1>{{mapping.name}}</h1>
-</div>
 <div id="mappingConfigHolder">
+    <div class="back-header">
+        <a href="#mapping/"><span class="header-link-text"><i class="fa fa-lg fa-angle-double-left"></i> Back to Mappings</span></a>
+    </div>
     <div class="mapping-config-body">
+        <div class="mapping-config-header">
+            {{mapping.name}}
+        </div>
         <div class="mapping-body">
             <a href="{{mapping.sourceConnector.url}}"><img class="mapping-icon left-icon" src="{{mapping.sourceIcon}}" alt="{{mapping.sourceConnector.displayName}}" /></a>
             <div class="mapping-source">
