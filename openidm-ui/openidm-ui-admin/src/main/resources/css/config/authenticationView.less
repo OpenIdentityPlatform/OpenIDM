@@ -251,6 +251,18 @@
   }
 
   #authenticationForm {
+
+    button {
+      .linear-gradient(top, @color-active, darken(@color-active, 10%)) !important;
+      border: 1px solid darken(@color-active, 10%);
+    }
+
+    button:hover {
+      .linear-gradient(top, lighten(@color-active, @button-hover-lightness), @color-active) !important;
+      border: 1px solid darken(@color-active, 10%);
+      color:white;
+    }
+
     #authErrorMessage.error-box {
       width: 880px;
     }
