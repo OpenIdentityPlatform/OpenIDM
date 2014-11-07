@@ -742,7 +742,7 @@ openidm.scheduler.execute.persistent.schedules=true
    scheduled task, in a schedule configuration file named
    (<filename>schedule-<replaceable>task-name</replaceable>.json)</filename>,
    with the <literal>"invokeService"</literal> parameter set to
-   <literal>"taskscanner</literal>. The <literal>"invokeContext"</literal>
+   <literal>"taskscanner"</literal>. The <literal>"invokeContext"</literal>
    parameter defines the details of the scan, and the task that should be
    executed when the specified condition is triggered.
   </para>
