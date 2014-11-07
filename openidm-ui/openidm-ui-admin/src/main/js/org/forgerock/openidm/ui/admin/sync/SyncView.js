@@ -71,7 +71,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         loadData: function(args, callback){
             var schedules = [], seconds = "";
             this.sync = MappingBaseView.data.syncConfig;
-            this.mapping = MappingBaseView.currentMapping();
+            this.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
 
             this.data.mappingName = this.mappingName = args[0];
             this.data.hideRecon = true;
