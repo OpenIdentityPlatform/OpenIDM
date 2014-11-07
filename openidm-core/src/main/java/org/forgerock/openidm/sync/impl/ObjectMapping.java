@@ -857,6 +857,7 @@ class ObjectMapping {
             if (!sourceIter.hasNext()) {
                 if (!reconContext.getReconHandler().allowEmptySourceSet()) {
                     LOGGER.warn("Cannot perform reconciliation with an empty source object set, unless explicitly configured to allow it.");
+                    reconContext.setStage(ReconStage.COMPLETED_FAILED);
                     reconContext.getStatistics().reconEnd();
                     logReconEndFailure(reconContext, rootContext, context);
                     return;
@@ -919,6 +920,7 @@ class ObjectMapping {
             reconContext.checkCanceled();
             throw new SynchronizationException("Interrupted execution of reconciliation", ex);
         } catch (Exception e) {
+            reconContext.setStage(ReconStage.COMPLETED_FAILED);
             reconContext.getStatistics().reconEnd();
             logReconEndFailure(reconContext, context.asContext(RootContext.class), context);
             throw new SynchronizationException("Synchronization failed", e);
