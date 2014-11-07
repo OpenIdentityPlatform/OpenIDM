@@ -74,7 +74,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                         objects.put(field.toString(), field.toString());
                     }
                     objects.put(value, String.valueOf(valueAssertion));
-                    return "${dotnotation:" + field.toString() + "} " + operand + " ${" + value + "} ";
+                    return "(${dotnotation:" + field.toString() + "} " + operand + " ${" + value + "})";
                 }
 
                 @Override
@@ -84,7 +84,12 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                     } else {
                         objects.put(field.toString(), field.toString());
                     }
-                    return "${dotnotation:" + field.toString() + "} IS NOT NULL";
+                    return "(${dotnotation:" + field.toString() + "} IS NOT NULL)";
+                }
+
+                @Override
+                public String visitNotFilter(Map<String, String> objects, QueryFilter subFilter) {
+                    return "(NOT " + subFilter.accept(this, objects) + ")";
                 }
             };
 
