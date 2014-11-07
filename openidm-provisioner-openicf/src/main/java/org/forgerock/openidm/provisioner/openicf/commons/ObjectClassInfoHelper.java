@@ -209,6 +209,9 @@ public class ObjectClassInfoHelper {
                 }
             }
         }
+
+        checkForInvalidAttributes(request.getContent().keys());
+
         if (logger.isTraceEnabled()) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder().addAttributes(result.values());
             builder.setName(nameValue);
@@ -241,6 +244,9 @@ public class ObjectClassInfoHelper {
                 }
             }
         }
+
+        checkForInvalidAttributes(request.getContent().keys());
+
         if (logger.isTraceEnabled()) {
             ConnectorObjectBuilder builder = new ConnectorObjectBuilder().addAttributes(result.values());
             if (null != newName) {
@@ -253,6 +259,24 @@ public class ObjectClassInfoHelper {
                     .build(), false));
         }
         return new HashSet<Attribute>(result.values());
+    }
+
+    // ensure all attributes specified in the data are present in the target schema
+    private void checkForInvalidAttributes(Set<String> keys) throws BadRequestException {
+        for (String requestKey : keys) {
+            if (!requestKey.startsWith("_")) {
+                boolean found = false;
+                for (AttributeInfoHelper attributeInfo : attributes) {
+                    if (attributeInfo.getName().equals(requestKey)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new BadRequestException("Target does not support attribute " + requestKey);
+                }
+            }
+        }
     }
 
     /**
