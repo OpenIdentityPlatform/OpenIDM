@@ -66,6 +66,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -98,7 +99,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     protected ConnectionFactory connectionFactory;
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private ScriptRegistry scopeFactory;
+    private ScriptRegistry scriptRegistry;
 
     @Activate
     public void activate(ComponentContext context) {
@@ -234,14 +235,19 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     }
 
     private String startTaskScanJob(ServerContext context, String invokerName, String scriptName, JsonValue params) throws ExecutionException {
-        TaskScannerContext taskScannerContext = new TaskScannerContext(invokerName, scriptName, params, context);
-        addTaskScanRun(taskScannerContext);
-        TaskScannerJob taskScanJob = null;
+        TaskScannerContext taskScannerContext = null;
+
         try {
-            taskScanJob = new TaskScannerJob(connectionFactory, taskScannerContext, scopeFactory);
+            JsonValue scriptConfig = params.get("task").expect(Map.class).get("script").expect(Map.class);
+            ScriptEntry script = scriptRegistry.takeScript(scriptConfig);
+
+            taskScannerContext = new TaskScannerContext(invokerName, scriptName, params, context, script);
         } catch (ScriptException e) {
             throw new ExecutionException(e);
         }
+
+        addTaskScanRun(taskScannerContext);
+        TaskScannerJob taskScanJob = new TaskScannerJob(connectionFactory, taskScannerContext);
         return taskScanJob.startTask();
     }
 
