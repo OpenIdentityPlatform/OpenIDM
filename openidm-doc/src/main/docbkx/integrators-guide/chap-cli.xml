@@ -172,6 +172,12 @@ $ ./cli.sh configexport --user username:passsword <replaceable>export-location</
 
   <screen>
 $ ./cli.sh configexport --user openidm-admin:openidm-admin /tmp/conf</screen>
+
+  <para>
+   On Windows systems, the <replaceable>export-location</replaceable> must be
+   provided in quotation marks, for example:
+  </para>
+  <screen>C:\openidm\cli.bat --user openidm-admin:openidm-admin "C:\temp\openidm"</screen>
   
   <para>Configuration objects are exported, as <filename>.json</filename>
    files, to the specified directory. The command creates the directory if
@@ -290,6 +296,13 @@ $ ./cli.sh configimport --user username:password [--replaceAll] <replaceable>imp
   <screen>
 $ ./cli.sh configimport --user openidm-admin:openidm-admin --replaceAll /tmp/conf
   </screen>
+
+  <para>
+   On Windows systems, the <replaceable>import-location</replaceable> must be
+   provided in quotation marks, for example:
+  </para>
+  <screen>C:\openidm\cli.bat --user openidm-admin:openidm-admin --replaceAll "C:\temp\openidm"</screen>
+
 
   <para>Configuration objects are imported, as <literal>.json</literal> files, 
   from the specified directory to the <filename>conf</filename> directory. The 
