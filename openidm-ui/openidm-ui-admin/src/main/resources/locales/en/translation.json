@@ -550,6 +550,8 @@
                 "jndiProperties" : "JNDI Properties"
             },
             "ldapConnector" : {
+                "ldapType" : "LDAP Type",
+                "ldapTypeChange" : "Are you sure you want to change to these LDAP details? Any unsaved work will be lost.",
                 "link": "Setup Active Directory",
                 "title": "Data Source: Active Directory",
                 "host": "Host name or IP",

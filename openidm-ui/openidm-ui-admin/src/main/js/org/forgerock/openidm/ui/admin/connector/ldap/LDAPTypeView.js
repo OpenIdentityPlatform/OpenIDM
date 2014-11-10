@@ -27,8 +27,10 @@
 define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
     "org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog"
-], function(ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog) {
+    "org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog",
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function(ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog, ConnectorDelegate, uiUtils) {
 
     var LDAPTypeView = ConnectorTypeAbstractView.extend({
         events: {
@@ -36,9 +38,36 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
             "click .remove-btn": "removeField",
             "focus .filter": "showFilterDialog",
             "click #ssl": "toggleSSLPort",
-            "click #toggleCert": "toggleCert"
+            "click #toggleCert": "toggleCert",
+            "change #ldapTemplateType" : "changeLdapType"
         },
+        data : {
+            ldapSelector : [
+                {
+                    "displayName" : "Generic LDAP Configuration",
+                    "fileName" : "baseConfig"
+                },
+                {
+                    "displayName" : "AD LDAP Configuration",
+                    "fileName" : "provisioner.openicf-adldap"
+                },
+                {
+                    "displayName" : "ADLDS LDAP Configuration",
+                    "fileName" : "provisioner.openicf-adldsldap"
+                },
+                {
+                    "displayName" : "DJ LDAP Configuration",
+                    "fileName" : "provisioner.openicf-ldap"
+                },
+                {
+                    "displayName" : "IBM LDAP Configuration",
+                    "fileName" : "provisioner.openicf-racfldap"
+                }
+            ]
+        },
+        model : {
 
+        },
         render: function(args, callback) {
             var base = "templates/admin/connector/";
 
@@ -46,9 +75,31 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
 
             this.data.connectorDefaults = args.connectorDefaults;
 
+            if(!this.model.defaultLdap) {
+                this.model.defaultLdap = _.clone(this.data.connectorDefaults);
+            }
+
+            this.data.editState = args.editState;
+
+            this.model.systemType = args.systemType;
+            this.model.connectorType = args.connectorType;
+
             this.template = base + args.connectorType +".html";
 
+            if(!this.data.editState) {
+                if(args.ldapType) {
+                    this.model.ldapType = args.ldapType;
+                    this.$el.find("#ldapTemplateType").val(args.ldapType);
+                } else {
+                    this.model.ldapType = "baseConfig";
+                }
+            }
+
             this.parentRender(_.bind(function() {
+                if(!this.data.editState) {
+                    this.$el.find("#ldapTemplateType").val(this.model.ldapType);
+                }
+
                 if(args.animate) {
                     $("#connectorDetails").slideDown("slow", function() {});
                 } else {
@@ -69,6 +120,39 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     callback();
                 }
             }, this));
+        },
+
+        changeLdapType: function(event) {
+            var value = $(event.target).val();
+
+            uiUtils.jqConfirm($.t("templates.connector.ldapConnector.ldapTypeChange"), _.bind(function(){
+                if(value === "baseConfig") {
+                    this.render({
+                        "animate": false,
+                        "connectorDefaults": this.model.defaultLdap,
+                        "editState" : this.data.editState,
+                        "systemType" : this.model.systemType,
+                        "connectorType" : this.model.connectorType,
+                        "ldapType" : value
+                    });
+                } else {
+                    ConnectorDelegate.connectorDefault(value, "ldap").then(_.bind(function (result) {
+                            this.render({
+                                "animate": false,
+                                "connectorDefaults": result,
+                                "editState" : this.data.editState,
+                                "systemType" : this.model.systemType,
+                                "connectorType" : this.model.connectorType,
+                                "ldapType" : value
+                            });
+                        }, this)
+                    );
+                }
+            }, this),
+
+            _.bind(function() {
+                this.$el.find("#ldapTemplateType").val(this.model.ldapType);
+            }, this), "330px");
         },
 
         showFilterDialog: function (event) {

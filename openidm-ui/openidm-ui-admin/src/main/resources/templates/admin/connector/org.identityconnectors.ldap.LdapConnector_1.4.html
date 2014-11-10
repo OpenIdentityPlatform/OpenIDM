@@ -1,3 +1,18 @@
+{{#unless editState}}
+<fieldset>
+    <legend><span>{{t "templates.connector.ldapConnector.ldapType"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body">
+        <div class="group-field-block group-lead no-validation-block">
+            <label for="ldapTemplateType" class="light">{{t "templates.connector.ldapConnector.ldapType"}}</label>
+            <select data-validator="required" data-validator-event="changed" id="ldapTemplateType" class="form-size-m" name="enabled">
+                {{#each ldapSelector}}
+                <option value="{{fileName}}">{{displayName}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+</fieldset>
+{{/unless}}
 <fieldset>
     <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
     <div class="group-body">
@@ -172,4 +187,3 @@
         </div>
     </div>
 </fieldset>
-
