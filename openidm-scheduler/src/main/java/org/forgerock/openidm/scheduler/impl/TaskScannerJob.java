@@ -65,21 +65,11 @@ public class TaskScannerJob {
 
     private ConnectionFactory connectionFactory;
     private TaskScannerContext taskScannerContext;
-    private ScriptRegistry scopeFactory;
-    private ScriptEntry script;
 
-    public TaskScannerJob(ConnectionFactory connectionFactory, TaskScannerContext context, ScriptRegistry scopeFactory)
-            throws ExecutionException, ScriptException {
+    public TaskScannerJob(ConnectionFactory connectionFactory, TaskScannerContext context)
+            throws ExecutionException {
         this.connectionFactory = connectionFactory;
         this.taskScannerContext = context;
-        this.scopeFactory = scopeFactory;
-
-        JsonValue scriptValue = context.getScriptValue();
-        if (!scriptValue.isNull()) {
-            this.script = scopeFactory.takeScript(scriptValue);
-        } else {
-            throw new ExecutionException("No valid script '" + scriptValue + "' configured in task scanner.");
-        }
     }
 
     /**
@@ -125,9 +115,7 @@ public class TaskScannerJob {
      * Performs the task associated with the task scanner event.
      * Runs the query and executes the script across each resulting object.
      *
-     * @param invokerName name of the invoker
-     * @param scriptName name of the script associated with the task scanner event
-     * @param params parameters necessary for the execution of the script
+     * @param executor ExecutorService in which to invoke this task.
      * @throws ExecutionException
      */
     private void performTask(ExecutorService executor)
@@ -251,11 +239,10 @@ public class TaskScannerJob {
     }
 
     /**
-     * Flatten a list of parameters and perform a query to fetch all objects from storage
-     * @param id the identifier of the resource to query
-     * @param params the parameters of the query
+     * Flatten a list of parameters and perform a query to fetch all objects from storage.
+     *
      * @return JsonValue containing a list of all the retrieved objects
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private JsonValue fetchAllObjects() throws ResourceException {
         JsonValue flatParams = flattenJson(taskScannerContext.getScanValue());
@@ -268,7 +255,7 @@ public class TaskScannerJob {
      * @param resourceID the identifier of the resource to query
      * @param params parameters to supply to the query
      * @return the set of results from the performed query
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private JsonValue performQuery(String resourceID, JsonValue params) throws ResourceException {
         final JsonValue queryResults = new JsonValue(new ArrayList<Map<String, Object>>());;
@@ -298,7 +285,7 @@ public class TaskScannerJob {
      * Performs a read on a resource and returns the result
      * @param resourceID the identifier of the resource to read
      * @return the results from the performed read
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private JsonValue performRead(String resourceID) throws ResourceException {
         JsonValue readResults = null;
@@ -314,7 +301,7 @@ public class TaskScannerJob {
      * @param path JsonPointer to the updated/added field
      * @param obj object to add to the field
      * @return the updated JsonValue
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private JsonValue updateValueWithObject(String resourceID, JsonValue value, JsonPointer path, Object obj) throws ResourceException {
         ensureJsonPointerExists(path, value);
@@ -327,7 +314,7 @@ public class TaskScannerJob {
      * @param resourceID the resource identifier to perform the update on
      * @param value the object to update with
      * @return the updated object
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private JsonValue performUpdate(String resourceID, JsonValue value) throws ResourceException {
         String id = value.get("_id").required().asString();
@@ -366,7 +353,7 @@ public class TaskScannerJob {
      * @param resourceID the resource identifier to fetch an object from
      * @param value the value to retrieve an updated copy of
      * @return the updated value
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private JsonValue retrieveUpdatedObject(String resourceID, JsonValue value)
             throws JsonValueException, ResourceException {
@@ -378,7 +365,7 @@ public class TaskScannerJob {
      * @param resourceID the resource identifier to fetch the object from
      * @param id the identifier of the object to fetch
      * @return the object retrieved from the resource
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private JsonValue retrieveObject(String resourceID, String id) throws ResourceException {
         return performRead(retrieveFullID(resourceID, id));
@@ -430,18 +417,14 @@ public class TaskScannerJob {
      *      Useful for performing updates.<br>
      *   <b>"input"</b> contains the supplied object
      *
-     * @param scriptName name of the script
-     * @param invokerName name of the invoker
-     * @param script the script to execute
-     * @param resourceID the resource identifier for the object that the script will be performed on
-     * @param startField JsonPointer to the field that will be marked at script start
-     * @param completedField JsonPointer to the field that will be marked at script completion
      * @param input value to input to the script
      * @throws ExecutionException
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     private void execScript(JsonValue input)
             throws ExecutionException, ResourceException {
+        ScriptEntry script = taskScannerContext.getScriptEntry();
+
         if (script != null) {
             String resourceID = taskScannerContext.getObjectID();
             ServerContext context = taskScannerContext.getContext();

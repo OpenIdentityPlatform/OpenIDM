@@ -29,11 +29,20 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.util.ConfigMacroUtil;
+import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.ScriptRegistry;
 import org.joda.time.Days;
 import org.joda.time.ReadablePeriod;
 
-// TODO: cache components that are fetched frequently
+import javax.script.ScriptException;
+
+/**
+ * Represents the information for a recurring {@link org.forgerock.openidm.scheduler.impl.TaskScannerJob}.
+ *
+ * This is carried over across all instances of the {@link org.forgerock.openidm.scheduler.impl.TaskScannerJob}
+ */
 public class TaskScannerContext {
 
     enum TaskScannerState {
@@ -51,14 +60,21 @@ public class TaskScannerContext {
     private boolean canceled = false;
     private TaskScannerStatistic statistics;
     private TaskScannerState state;
+    private ScriptEntry scriptEntry;
 
-    public TaskScannerContext(String invokerName, String scriptName, JsonValue params, ServerContext context) {
+    public TaskScannerContext(String invokerName,
+                              String scriptName,
+                              JsonValue params,
+                              ServerContext context,
+                              ScriptEntry scriptEntry)
+            throws ScriptException {
         this.invokerName = invokerName;
         this.scriptName = scriptName;
         this.params = params;
         this.context = context;
         this.statistics = new TaskScannerStatistic();
         this.state = TaskScannerState.INITIALIZED;
+        this.scriptEntry = scriptEntry;
     }
 
     public void startJob() {
@@ -96,7 +112,7 @@ public class TaskScannerContext {
         return state == TaskScannerState.COMPLETED;
     }
 
-    public boolean hasErorr() {
+    public boolean hasError() {
         return state == TaskScannerState.ERROR;
     }
 
@@ -132,13 +148,17 @@ public class TaskScannerContext {
         return this.scriptName;
     }
 
+    public ScriptEntry getScriptEntry() {
+        return this.scriptEntry;
+    }
+
     public String getTaskScanID() {
         return context.getId();
     }
 
     /**
-     * Retrieve the timeout period from the supplied config
-     * @param value JsonValue configuration containing "recovery/timeout"
+     * Retrieve the timeout period from the supplied config.
+     *
      * @return the timeout period taken from the config
      */
     public ReadablePeriod getRecoveryTimeout() {
@@ -154,10 +174,6 @@ public class TaskScannerContext {
 
     public Integer getMaxRecords() {
         return params.get("maxRecords").asInteger();
-    }
-
-    public JsonValue getScriptValue() {
-        return params.get("task").expect(Map.class).get("script").expect(Map.class);
     }
 
     public JsonValue getScanValue() {
