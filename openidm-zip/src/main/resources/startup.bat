@@ -21,13 +21,21 @@ if not "%OPENIDM_OPTS%" == "" goto noOpenIDMOpts
 set OPENIDM_OPTS=${openidm.options} -Dfile.encoding=UTF-8
 :noOpenIDMOpts
 
+set "JPDA="
+
 rem Check for a project directory, default to OpenIDM home directory
 set PROJECT_HOME=%OPENIDM_HOME%
 set CMD_LINE_ARGS=-c bin/launcher.json
 :optLoop
 if "%1"=="" goto optDone
+rem We do not want jpda in CMD_LINE_ARGS
+if "%1"=="jpda" goto optJpda
 set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
 if "%1"=="-p" goto optP
+shift
+goto optLoop
+:optJpda
+set "JPDA=JPDA"
 shift
 goto optLoop
 :optP
@@ -49,8 +57,6 @@ set LOGGING_CONFIG=-Djava.util.logging.config.file="%OPENIDM_HOME%\conf\logging.
 :noJuliConfig
 set JAVA_OPTS=%JAVA_OPTS% %LOGGING_CONFIG%
 
-if not ""%1"" == ""jpda"" goto noJpda
-set JPDA=jpda
 if not "%JPDA_TRANSPORT%" == "" goto gotJpdaTransport
 set JPDA_TRANSPORT=dt_socket
 :gotJpdaTransport
@@ -97,4 +103,3 @@ call %_EXECJAVA% %JAVA_OPTS% %OPENIDM_OPTS% %JPDA_OPTS% -Djava.endorsed.dirs="%J
 popd
 
 :end
-
