@@ -768,7 +768,7 @@ openidm.scheduler.execute.persistent.schedules=true
             "object" : "managed/user",
             "property" : "sunset/date",
             "condition" : {
-                "before": "${Time.now}"
+                "before" : "${Time.now}"
             },
             "taskState" : {
                 "started" : "sunset/task-started",
