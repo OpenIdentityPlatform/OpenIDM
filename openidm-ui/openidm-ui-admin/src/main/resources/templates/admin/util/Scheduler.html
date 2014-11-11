@@ -32,13 +32,17 @@
         {{/if}}
 
         <div class="group-field-block-inline no-validation-block">
-            <label class="light">{{t "templates.scheduler.enabled"}}</label>
-            <input type="checkbox" value="true" class="enabled"/>
+            <label class="light">
+                <input type="checkbox" value="true" class="enabled"/>
+                {{t "templates.scheduler.enabled"}}
+            </label>
         </div>
 
         <div class="group-field-block-inline no-validation-block">
-            <label class="light">{{t "templates.scheduler.persisted"}}</label>
-            <input type="checkbox" value="false" class="persisted"/>
+            <label class="light">
+                <input type="checkbox" value="false" class="persisted"/>
+                {{t "templates.scheduler.persisted"}}
+            </label>
         </div>
 
         <div class="group-field-block-inline misfirePolicyBlock fieldHidden no-validation-block">
@@ -61,3 +65,4 @@
         </div>
 
     </div>
+</div>

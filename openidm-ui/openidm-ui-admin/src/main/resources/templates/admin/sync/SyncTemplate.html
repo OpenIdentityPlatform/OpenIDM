@@ -39,8 +39,10 @@
                     <span class="managedLiveSyncDisabled noLiveSyncMessage fieldHidden"><i class="fa fa-times-circle-o "></i> {{t "templates.sync.liveSyncDisabled"}}</span>
 
                     <div class="group-field-block-inline no-validation-block fieldHidden">
-                        <label class="light">{{t "templates.sync.enableLiveSync"}}</label>
-                        <input type="checkbox" value="false" class="liveSyncEnabled"/>
+                        <label class="light">
+                            <input type="checkbox" value="false" class="liveSyncEnabled"/>
+                            {{t "templates.sync.enableLiveSync"}}
+                        </label>
                     </div>
 
                     <div class="group-field-block">

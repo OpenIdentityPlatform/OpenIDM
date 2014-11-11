@@ -90,11 +90,13 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 managedPromise = ConfigDelegate.readEntity("managed");
 
             $.when(connectorPromise, managedPromise).then(_.bind(function(connectors, managedObjects) {
+                this.model.resources = [];
+
                 _.each(managedObjects.objects, _.bind(function(managed){
                     this.model.resources.push("managed/" + managed.name);
                 }, this));
 
-                _.each(connectors[0], _.bind(function(connector) {
+                _.each(connectors, _.bind(function(connector) {
                     _.each(connector.objectTypes, _.bind(function(ot) {
                         this.model.resources.push("system/" + connector.name + "/" + ot);
                     }, this));
