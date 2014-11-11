@@ -3695,6 +3695,23 @@ Properties:
    "ok": true,
    "name": "xmlfile"
 }</screen>
+  <para>
+   If the configuration is not valid, the command returns an error, indicating
+   the problem with the configuration. For example, the following result is
+   returned when the LDAP connector configuration is missing a required property
+   (in this case, the <literal>baseContexts</literal> to synchronize):
+  </para>
+  <screen>{
+  "error": "org.identityconnectors.framework.common.exceptions.ConfigurationException:
+           The list of base contexts cannot be empty",
+  "name": "OpenDJ",
+  "ok": false
+} </screen>
+  <para>
+   The <literal>testConfig</literal> action requires a running OpenIDM instance,
+   as it uses the REST API, but does not require an active connector instance
+   for the connector whose configuration you want to test.
+  </para>
  </section>
 
  <section xml:id="adding-to-connector-config">
