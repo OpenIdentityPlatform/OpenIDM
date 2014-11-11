@@ -91,6 +91,14 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                 public String visitNotFilter(Map<String, String> objects, QueryFilter subFilter) {
                     return "(NOT " + subFilter.accept(this, objects) + ")";
                 }
+
+                @Override
+                public String visitStartsWithFilter(Map<String, String> parameters, JsonPointer field, Object valueAssertion) {
+                    // OrientDB needs double % for "like anything"
+                    return "".equals(valueAssertion)
+                        ? visitValueAssertion(parameters, "LIKE", field, "%%")
+                        : visitValueAssertion(parameters, "LIKE", field, valueAssertion + "%");
+                }
             };
 
     public Queries() {
