@@ -8,7 +8,10 @@
 </div>
 <div class="event-hook-piece file-code">
     <div>
-        <input type="radio" name="scriptType" value="file-code" {{#unless scriptData.source}} checked {{/unless}}><span class="event-hook-title">{{t "templates.scriptEditor.filePath"}}</span>
+        <label class="event-hook-title">
+            <input type="radio" name="scriptType" value="file-code" {{#unless scriptData.source}} checked {{/unless}}/>
+            {{t "templates.scriptEditor.filePath"}}
+        </label>
     </div>
     <input class="scriptFilePath" autocomplete="off" type="text" name="fileName" {{#if scriptData.source}} value="" disabled="true" {{else}} value="{{scriptData.file}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur focus" data-validator="required" {{/unless}} {{/if}}/>
     {{#unless disablePassedVariable}}
@@ -18,7 +21,10 @@
 </div>
 <div class="event-hook-piece inline-code">
     <div>
-        <input type="radio" name="scriptType" value="inline-code" {{#if scriptData.source}} checked {{/if}}><span class="event-hook-title">{{t "templates.scriptEditor.inline"}}</span>
+        <label class="event-hook-title">
+            <input type="radio" name="scriptType" value="inline-code" {{#if scriptData.source}} checked {{/if}}/>
+            {{t "templates.scriptEditor.inline"}}
+        </label>
     </div>
     {{#if scriptData.source}}
     <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur" data-validator="required" {{/unless}} name="sourceCode">{{scriptData.source}}</textarea>
