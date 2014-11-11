@@ -284,7 +284,10 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 this.$el.find("#validateConnector").show();
                 this.$el.find("#addEditObjectType").show();
                 this.$el.find("#connectorEnabled").parents(".group-field-block").show();
-                this.$el.find("#connectorEnabled").val("true");
+
+                if (!this.data.editState) {
+                    this.$el.find("#connectorEnabled").val("true");
+                }
             }
         },
 
