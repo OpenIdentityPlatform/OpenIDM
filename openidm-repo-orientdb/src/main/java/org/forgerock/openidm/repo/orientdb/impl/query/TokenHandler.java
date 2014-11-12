@@ -116,8 +116,8 @@ public class TokenHandler {
                 Object replacement = params.get(tokenKey);
 
                 if (PREFIX_LIST.equals(tokenPrefix)) {
-                    // quote each element and split on ,
-                    replacement = Arrays.asList(("'" + replacement.toString().replaceAll(",", "','") + "'").split(","));
+                    // escape quotes, quote each element, and split on ,
+                    replacement = Arrays.asList(("'" + replacement.toString().replaceAll("'", "\\\\'").replaceAll(",", "','") + "'").split(","));
                 }
 
                 if (replacement instanceof List) {
@@ -147,8 +147,8 @@ public class TokenHandler {
                         replacement = JSON_POINTER_TO_DOT_NOTATION.apply(replacement.toString());
                     }
                 } else {
-                    // Default is single quoted string replacement
-                    replacement = "'" + replacement + "'";
+                    // Default is single quoted string replacement (escaping single quotes in replacement)
+                    replacement = "'" + replacement.toString().replaceAll("'", "\\\\'") + "'";
                 }
                 
                 matcher.appendReplacement(buffer, "");
