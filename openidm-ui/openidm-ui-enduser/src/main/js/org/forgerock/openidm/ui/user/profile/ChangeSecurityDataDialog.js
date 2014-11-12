@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/user/delegates/SecurityQuestionDelegate"
 ], function(Dialog, validatorsManager, conf, userDelegate, authnDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
-    var ChangeSecurityDataDialog = Dialog.extend({    
+    var ChangeSecurityDataDialog = Dialog.extend({
         contentTemplate: "templates/user/ChangeSecurityDataDialogTemplate.html",
 
         events: {
@@ -62,21 +62,21 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
                 }
             }
         },
-        
+
         formSubmit: function(event) {
             event.preventDefault();
-            
+
             var patchDefinitionObject = [], element;
-            
-            if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {            
+
+            if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
                 patchDefinitionObject.push({operation: "replace", field: "password", value: this.$el.find("input[name=password]").val()});
             }
-    
-            if(validatorsManager.formValidated(this.$el.find("#securityDataChange"))) {            
+
+            if(validatorsManager.formValidated(this.$el.find("#securityDataChange"))) {
                 patchDefinitionObject.push({operation: "replace", field: "securityQuestion", value: this.$el.find("select[name=securityQuestion]").val()});
                 patchDefinitionObject.push({operation: "replace", field: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val()});
             }
-            
+
             this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                 delete conf.passwords;
@@ -91,14 +91,21 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             }, this));
         },
         customValidate: function () {
+            var passwordValid = validatorsManager.formValidated(this.$el.find("#passwordChange")),
+                passwordSet = this.$el.find("#password").val().length > 0 || this.$el.find("#passwordConfirm").val().length > 0,
+                securityValid = validatorsManager.formValidated(this.$el.find("#securityDataChange")),
+                securityAnswerSet = this.$el.find("#securityAnswer").val().length > 0;
 
-            if(validatorsManager.formValidated(this.$el.find("#passwordChange")) || validatorsManager.formValidated(this.$el.find("#securityDataChange"))) {
+            // Either a password or a security answer must be provided and the option that is not provided must be empty or valid
+            if (
+                (passwordValid && (securityAnswerSet === false || securityValid)) ||
+                (securityValid  && (passwordSet === false || passwordValid))
+            ) {
                 this.$el.find("input[type=submit]").prop('disabled', false);
-            }
-            else {
+            } else {
                 this.$el.find("input[type=submit]").prop('disabled', true);
             }
-            
+
         },
         render: function() {
             this.actions = [];
@@ -114,32 +121,32 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
                         this.reloadData();
                     }
                 }, this));
-                
+
             }, this));
-            
+
             this.$el.find("input[type=submit]").prop('disabled', true);
         },
-        
+
         reloadData: function() {
             var user = conf.loggedUser, self = this;
             this.$el.find("input[name=_id]").val(conf.loggedUser._id);
-            
+
             if (conf.globalData.securityQuestions) {
                 securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
-                    uiUtils.loadSelectOptions(secquestions, self.$el.find("select[name='securityQuestion']"), 
+                    uiUtils.loadSelectOptions(secquestions, self.$el.find("select[name='securityQuestion']"),
                         false, _.bind(function() {
-                            this.$el.find("select[name='securityQuestion']").val(user.securityQuestion);                
-                            this.$el.find("input[name=oldSecurityQuestion]").val(user.securityQuestion);                
+                            this.$el.find("select[name='securityQuestion']").val(user.securityQuestion);
+                            this.$el.find("input[name=oldSecurityQuestion]").val(user.securityQuestion);
                         validatorsManager.validateAllFields(this.$el);
                     }, self));
                 });
             }
-            
+
             this.$el.find("select[name=securityQuestion]").on('change', _.bind(function() {
                 this.$el.find("input[name=securityAnswer]").trigger('change');
             }, this));
         }
-    }); 
-    
+    });
+
     return new ChangeSecurityDataDialog();
 });
