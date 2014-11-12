@@ -39,30 +39,30 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/SalesforceTypeView", [
             "change .url-radio" : "changeUrl"
         },
         data: {
-          "callbackURL" : window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
-          "urlTypes": [
-              {
-                  "name": "Production",
-                  "value" : "https://login.salesforce.com/services/oauth2/token",
-                  "id": "productionRadio",
-                  "readonly": true,
-                  "selected":false
-              },
-              {
-                  "name": "Sandbox",
-                  "value": "https://test.salesforce.com/services/oauth2/token",
-                  "id" : "sandboxRadio",
-                  "readonly": true,
-                  "selected":false
-              },
-              {
-                  "name": "Custom",
-                  "value": "https://[custom domain name]/services/oauth2/token",
-                  "id" : "customRadio",
-                  "readonly": false,
-                  "selected":false
-              }
-          ]
+            "callbackURL" : window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
+            "urlTypes": [
+                {
+                    "name": "Production",
+                    "value" : "https://login.salesforce.com/services/oauth2/token",
+                    "id": "productionRadio",
+                    "readonly": true,
+                    "selected":false
+                },
+                {
+                    "name": "Sandbox",
+                    "value": "https://test.salesforce.com/services/oauth2/token",
+                    "id" : "sandboxRadio",
+                    "readonly": true,
+                    "selected":false
+                },
+                {
+                    "name": "Custom",
+                    "value": "https://[custom domain name]/services/oauth2/token",
+                    "id" : "customRadio",
+                    "readonly": false,
+                    "selected":false
+                }
+            ]
         },
         getScopes: function() {
             var salesforceScope = "id%20api%20refresh_token";
@@ -80,14 +80,20 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/SalesforceTypeView", [
             return ExternalAccessDelegate.getToken(mergedResult.configurationProperties.clientId,
                 oAuthCode,
                     window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
-                    mergedResult.configurationProperties.loginUrl,
+                mergedResult.configurationProperties.loginUrl,
                 mergedResult._id.replace("/", "_"));
         },
 
         setToken: function(refeshDetails, connectorDetails, connectorLocation, urlArgs) {
-            connectorDetails.configurationProperties.refreshToken = refeshDetails.refresh_token;
+            if(refeshDetails.refresh_token !== undefined) {
+                connectorDetails.configurationProperties.refreshToken = refeshDetails.refresh_token;
+                connectorDetails.enabled = true;
+            } else {
+                connectorDetails.configurationProperties.refreshToken = null;
+                connectorDetails.enabled = false;
+            }
+
             connectorDetails.configurationProperties.instanceUrl = refeshDetails.instance_url;
-            connectorDetails.enabled = true;
 
             ConnectorDelegate.testConnector(connectorDetails).then(_.bind(function(testResult){
                 connectorDetails.objectTypes = testResult.objectTypes;
