@@ -28,7 +28,7 @@
         "get-notifications-for-user-count" : "select count(*) AS total FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc",
         "scan-tasks" : "SELECT * FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "scan-tasks-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL",
-        
+
         "query-cluster-failed-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')",
         "query-cluster-instances" : "SELECT * FROM cluster_states",
         "query-cluster-events" : "SELECT * FROM cluster_events WHERE instanceId = ${instanceId}",
@@ -38,15 +38,15 @@
         "audit-by-recon-id-type" : "select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
         "audit-by-recon-id-situation" : "select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
         "audit-by-activity-parent-action" : "select * FROM audit_activity WHERE parentActionId = ${parentActionId}",
-        
+
         "audit-last-recon-for-mapping" : "select * from audit_recon where entryType = 'start' and mapping = ${mapping} order by timestamp desc limit 1",
         "audit-by-recon-id-situations-latest" : "SELECT sourceObjectId,targetObjectId,ambiguousTargetObjectIds,timestamp,situation FROM audit_recon WHERE reconId = ${reconId} AND (${completed} = '' OR timestamp <= ${completed}) AND situation IN [${list:situations}] ORDER BY timestamp DESC SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "audit-by-recon-id-situations-latest-filtered" : "SELECT sourceObjectId,targetObjectId,ambiguousTargetObjectIds,timestamp,situation FROM audit_recon WHERE reconId = ${reconId} AND (${completed} = '' OR timestamp <= ${completed}) AND situation IN [${list:situations}] AND (sourceObjectId IN [${list:filteredIds}] OR targetObjectId IN [${list:filteredIds}]) ORDER BY timestamp DESC SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
-        
+
         "get-managed-users" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
-        "get-managed-users-filtered" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user LET $userNameLike = if((${userName} = ''), '%%', '${unquoted:userName}%'), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((${sn} = ''), '%%', '${unquoted:sn}%'), $givenNameLike = if((${givenName} = ''), '%%', '${unquoted:givenName}%') WHERE  userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '') ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "get-managed-users-filtered" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user LET $userNameLike = if((\"${unquoted:userName}\" = ''), '%%', \"${unquoted:userName}%\"), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((\"${unquoted:sn}\" = ''), '%%', \"${unquoted:sn}%\"), $givenNameLike = if((\"${unquoted:givenName}\" = ''), '%%', \"${unquoted:givenName}%\") WHERE userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '') ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "get-managed-users-count" : "SELECT COUNT(*) AS total FROM managed_user",
-        "get-managed-users-filtered-count" : "SELECT COUNT(*) AS total FROM managed_user LET $userNameLike = if((${userName} = ''), '%%', '${unquoted:userName}%'), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((${sn} = ''), '%%', '${unquoted:sn}%'), $givenNameLike = if((${givenName} = ''), '%%', '${unquoted:givenName}%') WHERE  userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '')",
+        "get-managed-users-filtered-count" : "SELECT COUNT(*) AS total FROM managed_user LET $userNameLike = if((\"${unquoted:userName}\" = ''), '%%', \"${unquoted:userName}%\"), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((\"${unquoted:sn}\" = ''), '%%', \"${unquoted:sn}%\"), $givenNameLike = if((\"${unquoted:givenName}\" = ''), '%%', \"${unquoted:givenName}%\") WHERE  userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '')",
         "get-recons" : "SELECT reconId, timestamp, mapping, message FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY timestamp DESC"
     },
     "commands" : {
@@ -322,7 +322,7 @@
                 ]
             },
             "audit_activity" : {},
-            "audit_access" : { 
+            "audit_access" : {
                 "index" : [
                     {
                         "propertyName" : "status",
