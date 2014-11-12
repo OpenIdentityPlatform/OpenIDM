@@ -290,12 +290,13 @@ function cannotContainOthers(fullObject, value, params, property) {
     
     if (value && typeof(value) === "string" && value.length) {
         for (var i = 0; i < fieldArray.length; i++) {
-            if (typeof(fullObject[fieldArray[i]]) === "undefined" && typeof(fullObject_server[fieldArray[i]]) !== "undefined") {
+              	if (fullObject[fieldArray[i]] && typeof(fullObject[fieldArray[i]]) === "undefined" && typeof(fullObject_server[fieldArray[i]]) !== "undefined") {
                 fullObject[fieldArray[i]] = fullObject_server[fieldArray[i]];
             }
             
-            if (typeof(fullObject[fieldArray[i]]) === "string" && value.match(fullObject[fieldArray[i]]))
+        	if (fullObject[fieldArray[i]] && typeof(fullObject[fieldArray[i]]) === "string" && value.match(fullObject[fieldArray[i]])) {
                 return [{"policyRequirement": "CANNOT_CONTAIN_OTHERS", params: {"disallowedFields": fieldArray[i]}}];
+        	}
         }
     }
     return [];
