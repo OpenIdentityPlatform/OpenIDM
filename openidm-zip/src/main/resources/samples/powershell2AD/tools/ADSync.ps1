@@ -110,7 +110,7 @@ if ($Connector.Operation -eq "GET_LATEST_SYNC_TOKEN")
 }
 elseif ($Connector.Operation -eq "SYNC")
 {
-	$searchBase = 'ou=test,dc=example,dc=com'
+	$searchBase = 'CN=Users,DC=example,DC=com'
 	$attrsToGet = "*"
 	$filter = "uSNChanged -gt {0}" -f $Connector.Token
 	
