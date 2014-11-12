@@ -41,8 +41,8 @@ http://openidm.forgerock.org/doc/integrators-guide/index.html#powershell-connect
 3- copy all the .ps1 files on the machine where you installed the .Net connector server and the PowerShell connector.
 In the sample provisioner, files are copied in the folder C:/openidm/samples/powershell2AD/tools/
 
-4- Edit the ADSearch.ps1 file to define the base suffix of your AD DC (line 95 of the script). Change the following:
-$searchBase = 'CN=Users,DC=example,DC=com'
+4- Edit the ADSearch.ps1 (line 95) and ADSync.ps1 (line 113) files to define the base suffix of your AD DC. Change the following:
+$searchBase = 'CN=Users,DC=example,DC=com' to accomodate your environment.
 
 5- Copy the remote connector provisioner file to openidm/conf/ from openidm/samples/provisioners/provisioner.openicf.connectorinfoprovider.json 
 Adapt to your local configuartion 
