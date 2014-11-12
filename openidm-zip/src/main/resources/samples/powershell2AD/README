@@ -24,43 +24,43 @@ your own identifying information:
 PowerShell Connector - AD samples
 ---------------------------------
 
-the tools/ folder contains a bunch of samples for the OpenICF PowerShell Connector.
+The tools/ folder contains a bunch of samples for the OpenICF PowerShell Connector.
 The samples use the MS Active Directory PowerShell module. See:
 http://technet.microsoft.com/en-us/library/hh852274.aspx
 
 These are the steps to follow to use the samples:
 
-1- install the OpenICF .Net connector server on a machine running an Active Directory Domain Controler
+1- Install the OpenICF .Net connector server on a machine running an Active Directory Domain Controller
 or a Workstation where the MS Active Directory PowerShell module is installed. See:
 http://openidm.forgerock.org/doc/integrators-guide/index.html#install-.net-connector
 The user used by the script is the same as the user running the .Net Connector server
 
-2- install the PowerShell connector. See:
+2- Install the PowerShell connector. See:
 http://openidm.forgerock.org/doc/integrators-guide/index.html#powershell-connector
 
-3- copy all the .ps1 files on the machine where you installed the .Net connector server and the PowerShell connector.
-In the sample provisioner, files are copied in the folder C:/openidm/samples/powershell2AD/tools/
+3- Copy all the .ps1 files to the machine where you installed the .Net connector server and the PowerShell connector.
+In the sample provisioner, files are copied to the folder C:/openidm/samples/powershell2AD/tools/
 
 4- Edit the ADSearch.ps1 (line 95) and ADSync.ps1 (line 113) files to define the base suffix of your AD DC. Change the following:
-$searchBase = 'CN=Users,DC=example,DC=com' to accomodate your environment.
+$searchBase = 'CN=Users,DC=example,DC=com' to accommodate your environment.
 
 5- Copy the remote connector provisioner file to openidm/conf/ from openidm/samples/provisioners/provisioner.openicf.connectorinfoprovider.json 
-Adapt to your local configuartion 
+Adapt to your local configuration
 
-6- edit the sample PowerShell connector provisioner file to suit your installation.
-The file is samples/provisioners/provisioner.openicf-ADPowerShell.json. You may need to change the files path. 
+6- Edit the sample PowerShell connector provisioner file to suit your installation.
+The file is samples/provisioners/provisioner.openicf-ADPowerShell.json. You may need to change the file paths.
 For instance:
 "configurationProperties" : {
         "AuthenticateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADAuthenticate.ps1",
         "CreateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADCreate.ps1",
 
-may not reflect your Windows folder. The other setting should not be changed
+may not reflect your Windows folder. The other settings should not be changed
 
 The Host, port, login and password do not need to be provided in these samples.
 login and password: The scripts execute under the same user as the .Net Connector Server
-host and port: By default the AD cmdlets will pick up the first available Domain Controler
+host and port: By default the AD cmdlets will pick up the first available Domain Controller
 
-7- copy the provisioner file in the openidm/conf/ folder. 
+7- Copy the provisioner file to the openidm/conf/ folder.
 
 
 OpenIDM instructions:
