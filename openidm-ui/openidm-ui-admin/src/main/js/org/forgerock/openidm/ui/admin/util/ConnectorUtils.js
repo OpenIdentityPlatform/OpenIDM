@@ -151,7 +151,7 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
             return icon.type === iconType;
         });
 
-        if(foundIcon === null) {
+        if(!foundIcon) {
             foundIcon = {
                 "iconClass" : "connector-icon-default",
                 "src": "img/icon-default-01.png"
