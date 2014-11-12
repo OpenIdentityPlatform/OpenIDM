@@ -163,7 +163,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                     function(){
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
                     });
-            },this), "340px");
+            },this), "360px");
         },
 
         mappingDetail: function(event){
