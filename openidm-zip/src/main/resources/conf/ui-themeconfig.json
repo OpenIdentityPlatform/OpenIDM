@@ -57,8 +57,7 @@
             "header-height": "40px"
         },
         "footer": {
-            "mailto": "info@forgerock.com",
-            "phone": "+47-2108-1746"
+            "mailto": "info@forgerock.com"
         }
     }
 }

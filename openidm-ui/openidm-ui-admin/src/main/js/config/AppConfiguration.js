@@ -39,7 +39,7 @@ define("config/AppConfiguration", [
                     moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
                     configuration: {
                         LoginView : "org/forgerock/commons/ui/common/LoginView",
-                        LoginDialog : "org/forgerock/commons/ui/common/LoginDialog"
+                        LoginDialog : "org/forgerock/openidm/ui/admin/util/LoginDialog"
                     }
                 },
                 {
