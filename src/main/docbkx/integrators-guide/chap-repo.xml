@@ -907,13 +907,19 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore</screen>
    <para>
     Free-form commands and native queries on the repository are disallowed by
     default and should remain so in production to reduce the risk of injection
-    attacks. Parameterized or pre-defined queries and commands (using the
-    <literal>queryId</literal> and <literal>commandId</literal> keywords) can be
-    authorized on the repository for external calls if necessary, although you
-    should exercise caution when doing so.
+    attacks.
    </para>
    <para>
-    For more information, see <link
+    Common filter expressions, called with the <literal>_queryFilter</literal>
+    keyword, enable you to form arbitrary queries on the repository, using a
+    number of supported filter operations. For more information on these filter
+    operations, see <link
+    xlink:href="integrators-guide#adding-constructing-queries"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
+    Queries</citetitle></link>. Parameterized or pre-defined queries and
+    commands (using the <literal>_queryId</literal> and
+    <literal>_commandId</literal> keywords) can be authorized on the repository
+    for external calls if necessary. For more information, see <link
     xlink:href="integrators-guide#parameterized-queries"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Parameterized
     Queries</citetitle></link>.
@@ -944,6 +950,10 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore</screen>
    <programlisting language="javascript">openidm.action("repo/ui/notification", "command", {},
 { "commandId" : "delete-notifications-by-id", "userName" : "scarter"});
 </programlisting>
+   <para>
+    Exercise caution when allowing commands to be run on the repository over the
+    REST interface, as there is an attached risk to the underlying data.
+   </para>
   </section>
  </section>
 

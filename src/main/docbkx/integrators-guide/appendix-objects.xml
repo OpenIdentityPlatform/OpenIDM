@@ -937,26 +937,24 @@ val = openidm.read("managed/foobar/myidentifier")</programlisting>
 
     <section xml:id="managed-objects-programmatic-query">
      <title>Querying Object Sets</title>
-
-     <para>The following script example queries object type instances.</para>
-
+     <para>
+      You can query managed objects using common query filter syntax, or by
+      configuring predefined queries in your repository configuration. The
+      following script example queries managed user objects whose userName is
+      Smith.
+     </para>
      <programlisting language="javascript">
-var params = {
-    "_queryId": "my-custom-query-id",
-    "mycustomtoken": "samplevalue"
+var qry = {
+    "_queryFilter" : "/userName eq \"smith\""
 };
-val = openidm.query("managed/foobar", params);</programlisting>
-
-     <para>The example sets up a query with ID
-     <literal>my-custom-query-id</literal>. The query definition (not shown)
-     is found in the repository configuration. The query definition includes
-     the parameter <literal>mycustomtoken</literal> for token
-     substitution.</para>
-     <para>An example for a query can be found in chapter <link
-  xlink:href="integrators-guide#correlation-query-managed-object"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Managed Object as Correlation Query Target</citetitle>
-</link>.</para>
+val = openidm.query("managed/user", qry);
+     </programlisting>
+     <para>
+      For more information, see <link xlink:show="new"
+      xlink:href="integrators-guide#queries"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Defining and
+      Calling Queries</citetitle></link>.
+     </para>
     </section>
    </section>
   </section>
@@ -1004,12 +1002,14 @@ val = openidm.query("managed/foobar", params);</programlisting>
    objects for data that does not require audit log, and does not serve
    directly as a target or source for mappings.</para>
 
-   <para>Although you can set and manipulate configuration objects both
-   programmatically and also manually, configuration objects are expected to
-   change slowly, perhaps through a mix of both manual file updates and also
-   programmatic updates. To store temporary values that can change frequently
-   and that you do not expect to be updated by configuration file changes,
-   custom repository objects can be more appropriate.</para>
+   <para>
+    Although you can set and manipulate configuration objects both
+    programmatically and manually, configuration objects are expected to change
+    slowly, perhaps through a mix of both manual file updates and programmatic
+    updates. To store temporary values that can change frequently and that you
+    do not expect to be updated by configuration file changes, custom repository
+    objects might be more appropriate.
+   </para>
   </section>
 
   <section xml:id="configuration-objects-naming">
@@ -1094,9 +1094,11 @@ val = openidm.query("managed/foobar", params);</programlisting>
    configuration object called <literal>escalation</literal> is
    <literal>custom/escalation</literal>.</para>
 
-   <para>OpenIDM supports REST mappings for create, read, update, and delete
-   of configuration objects. Currently OpenIDM does not support patch and
-   custom query operations for configuration objects.</para>
+   <para>
+    OpenIDM supports REST mappings for create, read, update, query, and
+    delete of configuration objects. Currently OpenIDM does not support patch
+    operations for configuration objects.
+   </para>
   </section>
 
   <section xml:id="configuration-objects-access-programmatic">
@@ -1105,7 +1107,7 @@ val = openidm.query("managed/foobar", params);</programlisting>
    <para>You can address configuration objects as resources using the URL or
    URI <literal>config/</literal> prefix both internally and also through
    the REST interface. The resource API provides script object functions for
-   create, read, update, and delete operations.</para>
+   create, read, update, query, and delete operations.</para>
 
    <para>OpenIDM supports concurrency through a multi version concurrency
    control mechanism. In other words, each time an object changes, OpenIDM

@@ -1522,6 +1522,12 @@ $ <userinput>curl \
    </listitem>
    <listitem>
     <para>
+     <literal>_queryFilter</literal> for arbitrary filters, in common filter
+     notation
+    </para>
+   </listitem>
+   <listitem>
+    <para>
      <literal>_queryExpression</literal> for client-supplied queries, in native
      query format
     </para>
@@ -4013,107 +4019,189 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   <indexterm>
    <primary>Correlation queries</primary>
   </indexterm>
-
-  <para>Every time OpenIDM creates an object through synchronization, it
-  creates a link between the source and target objects. OpenIDM then uses the
-  link to determine the object's situation during later synchronization
-  operations.</para>
-
-  <para>Initial, bulk synchronization operations can involve correlating
-  many objects that exist both on source and target systems. In this case,
-  OpenIDM uses correlation queries to find target objects that already exist,
-  and that correspond to source objects. For the target objects that match
-  a correlation query, OpenIDM needs only to create a link, rather than a
-  new target object.</para>
-
-  <para>Correlation queries run against target resources. The query syntax
-  therefore depends on the target system, and is either specific to the data
-  store underlying the OpenIDM repository, or to OpenICF query capabilities.
+  <para>
+   Every time OpenIDM creates an object through synchronization, it creates a
+   <emphasis>link</emphasis> between the source and target objects. OpenIDM then
+   uses the link to determine the object's situation during later
+   synchronization operations.
   </para>
-
-  <section xml:id="correlation-query-managed-object">
-   <title>Managed Objects as Correlation Query Targets</title>
-
-   <para>Queries on managed objects in the repository must be defined in the
-   configuration file for the repository, which is either
-   <filename>openidm/conf/repo.orientdb.json</filename>, or
-   <filename>openidm/conf/repo.jdbc.json</filename>.</para>
-
-   <para>The following example shows a correlation query defined in
-   <filename>openidm/conf/repo.orientdb.json</filename>.</para>
-
-   <programlisting language="javascript">
+  <para>
+   Initial, full synchronization operations can involve correlating many objects
+   that exist on both source and target systems. In this case, OpenIDM uses
+   correlation queries to find target objects that already exist, and that
+   correspond to source objects. For the target objects that match a correlation
+   query, OpenIDM needs only to create a link, rather than a new target object.
+  </para>
+  <para>
+   Correlation queries are accomplished by using script to construct the actual
+   query map. The content of the query is generated dynamically, using values
+   from the source object. Each source object results in a new query being sent
+   to the target system, using (possibly transformed) values from the source
+   object for its execution.
+  </para>
+  <para>
+   Correlation queries are defined as part of the mapping (in
+   <filename>sync.json</filename>) and run against
+   <emphasis>target resources</emphasis>, either managed or system objects,
+   depending on the mapping. Correlation queries on system objects access the
+   connector, which executes the query on the external resource.
+  </para>
+  <para>
+   The preferred syntax for a correlation query is a filtered query, using the
+   <literal>_queryFilter</literal> keyword, although predefined queries (using
+   <literal>_queryId</literal>) and native queries (using
+   <literal>_queryExpression</literal>) are also supported for correlation
+   queries.
+  </para>
+  <para>
+   A correlation query must return a map that holds a generic query, with the
+   following elements:
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     A condition, such as "Equals", "Starts with", or "Greater than".
+    </para>
+    <para>
+     For examples of query conditions, see <link xlink:show="new"
+     xlink:href="integrators-guide#constructing-queries"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
+     Queries</citetitle></link>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The element that is being compared, on the target object, for example,
+     <literal>uid</literal>.
+    </para>
+    <para>
+     Note that this element on the target object is not necessarily a single
+     attribute. Your query filter can be as simple, or as complex, as you need
+     it to be, from a single operator to an entire boolean expression tree.
+    </para>
+    <para>
+     When the target object is a system object, this attribute must be referred
+     to by its OpenIDM name, rather than its native (OpenICF) name. For example,
+     in the following provisioner configuration excerpt, the name to use would
+     be <literal>uid</literal> and not <literal>__NAME__</literal>:
+    </para>
+    <programlisting language="javascript">"uid" : {
+    "type" : "string",
+    "nativeName" : "__NAME__",
+    "required" : true,
+    "nativeType" : "string"
+}
+... </programlisting>
+   </listitem>
+   <listitem>
+    <para>
+     The value to search for in the query.
+    </para>
+    <para>
+     This value is generally based on one or more values from the source object,
+     but is not necessarily the value of a single source object property. The
+     way in which your script uses the values from the source object to find a
+     matching record in the target system is up to you. It might be a
+     transformation of a source object property (for example,
+     <literal>toUpperCase()</literal>), concatenated with other strings or
+     properties. You can also use this value to call an external REST endpoint,
+     the response from which would be the final "value" portion of the query.
+    </para>
+   </listitem>
+  </itemizedlist>
+  <para>
+   The following query finds objects on the target whose <literal>uid</literal>
+   is the same as the <literal>userName</literal> of a source object.
+  </para>
+  <programlisting language="javascript">
+    "correlationQuery" : {
+        "type" : "text/javascript",
+        "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
+    },
+  </programlisting>
+  <para>
+   The query can return zero or more objects. The situation that OpenIDM
+   assigns to the source object depends on the number of target objects that are
+   returned.
+  </para>
+  <para>
+   Correlation queries that do not use common query filter syntax must be
+   defined in the configuration file for the repository, either
+   <filename>openidm/conf/repo.jdbc.json</filename> or
+   <filename>openidm/conf/repo.orientdb.json</filename>, and must be referenced
+   in the mapping (<literal>sync.json</literal>) file.
+  </para>
+  <para>
+   The following example shows a query, defined in the OrientDB repository
+   configuration (<filename>openidm/conf/repo.orientdb.json</filename>), that
+   can be used as the basis for a correlation query.
+  </para>
+  <programlisting language="javascript">
 "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid}"
-</programlisting>
-
-   <para>By default, a <literal>${value}</literal> token replacement is
-   assumed to be a quoted string. If the value is not a quoted string, use the
-   <literal>unquoted:</literal> prefix, as shown above.</para>
-
-   <para>The following correlation query example shows the JavaScript to call
-   the query defined for OrientDB. The <literal>_queryId</literal> property
-   value matches the name of the query specified in
-   <filename>openidm/conf/repo.orientdb.json</filename>,
-   <literal>for-userName</literal>. The <literal>source.name</literal> value
-   replaces <literal>${uid}</literal> in the query. OpenIDM replaces
-   <literal>${unquoted:_resource}</literal> in the query with the name of the
-   table that holds managed objects.</para>
-
-   <programlisting language="javascript">
+  </programlisting>
+  <para>
+   By default, a <literal>${value}</literal> token replacement is assumed to be
+   a quoted string. If the value is not a quoted string, use the
+   <literal>unquoted:</literal> prefix, as shown above.
+  </para>
+  <para>
+   You would call this query in the mapping (<literal>sync.json</literal>) file
+   as follows:
+  </para>
+  <programlisting language="javascript">
 {
   "correlationQuery": {
     "type": "text/javascript",
     "source":
-      "var query = {'_queryId' : 'for-userName', 'uid' : source.name}; query;"
+      "var qry = {'_queryId' : 'for-userName', 'uid' : source.name}; qry;"
   }
 }</programlisting>
-
-   <para>The query can return zero or more objects, so the situation OpenIDM
-   assigns to the source object depends on the number of target objects
-   returned.</para>
-
-   <para>With a JDBC-based repository, the query defined in
-   <filename>openidm/conf/repo.jdbc.json</filename> is more complex due
-   to how the tables are indexed. The correlation query you define in
-   <filename>openidm/conf/sync.json</filename> is the same, however.</para>
-  </section>
-
-  <section xml:id="correlation-query-system-object">
-   <title>System Objects as Correlation Query Targets</title>
-   <para>
-    Correlation queries on system objects access the connector. The connector
-    then executes the query on the external resource.
-   </para>
-   <para>
-    Your correlation query JavaScript must return a map that holds a generic
-    query with the following elements:
-   </para>
-   <itemizedlist>
-    <listitem>
-     <para>
-      A condition, such as "Equals"
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      The naming attribute to compare on the system object. In the example that
-      follows, the naming attribute is <literal>uid</literal>.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      The value from the source object to use in the search filter. You set this
-      as the value of the <literal>value</literal> property, which takes an
-      array. In the example that follows, the value to use in the search filter
-      is <literal>source.userName</literal>.
-     </para>
-    </listitem>
-   </itemizedlist>
-   <programlisting language="javascript">
-var map = {"_queryFilter": 'uid eq "' + source.userName + '"'};
-map;
-   </programlisting>
-  </section>
+  <para>
+  The <literal>_queryId</literal> property
+  value (<literal>for-userName</literal>) matches the name of the query
+  specified in <filename>openidm/conf/repo.orientdb.json</filename>. The
+  <literal>source.name</literal> value replaces <literal>${uid}</literal> in
+  the query. OpenIDM replaces <literal>${unquoted:_resource}</literal> in the
+  query with the name of the table that holds managed objects.
+  </para>
+  <para>
+   OpenIDM ${docTargetVersion} offers a new declarative correlation option,
+   named the expression builder, that makes it easier to configure correlation
+   queries. The easiest way to use the expression builder to build up a
+   correlation query is by using the Admin UI. The following image shows how the
+   expression builder is used to build up a correlation query for a mapping from
+   <literal>system/ldap/accounts</literal> to <literal>managed/user</literal>
+   objects. The query essentially states that, in order for a match to exist
+   between the source (LDAP) object and the target (managed) object, both the
+   <literal>userName</literal> and <literal>telephoneNumber</literal> of those
+   objects must match.
+  </para>
+  <mediaobject>
+   <alt>Admin UI mapping screen showing correlation query</alt>
+   <imageobject>
+    <imagedata fileref="images/expression-builder.png" format="PNG"/>
+   </imageobject>
+  </mediaobject>
+  <para>
+   The resulting correlation query, in the mapping configuration
+   (<literal>sync.json</literal>) is as follows:
+  </para>
+  <programlisting language="javascript">"correlationQuery" : {
+    "type" : "text/javascript",
+    "expressionTree" : {
+        "all" : [
+            "givenName",
+            "telephoneNumber"
+        ]
+    },
+    "mapping" : "systemLdapAccounts_managedUser",
+    "file" : "ui/correlateTreeToQueryFilter.js"
+},</programlisting>
+  <para>
+   The logic in the expression builder is in the script
+   <filename>openidm/bin/defaults/script/ui/correlateTreeToQueryFilter.js</filename>
+   which converts the expression into the required query filter.
+  </para>
  </section>
 
  <section xml:id="advanced-dataflow">
@@ -4252,15 +4340,18 @@ map;
 }</programlisting>
 
   <variablelist>
-   <para>The following list shows all the properties that you can use as hooks
-   in mapping configurations to call scripts.</para>
+   <para>
+    The following list shows the properties that you can use as hooks in mapping
+    configurations to call scripts.
+   </para>
    <varlistentry>
     <term>Triggered by Situation</term>
     <!-- All related to the "Supported script hooks" section of
     ManagedObjectSet.java -->
     <listitem>
-     <para>onCreate, onRead, onUpdate, onDelete, onValidate, onRetrieve,
-      onStore, onLink, onUnlink, postCreate, postUpdate, postDelete</para>
+     <para>
+      onCreate, onUpdate, onDelete, onLink, onUnlink
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
