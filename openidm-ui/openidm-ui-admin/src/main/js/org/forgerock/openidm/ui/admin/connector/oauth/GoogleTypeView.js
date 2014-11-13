@@ -43,7 +43,9 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView", [
 
             return googleScope;
         },
-
+        data: {
+            "callbackURL": window.location.protocol + "//" + window.location.host + "/admin/oauth.html"
+        },
         getAuthUrl : function() {
             return $("#OAuthurl").val();
         },

@@ -620,6 +620,16 @@
                     "badBaseContext" : "Bad Base Context(s)"
                 }
             },
+            "google" : {
+                "listHeader" : "You must grant this project access to all of the following APIs:",
+                "callbackUrlMessage" : "Be sure your project is configured to use this callback URL",
+                "listItemOne" : "Admin SDK API",
+                "gettingStarted" : "Need help getting started?",
+                "listItemTwo" : "Enterprise License Manager API",
+                "needHelp" : "Need help locating your client id and secret?",
+                "changeHeader" : "Note for new and recently-changed projects",
+                "changeDetails" : "When you create a new project in Google, it can take up to 24 hours for the data to be propagated through Google. If you are setting up OpenIDM with a project that you have just created, or if you have recently changed the Callback URL of your project, you might receive an error when you attempt to validate the client id and secret."
+            },
             "salesforce" : {
                 "callbackUrlMessage" : "Be sure your application is configured to use this Callback URL",
                 "listHeader" : "You must grant this application all of the following OAuth Scopes:",
@@ -637,9 +647,6 @@
                 "base" : "Base OAuth Details",
                 "clientSecret": "Client Secret",
                 "clientId" : "Client Id"
-            },
-            "google": {
-
             }
         },
         "mapping": {

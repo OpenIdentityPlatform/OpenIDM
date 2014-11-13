@@ -118,9 +118,17 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
         deleteConnections: function(event) {
             var selectedItems = $(event.currentTarget).parents(".resource-body"),
-                url;
+                url,
+                tempConnector = _.clone(this.data.currentConnectors);
 
-            uiUtils.jqConfirm($.t("templates.connector.connectorDelete"), function(){
+            uiUtils.jqConfirm($.t("templates.connector.connectorDelete"), _.bind(function(){
+
+                _.each(tempConnector, function(connectorObject, index){
+                    if(connectorObject.cleanUrlName === selectedItems.attr("data-connector-title")) {
+                        this.data.currentConnectors.splice(index, 1);
+                    }
+                }, this);
+
                 url = selectedItems.attr("data-connector-title").split("_");
 
                 ConfigDelegate.deleteEntity(url[0] +"/" +url[1]).then(function(){
@@ -131,7 +139,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                     function(){
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
                     });
-            }, "330px");
+            } , this), "330px");
         },
 
         deleteManaged: function(event) {

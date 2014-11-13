@@ -19,6 +19,21 @@
   border: 1px solid darken(@color-active, 10%);
 }
 
+/*
+  We need these importants to override disable issues with the object type dialog
+*/
+button.ui-button:disabled
+{
+  background: #808080 !important;
+  background-image:none !important;
+  border: 1px solid #808080;
+  cursor: default;
+  box-shadow: 0 0 0 0 #888888;
+  -moz-box-shadow: 0 0 0 0 #888888;
+  -webkit-box-shadow: 0 0 0 0 #888888;
+}
+
+
 #objectTypesForm {
   margin:0;
   padding:0;
