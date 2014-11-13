@@ -219,7 +219,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             if(this.conditional_script_editor !== undefined) {
                 propertyObj.condition = this.conditional_script_editor.generateScript();
 
-                if(propertyObj.transform === null) {
+                if(propertyObj.condition === null) {
                     delete propertyObj.condition;
                 }
             } else {
