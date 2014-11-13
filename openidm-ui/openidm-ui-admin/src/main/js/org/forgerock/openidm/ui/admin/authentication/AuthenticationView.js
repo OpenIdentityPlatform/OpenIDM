@@ -195,7 +195,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     jsonEditorBasicFormat.enabled = module.enabled;
                     jsonEditorAdvancedFormat.customProperties = [];
 
-                    function addProperty(jsonEditor, value, property, module) {
+                    function addProperty(jsonEditor, value, property) {
                         if (property === "propertyMapping") {
                             _(value).each(function(propertyMapValue, propertyMapKey) {
                                 // Generic propertyMapping property: is truthy only if the property exists on the main object
@@ -232,10 +232,10 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
                     _(module.properties).each(function(value, key) {
                         if (_(jsonEditorBasicFormat).has(key)) {
-                            addProperty(jsonEditorBasicFormat, value, key, this.model.modules[tempKey]);
+                            addProperty(jsonEditorBasicFormat, value, key);
 
                         } else if (_(jsonEditorAdvancedFormat).has(key)) {
-                            addProperty(jsonEditorAdvancedFormat, value, key, this.model.modules[tempKey]);
+                            addProperty(jsonEditorAdvancedFormat, value, key);
 
                         } else if (key !== "groupRoleMapping") {
                             jsonEditorAdvancedFormat.customProperties.push({
@@ -545,10 +545,10 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         tempModule.properties.augmentSecurityContext = this.model.modules[tempID].scriptEditor.getScriptHook().script;
                     }
 
-                    if (this.model.modules[tempID].module.find(".container-userorgroup select").val() === $.t("templates.auth.userRoles")) {
+                    if (tempEditor.propertyMapping.userorgroup.length > 0) {
                         tempModule.properties.propertyMapping.userRoles = tempEditor.propertyMapping.userorgroup;
 
-                    } else if (this.model.modules[tempID].module.find(".container-userorgroup select").val() === $.t("templates.auth.groupMembership")) {
+                    } else if (!_.isUndefined(tempEditor.propertyMapping.userorgroup.grpMembership)) {
                         tempModule.properties.propertyMapping.groupMembership = tempEditor.propertyMapping.userorgroup.grpMembership;
                         tempModule.properties.groupRoleMapping = {};
 
@@ -583,4 +583,3 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
     return new AuthenticationView();
 });
-
