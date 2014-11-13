@@ -933,9 +933,9 @@ Content-Length: 89
         </tgroup>
        </informaltable>
        <para>
-        OpenIDM supports REST mappings for create, read, update, and
+        OpenIDM supports REST mappings for create, read, update, query, and
         delete of configuration objects. Currently OpenIDM does not support
-        custom query operations or patch operations for configuration objects.
+        patch operations for configuration objects.
        </para>
        <para>
         For an example that displays the current configuration, the current
@@ -979,19 +979,6 @@ Content-Length: 89
       "source" : "email"
     }, {
 ... </computeroutput></screen>
-    <note>
-     <para>
-      The <command>--header "X-OpenIDM-Username=openidm-admin</command> and
-      <command>--header "X-OpenIDM-Password=openidm-admin</command> options
-      are constructs unique to OpenIDM. You can also specify the username and
-      password with the following option:
-      <command>--user openidm-admin:openidm-admin</command>. For more
-      information, see the section on <link
-      xlink:role="http://docbook.org/xlink/role/olink"
-      xlink:href="integrators-guide#openidm-authentication">
-      <citetitle>Authentication</citetitle></link>.
-     </para>
-    </note>
    </section>
 
    <section xml:id="managing-users-REST">
@@ -1020,6 +1007,12 @@ Content-Length: 89
         <entry>/openidm/managed/user?_queryId=query-all-ids</entry>
         <entry>GET</entry>
         <entry>List all the managed users in the repository</entry>
+       </row>
+       <row>
+        <entry>/openidm/managed/user?_queryFilter=<replaceable>filter</replaceable></entry>
+        <entry>GET</entry>
+        <entry>Query the managed user object with the defined filter. The value
+         of the query filter must be URL encoded.</entry>
        </row>
       <row>
        <entry>/openidm/managed/user/<replaceable>id</replaceable></entry>
@@ -1072,6 +1065,19 @@ Content-Length: 89
 --header "X-OpenIDM-Password: openidm-admin" \
 --request GET \
 "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+   </userinput></screen>
+
+   <para>
+    The following example queries the repository for managed users whose user
+    name is Smith.
+   </para>
+
+   <screen>$ <userinput>curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+ "https://localhost:8443/openidm/managed/user?_queryFilter=userName%20eq%20%22smith%22"
    </userinput></screen>
 
    <para>

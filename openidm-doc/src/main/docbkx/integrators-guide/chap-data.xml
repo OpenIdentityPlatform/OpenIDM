@@ -147,19 +147,90 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
   <title>Defining and Calling Queries</title>
   <para>
    OpenIDM supports an advanced query model that enables you to define queries,
-   and to call them over the REST or Resource API.
+   and to call them over the REST or Resource API. Three types of queries are
+   supported, on both managed, and system objects:
   </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     Common filter expressions
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Parameterized, or predefined queries
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Native query expressions
+    </para>
+   </listitem>
+  </itemizedlist>
+  <para>
+   Each of these mechanisms is discussed in the following sections.
+  </para>
+
+  <section xml:id="query-filters">
+   <title>Common Filter Expressions</title>
+   <para>
+    The ForgeRock REST API defines common filter expressions, that enable you to
+    form arbitrary queries using a number of supported filter operations. This
+    query capability is the standard way to query data if no predefined query
+    exists, and is supported for all managed and system objects.
+   </para>
+   <para>
+    Common filter expressions are useful in that they do not require knowledge
+    of how the object is stored and do not require additions to the repository
+    configuration.
+   </para>
+   <para>
+    Common filter expressions are called with the
+    <literal>_queryFilter</literal> keyword. The following example uses a common
+    filter expression to retrieve managed user objects whose user name is Smith.
+   </para>
+   <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/managed/user?_queryFilter=userName%20eq%20%22smith%22"</screen>
+   <para>
+    The filter is URL encoded in this example. The corresponding filter using
+    the resource API would be:
+   </para>
+   <screen>openidm.query("managed/user", { "_queryFilter" : '/userName eq "smith"' });</screen>
+   <para>
+    Note that, this JavaScript invocation is internal and is not subject to the
+    same URL-encoding requirements that a GET request would be. Also, because
+    JavaScript supports the use of single quotes, it is not necessary to escape
+    the double quotes in this example.
+   </para>
+   <para>
+    For a list of supported filter operations, see
+    <xref linkend="constructing-queries" />.
+   </para>
+   <para>
+    Note that using common filter expressions to retrieve values from arrays is
+    currently not supported. If you need to search within an array you should
+    set up a predefined (parameterized) in your repository configuration. For
+    more information, see <xref linkend="parameterized-queries" />.
+   </para>
+  </section>
 
   <section xml:id="parameterized-queries">
    <title>Parameterized Queries</title>
-
    <para>
     Managed objects in the supported OpenIDM repositories can be accessed using
     a parameterized query mechanism. Parameterized queries on repositories are
     defined in the repository configuration (<filename>repo.*.json</filename>)
     and are called by their <literal>_queryId</literal>.
    </para>
-
+   <para>
+    Parameterized queries provide precise control over the query that is
+    executed. Such control might be useful for tuning, or for performing
+    database operations such as aggregation (which is not possible with a
+    common filter expression.)
+   </para>
    <para>
     Parameterized queries provide security and portability for the query call
     signature, regardless of the back-end implementation. Queries that are
@@ -168,7 +239,6 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
     officially supported repositories have been reviewed and hardened against
     injection attacks.
    </para>
-
    <para>
     For system objects, support for parameterized queries is restricted to
     <literal>_queryId=query-all-ids</literal>. There is currently no support for
@@ -177,28 +247,22 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
     REST interface, but are issued from internal calls, such as correlation
     queries.
    </para>
-
    <para>
     A typical query definition is as follows:
    </para>
-
    <programlisting>
 "query-all-ids" : "select _openidm_id from ${unquoted:_resource}"
    </programlisting>
-
    <para>
     To call this query, you would reference its ID, as follows:
    </para>
-
    <programlisting>
 ?_queryId=query-all-ids
    </programlisting>
-
    <para>
     The following example calls <literal>query-all-ids</literal> over the REST
     interface:
    </para>
-
    <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -208,56 +272,48 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
 
   <section xml:id="native-queries">
    <title>Native Query Expressions</title>
-
    <para>
     Native query expressions are supported for all managed objects and system
-    objects, and can be called directly over the REST interface, rather than
-    being defined in the repository configuration.
+    objects, and can be called directly, rather than being defined in the
+    repository configuration.
    </para>
-
    <para>
     Native queries are intended specifically for internal callers, such as
-    custom scripts, in situations where the parameterized query facility is
-    insufficient. For example, native queries are useful if the query needs to
-    be generated dynamically.
+    custom scripts, and should be used only in situations where the common
+    filter or parameterized query facilities are insufficient. For example,
+    native queries are useful if the query needs to be generated dynamically.
    </para>
-
    <para>
     The query expression is specific to the target resource. For repositories,
     queries use the native language of the underlying data store. For system
     objects that are backed by OpenICF connectors, queries use the applicable
     query language of the system resource.
    </para>
-
    <para>
     Native queries on the repository are made using the
     <literal>_queryExpression</literal> keyword. For example:
    </para>
-
    <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  "https://localhost:8443/openidm/managed/user?_queryExpression=select+from+managed_user"
    </screen>
-
    <para>
     Unless you have specifically enabled native queries, the previous command
     returns a 403 access denied error message. Native queries should not be
     enabled in production environments, as they are not portable and do not
     guard against injection attacks.
    </para>
-
    <para>
     Such query expressions should therefore not be used or made accessible over
     the REST interface or over HTTP, other than for development, and should be
     used only via the internal Resource API. If you want to enable such
     native queries for development, see the section on
     <link xlink:href="integrators-guide#security-urls"
-          xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Protecting
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Protecting
     Sensitive REST Interface URLs</citetitle></link>.
    </para>
-
    <para>
     Alternatively, if you really need to expose native queries over HTTP, in a
     selective manner, you can design a custom endpoint to wrap such access.
@@ -266,14 +322,13 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
 
   <section xml:id="constructing-queries">
    <title>Constructing Queries</title>
-
    <para>
     The <literal>openidm.query</literal> function enables you to query OpenIDM
-    resource objects for reconciliation processes and workflows. The query
-    syntax is <literal>openidm.query(id, params)</literal>, where
-    <literal>id</literal> specifies the object on which the query should be
-    performed and <literal>params</literal> provides the parameters that are
-    passed to the query, either <literal>_queryFilter</literal> or
+    managed and system objects. The query syntax is
+    <literal>openidm.query(id, params)</literal>, where <literal>id</literal>
+    specifies the object on which the query should be performed and
+    <literal>params</literal> provides the parameters that are passed to the
+    query, either <literal>_queryFilter</literal> or
     <literal>_queryID</literal>. For example:
    </para>
 
@@ -286,229 +341,560 @@ var results = openidm.query("system/ScriptedSQL/account", params)
    </programlisting>
 
    <para>
-    The query filter is specified in common filter notation. The following
-    provide examples of query filter operations:
+    Over the REST interface, the query filter is specified as
+    <literal>_queryFilter=<replaceable>filter</replaceable></literal>, for
+    example:
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"Smith"'
+   </userinput></screen>
+   <para>
+    When called over REST, you must URL encode the filter expression. The
+    following examples show the filter expressions using the resource API and
+    the REST API, but do not show the URL encoding, to make them easier to read.
    </para>
 
-   <bridgehead>Attribute Operations</bridgehead>
-    <variablelist>
-     <varlistentry>
-      <term><literal>Equals</literal> Filter</term>
-      <listitem>
-       <para>
-        Determines whether the resource contains an attribute that matches a
-        specific attribute value.
-       </para>
-       <para>
-        Returns <literal>true</literal> if the object satisfies all selection
-        criteria of the filter, otherwise returns <literal>false</literal>.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "employeeType eq \"Permanent\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-    </variablelist>
+   <variablelist>
+   <para>
+    The <replaceable>filter</replaceable> expression is constructed from the
+    building blocks shown in this section. In these expressions the simplest
+    <replaceable>json-pointer</replaceable> is a field of the JSON resource,
+    such as <literal>userName</literal> or <literal>id</literal>. A json-pointer
+    can, however, point to nested elements as described in the
+    <link xlink:show="new" xlink:href="http://tools.ietf.org/html/rfc6901">JSON
+    Pointer RFC</link>.
+   </para>
+   <varlistentry>
+    <term>Comparison expressions</term>
+    <listitem>
+     <para>
+      The following examples show how you can build filters using comparison
+      expressions.
+     </para>
 
-   <bridgehead>Comparable Attribute Operations</bridgehead>
-    <para>
-     Compares single-value attributes to a given filter.
-    </para>
-    <variablelist>
-     <varlistentry>
-      <term><literal>GreaterThan</literal> Filter</term>
-      <listitem>
-       <para>
-        Determines whether the attribute value of the resource object is greater
-        than the one provided in the filter.
-       </para>
-       <para>
-        Returns <literal>true</literal> if the attribute value is greater,
-        otherwise returns <literal>false</literal>.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "employeeNumber gt \"50000\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>GreaterThanOrEqual</literal> Filter</term>
-      <listitem>
-       <para>
-        Determines whether the attribute value of the resource object is greater
-        than or equal to the one provided in the filter.
-       </para>
-       <para>
-        Returns <literal>true</literal> if the attribute value is greater than
-        or equal, otherwise returns <literal>false</literal>.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "employeeNumber ge \"50000\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>LessThan</literal> Filter</term>
-      <listitem>
-       <para>
-        Determines whether the attribute value of the resource object is less
-        than the one provided in the filter.
-       </para>
-       <para>
-        Returns <literal>true</literal> if the attribute value is less,
-        otherwise returns <literal>false</literal>.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "employeeNumber lt \"50000\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>LessThanOrEqual</literal> Filter</term>
-      <listitem>
-       <para>
-        Determines whether the attribute value of the resource object is less
-        than or equal to the one provided in the filter.
-       </para>
-       <para>
-        Returns <literal>true</literal> if the attribute value is less than or
-        equal, otherwise returns <literal>false</literal>.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "employeeNumber le \"50000\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-    </variablelist>
+     <variablelist>
 
-   <bridgehead>String Attribute Operations</bridgehead>
-    <para>
-     Compares string values to a given filter.
-    </para>
-    <variablelist>
-     <varlistentry>
-      <term><literal>StartsWith</literal> Filter</term>
-      <listitem>
-       <para>Returns attributes whose value starts with the string specified in
-        the filter.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "lastName sw \"smi\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>Contains</literal> Filter</term>
-      <listitem>
-       <para>
-        Returns attributes whose value contains the string specified in the
-        filter.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "lastName co \"smi\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>EndsWith</literal> Filter</term>
-      <listitem>
-       <para>
-        Returns attributes whose value ends with the string specified in the
-        filter.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter" : "lastName ew \"ith\""
-       </programlisting>
-      </listitem>
-     </varlistentry>
-    </variablelist>
+      <varlistentry>
+       <term><literal><replaceable>json-pointer</replaceable> eq <replaceable>json-value</replaceable></literal></term>
+       <listitem>
+        <para>
+         Matches when the pointer equals the value, for example:
+        </para>
+        <programlisting language="javascript">
+"_queryFilter" : '/givenName eq "Dan"'
+        </programlisting>
+        <para>
+         The following REST call returns the user name and given name of all
+         managed users whose first name (<literal>givenName</literal>) is "Dan".
+        </para>
+        <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=givenName+eq+"Dan"&amp;_fields=userName,givenName'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "givenName": "Dan",
+      "userName": "dlangdon"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dcope"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dlanoway"
+    }
+}</computeroutput></screen>
+       </listitem>
+      </varlistentry>
 
-   <bridgehead>Filter Operations</bridgehead>
-    <para>
-     Filter operations are used to construct more complex filters by comparing
-     two filters from the preceding section or negating filters defined in the
-     previous section.
-    </para>
-    <variablelist>
-     <varlistentry>
-      <term><literal>AND Filter</literal></term>
-      <listitem>
-       <para>
-        A filter that matches entries using the AND boolean operator on two
-        filters.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter": "(lastName eq \"Smith\") and (givenName eq \"John\")"
-       </programlisting>
+      <varlistentry>
+       <term><literal><replaceable>json-pointer</replaceable> co <replaceable>json-value</replaceable></literal></term>
+       <listitem>
+        <para>
+         Matches when the pointer contains the value, for example:
+        </para>
+        <programlisting language="javascript">
+"_queryFilter" : '/givenName co "smi"'
+        </programlisting>
+        <para>
+         The following REST call returns the user name and given name of all
+         managed users whose first name (<literal>givenName</literal>) contains
+         "Da".
+        </para>
+        <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=givenName+co+"Da"&amp;_fields=userName,givenName'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 10,
+  "result": [
+    {
+      "givenName": "Dave",
+      "userName": "djensen"
+    },
+    {
+      "givenName": "David",
+      "userName": "dakers"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dlangdon"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dcope"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dlanoway"
+    },
+    {
+      "givenName": "Daniel",
+      "userName": "dsmith"
+    },
+...
+}</computeroutput></screen>
+       </listitem>
+      </varlistentry>
+
+      <varlistentry>
+       <term><literal><replaceable>json-pointer</replaceable> sw <replaceable>json-value</replaceable></literal></term>
+       <listitem>
+        <para>
+         Matches when the pointer starts with the value, for example:
+        </para>
+        <programlisting language="javascript">
+"_queryFilter" : '/sn sw "Jen"'
+        </programlisting>
+        <para>
+         The following REST call returns the user names of all managed users
+         whose last name (<literal>sn</literal>) starts with "Jen".
+        </para>
+        <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/managed/user?_queryFilter=sn+sw+"Jen"&amp;_fields=userName'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 4,
+  "result": [
+    {
+      "userName": "bjensen"
+    },
+    {
+      "userName": "djensen"
+    },
+    {
+      "userName": "cjenkins"
+    },
+    {
+      "userName": "mjennings"
+    }
+  ]
+}</computeroutput></screen>
       </listitem>
      </varlistentry>
-     <varlistentry>
-      <term><literal>OR Filter</literal></term>
-      <listitem>
-       <para>
-        A filter that matches entries using the OR boolean operator on two
-        filters.
-       </para>
-       <para>
-        For example:
-       </para>
+
+      <varlistentry>
+       <term><literal><replaceable>json-pointer</replaceable> lt <replaceable>json-value</replaceable></literal></term>
+       <listitem>
+        <para>
+         Matches when the pointer is less than the value, for example:
+        </para>
        <programlisting language="javascript">
-"_queryFilter": "(lastName eq \"Smith\") or (lastName eq \"Smythe\")"
+"_queryFilter" : '/employeeNumber lt "5000"'
        </programlisting>
+     <para>
+      The following REST call returns the user names of all managed users whose
+      <literal>employeeNumber</literal> is lower than 5000.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+lt+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 4999,
+  "result": [
+    {
+      "employeeNumber": "4907",
+      "userName": "jnorris"
+    },
+    {
+      "employeeNumber": "4905",
+      "userName": "afrancis"
+    },
+    {
+      "employeeNumber": "3095",
+      "userName": "twhite"
+    },
+    {
+      "employeeNumber": "3921",
+      "userName": "abasson"
+    },
+    {
+      "employeeNumber": "2892",
+      "userName": "dcarter"
+    }
+...
+  ]
+}</computeroutput></screen>
       </listitem>
      </varlistentry>
+
      <varlistentry>
-      <term><literal>NOT Filter</literal></term>
+      <term><literal><replaceable>json-pointer</replaceable> le <replaceable>json-value</replaceable></literal></term>
       <listitem>
        <para>
-        A filter that filters out matched entries by using a query. Syntax is
-        <literal>"! (expression)"</literal>.
-       </para>
-       <para>
-        For example:
+        Matches when the pointer is less than or equal to the value, for
+        example:
        </para>
        <programlisting language="javascript">
-"_queryFilter": "! (employeeType eq \"Contractor\")"
+"_queryFilter" : '/employeeNumber le "5000"'
        </programlisting>
+     <para>
+      The following REST call returns the user names of all managed users whose
+      <literal>employeeNumber</literal> is 5000 or lower.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+le+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 5000,
+  "result": [
+    {
+      "employeeNumber": "4907",
+      "userName": "jnorris"
+    },
+    {
+      "employeeNumber": "4905",
+      "userName": "afrancis"
+    },
+    {
+      "employeeNumber": "3095",
+      "userName": "twhite"
+    },
+    {
+      "employeeNumber": "3921",
+      "userName": "abasson"
+    },
+    {
+      "employeeNumber": "2892",
+      "userName": "dcarter"
+    }
+...
+  ]
+}</computeroutput></screen>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term><literal><replaceable>json-pointer</replaceable> gt <replaceable>json-value</replaceable></literal></term>
+      <listitem>
+       <para>
+        Matches when the pointer is greater than the value, for example:
+       </para>
+       <programlisting language="javascript">
+"_queryFilter" : '/employeeNumber gt "50000"'
+       </programlisting>
+     <para>
+      The following REST call returns the user names of all managed users whose
+      <literal>employeeNumber</literal> is higher than 5000.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+gt+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 1458,
+  "result": [
+    {
+      "employeeNumber": "5003",
+      "userName": "agilder"
+    },
+    {
+      "employeeNumber": "5011",
+      "userName": "bsmith"
+    },
+    {
+      "employeeNumber": "5034",
+      "userName": "bjensen"
+    },
+    {
+      "employeeNumber": "5027",
+      "userName": "cclarke"
+    },
+    {
+      "employeeNumber": "5033",
+      "userName": "scarter"
+    }
+...
+  ]
+}</computeroutput></screen>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term><literal><replaceable>json-pointer</replaceable> ge <replaceable>json-value</replaceable></literal></term>
+      <listitem>
+       <para>
+        Matches when the pointer is greater than or equal to the value for
+        example:
+       </para>
+       <programlisting language="javascript">
+"_queryFilter" : '/employeeNumber ge "50000"'
+       </programlisting>
+        <para>
+         or
+        </para>
+        <programlisting language="javascript">
+
+        </programlisting>
+     <para>
+      The following REST call returns the user names of all managed users whose
+      <literal>employeeNumber</literal> is 5000 or higher.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+ge+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 1457,
+  "result": [
+    {
+      "employeeNumber": "5000",
+      "userName": "agilder"
+    },
+    {
+      "employeeNumber": "5011",
+      "userName": "bsmith"
+    },
+    {
+      "employeeNumber": "5034",
+      "userName": "bjensen"
+    },
+    {
+      "employeeNumber": "5027",
+      "userName": "cclarke"
+    },
+    {
+      "employeeNumber": "5033",
+      "userName": "scarter"
+    }
+...
+  ]
+}</computeroutput></screen>
       </listitem>
      </varlistentry>
     </variablelist>
-   </section>
+   </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Presence expression</term>
+    <listitem>
+     <para>
+      <literal><replaceable>json-pointer</replaceable> pr</literal> matches any
+      object in which the <replaceable>json-pointer</replaceable> is present,
+      for example:
+     </para>
+     <programlisting language="javascript">
+"_queryFilter" : '/mail pr'
+     </programlisting>
+     <para>
+      The following REST call returns the mail addresses for all managed users
+      who have a <literal>mail</literal> property in their entry.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/managed/user?_queryFilter=mail%20pr&amp;_fields=mail'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "mail": "jdoe@exampleAD.com"
+    },
+    {
+      "mail": "bjensen@example.com"
+    }
+  ]
+}</computeroutput></screen>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Literal expressions</term>
+    <listitem>
+     <para>
+      <literal>true</literal> matches any object in the resource.
+     </para>
+     <para>
+      <literal>false</literal> matches no object in the resource.
+     </para>
+     <para>
+      For example, you can list the <literal>_id</literal> of all managed
+      objects as follows:
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET
+ 'https://localhost:8443/managed/user?_queryFilter=true&amp;_fields=_id'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "_id": "d2e29d5f-0d74-4d04-bcfe-b1daf508ad7c"
+    },
+    {
+      "_id": "709fed03-897b-4ff0-8a59-6faaa34e3af6"
+    }
+  ]
+}</computeroutput>
+     </screen>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Complex expressions</term>
+    <listitem>
+     <para>
+      You can combine expressions using the boolean operators
+      <literal>and</literal>, <literal>or</literal>, and <literal>!</literal>
+      (not). The following example queries managed user objects located in
+      London, with last name Jensen.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ https://localhost:8443/managed/user?_queryFilter=city+eq+"London"+and+sn+eq+"Jensen"&amp;_fields=userName,givenName,sn'&amp;_fields=userName'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "sn": "Jensen",
+      "givenName": "Clive",
+      "userName": "cjensen"
+    },
+    {
+      "sn": "Jensen",
+      "givenName": "Dave",
+      "userName": "djensen"
+    },
+    {
+      "sn": "Jensen",
+      "givenName": "Margaret",
+      "userName": "mjensen"
+    }
+  ]
+}</computeroutput></screen>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  </section>
 
   <section xml:id="paging-query-results">
    <title>Paging Query Results</title>
    <para>
-    The OpenIDM repository provides some support for paging results, useful, for
-    example, for UI display purposes. Note that this paging is not guaranteed to
-    include all results if the data moves in between paging calls. Predefined
-    queries must be configured to support paging. For example:
+    The common filter query mechanism supports paged query results for managed
+    and system objects.
+   </para>
+   <para>
+    The following filtered query returns the first two records in an LDAP
+    repository, whose <literal>uid</literal> starts with <literal>b</literal>.
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/ldap/account?_queryFilter=uid%20sw%20%22b%22&amp;_pageSize=2"
+   </userinput>
+<computeroutput>
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "_id": "uid=bjensen,ou=People,dc=example,dc=com",
+      "sn": "Jensen",
+      "dn": "uid=bjensen,ou=People,dc=example,dc=com",
+      "givenName": "Barbara",
+      "description": "Created for OpenIDM",
+      "cn": "Babara Jensen",
+      "uid": "bjensen",
+      "ldapGroups": [
+        "cn=openidm2,ou=Groups,dc=example,dc=com"
+      ],
+      "mail": "bjensen@example.com",
+      "telephoneNumber": "1-360-229-7105"
+    },
+    {
+      "_id": "cn=bsmith,ou=People,dc=example,dc=com",
+      "sn": "Smith",
+      "dn": "cn=bsmith,ou=People,dc=example,dc=com",
+      "givenName": "Bill",
+      "description": null,
+      "cn": "bsmith",
+      "uid": "bsmith",
+      "ldapGroups": [],
+      "mail": "bsmith@example.com",
+      "telephoneNumber": "0987362837"
+    }
+  ]
+}</computeroutput>   </screen>
+   <para>
+    Predefined queries also provide some support for paged
+    results, useful, for example, for UI display purposes. Predefined queries
+    must be configured to support paging, in the repository configuration. For
+    example:
    </para>
    <screen>"query-all-ids" : "select _openidm_id from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",</screen>
    <para>
@@ -537,11 +923,6 @@ var results = openidm.query("system/ScriptedSQL/account", params)
      }
    ]
  }</computeroutput>  </screen>
-   <para>
-    Paging is supported for managed objects, as queries on these objects are
-    delegated to the repository. There is currently no out of the box support
-    for paged queries on other objects.
-   </para>
    <variablelist>
     <para>
      The following paging parameters are supported:
