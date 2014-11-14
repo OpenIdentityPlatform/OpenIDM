@@ -213,7 +213,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                                 })[0].targetObject, _this.data.targetProps);
                                             } else if (targetObject) {
                                                 return  mappingUtils.buildObjectRepresentation(targetObject, _this.data.targetProps);
-                                            } else if (reconRecord.ambiguousTargetObjectIds.length) {
+                                            } else if (reconRecord.ambiguousTargetObjectIds && reconRecord.ambiguousTargetObjectIds.length) {
                                                 return "Multiple Matches Found";
                                             } else {
                                                 return "Not Found";
