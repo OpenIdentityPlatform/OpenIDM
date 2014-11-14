@@ -165,6 +165,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(), // mapping
                     new Optional(), // message
                     new Optional(new ParseJsonValue()), // messageDetail
+                    new Optional(), // reconAction
                     new Optional(), // reconciling
                     new NotNull(), // reconId
                     new Optional(), // rootActionId
@@ -182,6 +183,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(new ParseJsonValue()), // after
                     new Optional(new ParseJsonValue()), // before
                     new Optional(), // changedFields
+                    new Optional(), // exception
                     new Optional(), // message
                     new Optional(), // objectId
                     new Optional(), // parentActionId
@@ -196,6 +198,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             processors = new CellProcessor[] {
                     new NotNull(), // _id
                     new Optional(), // action
+                    new Optional(), // exception
                     new Optional(), // ip
                     new Optional(), // principal
                     new Optional(new ParseJsonValue()), // roles
