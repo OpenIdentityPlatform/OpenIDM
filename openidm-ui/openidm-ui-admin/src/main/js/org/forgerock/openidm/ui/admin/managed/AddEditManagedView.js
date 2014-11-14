@@ -54,7 +54,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             var managedPromise,
                 repoCheckPromise,
                 eventKeys,
-                eventList = ["onCreate", "postCreate", "onRead", "onUpdate", "postUpdate", "onDelete", "postDelete", "onValidate", "onRetrieve", "onStore"],
+                eventList = ["onCreate", "postCreate", "onRead", "onUpdate", "postUpdate", "onDelete", "postDelete", "onValidate", "onRetrieve", "onStore", "onSync"],
                 propertiesEventList = ["onValidate", "onRetrieve", "onStore"];
 
             this.data = {
