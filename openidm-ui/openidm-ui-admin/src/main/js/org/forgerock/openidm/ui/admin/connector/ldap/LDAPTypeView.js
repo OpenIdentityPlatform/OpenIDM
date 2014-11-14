@@ -29,8 +29,9 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function(ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog, ConnectorDelegate, uiUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/delegates/SecurityDelegate"
+], function(ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog, ConnectorDelegate, uiUtils, securityDelegate) {
 
     var LDAPTypeView = ConnectorTypeAbstractView.extend({
         events: {
@@ -95,6 +96,17 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                 }
             }
 
+            if(this.data.editState) {
+                securityDelegate.getPublicKeyCert("truststore", "openidm_" +args.connectorDefaults.name).then(_.bind(function(cert){
+                    this.data.publicKey = cert;
+                    this.ldapParentRender(args, callback);
+                }, this));
+            } else {
+                this.ldapParentRender(args, callback);
+            }
+
+        },
+        ldapParentRender : function(args, callback) {
             this.parentRender(_.bind(function() {
                 if(!this.data.editState) {
                     this.$el.find("#ldapTemplateType").val(this.model.ldapType);
@@ -110,8 +122,6 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     this.$el.find("#toggleCert").show();
                 }
 
-                this.fieldButtonCheck();
-
                 validatorsManager.bindValidators(this.$el, "config/provisioner.openicf/ldap", _.bind(function () {
                     validatorsManager.validateAllFields(this.$el);
                 }, this));
@@ -126,33 +136,33 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
             var value = $(event.target).val();
 
             uiUtils.jqConfirm($.t("templates.connector.ldapConnector.ldapTypeChange"), _.bind(function(){
-                if(value === "baseConfig") {
-                    this.render({
-                        "animate": false,
-                        "connectorDefaults": this.model.defaultLdap,
-                        "editState" : this.data.editState,
-                        "systemType" : this.model.systemType,
-                        "connectorType" : this.model.connectorType,
-                        "ldapType" : value
-                    });
-                } else {
-                    ConnectorDelegate.connectorDefault(value, "ldap").then(_.bind(function (result) {
-                            this.render({
-                                "animate": false,
-                                "connectorDefaults": result,
-                                "editState" : this.data.editState,
-                                "systemType" : this.model.systemType,
-                                "connectorType" : this.model.connectorType,
-                                "ldapType" : value
-                            });
-                        }, this)
-                    );
-                }
-            }, this),
+                    if(value === "baseConfig") {
+                        this.render({
+                            "animate": false,
+                            "connectorDefaults": this.model.defaultLdap,
+                            "editState" : this.data.editState,
+                            "systemType" : this.model.systemType,
+                            "connectorType" : this.model.connectorType,
+                            "ldapType" : value
+                        });
+                    } else {
+                        ConnectorDelegate.connectorDefault(value, "ldap").then(_.bind(function (result) {
+                                this.render({
+                                    "animate": false,
+                                    "connectorDefaults": result,
+                                    "editState" : this.data.editState,
+                                    "systemType" : this.model.systemType,
+                                    "connectorType" : this.model.connectorType,
+                                    "ldapType" : value
+                                });
+                            }, this)
+                        );
+                    }
+                }, this),
 
-            _.bind(function() {
-                this.$el.find("#ldapTemplateType").val(this.model.ldapType);
-            }, this), "330px");
+                _.bind(function() {
+                    this.$el.find("#ldapTemplateType").val(this.model.ldapType);
+                }, this), "330px");
         },
 
         showFilterDialog: function (event) {
@@ -223,6 +233,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                 buttons: [
                     {
                         text : $.t("common.form.save"),
+                        id: "sslSaveButton",
                         click: function(e) {
                             var saveBtn = $(this).parent(".ui-dialog").find(".ui-dialog-buttonpane .ui-button:first"),
                                 certField;
@@ -247,6 +258,22 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     }
                 ]
             });
+        },
+
+        connectorSaved: function(callback, details) {
+            if (this.$el.find("#certificate").val().length) {
+                securityDelegate.uploadCert("truststore", "openidm_" +details.name, this.$el.find("#certificate").val()).then(function () {
+                    if(callback) {
+                        callback();
+                    }
+                });
+            } else {
+                securityDelegate.deleteCert("truststore", "openidm_" +details.name).always(function () {
+                    if(callback) {
+                        callback();
+                    }
+                });
+            }
         }
     });
 

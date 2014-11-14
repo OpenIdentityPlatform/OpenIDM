@@ -4,7 +4,7 @@
     <div class="group-body">
         <div class="group-field-block group-lead no-validation-block">
             <label for="ldapTemplateType" class="light">{{t "templates.connector.ldapConnector.ldapType"}}</label>
-            <select data-validator="required" data-validator-event="changed" id="ldapTemplateType" class="form-size-m" name="enabled">
+            <select data-validator="required" data-validator-event="changed" id="ldapTemplateType" class="form-size-m">
                 {{#each ldapSelector}}
                 <option value="{{fileName}}">{{displayName}}</option>
                 {{/each}}
@@ -28,7 +28,6 @@
         <div class="group-field-block" style="display:none" id="certContainer">
             <div class="separate-message">
                 <textarea id="certificate" name="certificate" class="certificate" placeholder="{{t "templates.connector.ldapConnector.certificateHint"}}" data-validator="certificate" data-validator-event="keyup change blur">{{publicKey}}</textarea>
-                <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>

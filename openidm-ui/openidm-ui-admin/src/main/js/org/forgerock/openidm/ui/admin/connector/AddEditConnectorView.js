@@ -660,7 +660,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 connDetails = this.connectorTypeRef.data.connectorDefaults,
                 mergedResult = {},
                 tempArrayObject,
-                tempName,
                 tempKeys,
                 arrayComponents = $(".connector-array-component");
 
@@ -716,19 +715,19 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             ConnectorDelegate.deleteCurrentConnectorsCache();
 
-            if(this.data.editState) {
-                ConfigDelegate.updateEntity(this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
-                    _.delay(function () {
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
-                    }, 1500);
-                }, this));
-            } else {
-                ConfigDelegate.createEntity(this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
-                    _.delay(function() {
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
-                    }, 1500);
-                }, this));
-            }
+            ConfigDelegate[this.data.editState ? "updateEntity" : "createEntity" ](this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
+                if(this.connectorTypeRef.connectorSaved) {
+                    this.connectorTypeRef.connectorSaved(this.delayReturn, mergedResult);
+                } else {
+                    this.delayReturn();
+                }
+            }, this));
+        },
+
+        delayReturn: function() {
+            _.delay(function () {
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+            }, 1500);
         },
 
         oAuthFormSubmit: function(event) {
