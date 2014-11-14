@@ -88,31 +88,36 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
             }
 
             if(this.data.linkedData.linkedTo.length > 0) {
-                this.editor = new JSONEditor(
-                    this.$el.find("#linkedViewContent")[0],
-                    {
-                        theme: "jqueryui",
-                        disable_edit_json: true,
-                        disable_properties: true,
-                        disable_array_delete: true,
-                        disable_array_reorder: true,
-                        disable_array_add: true,
-                        schema: {
-                            type: "object",
-                            title: this.cleanLinkName(this.data.linkedData.linkedTo[selection].resourceName)
+
+                if (this.data.linkedData.linkedTo[selection].content !== null) {
+                    this.editor = new JSONEditor(
+                        this.$el.find("#linkedViewContent")[0],
+                        {
+                            theme: "jqueryui",
+                            disable_edit_json: true,
+                            disable_properties: true,
+                            disable_array_delete: true,
+                            disable_array_reorder: true,
+                            disable_array_add: true,
+                            schema: {
+                                type: "object",
+                                title: this.cleanLinkName(this.data.linkedData.linkedTo[selection].resourceName)
+                            }
                         }
+                    );
+
+                    if (this.data.linkedData.linkedTo[selection].content._id) {
+                        delete this.data.linkedData.linkedTo[selection].content._id;
                     }
-                );
 
-                if (this.data.linkedData.linkedTo[selection].content._id) {
-                    delete this.data.linkedData.linkedTo[selection].content._id;
+                    this.editor.setValue(this.data.linkedData.linkedTo[selection].content);
+
+                    this.$el.find("#linkedViewContent h3:first").hide();
+                    this.$el.find(".ui-widget-content .row select").hide();
+                    this.$el.find(".ui-widget-content .row input").attr("disabled", true);
+                } else {
+                    this.$el.find("#linkedViewContent").text($.t("templates.admin.LinkedTemplate.recordMissing") + ': ' + this.data.linkedData.linkedTo[selection].resourceName);
                 }
-
-                this.editor.setValue(this.data.linkedData.linkedTo[selection].content);
-
-                this.$el.find("#linkedViewContent h3:first").hide();
-                this.$el.find(".ui-widget-content .row select").hide();
-                this.$el.find(".ui-widget-content .row input").attr("disabled", true);
             }
         }
     });

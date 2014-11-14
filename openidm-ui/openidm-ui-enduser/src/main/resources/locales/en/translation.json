@@ -144,7 +144,8 @@
             "LinkedTemplate" : {
                 "linkedResource" : "Linked Resource",
                 "linkedSystems" : "Linked Systems",
-                "noLinkedSystems" : "No Linked Systems Available."
+                "noLinkedSystems" : "No Linked Systems Available.",
+                "recordMissing" : "Linked record missing"
             }
         }
     },

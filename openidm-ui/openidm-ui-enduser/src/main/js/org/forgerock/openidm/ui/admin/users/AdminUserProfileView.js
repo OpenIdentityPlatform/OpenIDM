@@ -56,7 +56,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             event.preventDefault();
 
             if(validatorsManager.formValidated(this.$el)) {
-                var data = form2js(this.$el.attr("id"), '.', false),
+                var data = form2js(this.$el.find("form")[0], '.', false),
                     self = this,
                     oldUserName;
                 delete data.lastPasswordSet;
@@ -112,7 +112,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         this.linkedView.element = "#linkedViewBody";
 
                         this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-                        validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
+                        validatorsManager.bindValidators(this.$el.find("form"), userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
 
                             this.reloadData();
                             this.linkedView.render({"id": user._id}, callback);
@@ -159,7 +159,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         },
 
         reloadData: function() {
-            js2form(this.$el[0], this.editedUser);
+            js2form(this.$el.find("form")[0], this.editedUser);
             this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             this.$el.find("input[name=deleteButton]").val($.t("common.form.delete"));
             this.$el.find("input[name=backButton]").val($.t("common.form.back"));
@@ -169,7 +169,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 this.$el.find("input[name=roles][value='"+v+"']").prop('checked', true);
             }, this));
 
-            validatorsManager.validateAllFields(this.$el);
+            validatorsManager.validateAllFields(this.$el.find("form"));
 
             countryStateDelegate.getAllCountries(_.bind(function(countries) {
                 uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
