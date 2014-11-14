@@ -518,6 +518,12 @@
    </listitem>
    <listitem>
     <para>
+     <literal>_queryFilter</literal> for arbitrary filters, in common filter
+     notation
+    </para>
+   </listitem>
+   <listitem>
+    <para>
      <literal>_queryExpression</literal> for client-supplied queries, in native
      query format
     </para>
