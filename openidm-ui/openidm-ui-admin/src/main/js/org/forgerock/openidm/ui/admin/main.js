@@ -33,6 +33,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./delegates/ExternalAccessDelegate",
     "./delegates/SearchDelegate",
     "./delegates/ReconDelegate",
+    "./delegates/SecurityDelegate",
 
     "./ResourcesView",
     "./MapResourceView",
