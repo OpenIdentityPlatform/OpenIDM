@@ -520,7 +520,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
          Matches when the pointer is less than the value, for example:
         </para>
        <programlisting language="javascript">
-"_queryFilter" : '/employeeNumber lt "5000"'
+"_queryFilter" : '/employeeNumber lt 5000'
        </programlisting>
      <para>
       The following REST call returns the user names of all managed users whose
@@ -531,30 +531,30 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+lt+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+lt+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
   "resultCount": 4999,
   "result": [
     {
-      "employeeNumber": "4907",
+      "employeeNumber": 4907,
       "userName": "jnorris"
     },
     {
-      "employeeNumber": "4905",
+      "employeeNumber": 4905,
       "userName": "afrancis"
     },
     {
-      "employeeNumber": "3095",
+      "employeeNumber": 3095,
       "userName": "twhite"
     },
     {
-      "employeeNumber": "3921",
+      "employeeNumber": 3921,
       "userName": "abasson"
     },
     {
-      "employeeNumber": "2892",
+      "employeeNumber": 2892,
       "userName": "dcarter"
     }
 ...
@@ -571,7 +571,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
         example:
        </para>
        <programlisting language="javascript">
-"_queryFilter" : '/employeeNumber le "5000"'
+"_queryFilter" : '/employeeNumber le 5000'
        </programlisting>
      <para>
       The following REST call returns the user names of all managed users whose
@@ -582,30 +582,30 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+le+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+le+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
   "resultCount": 5000,
   "result": [
     {
-      "employeeNumber": "4907",
+      "employeeNumber": 4907,
       "userName": "jnorris"
     },
     {
-      "employeeNumber": "4905",
+      "employeeNumber": 4905,
       "userName": "afrancis"
     },
     {
-      "employeeNumber": "3095",
+      "employeeNumber": 3095,
       "userName": "twhite"
     },
     {
-      "employeeNumber": "3921",
+      "employeeNumber": 3921,
       "userName": "abasson"
     },
     {
-      "employeeNumber": "2892",
+      "employeeNumber": 2892,
       "userName": "dcarter"
     }
 ...
@@ -621,7 +621,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
         Matches when the pointer is greater than the value, for example:
        </para>
        <programlisting language="javascript">
-"_queryFilter" : '/employeeNumber gt "50000"'
+"_queryFilter" : '/employeeNumber gt 5000'
        </programlisting>
      <para>
       The following REST call returns the user names of all managed users whose
@@ -632,30 +632,30 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+gt+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+gt+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
   "resultCount": 1458,
   "result": [
     {
-      "employeeNumber": "5003",
+      "employeeNumber": 5003,
       "userName": "agilder"
     },
     {
-      "employeeNumber": "5011",
+      "employeeNumber": 5011,
       "userName": "bsmith"
     },
     {
-      "employeeNumber": "5034",
+      "employeeNumber": 5034,
       "userName": "bjensen"
     },
     {
-      "employeeNumber": "5027",
+      "employeeNumber": 5027,
       "userName": "cclarke"
     },
     {
-      "employeeNumber": "5033",
+      "employeeNumber": 5033,
       "userName": "scarter"
     }
 ...
@@ -672,7 +672,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
         example:
        </para>
        <programlisting language="javascript">
-"_queryFilter" : '/employeeNumber ge "50000"'
+"_queryFilter" : '/employeeNumber ge 5000'
        </programlisting>
         <para>
          or
@@ -689,30 +689,30 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+ge+"5000"&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+ge+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
   "resultCount": 1457,
   "result": [
     {
-      "employeeNumber": "5000",
+      "employeeNumber": 5000,
       "userName": "agilder"
     },
     {
-      "employeeNumber": "5011",
+      "employeeNumber": 5011,
       "userName": "bsmith"
     },
     {
-      "employeeNumber": "5034",
+      "employeeNumber": 5034,
       "userName": "bjensen"
     },
     {
-      "employeeNumber": "5027",
+      "employeeNumber": 5027,
       "userName": "cclarke"
     },
     {
-      "employeeNumber": "5033",
+      "employeeNumber": 5033,
       "userName": "scarter"
     }
 ...
