@@ -420,44 +420,57 @@ public class ServletConnectionFactory implements ConnectionFactory {
      *             TODO.
      */
     public Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
-
         FilterCondition filterCondition = null;
+
+        final Pair<JsonPointer, ScriptEntry> condition = getScript(config.get("condition"));
+        final Pair<JsonPointer, ScriptEntry> onRequest = getScript(config.get("onRequest"));
+        final Pair<JsonPointer, ScriptEntry> onResponse = getScript(config.get("onResponse"));
+        final Pair<JsonPointer, ScriptEntry> onFailure = getScript(config.get("onFailure"));
+
+        // Require at least one of the following
+        if (null == onRequest && null == onResponse && null == onFailure) {
+            return null;
+        }
+        
+        // Check for condition on pattern
         Pattern pattern = config.get("pattern").asPattern();
         if (null != pattern) {
             filterCondition = Filters.matchResourceName(pattern);
         }
 
+        // Check for condition on type
         final EnumSet<RequestType> requestTypes = EnumSet.noneOf(RequestType.class);
         for (JsonValue method : config.get("methods").expect(List.class)) {
             requestTypes.add(method.asEnum(RequestType.class));
         }
-
         if (!requestTypes.isEmpty()) {
-            if (null == filterCondition) {
-                filterCondition = Filters.matchRequestType(requestTypes);
-            } else {
-                filterCondition =
-                        Filters.and(filterCondition, Filters.matchRequestType(requestTypes));
-            }
+            filterCondition = (null == filterCondition) 
+                    ? Filters.matchRequestType(requestTypes)
+                    : Filters.and(filterCondition, Filters.matchRequestType(requestTypes));
         }
 
-        // TODO add condition to filter condition
-        Pair<JsonPointer, ScriptEntry> condition = getScript(config.get("condition"));
+        // Create the filter
+        Filter filter = (null == filterCondition)
+                ? Filters.asFilter(new ScriptedFilter(onRequest, onResponse, onFailure))
+                : Filters.conditionalFilter(filterCondition, Filters.asFilter(
+                        new ScriptedFilter(onRequest, onResponse, onFailure)));
 
-        Pair<JsonPointer, ScriptEntry> onRequest = getScript(config.get("onRequest"));
-        Pair<JsonPointer, ScriptEntry> onResponse = getScript(config.get("onResponse"));
-        Pair<JsonPointer, ScriptEntry> onFailure = getScript(config.get("onFailure"));
-
-        if (null == onRequest && null == onResponse && null == onFailure) {
-            return null;
+        // Check for a condition script
+        if (null != condition) {
+            FilterCondition conditionFilterCondition = new FilterCondition() {
+                @Override
+                public boolean matches(final ServerContext context, final Request request) {
+                    try {
+                        return (Boolean)condition.getValue().getScript(context).eval();
+                    } catch (ScriptException e) {
+                        logger.warn("Failed to evaluate filter condition: ", e.getMessage(), e);
+                    }
+                    return false;
+                }
+            };
+            filter = Filters.conditionalFilter(conditionFilterCondition, filter);
         }
-
-        if (null == filterCondition) {
-            return Filters.asFilter(new ScriptedFilter(onRequest, onResponse, onFailure));
-        } else {
-            return Filters.conditionalFilter(filterCondition, Filters.asFilter(
-                    new ScriptedFilter(onRequest, onResponse, onFailure)));
-        }
+        return filter;
     }
 
     private Pair<JsonPointer, ScriptEntry> getScript(JsonValue scriptJson) throws ScriptException {
