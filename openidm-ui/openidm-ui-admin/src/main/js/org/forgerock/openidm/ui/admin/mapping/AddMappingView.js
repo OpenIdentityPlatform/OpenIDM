@@ -38,8 +38,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
     var MappingAddView = AdminAbstractView.extend({
         template: "templates/admin/mapping/AddMappingTemplate.html",
         events: {
-            "click .add-resource-button" : "addResourceMapping",
-            "click .resource-body" : "mappingDetail"
+            "click .add-resource-button" : "addResourceMapping"
         },
         addMappingView: false,
         render: function(args, callback) {
@@ -156,6 +155,9 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
             MapResourceView.addMapping(resourceData);
         },
 
+        /*
+            No longer in use but code could be useful if this feature is desired later in different context
+         */
         mappingDetail: function(event){
             var clickedEle = $(event.target),
                 index,
