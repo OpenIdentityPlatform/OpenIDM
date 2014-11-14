@@ -26,13 +26,21 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.script.Bindings;
 import org.activiti.engine.ActivitiException;
+import org.activiti.engine.delegate.ExecutionListener;
+import org.activiti.engine.delegate.TaskListener;
 import org.activiti.engine.delegate.VariableScope;
 import org.activiti.engine.impl.bpmn.behavior.ScriptTaskActivityBehavior;
+import org.activiti.engine.impl.bpmn.helper.ClassDelegate;
+import org.activiti.engine.impl.bpmn.parser.FieldDeclaration;
 import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.el.Expression;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.persistence.entity.TaskEntity;
+import org.activiti.engine.impl.pvm.delegate.ActivityBehavior;
 import org.activiti.engine.impl.scripting.Resolver;
 import org.activiti.engine.impl.scripting.ResolverFactory;
 import org.forgerock.json.fluent.JsonValue;
@@ -53,33 +61,99 @@ public class OpenIDMResolverFactory implements ResolverFactory {
 
     @Override
     public Resolver createResolver(VariableScope variableScope) {
+        Bindings bindings;
+        ScriptTaskActivityBehavior behaviour;
+        String language = "groovy";
+        Map<String, String> scriptJson = new HashMap<String, String>(3);
+        ServerContext context;
+        ScriptEntry script;
+
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
         PersistenceConfig persistenceConfig = session.getOpenIDMPersistenceConfig();
         ScriptRegistry scriptRegistry = session.getOpenIDMScriptRegistry();
         JsonValue openidmContext = (JsonValue) variableScope.getVariable(ActivitiConstants.OPENIDM_CONTEXT);
-        Bindings bindings = null;
-        ScriptTaskActivityBehavior behaviour = (ScriptTaskActivityBehavior) ((ExecutionEntity) variableScope).getActivity().getActivityBehavior();
+
         try {
-            Class cls;
-            String language;
-            Map<String, String> scriptJson = new HashMap<String, String>(3);
-            cls = Class.forName("org.activiti.engine.impl.bpmn.behavior.ScriptTaskActivityBehavior");
-            Field languageField = cls.getDeclaredField("language");
-            languageField.setAccessible(true);
-            language = (String) languageField.get(behaviour);
-            ServerContext context = new ServerContext(openidmContext, persistenceConfig);
-            ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", language));
+            if (variableScope instanceof ExecutionEntity) {
+                ActivityBehavior activityBehavior = ((ExecutionEntity) variableScope).getActivity().getActivityBehavior();
+                //Called from ScriptTask
+                if (activityBehavior instanceof ScriptTaskActivityBehavior) {
+                    behaviour = (ScriptTaskActivityBehavior) activityBehavior;
+                    Class cls = Class.forName("org.activiti.engine.impl.bpmn.behavior.ScriptTaskActivityBehavior");
+                    Field languageField = cls.getDeclaredField("language");
+                    languageField.setAccessible(true);
+                    language = (String) languageField.get(behaviour);
+                } else {
+                    //Called from ExecutionListener
+                    String eventName = ((ExecutionEntity) variableScope).getEventName();
+                    List<ExecutionListener> executionListeners = ((ExecutionEntity) variableScope).getActivity().getExecutionListeners(eventName);
+                    for (ExecutionListener executionListener : executionListeners) {
+                        if (executionListener instanceof ClassDelegate) {
+                            String className = ((ClassDelegate) executionListener).getClassName();
+                            if ("org.activiti.engine.impl.bpmn.listener.ScriptExecutionListener".equals(className)) {
+                                language = processClassDelegate(variableScope, (ClassDelegate) executionListener);
+                            }
+                        }
+                    }
+                }
+            } else if (variableScope instanceof TaskEntity) {
+                //Called from TaskListener
+                String eventName = ((TaskEntity) variableScope).getEventName();
+                Map<String, List<TaskListener>> taskListeners = ((TaskEntity) variableScope).getTaskDefinition().getTaskListeners();
+                List<TaskListener> eventListeners = taskListeners.get(eventName);
+                for (TaskListener taskListener : eventListeners) {
+                    if (taskListener instanceof ClassDelegate) {
+                        String className = ((ClassDelegate) taskListener).getClassName();
+                        if ("org.activiti.engine.impl.bpmn.listener.ScriptTaskListener".equals(className)) {
+                            language = processClassDelegate(variableScope, (ClassDelegate) taskListener);
+                        }
+                    }
+                }
+            } else {
+                LoggerFactory.getLogger(OpenIDMResolverFactory.class).info("Script language could not be determined, using default groovy instead");
+            }
+        } catch (Exception ex) {
+            LoggerFactory.getLogger(OpenIDMResolverFactory.class).error(ex.getMessage(), ex);
+        }
+
+        try {
+            context = new ServerContext(openidmContext, persistenceConfig);
+            script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", language));
             if (script == null) {
                 scriptJson.put("source", "");
                 scriptJson.put("type", language);
                 scriptJson.put("name", "ActivitiScript");
                 script = scriptRegistry.takeScript(new JsonValue(scriptJson));
             }
-            bindings = script.getScriptBindings(context, null);
         } catch (Exception ex) {
             LoggerFactory.getLogger(OpenIDMResolverFactory.class).error(ex.getMessage(), ex);
             throw new ActivitiException(ex.getMessage(), ex);
         }
+        bindings = script.getScriptBindings(context, null);
         return new OpenIDMResolver(bindings);
+    }
+    
+    /**
+     * Processes a ClassDelegate, fetching the language field of it.
+     * @param scope variable scope the function was called from
+     * @param delegate object containing the language field
+     * @return value of language field, if not found groovy is the default language
+     */
+    private String processClassDelegate(VariableScope scope, ClassDelegate delegate) {
+        String language = "groovy";
+        try {
+            Class cls = Class.forName("org.activiti.engine.impl.bpmn.helper.ClassDelegate");
+            Field languageFields = cls.getDeclaredField("fieldDeclarations");
+            languageFields.setAccessible(true);
+            List<FieldDeclaration> fieldDeclarations = (List<FieldDeclaration>) languageFields.get(delegate);
+            for (FieldDeclaration field : fieldDeclarations) {
+                if ("language".equals(field.getName())) {
+                    language = (String) ((Expression) field.getValue()).getValue(scope);
+                }
+            }
+        } catch (Exception ex) {
+            LoggerFactory.getLogger(OpenIDMResolverFactory.class).error(ex.getMessage(), ex);
+        }
+        return language;
     }
 }
