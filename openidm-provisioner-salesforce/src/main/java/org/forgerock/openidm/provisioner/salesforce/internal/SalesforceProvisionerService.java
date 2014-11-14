@@ -48,6 +48,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
@@ -236,11 +237,15 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
     private void testConnection(boolean ignoreResourceException) throws Exception {
         try {
+            if (connection == null) {
+                // connection may be null if we activated with "enabled" : false
+                throw new ServiceUnavailableException("Salesforce Connector not available");
+            }
             connection.test();
         } catch (ResourceException e) {
             // authenticate or the test throws this, temporary error
             logger.warn("Service temporarily unavailable; cannot start Salesforce Connector: " + e.getMessage());
-            if (ignoreResourceException) {
+            if (!ignoreResourceException) {
                 throw e;
             }
         } catch (Exception ex) {
