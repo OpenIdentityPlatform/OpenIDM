@@ -133,16 +133,20 @@
    </varlistentry>
 
    <varlistentry>
-    <term>Automatic sync</term>
+    <term>Implicit synchronization</term>
     <listitem>
      <para>
-      <firstterm>Automatic sync</firstterm> automatically pushes changes made in
+      <firstterm>Implicit synchronization</firstterm> automatically pushes changes made in
       the OpenIDM internal repository to external systems.
      </para>
-
      <para>
-      The section that follows describes additional features that
-      can be included with automatic sync.
+      Note that implicit synchronization only pushes changes out to the external
+      data sources. To synchronize a complete data set, you should start with a
+      reconciliation operation.
+     </para>
+     <para>
+      To disable implicit synchronization, see
+      <xref linkend="disabling-automatic-sync" />.
      </para>
     </listitem>
    </varlistentry>
@@ -151,155 +155,16 @@
   <para>
    To determine what to synchronize, and how to carry out synchronization,
    OpenIDM relies on mappings configured in the
-   <literal>/path/to/conf/sync.json</literal> file. LiveSync and automatic sync
+   <literal>/path/to/conf/sync.json</literal> file. LiveSync and implicit sync
    rely on the mappings configured once per OpenIDM server.
   </para>
 
   <para>
    For reconciliation or LiveSync, you can schedule changes as described in
    <link xlink:href="integrators-guide#chap-scheduler-conf"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
-    Tasks and Events</citetitle></link>.
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
+   Tasks and Events</citetitle></link>.
   </para>
-
-  <section xml:id="sync-types-automatic">
-   <title>How Automatic Sync works with <literal>onSync</literal></title>
-
-    <para>
-     When automatic sync is used to push a large number of changes to external
-     databases, that process takes time. Problems such as lost connections
-     could happen, resulting in partial synchronization.
-    </para>
-
-    <para>
-     For example, if a Human Resources manager adds a group of new employees in
-     one database, a partial synchronization may mean that some of those
-     employees do not have access to their email or other systems.
-    </para>
-
-    <para>
-     Automatic sync assumes that the external data sources include all data
-     currently in the internal OpenIDM repository. If that does not reflect
-     your configuration, you should start either with an initial reconciliation,
-     or with LiveSync as described in the Installation Guide,
-     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:href="install-guide#more-sample6"><citetitle>Sample 6 - LiveSync
-     with an AD Server</citetitle></link>.
-    </para>
-
-    <para>
-     An example of automatic sync is depicted in the OpenIDM Installation Guide,
-     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:href="install-guide#more-sample5b"><citetitle>Sample 5b - Compensated
-     Synchronization with <literal>onSync</literal></citetitle></link>. That
-     sample demonstrates how OpenIDM compensates for the failure of an external
-     resource.
-    </para>
-
-    <para>
-     OpenIDM includes an optional <literal>onSync</literal> hook, which you
-     can include in the <filename>/path/to/conf/managed.json</filename> file.
-     A sample excerpt is shown here:
-    </para>
-
-    <programlisting language="javascript">
-...
-"onDelete" : {
-    "type" : "text/javascript",
-    "file" : "ui/onDelete-user-cleanup.js"
-    },
-"onSync" : {
-    "type" : "text/javascript",
-    "file" : "compensate.js"
-    },
-"properties" : [
-    ...
-    </programlisting>
-
-    <para>
-     Note the reference from <literal>onSync</literal> to
-     <filename>compensate.js</filename>. You can find that file in the
-     <filename>/path/to/openidm/bin/defaults/script</filename> directory.
-    </para>
-
-    <para>
-     When a change to a user is made, either in the UI or through a REST call,
-     a change is made to the managed object for that user.
-    </para>
-
-    <para>
-     The automatic sync feature of OpenIDM attempts to synchronize the change
-     (and any other pending changes) to the external data store(s). The
-     automatic sync process is configured in the associated
-     <filename>sync.json</filename> configuration file.
-    </para>
-
-    <para>
-     Look at the contents of the <filename>sync.json</filename> file. It might
-     start with source and target mappings similar to:
-    </para>
-
-    <programlisting language="javascript">
-   ...
-   "mappings" : [
-     {
-       "name" : "managedUser_systemAdAccounts",
-       "source" : "managed/user",
-       "target" : "system/ad/account",
-     ...
-    </programlisting>
-
-    <para>
-     Based on this excerpt, automatic synchronization takes information from the
-     internal OpenIDM managed user data store, and synchronizes that information
-     to the AD data store. Once complete, it proceeds down the file to the
-     next <literal>source</literal> and <literal>target</literal> to be
-     synchronized.
-    </para>
-
-    <para>
-     The <filename>compensate.js</filename> script is designed to avoid
-     partial synchronization. If synchronization proceeds to completion, OpenIDM
-     exits from the script, based on some of the first active entries in the file:
-    </para>
-
-    <programlisting language="javascript">
-if (syncResults.success) {
-     logger.debug("sync was a success; no compensation necessary");
-     return;
-}</programlisting>
-
-    <para>
-     If synchronization does not complete, OpenIDM proceeds through the
-     remainder of the <filename>compensate.js</filename> script, with warning
-     messages related to the sync action (<literal>notifyCreate, notifyUpdate,
-     notifyDelete</literal>, along with the error that caused the sync failure,
-     which should be available in the standard OpenIDM log file.
-    </para>
-
-    <para>
-     Without the <filename>compensate.js</filename> script, any issues with
-     connections to an external resource can lead to data stores that are
-     out of sync, such as the example cited earlier where some new employees
-     do not have access to their corporate email accounts.
-    </para>
-
-    <para>
-     With the <filename>compensate.js</filename> script, any such errors will
-     result in each data store using the information it had before
-     automatic synchronization started. OpenIDM stores that information,
-     temporarily, in properties such as <literal>oldObject</literal> and
-     <literal>oldTarget</literal>.
-    </para>
-
-    <para>
-     In this particular example, human resource managers should see that
-     new employees are not shown in their database. Then, the administrators
-     of the OpenIDM system can check log files for errors, address them, and
-     then restart automatic synchronization with a new REST call.
-    </para>
-
-  </section>
 
  </section>
 
@@ -678,33 +543,6 @@ if (syncResults.success) {
      <para>See the <link xlink:href="integrators-guide#appendix-scripting"
                          xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
      Reference</citetitle></link> appendix for more on scripting.</para>
-
-   <para>By default, all mappings participate in automatic synchronization
-   operations. You can prevent a specific mapping from participating in
-   automatic synchronization by setting the <literal>"enableSync"</literal>
-   property of that mapping to false. In the following example, automatic
-   synchronization is disabled. This means that changes to objects in the internal
-   repository are not automatically propagated to the LDAP directory. To
-   propagate changes to the LDAP directory, reconciliation must be launched
-   manually.</para>
-
-   <programlisting language="javascript">
-{
-    "mappings" : [
-        {
-            "name" : "managedUser_systemLdapAccounts",
-            "source" : "managed/user",
-            "target" : "system/ldap/account",
-            "enableSync" : false,
-             ....
-}
-   </programlisting>
-   <para>
-    Note that if <literal>enableSync</literal> is set to <literal>false</literal>
-    for a system to managed user mapping (for example
-    <literal>"systemLdapAccounts_managedUser"</literal>), LiveSync is disabled
-    for that mapping.
-   </para>
 
    <para>
     If a source resource is empty, the default behavior is for a reconciliation
@@ -1708,7 +1546,7 @@ $ <userinput>curl \
    account in LDAP with the data from the OpenIDM repository. The
    <literal>_id</literal> for <literal>bjensen</literal> in this example is
    <literal>b3c2f414-e7b3-46aa-8ce6-f4ab1e89288c</literal>.
-   The example assumes that automatic synchronization has been disabled and that
+   The example assumes that implicit synchronization has been disabled and that
    a reconciliation operation is required to copy changes made in the repository
    to the LDAP system.
   </para>
@@ -2416,7 +2254,7 @@ $ <userinput>curl \
  <section xml:id="querying-sync-logs">
   <title>Querying the Synchronization Audit Log</title>
   <para>
-   LiveSync and automatic sync operations are logged in the file
+   LiveSync and implicit sync operations are logged in the file
    <filename>/path/to/openidm/audit/sync.csv</filename> and in the repository.
    You can read the synchronization audit logs over the REST interface, as
    outlined in the following examples.
@@ -2436,7 +2274,7 @@ $ <userinput>curl \
    Each distinct synchronization operation is identified by its
    <literal>actionId</literal>. The <literal>rootActionId</literal> is the ID
    that was assigned to the incoming or initiating request - so if a
-   modification to a user entry triggers an automatic synchronization operation,
+   modification to a user entry triggers an implicit synchronization operation,
    the sync operation is assigned an <literal>actionId</literal> and
    <literal>rootActionId</literal> refers to the
    original change operation. Each entry in the log is identified by a unique
@@ -2495,7 +2333,7 @@ $ <userinput>curl \
    The first record indicates a change on the <literal>system/ad</literal>
    entry, which triggered a LiveSync to update the corresponding
    <literal>managed/user</literal> entry. The second record indicates an
-   automatic sync from <literal>managed/user</literal> to the corresponding
+   implicit sync from <literal>managed/user</literal> to the corresponding
    entry in <literal>system/ldap</literal>. Note that the
    <literal>rootActionId</literal> is the same for both these records.
   </para>
@@ -2736,6 +2574,142 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   "_id": "4"
 }   </computeroutput></screen>
    </section>
+
+ <section xml:id="disabling-automatic-sync">
+  <title>Disabling Automatic Synchronization Operations</title>
+   <para>
+    By default, all mappings participate in automatic synchronization
+    operations, that is, a change to a managed object is automatically
+    synchronized to all resources for which the managed object is configured as
+    a source. Similarly, if LiveSync is enabled for a system, changes to an
+    object on that system are automatically propagated to the managed object
+    repository. You can prevent a specific mapping from participating in this
+    automatic synchronization by setting the <literal>"enableSync"</literal>
+    property of that mapping to false. In the following example, implicit
+    synchronization is disabled. This means that changes to objects in the
+    internal repository are not automatically propagated to the LDAP directory.
+    To propagate changes to the LDAP directory, reconciliation must be launched
+    manually.
+   </para>
+
+   <programlisting language="javascript">
+{
+    "mappings" : [
+        {
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "enableSync" : false,
+             ....
+}
+   </programlisting>
+   <para>
+    If <literal>enableSync</literal> is set to <literal>false</literal> for a
+    system to managed user mapping (for example
+    <literal>"systemLdapAccounts_managedUser"</literal>), LiveSync is disabled
+    for that mapping.
+   </para>
+ </section>
+
+ <section xml:id="sync-failure-compensation">
+  <title>Configuring Synchronization Failure Compensation</title>
+  <para>
+   When implicit synchronization is used to push a large number of changes from
+   the managed object repository to several external repositories, the process
+   can take some time. Problems such as lost connections might happen, resulting
+   in the changes being only partially synchronized.
+  </para>
+  <para>
+   For example, if a Human Resources manager adds a group of new employees in
+   one database, a partial synchronization might mean that some of those
+   employees do not have access to their email or other systems.
+  </para>
+  <para>
+   You can configure implicit synchronization such that the system reverts an
+   entire synchronization operation, in the event that it was not completely
+   successful. An example of such a configuration is illustrated in the OpenIDM
+   Installation Guide, <link xlink:show="new"
+   xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="install-guide#more-sample5b"><citetitle>Sample 5b - Failure
+   Compensation With Multiple Resources</citetitle></link>. That sample
+   demonstrates how OpenIDM compensates when synchronization to an external
+   resource fails.
+  </para>
+  <para>
+   Failure compensation works by using the optional <literal>onSync</literal>
+   hook, which can be specified in the <filename>conf/managed.json</filename>
+   file. The <literal>onSync</literal> hook can be used to provide failure
+   compensation as follows:
+  </para>
+  <programlisting language="javascript">
+...
+"onDelete" : {
+    "type" : "text/javascript",
+    "file" : "ui/onDelete-user-cleanup.js"
+    },
+"onSync" : {
+    "type" : "text/javascript",
+    "file" : "compensate.js"
+    },
+"properties" : [
+    ...
+   </programlisting>
+   <para>
+    The <literal>onSync</literal> hook references a script
+    (<filename>compensate.js</filename>), that is located in the
+    <filename>/path/to/openidm/bin/defaults/script</filename> directory.
+   </para>
+   <para>
+    When a managed object is changed, an implicit synchronization operation
+    attempts to synchronize the change (and any other pending changes) with any
+    external data store(s) for which a mapping is configured.
+   </para>
+   <para>
+    The implicit synchronization process proceeds with each mapping, in the
+    order in which the mappings are specified in <literal>sync.json</literal>.
+   </para>
+   <para>
+    The <filename>compensate.js</filename> script is designed to avoid
+    partial synchronization. If synchronization is successful, for all
+    configured mappings, OpenIDM exits from the script.
+   </para>
+   <para>
+    If an implicit synchronization operation fails for a particular resource,
+    the <literal>onSync</literal> hook invokes the
+    <filename>compensate.js</filename> script. This script attempts to revert
+    the original change by performing another update to the managed object. This
+    change, in turn, triggers another implicit synchronization operation to all
+    external resources for which mappings are configured.
+   </para>
+   <para>
+    If the synchronization operation fails again, the
+    <literal>compensate.js</literal> script is triggered again. This time,
+    however, the script recognizes that the change was originally called as a
+    result of a compensation and aborts. OpenIDM logs warning messages related
+    to the sync action
+    (<literal>notifyCreate, notifyUpdate, notifyDelete</literal>), along with
+    the error that caused the sync failure.
+   </para>
+   <para>
+    If failure compensation is not configured, any issues with connections to an
+    external resource can lead to data stores that are out of sync, such as the
+    example cited earlier where some new employees do not have access to their
+    corporate email accounts.
+   </para>
+   <para>
+    With the <filename>compensate.js</filename> script, any such errors will
+    result in each data store using the information it had before
+    automatic synchronization started. OpenIDM stores that information,
+    temporarily, in properties such as <literal>oldObject</literal> and
+    <literal>oldTarget</literal>.
+   </para>
+   <para>
+    In this particular example, human resource managers should see that
+    new employees are not shown in their database. Then, the administrators
+    of the OpenIDM system can check log files for errors, address them, and
+    then restart the implicit synchronization process with a new REST call.
+   </para>
+  </section>
 
  <section xml:id="handling-sync">
   <title>Synchronization Situations and Actions</title>
@@ -3525,20 +3499,20 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   </section>
 
   <section xml:id="autosync-and-livesync">
-   <title>Situations Specific to Automatic Synchronization and LiveSync</title>
+   <title>Situations Specific to Implicit Synchronization and LiveSync</title>
    <para>
-    Certain situations occur only during automatic synchronization (when OpenIDM
+    Certain situations occur only during implicit synchronization (when OpenIDM
     pushes changes made in the repository out to external systems) and LiveSync
     (when OpenIDM polls external system change logs for changes and updates the
     repository).
    </para>
    <para>
-    The following table shows the situations that pertain only to automatic sync
+    The following table shows the situations that pertain only to implicit sync
     and LiveSync, when records are <emphasis>deleted</emphasis> from the source
     or target resource.
    </para>
    <table pgwide="1" rules="none">
-    <title>Resolving Automatic Sync and LiveSync Delete Situations</title>
+    <title>Resolving Implicit Sync and LiveSync Delete Situations</title>
     <tgroup cols="8">
      <colspec colnum="1" colname="c1" colwidth="1*" />
      <colspec colnum="2" colname="c2" colwidth="1*" />
@@ -4008,7 +3982,6 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    </section>
 
  </section>
-
 
  <section xml:id="correlation">
   <title>Correlation Queries</title>
