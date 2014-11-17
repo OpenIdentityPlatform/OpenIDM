@@ -35,7 +35,9 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
     "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog",
     "org/forgerock/openidm/ui/admin/sync/SituationalScriptsView",
     "org/forgerock/openidm/ui/admin/sync/ReconScriptsView",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
+    "org/forgerock/openidm/ui/admin/sync/TestSyncView",
+    "org/forgerock/openidm/ui/admin/util/MappingUtils"
 ], function(AdminAbstractView,
             MappingBaseView,
             eventManager,
@@ -46,7 +48,9 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             SituationPolicyDialog,
             SituationalScriptsView,
             ReconScriptsView,
-            BrowserStorageDelegate) {
+            BrowserStorageDelegate,
+            TestSyncView,
+            mappingUtils) {
 
     var SyncView = AdminAbstractView.extend({
         template: "templates/admin/sync/SyncTemplate.html",
@@ -71,11 +75,14 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         loadData: function(args, callback){
             var schedules = [], seconds = "";
             this.sync = MappingBaseView.data.syncConfig;
+            this.recon = MappingBaseView.currentMapping().recon;
             this.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
 
             this.data.mappingName = this.mappingName = args[0];
             this.data.hideRecon = true;
             this.data.hideSituational = true;
+            this.data.hideTestSync = true;
+            this.data.hideSingleRecordRecon = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
             _.each(SituationalScriptsView.model.scripts, function(script) {
                 if (_.has(SituationalScriptsView.model, "mapping")) {
                     if (_.has(SituationalScriptsView.model.mapping, script)) {
@@ -97,6 +104,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             this.parentRender(_.bind(function() {
                 SituationalScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
                 ReconScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
+                TestSyncView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName, recon: MappingBaseView.data.recon});
 
                 MappingBaseView.moveSubmenu();
                 if (this.mapping.hasOwnProperty("enableSync")) {
@@ -177,16 +185,18 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         },
 
         saveLiveSync: function() {
+            var mapping;
             _.each(this.sync.mappings, function(map, key) {
                 if (map.name === this.mappingName) {
                     this.sync.mappings[key].enableSync = this.$el.find(".liveSyncEnabled").prop("checked");
+                    mapping = map;
                 }
             }, this);
 
-            ConfigDelegate.updateEntity("sync", this.sync).then(function() {
-                BrowserStorageDelegate.set("currentMapping", this.sync);
+            ConfigDelegate.updateEntity("sync", this.sync).then(_.bind(function() {
+                BrowserStorageDelegate.set("currentMapping",  _.extend(mapping,this.recon));
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncLiveSyncSaveSuccess");
-            });
+            }, this));
         },
 
         reconDeleted: function() {
@@ -264,6 +274,11 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
                     this.mapping.policies = data.policies;
                     $("#policyPatternName").text(data.patternName);
                     $("#policyPatternDesc").text(data.patternDescription);
+                    if(mappingUtils.readOnlySituationalPolicy(data.policies)){
+                        this.$el.find("#singleRecordRecon").hide();
+                    } else {
+                        this.$el.find("#singleRecordRecon").show();
+                    }
                 }
             }, this));
         }

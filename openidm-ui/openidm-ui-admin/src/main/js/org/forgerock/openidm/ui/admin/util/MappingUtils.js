@@ -28,9 +28,10 @@
  * @author huck.elliott
  */
 define("org/forgerock/openidm/ui/admin/util/MappingUtils", [
+    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
 ],
-  function(browserStorageDelegate) {
+  function(searchDelegate, browserStorageDelegate) {
 
     var obj = {};
     
@@ -60,6 +61,42 @@ define("org/forgerock/openidm/ui/admin/util/MappingUtils", [
         }, this));
         
         return propVals.join("<br/>");
+    };
+    
+    obj.setupSampleSearch = function(el,mapping,autocompleteProps,selectSuccessCallback){
+        if (!el.hasClass("ui-autocomplete-input")) {
+            el.autocomplete({
+                delay: 500,
+                minLength: 2,
+                select: function (event, ui) {
+                    el.val(ui.item[mapping.properties[0].source]);
+                    
+                    selectSuccessCallback(ui.item);
+
+                    return false;
+                },
+                source: function (request, response) {
+                    searchDelegate.searchResults(mapping.source, autocompleteProps, request.term).always(response);
+                }
+            }).data( "ui-autocomplete" )._renderItem = function (ul, item) {
+                var validDisplayProps = _.reject(autocompleteProps,function(p){ 
+                        return (p && !p.length) || !item[p]; 
+                    }),
+                    txt = _.chain(item)
+                            .pick(validDisplayProps)
+                            .values()
+                            .join(" / ");
+                return $( "<li>" )
+                    .append( "<a>" + Handlebars.Utils.escapeExpression(txt) + "</a>" )
+                    .appendTo( ul );
+            };
+        }
+    };
+    
+    obj.readOnlySituationalPolicy = function(policies){
+        return _.reduce(policies, function(memo, val){
+            return memo && val.action === "ASYNC";
+        }, true);
     };
 
     return obj;

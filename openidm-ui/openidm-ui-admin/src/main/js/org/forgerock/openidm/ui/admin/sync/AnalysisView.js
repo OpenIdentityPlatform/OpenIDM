@@ -27,6 +27,7 @@
 define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
+    "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
@@ -34,8 +35,9 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/MappingUtils",
-    "org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog"
-], function(AdminAbstractView, MappingBaseView, eventManager, constants, reconDelegate, dateUtil, syncDelegate, configDelegate, mappingUtils, changeAssociationDialog) {
+    "org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog",
+    "org/forgerock/openidm/ui/admin/sync/TestSyncDialog"
+], function(AdminAbstractView, MappingBaseView, conf, eventManager, constants, reconDelegate, dateUtil, syncDelegate, configDelegate, mappingUtils, changeAssociationDialog, TestSyncDialog) {
     var AnalysisView = AdminAbstractView.extend({
         template: "templates/admin/sync/AnalysisTemplate.html",
         element: "#analysisView",
@@ -43,13 +45,21 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
         events: {
             "change #situationSelection": "changeSituationView",
             "click #doSyncButton": "syncNow",
-            "click #changeAssociation": "changeAssociation"
+            "click #changeAssociation": "changeAssociation",
+            "click #singleRecordSync": "singleRecordSync"
         },
         data: {},
         syncNow: function(e){
             e.preventDefault();
             $(e.target).closest("button").prop('disabled',true);
             MappingBaseView.syncNow(e);
+        },
+        singleRecordSync: function(e){
+            conf.globalData.testSyncSource = this.getSelectedRow().sourceObject;
+            
+            e.preventDefault();
+            
+            TestSyncDialog.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName, recon: MappingBaseView.data.recon});
         },
         changeAssociation: function(e){
             var args,
@@ -160,6 +170,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                     _this.$el.find("td.ui-search-input input").attr("placeholder",$.t("templates.mapping.analysis.enterSearchTerms"));
                                     $("table.recon-grid", container).find(".cbox").prop("disabled",true);
                                     $("table.recon-grid", container).find(".newLinkWarning").tooltip();
+                                    _this.$el.find(".actionButton").prop('disabled',true);
                                 },
                                 beforeRequest: function(){
                                     var params = $("table.recon-grid", container).jqGrid('getGridParam','postData');
@@ -176,7 +187,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                     var rowData = $("table.recon-grid", container).jqGrid("getRowData", id),
                                         disableButton = !rowData.sourceObject.length || _.contains(_this.data.newLinkIds,rowData._id);
 
-                                    _this.$el.find("#changeAssociation").prop('disabled',disableButton);
+                                    _this.$el.find(".actionButton").prop('disabled',disableButton);
                                 },
                                 colModel: [
                                     {"name":"sourceObject", "hidden": true},
@@ -266,7 +277,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
             this.data.numRepresentativeProps = mappingUtils.numRepresentativeProps(this.mapping.name);
             this.data.sourceProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps);
             this.data.targetProps = _.pluck(this.mapping.properties,"target").slice(0,this.data.numRepresentativeProps);
-            
+            this.data.hideSingleRecordReconButton = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
 
             this.data.reconAvailable = false;
             this.parentRender(_.bind(function() {

@@ -227,7 +227,19 @@
             "liveSyncEnabled": "LiveSync schedule is enabled.",
             "liveSyncDisabled": "LiveSync schedule is not enabled.",
             "situationalScripts":"Situational Event Scripts",
-            "reconciliationScript":"Reconciliation Script"
+            "reconciliationScript":"Reconciliation Script",
+            "testSync": {
+                "title": "Single Record Recon",
+                "sourceProperties": "Source Properties",
+                "targetProperties": "Target Properties",
+                "reconcileSelectedRecord": "Reconcile Selected Record",
+                "changedPropertyMessage": "Target property has changed. Hover to view previous value.",
+                "previousValue": "Previous Value",
+                "singleRecordReconciliationComplete": "Single Record Reconciliation Complete",
+                "findSourceRecord": "Find Source Record",
+                "refreshSourceRecord": "Refresh Source Record",
+                "removeSourceRecord": "Remove Source Record"
+            }
         },
         "correlation": {
             "correlation": "Correlation",
@@ -750,7 +762,8 @@
                 "newLinksWarning": "__count__ records have changed since last Sync.",
                 "oneNewLinkWarning": "1 record has changed since last Sync",
                 "forResultsToTakeEffect": " for the result of these changes to take effect.",
-                "existingLink": "Existing Link"
+                "existingLink": "Existing Link",
+                "reconcileSelectedRecord": "Reconcile Selected Record"
             },
             "reconAnalysis": {
                 "inProgress" : "In Progress: ",

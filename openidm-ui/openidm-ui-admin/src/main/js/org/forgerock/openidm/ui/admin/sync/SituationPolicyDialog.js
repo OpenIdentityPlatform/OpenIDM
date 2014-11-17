@@ -48,6 +48,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog", [
             this.pattern = pattern;
             this.allPatterns = allPatterns;
             this.callback = callback;
+            this.recon = mapping.recon;
 
             this.currentDialog = $('<div id="situationPolicyDialog"></div>');
             this.setElement(this.currentDialog);
@@ -65,19 +66,21 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog", [
             btns.push({
                 text: $.t("common.form.save"),
                 click: _.bind(function() {
-                    var definedPolicies = this.getPolicies();
+                    var definedPolicies = this.getPolicies(),
+                        mapping;
 
                     ConfigDelegate.readEntity("sync").then(_.bind(function(data) {
                         _(data.mappings).each(function(map, index) {
                             if (map.name === this.mapping.name) {
                                 data.mappings[index].policies = definedPolicies.policies;
+                                mapping = map;
                             }
                         }, this);
 
-                        ConfigDelegate.updateEntity("sync", data).then(function() {
-                            BrowserStorageDelegate.set("currentMapping", data);
+                        ConfigDelegate.updateEntity("sync", data).then(_.bind(function() {
+                            BrowserStorageDelegate.set("currentMapping", _.extend(mapping,this.recon));
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncPolicySaveSuccess");
-                        });
+                        }, this));
 
                         if (callback) {
                             callback(definedPolicies);

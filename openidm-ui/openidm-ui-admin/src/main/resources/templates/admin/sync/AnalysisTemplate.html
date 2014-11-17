@@ -21,7 +21,8 @@
                     <option value="{{key}}">{{key}} ({{value}})</option>
                 {{/each}}
             </select>
-            <button id="changeAssociation" class="button" disabled>{{t "templates.mapping.analysis.changeAssociation"}}</button>
+            <button id="changeAssociation" class="button actionButton" disabled>{{t "templates.mapping.analysis.changeAssociation"}}</button>
+            {{#unless hideSingleRecordReconButton}}<button id="singleRecordSync" class="button actionButton" disabled>{{t "templates.mapping.analysis.reconcileSelectedRecord"}}</button>{{/unless}}
             <div id="analysisGridContainer">
                 <table class="recon-grid" id="analysisGrid"></table>
                 <div class="recon-pager" id="analysisGridGridPager"></div> 

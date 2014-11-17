@@ -200,6 +200,15 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
         
         return prom;
     };
+
+    obj.getLastAuditForObjectId = function(reconId, objectIdType, objectId) {
+        var queryFilter = 'reconId eq "' + reconId + '" and ' + objectIdType + ' eq "' + objectId + '"';
+        return obj.serviceCall({
+            "type": "GET",
+            "serviceUrl": "/openidm/repo/audit/recon",
+            "url":  "?_queryFilter=" + encodeURIComponent(queryFilter) 
+        });
+    };
     
     return obj;
 });
