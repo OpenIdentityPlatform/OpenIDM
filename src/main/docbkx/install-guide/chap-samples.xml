@@ -470,8 +470,10 @@ $ curl \
     Guide</citetitle>.
    </para>
    
-   <para>Test that the automatic reconciliation has been successful by
-   locating the new user in the LDAP directory.</para>
+   <para>
+    Test that the implicit reconciliation has been successful by locating the
+    new user in the LDAP directory.
+   </para>
    
    <screen>$ <userinput>/path/to/OpenDJ/bin/ldapsearch \
  -bindDN "cn=Directory Manager" \
