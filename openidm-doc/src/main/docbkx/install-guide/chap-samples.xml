@@ -459,7 +459,7 @@ $ curl \
  "https://localhost:8443/openidm/managed/user?_action=create"</screen>
 
    <para>
-    By default, automatic synchronization is enabled. This means that when you
+    By default, implicit synchronization is enabled. This means that when you
     update a managed object, any mappings defined in the
     <filename>sync.json</filename> file that have the managed object as the
     source are automatically executed to update the target system. For more
@@ -675,7 +675,7 @@ $ curl \
  "https://localhost:8443/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</userinput></screen>
 
    <para>
-    By default, automatic synchronization is enabled. This means that when you
+    By default, implicit synchronization is enabled. This means that when you
     update a managed object, any mappings defined in the
     <filename>sync.json</filename> file that have the managed object as the
     source are automatically executed to update the target system. For more
@@ -1473,7 +1473,7 @@ mysql &gt; <userinput>select * from Users;</userinput>
      <para>
       Regular users can update their profiles or passwords. Any changes are
       automatically synchronized back to the <literal>hrdb</literal> database,
-      through the automatic synchronization mechanism.
+      through the implicit synchronization mechanism.
      </para>
      <para>
       For example, log into the UI as user <literal>john</literal> with the
@@ -2850,19 +2850,18 @@ $ ./startup.sh -p samples/sample5</screen>
    <para>
     Rerun the reconciliation and query REST commands shown previously. The
     reconciliation operation creates the new user from the simulated LDAP
-    resource in the OpenIDM repository. Automatic synchronization then creates
-    that user in the AD resource.
+    resource in the OpenIDM repository. An implicit synchronization operation
+    then creates that user in the AD resource.
    </para>
   </section>
  </section>
 
  <section xml:id="more-sample5b">
-  <title>Sample 5b - Compensated Synchronization with <literal>onSync</literal></title>
+  <title>Sample 5b - Failure Compensation With Multiple Resources</title>
 
   <indexterm>
    <primary>Samples</primary>
-   <secondary>Sample 5b - Synchronization with the <literal>onSync</literal>
-    script hook</secondary>
+   <secondary>Sample 5b - Failure Compensation With Multiple Resources</secondary>
   </indexterm>
 
   <para>
@@ -2871,7 +2870,7 @@ $ ./startup.sh -p samples/sample5</screen>
    resources.
   </para>
   <para>
-   Typically, when a managed/user object is changed, automatic synchronization
+   Typically, when a managed/user object is changed, implicit synchronization
    replays that change to all configured external resources. If synchronization
    fails for one target resource (for example, due to a policy validation
    failure on the target, or the target being unavailable), the synchronization
@@ -2921,12 +2920,12 @@ $ ./startup.sh -p samples/sample5</screen>
   <para>
    You can use the <literal>onSync</literal> script hook to ensure that changes
    made in the repository are synchronized to all external resources, or that
-   no changes are made. For more information about how automatic synchronization
+   no changes are made. For more information about how implicit synchronization
    uses the <literal>onSync</literal> script hook, see <link xlink:show="new"
    xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:href="integrators-guide#sync-types-automatic"><citetitle>How Automatic
-   Sync works with onSync</citetitle></link> in the <citetitle>Integrator's
-   Guide</citetitle>.
+   xlink:href="integrators-guide#sync-failure-compensation"><citetitle>Configuring
+   Synchronization Failure Compensation</citetitle></link> in the
+   <citetitle>Integrator's Guide</citetitle>.
   </para>
 
   <para>
@@ -2971,11 +2970,12 @@ $ ./startup.sh -p samples/sample5b</screen>
    </para>
    <para>
     Make a change to the data of an existing user (<literal>DDOE1</literal>).
-    With automatic synchronization, that change is reflected almost immediately
-    on the external resources. For sample 5b, you should see the changes in both
-    XML files in the <filename>/path/to/openidm/sample5b/data</filename>
-    directory. Alternatively, you can query the external resources over REST, as
-    described previously.
+    As a result of the implicit synchronization from the managed object
+    repository, that change is reflected almost immediately on the external
+    resources. For sample 5b, you should see the changes in both XML files in
+    the <filename>/path/to/openidm/sample5b/data</filename> directory.
+    Alternatively, you can query the external resources over REST, as described
+    previously.
    </para>
    <para>
     The synchronization is successful, across all configured external resources,
@@ -2995,7 +2995,7 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
 
    <para>
     In the UI, now try another update to user <literal>DDOE1</literal>. With the
-    modified filename of the simulated LDAP resource, automatic synchronization
+    modified filename of the simulated LDAP resource, implicit synchronization
     cannot write to this resource. An error similar to the following is
     displayed in the log file, <filename>openidm0.log.0</filename>:
    </para>
@@ -3004,13 +3004,13 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
 /path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml</screen>
 
    <para>
-    Although the AD resource is available, automatic synchronization will not
+    Although the AD resource is available, implicit synchronization will not
     reach this resource, because the mapping is specified
     <emphasis>after</emphasis> the managed/user to LDAP mapping in the
     <filename>sync.json</filename> file.
    </para>
    <para>
-    When the automatic synchronization fails for the LDAP resource, the
+    When the implicit synchronization operation fails for the LDAP resource, the
     <literal>onSync</literal> hook invokes the
     <filename>compensate.js</filename> script. This script attempts to revert
     the original change by performing another update to DDOE1 in the repository
@@ -3514,7 +3514,7 @@ userPassword: passw0rd</screen>
      </step>
      <step>
       <para>
-       Automatic synchronization pushes this change out to the OpenDJ data store.
+       Implicit synchronization pushes this change out to the OpenDJ data store.
        To test this synchronization operation, search the OpenDJ baseDN for the
        new user entry.
       </para>
