@@ -35,8 +35,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-    ], function(AdminAbstractView, MappingBaseView, eventManager, conf, UIUtils, constants, browserStorageDelegate, searchDelegate, connectorDelegate, configDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/admin/util/MappingUtils"
+    ], function(AdminAbstractView, MappingBaseView, eventManager, conf, UIUtils, constants, browserStorageDelegate, searchDelegate, connectorDelegate, configDelegate, mappingUtils) {
 
     var PropertiesView = AdminAbstractView.extend({
         template: "templates/admin/mapping/PropertiesTemplate.html",
@@ -227,39 +228,14 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
              
             this.data.mapProps = mapProps;
             
-            if (!$("#findSampleSource",this.$el).hasClass("ui-autocomplete-input")) {
-                $("#findSampleSource",this.$el).autocomplete({
-                    delay: 500,
-                    minLength: 2,
-                    select: function (event, ui) {
-                        conf.globalData.sampleSource = ui.item;
-                        sampleSource = ui.item;
-                        $("#findSampleSource").val(ui.item[_this.mapping.properties[0].source]);
-                        
-
-                        $('#mappingTable').jqGrid('setGridParam', {
-                            datatype: 'local',
-                            data: gridFromMapProps(mapProps)
-                        }).trigger('reloadGrid');
-
-                        return false;
-                    },
-                    source: function (request, response) {
-                        searchDelegate.searchResults(_this.mapping.source, autocompleteProps, request.term).always(response);
-                    }
-                }).data( "ui-autocomplete" )._renderItem = function (ul, item) {
-                    var validDisplayProps = _.reject(autocompleteProps,function(p){ 
-                            return (p && !p.length) || !item[p]; 
-                        }),
-                        txt = _.chain(item)
-                                .pick(validDisplayProps)
-                                .values()
-                                .join(" / ");
-                    return $( "<li>" )
-                        .append( "<a>" + Handlebars.Utils.escapeExpression(txt) + "</a>" )
-                        .appendTo( ul );
-                };
-            }
+            mappingUtils.setupSampleSearch($("#findSampleSource",this.$el),this.mapping,autocompleteProps, _.bind(function(item){
+                conf.globalData.sampleSource = item;
+                sampleSource = item;
+                $('#mappingTable',this.$el).jqGrid('setGridParam', {
+                    datatype: 'local',
+                    data: gridFromMapProps(mapProps)
+                }).trigger('reloadGrid');
+            }, this));
 
 
             //$('#mappingTable').after('<div id="mappingTable_pager"></div>');
