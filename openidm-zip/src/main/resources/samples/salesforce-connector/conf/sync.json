@@ -2,25 +2,8 @@
     "_id" : "sync",
     "mappings" : [
         {
+            "name" : "sourceSalesforceUser_managedUser",
             "target" : "managed/user",
-            "properties" : [
-                {
-                    "source" : "FirstName",
-                    "target" : "givenName"
-                },
-                {
-                    "source" : "LastName",
-                    "target" : "sn"
-                },
-                {
-                    "source" : "Email",
-                    "target" : "mail"
-                },
-                {
-                    "source" : "Username",
-                    "target" : "userName"
-                }
-            ],
             "source" : "system/salesforce/User",
             "policies" : [
                 {
@@ -76,9 +59,28 @@
                     "situation" : "UNQUALIFIED"
                 }
             ],
-            "name" : "sourceSalesforceUser_managedUser"
+            "properties" : [
+                {
+                    "source" : "FirstName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "LastName",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "Email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "Username",
+                    "target" : "userName"
+                }
+            ]
         },
         {
+            "name" : "managedUser_sourceSalesforceUser",
+            "source" : "managed/user",
             "target" : "system/salesforce/User",
             "links" : "sourceSalesforceUser_managedUser",
             "properties" : [
@@ -99,10 +101,9 @@
                     "target" : "Email"
                 }
             ],
-            "source" : "managed/user",
             "policies" : [
                 {
-                    "action" : "CREATE",
+                    "action" : "ASYNC",
                     "situation" : "ABSENT"
                 },
                 {
@@ -150,11 +151,10 @@
                     "situation" : "UNASSIGNED"
                 },
                 {
-                    "action" : "DELETE",
+                    "action" : "ASYNC",
                     "situation" : "UNQUALIFIED"
                 }
-            ],
-            "name" : "managedUser_sourceSalesforceUser"
+            ]
         }
     ]
 }
