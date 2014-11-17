@@ -21,7 +21,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SearchDelegate", [
                             .map(function(p){
                                 var op = operator;
                                 if(p === "_id" && op !== "neq"){
-                                    op = "eq"
+                                    op = "eq";
                                 }
                                 return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
                             })
