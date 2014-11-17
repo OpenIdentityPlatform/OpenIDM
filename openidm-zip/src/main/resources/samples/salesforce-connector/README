@@ -27,8 +27,9 @@
  -------------------------------------------------------------------------------------------------
 
  This sample will demonstrate a recon and sync between Salesforce and OrientDB. To get started you
- need access to a Salesforce account that has an app with OAuth enabled to allow us to retrieved a
- consumer key and a consumer secret. That app must have a callback url in the form,
+ need access to a Salesforce account that has an app with OAuth enabled to allow us to retrieve a
+ consumer key and a consumer secret. Salesforce uses OAuth 2.0. That app must have a callback url
+ in the form,
     Protocol://hostname:portNumber/admin/oauth.html
  The "admin/oauth.html" is important to have so that OpenIDM can do that OAuth flow correctly.
 
@@ -44,24 +45,24 @@
 
 
  ------------------------------------------------------------------------------------------------------
-                                Running the Salesforce Connector Sample
+                       Running the Salesforce Connector Sample via the Admin UI
  ------------------------------------------------------------------------------------------------------
 
  1) Start the Salesforce sample with the following command,
 
         ./startup.sh -p samples/salesforce-connector
 
- 1) Go to the administration view in OpenIDM by going to the following URL:
+ 2) Go to the administration view in OpenIDM by going to the following URL:
 
         https://localhost:8443/admin
 
- 2) You should now see the Salesforce connector icon with the connector disabled at this point. We will
- need to use the Consumer Key and Consumer Secret that was retrieved in the section above to complete
- the OAuth 2.0 flow so that we can activate the connector.
+ 3) You should now see the Salesforce connector icon with the connector disabled at this point. Use the
+ Consumer Key and Consumer Secret that was retrieved in the section above to complete the OAuth 2.0 flow
+ so that the connector can complete the activation process.
     a) Click on the Salesforce icon in the Connectors section to edit the connector
     b) In the section General Details, there is a drop down menu for Connector Type
         - use that drop down menu and select the Salesforce Connector
-    c) Under the Base Connector Details we will have to set 3 things:
+    c) Under the Base Connector Details, set the following items:
         1) Login URL : click the circle fill box to enable this as a Sandbox environment
         2) Enter in the Consumer Key in the Consumer Key input field.
         3) Enter in the Consumer Secret in the Consumer Secret input field.
@@ -71,28 +72,241 @@
  After you have given consent to OpenIDM to retrieve users from your Salesforce account we can start
  a recon between Salesforce Users store and Managed Users.
 
- 3) Select the Mappings tab on the OpenIDM UI to view the mappings that are available.
+ 4) Select the Mappings tab on the OpenIDM UI to view the mappings that are available.
     -For this sample there two mappings one from Salesforce Users to Managed Users and going back from
     Managed Users to Salesforce.
 
- 4) Select the mapping that shows Salesforce as the source and Managed as the target.
- 5) Click on the Reconcile Now button to preform the recon. If you click on the arrow on the left hand side by the
+ 5) Select the mapping that shows Salesforce as the source and Managed as the target.
+ 6) Click on the Reconcile Now button to perform the recon. If you click on the arrow on the left hand side by the
  completed sync message you will see details of the sync.
- 6) To take a close look at the users that you brought in from Salesforce click on the User view button in the
+ 7) To take a close look at the users that you brought in from Salesforce click on the User view button in the
  upper right hand side of the admin user view page.
- 7) Click the Users tab from the navigation bar to view the users.
+ 8) Click the Users tab from the navigation bar to view the users.
 
  Now that we are confident that we pulled in the users from Salesforce we want to test the mapping we created
- from Managed User to Salesforce User. We can do this by updating one of the user by selecting them while we
+ from Managed User to Salesforce User. We can do this by updating one of the users by selecting them while we
  are in the User view table.
 
- 8) Select a user from the table, this will show the user profile attributes with values.
- 9) For this sample we will just modify a first name of the entry we are looking at and click update.
+ 9) Select a user from the table, this will show the user profile attributes with values.
+ 10) For this sample we will just modify a first name of the entry we are looking at and click update.
 
- If you go back to your user view inside of Salesforce you will see that user now reflects the changed you
+ If you go back to your user view inside of Salesforce you will see that user now reflects the change you
  made through the OpenIDM UI console.
 
 
- In summary, this sample has made the various CRUD operations as part of the recon and sync operations that took place.
- You can modify this sample to sync more than the four attributes provided in the sample. This sample is just a starting
- place for using the Salesforce connector with OpenIDM.
+ ------------------------------------------------------------------------------------------------------
+                       Running the Salesforce Connector Sample via the CLI
+ ------------------------------------------------------------------------------------------------------
+
+ Before you begin, you will need to get a refresh token from Salesforce
+
+    Getting the refresh token:
+    1) Open the following URL in a browser:
+        https://login.salesforce.com/services/oauth2/authorize
+        ?response_type=code&
+        client_id=__YOUR_CLIENT_ID__&
+        redirect_uri=https://localhost:8080/oauth2&
+        scope=id%20api%20refresh_token
+
+    2) At this point, you will be redirected to Salesforce to start the OAuth flow. You will be prompted
+    to give this application access to your sales force account. After you have given consent, you will
+    get an access token code for the next step.
+        Copy the token from the response URL, the param is code=__YOUR_CODE__
+
+    3) With the code you retrieved in step 2, you will now retrieve a refresh token using the following
+    request:
+        curl -v https://login.salesforce.com/services/oauth2/token
+        -d "grant_type=authorization_code"
+        -d "client_id=YOUR_CLIENT_ID"
+        -d "client_secret=YOUR_CLIENT_SECRET" -d "redirect_uri=https://localhost:8443/admin/oauth.html"
+        -d "code=__CODE_FROM_STEP_2__"
+
+        Response:
+            {
+                "id":"https://test.salesforce.com/id/{id}",
+                "issued_at":"1416247254725",
+                "scope":"id api refresh_token",
+                instance_url":"https://login.salesforce.com",
+                "token_type":"Bearer",
+                "refresh_token":"YOUR_REFRESH_TOKEN",
+                "signature":"GENERATED_SIGNATURE",
+                "access_token":"YOUR_ACCESS_TOKEN"
+            }
+
+    Now you have everything you need to edit the samples/salesforce/conf/provisioner.salesforce-salesforce.json
+    configuration file. The Consumer Key, Consumer Secret, and refresh token.
+
+    4) Open up the salesforce provisioner config for editing.
+
+            $ vi samples/salesforce-connector/conf/provisioner.salesforce-salesforce.json
+
+        In the section "configurationProperties", use the response from step 3 to add the missing values
+
+            "configurationProperties" : {
+                    "connectTimeout" : 120000,
+                    "loginUrl" : YOUR_LOGIN_URL,
+                    "idleCheckInterval" : 10000,
+                    "refreshToken" : YOUR_REFRESH_TOKEN,
+                    "clientSecret" : YOUR_CLIENT_SECRET,
+                    "clientId" : YOUR_CLIENT_ID,
+                    "instanceUrl" : "https://login.salesforce.com",
+                    "version" : 29
+                }
+
+        Make sure to enable the connector in this file.
+
+            "enabled" : true
+
+    After you save this file with your changes, the Salesforce connector should now be available.
+
+    5) Test availability of Salesforce Connector
+
+             $ curl  --header "X-OpenIDM-Username: openidm-admin"
+                     --header "X-OpenIDM-Password: openidm-admin"
+                     --header "Content-Type: application/json"
+                     --request POST
+                     "http://localhost:8080/openidm/system/salesforce?_action=test"
+
+             Response should be:
+             {
+                 "name": "salesforce",
+                 "enabled": true,
+                 "config": "config/provisioner.salesforce/salesforce",
+                 "objectTypes": [
+                     "User",
+                     "PermissionSet",
+                     "PermissionSetAssignment",
+                     "Profile",
+                     "PermissionSetLicenseAssign",
+                     "Organization",
+                     "PermissionSetLicense",
+                     "Group",
+                     "GroupMember"
+                 ],
+                 "connectorRef": {
+                     "connectorName": "org.forgerock.openidm.salesforce.Salesforce",
+                     "bundleName": "org.forgerock.openidm.salesforce",
+                     "displayName": "Salesforce Connector",
+                     "systemType": "provisioner.salesforce",
+                     "bundleVersion": "2.0.29.1-RC3-SNAPSHOT"
+                 },
+                 "ok": true
+             }
+
+   ------------------------------------------------------------------------------------------------------
+                       Reconciling Salesforce Users to Managed Users via the CLI
+   ------------------------------------------------------------------------------------------------------
+
+   A sync.json is included with this sample which maps some user attributes from Salesforce to Managed User
+   entries. To trigger a reconciliation with this mapping, simply issue the following command
+
+      Request :
+          $ curl  --header "X-OpenIDM-Username: openidm-admin"
+                  --header "X-OpenIDM-Password: openidm-admin"
+                  --header "Content-Type: application/json"
+                  --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=sourceSalesforceUser_managedUser"
+
+      Response :
+              {"_id":"3d83b958-dfec-4675-8c49-68c568d0980b","state":"ACTIVE"}
+
+    A quick look at the reconciliation entry will tell us what happened during the reconciliation process :
+
+       Request :
+           $ curl  --header "X-OpenIDM-Username: openidm-admin"
+                   --header "X-OpenIDM-Password: openidm-admin"
+                   --header "Content-Type: application/json"
+                   --request GET "http://localhost:8080/openidm/recon/3d83b958-dfec-4675-8c49-68c568d0980b"
+       Response:
+             {
+                "_id":"3d83b958-dfec-4675-8c49-68c568d0980b",
+                "mapping":"sourceSalesforceUser_managedUser",
+                "state":"SUCCESS",
+                "stage":"COMPLETED_SUCCESS",
+                "stageDescription":"reconciliation completed.",
+                "progress":{
+                   "source":{
+                      "existing":{
+                         "processed":5,
+                         "total":"5"
+                      }
+                   },
+                   "target":{
+                      "existing":{
+                         "processed":0,
+                         "total":"0"
+                      },
+                      "created":5
+                   },
+                   "links":{
+                      "existing":{
+                         "processed":0,
+                         "total":"0"
+                      },
+                      "created":5
+                   }
+                },
+                "situationSummary":{
+                   "SOURCE_IGNORED":0,
+                   "MISSING":0,
+                   "FOUND":0,
+                   "AMBIGUOUS":0,
+                   "UNQUALIFIED":0,
+                   "CONFIRMED":0,
+                   "SOURCE_MISSING":0,
+                   "ABSENT":5,
+                   "TARGET_IGNORED":0,
+                   "UNASSIGNED":0,
+                   "FOUND_ALREADY_LINKED":0
+                },
+                "statusSummary":{
+                   "FAILURE":0,
+                   "SUCCESS":5
+                },
+                "parameters":{
+                   "object":{
+                      "sourceQuery":{
+                         "resourceName":"system/salesforce/User",
+                         "_queryId":"query-all-ids"
+                      },
+                      "targetQuery":{
+                         "resourceName":"managed/user",
+                         "_queryId":"query-all-ids"
+                      }
+                   },
+                   "pointer":{
+                      "empty":true
+                   },
+                   "transformers":[
+
+                   ],
+                   "set":false,
+                   "map":true,
+                   "string":false,
+                   "wrappedObject":{
+                      "targetQuery":{
+                         "_queryId":"query-all-ids",
+                         "resourceName":"managed/user"
+                      },
+                      "sourceQuery":{
+                         "_queryId":"query-all-ids",
+                         "resourceName":"system/salesforce/User"
+                      }
+                   },
+                   "list":false,
+                   "number":false,
+                   "boolean":false,
+                   "null":false,
+                   "collection":false
+                },
+                "started":"2014-11-17T20:19:07.201Z",
+                "ended":"2014-11-17T20:19:08.676Z",
+                "duration":1475
+             }
+
+
+
+
+ In summary, this sample has made the various CREATE, READ, and UPDATE operations as part of the
+ recon and sync operations that took place. You can modify this sample to sync more than the four
+ attributes provided in the sample. This sample is just a starting place for using the Salesforce
+ connector with OpenIDM.
