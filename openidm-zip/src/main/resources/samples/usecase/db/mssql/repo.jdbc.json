@@ -53,7 +53,7 @@
             
             "audit-by-mapping" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE mapping = ${mappingName}",
             "audit-by-recon-id" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId}",
-            "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND entryType = ${entryType}",
+            "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND entrytype = ${entryType}",
             "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND situation = ${situation}",
             "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentactionid = ${parentActionId}",
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
