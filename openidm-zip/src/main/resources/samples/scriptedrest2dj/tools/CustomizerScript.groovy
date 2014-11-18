@@ -40,15 +40,14 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConfiguration
+import org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConfiguration.AuthMethod
 import org.identityconnectors.common.security.GuardedString
 
 // must import groovyx.net.http.HTTPBuilder.RequestConfigDelegate
 import groovyx.net.http.HTTPBuilder.RequestConfigDelegate
 
 /**
- * A NAME does ...
- *
- * @author Laszlo Hordos
+ * A customizer script defines the custom closures to interact with the default implementation and customize it.
  */
 customize {
     init { HttpClientBuilder builder ->
@@ -82,13 +81,6 @@ customize {
 
         switch (ScriptedRESTConfiguration.AuthMethod.valueOf(c.defaultAuthMethod)) {
             case ScriptedRESTConfiguration.AuthMethod.BASIC_PREEMPTIVE:
-
-                // Create AuthCache instance
-                def authCache = new BasicAuthCache();
-                // Generate BASIC scheme object and add it to the local auth cache
-                authCache.put(httpHost, new BasicScheme());
-                c.propertyBag.put(HttpClientContext.AUTH_CACHE, authCache)
-
             case ScriptedRESTConfiguration.AuthMethod.BASIC:
                 // It's part of the http client spec to request the resource anonymously
                 // first and respond to the 401 with the Authorization header.
@@ -121,7 +113,12 @@ customize {
 
         def c = delegate as ScriptedRESTConfiguration
 
-        def authCache = c.propertyBag.get(HttpClientContext.AUTH_CACHE)
+        def authCache = null
+        if (AuthMethod.valueOf(c.defaultAuthMethod).equals(AuthMethod.BASIC_PREEMPTIVE)){
+            authCache = new BasicAuthCache();
+            authCache.put(new HttpHost(c.serviceAddress?.host, c.serviceAddress?.port, c.serviceAddress?.scheme), new BasicScheme());
+
+        }
 
         def cookieStore = c.propertyBag.get(HttpClientContext.COOKIE_STORE)
 
