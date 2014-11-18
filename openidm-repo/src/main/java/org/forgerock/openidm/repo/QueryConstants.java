@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -124,4 +124,14 @@ public final class QueryConstants {
      * Page size requested. Generally used in a LIMIT clause.
      */
     public static final String PAGE_SIZE = HttpUtils.PARAM_PAGE_SIZE;
+    
+    /**
+     * Sort keys used for sorting the results of the query.
+     */
+    public static final String SORT_KEYS = HttpUtils.PARAM_SORT_KEYS;
+    
+    /**
+     * The clause at the end of the query expressing that provides paging details.
+     */
+    public static final String PAGE_CLAUSE = "pageClause";
 }

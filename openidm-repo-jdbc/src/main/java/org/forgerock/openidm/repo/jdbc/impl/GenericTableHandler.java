@@ -23,6 +23,10 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +43,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.forgerock.json.fluent.JsonPointer;
@@ -46,9 +51,11 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
@@ -123,6 +130,8 @@ public class GenericTableHandler implements TableHandler {
     final TypeReference<LinkedHashMap<String,Object>> typeRef = new TypeReference<LinkedHashMap<String,Object>>() {};
 
     final TableQueries queries;
+    
+    final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
 
     Map<QueryDefinition, String> queryMap;
 
@@ -191,7 +200,9 @@ public class GenericTableHandler implements TableHandler {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
-        queries = new TableQueries(mainTableName, propTableName, dbSchemaName, queryFilterVisitor, new GenericQueryResultMapper());
+        this.queryFilterVisitor = queryFilterVisitor;
+        
+        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, queryFilterVisitor, new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(queriesConfig, commandsConfig, queryMap);
 
@@ -699,6 +710,57 @@ public class GenericTableHandler implements TableHandler {
 
     protected PreparedStatement getPreparedStatement(Connection connection, QueryDefinition queryDefinition) throws SQLException {
         return queries.getPreparedStatement(connection, queryMap.get(queryDefinition));
+    }
+    
+    @Override
+    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+        final String offsetParam = (String) params.get(PAGED_RESULTS_OFFSET);
+        final String pageSizeParam = (String) params.get(PAGE_SIZE);
+        String filterString = getFilterString(filter, replacementTokens);
+        
+        // Check for sort keys and build up order-by syntax
+        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
+        if (sortKeys != null && sortKeys.size() > 0) {
+            List<String> innerJoins = new ArrayList<String>();
+            List<String> keys = new ArrayList<String>();
+            prepareSortKeyStatements(sortKeys, innerJoins, keys, replacementTokens);
+            filterString = StringUtils.join(innerJoins, " ") + " " + filterString + " ORDER BY " + StringUtils.join(keys, ", ");
+        }
+
+        return "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj "
+                + filterString + " LIMIT " + pageSizeParam + " OFFSET " + offsetParam;
+    }
+    
+    /**
+     * Loops through sort keys constructing the inner join and key statements.
+     * 
+     * @param sortKeys  a {@link List} of sort keys
+     * @param innerJoins a {@link List} to store INNER JOIN statements
+     * @param keys a {@link List} to store ORDER BY keys
+     * @param replacementTokens a {@link Map} containing replacement tokens for the {@link PreparedStatement}
+     */
+    protected void prepareSortKeyStatements(List<SortKey> sortKeys, List<String> innerJoins, List<String> keys, Map<String, Object> replacementTokens) {
+        for (int i = 0; i < sortKeys.size(); i++) {
+            final SortKey sortKey = sortKeys.get(i);
+            final String tokenName = "sortKey" + i;
+            final String tableAlias = "orderby" + i;
+            final String innerJoin = "INNER JOIN ${_dbSchema}.${_propTable} " + tableAlias + " ON " + tableAlias 
+                    + ".${_mainTable}_id = obj.id AND " + tableAlias + ".propkey = ${" + tokenName + "}";
+            innerJoins.add(innerJoin);
+            keys.add(tableAlias + ".propvalue " + (sortKey.isAscendingOrder() ? "ASC" : " DESC"));
+            replacementTokens.put(tokenName, sortKey.getField().toString());
+        }
+    }
+    
+    /**
+     * Returns a query string representing the supplied filter.
+     * 
+     * @param filter the {@link QueryFilter} object
+     * @param replacementTokens replacement tokens for the query string
+     * @return a query string
+     */
+    protected String getFilterString(QueryFilter filter, Map<String, Object> replacementTokens) {
+        return " WHERE " + filter.accept(queryFilterVisitor, replacementTokens);
     }
 }
 

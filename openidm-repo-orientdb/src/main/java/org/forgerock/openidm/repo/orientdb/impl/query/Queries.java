@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,15 +23,18 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
@@ -40,14 +43,13 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.ResourceUtil;
-
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.exception.OQueryParsingException;
-import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.exception.OQueryParsingException;
+import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 
 /**
  * Configured and add-hoc query support on OrientDB
@@ -137,15 +139,15 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
 
     private QueryInfo<OSQLSynchQuery<ODocument>> findQueryInfo(String type, Map<String, String> params,
             String queryId, String queryExpression, QueryFilter filter) {
-        if (filter == null) {
-            return findQueryInfo(type, queryId, queryExpression);
+        String queryString = queryExpression == null ? null : queryExpression + params.get("pageClause");
+        if (filter != null) {
+            // If there is a filter, use it's query string
+            queryString = "SELECT * FROM ${unquoted:_resource} WHERE "
+                    + filter.accept(QUERY_FILTER_VISITOR, params) 
+                    + params.get(QueryConstants.PAGE_CLAUSE);
         }
-
-        String filterQuery = "SELECT * FROM ${unquoted:_resource} WHERE "
-                + filter.accept(QUERY_FILTER_VISITOR, params);
-
         // treat the query created by the filter as a queryExpression
-        return findQueryInfo(type, queryId, filterQuery);
+        return findQueryInfo(type, queryId, queryString);
     }
 
     /**
@@ -168,13 +170,11 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
         params.put(QueryConstants.RESOURCE_NAME, OrientDBRepoService.typeToOrientClassName(type));
         params.putAll(getPagingParameters(request));
 
-        if (request.getQueryId() == null
-                && request.getQueryExpression() == null
+        if (request.getQueryId() == null 
+                && request.getQueryExpression() == null 
                 && request.getQueryFilter() == null) {
-            throw new BadRequestException("Either "
-                    + QueryConstants.QUERY_ID
-                    + ", " + QueryConstants.QUERY_EXPRESSION
-                    + ", or " + QueryConstants.QUERY_FILTER
+            throw new BadRequestException("Either " + QueryConstants.QUERY_ID + ", " 
+                    + QueryConstants.QUERY_EXPRESSION + ", or " + QueryConstants.QUERY_FILTER
                     + " to identify/define a query must be passed in the parameters. " + params);
         }
 
@@ -251,17 +251,32 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
 
         final String offsetParam;
         final String pageSizeParam;
+        final List<SortKey> sortKeys;
+        String pageClause;
 
         if (requestPageSize > 0) {
             offsetParam = String.valueOf(request.getPagedResultsOffset());
             pageSizeParam = String.valueOf(requestPageSize);
+            sortKeys = request.getSortKeys();
+            pageClause = "SKIP " + offsetParam + " LIMIT " + pageSizeParam;
+            // Add sort keys, if any
+            if (sortKeys != null && sortKeys.size() > 0) {
+                List<String> keys = new ArrayList<String>();
+                for (SortKey sortKey : sortKeys) {
+                    String field = sortKey.getField().toString().substring(1);
+                    keys.add(field + (sortKey.isAscendingOrder() ? " ASC" : " DESC"));
+                }
+                pageClause += " ORDER BY " + StringUtils.join(keys, ", ");
+            }
         } else {
             offsetParam = "0";
             pageSizeParam = "-1"; // unlimited in Orient
+            pageClause = "";
         }
 
         params.put(QueryConstants.PAGED_RESULTS_OFFSET, offsetParam);
         params.put(QueryConstants.PAGE_SIZE, pageSizeParam);
+        params.put(QueryConstants.PAGE_CLAUSE, pageClause);
 
         return params;
     }

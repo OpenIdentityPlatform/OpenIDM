@@ -52,6 +52,7 @@ import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
 import org.forgerock.openidm.repo.util.TokenHandler;
@@ -131,11 +132,11 @@ public class TableQueries {
         PreparedStatement getQuery(Connection con, String queryId, String type,
                 Map<String, Object> params) throws SQLException, ResourceException {
 
-            QueryInfo info = getQueryInfo(queryId);
-            if (info == null) {
+            QueryInfo foundInfo = getQueryInfo(queryId);
+            if (foundInfo == null) {
                 throw new BadRequestException("No query defined/configured for requested queryId " + queryId);
             }
-            return resolveQuery(info, con, params);
+            return resolveQuery(foundInfo, con, params);
         }
 
         /**
@@ -161,9 +162,12 @@ public class TableQueries {
     final String dbSchemaName;
     final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
     final QueryResultMapper resultMapper;
+    
+    private TableHandler tableHandler;
 
-    public TableQueries(String mainTableName, String propTableName, String dbSchemaName,
+    public TableQueries(TableHandler tableHandler, String mainTableName, String propTableName, String dbSchemaName,
             QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, QueryResultMapper resultMapper) {
+        this.tableHandler = tableHandler;
         this.mainTableName = mainTableName;
         this.propTableName = propTableName;
         this.dbSchemaName = dbSchemaName;
@@ -279,16 +283,13 @@ public class TableQueries {
 
         final String offsetParam;
         final String pageSizeParam;
-        final String pageClause;
 
         if (requestPageSize > 0) {
             offsetParam = String.valueOf((Integer) params.get(PAGED_RESULTS_OFFSET));
             pageSizeParam = String.valueOf(requestPageSize);
-            pageClause = "SKIP " + offsetParam + " LIMIT " + pageSizeParam;
         } else {
             offsetParam = "0";
             pageSizeParam = String.valueOf(Integer.MAX_VALUE);
-            pageClause = "";
         }
 
         params.put(PAGED_RESULTS_OFFSET, offsetParam);
@@ -304,7 +305,7 @@ public class TableQueries {
         final PreparedStatement foundQuery;
         try {
             if (queryFilter != null) {
-                foundQuery = parseQueryFilter(con, queryFilter);
+                foundQuery = parseQueryFilter(con, queryFilter, params);
             } else if (queryExpression != null) {
                 foundQuery = resolveInlineQuery(con, queryExpression, params);
             } else if (queries.queryIdExists(queryId)) {
@@ -429,11 +430,11 @@ public class TableQueries {
      *            the query filter to parse
      * @return A resolved statement
      */
-    PreparedStatement parseQueryFilter(Connection con, QueryFilter filter)
+    PreparedStatement parseQueryFilter(Connection con, QueryFilter filter, Map<String, Object> params)
             throws SQLException, ResourceException {
         Map<String, Object> replacementTokens = new LinkedHashMap<String, Object>();
-        String rawQuery = "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj WHERE "
-                + filter.accept(queryFilterVisitor, replacementTokens);
+        
+        String rawQuery = tableHandler.buildRawQuery(filter, replacementTokens, params);
 
         Map<String, String> replacements = new LinkedHashMap<String, String>();
         replacements.put("_mainTable", mainTableName);
