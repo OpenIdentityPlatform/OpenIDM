@@ -991,16 +991,43 @@ var results = openidm.query("system/ScriptedSQL/account", params)
     </varlistentry>
    </variablelist>
   </section>
- <!--
   <section xml:id="sorting-query-results">
    <title>Sorting Query Results</title>
    <para>
-    You can sort the results of a query on a managed object, using the
-    <literal>_sortKeys</literal> parameter. This parameter takes a
-    comma-separated list as a value and orders the way in which the JSON result
-    is returned, based on this list.
+    You can sort the results of a query, using the <literal>_sortKeys</literal>
+    parameter. This parameter takes a comma-separated list as a value and orders
+    the way in which the JSON result is returned, based on this list.
    </para>
-  </section> -->
+   <para>
+    The following query returns all users with the <literal>givenName</literal>
+    <literal>Dan</literal>, and sorts the results alphabetically, according to
+    surname (<literal>sn</literal>).
+   </para>
+   <screen>$ <userinput>
+'https://localhost:8443/openidm/system/ldap/account?_queryFilter=givenName+eq+"Dan"&amp;_fields=givenName,sn&amp;_sortKeys=sn'
+</userinput>
+<computeroutput>
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "sn": "Cope",
+      "givenName": "Dan"
+    },
+    {
+      "sn": "Langdon",
+      "givenName": "Dan"
+    },
+    {
+      "sn": "Lanoway",
+      "givenName": "Dan"
+    }
+  ]
+}   </computeroutput>
+   </screen>
+  </section>
  </section>
 
 </chapter>
