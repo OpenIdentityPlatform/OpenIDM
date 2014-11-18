@@ -119,40 +119,37 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params, boolean formatted) throws ResourceException {
-        String queryId = params.get("_queryId");
+    public void query(ServerContext context, QueryRequest request, final QueryResultHandler handler, 
+            final String type, final boolean formatted) throws ResourceException {
         try {
-            QueryRequest request = Requests.newQueryRequest(getRepoTarget(type));
-            request.setQueryId(queryId);
-            request.getAdditionalParameters().putAll(params);
-            final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
-            connectionFactory.getConnection().query(context, request, new QueryResultHandler() {
+            QueryRequest newRequest = Requests.copyOfQueryRequest(request);
+            newRequest.setResourceName(getRepoTarget(type));
+            connectionFactory.getConnection().query(context, newRequest, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
-                    // Continue
+                    handler.handleError(error);
                 }
 
                 @Override
                 public boolean handleResource(Resource resource) {
-                    queryResults.add(resource.getContent().asMap());
-                    return true;
+                    JsonValue content = resource.getContent();
+                    if (formatted) {
+                        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+                            content = new JsonValue(AuditServiceImpl.formatReconEntry(content.asMap()));
+                        } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
+                            content = new JsonValue(AuditServiceImpl.formatActivityEntry(content.asMap()));
+                        } else if (type.equals(AuditServiceImpl.TYPE_ACCESS)) {
+                            content = new JsonValue(AuditServiceImpl.formatAccessEntry(content.asMap()));
+                        }
+                    }
+                    return handler.handleResource(new Resource(resource.getId(), resource.getRevision(), content));
                 }
 
                 @Override
                 public void handleResult(QueryResult result) {
-                    // Ignore
+                    handler.handleResult(result);
                 }
             });
-            if (type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return AuditServiceImpl.getReconResults(queryResults, formatted);
-            } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
-                formatActivityList(queryResults);
-                return AuditServiceImpl.getActivityResults(queryResults, formatted);
-            } else if (type.equals(AuditServiceImpl.TYPE_ACCESS)) {
-                return AuditServiceImpl.getAccessResults(queryResults, formatted);
-            } else {
-                throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
-            }
         } catch (Exception e) {
             throw new BadRequestException(e);
         }

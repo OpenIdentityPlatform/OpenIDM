@@ -19,6 +19,8 @@ package org.forgerock.openidm.audit.impl;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -89,8 +91,8 @@ public class AuditServiceImplTest {
         }
 
         @Override
-        public Map<String, Object> query(ServerContext context, String type, Map<String, String> params, boolean formatted) throws ResourceException {
-            return null; // not implemented
+        public void query(ServerContext context, QueryRequest request, QueryResultHandler handler, String type, boolean formatted) throws ResourceException {
+            // Not implemented
         }
     };
 

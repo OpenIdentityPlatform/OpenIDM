@@ -40,6 +40,10 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.InvalidException;
@@ -48,7 +52,6 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.cellprocessor.Optional;
@@ -238,23 +241,26 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params, boolean formatted) throws ResourceException {
-        String queryId = params.get("_queryId");
+    public void query(ServerContext context, QueryRequest request, final QueryResultHandler handler, 
+            final String type, final boolean formatted) throws ResourceException {
+        Map<String, String> params = request.getAdditionalParameters();
+        String queryId = request.getQueryId();
         try {
             List<Map<String, Object>> reconEntryList = getEntryList(type);
+            Map<String, Object> result = null;
             if (reconEntryList == null) {
                 throw new NotFoundException(type + " audit log not found");
             }
 
             String reconId = params.get("reconId");
             if (AuditServiceImpl.QUERY_BY_RECON_ID.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return AuditServiceImpl.getReconResults(reconEntryList, formatted);
+                result = AuditServiceImpl.getReconResults(reconEntryList, formatted);
             } else if (AuditServiceImpl.QUERY_BY_MAPPING.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "mapping", params.get("mappingName"), formatted);
+                result = getReconQueryResults(reconEntryList, reconId, "mapping", params.get("mappingName"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_SITUATION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "situation", params.get("situation"), formatted);
+                result = getReconQueryResults(reconEntryList, reconId, "situation", params.get("situation"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_TYPE.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "entryType", params.get("entryType"), formatted);
+                result = getReconQueryResults(reconEntryList, reconId, "entryType", params.get("entryType"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_ACTIVITY_PARENT_ACTION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
                 String actionId = params.get("parentActionId");
                 List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
@@ -263,10 +269,16 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                         rawEntryList.add(entry);
                     }
                 }
-                return AuditServiceImpl.getActivityResults(rawEntryList, formatted);
+                result = AuditServiceImpl.getActivityResults(rawEntryList, formatted);
             } else {
                 throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
             }
+            List<Map<String, Object>> results = (List<Map<String, Object>>) result.get("result");
+            for (Map<String, Object> queryResult : results) {
+                String id = (String) queryResult.get(Resource.FIELD_CONTENT_ID);
+                handler.handleResource(new Resource(id, null, new JsonValue(queryResult)));
+            }
+            handler.handleResult(new QueryResult());
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException(e);
