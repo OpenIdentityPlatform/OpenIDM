@@ -83,7 +83,7 @@ public class ObjectClassInfoHelperFactory {
                 public ObjectClassInfoHelper apply(JsonValue schema) throws SchemaException {
                     final ObjectClass objectClass = new ObjectClass(schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS).required().asString());
                     if (schema.isDefined(Constants.PROPERTIES)) {
-                        throw new SchemaException(schema, "Properties is not allowed for the ALL object class");
+                        throw new SchemaException(schema, "Properties is not allowed for the __ALL__ object class");
                     }
                     return new ObjectClassInfoHelper(
                             objectClass,
