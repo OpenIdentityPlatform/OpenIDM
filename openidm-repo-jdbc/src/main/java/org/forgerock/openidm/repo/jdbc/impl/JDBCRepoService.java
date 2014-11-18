@@ -24,6 +24,16 @@
 
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
+import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -71,6 +81,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
@@ -92,15 +103,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
-import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
-import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 
 /**
  * Repository service implementation using JDBC
@@ -536,18 +538,18 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             /*
              * Execute additional -count query if we are paging
              */
-            final QueryResult result;
             final String nextCookie;
             final int remainingResults;
 
             if (pagedResultsRequested) {
-                final String countQueryId = request.getQueryId() + "-count";
 
+                // The number of results (if known)
                 Integer resultCount = null;
 
                 TableHandler tableHandler = getTableHandler(trimStartingSlash(request.getResourceName()));
 
                 // Get total if -count query is available
+                final String countQueryId = request.getQueryId() + "-count";
                 if (tableHandler.queryIdExists(countQueryId)) {
                     QueryRequest countRequest = Requests.copyOfQueryRequest(request);
                     countRequest.setQueryId(countQueryId);
@@ -568,14 +570,14 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
                 if (results.size() < requestPageSize) {
                     remainingResults = 0;
+                    nextCookie = null;
                 } else {
                     remainingResults = unknownCount ? -1 : resultCount - (firstResultIndex + results.size());
-                }
-
-                if (remainingResults > 0 || unknownCount) {
-                    nextCookie = String.valueOf(firstResultIndex + requestPageSize);
-                } else {
-                    nextCookie = null;
+                    if (remainingResults == 0) {
+                        nextCookie = null;
+                    } else {
+                        nextCookie = String.valueOf(firstResultIndex + requestPageSize);
+                    }
                 }
             } else {
                 nextCookie = null;
@@ -602,6 +604,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         params.put(QUERY_FILTER, request.getQueryFilter());
         params.put(PAGE_SIZE, request.getPageSize());
         params.put(PAGED_RESULTS_OFFSET, request.getPagedResultsOffset());
+        params.put(SORT_KEYS, request.getSortKeys());  
 
         Connection connection = null;
         try {

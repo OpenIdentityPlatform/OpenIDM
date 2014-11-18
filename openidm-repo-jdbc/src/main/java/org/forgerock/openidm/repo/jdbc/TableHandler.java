@@ -35,6 +35,7 @@ import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 
@@ -183,6 +184,16 @@ public interface TableHandler {
      * @return true if queryId is available
      */
     public boolean queryIdExists(final String queryId);
+    
+    /**
+     * Builds a raw query from the supplied filter.
+     * 
+     * @param filter the query filter
+     * @param replacementTokens a map to store any replacement tokens
+     * @param params a map containing query parameters
+     * @return the raw query String
+     */
+    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params);
     
     /**
      * Query if a given exception signifies a well known error type

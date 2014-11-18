@@ -606,17 +606,16 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         /*
          * Execute additional -count query if we are paging
          */
-
-        final QueryResult result;
         final String nextCookie;
         final int remainingResults;
 
         if (pagedResultsRequested) {
-            final String countQueryId = request.getQueryId() + "-count";
 
+            // The number of results (if known)
             Integer resultCount = null;
 
             // Get total if -count query is available
+            final String countQueryId = request.getQueryId() + "-count";
             if (queries.queryIdExists(countQueryId)) {
                 QueryRequest countRequest = Requests.copyOfQueryRequest(request);
                 countRequest.setQueryId(countQueryId);
@@ -631,20 +630,20 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 if (countResult != null && !countResult.isEmpty()) {
                     resultCount = countResult.get(0).getContent().get("total").asInteger();
                 }
-            }
+            }   
 
             boolean unknownCount = resultCount == null;
 
             if (results.size() < requestPageSize) {
                 remainingResults = 0;
+                nextCookie = null;
             } else {
                 remainingResults = unknownCount ? -1 : resultCount - (firstResultIndex + results.size());
-            }
-
-            if (remainingResults > 0 || unknownCount) {
-                nextCookie = String.valueOf(firstResultIndex + requestPageSize);
-            } else {
-                nextCookie = null;
+                if (remainingResults == 0) {
+                    nextCookie = null;
+                } else {
+                    nextCookie = String.valueOf(firstResultIndex + requestPageSize);
+                }
             }
         } else {
             nextCookie = null;

@@ -24,14 +24,21 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -120,5 +127,28 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
         result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " obj USING " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid = ? AND obj.rev = ?");
         result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id IN (SELECT obj.id FROM " + mainTable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ? AND obj.objectid = ?)");
         return result;
+    }
+    
+    @Override
+    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+        final String offsetParam = (String) params.get(PAGED_RESULTS_OFFSET);
+        final String pageSizeParam = (String) params.get(PAGE_SIZE);
+        String pageClause = " LIMIT " + pageSizeParam + " OFFSET " + offsetParam;
+        
+        // Check for sort keys and build up order-by syntax
+        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
+        if (sortKeys != null && sortKeys.size() > 0) {
+            List<String> keys = new ArrayList<String>();
+            for (int i = 0; i < sortKeys.size(); i++) {
+                final SortKey sortKey = sortKeys.get(i);
+                final String tokenName = "sortKey" + i;
+                keys.add("json_extract_path_text(fullobject, ${" + tokenName + (sortKey.isAscendingOrder() ? "}) ASC" : "}) DESC"));
+                replacementTokens.put(tokenName, sortKey.getField().toString().substring(1));
+            }
+            pageClause = " ORDER BY " + StringUtils.join(keys, ", ") + pageClause;
+        }
+        
+        return "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE "
+                + filter.accept(queryFilterVisitor, replacementTokens) + pageClause;
     }
 }

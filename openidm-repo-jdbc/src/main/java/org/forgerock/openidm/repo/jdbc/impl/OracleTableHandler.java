@@ -24,15 +24,24 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,5 +118,40 @@ public class OracleTableHandler extends GenericTableHandler {
         result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + mainTable + " obj, " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
 
         return result;
+    }    
+    
+    @Override
+    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+        final int offsetParam = Integer.parseInt((String)params.get(PAGED_RESULTS_OFFSET));
+        final int pageSizeParam = Integer.parseInt((String)params.get(PAGE_SIZE));
+        String filterString = getFilterString(filter, replacementTokens);
+        String innerJoinClause = "";
+        String keysClause = "";
+        
+        // Check for sort keys and build up order-by syntax
+        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
+        if (sortKeys != null && sortKeys.size() > 0) {
+            List<String> innerJoins = new ArrayList<String>();
+            List<String> keys = new ArrayList<String>();
+            prepareSortKeyStatements(sortKeys, innerJoins, keys, replacementTokens);
+            innerJoinClause = StringUtils.join(innerJoins, " ");
+            keysClause = StringUtils.join(keys, ", ");
+        } else {
+            keysClause = "obj.id DESC";
+        }
+        
+
+        return "SELECT * FROM ( SELECT obj.fullobject, row_number() over (ORDER BY " 
+                + keysClause
+                + " ) rn FROM ${_dbSchema}.${_mainTable} obj " 
+                + innerJoinClause
+                + filterString 
+                + "ORDER BY "
+                + keysClause
+                + ") WHERE rn BETWEEN " 
+                + (offsetParam+1)
+                + " AND " 
+                + (offsetParam + pageSizeParam)
+                + " ORDER BY rn";
     }
 }

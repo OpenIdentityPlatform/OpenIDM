@@ -24,6 +24,10 @@
 
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,15 +41,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
@@ -133,7 +140,7 @@ public class MappedTableHandler implements TableHandler {
                     }
                 };
 
-        queries = new TableQueries(tableName, null, dbSchemaName, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
+        queries = new TableQueries(this, tableName, null, dbSchemaName, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
         String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
@@ -515,6 +522,30 @@ public class MappedTableHandler implements TableHandler {
     @Override
     public String toString() {
         return "Generic handler mapped to " + tableName + " and mapping " + rawMappingConfig;
+    }
+
+    @Override
+    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+        final String offsetParam = (String) params.get(PAGED_RESULTS_OFFSET);
+        final String pageSizeParam = (String) params.get(PAGE_SIZE);
+        String pageClause = " LIMIT " + pageSizeParam + " OFFSET " + offsetParam;
+        
+        // Check for sort keys and build up order-by syntax
+        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
+        if (sortKeys != null && sortKeys.size() > 0) {
+            List<String> keys = new ArrayList<String>();
+            for (int i = 0; i < sortKeys.size(); i++) {
+            //for (SortKey sortKey : sortKeys) {
+                SortKey sortKey = sortKeys.get(i);
+                String tokenName = "sortKey" + i;
+                keys.add("${" + tokenName + "}" + (sortKey.isAscendingOrder() ? " ASC" : " DESC"));
+                replacementTokens.put(tokenName, sortKey.getField().toString().substring(1));
+            }
+            pageClause = " ORDER BY " + StringUtils.join(keys, ", ") + pageClause;
+        }
+        
+        return "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj WHERE "
+                + filter.accept(queryFilterVisitor, replacementTokens) + pageClause;
     }
 }
 
