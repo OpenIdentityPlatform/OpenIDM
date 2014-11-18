@@ -67,8 +67,12 @@ define("org/forgerock/openidm/ui/admin/sync/TestSyncView", [
             this.data = _.extend(this.data,args);
             
             this.parentRender(_.bind(function () {
-                this.setupSearch();
-                TestSyncGridView.render(this.data);
+                if(this.data.recon){
+                    this.setupSearch();
+                    TestSyncGridView.render(this.data);
+                } else {
+                    this.$el.parent().hide();
+                }
             }, this));
         },
         setupSearch: function(){
