@@ -143,6 +143,12 @@ define("config/AppConfiguration", [
                                                 "name": "templates.sync.sync",
                                                 "icon": "fa fa-clock-o",
                                                 "inactive": false
+                                            },
+                                            "schedule": {
+                                                "url": "#schedule/",
+                                                "name": "templates.schedule.schedule",
+                                                "icon": "fa fa-calendar",
+                                                "inactive": false
                                             }
                                         }
                                     }

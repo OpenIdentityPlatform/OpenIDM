@@ -120,6 +120,13 @@ define("config/routes/AdminRoutesConfig", [
             url: /^correlation\/(.+)\/$/,
             pattern: "correlation/?/",
             forceUpdate: true
+        },
+        "scheduleView" : {
+            view: "org/forgerock/openidm/ui/admin/sync/ScheduleView",
+            role: "ui-admin",
+            url: /^schedule\/(.+)\/$/,
+            pattern: "schedule/?/",
+            forceUpdate: true
         }
     };
 

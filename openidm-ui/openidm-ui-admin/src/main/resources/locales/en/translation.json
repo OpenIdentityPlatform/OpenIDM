@@ -211,6 +211,17 @@
             "scriptEvents": "Script Events",
             "addScript": "Add Script"
         },
+        "schedule": {
+            "schedule": "Scheduling",
+            "addReconciliationSchedule": "Add Reconciliation Schedule",
+            "enableLiveSync": "Enable LiveSync for this mapping",
+            "liveSyncEnabled": "LiveSync schedule is enabled.",
+            "liveSyncDisabled": "LiveSync schedule is not enabled.",
+            "managedObjects": "Incremental changes from the source will automatically be synced to the target system.",
+            "systemObjects1": "Incremental changes from the source system will be synced to the target system every ",
+            "systemObjects2": "seconds.",
+            "noLiveSync": "Incremental changes from the source system are not monitored, visit the resource setup page for the source system to configure this feature."
+        },
         "sync": {
             "sync": "Sync",
             "syncTitle": "Sync Configuration",
@@ -218,14 +229,6 @@
             "currentPolicy": "Current Policy",
             "modifySituationalPolicies": "Modify Situational Policies",
             "schedules": "Schedules",
-            "addReconciliationSchedule": "Add Reconciliation Schedule",
-            "enableLiveSync": "Enable LiveSync for this mapping",
-            "managedObjects": "Incremental changes from the source will automatically be synced to the target system.",
-            "systemObjects1": "Incremental changes from the source system will be synced to the target system every ",
-            "systemObjects2": "seconds.",
-            "noLiveSync": "Incremental changes from the source system are not monitored, visit the resource setup page for the source system to configure this feature.",
-            "liveSyncEnabled": "LiveSync schedule is enabled.",
-            "liveSyncDisabled": "LiveSync schedule is not enabled.",
             "situationalScripts":"Situational Event Scripts",
             "reconciliationScript":"Reconciliation Script",
             "testSync": {
