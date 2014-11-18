@@ -4000,11 +4000,12 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
      </para>
      <para>
       If you set up OpenDJ on a secure port with a self-signed certificate, you
-      should import that certificate into the OpenIDM datastore, as described in
-      the following section of the Integrator's Guide: <link xlink:show="new"
-      xlink:role="http://docbook.org/roles/xlink/role/olink"
-      xlink:href="integrators-guide#security-management-service"><citetitle>
-      Accessing the Security Management Service</citetitle></link>.
+      should import that certificate into the OpenIDM datastore. For more
+      information, see <link xlink:show="new"
+      xlink:href="integrators-guide#security-management-service"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Accessing the
+      Security Management Service</citetitle></link> in the <citetitle>Integrator's
+      Guide</citetitle>.
      </para>
     </listitem>
     <listitem>
