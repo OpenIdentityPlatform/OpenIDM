@@ -27,9 +27,11 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
+import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.util.encode.Base64;
 import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -47,8 +49,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -68,6 +72,8 @@ public class ConnectorUtilTest {
 
     private APIConfiguration runtimeAPIConfiguration = null;
     private JsonValue jsonConfiguration;
+    private static final JsonValue schema = new JsonValue(new HashMap<String, Object>());
+    private static final String OBJECT_TYPES = "objectTypes";
 
     @BeforeTest
     public void beforeTest() throws Exception {
@@ -297,5 +303,93 @@ public class ConnectorUtilTest {
         //parent ref not included in the clone
         _configuration.setConnectorInfo(((APIConfigurationImpl) runtimeAPIConfiguration).getConnectorInfo());
         return _configuration;
+    }
+
+    private static JsonValue toJsonValue(String json) throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+        return new JsonValue(mapper.readValue(json, Map.class));
+    }
+
+    @Test
+    public void testGetObjectTypes() throws URISyntaxException, IOException {
+        //GIVEN
+        schema.put(OBJECT_TYPES, toJsonValue(FileUtil.readFile(new File(
+                new File(ConnectorUtilTest.class.getResource("/").toURI()),
+                "/config/objectClassSchema.json"))));
+        schema.get(OBJECT_TYPES).remove("ALL_FAIL");
+
+        //change name of __ALL__ object class
+        schema.get(OBJECT_TYPES).put("all", schema.get(OBJECT_TYPES).get(ObjectClass.ALL_NAME));
+        schema.get(OBJECT_TYPES).remove(ObjectClass.ALL_NAME);
+
+        //WHEN
+        Map<String, ObjectClassInfoHelper> objectTypes = ConnectorUtil.getObjectTypes(schema);
+
+        //THEN
+        //check that the object classes in the schema exist
+        assertThat(objectTypes.containsKey("all"));
+        assertThat(objectTypes.containsKey(ObjectClass.GROUP_NAME));
+        assertThat(objectTypes.containsKey(ObjectClass.ACCOUNT_NAME));
+        assertThat(objectTypes.containsKey("__TEST__"));
+        assertThat(objectTypes.containsKey("CUSTOM"));
+    }
+
+    @Test
+    public void testGetObjectTypesAddsAllObjectClassByDefault() throws URISyntaxException, IOException {
+        //GIVEN
+        schema.put(OBJECT_TYPES, toJsonValue(FileUtil.readFile(new File(
+                new File(ConnectorUtilTest.class.getResource("/").toURI()),
+                "/config/objectClassSchema.json"))));
+        schema.get(OBJECT_TYPES).remove("ALL_FAIL");
+
+        //remove __ALL__ object class from schema
+        schema.get(OBJECT_TYPES).remove(ObjectClass.ALL_NAME);
+
+        //WHEN
+        Map<String, ObjectClassInfoHelper> objectTypes = ConnectorUtil.getObjectTypes(schema);
+
+        //THEN
+        //check that the __ALL__ object class was added by default
+        assertThat(objectTypes.containsKey(ObjectClass.ALL_NAME));
+    }
+
+    @Test(expectedExceptions = SchemaException.class)
+    public void testGetObjectTypesWithoutAllObjectClassWithTheAllObjectClassNameTaken() throws URISyntaxException, IOException {
+        //GIVEN
+        schema.put(OBJECT_TYPES, toJsonValue(FileUtil.readFile(new File(
+                new File(ConnectorUtilTest.class.getResource("/").toURI()),
+                "/config/objectClassSchema.json"))));
+        schema.get(OBJECT_TYPES).remove("ALL_FAIL");
+
+        //use the __ALL__ object class name on another objectclass
+        schema.get(OBJECT_TYPES).remove(ObjectClass.ALL_NAME);
+        schema.get(OBJECT_TYPES).put(ObjectClass.ALL_NAME, schema.get(OBJECT_TYPES).get("CUSTOM"));
+        schema.get(OBJECT_TYPES).remove("CUSTOM");
+
+        //WHEN
+        //try to get object types and fail
+        ConnectorUtil.getObjectTypes(schema);
+
+        //THEN
+    }
+
+    @Test
+    public void testGetOperationOptionConfiguration() throws URISyntaxException, IOException  {
+        //GIVEN
+        schema.put(OBJECT_TYPES, toJsonValue(FileUtil.readFile(new File(
+                new File(ConnectorUtilTest.class.getResource("/").toURI()),
+                "/config/objectClassSchema.json"))));
+        schema.get(OBJECT_TYPES).remove("ALL_FAIL");
+
+        //WHEN
+        Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionConfiguration =
+            ConnectorUtil.getOperationOptionConfiguration(schema);
+
+        //THEN
+        assertThat(operationOptionConfiguration.keySet().contains("all"));
+        assertThat(operationOptionConfiguration.keySet().contains(ObjectClass.GROUP_NAME));
+        assertThat(operationOptionConfiguration.keySet().contains(ObjectClass.ACCOUNT_NAME));
+        assertThat(operationOptionConfiguration.keySet().contains("__TEST__"));
+        assertThat(operationOptionConfiguration.keySet().contains("CUSTOM"));
     }
 }

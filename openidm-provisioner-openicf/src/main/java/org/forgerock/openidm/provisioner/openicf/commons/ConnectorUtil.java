@@ -594,11 +594,29 @@ public class ConnectorUtil {
     }
 
 
-    public static Map<String, ObjectClassInfoHelper> getObjectTypes(JsonValue configuration) throws JsonValueException, SchemaException {
+    public static Map<String, ObjectClassInfoHelper> getObjectTypes(JsonValue configuration) throws JsonValueException {
         JsonValue objectTypes = configuration.get(OPENICF_OBJECT_TYPES);
         Map<String, ObjectClassInfoHelper> result = new HashMap<String, ObjectClassInfoHelper>(objectTypes.expect(Map.class).asMap().size());
+        boolean allObjectClassFound = false;
         for (String objectType : objectTypes.keys()) {
-            result.put(objectType, ObjectClassInfoHelperFactory.createObjectClassInfoHelper(objectTypes.get(objectType)));
+            final ObjectClassInfoHelper objectClassInfoHelper =
+                    ObjectClassInfoHelperFactory.createObjectClassInfoHelper(objectTypes.get(objectType));
+            result.put(objectType, objectClassInfoHelper);
+            if (allObjectClassFound == false && ObjectClass.ALL.equals(objectClassInfoHelper.getObjectClass())){
+                allObjectClassFound = true;
+            }
+        }
+        if (!allObjectClassFound) {
+            //check if an objectclass is using the default object class name
+            if (result.containsKey(ObjectClass.ALL_NAME)) {
+                throw new SchemaException(configuration,
+                        "Unable to add the __ALL__ object class because some other object type is using the __ALL__ name");
+            }
+
+            //add default __ALL__ object class
+            final JsonValue allObjectClassSchema = new JsonValue(new HashMap<String, Object>());
+            allObjectClassSchema.put(ConnectorUtil.OPENICF_OBJECT_CLASS, ObjectClass.ALL_NAME);
+            result.put(ObjectClass.ALL_NAME, ObjectClassInfoHelperFactory.createObjectClassInfoHelper(allObjectClassSchema));
         }
         return result;
     }
@@ -626,7 +644,7 @@ public class ConnectorUtil {
     }
 
     public static Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> getOperationOptionConfiguration(JsonValue configuration) throws JsonValueException, SchemaException {
-        Set<String> objectTypes = configuration.get(OPENICF_OBJECT_TYPES).keys();
+        Set<String> objectTypes = ConnectorUtil.getObjectTypes(configuration).keySet();
         Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionConfigurationMap =
                 new HashMap<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>>(objectTypes.size());
 
