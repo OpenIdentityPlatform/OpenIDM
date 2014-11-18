@@ -4415,6 +4415,246 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
 
  </section>
 
+ <section xml:id='more-sample-audit'>
+
+  <title>Sample - Demonstrate Extended Audit Capabilities</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample Audit - Extended Audit Capabilities</secondary>
+  </indexterm>
+
+  <para>
+   This sample demonstrates how you can use the audit features associated with
+   OpenIDM, for access, activity, reconciliation, and synchronization.
+  </para>
+
+  <para>
+   This sample uses a MySQL database as a target repository for audit
+   information. This audit sample is closely related to the
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="install-guide#chap-sample"><citetitle>First OpenIDM
+   Sample</citetitle></link>.
+  </para>
+
+  <para>
+   One difference: the audit sample includes a ScriptedSQL implementation of
+   the Groovy Connector Toolkit.
+  </para>
+
+  <para>
+   If you want to use any of the audit features demonstrated in this sample,
+   copy information from files in the /path/to/samples/audit-sample directory.
+   This can help you set up auditing for any other sample.
+  </para>
+
+  <section xml:id="audit-config-files">
+   <title>Audit Sample Configuration Files</title>
+
+   <para>
+    Review the configuration files used in this sample. They can help you
+    understand the functionality of the data sets being audited.
+   </para>
+
+   <itemizedlist>
+    <para>
+     The key configuration files, in the
+     <literal>/path/to/samples/audit-sample</literal> directory, are as follows:
+    </para>
+    <listitem>
+     <para>
+      <filename>conf/provisioner.openicf-scriptedsql.json</filename> shows the
+      configuration of the <link xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:show="new" xlink:href="integrators-guide#scripted-sql-connector">
+      <citetitle>Scripted SQL Connector</citetitle></link>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>conf/provisioner.openicf-xml.json</filename> shows the
+      configuration of the <link xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:show="new" xlink:href="integrators-guide#xml-file-connector">
+      <citetitle>XML File Connector</citetitle></link>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>conf/audit.json</filename> configures audit logging on the
+      router, to a remote system, as discussed in <link xlink:show="new"
+      xlink:href="integrators-guide#audit-configuration"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Audit
+     Configuration</citetitle></link>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>conf/sync.json</filename> shows mappings between managed users
+      and the data set attached through the XML File Connector.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>data/sample_audit_db.mysql</filename> includes a schema that
+      supports tables in the external MySQL database.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Groovy scripts in the <filename>tools/</filename> subdirectory supports
+      communications between the Scripted SQL connector and the MySQL
+      database.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+  </section>
+
+  <section xml:id="external-audit-mysql-sample">
+   <title>Configuration with MySQL</title>
+
+   <para>
+    You need to set up communications between OpenIDM and an external MySQL
+    database server.
+   </para>
+
+   <para>
+    Make sure MySQL is running.
+   </para>
+
+   <itemizedlist>
+    <para>
+     The sample expects the following configuration for MySQL:
+    </para>
+    <listitem>
+     <para>
+      The database is available on the local system.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      The database listens on the standard MySQL port, 3306.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      You can connect to the MySQL database over the network.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      MySQL is configured with an administrative account with user
+      <literal>root</literal> and password <literal>password</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      MySQL serves a database called <literal>audit</literal> with three tables:
+      <literal>access</literal>, <literal>activity</literal>, and
+      <literal>recon</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      For more information on the database schema, examine the following data
+      definition language file:
+      <literal>openidm/samples/audit-sample/data/sample_audit_db.mysql</literal>.
+      Import the file into MySQL before running the sample.
+     </para>
+     <screen>$ <userinput>$ mysql -u root -p &lt; /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
+     </userinput>
+Enter password:
+$ </screen>
+    </listitem>
+   </itemizedlist>
+
+   <para>
+    Now you can review the format of the audit database sample, created from
+    the <filename>sample_audit_db.mysql</filename> file, at the MySQL prompt."
+    access that prompt, run the following command:
+   </para>
+
+   <screen>$ <userinput>mysql -u root -p</userinput>
+mysql &gt; <userinput>use audit;</userinput>
+<computeroutput>Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed</computeroutput></screen>
+
+   <para>
+    You can now review the current state of the access, activity, and
+    reconciliation logs with the following commands:
+   </para>
+
+   <screen>select * from auditaccess;
+select * from auditactivity;
+select * from auditrecon;
+select * from auditsync;</screen>
+
+   <para>
+    Unless you enable scheduled reconciliation, you will not see audit
+    data until you run reconciliation manually.
+   </para>
+
+  </section>
+
+  <section xml:id="install-sample-audit">
+   <title>Install the Sample</title>
+
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>,
+    then start OpenIDM with the configuration for the audit sample.</para>
+
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/audit-sample</screen>
+
+  </section>
+
+  <section xml:id="run-sample-audit">
+   <title>Running the Sample</title>
+
+   <para>Run reconciliation over the REST interface.</para>
+
+   <screen>$ curl \
+    --cacert self-signed.crt \
+    --header "X-OpenIDM-Username: openidm-admin" \
+    --header "X-OpenIDM-Password: openidm-admin" \
+    --header "Content-Type: application/json" \
+    --request POST \
+    "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
+   </screen>
+
+   <para>
+    Alternatively, open the
+    <filename>schedule-reconcile_systemXmlAccounts_managedUser.json</filename>
+    file in the <literal>/path/to/openidm/samples/audit-sample/conf</literal>
+    directory and change the value of the <literal>"enabled"</literal> directive
+    to turn on scheduled reconciliation:
+   </para>
+
+   <screen>"enabled" : true,</screen>
+
+   <para>
+    You can now review the results in the MySQL database, from the MySQL prompt,
+    using the commands described earlier.
+   </para>
+
+   <para>
+    If you have retained the default <literal>"useForQueries" : true</literal>
+    option in the <filename>conf/audit.json</filename> file, you can also
+    <literal>GET</literal> the same data with a REST call. For examples on how
+    you can query reconciliation, activity, and synchronization audit logs,
+    see relevant sections of the
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+          xlink:href="integrators-guide#chap-synchronization">
+     <citetitle>Configuring Synchronization</citetitle></link>. For more
+    information on <literal>"useForQueries"</literal>, see
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+          xlink:href="integrators-guide#audit-remote-logging"><citetitle>Logging
+    to a Remote System</citetitle></link>.
+   </para>
+
+  </section>
+
+ </section>
+
  <section xml:id="sample-google-connector">
   <title>Sample - Connecting to Google With the Google Apps Connector</title>
   <indexterm>
