@@ -9,6 +9,8 @@ IF (NOT EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE (name = N'openidm
 -- -----------------------------------------------------
 CREATE DATABASE [openidm] COLLATE Latin1_General_100_CS_AS
 GO
+ALTER DATABASE [openidm] SET READ_COMMITTED_SNAPSHOT ON
+GO
 USE [openidm]
 GO
 
