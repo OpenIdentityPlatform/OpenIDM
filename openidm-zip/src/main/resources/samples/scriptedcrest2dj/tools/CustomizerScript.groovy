@@ -46,11 +46,12 @@ import org.forgerock.json.fluent.JsonValue
 import org.forgerock.json.resource.Context
 import org.forgerock.json.resource.QueryResult
 import org.forgerock.json.resource.Resource
+import org.identityconnectors.common.security.GuardedString
+
+import org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConfiguration.AuthMethod
 
 /**
  * A customizer script defines the custom closures to interact with the default implementation and customize it.
- *
- * @author Laszlo Hordos
  */
 customize {
     init { HttpAsyncClientBuilder builder ->
@@ -83,16 +84,29 @@ customize {
             builder.setDefaultRequestConfig(config)
         }
 
-        //TODO Support getting user credentials from the provisoner and auth method from provisioner
-        //Getting user credentials and the auth method from the provisioner was not supported in 1.4.0.0 of the
-        //groovy connector. Support these once groovy connector 1.4.1.0 is released.
+        // Authentication
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        def authCache = new BasicAuthCache();
-        authCache.put(httpHost, new BasicScheme());
-        c.propertyBag.put(HttpClientContext.AUTH_CACHE, authCache)
-        credentialsProvider.setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()),
-                new UsernamePasswordCredentials("idm", "password"));
-        builder.setDefaultCredentialsProvider(credentialsProvider);
+        switch (AuthMethod.valueOf(c.defaultAuthMethod)) {
+            case AuthMethod.BASIC_PREEMPTIVE:
+            case AuthMethod.BASIC:
+                // It's part of the http client spec to request the resource anonymously
+                // first and respond to the 401 with the Authorization header.
+
+                c.password.access(
+                        {
+                            credentialsProvider.setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()),
+                                    new UsernamePasswordCredentials(c.username, new String(it)));
+                        } as GuardedString.Accessor
+                );
+
+
+                builder.setDefaultCredentialsProvider(credentialsProvider);
+                break;
+            case AuthMethod.NONE:
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
 
         c.propertyBag.put(HttpClientContext.COOKIE_STORE, new BasicCookieStore());
     }
@@ -103,7 +117,12 @@ customize {
 
     beforeRequest { Context context, HttpClientContext clientContext, HttpUriRequest request ->
         clientContext.setCookieStore(propertyBag.get(HttpClientContext.COOKIE_STORE))
-        clientContext.setAuthCache(propertyBag.get(HttpClientContext.AUTH_CACHE))
+        def c = delegate as ScriptedCRESTConfiguration
+        if (AuthMethod.valueOf(c.defaultAuthMethod).equals(AuthMethod.BASIC_PREEMPTIVE)){
+            def authCache = new BasicAuthCache();
+            authCache.put(new HttpHost(c.serviceAddress?.host, c.serviceAddress?.port, c.serviceAddress?.scheme), new BasicScheme());
+            clientContext.setAuthCache(authCache)
+        }
     }
 
     onFail { Context context, HttpClientContext clientContext, HttpUriRequest request, Exception ex ->
