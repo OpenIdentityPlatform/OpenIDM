@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -25,11 +25,12 @@
 /*global define, _, $, window */
 
 define("config/process/CommonIDMConfig", [
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
-    var obj = [
-       {
+    var ignorePassword = false,
+        obj = [
+        {
             startEvent: constants.EVENT_HANDLE_DEFAULT_ROUTE,
             description: "",
             override: true,
@@ -38,14 +39,15 @@ define("config/process/CommonIDMConfig", [
                 "org/forgerock/commons/ui/common/main/Configuration"
             ],
             processDescription: function(event, router, conf) {
-                if (conf.globalData.userComponent === "repo/internal/user" && _.isString(conf.loggedUser.password)) {
+                if (conf.globalData.userComponent === "repo/internal/user" && _.isString(conf.loggedUser.password) && !ignorePassword) {
                     eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
+                    ignorePassword = true;
                 } else {
                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
                 }
             }
         }
     ];
-    
+
     return obj;
 });
