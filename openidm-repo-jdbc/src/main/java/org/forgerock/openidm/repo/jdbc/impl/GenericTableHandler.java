@@ -74,47 +74,74 @@ import org.slf4j.LoggerFactory;
 public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);
 
-    private static final QueryFilterVisitor<String, Map<String, Object>> QUERY_FILTER_VISITOR =
-            new SQLQueryFilterVisitor<Map<String, Object>>() {
-                // key/value number for each key/value placeholder
-                int objectNumber = 0;
-                @Override
-                public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
-                    ++objectNumber;
-                    String key = "k"+objectNumber;
-                    String value = "v"+objectNumber;
+    /**
+     * QueryFilterVisitor for generating WHERE clause SQL queries against generic table schema.
+     */
+    static class GenericSQLQueryFilterVisitor extends SQLQueryFilterVisitor<Map<String, Object>> {
 
-                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                        objects.put(value, valueAssertion);
-                        return "(obj.objectid " + operand + " ${" + value + "})";
-                    } else {
-                        objects.put(key, field.toString());
-                        objects.put(value, valueAssertion);
-                        return "(EXISTS "
-                                + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
-                                +          "WHERE prop.${_mainTable}_id = obj.id "
-                                +            "AND prop.propkey = ${" + key + "} "
-                                +            "AND prop.propvalue " + operand + " ${" + value + "} "
-                                + "))";
-                    }
-                }
+        /**
+         * Generate the WHERE clause for properties table based on type of value being asserted
+         *
+         * @param operand the comparison operand
+         * @param placeholder the value placeholder
+         * @param valueAssertion the actual value assertion
+         * @return SQL WHERE clause for properties table
+         */
+        String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
+            // validate type is integer or double cast all numeric types to decimal
+            if (valueAssertion instanceof Integer || valueAssertion instanceof Long
+                    || valueAssertion instanceof Float || valueAssertion instanceof Double) {
+                return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
+                        + "AND CAST(prop.propvalue AS DECIMAL) " + operand + " ${" + placeholder + "}";
+            } else if (valueAssertion instanceof Boolean) {
+                // validate type is boolean if valueAssertion is a boolean
+                return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
+            } else {
+                // assume String
+                return "prop.propvalue " + operand + " ${" + placeholder + "}";
+            }
+        }
 
-                @Override
-                public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
-                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                        // NOT NULL is enforced by the schema
-                        return "(obj.objectid IS NOT NULL)";
-                    } else {
-                        ++objectNumber;
-                        String key = "k" + objectNumber;
-                        objects.put(key, field.toString());
-                        return "(EXISTS "
-                                + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
-                                +          "WHERE prop.${_mainTable}_id = obj.id "
-                                +            "AND prop.propkey = ${" + key + "}))";
-                    }
-                }
-            };
+        // key/value number for each key/value placeholder
+        int objectNumber = 0;
+
+        @Override
+        public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
+            ++objectNumber;
+            String key = "k"+objectNumber;
+            String value = "v"+objectNumber;
+
+            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                objects.put(value, valueAssertion);
+                return "(obj.objectid " + operand + " ${" + value + "})";
+            } else {
+                objects.put(key, field.toString());
+                objects.put(value, valueAssertion);
+                return "(EXISTS "
+                        + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
+                        +          "WHERE prop.${_mainTable}_id = obj.id "
+                        +            "AND prop.propkey = ${" + key + "} "
+                        +            "AND " + getPropTypeValueClause(operand, value, valueAssertion) + " "
+                        + "))";
+            }
+        }
+
+        @Override
+        public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
+            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                // NOT NULL is enforced by the schema
+                return "(obj.objectid IS NOT NULL)";
+            } else {
+                ++objectNumber;
+                String key = "k" + objectNumber;
+                objects.put(key, field.toString());
+                return "(EXISTS "
+                        + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
+                        +          "WHERE prop.${_mainTable}_id = obj.id "
+                        +            "AND prop.propkey = ${" + key + "}))";
+            }
+        }
+    };
 
     SQLExceptionHandler sqlExceptionHandler;
 
@@ -168,7 +195,7 @@ public class GenericTableHandler implements TableHandler {
      * @param sqlExceptionHandler a handler for SQLExceptions
      */
     public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        this(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, QUERY_FILTER_VISITOR, sqlExceptionHandler);
+        this(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, new GenericSQLQueryFilterVisitor(), sqlExceptionHandler);
     }
 
     /**

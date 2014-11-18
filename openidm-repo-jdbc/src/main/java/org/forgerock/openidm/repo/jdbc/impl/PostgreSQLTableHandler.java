@@ -89,7 +89,13 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
                     if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
                         return "(obj.objectid " + operand + " ${" + value + "})";
                     } else {
-                        return "(" + jsonExtractPathOnField(field, objects) + " " + operand + " ${" + value + "})";
+                        // cast to numeric for numeric types
+                        String cast = (valueAssertion instanceof Integer || valueAssertion instanceof Long
+                                || valueAssertion instanceof Float || valueAssertion instanceof Double)
+                            ? "::numeric"
+                            : "";
+
+                        return "(" + jsonExtractPathOnField(field, objects) + cast + " " + operand + " (${" + value + "})" + cast + ")";
                     }
                 }
 

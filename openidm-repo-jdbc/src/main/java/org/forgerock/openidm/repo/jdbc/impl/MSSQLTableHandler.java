@@ -48,7 +48,24 @@ public class MSSQLTableHandler extends GenericTableHandler {
 
     public MSSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize,
+                new GenericSQLQueryFilterVisitor() {
+                    @Override
+                    String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
+                        // validate type is integer or double cast all numeric types to decimal
+                        if (valueAssertion instanceof Integer || valueAssertion instanceof Long
+                                || valueAssertion instanceof Float || valueAssertion instanceof Double) {
+                            return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
+                                    + "AND (CASE ISNUMERIC(propvalue) WHEN 1 THEN CAST(propvalue AS FLOAT) ELSE null END) " + operand + " ${" + placeholder + "}";
+                        } else if (valueAssertion instanceof Boolean) {
+                            // validate type is boolean if valueAssertion is a boolean
+                            return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
+                        } else {
+                            // assume String
+                            return "prop.propvalue " + operand + " ${" + placeholder + "}";
+                        }
+                    }
+                }, sqlExceptionHandler);
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
