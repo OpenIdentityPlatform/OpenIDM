@@ -651,6 +651,61 @@
     }
   }
 }</programlisting>
+   <para>
+    OpenICF 1.4 supports the <literal>__ALL__</literal> object type, which
+    ensures that objects of every type are included in a synchronization
+    operation. The primary purpose of this object type is to prevent
+    synchronization errors when multiple changes affect more than one object
+    type.
+   </para>
+   <para>
+    For example, imagine a deployment synchronizing two external systems. On
+    system A, the administrator creates a user, <literal>jdoe</literal>, then
+    adds the user to a group, <literal>engineers</literal>. When these changes
+    are synchronized to system B, if the <literal>__GROUPS__</literal> object
+    type is synchronized first, the synchronization will fail, because the group
+    contains a user that does not yet exist on system B. Synchronizing the
+    <literal>__ALL__</literal> object type ensures that user
+    <literal>jdoe</literal> is created on the external system before he is added
+    to the group <literal>engineers</literal>.
+   </para>
+   <para>
+    The <literal>__ALL__</literal> object type is assumed by default - you do
+    not need to declare it in your provisioner configuration file. If it is not
+    declared, the object type is named <literal>__ALL__</literal>. If you want
+    to map a different name for this object type, declare it in your provisioner
+    configuration. The following excerpt from a sample provisioner configuration
+    uses the name <literal>allobjects</literal>:
+   </para>
+   <programlisting language="javascript">"objectTypes": {
+    "allobjects": {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "__ALL__",
+        "type": "object",
+        "nativeType": "__ALL__"
+    },
+...</programlisting>
+   <para>
+    A LiveSync operation invoked with no object type assumes an object type of
+    <literal>__ALL__</literal>. For example, the following call invokes a
+    LiveSync operation on all defined object types in an LDAP system:
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/ldap?_action=liveSync"</userinput></screen>
+   <note>
+    <para>
+     The <literal>__ALL__</literal> object type requires the use of time stamps
+     to ensure that changes are processed in the correct order. For the
+     <xref linkend="ldap-connector" />, you must set
+     <literal>useTimestampsForSync</literal> to true, to make use of this
+     object type.
+    </para>
+   </note>
 
    <varlistentry>
     <term>Object Level Extensions</term>
