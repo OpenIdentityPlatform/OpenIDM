@@ -654,23 +654,13 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
+    public void handleQuery(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
         try {
             final String type = request.getResourceNameObject().head(1).toString();
             final boolean formatted = getFormattedValue(request.getAdditionalParameter("formatted"));
-            Map<String,String> params = new HashMap<String,String>();
-            params.putAll(request.getAdditionalParameters());
-            params.put("_queryId", request.getQueryId());
             logger.debug("Audit query called for {} with {}", request.getResourceName(), request.getAdditionalParameters());
             AuditLogger auditLogger = getQueryAuditLogger(type);
-            Map<String, Object> result = auditLogger.query(context, type, params, formatted);
-
-            for (Map<String,Object> o: (Iterable<Map<String,Object>>) result.get("result")) {
-                String id = (String) o.get(Resource.FIELD_CONTENT_ID);
-                handler.handleResource(new Resource(id, null, new JsonValue(o)));
-            }
-            handler.handleResult(new QueryResult());
+            auditLogger.query(context, request, handler, type, formatted);
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -866,7 +856,7 @@ public class AuditServiceImpl implements AuditService {
      * @param entry the full entry to format
      * @return the formatted entry
      */
-    private static Map<String,Object> formatAccessEntry(Map<String,Object> entry) {
+    static Map<String,Object> formatAccessEntry(Map<String,Object> entry) {
         Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
         formattedEntry.put(LOG_ID, entry.get(LOG_ID));
         formattedEntry.put(ACCESS_LOG_ACTION, entry.get(ACCESS_LOG_ACTION));
@@ -885,7 +875,7 @@ public class AuditServiceImpl implements AuditService {
      * @param entry the full entry to format
      * @return the formatted entry
      */
-    private static Map<String,Object> formatActivityEntry(Map<String,Object> entry) {
+    static Map<String,Object> formatActivityEntry(Map<String,Object> entry) {
         Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
         formattedEntry.put(LOG_ID, entry.get(LOG_ID));
         formattedEntry.put(ACTIVITY_ID, entry.get(ACTIVITY_ID));
