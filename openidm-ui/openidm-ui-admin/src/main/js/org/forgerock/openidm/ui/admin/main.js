@@ -78,6 +78,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./sync/ChangeAssociationDialog",
     "./sync/TestSyncView",
     "./sync/TestSyncGridView",
+    "./sync/ScheduleView",
     
     "./settings/SettingsView"
 

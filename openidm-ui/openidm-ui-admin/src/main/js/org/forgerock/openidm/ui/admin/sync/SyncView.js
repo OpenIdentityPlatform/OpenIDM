@@ -58,9 +58,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         noBaseTemplate: true,
         events: {
             "click .sync-input-body fieldset legend" : "sectionHideShow",
-            "click #situationalPolicyEditorButton": "configureSituationalPolicy",
-            "click #addNew": "addReconciliation",
-            "click .saveLiveSync": "saveLiveSync"
+            "click #situationalPolicyEditorButton": "configureSituationalPolicy"
         },
         mapping: null,
         allPatterns: {},
@@ -107,74 +105,6 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
                 TestSyncView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName, recon: MappingBaseView.data.recon});
 
                 MappingBaseView.moveSubmenu();
-                if (this.mapping.hasOwnProperty("enableSync")) {
-                    this.$el.find(".liveSyncEnabled").prop('checked', this.mapping.enableSync);
-                } else {
-                    this.$el.find(".liveSyncEnabled").prop('checked', true);
-                }
-
-                SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
-                    if (schedules.result.length > 0) {
-                        _(schedules.result).each(function (scheduleId) {
-                            SchedulerDelegate.specificSchedule(scheduleId._id).then(_.bind(function (schedule) {
-                                // There is a liveSync Scheduler and it is enabled and the source matches the source of the mapping
-                                if (schedule.invokeService.indexOf("provisioner") >= 0 && schedule.enabled && schedule.invokeContext.source === this.mapping.source) {
-                                    seconds = schedule.schedule.substr(schedule.schedule.indexOf("/") + 1);
-                                    seconds = seconds.substr(0, seconds.indexOf("*") - 1);
-
-                                    this.$el.find(".noLiveSyncMessage").hide();
-                                    this.$el.find(".systemObjectMessage").show();
-                                    this.$el.find(".managedSourceMessage").hide();
-                                    this.$el.find(".liveSyncSeconds").text(seconds);
-
-                                    // This is a recon schedule
-                                } else if (schedule.invokeService.indexOf("sync") >= 0) {
-                                    // The mapping is of a managed object
-                                    if (this.mapping.source.indexOf("managed/") >= 0) {
-                                        this.$el.find(".noLiveSyncMessage").hide();
-                                        this.$el.find(".systemObjectMessage").hide();
-                                        this.$el.find(".managedSourceMessage").show();
-                                    } else {
-                                        this.$el.find(".noLiveSyncMessage").show();
-                                        this.$el.find(".systemObjectMessage").hide();
-                                        this.$el.find(".managedSourceMessage").hide();
-                                    }
-
-                                    if (schedule.invokeContext.mapping === this.mappingName) {
-                                        Scheduler.generateScheduler({
-                                            "element": $("#schedules"),
-                                            "defaults": {
-                                                enabled: schedule.enabled,
-                                                schedule: schedule.schedule,
-                                                persisted: schedule.persisted,
-                                                misfirePolicy: schedule.misfirePolicy
-                                            },
-                                            "onDelete": this.reconDeleted,
-                                            "invokeService": schedule.invokeService,
-                                            "scheduleId": scheduleId._id
-                                        });
-                                        this.$el.find("#addNew").hide();
-                                    }
-                                }
-                            }, this));
-                        }, this);
-
-                    } else if (this.mapping.source.indexOf("managed/") >= 0) {
-                        this.$el.find(".noLiveSyncMessage").hide();
-                        this.$el.find(".systemObjectMessage").hide();
-                        this.$el.find(".managedSourceMessage").show();
-                    } else {
-                        this.$el.find(".noLiveSyncMessage").show();
-                        this.$el.find(".systemObjectMessage").hide();
-                        this.$el.find(".managedSourceMessage").hide();
-                    }
-
-                }, this));
-
-
-                if ($("#schedules .schedulerBody").length === 0) {
-                    this.$el.find("#addNew").show();
-                }
 
                 this.setCurrentPolicyType();
 
@@ -201,32 +131,6 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
 
         reconDeleted: function() {
             $("#addNew").show();
-        },
-
-        addReconciliation: function() {
-            SchedulerDelegate.addSchedule({
-                "type": "cron",
-                "invokeService": "sync",
-                "schedule": "* * * * * ?",
-                "persisted": true,
-                "enabled": false,
-                "invokeContext": {
-                    "action": "reconcile",
-                    "mapping": this.mapping.name
-                }
-            }).then(_.bind(function(newSchedule) {
-                Scheduler.generateScheduler({
-                    "element": $("#schedules"),
-                    "defaults": {},
-                    "onDelete": this.reconDeleted,
-                    "invokeService": newSchedule.invokeService,
-                    "scheduleId": newSchedule._id
-                });
-
-                this.$el.find("#addNew").hide();
-
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "scheduleCreated");
-            }, this));
         },
 
         setCurrentPolicyType: function() {
