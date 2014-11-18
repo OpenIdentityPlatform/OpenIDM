@@ -4594,6 +4594,16 @@ select * from auditsync;</screen>
     data until you run reconciliation manually.
    </para>
 
+   <para>
+    Download the <link xlink:show="new"
+    xlink:href="http://dev.mysql.com/downloads/connector/j/5.1.html">MySQL
+    Driver</link>, (MySQL Connector/J, version 5.1 or later) from the MySQL
+    website. Unpack the download and copy the .jar into the
+    <filename>openidm/bundle</filename> directory.
+   </para>
+   <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar \
+ /path/to/openidm/bundle/</screen>
+
   </section>
 
   <section xml:id="install-sample-audit">
