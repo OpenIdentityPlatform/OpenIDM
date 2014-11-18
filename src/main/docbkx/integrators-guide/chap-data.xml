@@ -357,7 +357,16 @@ var results = openidm.query("system/ScriptedSQL/account", params)
     following examples show the filter expressions using the resource API and
     the REST API, but do not show the URL encoding, to make them easier to read.
    </para>
-
+   <para>
+    Note that, for generic mappings, any fields that are included in the query
+    filter (for example <literal>userName</literal> in the previous query), must
+    be explicitly defined as <emphasis>searchable</emphasis>, if you have set
+    the global <literal>searchableDefault</literal> to false. For more
+    information, see <link xlink:show="new"
+    xlink:href="integrators-guide#searches-with-generic-mappings"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Improving
+    Search Performance for Generic Mappings</citetitle></link>.
+   </para>
    <variablelist>
    <para>
     The <replaceable>filter</replaceable> expression is constructed from the
@@ -994,9 +1003,14 @@ var results = openidm.query("system/ScriptedSQL/account", params)
   <section xml:id="sorting-query-results">
    <title>Sorting Query Results</title>
    <para>
-    You can sort the results of a query, using the <literal>_sortKeys</literal>
-    parameter. This parameter takes a comma-separated list as a value and orders
-    the way in which the JSON result is returned, based on this list.
+    For common filter query expressions, you can sort the results of a query,
+    using the <literal>_sortKeys</literal> parameter. This parameter takes a
+    comma-separated list as a value and orders the way in which the JSON result
+    is returned, based on this list.
+   </para>
+   <para>
+    The <literal>_sortKeys</literal> parameter is not supported for predefined
+    queries.
    </para>
    <para>
     The following query returns all users with the <literal>givenName</literal>
