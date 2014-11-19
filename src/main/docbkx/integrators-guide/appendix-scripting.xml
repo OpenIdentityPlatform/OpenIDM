@@ -43,8 +43,9 @@
 
   <para>
    OpenIDM ${docTargetVersion} supports scripts written in JavaScript and
-   Groovy. OpenIDM configures script options in the
-   <filename>conf/script.json</filename> file.
+   Groovy. Script options are configured in the
+   <filename>conf/script.json</filename> file, described in
+   <xref linkend="script-json" /> .
   </para>
 
   <section xml:id="scripting-configuration">
@@ -69,12 +70,13 @@
 
      <para>
       OpenIDM ${docTargetVersion} includes a script configuration file
-      in the <filename>conf/</filename> directory,
-      <filename>script.json</filename>. OpenIDM uses this file to set up
-      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-            xlink:href="integrators-guide#config-default-directories">
-       <citetitle>Default and Custom Configuration Directories</citetitle>
-      </link>.
+      (<filename>/path/to/openidm/conf/script.json</filename>) that enables you
+      to modify the parameters used by your Groovy and Java Scripts. You can
+      also use this file to change the default project and script directories.
+      For more information, see <link
+      xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:href="integrators-guide#config-default-directories"><citetitle>Default
+      and Custom Configuration Directories</citetitle></link>.
      </para>
 
      <para>
@@ -1373,6 +1375,15 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
         </step>
        </substeps>
       </step>
+      <step>
+       <para>
+        Edit the <filename>openidm/conf/script.json</filename> file to enable
+        debugging. Specifically, uncomment and edit the following line:
+       </para>
+       <programlisting>
+"#javascript.debug": "transport=socket,suspend=y,address=9888,trace=true",
+       </programlisting>
+      </step>
             <!-- Fix for OPENIDM-566: JavaScript debugger configuration description refinement -->
             <step>
                 <para>Prepare the Eclipse debugger to allow you to set breakpoints.</para>
@@ -1393,4 +1404,41 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
             </step>
         </procedure>
     </section>
+ <!-- OPENIDM-2211 still in progress
+ <section xml:id="script-endpoint">
+  <title>Validating Scripts Over REST</title>
+  <para>
+   OpenIDM exposes a <literal>script</literal> endpoint that enables you to
+   validate scripts by specifying the script parameters as part of the JSON
+   payload. Scripts called over the <literal>script</literal> endpoint have
+   access to scopes outside of which they were created. The only supported
+   action on the <literal>script</literal> endpoint is <literal>eval</literal>,
+   so scripts can not be launched from this endpoint, but merely evaluated.
+  </para>
+  <para>
+   The following REST call evaluates the <literal>autoPurgeAuditRecon.js</literal>
+   script (provided in <filename>openidm/bin/defaults/script/audit</filename>.
+   The example assumes that the script exists in the directory reserved for
+   custom scripts (<filename>openidm/script</filename>).
+  </para>
+  <screen>$ <userinput>curl \
+ -cacert self-signed.crt \
+ -header "X-OpenIDM-Username: openidm-admin" \
+ -header "X-OpenIDM-Password: openidm-admin" \
+ -header "Content-Type: application/json" \
+ -request POST \
+ -data '{
+   "type": "text\/javascript",
+   "file": "script\/autoPurgeAuditRecon.js",
+   "input": {
+     "mappings": ["%"],
+     "purgeType" : "purgeByNumOfReconsToKeep",
+     "numOfRecons" : 1
+   }
+ }' \
+ "https://localhost:8443/openidm/script?_action=eval"</userinput>
+<computeroutput>[
+  0
+] </computeroutput>  </screen>
+ </section>     -->
 </appendix>
