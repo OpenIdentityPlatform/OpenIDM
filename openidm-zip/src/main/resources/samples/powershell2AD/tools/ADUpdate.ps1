@@ -126,7 +126,7 @@ function Update-Group ($attributes)
 	}
 	
 	# Members changes
-	$val = $accessor.FindString("member")
+	$val = $accessor.FindStringList("member")
 	if ($val -ne $null) 
 	{
 		# Put the members in a hashtable
