@@ -94,7 +94,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	
 	# Standard attributes - multi valued
 	$StandardMulti = @("otherMailbox","otherLoginWorkstations","o","postOfficeBox","otherTelephone",
-	"otherMobile","seeAlso",,"url","ou","postalAddress","otherHomePhone","internationalISDNNumber")
+	"otherMobile","seeAlso","url","ou","postalAddress","otherHomePhone","internationalISDNNumber")
 	
 	foreach ($attr in $StandardMulti)
 	{
