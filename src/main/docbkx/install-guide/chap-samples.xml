@@ -4559,7 +4559,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
       <literal>openidm/samples/audit-sample/data/sample_audit_db.mysql</literal>.
       Import the file into MySQL before running the sample.
      </para>
-     <screen>$ <userinput>$ mysql -u root -p &lt; /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
+     <screen>$ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
      </userinput>
 Enter password:
 $ </screen>
