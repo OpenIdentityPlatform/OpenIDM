@@ -56,6 +56,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
@@ -112,8 +113,8 @@ import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
-import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.SimpleSystemIdentifier;
+import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.impl.SystemObjectSetService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -1731,6 +1732,63 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             handler.handleError(e);
         }
     }
+    
+    /**
+     * A container for information about a sync retry after a failure
+     */
+    private class SyncRetry {
+        
+        /**
+         * The retry value, true if the sync should be retried, false otherwise.
+         */
+        boolean value;
+        
+        /**
+         * The {@link Throwable} associated with the failure
+         */
+        Throwable throwable;
+        
+        public SyncRetry() {
+            value = false;
+            throwable = null;
+        }
+
+        /**
+         * Returns the retry value.
+         * 
+         * @return true if the sync should be retried, false otherwise.
+         */
+        public boolean getValue() {
+            return value;
+        }
+
+        /**
+         * Sets the retry value.
+         * 
+         * @param value true if the sync should be retried, false otherwise.
+         */
+        public void setValue(boolean value) {
+            this.value = value;
+        }
+
+        /**
+         * Returns the {@link Throwable} associated with the failure
+         * 
+         * @return the {@link Throwable} associated with the failure
+         */
+        public Throwable getThrowable() {
+            return throwable;
+        }
+
+        /**
+         * Sets the {@link Throwable} associated with the failure.
+         * 
+         * @param throwable the {@link Throwable} associated with the failure.
+         */
+        public void setThrowable(Throwable throwable) {
+            this.throwable = throwable;
+        }
+    }
 
     private static final QueryFilterVisitor<Filter, ObjectClassInfoHelper> RESOURCE_FILTER =
             new QueryFilterVisitor<Filter, ObjectClassInfoHelper>() {
@@ -2050,7 +2108,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * 668, "lastPollDate" : "2011-05-16T14:47:52.875Z", "lastStartTime" :
      * "2011-05-16T14:29:07.863Z", "progressMessage" : "SUCCEEDED" } }}
      * <p/>
-     * {@inheritDoc} Synchronise the changes from the end system for the given
+     * {@inheritDoc} Synchronize the changes from the end system for the given
      * {@code objectType}.
      * <p/>
      * OpenIDM takes active role in the synchronization process by asking the
@@ -2100,6 +2158,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         stage.remove("lastException");
 
         try {
+            final SyncRetry syncRetry = new SyncRetry();
             final OperationHelper helper = operationHelperBuilder.build(objectType, stage, cryptoService);
 
             if (helper.isOperationPermitted(SyncApiOp.class)) {
@@ -2138,7 +2197,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                      */
                                     @SuppressWarnings("fallthrough")
                                     public boolean handle(SyncDelta syncDelta) {
-                                        boolean retry = false;
                                         try {
                                             // Q: are we going to encode ids?
                                             final String resourceId = syncDelta.getUid().getUidValue();
@@ -2200,27 +2258,28 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                         } catch (Exception e) {
                                             failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
                                             if (logger.isDebugEnabled()) {
-                                                logger.error("Failed synchronise {} object, handle failure using {}",
+                                                logger.error("Failed to synchronize {} object, handle failure using {}",
                                                         syncDelta.getUid(), syncFailureHandler, e);
                                             }
-                                            Map<String, Object> syncFailure = new HashMap<String, Object>(6);
-                                            syncFailure.put("token", syncDelta.getToken().getValue());
-                                            syncFailure.put("systemIdentifier", systemIdentifier.getName());
-                                            syncFailure.put("objectType", objectType);
-                                            syncFailure.put("uid", syncDelta.getUid().getUidValue());
-                                            syncFailure.put("failedRecord", failedRecord[0]);
+                                            Map<String, Object> syncFailureMap = new HashMap<String, Object>(6);
+                                            syncFailureMap.put("token", syncDelta.getToken().getValue());
+                                            syncFailureMap.put("systemIdentifier", systemIdentifier.getName());
+                                            syncFailureMap.put("objectType", objectType);
+                                            syncFailureMap.put("uid", syncDelta.getUid().getUidValue());
+                                            syncFailureMap.put("failedRecord", failedRecord[0]);
                                             try {
-                                                syncFailureHandler.invoke(syncFailure, e);
-                                            } catch (SyncHandlerException ex) {
+                                                syncFailureHandler.invoke(syncFailureMap, e);
+                                            } catch (SyncHandlerException syncHandlerException) {
                                                 // Current contract of the failure handler is that throwing this exception indicates 
                                                 // that it should retry for this entry
-                                                retry = true;
+                                                syncRetry.setValue(true);
+                                                syncRetry.setThrowable(syncHandlerException);
                                                 logger.debug("Sync failure handler indicated to stop current change set processing until retry handling: {}", 
-                                                        ex.getMessage(), ex);
+                                                        syncHandlerException.getMessage(), syncHandlerException);
                                             }
                                         }
 
-                                        if (retry) {
+                                        if (syncRetry.getValue()) {
                                             // Stop the processing of this result set. Next retry will start again after last token.
                                             return false; 
                                         } else {
@@ -2230,20 +2289,23 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             return true;
                                         }
                                     }
-                                }, operationOptionsBuilder.build());
-                        if (syncToken != null) {
-                            lastToken[0] = syncToken;
-                        }
-                    } catch (Throwable t) {
-                        Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
-                        lastException.put("throwable", t.getMessage());
-                        if (null != failedRecord[0]) {
-                            lastException.put("syncDelta", failedRecord[0]);
-                        }
-                        stage.put("lastException", lastException);
-                        if (logger.isDebugEnabled()) {
-                            logger.error("Live synchronization of {} failed on {}",
-                                    new Object[] { objectType, systemIdentifier.getName() }, t);
+                        }, operationOptionsBuilder.build());
+                        if (syncRetry.getValue()) {
+                            Throwable throwable = syncRetry.getThrowable();
+                            Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
+                            lastException.put("throwable", throwable.getMessage());
+                            if (null != failedRecord[0]) {
+                                lastException.put("syncDelta", failedRecord[0]);
+                            }
+                            stage.put("lastException", lastException);
+                            if (logger.isDebugEnabled()) {
+                                logger.error("Live synchronization of {} failed on {}",
+                                        new Object[] { objectType, systemIdentifier.getName() }, throwable);
+                            }
+                        } else {
+                            if (syncToken != null) {
+                                lastToken[0] = syncToken;
+                            }
                         }
                     } finally {
                         token = lastToken[0];
@@ -2266,5 +2328,4 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
         return stage;
     }
-
 }
