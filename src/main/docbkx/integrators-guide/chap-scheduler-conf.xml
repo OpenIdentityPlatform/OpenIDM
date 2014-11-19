@@ -175,9 +175,11 @@ openidm.scheduler.execute.persistent.schedules=true
   xlink:href="http://www.quartz-scheduler.org/documentation/quartz-2.1.x/configuration/ConfigMain"
   ><citetitle>Quartz Scheduler Configuration Reference</citetitle></link>.</para>
 
-  <para>Each schedule configuration file, <filename>openidm/conf/schedule-
-  <replaceable>schedule-name</replaceable>.json</filename> has the following 
-  format:</para>
+  <para>
+   Each schedule configuration file,
+   <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>.json</filename>,
+   has the following format:
+  </para>
 
   <programlisting language="javascript">
 {
@@ -192,7 +194,7 @@ openidm.scheduler.execute.persistent.schedules=true
  "timeZone"            : "<replaceable>(optional) time zone</replaceable>",
  "invokeService"       : "<replaceable>service identifier</replaceable>",
  "invokeContext"       : "<replaceable>service specific context info</replaceable>",
- "invokeLogLevel"      : "<replaceable>(optional) debug</replaceable>"
+ "invokeLogLevel"      : "<replaceable>(optional) level</replaceable>"
 }</programlisting>
 
  <variablelist>
