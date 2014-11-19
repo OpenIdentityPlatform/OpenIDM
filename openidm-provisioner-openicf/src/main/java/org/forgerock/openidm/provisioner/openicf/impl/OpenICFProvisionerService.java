@@ -1493,6 +1493,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (AttributeMissingException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
+            } catch (IllegalArgumentException e) {
+                handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             } finally {
