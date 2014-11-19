@@ -48,7 +48,7 @@ $searchBase = 'CN=Users,DC=example,DC=com' to accommodate your environment.
 Adapt to your local configuration
 
 6- Edit the sample PowerShell connector provisioner file to suit your installation.
-The file is samples/provisioners/provisioner.openicf-ADPowerShell.json. You may need to change the file paths.
+The file is samples/provisioners/provisioner.openicf-adpowershell.json. You may need to change the file paths.
 For instance:
 "configurationProperties" : {
         "AuthenticateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADAuthenticate.ps1",
@@ -77,12 +77,13 @@ Returns:
 
 [
     {
-        "name": "ADPowerShell",
+        "name": "adpowershell",
         "enabled": true,
-        "config": "config/provisioner.openicf/ADPowerShell",
+        "config": "config/provisioner.openicf/adpowershell",
         "objectTypes": [
-            "__ACCOUNT__",
-            "__GROUP__"
+            "__ALL__",
+	    "group",
+            "account"
         ],
         "connectorRef": {
             "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
@@ -99,7 +100,7 @@ Returns:
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
           --request POST \
-          http://localhost:8080/openidm/system/ADPowerShell/__ACCOUNT__?_action=authenticate&username=TestUser&password=Passw0rd
+          http://localhost:8080/openidm/system/adpowershell/account?_action=authenticate&username=TestUser&password=Passw0rd
 
 Returns the user ObjectGUID if success
 {
@@ -111,7 +112,7 @@ Returns the user ObjectGUID if success
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
-          http://localhost:8080/openidm/system/ADPowerShell/__ACCOUNT__?_queryFilter=cn+eq+"Guest"
+          http://localhost:8080/openidm/system/adpowershell/account?_queryFilter=cn+eq+"Guest"
 
 Returns the default Guest user:
 
@@ -177,71 +178,70 @@ Returns the default Guest user:
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
-	  http://localhost:8080/openidm/system/ADPowerShell/__ACCOUNT__?_queryId=query-all-ids
+	  http://localhost:8080/openidm/system/adpowershell/account?_queryId=query-all-ids
 
 3- Read a specific user (pick up an _id from the Search ALL)
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
-	  http://localhost:8080/openidm/system/ADPowerShell/__ACCOUNT__/eb9e36db-451e-43a7-97ce-f9d8c628eca0
+	  http://localhost:8080/openidm/system/adpowershell/account/eb9e36db-451e-43a7-97ce-f9d8c628eca0
 
 Returns for instance:
 
 {
-    "cn": "Bob Fleming",
-    "distinguishedName": "CN=Bob Fleming,OU=test,DC=example,DC=com",
-    "passwordNeverExpires": false,
-    "sn": "Fleming",
-    "homePhone": null,
-    "title": null,
-    "passwordNotRequired": true,
-    "mail": "Bob.Fleming@example.com",
-    "allowReversiblePasswordEncryption": false,
-    "division": null,
-    "badPwdCount": 0,
-    "department": null,
-    "manager": null,
-    "streetAddress": null,
-    "whenCreated": "21/03/2013 15:58:14",
-    "sAMAccountName": "bob",
-    "displayName": null,
-    "givenName": "Bob",
-    "sAMAccountType": 805306368,
-    "userPrincipalName": "bob@example.com",
-    "company": null,
-    "accountExpirationDate": null,
-    "createTimeStamp": "21/03/2013 15:58:14",
-    "codePage": 0,
-    "employeeID": null,
+    "uSNCreated": "479423",
     "userAccountControl": 544,
-    "pwdLastSet": "130445461003164031",
-    "whenChanged": "24/09/2014 17:41:42",
-    "employeeNumber": null,
-    "name": "Bob Fleming",
-    "telephoneNumber": "0052-611-091",
-    "homeDrive": null,
     "description": [
-        "Employee Bob Fleming r"
+        "Updated by Bob"
     ],
-    "cannotChangePassword": false,
-    "logonCount": 0,
-    "memberOf": [
-        "CN=Administrators,CN=Builtin,DC=example,DC=com"
-    ],
-    "initials": null,
-    "lockoutTime": "0",
-    "modifyTimeStamp": "24/09/2014 17:41:42",
+    "uSNChanged": "1311154",
+    "modifyTimeStamp": "18/11/2014 15:45:31",
+    "streetAddress": null,
+    "homePhone": null,
+    "memberOf": [],
     "postalCode": null,
-    "badPasswordTime": "0",
-    "lastLogon": "0",
-    "countryCode": 0,
+    "name": "Bob Fleming",
+    "scriptPath": null,
+    "badPasswordTime": "130596768837529400",
+    "title": null,
+    "employeeID": null,
+    "userPrincipalName": "bob@example.com",
+    "telephoneNumber": "0052-611-091",
+    "whenChanged": "18/11/2014 15:45:31",
+    "smartcardLogonRequired": false,
+    "initials": null,
+    "badPwdCount": "0",
+    "trustedForDelegation": false,
+    "employeeNumber": null,
+    "passwordNotRequired": true,
+    "lockoutTime": "0",
+    "whenCreated": "21/03/2013 15:58:14",
+    "displayName": null,
+    "allowReversiblePasswordEncryption": false,
+    "mail": "Bob.Fleming@example.com",
+    "homeDrive": null,
+    "manager": null,
+    "givenName": "Bob",
+    "passwordNeverExpires": false,
+    "accountExpirationDate": null,
+    "objectGUID": "eb9e36db-451e-43a7-97ce-f9d8c628eca0",
+    "createTimeStamp": "21/03/2013 15:58:14",
+    "division": null,
+    "distinguishedName": "CN=Bob Fleming,CN=Users,DC=example,DC=com",
+    "lastLogon": "130596768978397647",
+    "cn": "Bob Fleming",
+    "sn": "Fleming",
+    "cannotChangePassword": false,
     "homeDirectory": null,
-    "accountExpires": "0",
-    "__NAME__": "CN=Bob Fleming,OU=test,DC=example,DC=com",
+    "department": null,
+    "pwdLastSet": "130596776194502322",
+    "company": null,
+    "lastLogonTimestamp": "130595128752246642",
+    "logonCount": "54",
+    "sAMAccountName": "bob",
     "_id": "eb9e36db-451e-43a7-97ce-f9d8c628eca0"
 }
-
 
 4 - Create a user 
 
@@ -250,64 +250,69 @@ Returns for instance:
           --header "X-OpenIDM-Password: openidm-admin" \
           --request POST \
           --data '{ 
-		"__NAME__": "CN=OpenIDM Sample,OU=test,DC=example,DC=com",
+		"distinguishedName": "CN=OpenIDM Sample,CN=Users,DC=example,DC=com",
 		"sn": "Sample",
 		"cn": "OpenIDM",
 		"sAMAccountName": "sample",
 		"userPrincipalName": "sample@example.com",
+		"passwordNeverExpires": true,
+		"__ENABLE__": true,
+		"__PASSWORD__": "Passw0rd",
 		"telephoneNumber": "0052-611-091"
 		}' \
-       	http://localhost:8080/openidm/system/ADPowerShell/__ACCOUNT__?_action=create
+       	http://localhost:8080/openidm/system/adpowershell/account?_action=create 
 
 returns:
 
 {
-    "cn": "OpenIDM",
-    "distinguishedName": "CN=OpenIDM,OU=test,DC=example,DC=com",
-    "passwordNeverExpires": false,
-    "sn": "Sample",
-    "homePhone": null,
-    "title": null,
-    "passwordNotRequired": false,
-    "allowReversiblePasswordEncryption": false,
-    "division": null,
-    "badPwdCount": 0,
-    "department": null,
-    "manager": null,
-    "streetAddress": null,
-    "whenCreated": "24/10/2014 18:20:44",
-    "sAMAccountName": "sample",
-    "displayName": null,
-    "givenName": null,
-    "sAMAccountType": 805306368,
-    "userPrincipalName": "sample@example.com",
-    "company": null,
+    "_id": "76ea8c7a-fbe7-4926-8442-f99e9900e34c",
     "accountExpirationDate": null,
-    "createTimeStamp": "24/10/2014 18:20:44",
-    "codePage": 0,
-    "employeeID": null,
-    "userAccountControl": 514,
-    "pwdLastSet": "0",
-    "whenChanged": "24/10/2014 18:20:44",
-    "employeeNumber": null,
-    "name": "OpenIDM",
-    "telephoneNumber": "0052-611-091",
-    "homeDrive": null,
-    "description": null,
-    "cannotChangePassword": false,
-    "logonCount": 0,
-    "memberOf": [],
-    "initials": null,
-    "modifyTimeStamp": "24/10/2014 18:20:44",
-    "postalCode": null,
+    "allowReversiblePasswordEncryption": false,
     "badPasswordTime": "0",
-    "lastLogon": "0",
-    "countryCode": 0,
+    "badPwdCount": "0",
+    "cannotChangePassword": false,
+    "cn": "OpenIDM",
+    "company": null,
+    "createTimeStamp": "18/11/2014 15:54:47",
+    "department": null,
+    "description": null,
+    "displayName": null,
+    "distinguishedName": "CN=OpenIDM,CN=Users,DC=example,DC=com",
+    "division": null,
+    "employeeID": null,
+    "employeeNumber": null,
+    "givenName": null,
     "homeDirectory": null,
-    "accountExpires": "9223372036854775807",
-    "__NAME__": "CN=OpenIDM,OU=test,DC=example,DC=com",
-    "_id": "3a40e42e-219c-4614-b5e7-4756f5849f86"
+    "homeDrive": null,
+    "homePhone": null,
+    "initials": null,
+    "lastLogon": "0",
+    "logonCount": "0",
+    "manager": null,
+    "memberOf": [],
+    "modifyTimeStamp": "18/11/2014 15:54:47",
+    "name": "OpenIDM",
+    "objectGUID": "76ea8c7a-fbe7-4926-8442-f99e9900e34c",
+    "passwordNeverExpires": true,
+    "passwordNotRequired": false,
+    "postalCode": null,
+    "pwdLastSet": "130607960876320218",
+    "sAMAccountName": "sample",
+    "scriptPath": null,
+    "smartcardLogonRequired": false,
+    "sn": "Sample",
+    "streetAddress": null,
+    "telephoneNumber": "0052-611-091",
+    "title": null,
+    "trustedForDelegation": false,
+    "uSNChanged": "1311167",
+    "uSNCreated": "1311163",
+    "userAccountControl": 66048,
+    "userPrincipalName": "sample@example.com",
+    "whenChanged": "18/11/2014 15:54:47",
+    "whenCreated": "18/11/2014 15:54:47"
 }
+
 
 5 - Delete the created user
 
@@ -315,11 +320,11 @@ returns:
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
           --request DELETE \
-          http://localhost:8080/openidm/system/ADPowerShell/__ACCOUNT__/3a40e42e-219c-4614-b5e7-4756f5849f86
+          http://localhost:8080/openidm/system/adpowershell/account/76ea8c7a-fbe7-4926-8442-f99e9900e34c
 
 returns:
 
 {
-    "_id": "3a40e42e-219c-4614-b5e7-4756f5849f86"
+    "_id": "76ea8c7a-fbe7-4926-8442-f99e9900e34c"
 }
 
