@@ -414,11 +414,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         } else {
                             facade.validate();
                             if (connectorFacade.compareAndSet(null, facade)) {
-                                if (null != routeEntry) {
-                                    // This should not happen but keep it in case
-                                    routeEntry.removeRoute();
-                                }
-
                                 if (facade.getSupportedOperations().contains(TestApiOp.class)) {
                                     try {
                                         facade.test();
