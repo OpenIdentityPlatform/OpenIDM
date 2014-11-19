@@ -186,7 +186,6 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(new ParseJsonValue()), // after
                     new Optional(new ParseJsonValue()), // before
                     new Optional(), // changedFields
-                    new Optional(), // exception
                     new Optional(), // message
                     new Optional(), // objectId
                     new Optional(), // parentActionId
@@ -201,7 +200,6 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             processors = new CellProcessor[] {
                     new NotNull(), // _id
                     new Optional(), // action
-                    new Optional(), // exception
                     new Optional(), // ip
                     new Optional(), // principal
                     new Optional(new ParseJsonValue()), // roles
@@ -304,7 +302,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
         // Synchronize writes so that simultaneous writes don't corrupt the file
         synchronized (lock) {
             try {
-                AuditServiceImpl.preformatLogEntry(obj);
+                AuditServiceImpl.preformatLogEntry(type, obj);
                 createImpl(type, obj);
             } finally {
                 measure.end();

@@ -179,7 +179,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
     public void create(ServerContext context, String type, Map<String, Object> obj) throws ResourceException {
         EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
         try {
-            AuditServiceImpl.preformatLogEntry(obj);
+            AuditServiceImpl.preformatLogEntry(type, obj);
             createImpl(context, type, obj);
         } finally {
             measure.end();
