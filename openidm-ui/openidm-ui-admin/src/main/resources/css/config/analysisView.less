@@ -76,6 +76,10 @@
     height:40px;
     width:100%;
 
+    &:nth-child(odd) {
+      background-color: #f7f7f7;
+    }
+
     .fa-circle{
       font-size: 12px;
       padding: 15px;
@@ -99,10 +103,6 @@
     .fa-info-circle:hover {
       color:#5a646d;
     }
-  }
-
-  .sync-item.odd {
-    background-color: #f7f7f7;
   }
 }
 
@@ -145,7 +145,7 @@
 #reconContainer {
     #reconTabs {
         position: relative;
-        div.actionContainer { 
+        div.actionContainer {
             display: none;
             position: absolute;
             z-index: 2;
@@ -159,12 +159,12 @@
 
         div ul {
             width:  100%;
-            height: 40px;  
+            height: 40px;
             li {
                 display: block;
                 width: 25%;
                 float: left;
-                text-align: center;    
+                text-align: center;
             }
         }
     }
