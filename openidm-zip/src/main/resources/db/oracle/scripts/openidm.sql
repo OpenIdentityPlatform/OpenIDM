@@ -52,7 +52,8 @@ CREATE TABLE auditaccess (
   ip VARCHAR2(40 CHAR),
   principal CLOB,
   roles VARCHAR2(1024 CHAR),
-  status VARCHAR2(7 CHAR)
+  status VARCHAR2(7 CHAR),
+  userid VARCHAR2(24 CHAR)
 );
 
 

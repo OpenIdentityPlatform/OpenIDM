@@ -814,7 +814,7 @@ public class AuditServiceImpl implements AuditService {
         Object exception = entryMap.get("exception");
         try {
             if (exception == null) {
-                entryMap.put("exception", "");
+                return;
             } else if (!(exception instanceof String)) {
                 entryMap.put("exception", AuditServiceImpl.formatException((Exception) exception));
             }

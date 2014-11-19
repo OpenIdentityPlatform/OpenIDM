@@ -168,6 +168,7 @@ CREATE TABLE openidm.auditaccess (
   principal TEXT,
   roles VARCHAR(1024) DEFAULT NULL,
   status VARCHAR(7) DEFAULT NULL,
+  userid VARCHAR(24) DEFAULT NULL ,
   PRIMARY KEY (objectid)
 );
 

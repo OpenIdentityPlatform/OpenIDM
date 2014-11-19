@@ -369,6 +369,7 @@ CREATE  TABLE [openidm].[auditaccess] (
   principal NTEXT NULL ,
   roles NVARCHAR(1024) NULL ,
   status NVARCHAR(7) NULL ,
+  userid NVARCHAR(24) NULL ,
   PRIMARY KEY CLUSTERED (objectid),
 );
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditaccess, 'COLUMN', activitydate;
