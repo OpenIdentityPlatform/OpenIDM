@@ -48,22 +48,42 @@ public class JettyPropertyUtil {
      * @return the property value.
      */
     public static String getProperty(String propName, boolean obfuscated) {
-        String prop = IdentityServer.getInstance().getProperty(propName);
-        if (prop == null) {
+        String propValue = IdentityServer.getInstance().getProperty(propName);
+
+        String clear = decryptOrDeobfuscate(propValue);
+
+        if (obfuscated) {
+            propValue = Main.obfuscate(clear);
+        } else {
+            propValue = clear;
+        }
+
+        return propValue;
+    }
+
+    /**
+     * Decrypts or de-obfuscates a string. Will decrypt if string is appended with 'CRYPT:' and
+     * will de-obfuscate if string is appended with 'OBF:'. If neither prefix is present, will
+     * return the same value. Will return null if encrypted is null or encountered an error.
+     *
+     * @see org.forgerock.openidm.crypto.impl.Main for further details
+     *
+     * @param encrypted
+     *            string value that will be decrypted/de-obfuscated.
+     * @return decrypted/de-obfuscated value.
+     * @throws java.lang.RuntimeException
+     */
+    public static String decryptOrDeobfuscate(String encrypted) {
+        if (encrypted == null) {
             return null;
         }
+        String decrypted = null;
         try {
-            String clear = new String(Main.unfold(prop));
-            if (obfuscated) {
-                prop = Main.obfuscate(clear);
-            } else {
-                prop = clear;
-            }
+            decrypted = new String(Main.unfold(encrypted));
         } catch (GeneralSecurityException ex) {
-            throw new RuntimeException("Failed to obtain property " + propName
-                    + " in Jetty obfuscated format.", ex);
+            throw new RuntimeException("Failed to decrypt/de-obfuscate value of string", ex);
         }
-        return prop;
+        return decrypted;
     }
 
     /**
