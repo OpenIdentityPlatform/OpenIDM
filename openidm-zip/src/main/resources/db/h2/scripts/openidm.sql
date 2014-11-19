@@ -29,7 +29,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  `partpropvalue` varchar as left(propvalue, 255),
   CONSTRAINT `fk_genericobjectproperties_genericobjects`
     FOREIGN KEY (`genericobjects_id` )
     REFERENCES `openidm`.`genericobjects` (`id` )
@@ -40,7 +39,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
 CREATE INDEX  IF NOT EXISTS  `openidm`.`fk_genericobjectproperties_genericobjects` ON
 `openidm`.`genericobjectproperties` (`genericobjects_id` ASC);
 
-CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_genericobjectproperties_prop` ON `openidm`.`genericobjectproperties` (`propkey` ASC, `partpropvalue` ASC);
+CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_genericobjectproperties_prop` ON `openidm`.`genericobjectproperties` (`propkey` ASC, `propvalue` ASC);
 
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjects` (
@@ -65,14 +64,13 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  `partpropvalue` varchar AS left(propvalue, 255),
   CONSTRAINT `fk_managedobjectproperties_managedobjects`
     FOREIGN KEY (`managedobjects_id` )
     REFERENCES `openidm`.`managedobjects` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION);
     
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_managedobjectproperties_prop` ON `openidm`.`managedobjectproperties` (`propkey` ASC, `partpropvalue` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_managedobjectproperties_prop` ON `openidm`.`managedobjectproperties` (`propkey` ASC, `propvalue` ASC);
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_managedobjectproperties_managedobjects` ON `openidm`.`managedobjectproperties` (`managedobjects_id` ASC);
 
 
@@ -99,7 +97,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(255) NULL ,
   `propvalue` TEXT NULL ,
-  `partpropvalue` varchar AS left(propvalue, 255),
   CONSTRAINT `fk_configobjectproperties_configobjects`
     FOREIGN KEY (`configobjects_id` )
     REFERENCES `openidm`.`configobjects` (`id` )
@@ -107,7 +104,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_configobjectproperties_configobjects` ON `openidm`.`configobjectproperties`(`configobjects_id` ASC);
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_configobjectproperties_prop` ON `openidm`.`configobjectproperties`(`propkey` ASC, `partpropvalue` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_configobjectproperties_prop` ON `openidm`.`configobjectproperties`(`propkey` ASC, `propvalue` ASC);
 
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
@@ -244,7 +241,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  `partpropvalue` varchar AS left(propvalue, 255),
   CONSTRAINT `fk_schedulerobjectproperties_schedulerobjects`
     FOREIGN KEY (`schedulerobjects_id` )
     REFERENCES `openidm`.`schedulerobjects` (`id` )
@@ -252,7 +248,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_schedulerobjectproperties_schedulerobjects` ON `openidm`.`schedulerobjectproperties`(`schedulerobjects_id` ASC);
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_schedulerobjectproperties_prop` ON `openidm`.`schedulerobjectproperties`(`propkey` ASC, `partpropvalue` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_schedulerobjectproperties_prop` ON `openidm`.`schedulerobjectproperties`(`propkey` ASC, `propvalue` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
@@ -275,7 +271,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  `partpropvalue` varchar AS left(propvalue, 255),
   CONSTRAINT `fk_clusterobjectproperties_clusterobjects`
     FOREIGN KEY (`clusterobjects_id` )
     REFERENCES `openidm`.`clusterobjects` (`id` )
@@ -283,7 +278,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `fk_clusterobjectproperties_clusterobjects` ON `openidm`.`clusterobjectproperties`  (`clusterobjects_id` ASC);
-CREATE INDEX IF NOT EXiSTS `idx_clusterobjectproperties_prop` ON `openidm`.`clusterobjectproperties` (`propkey` ASC, `partpropvalue` ASC);
+CREATE INDEX IF NOT EXiSTS `idx_clusterobjectproperties_prop` ON `openidm`.`clusterobjectproperties` (`propkey` ASC, `propvalue` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   `objectid` VARCHAR(38) NOT NULL ,

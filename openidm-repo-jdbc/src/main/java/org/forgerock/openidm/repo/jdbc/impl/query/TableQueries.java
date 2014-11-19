@@ -45,6 +45,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -54,6 +55,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
+import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -160,17 +162,19 @@ public class TableQueries {
     final String mainTableName;
     final String propTableName;
     final String dbSchemaName;
+    final int maxPropLen;
     final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
     final QueryResultMapper resultMapper;
     
     private TableHandler tableHandler;
 
-    public TableQueries(TableHandler tableHandler, String mainTableName, String propTableName, String dbSchemaName,
+    public TableQueries(TableHandler tableHandler, String mainTableName, String propTableName, String dbSchemaName, int maxPropLen,
             QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, QueryResultMapper resultMapper) {
         this.tableHandler = tableHandler;
         this.mainTableName = mainTableName;
         this.propTableName = propTableName;
         this.dbSchemaName = dbSchemaName;
+        this.maxPropLen = maxPropLen;
         this.queryFilterVisitor = queryFilterVisitor;
         this.resultMapper = resultMapper;
     }
@@ -321,6 +325,7 @@ public class TableQueries {
             } else if (queryExpression != null) {
                 queryDescription = queryExpression;
             } else {
+                QueryInfo info = queries.getQueryInfo(queryId);
                 queryDescription = queries.getQueryInfo(queryId).getQueryString();
             }
             throw new InternalServerErrorException("DB reported failure preparing query: "
@@ -524,7 +529,7 @@ public class TableQueries {
                 Object objValue =  params.get(tokenName);
                 String value = null;
                 if (objValue != null) {
-                    value = objValue.toString();
+                    value = trimValue(objValue);
                 } else {
                     // fail with an exception if token not found
                     throw new BadRequestException("Missing entry in params passed to query for token " + tokenName);
@@ -554,7 +559,7 @@ public class TableQueries {
                             if (list_value != null && list_value.startsWith("'") && list_value.endsWith("'")) {
                                 list_value = list_value.substring(1, list_value.length()-1);
                             }
-                            statement.setString(count, list_value);
+                            statement.setString(count, trimValue(list_value));
                             count++;
                         }
                     }
@@ -651,5 +656,9 @@ public class TableQueries {
         } else {
             return Name.get(EVENT_RAW_QUERY_PREFIX + queryId);
         }
+    }
+
+    private String trimValue(Object param) {
+        return StringUtils.left(param.toString(), maxPropLen);
     }
 }
