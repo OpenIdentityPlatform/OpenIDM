@@ -220,6 +220,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `principal` TEXT NULL ,
   `roles` VARCHAR(1024) NULL ,
   `status` VARCHAR(7) NULL ,
+  `userid` VARCHAR(24) NULL ,
   PRIMARY KEY (`objectid`) );
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjects` (

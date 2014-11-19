@@ -153,6 +153,12 @@
                     "required" : false,
                     "nativeName" : "messagedetail",
                     "nativeType" : "string"
+                },
+                "reconAction" : {
+                    "type": "string",
+                    "required": false,
+                    "nativeName": "reconaction",
+                    "nativeType" : "string"
                 }
             }
         },
