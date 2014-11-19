@@ -204,8 +204,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                 && (connectorLocation
                                         .equals(ConnectorReference.ConnectorLocation.OSGI) ^ entry
                                         .getKey().getConnectorHost().equals(connectorHost))
-                                && ((ConnectorKey) source).equals(entry.getKey().getConnectorKey())) {
-
+                                && ((ConnectorKey) source)
+                                        .equals(getConnectorInfo(entry.getKey(), getConnectorInfoManager(entry.getKey()))
+                                        .getConnectorKey())) {
                             // TODO What to do if it's null? Throw NPE now
                             ConnectorInfo ci = findConnectorInfo(entry.getKey());
 
@@ -589,6 +590,10 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      * {@inheritDoc}
      */
     public ConnectorInfo findConnectorInfo(ConnectorReference connectorReference) {
+        return getConnectorInfo(connectorReference, getConnectorInfoManager(connectorReference));
+    }
+
+    private ConnectorInfoManager getConnectorInfoManager(ConnectorReference connectorReference) {
         ConnectorInfoManager connectorInfoManager = null;
         switch (connectorReference.getConnectorLocation()) {
         case LOCAL:
@@ -608,6 +613,10 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                 rfci.first);
             }
         }
+        return connectorInfoManager;
+    }
+
+    private ConnectorInfo getConnectorInfo(ConnectorReference connectorReference, ConnectorInfoManager connectorInfoManager) {
         ConnectorInfo connectorInfo = null;
         if (null != connectorInfoManager) {
             try {
@@ -881,15 +890,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                 ConnectorUtil.getConnectorReference(config);
                         ConnectorInfo ci = findConnectorInfo(connectorReference);
                         if (null == ci) {
-                            throw new JsonValueException(config);
+                            throw new WaitForMetaData("ConnectorInfo is not available");
                         }
                         properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
-                    } catch (JsonValueException jve) {
-                        throw jve;
-                    } catch (Exception e) {
+                    } catch (RuntimeException e) {
                         logger.error("Failed to parse the config of {}-{}: {}", new Object[] {
-                            pidOrFactory, instanceAlias, e.getMessage()}, e);
-                        throw new JsonValueException(config, e);
+                                pidOrFactory, instanceAlias, e.getMessage()}, e);
+                        throw e;
                     }
 
                     if (null == properties) {
