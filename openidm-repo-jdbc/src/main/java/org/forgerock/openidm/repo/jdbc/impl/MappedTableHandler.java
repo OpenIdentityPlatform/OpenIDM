@@ -140,7 +140,7 @@ public class MappedTableHandler implements TableHandler {
                     }
                 };
 
-        queries = new TableQueries(this, tableName, null, dbSchemaName, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
+        queries = new TableQueries(this, tableName, null, dbSchemaName, GenericTableHandler.PROP_VALUE_MAX_LEN, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
         String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;

@@ -215,7 +215,7 @@ CREATE TABLE configobjectproperties (
   configobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(255 CHAR),
-  propvalue VARCHAR2(4000 CHAR)
+  propvalue VARCHAR2(2000 CHAR)
 );
 
 
@@ -276,7 +276,7 @@ CREATE TABLE genericobjectproperties (
   genericobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(32 CHAR),
-  propvalue VARCHAR2(4000 CHAR)
+  propvalue VARCHAR2(2000 CHAR)
 );
 
 
@@ -434,7 +434,7 @@ CREATE TABLE managedobjectproperties (
   managedobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(32 CHAR),
-  propvalue VARCHAR2(4000 CHAR)
+  propvalue VARCHAR2(2000 CHAR)
 );
 
 
@@ -495,7 +495,7 @@ CREATE TABLE schedobjectproperties (
   schedulerobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(32 CHAR),
-  propvalue VARCHAR2(4000 CHAR)
+  propvalue VARCHAR2(2000 CHAR)
 );
 
 
@@ -556,7 +556,7 @@ CREATE TABLE clusterobjectproperties (
   clusterobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(32 CHAR),
-  propvalue VARCHAR2(4000 CHAR)
+  propvalue VARCHAR2(2000 CHAR)
 );
 
 

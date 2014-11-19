@@ -105,9 +105,8 @@ CREATE  TABLE [openidm].[genericobjectproperties]
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 ); 
-ALTER TABLE [openidm].[genericobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
 CREATE INDEX fk_genericobjectproperties_genericobjects ON [openidm].[genericobjectproperties] (genericobjects_id ASC);
-CREATE INDEX idx_genericobjectproperties_prop ON [openidm].[genericobjectproperties] (propkey ASC, partpropvalue ASC);
+CREATE INDEX idx_genericobjectproperties_prop ON [openidm].[genericobjectproperties] (propkey ASC, propvalue ASC);
 END
 
 
@@ -152,9 +151,8 @@ CREATE  TABLE [openidm].[managedobjectproperties]
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
-ALTER TABLE [openidm].[managedobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
 CREATE INDEX fk_managedobjectproperties_managedobjects ON [openidm].[managedobjectproperties] (managedobjects_id ASC);
-CREATE INDEX idx_managedobjectproperties_prop ON [openidm].[managedobjectproperties] (propkey ASC, partpropvalue ASC);
+CREATE INDEX idx_managedobjectproperties_prop ON [openidm].[managedobjectproperties] (propkey ASC, propvalue ASC);
 END
 
 
@@ -198,9 +196,8 @@ CREATE  TABLE [openidm].[configobjectproperties] (
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
-ALTER TABLE [openidm].[configobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
 CREATE INDEX fk_configobjectproperties_configobjects ON [openidm].[configobjectproperties] (configobjects_id ASC);
-CREATE INDEX idx_configobjectproperties_prop ON [openidm].[configobjectproperties] (propkey ASC, partpropvalue ASC);
+CREATE INDEX idx_configobjectproperties_prop ON [openidm].[configobjectproperties] (propkey ASC, propvalue ASC);
 END
 
 
@@ -416,9 +413,8 @@ CREATE  TABLE [openidm].[schedulerobjectproperties] (
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
-ALTER TABLE [openidm].[schedulerobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
 CREATE INDEX fk_schedulerobjectproperties_schedulerobjects ON [openidm].[schedulerobjectproperties] (schedulerobjects_id ASC);
-CREATE INDEX idx_schedulerobjectproperties_prop ON [openidm].[schedulerobjectproperties] (propkey ASC, partpropvalue ASC);
+CREATE INDEX idx_schedulerobjectproperties_prop ON [openidm].[schedulerobjectproperties] (propkey ASC, propvalue ASC);
 END
 
 
@@ -462,9 +458,8 @@ CREATE  TABLE [openidm].[clusterobjectproperties] (
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
-ALTER TABLE [openidm].[clusterobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
 CREATE INDEX fk_clusterobjectproperties_clusterobjects ON [openidm].[clusterobjectproperties] (clusterobjects_id ASC);
-CREATE INDEX idx_clusterobjectproperties_prop ON [openidm].[clusterobjectproperties] (propkey ASC, partpropvalue ASC);
+CREATE INDEX idx_clusterobjectproperties_prop ON [openidm].[clusterobjectproperties] (propkey ASC, propvalue ASC);
 END
 
 

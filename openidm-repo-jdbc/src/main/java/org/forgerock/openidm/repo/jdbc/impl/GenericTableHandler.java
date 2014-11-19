@@ -75,9 +75,33 @@ public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);
 
     /**
+     * Maximum length of a property value.
+     * This is used to truncate possible CLOB values so they fit in an index.
+     */
+    static final int PROP_VALUE_MAX_LEN = 2000;
+
+    /**
      * QueryFilterVisitor for generating WHERE clause SQL queries against generic table schema.
      */
     static class GenericSQLQueryFilterVisitor extends SQLQueryFilterVisitor<Map<String, Object>> {
+
+        private boolean isNumeric(final Object valueAssertion) {
+            return  valueAssertion instanceof Integer || valueAssertion instanceof Long
+                    || valueAssertion instanceof Float || valueAssertion instanceof Double;
+        }
+
+        private boolean isBoolean(final Object valueAssertion) {
+            return valueAssertion instanceof Boolean;
+        }
+
+        private Object trimValue(final Object value) {
+            // Must retain types for getPropTypeValueClause()
+            if (isNumeric(value) || isBoolean(value)) {
+                return value;
+            } else {
+                return StringUtils.left(value.toString(), PROP_VALUE_MAX_LEN);
+            }
+        }
 
         /**
          * Generate the WHERE clause for properties table based on type of value being asserted
@@ -89,17 +113,31 @@ public class GenericTableHandler implements TableHandler {
          */
         String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
             // validate type is integer or double cast all numeric types to decimal
-            if (valueAssertion instanceof Integer || valueAssertion instanceof Long
-                    || valueAssertion instanceof Float || valueAssertion instanceof Double) {
+            if (isNumeric(valueAssertion)) {
                 return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
                         + "AND CAST(prop.propvalue AS DECIMAL) " + operand + " ${" + placeholder + "}";
-            } else if (valueAssertion instanceof Boolean) {
+            } else if (isBoolean(valueAssertion)) {
                 // validate type is boolean if valueAssertion is a boolean
                 return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
             } else {
                 // assume String
                 return "prop.propvalue " + operand + " ${" + placeholder + "}";
             }
+        }
+
+        @Override
+        public String visitContainsFilter(Map<String, Object> parameters, JsonPointer field, Object valueAssertion) {
+            return super.visitContainsFilter(parameters, field, trimValue(valueAssertion));
+        }
+
+        @Override
+        public String visitEqualsFilter(Map<String, Object> parameters, JsonPointer field, Object valueAssertion) {
+            return super.visitEqualsFilter(parameters, field, trimValue(valueAssertion));
+        }
+
+        @Override
+        public String visitStartsWithFilter(Map<String, Object> parameters, JsonPointer field, Object valueAssertion) {
+            return super.visitStartsWithFilter(parameters, field, trimValue(valueAssertion));
         }
 
         // key/value number for each key/value placeholder
@@ -229,7 +267,7 @@ public class GenericTableHandler implements TableHandler {
 
         this.queryFilterVisitor = queryFilterVisitor;
         
-        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, queryFilterVisitor, new GenericQueryResultMapper());
+        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, PROP_VALUE_MAX_LEN, queryFilterVisitor, new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(queriesConfig, commandsConfig, queryMap);
 
@@ -420,7 +458,7 @@ public class GenericTableHandler implements TableHandler {
                     String propvalue = null;
                     Object val = entry.getObject();
                     if (val != null) {
-                        propvalue = val.toString(); // TODO: proper type conversions?
+                        propvalue = StringUtils.left(val.toString(), PROP_VALUE_MAX_LEN);
                     }
                     String proptype = null;
                     if (propvalue != null) {
