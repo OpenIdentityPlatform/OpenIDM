@@ -212,15 +212,14 @@ orientdb&gt; </screen>
     </listitem>
     <listitem>
      <para>
-      In some cases, the <filename>conf/authentication.json</filename> file
-      includes a <literal>PASSTHROUGH</literal> authentication module that
-      allows newly created users to log into the UI. For more information,
-      see the Integrator's Guide section on <link xlink:show="new"
-      xlink:role="http://docbook.org/xlink/role/olink"
+      The default Sample 1 version of the
+      <filename>conf/authentication.json</filename> file includes several
+      authentication modules: <literal>MANAGED_USER</literal>,
+      <literal>INTERNAL_USER</literal>, and <literal>CLIENT_CERT</literal>. For
+      more information, see the Integrator's Guide section on
+      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#passthrough-auth">
       <citetitle>Using Delegated Authentication</citetitle></link>.
-      For OpenIDM ${docTargetVersion}, <literal>PASSTHROUGH</literal> is
-      an alias for <literal>DELEGATED</literal>.
      </para>
     </listitem>
    </orderedlist>
@@ -335,24 +334,24 @@ orientdb&gt; </screen>
             },
             "properties": [
                 {
-                    "source": "_id",
-                    "target": "_id"
-                },
-                {
-                    "source": "description",
-                    "target": "description"
+                    "source": "email",
+                    "target": "mail"
                 },
                 {
                     "source": "firstname",
                     "target": "givenName"
                 },
                 {
-                    "source": "email",
-                    "target": "mail"
-                },
-                {
                     "source": "lastname",
                     "target": "sn"
+                },
+                }
+                    "source": "description",
+                    "target": "description"
+                },
+                {
+                    "source": "_id",
+                    "target": "_id"
                 },
                 {
                     "source": "name",
@@ -361,7 +360,7 @@ orientdb&gt; </screen>
                 {
                     "source": "password",
                     "target": "password"
-                }
+                },
                 {
                     "source" : "mobileTelephoneNumber",
                     "target" : "telephoneNumber"
@@ -462,7 +461,12 @@ $ ./startup.sh -p samples/sample1
  <para>Successful reconciliation returns a reconciliation run ID, similar
  to the following:</para>
  
- <screen>{"_id":"2d87c817-3d00-4776-a705-7de2c65937d8"}</screen>
+ <screen>{"_id":"2d87c817-3d00-4776-a705-7de2c65937d8","state":"ACTIVE"}</screen>
+
+  <para>
+   In this case, <literal>"ACTIVE"</literal> is the state of the reconciliation
+   operation.
+  </para>
 
   <para>To see what happened, you could look at the CSV format log file,
   <filename>openidm/audit/recon.csv</filename>. If that file seems difficult
@@ -518,7 +522,7 @@ $ ./startup.sh -p samples/sample1
    <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
-  "resultCount": 3,
+  "resultCount": 2,
   "result": [
     {
       "_rev": "0",
@@ -527,14 +531,18 @@ $ ./startup.sh -p samples/sample1
     {
       "_rev": "0",
       "_id": "bjensen"
-    },
-    {
-      "_rev"  "0",
-      "_id"  "joe"
     }
   ]
 }  </computeroutput>
 </screen>
+
+  <para>
+   You can set up arbitrary queries. For more information on the use of the
+   various query expressions in a REST call, see the following
+   section on <link xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:show="new" xlink:href="http://integrators-guide#queries">
+   <citetitle>Defining and Calling Queries</citetitle></link>.
+  </para>
 
   <para>
    If you created user <literal>joe</literal>, as described in the procedure
@@ -559,82 +567,96 @@ $ ./startup.sh -p samples/sample1
  "https://localhost:8443/openidm/managed/user/bjensen"</userinput>
    <computeroutput>
 {
-    "_id" : "bjensen",
-    "_rev" : "1",
     "mail" : "bjensen@example.com",
     "sn" : "Jensen",
     "passwordAttempts" : "0",
     "lastPasswordAttempt" : "Tue Apr 15 2014 20:58:46 GMT-0800 (GMT-08:00)",
     "address2" : "",
     "givenName" : "Barbara",
+    "effectiveRoles" : [ "openidm-authorized" ],
     "country" : "",
     "city" : "",
     "lastPasswordSet" : "",
     "postalCode" : "",
+    "_id" : "bjensen",
+    "_rev" : "1",
     "description" : "Created By XML1",
     "accountStatus" : "active",
     "telephoneNumber" : "1234567",
     "roles" : [ "openidm-authorized" ],
     "postalAddress" : "",
     "stateProvince" : "",
-    "userName" : "bjensen@example.com",
-    "effectiveRoles" : [ "openidm-authorized" ],
-    "effectiveAssignments" : { }
+    "userName" : "bjensen@example.com"
 }</computeroutput>
 </screen>
 
-  <para>In the OrientDB console, connect to the database, and then query the
-  users and audit logs. The following shows edited excerpts from a console
-  session querying OrientDB.</para>
+  <para>
+   But that is a lot of information. If you need that information for all users,
+   you could substitute <literal>query-all</literal> for
+   <literal>query-all-ids</literal>. But that is too much for most administrators,
+   especially when dealing with more than a couple of users.
+  </para>
+
+  <para>
+   So with some of the query expressions described in the <link xlink:show="new"
+   xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#queries"><citetitle>Defining and Calling
+  Queries</citetitle></link>, you can filter the output.
+  </para>
 
   <para>
    As defined in the mapping file <filename>conf/sync.json</filename>, the
    <literal>sn</literal> and <literal>mail</literal> parameters correspond
-   to family name (surname) and email address, respectively.
+   to surname (sn) and email address, respectively.
   </para>
 
-  <para>To make it easier to view the records, the first
-  query only requests three specific fields.</para>
+  <para>
+   For example, the following RESTful GET filters output by surname (sn):
+  </para>
 
-  <screen>&gt; connect remote:localhost/openidm admin admin
-Connecting to database [remote:localhost/openidm] with user 'admin'...OK
+  <screen>$ <userinput>curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request GET \
+   "https://localhost:8443/openidm/managed/user?_queryFilter=sn%20%pr&amp;_fields=sn"
+  </userinput>
+   <computeroutput>{
+ "result" : [ {
+    "sn" : "Carter",
+ }, {
+    "sn" : "Jensen"
+ } ]
+ "resultCount" : 2,
+ "pagedResultsCookie" : null,
+ "remainingPagedResults" : -1
+}</computeroutput></screen>
 
-&gt; select sn,mail,description from managed_user
+  <para>
+   Now that you have a listing of desired users, you can add more fields:
+  </para>
 
----+---------+--------------------+--------------------+--------------------
-  #| RID     |familyName          |email               |description         
----+---------+--------------------+--------------------+--------------------
-  0|    #-2:1|smith               |joe@example.com     |My first user
-  1|    #-2:2|Jensen              |bjensen@example.com |Created By XML1
-  2|    #-2:3|Carter              |scarter@example.com |Created By XML1
----+---------+--------------------+--------------------+--------------------
-
-3 item(s) found. Query executed in 0.0040 sec(s).
-
-&gt; select * from audit_activity
-
----+---------+-------------+----------+...
-  #| RID     |rev |action  |status    |...
----+---------+-------------+----------+...
-  0|    #-2:1|0   |CREATE  |SUCCESS   |...
-  1|    #-2:2|0   |CREATE  |SUCCESS   |...
-  2|    #-2:3|0   |CREATE  |SUCCESS   |...
-  3|    #-2:4|0   |CREATE  |SUCCESS   |...
-  ...
- 18 item(s) found. Query executed in 0.0090 sec(s). 
-
-&gt; select * from audit_recon
-
-----+------+------+-------+---------+---------+---------+...
-#   |@RID  |action|status |exception|entryType|situation|...
-----+------+------+-------+---------+---------+---------+...
-0   |#19:0 |null  |SUCCESS|         |start    |null     |...
-1   |#19:1 |CREATE|SUCCESS|         |         |ABSENT   |...
-2   |#19:2 |CREATE|SUCCESS|         |         |ABSENT   |...
-3   |#19:3 |IGNORE|SUCCESS|         |         |UNASSI...|...
-
-4 item(s) found. Query executed in 0.0070 sec(s).
-</screen>
+  <screen>$ <userinput>curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request GET \
+   "https://localhost:8443/openidm/managed/user?_queryFilter=sn%20%pr&amp;_fields=sn,mail,description"
+  </userinput>
+   <computeroutput>{
+ "result" : [ {
+    "sn" : "Carter",
+    "mail" : "scarter@example.com",
+    "description" : "Created by XML1",
+ }, {
+    "sn" : "Jensen"
+    "mail" : "bjensen@example.com",
+    "description" : "Created by XML1",
+ } ]
+ "resultCount" : 2,
+ "pagedResultsCookie" : null,
+ "remainingPagedResults" : -1
+}</computeroutput></screen>
 
   <para>This information is also available in the CSV format audit logs located 
   in the <filename>openidm/audit</filename> directory.</para>
@@ -688,13 +710,10 @@ $ curl \
       "_id": "scarter",
       "_rev": "0"
    }, {
-      "_id": "joe",
-      "_rev": "0"
-   }, {
       "_id": "tmorris",
       "_rev": "0"
    } ],
-   "resultCount": 4,
+   "resultCount": 3,
    "pagedResultsCookie": null,
    "remainingPagedResults": -1
 }</computeroutput>
@@ -711,11 +730,9 @@ $ curl \
 "_id",  "action",...,"reconId","situation","sourceObjectId",                "targetObjectId","timestamp";
 "7e...","CREATE",...,"486...", "ABSENT",   "system/xmlfile/account/bjensen","managed/user/bjensen",...;
 "1a...","CREATE",...,"486...", "ABSENT",   "system/xmlfile/account/scarter","managed/user/scarter",...;
-"47...","IGNORE",...,"486...", "UNQUALIFIED",""            ,...,            "managed/user/joe",...;
 "33...","UPDATE",...,"aa9...", "CONFIRMED","system/xmlfile/account/bjensen","managed/user/bjensen",...;
 "1d...","UPDATE",...,"aa9...", "CONFIRMED","system/xmlfile/account/scarter","managed/user/scarter",...;
 "0e...","CREATE",...,"aa9...", "ABSENT",   "system/xmlfile/account/tmorris","managed/user/tmorris",...;
-"23...","IGNORE",...,"aa9...", "UNQUALIFIED","",...,                        "managed/user/joe",...;
 </programlisting>
 
   <para>
