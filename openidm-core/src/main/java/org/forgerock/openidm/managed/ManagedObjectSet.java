@@ -450,7 +450,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             Resource oldValue, JsonValue newValue, String logMessage)
             throws ResourceException {
 
-        if (newValue.equals(oldValue.getContent())) { // object hasn't changed
+        if (newValue.asMap().equals(oldValue.getContent().asMap())) { // object hasn't changed
             return new Resource(resourceId, rev, null);
         }
         // Execute the onUpdate script if configured
@@ -467,9 +467,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         UpdateRequest updateRequest = Requests.newUpdateRequest(repoId(resourceId), newValue);
         updateRequest.setRevision(rev);
         Resource response = connectionFactory.getConnection().update(context, updateRequest);
-
-        activityLogger.log(context, request.getRequestType(), logMessage, managedId(resourceId).toString(),
-                oldValue.getContent(), response.getContent(), Status.SUCCESS);
 
         // Execute the postUpdate script if configured
         execScript(context, postUpdate, response.getContent(),
@@ -534,8 +531,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                                 JsonValue newValue = decrypted.getContent().copy();
                                 JsonValuePatch.apply(newValue, operations);
                                 
-                                handler.handleResult(update(context, request, resource.getId(), resource.getRevision(), decrypted, newValue,
-                                        "Patch " + operations.toString()).getContent());
+                                Resource response = update(context, request, resource.getId(), resource.getRevision(), 
+                                        decrypted, newValue, "Patch " + operations.toString());
+                                
+                                activityLogger.log(context, request.getRequestType(), "Patch " + operations.toString(), 
+                                        managedId(resource.getId()).toString(), resource.getContent(), response.getContent(), 
+                                        Status.SUCCESS);
+                                
+                                handler.handleResult(response.getContent());
                             } catch (ResourceException e) {
                                 handler.handleError(e);
                             }
