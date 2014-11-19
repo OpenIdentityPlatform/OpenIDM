@@ -1404,41 +1404,5 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
             </step>
         </procedure>
     </section>
- <!-- OPENIDM-2211 still in progress
- <section xml:id="script-endpoint">
-  <title>Validating Scripts Over REST</title>
-  <para>
-   OpenIDM exposes a <literal>script</literal> endpoint that enables you to
-   validate scripts by specifying the script parameters as part of the JSON
-   payload. Scripts called over the <literal>script</literal> endpoint have
-   access to scopes outside of which they were created. The only supported
-   action on the <literal>script</literal> endpoint is <literal>eval</literal>,
-   so scripts can not be launched from this endpoint, but merely evaluated.
-  </para>
-  <para>
-   The following REST call evaluates the <literal>autoPurgeAuditRecon.js</literal>
-   script (provided in <filename>openidm/bin/defaults/script/audit</filename>.
-   The example assumes that the script exists in the directory reserved for
-   custom scripts (<filename>openidm/script</filename>).
-  </para>
-  <screen>$ <userinput>curl \
- -cacert self-signed.crt \
- -header "X-OpenIDM-Username: openidm-admin" \
- -header "X-OpenIDM-Password: openidm-admin" \
- -header "Content-Type: application/json" \
- -request POST \
- -data '{
-   "type": "text\/javascript",
-   "file": "script\/autoPurgeAuditRecon.js",
-   "input": {
-     "mappings": ["%"],
-     "purgeType" : "purgeByNumOfReconsToKeep",
-     "numOfRecons" : 1
-   }
- }' \
- "https://localhost:8443/openidm/script?_action=eval"</userinput>
-<computeroutput>[
-  0
-] </computeroutput>  </screen>
- </section>     -->
+
 </appendix>
