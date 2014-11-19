@@ -25,8 +25,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -147,9 +145,14 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
         }
 
         JsonValue moduleProperties = moduleConfig.get("properties");
-        //decrypt/de-obfuscate keystore password
+        if (moduleProperties.isDefined("privateKeyPassword")) {
+            //decrypt/de-obfuscate privateKey password
+            moduleProperties.put("privateKeyPassword", JettyPropertyUtil.decryptOrDeobfuscate(moduleProperties.get("privateKeyPassword").asString()));
+        }
+
         if (moduleProperties.isDefined("keystorePassword")) {
-            moduleProperties.put("keystorePassword", JettyPropertyUtil.getProperty("openidm.keystore.password", false));
+            //decrypt/de-obfuscate keystore password
+            moduleProperties.put("keystorePassword", JettyPropertyUtil.decryptOrDeobfuscate(moduleProperties.get("keystorePassword").asString()));
         }
 
         // set the classname config so the actual auth module gets wrapped in a IDMJaspiModuleWrapper:
