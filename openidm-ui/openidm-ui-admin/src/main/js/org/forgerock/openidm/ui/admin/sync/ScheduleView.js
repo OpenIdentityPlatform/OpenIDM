@@ -53,9 +53,12 @@ define("org/forgerock/openidm/ui/admin/sync/ScheduleView", [
         mapping: null,
         allPatterns: {},
         pattern: "",
+        foundLiveSync: false,
 
         render: function (args, callback) {
             MappingBaseView.child = this;
+
+            this.foundLiveSync = false;
 
             MappingBaseView.render(args,_.bind(function(){
                 this.loadData(args, callback);
@@ -94,17 +97,22 @@ define("org/forgerock/openidm/ui/admin/sync/ScheduleView", [
                                     this.$el.find(".managedSourceMessage").hide();
                                     this.$el.find(".liveSyncSeconds").text(seconds);
 
+                                    this.foundLiveSync = true;
+
                                     // This is a recon schedule
                                 } else if (schedule.invokeService.indexOf("sync") >= 0) {
                                     // The mapping is of a managed object
+
                                     if (this.mapping.source.indexOf("managed/") >= 0) {
                                         this.$el.find(".noLiveSyncMessage").hide();
                                         this.$el.find(".systemObjectMessage").hide();
                                         this.$el.find(".managedSourceMessage").show();
                                     } else {
-                                        this.$el.find(".noLiveSyncMessage").show();
-                                        this.$el.find(".systemObjectMessage").hide();
-                                        this.$el.find(".managedSourceMessage").hide();
+                                        if(!this.foundLiveSync) {
+                                            this.$el.find(".noLiveSyncMessage").show();
+                                            this.$el.find(".systemObjectMessage").hide();
+                                            this.$el.find(".managedSourceMessage").hide();
+                                        }
                                     }
 
                                     if (schedule.invokeContext.mapping === this.mappingName) {
