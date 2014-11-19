@@ -7,6 +7,8 @@ package org.forgerock.openidm.provisioner.salesforce.internal.schema;
 
 import org.forgerock.json.fluent.JsonValue;
 
+import java.util.Set;
+
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
@@ -3135,5 +3137,9 @@ public class SchemaHelper {
 
     public static JsonValue getObjectSchema() {
         return objectSchema;
+    }
+
+    public static Set<String> getObjectProperties(String type) {
+        return getObjectSchema().get(type).get("properties").keys();
     }
 }

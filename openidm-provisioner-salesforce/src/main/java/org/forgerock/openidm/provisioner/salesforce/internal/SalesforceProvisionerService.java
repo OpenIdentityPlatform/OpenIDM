@@ -660,8 +660,10 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
             };
 
     private String buildQueryExpressionFromQueryFilter(String type, QueryFilter queryFilter) {
-        // TODO use actual fields from "meta-data"
-        return "SELECT Id, UserName, FirstName, LastName FROM " + type + " WHERE "
+        return "SELECT "
+                + StringUtils.join(SchemaHelper.getObjectProperties(type), ", ")
+                + " FROM " + type
+                + " WHERE "
                 + queryFilter.accept(SALESFORCE_QUERY_FILTER_VISITOR, null);
     }
 
