@@ -62,65 +62,74 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 
  if ($Connector.Operation -eq "SCHEMA")
  {
-	$schema =[DirectoryServices.ActiveDirectory.ActiveDirectorySchema]::GetCurrentSchema()
-	
+
  	###########################
- 	# AD User object class
+ 	# __ACCOUNT__ object class
 	###########################
-	# Here is an example of AD attribute definition:
-	#
-	# Name                   : sAMAccountName
-	# CommonName             : SAM-Account-Name
-	# Oid                    : 1.2.840.113556.1.4.221
-	# Syntax                 : DirectoryString
-	# Description            :
-	# IsSingleValued         : True
-	# IsIndexed              : True
-	# IsIndexedOverContainer : False
-	# IsInAnr                : True
-	# IsOnTombstonedObject   : True
-	# IsTupleIndexed         : False
-	# IsInGlobalCatalog      : True
-	# RangeLower             : 0
-	# RangeUpper             : 256
-	# IsDefunct              : False
-	# Link                   :
-	# LinkId                 :
-	# SchemaGuid             : 3e0abfd0-126a-11d0-a060-00aa006c33ed
-	
+
 	$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
 	$ocib.ObjectType = "__ACCOUNT__"
 	
-	foreach ($attr in $schema.FindClass("user").MandatoryProperties)
+	# Required Attributes
+	$Required = @("cn","sn","sAMAccountName","userPrincipalName")
+	
+	foreach ($attr in $Required)
 	{
-		if ($attr.Name.StartsWith("ms","CurrentCultureIgnoreCase")) {continue}
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr.Name);
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
 		$caib.Required = $TRUE
-		if (! $attr.IsSingleValued ) {$caib.MultiValued = $TRUE}
-		switch ($attr.Syntax)
-		{
-			"Int64" {$caib.ValueType = [long] ; break}
-            "Int" {$caib.ValueType = [int]; break}
-            "Bool" {$caib.ValueType = [bool]; break}
-			"Enumeration" {$caib.ValueType = [int]; break}
-			default {break} # String is default
-		}
+		$caib.ValueType = [string];
 		$ocib.AddAttributeInfo($caib.Build())
 	}
 	
-	foreach ($attr in $schema.FindClass("user").OptionalProperties)
+	# Standard attributes - single valued
+	$StandardSingle = @("division","primaryInternationalISDNNumber","c","l","department","givenName","telephoneNumber","employeeNumber","displayName",
+	"personalTitle","homeDirectory","postalCode","manager","st","initials","employeeType","streetAddress","co","title","middleName","wWWHomePage","company",
+	"name","comment","scriptPath","mail","displayNamePrintable","ipPhone","homePostalAddress","facsimileTelephoneNumber","homePhone","street","homeDrive",
+	"info","assistant","mobile","employeeID","logonWorkstation","logonHours","userWorkstations","userSharedFolder","description")
+	
+	foreach ($attr in $StandardSingle)
 	{
-		if ($attr.Name.StartsWith("ms","CurrentCultureIgnoreCase")) {continue}
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr.Name);
-		if (! $attr.IsSingleValued ) {$caib.MultiValued = $TRUE}
-		switch ($attr.Syntax)
-		{
-			"Int64" {$caib.ValueType = [long] ; break}
-            "Int" {$caib.ValueType = [int]; break}
-            "Bool" {$caib.ValueType = [bool]; break}
-			"Enumeration" {$caib.ValueType = [int]; break}
-			default {break} # String is default
-		}
+	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build($attr,[string]))
+	}
+	
+	# Standard attributes - multi valued
+	$StandardMulti = @("otherMailbox","otherLoginWorkstations","o","postOfficeBox","otherTelephone",
+	"otherMobile","seeAlso",,"url","ou","postalAddress","otherHomePhone","internationalISDNNumber")
+	
+	foreach ($attr in $StandardMulti)
+	{
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+		$caib.MultiValued = $TRUE
+		$caib.ValueType = [string];
+		$ocib.AddAttributeInfo($caib.Build())
+	}
+	
+	# Standard attributes - multi valued - readonly back link
+	$StandardMultiRO = @("memberOf","directReports")
+	
+	foreach ($attr in $StandardMultiRO)
+	{
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+		$caib.MultiValued = $TRUE
+		$caib.Creatable = $FALSE
+		$caib.Updateable = $FALSE
+		$caib.ValueType = [string];
+		$ocib.AddAttributeInfo($caib.Build())
+	}
+	
+	# Technical attributes
+	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("userAccountControl",[int]))
+	# $ocib.AddAttributeInfo($AttributeInfoBuilder::Build("accountExpires",[int]))
+	
+	$Technical = @("objectGUID","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp","lastLogonTimestamp",
+	"badPwdCount","badPasswordTime","lastLogon","pwdLastSet","logonCount","lockoutTime")
+	
+	foreach ($attr in $Technical)
+	{
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+		$caib.Creatable = $FALSE
+		$caib.Updateable = $FALSE
+		$caib.ValueType = [string];
 		$ocib.AddAttributeInfo($caib.Build())
 	}
 	
@@ -152,36 +161,58 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
 	$ocib.ObjectType = "__GROUP__"
 	
-	foreach ($attr in $schema.FindClass("group").MandatoryProperties)
+	# Required Attributes
+	$Required = @("cn","sAMAccountName")
+	
+	foreach ($attr in $Required)
 	{
-		if ($attr.Name.StartsWith("ms","CurrentCultureIgnoreCase")) {continue}
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr.Name);
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
 		$caib.Required = $TRUE
-		if (! $attr.IsSingleValued ) {$caib.MultiValued = $TRUE}
-		switch ($attr.Syntax)
-		{
-			"Int64" {$caib.ValueType = [long] ; break}
-            "Int" {$caib.ValueType = [int]; break}
-            "Bool" {$caib.ValueType = [bool]; break}
-			"Enumeration" {$caib.ValueType = [int]; break}
-			default {break} # String is default
-		}
+		$caib.ValueType = [string];
 		$ocib.AddAttributeInfo($caib.Build())
 	}
 	
-	foreach ($attr in $schema.FindClass("group").OptionalProperties)
+	# Standard attributes - single valued
+	$StandardSingle = @("wWWHomePage","name","telephoneNumber","mail","displayNamePrintable","displayName","managedBy","info","description")
+	
+	foreach ($attr in $StandardSingle)
 	{
-		if ($attr.Name.StartsWith("ms","CurrentCultureIgnoreCase")) {continue}
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr.Name);
-		if (! $attr.IsSingleValued ) {$caib.MultiValued = $TRUE}
-		switch ($attr.Syntax)
-		{
-			"Int64" {$caib.ValueType = [long] ; break}
-            "Int" {$caib.ValueType = [int]; break}
-            "Bool" {$caib.ValueType = [bool]; break}
-			"Enumeration" {$caib.ValueType = [int]; break}
-			default {break} # String is default
-		}
+	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build($attr,[string]))
+	}
+	
+	# Standard attributes - multi valued
+	$StandardMulti = @("secretary","member")
+	
+	foreach ($attr in $StandardMulti)
+	{
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+		$caib.MultiValued = $TRUE
+		$caib.ValueType = [string];
+		$ocib.AddAttributeInfo($caib.Build())
+	}
+
+	# Standard attributes - multi valued - readonly back link
+	$StandardMultiRO = @("memberOf","directReports")
+	
+	foreach ($attr in $StandardMultiRO)
+	{
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+		$caib.MultiValued = $TRUE
+		$caib.Creatable = $FALSE
+		$caib.Updateable = $FALSE
+		$caib.ValueType = [string];
+		$ocib.AddAttributeInfo($caib.Build())
+	}
+	
+	# Technical attributes
+	$Technical = @("objectGUID","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp")
+	
+	foreach ($attr in $Technical)
+	{
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+		$caib.Creatable = $FALSE
+		$caib.Updateable = $FALSE
+		$caib.ValueType = [string];
 		$ocib.AddAttributeInfo($caib.Build())
 	}
 	
