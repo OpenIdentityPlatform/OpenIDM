@@ -1385,7 +1385,7 @@ mysql &gt; <userinput>select * from Users;</userinput>
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&amp;_pageSize=2&amp;_sortKeys=timestamp,id"</userinput>
+ "https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&amp;fields=id,uid_&amp;pageSize=2&amp;_sortKeys=timestamp,id"</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": "2014-09-10 12:18:46.0,2",

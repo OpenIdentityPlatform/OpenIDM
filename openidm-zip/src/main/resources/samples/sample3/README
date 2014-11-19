@@ -199,7 +199,7 @@ To try the example, follow these steps.
     depth.
 
     10. Show paging results with page size of 2
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id"
     {
       "result":[
         {
@@ -216,7 +216,7 @@ To try the example, follow these steps.
     }
 
     11. Use the pagedResultsCookie from the result in step 10 for the next query to retrieve the next result set. Make sure you encode the date:time.
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2"
     {
       "result":[
         {
