@@ -22,8 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-Sample 4 - CSV File to XML File
--------------------
+# Sample 4 - CSV File to XML File
 
 This sample demonstrates using both a comma-separated value file and an XML
 file as external resources. The synchronization mapping is directly from the 
@@ -31,12 +30,12 @@ CSV file to the XML file, without using the OpenIDM internal repository.
 Changes flow only from the CSV to XML. Data exists in both files, and
 correlation is used to find matching records.
 
-For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/install-guide/index.html#more-sample4
+For documentation pertaining to this example see : [Sample 4](http://openidm.forgerock.org/doc/install-guide/index.html#more-sample4)
 
 To try the sample, follow these steps.
 
-    1. CSV data for this sample is in the file samples/sample4/data/hr.csv.
+#####Step 1
+CSV data for this sample is in the file samples/sample4/data/hr.csv.
 
     $ cd /path/to/openidm
     $ cat samples/sample4/data/hr.csv
@@ -44,7 +43,7 @@ To try the sample, follow these steps.
     "Don", "DDOE", "Doe", "doe@example.org", "123456", "Z29vZA=="
     "Stephen", "SCARTER", "Carter", "scarter@example.com", "654321", "Z29vZA=="
 
-    XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xml
+XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xml
 
     $ cd /path/to/openidm
     $ cat samples/sample4/data/xmlConnectorData.xml
@@ -79,19 +78,21 @@ To try the sample, follow these steps.
     </icf:OpenICFContainer>
 
 
-    Note that the last entry in that file has the same email address (scarter@example.com) 
-    as an entry in the CSV. This will be used by correlation to find and update the record.
+Note that the last entry in that file has the same email address (scarter@example.com) as an entry in the CSV. This will be used by correlation to find and update the record.
 
-    2. Start OpenIDM with the configuration for sample 4.
+#####Step 2
+Start OpenIDM with the configuration for sample 4.
 
     $ ./startup.sh -p samples/sample4
 
-    3. Run reconciliation.
+#####Step 3
+Run reconciliation.
 
     $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=csv_xmlfile"
     {"reconId":"84b55592-a2d5-438a-ba71-c5e9a7a93938"}
 
-    4. See the data updated in the XML file:
+#####Step 4
+See the data updated in the XML file:
 
     $ cd /path/to/openidm
     $ cat samples/sample4/data/xmlConnectorData.xml
@@ -126,13 +127,12 @@ To try the sample, follow these steps.
     </icf:OpenICFContainer>
 
 
-    Note that Carter got updated, Doe got created, and Jensen got deleted. This 
-    is all based on the policies declared in sync.json.
+Note that Carter got updated, Doe got created, and Jensen got deleted. This is all based on the policies declared in sync.json.
 
-    You can also try changing data in either the CSV or the XML and running recon 
-    again. You should see the changes you make in the CSV used as authoritative,
-    overriding any changes you make in the XML and the two remaining in sync.
+You can also try changing data in either the CSV or the XML and running recon again. You should see the changes you make in the CSV used as authoritative, overriding any changes you make in the XML and the two remaining in sync.
 
-    These users will not be visible from the OpenIDM UI, since they are mapped 
-    directly rather than via the internal OpenIDM repository.
+These users will not be visible from the OpenIDM UI, since they are mapped directly rather than via the internal OpenIDM repository.
 
+# Sample 4 through the Administration UI
+
+Similar to Sample 1, the steps in this sample can be performed through the Administration UI. For more details please consult the [Installation Guide](http://openidm.forgerock.org/doc/install-guide/index.html).
