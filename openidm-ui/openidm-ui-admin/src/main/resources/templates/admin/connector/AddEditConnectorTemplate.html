@@ -79,6 +79,20 @@
             </div>
         </fieldset>
 
+        <div style="display:none;" id="connectorErrorMessage" class="float-left alert-box warning-message">
+            <p class="alert-message">
+                <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
+                <span class="message"></span>
+            </p>
+        </div>
+        <div class="float-right form-button-bar">
+            <input type="submit" id="validateConnector" name="validateConnector" value="{{t 'templates.connector.validateConnector'}}" class="button">
+            <input type="button" id="addEditObjectType" name="addEditObjectType" value="{{addEditObjectTypeTitle}}" class="button" disabled="true">
+            <input type="button" id="addEditConnector" name="addEditButton" value="{{addEditSubmitTitle}}" class="button" disabled="true">
+            <a href="#resources/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="button"></a>
+        </div>
+        <div style="clear:both;"></div>
+
         <fieldset id="liveSync">
             <legend><span>{{t "templates.connector.liveSync.schedules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
 
@@ -94,18 +108,5 @@
                 <div id="schedules" class="no-validation-block"></div>
             </div>
         </fieldset>
-
-        <div style="display:none;" id="connectorErrorMessage" class="float-left alert-box warning-message">
-            <p class="alert-message">
-                <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
-                <span class="message"></span>
-            </p>
-        </div>
-        <div class="float-right form-button-bar">
-            <input type="submit" id="validateConnector" name="validateConnector" value="{{t 'templates.connector.validateConnector'}}" class="button">
-            <input type="button" id="addEditObjectType" name="addEditObjectType" value="{{addEditObjectTypeTitle}}" class="button" disabled="true">
-            <input type="button" id="addEditConnector" name="addEditButton" value="{{addEditSubmitTitle}}" class="button" disabled="true">
-            <a href="#resources/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="button"></a>
-        </div>
     </form>
 </div>

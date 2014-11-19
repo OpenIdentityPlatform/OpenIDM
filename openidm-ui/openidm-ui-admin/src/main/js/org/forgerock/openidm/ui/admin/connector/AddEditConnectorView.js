@@ -324,7 +324,10 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                 Scheduler.generateScheduler({
                     "element": this.$el.find("#schedules .liveSyncScheduleContainer").last(),
-                    "defaults": {},
+                    "defaults": {
+                        "enabled" : true,
+                        "persisted" : true
+                    },
                     "onDelete": _.bind(this.removeSchedule, this),
                     "invokeService": "provisioner",
                     "source": source.val(),
