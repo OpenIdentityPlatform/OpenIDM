@@ -1,29 +1,20 @@
 <div class="sync-input-body">
     <form id="syncForm" class="form clearfix" autocomplete="off">
-        <fieldset id="sessionModuleForm">
-            <legend><span>{{t "templates.sync.syncTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-            <div class="group-body">
-                <h3>{{t "templates.sync.currentPolicy"}}: <span id="policyPatternName"></span></h3>
-                <p id="policyPatternDesc"></p>
-                <div class="group-field-block group-lead">
-                </div>
-
-                <div class="float-right form-button-bar">
-                    <input type="button" class="button" id="situationalPolicyEditorButton" value="{{t "templates.sync.modifySituationalPolicies"}}" />
-                </div>
-            </div>
+        <fieldset>
+            <legend><span>{{t "templates.situationalPolicies.policies"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+            <div class="group-body" id="policyPattern"></div>
         </fieldset>
 
         <fieldset>
             <legend><span>{{t "templates.sync.situationalScripts"}}</span><i class="fa fa-lg {{#if hideSituational}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
             <div class="group-body" id="situationalQueries" {{#if hideSituational}}style="display: none;"{{/if}}></div>
         </fieldset>
-
+        
         <fieldset>
             <legend><span>{{t "templates.sync.reconciliationScript"}}</span><i class="fa fa-lg {{#if hideRecon}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
             <div class="group-body" id="reconQueryView" {{#if hideRecon}}style="display: none;"{{/if}}></div>
         </fieldset>
-
+        
         <fieldset id="singleRecordRecon" {{#if hideSingleRecordRecon}}style="display:none;"{{/if}}>
             <legend><span>{{t "templates.sync.testSync.title"}}</span><i class="fa fa-lg {{#if hideTestSync}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
             <div class="group-body" id="testSyncView" {{#if hideTestSync}}style="display: none;"{{/if}}></div>
