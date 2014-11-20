@@ -273,7 +273,7 @@ CREATE  TABLE  [openidm].[auditrecon]
   message NTEXT NULL ,
   actionid NVARCHAR(511) NULL ,
   exceptiondetail NTEXT NULL ,
-  mapping NTEXT NULL ,
+  mapping NVARCHAR(511) NULL ,
   messagedetail NTEXT NULL ,
   PRIMARY KEY CLUSTERED (objectid),
 );
