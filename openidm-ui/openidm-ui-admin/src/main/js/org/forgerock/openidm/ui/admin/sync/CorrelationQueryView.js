@@ -240,7 +240,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
 
                 ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "correlationQuerySaveSuccess");
-                    BrowserStorageDelegate.set("currentMapping", this.model.mapping);
+                    BrowserStorageDelegate.set("currentMapping", _.extend(this.model.mapping, this.model.recon));
 
                     btns[$.t("templates.correlation.dontRunReconcile")] = function() {
                         $("#jqConfirm").dialog("close");

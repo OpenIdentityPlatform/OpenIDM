@@ -74,6 +74,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./sync/ObjectFiltersView",
     "./sync/SituationalScriptsView",
     "./sync/ReconScriptsView",
+    "./sync/ReconQueriesView",
+    "./sync/QueryFilterEditor",
     "./sync/CorrelationQueryView",
     "./sync/ChangeAssociationDialog",
     "./sync/TestSyncView",

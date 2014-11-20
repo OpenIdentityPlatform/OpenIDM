@@ -106,10 +106,9 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
             this.currentDialog.dialog({
                 title: "Script Manager",
                 width:"650",
-                height:"600",
                 modal: true,
-                resizable: false,
-                draggable: false,
+                resizable: true,
+                draggable: true,
                 buttons: btns,
                 position: { my: "center", at: "center", of: window },
                 close: _.bind(function () {

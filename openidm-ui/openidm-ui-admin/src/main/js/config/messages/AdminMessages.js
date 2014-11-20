@@ -128,6 +128,10 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.SyncMessages.correlationQuerySaved",
             type: "info"
         },
+        "reconQueryFilterSaveSuccess": {
+            msg: "config.messages.SyncMessages.reconQueryFilterSaveSuccess",
+            type: "info"
+        },
         "objectFiltersSaveSuccess": {
             msg: "config.messages.SyncMessages.objectFiltersSaved",
             type: "info"

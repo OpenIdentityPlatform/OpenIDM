@@ -32,6 +32,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/sync/AnalysisView",
     "org/forgerock/openidm/ui/admin/sync/ObjectFiltersView",
+    "org/forgerock/openidm/ui/admin/sync/ReconQueriesView",
     "org/forgerock/openidm/ui/admin/sync/CorrelationQueryView"
 ], function(AdminAbstractView,
             eventManager,
@@ -40,6 +41,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
             MappingBaseView,
             AnalysisView,
             ObjectFiltersView,
+            ReconQueriesView,
             CorrelationQueryView) {
 
     var CorrelationView = AdminAbstractView.extend({
@@ -74,10 +76,13 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
                 }
             }, this);
 
+            this.data.hideReconQueries = !this.dataModel.mapping.sourceQuery && !this.dataModel.mapping.targetQuery;
+
             this.parentRender(_.bind(function () {
-                AnalysisView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
-                CorrelationQueryView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName, startSync: this.sync});
-                ObjectFiltersView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
+                AnalysisView.render(this.dataModel);
+                CorrelationQueryView.render(_.extend({startSync: this.sync}, this.dataModel));
+                ObjectFiltersView.render(this.dataModel);
+                ReconQueriesView.render(this.dataModel);
                 MappingBaseView.moveSubmenu();
                 if(callback){
                     callback();
