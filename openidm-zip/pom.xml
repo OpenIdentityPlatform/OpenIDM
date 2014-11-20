@@ -53,6 +53,9 @@
     <properties>
         <!-- If we release this project, we need to include the Forgerock binary license -->
         <include.binary.license>${project.build.directory}</include.binary.license>
+        <!-- The SaaS connectors samples must be excluded from the community build -->
+        <exclude.google.samples>samples/google-connector/**</exclude.google.samples>
+        <exclude.salesforce.samples>samples/salesforce-connector/**</exclude.salesforce.samples>
     </properties>
     <dependencies>
         <dependency>
@@ -446,11 +449,6 @@
             <artifactId>groovy-connector</artifactId>
             <version>${openicf.groovyconnector.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.openicf.connectors</groupId>
-            <artifactId>googleapps-connector</artifactId>
-            <version>${openicf.googleconnector.version}</version>
-        </dependency>
         <!-- tomcat-jdbc and juli needed for scriptedsql 1.4 -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
@@ -750,7 +748,22 @@
                  <artifactId>openidm-salesforce</artifactId>
                  <version>${provisioner.salesforcemodule.version}</version>
               </dependency>
+              <dependency>
+                 <groupId>org.forgerock.openicf.connectors</groupId>
+                 <artifactId>googleapps-connector</artifactId>
+                 <version>${openicf.googleconnector.version}</version>
+              </dependency>
            </dependencies>
+           <properties>
+               <!-- We reset these 2 properties to include the SaaS connectors samples in the commercial build -->
+               <exclude.google.samples></exclude.google.samples>
+               <exclude.salesforce.samples></exclude.salesforce.samples>
+               <!-- Properties to include the SaaS connectors in the commercial build -->
+               <google.provisioner>provisioner.openicf-google.json</google.provisioner>
+               <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
+               <saas.connectors.conf>conf/**</saas.connectors.conf>
+               <saas.connectors.script>script/**</saas.connectors.script>
+           </properties>
         </profile>
     </profiles>
 </project>
