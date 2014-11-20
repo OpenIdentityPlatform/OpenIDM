@@ -65,7 +65,10 @@ define("org/forgerock/openidm/ui/admin/sync/ScheduleView", [
             }, this));
         },
         loadData: function(args, callback){
-            var schedules = [], seconds = "";
+            var schedules = [],
+                seconds = "",
+                promises = [],
+                tempPromises;
             this.sync = MappingBaseView.data.syncConfig;
             this.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
 
@@ -86,7 +89,11 @@ define("org/forgerock/openidm/ui/admin/sync/ScheduleView", [
                 SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
                     if (schedules.result.length > 0) {
                         _(schedules.result).each(function (scheduleId) {
-                            SchedulerDelegate.specificSchedule(scheduleId._id).then(_.bind(function (schedule) {
+                            tempPromises = SchedulerDelegate.specificSchedule(scheduleId._id);
+
+                            promises.push(tempPromises);
+
+                            tempPromises.then(_.bind(function (schedule) {
                                 // There is a liveSync Scheduler and it is enabled and the source matches the source of the mapping
                                 if (schedule.invokeService.indexOf("provisioner") >= 0 && schedule.enabled && schedule.invokeContext.source === this.mapping.source) {
                                     seconds = schedule.schedule.substr(schedule.schedule.indexOf("/") + 1);
@@ -131,6 +138,7 @@ define("org/forgerock/openidm/ui/admin/sync/ScheduleView", [
                                         this.$el.find("#addNew").hide();
                                     }
                                 }
+
                             }, this));
                         }, this);
 
@@ -144,16 +152,23 @@ define("org/forgerock/openidm/ui/admin/sync/ScheduleView", [
                         this.$el.find(".managedSourceMessage").hide();
                     }
 
+                    if(promises.length !== 0) {
+                        $.when.apply($, promises).then(_.bind(function () {
+                            this.$el.find(".schedule-input-body").show();
+
+                            if (callback) {
+                                callback();
+                            }
+                        }, this));
+                    } else {
+                        this.$el.find(".schedule-input-body").show();
+
+                        if (callback) {
+                            callback();
+                        }
+                    }
+
                 }, this));
-
-
-                if ($("#schedules .schedulerBody").length === 0) {
-                    this.$el.find("#addNew").show();
-                }
-
-                if(callback){
-                    callback();
-                }
             }, this));
         },
 
