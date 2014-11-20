@@ -36,6 +36,8 @@
                 <exclude>**/*.command</exclude>
                 <exclude>**/*.bat</exclude>
                 <exclude>**/internal-common/**</exclude>
+                <exclude>${exclude.google.samples}</exclude>
+                <exclude>${exclude.salesforce.samples}</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -747,15 +749,15 @@
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/provisioners</directory>
             <includes>
-                <include>provisioner.openicf-google.json</include>
+                <include>${google.provisioner}</include>
             </includes>
             <outputDirectory>/openidm/samples/google-connector/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
+                <include>${saas.connectors.conf}</include>
+                <include>${saas.connectors.script}</include>
             </includes>
             <outputDirectory>/openidm/samples/google-connector</outputDirectory>
         </fileSet>
@@ -763,15 +765,15 @@
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/provisioners</directory>
             <includes>
-                <include>provisioner.salesforce-salesforce.json</include>
+                <include>${salesforce.provisioner}</include>
             </includes>
             <outputDirectory>/openidm/samples/salesforce-connector/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
+                <include>${saas.connectors.conf}</include>
+                <include>${saas.connectors.script}</include>
             </includes>
             <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
         </fileSet>
