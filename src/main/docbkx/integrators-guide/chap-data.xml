@@ -683,12 +683,6 @@ var results = openidm.query("system/ScriptedSQL/account", params)
        <programlisting language="javascript">
 "_queryFilter" : '/employeeNumber ge 5000'
        </programlisting>
-        <para>
-         or
-        </para>
-        <programlisting language="javascript">
-
-        </programlisting>
      <para>
       The following REST call returns the user names of all managed users whose
       <literal>employeeNumber</literal> is 5000 or higher.
