@@ -32,7 +32,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/openidm/ui/admin/util/Scheduler",
-    "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog",
+    "org/forgerock/openidm/ui/admin/sync/SituationPolicyView",
     "org/forgerock/openidm/ui/admin/sync/SituationalScriptsView",
     "org/forgerock/openidm/ui/admin/sync/ReconScriptsView",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
@@ -45,7 +45,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             ConfigDelegate,
             SchedulerDelegate,
             Scheduler,
-            SituationPolicyDialog,
+            SituationPolicyView,
             SituationalScriptsView,
             ReconScriptsView,
             BrowserStorageDelegate,
@@ -57,12 +57,9 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         element: "#mappingContent",
         noBaseTemplate: true,
         events: {
-            "click .sync-input-body fieldset legend" : "sectionHideShow",
-            "click #situationalPolicyEditorButton": "configureSituationalPolicy"
+            "click .sync-input-body fieldset legend" : "sectionHideShow"
         },
         mapping: null,
-        allPatterns: {},
-        pattern: "",
 
         render: function (args, callback) {
             MappingBaseView.child = this;
@@ -71,7 +68,6 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             }, this));
         },
         loadData: function(args, callback){
-            var schedules = [], seconds = "";
             this.sync = MappingBaseView.data.syncConfig;
             this.recon = MappingBaseView.currentMapping().recon;
             this.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
@@ -102,11 +98,10 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             this.parentRender(_.bind(function() {
                 SituationalScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
                 ReconScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
+                SituationPolicyView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
                 TestSyncView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName, recon: MappingBaseView.data.recon});
 
                 MappingBaseView.moveSubmenu();
-
-                this.setCurrentPolicyType();
 
                 if(callback){
                     callback();
@@ -131,60 +126,6 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
 
         reconDeleted: function() {
             $("#addNew").show();
-        },
-
-        setCurrentPolicyType: function() {
-            var currentPattern = [],
-                currentPolicy = [],
-                patternFound = false;
-
-            function policySorter(policy) {
-                return policy.situation;
-            }
-
-            $.getJSON("templates/admin/sync/situationalPolicyPatterns.json", _.bind(function(patterns) {
-                this.allPatterns = patterns;
-
-                _(patterns).each(_.bind(function(pattern, name) {
-
-                    currentPattern = _.chain(pattern.policies)
-                        .map(function(policy) {
-                            return _.omit(policy, "options");
-                        })
-                        .sortBy(policySorter)
-                        .value();
-
-                    currentPolicy = _.sortBy(this.mapping.policies, policySorter);
-
-                    if (_(currentPattern).isEqual(currentPolicy)) {
-                        $("#policyPatternName").text(name);
-                        $("#policyPatternDesc").text(pattern.description);
-                        patternFound = true;
-                    }
-                },this));
-
-                if (!patternFound) {
-                    $("#policyPatternName").text("Custom");
-                    $("#policyPatternDesc").text(this.allPatterns.Custom.description);
-                }
-
-            }, this));
-        },
-
-        configureSituationalPolicy: function() {
-            this.setCurrentPolicyType();
-            SituationPolicyDialog.render(this.mapping, $("#policyPatternName").text(), this.allPatterns, _.bind(function(data) {
-                if (data) {
-                    this.mapping.policies = data.policies;
-                    $("#policyPatternName").text(data.patternName);
-                    $("#policyPatternDesc").text(data.patternDescription);
-                    if(mappingUtils.readOnlySituationalPolicy(data.policies)){
-                        this.$el.find("#singleRecordRecon").hide();
-                    } else {
-                        this.$el.find("#singleRecordRecon").show();
-                    }
-                }
-            }, this));
         }
     });
 

@@ -151,14 +151,48 @@
   }
 }
 
-
-
-#situationPolicyDialog {
+#policyPattern {
   padding: 10px;
 
-  #patternDescription {
+  .color {
+    float: left;
+    margin: 4px 10px 0 0;
+  }
+
+  .info {
+    color: #a3a3a3;
+    cursor: pointer;
+    margin: 0 0 0 5px;
+  }
+
+  .info:hover {
+    color: #5a646d;
+  }
+
+  .success-display {
+    color: #70a796;
+  }
+  .failure-display {
+    color: #ca3127;
+  }
+  .warning-display {
+    color:#e6bf24;
+  }
+
+  .policyInformation {
     display: inline-block;
-    margin: 0 0 10px 10px;
+    margin: 0 0 10px;
+    width: 100%;
+
+    #patternDescription {
+      margin: 0 0 10px 10px;
+      display: inline-block;
+      font-style: italic;
+    }
+    a {
+      float: right;
+      text-decoration: none;
+    }
   }
   &>p {
     margin: 5px 0 0;
@@ -170,24 +204,17 @@
     width: initial;
     font-size: 13px;
   }
-  .group-field-block {
-    padding: 0;
-    margin-top: 0px;
-    width: 100%;
-  }
 
-  fieldset {
+  #sessionModuleForm {
     border: 1px #ddd solid;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 5px;
     background-color: white;
+    padding: 5px;
+    margin: 0 0 10px;
 
     label {
       display: block;
-      padding: 3px 10px 7px 0;
-      text-align: right;
-      width: 170px;
+      padding: 3px 0 7px 0;
+      width: 140px;
     }
 
     select {
@@ -196,26 +223,11 @@
       font-size: 13px;
       width:180px;
     }
-  }
 
-  legend {
-    height: 25px;
-    padding: 5px 5px 0px 5px;
-    background-color: #80b7ab;
-    border: 2px solid #5fa595;
-    cursor: pointer;
-    margin-left: 10px;
-    color: white;
-
-    &:hover {
-      background-color: lighten(#80b7ab, @button-hover-lightness);
-    }
-
-    span {
-      margin-right: 10px;
-      width: 170px;
+    .situationRow {
       display: inline-block;
-      text-overflow: ellipsis;
+      width: 50%;
+      position: relative;
     }
   }
 
@@ -226,7 +238,7 @@
   }
 
   #situationCopy {
-    display: none;
+    display: none !important;
   }
   .situationRow {
     .situation{}
