@@ -499,7 +499,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=sn+sw+"Jen"&amp;_fields=userName'</userinput>
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=sn+sw+"Jen"&amp;_fields=userName'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -540,7 +540,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+lt+5000&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+lt+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -591,7 +591,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+le+5000&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+le+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -641,7 +641,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+gt+5000&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+gt+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -692,7 +692,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=employeeNumber+ge+5000&amp;_fields=userName,employeeNumber'</userinput>
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+ge+5000&amp;_fields=userName,employeeNumber'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -747,7 +747,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/managed/user?_queryFilter=mail%20pr&amp;_fields=mail'</userinput>
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=mail%20pr&amp;_fields=mail'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -782,7 +782,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET
- 'https://localhost:8443/managed/user?_queryFilter=true&amp;_fields=_id'</userinput>
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=true&amp;_fields=_id'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -814,7 +814,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- https://localhost:8443/managed/user?_queryFilter=city+eq+"London"+and+sn+eq+"Jensen"&amp;_fields=userName,givenName,sn'&amp;_fields=userName'</userinput>
+ https://localhost:8443/openidm/managed/user?_queryFilter=city+eq+"London"+and+sn+eq+"Jensen"&amp;_fields=userName,givenName,sn'&amp;_fields=userName'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
