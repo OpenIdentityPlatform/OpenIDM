@@ -82,6 +82,7 @@
                 "scheduleSaved" : "The schedule was successfully saved.",
                 "liveSyncSaved": "The LiveSync state has been saved.",
                 "correlationQuerySaved": "The correlation query has been saved.",
+                "reconQueryFilterSaveSuccess": "Reconcilation queries have been saved.",
                 "triggeredBySituationSaved": "The Triggered by Situation scripts have been saved.",
                 "objectFiltersSaved": "The Object Filter scripts have been saved.",
                 "triggeredByReconSaved": "The Triggered by Reconciliation scripts have been saved."
@@ -108,6 +109,37 @@
         }
     },
     "templates" : {
+        "util" : {
+            "filter": {
+                "options": {
+                    "none": "No Filter",
+                    "and": "All of...",
+                    "or": "Any of...",
+                    "not": "None of...",
+                    "expr": "The value for "
+                },
+                "delimiters": {
+                    "and": "And",
+                    "or": "Or"
+                },
+                "tags" : {
+                    "approxMatch": "starts with",
+                    "greaterOrEqual": "GTE (>=)",
+                    "lessOrEqual": "LTE (<=)",
+                    "equalityMatch": "is equal to",
+                    "ne": "is not equal to",
+                    "co": "contains",
+                    "lt": "LT (<)",
+                    "gt": "GT (>)",
+                    "extensible": {
+                        "rules": {
+                            "bitAnd": "Bitwise AND",
+                            "bitOr": "Bitwise OR"
+                        }
+                    }
+                }
+            }
+        },
         "MandatoryChangePassword" : {
             "title" : "Change Your Password",
             "mandatoryNewPassword" : "The current password is a default password. Please change this password to a more secure value.",
@@ -246,7 +278,10 @@
         },
         "correlation": {
             "correlation": "Correlation",
-            "objectFilters": "Object Filters",
+            "objectFilters": "Individual Record Validation",
+            "reconQueries": "Reconcilation Query Filters",
+            "sourceQuery": "Source Query",
+            "targetQuery": "Target Query",
             "associationRules": "Association Rules",
             "dataAssociationManagment": "Data Association Management",
             "noQuery": "No Correlation Query",
@@ -597,34 +632,7 @@
                 "authorizeGroups": "Save and Assign Admins",
                 "hideCert": "hide certificate",
                 "showCert": "show certificate",
-                "filter": {
-                    "title": {
-                        "dialog": "Update __type__"
-                    },
-                    "options": {
-                        "none": "No Filter",
-                        "and": "All of...",
-                        "or": "Any of...",
-                        "not": "None of...",
-                        "expr": "The value for "
-                    },
-                    "delimiters": {
-                        "and": "And",
-                        "or": "Or"
-                    },
-                    "tags" : {
-                        "approxMatch": "Starting with",
-                        "greaterOrEqual": "GTE (>=)",
-                        "lessOrEqual": "LTE (<=)",
-                        "equalityMatch": "Matching",
-                        "extensible": {
-                            "rules": {
-                                "bitAnd": "Bitwise AND",
-                                "bitOr": "Bitwise OR"
-                            }
-                        }
-                    }
-                },
+                "filterTitle": "Update __type__",
                 "errorMessages": {
                     "unknownHost" : "Unknown Host",
                     "portOutOfRange" : "Port Out of Range",

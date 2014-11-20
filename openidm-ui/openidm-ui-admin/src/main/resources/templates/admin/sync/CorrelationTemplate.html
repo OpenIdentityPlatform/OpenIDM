@@ -1,8 +1,7 @@
 <div class="correlationBody">
-    <form class="form clearfix" autocomplete="off">
         <fieldset>
-            <legend><span>{{t "templates.correlation.associationRules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-            <div class="group-body" id="correlationQueryView">
+            <legend><span>{{t "templates.correlation.reconQueries"}}</span><i class="fa fa-lg {{#if hideReconQueries}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
+            <div class="group-body" id="reconQueriesView" {{#if hideReconQueries}}style="display: none;"{{/if}}>
             </div>
         </fieldset>
 
@@ -13,9 +12,14 @@
         </fieldset>
 
         <fieldset>
+            <legend><span>{{t "templates.correlation.associationRules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+            <div class="group-body" id="correlationQueryView">
+            </div>
+        </fieldset>
+
+        <fieldset>
             <legend><span>{{t "templates.correlation.dataAssociationManagment"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
             <div class="group-body" id="analysisView">
             </div>
         </fieldset>
-    </form>
 </div>

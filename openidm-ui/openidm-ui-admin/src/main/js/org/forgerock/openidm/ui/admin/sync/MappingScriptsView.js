@@ -167,7 +167,7 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
             // Save the Sync object
             ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.successMessage);
-                BrowserStorageDelegate.set("currentMapping", this.model.mapping);
+                BrowserStorageDelegate.set("currentMapping", _.extend(this.model.mapping, this.model.recon));
             }, this));
         }
     });
