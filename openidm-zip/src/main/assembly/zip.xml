@@ -27,7 +27,7 @@
             <outputDirectory>/openidm/security</outputDirectory>
             <fileMode>0600</fileMode>
             <directoryMode>0700</directoryMode>
-        </fileSet>        
+        </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
@@ -774,6 +774,13 @@
                 <include>script/**</include>
             </includes>
             <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf*ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/ui/default/admin/public/templates/admin/connector/configs/ldap</outputDirectory>
         </fileSet>
     </fileSets>
     <!-- sample6 -->
