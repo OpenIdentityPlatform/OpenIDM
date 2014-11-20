@@ -154,7 +154,7 @@
         if (reconAudit.result[i].targetObjectId !== null && reconAudit.result[i].targetObjectId !== undefined) {
             reconAudit.result[i].targetObject = targetDataMap[reconAudit.result[i].targetObjectId.replace(target + "/", "")];
         }
-        if (reconAudit.result[i].sourceObjectId !== null && reconAudit.result[i].sourceObjectId !== undefined && reconAudit.result[i].targetObjectId !== null && reconAudit.result[i].targetObjectId !== undefined) {
+        if (!!reconAudit.result[i].sourceObject && !!reconAudit.result[i].targetObject) {
             if(openidm.query("repo/link", {'_queryFilter' : 'linkType eq "' + mapping + '" and firstId eq "' + reconAudit.result[i].sourceObject._id + '" and secondId eq "' + reconAudit.result[i].targetObject._id + '"'}).result.length > 0){
                 reconAudit.result[i].hasLink = true;
             }
