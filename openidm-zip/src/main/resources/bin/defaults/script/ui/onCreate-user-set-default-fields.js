@@ -34,7 +34,9 @@
 
 uiConfig =  openidm.read("config/ui/configuration");
 
-object.accountStatus = 'active';
+if (!object.accountStatus) {
+    object.accountStatus = 'active';
+}
 
 if(!object.roles) {
     object.roles = 'openidm-authorized';    
