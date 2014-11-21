@@ -747,7 +747,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'http://localhost:8443/openidm/managed/user?_queryFilter=mail%20pr&amp;_fields=mail'</userinput>
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=mail+pr&amp;_fields=mail'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -758,6 +758,33 @@ var results = openidm.query("system/ScriptedSQL/account", params)
     },
     {
       "mail": "bjensen@example.com"
+    }
+  ]
+}</computeroutput></screen>
+     <para>
+      The presence filter is not currently supported for system objects. To
+      query for presence on a system object, specify any attribute that exists
+      for all entries, such as the <literal>uid</literal> on an LDAP system,
+      and use the starts with (<literal>sw</literal>) filter, with an empty
+      value. For example, the following query returns the <literal>uid</literal>
+      of all users in an LDAP system.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/openidm/system/ldap/account?_queryFilter=uid+sw+""&amp;_fields=uid'</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "uid": "jdoe"
+    },
+    {
+      "uid": "bjensen"
     }
   ]
 }</computeroutput></screen>
