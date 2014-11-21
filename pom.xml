@@ -62,9 +62,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/openidm/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/openidm/trunk</url>
+        <connection>scm:svn:https://svn.forgerock.org/openidm/branches/3.1.0-RC</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/branches/3.1.0-RC</developerConnection>
+        <url>http://sources.forgerock.org/browse/openidm/branches/3.1.0-RC</url>
     </scm>
     <distributionManagement>
         <site>
