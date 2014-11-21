@@ -91,7 +91,7 @@ To try the sample, follow these steps.
 
     4. Run reconciliation.
     $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
-    {"reconId":"b149f0e3-4bb9-4790-9266-fab2e5c80ec6"}
+    {"_id":"b149f0e3-4bb9-4790-9266-fab2e5c80ec6","state":"ACTIVE"}
     
     5. Check 
     $ cat /path/to/openidm/samples/sample5b/data/xml_AD_Data.xml

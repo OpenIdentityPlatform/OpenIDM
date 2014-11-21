@@ -127,7 +127,7 @@ To run the sample in OpenIDM, follow these steps.
 
         $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
         "https://localhost:8443/openidm/recon?_action=recon&mapping=systemAdAccounts_managedUser"
-        {"reconId":"d88ca423-d5f2-4eb5-a451-a229399f92af"}
+        {"_id":"d88ca423-d5f2-4eb5-a451-a229399f92af","state":"ACTIVE"}
 
 3. Check that the users from Active Directory were added to OpenDJ:
 
