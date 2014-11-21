@@ -29,7 +29,7 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog",
+    "org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog",
     "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
     "./mocks/adminInit",
@@ -42,8 +42,6 @@ define([
         executeAll: function (server) {
 
             adminInit(server);
-
-            var testPromises = [];
 
             module('Admin UI Functions');
 
@@ -70,7 +68,6 @@ define([
 
                 eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, { userName: "openidm-admin", password: "openidm-admin" });
             });
-
 
             QUnit.asyncTest("Subsequent Login Process", function () {
                 var resourceRenderStub = sinon.stub(resourcesView, "render", function (args, callback) {
@@ -170,4 +167,4 @@ define([
 
     };
 
-}); 
+});
