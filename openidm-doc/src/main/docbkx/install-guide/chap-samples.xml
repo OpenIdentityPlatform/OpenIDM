@@ -3220,13 +3220,13 @@ Starting Directory Server ....... Done.
       <para>
        Import the LDIF data file required for the sample.
       </para>
-      <screen>$ <userinput>cd /path/to/opendj/bin</userinput>
-$ <userinput>./ldapmodify \
- --bindDN "cn=Directory Manager"
+      <screen>$<userinput> ./ldapmodify \
+ --bindDN "cn=Directory Manager" \
  --bindPassword password \
  --hostname localhost \
  --port 1389 \
- --filename /path/to/openidm/samples/sample6/data/Example.ldif</userinput></screen>
+ --filename /path/to/openidm/samples/sample6/data/Example.ldif</userinput>
+      </screen>
      </step>
      <step>
       <para>
@@ -3237,7 +3237,8 @@ $ <userinput>./ldapmodify \
        if it does not actually participate in a replication topology. The
        following commands configure the server for replication.
       </para>
-      <screen>$ <userinput>./dsconfig create-replication-server \
+      <screen>$<userinput> cd /path/to/opendj/bin
+ $ ./dsconfig create-replication-server \
  --hostname localhost \
  --port 4444 \
  --bindDN "cn=Directory Manager" \
