@@ -756,8 +756,8 @@
            </dependencies>
            <properties>
                <!-- We reset these 2 properties to include the SaaS connectors samples in the commercial build -->
-               <exclude.google.samples></exclude.google.samples>
-               <exclude.salesforce.samples></exclude.salesforce.samples>
+               <exclude.google.samples />
+               <exclude.salesforce.samples />
                <!-- Properties to include the SaaS connectors in the commercial build -->
                <google.provisioner>provisioner.openicf-google.json</google.provisioner>
                <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
