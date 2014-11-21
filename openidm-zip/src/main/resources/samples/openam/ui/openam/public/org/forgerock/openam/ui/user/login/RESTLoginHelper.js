@@ -84,9 +84,9 @@ define("org/forgerock/openam/ui/user/login/RESTLoginHelper", [
         });
     };
 
-    obj.logout = function() {
+    obj.logout = function(successCallback, errorCallback) {
         var _this = this;
-        return authNDelegate.logout();
+        return authNDelegate.logout().then(successCallback, errorCallback);
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
