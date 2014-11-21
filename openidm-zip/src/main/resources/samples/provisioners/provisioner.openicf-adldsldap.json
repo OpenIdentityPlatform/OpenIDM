@@ -4,7 +4,7 @@
         "connectorHostRef" : "#LOCAL",
         "connectorName" : "org.identityconnectors.ldap.LdapConnector",
         "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
-        "bundleVersion" : "1.1.1.3"
+        "bundleVersion" : "[1.4.0.0,2.0.0.0)"
     },
     "poolConfigOption" : {
         "maxObjects" : 10,
@@ -44,22 +44,9 @@
         "removeLogEntryObjectClassFromFilter" : true,
         "modifiersNamesToFilterOut" : [ ],
         "passwordDecryptionKey" : null,
-        "credentials" : {
-            "$crypto" : {
-                "value" : {
-                    "iv" : "vDXi98xjU8NA+1AGFiFUEw==",
-                    "data" : "wFku3MshcdGKfOzeE9w5ww==",
-                    "cipher" : "AES/CBC/PKCS5Padding",
-                    "key" : "openidm-sym-default"
-                },
-                "type" : "x-simple-encryption"
-            }
-        },
+        "credentials" : null,
         "changeLogBlockSize" : 100,
-        "baseContextsToSynchronize" : [
-            "OU=Users,OU=BigCo,DC=goldengate,DC=com",
-            "OU=Groups,OU=BigCo,DC=goldengate,DC=com"
-        ],
+        "baseContextsToSynchronize" : [ ],
         "attributesToSynchronize" : [ ],
         "changeNumberAttribute" : "changeNumber",
         "passwordDecryptionInitializationVector" : null,
@@ -75,11 +62,8 @@
         "failover" : [ ],
         "ssl" : false,
         "referralsHandling" : "ignore",
-        "principal" : "CN=Nicolas Philippe,OU=Users,OU=BigCo,DC=goldengate,DC=com",
-        "baseContexts" : [
-            "OU=Users,OU=BigCo,DC=goldengate,DC=com",
-            "OU=Groups,OU=BigCo,DC=goldengate,DC=com"
-        ],
+        "principal" : "",
+        "baseContexts" : [ ],
         "readSchema" : true,
         "accountObjectClasses" : [
             "user"
@@ -87,7 +71,7 @@
         "accountUserNameAttributes" : [
             "adminDisplayName"
         ],
-        "host" : "ec2-54-204-152-236.compute-1.amazonaws.com",
+        "host" : "",
         "groupMemberAttribute" : "member",
         "getGroupMemberId" : true,
         "accountSearchFilter" : "",
