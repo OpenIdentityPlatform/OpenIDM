@@ -28,7 +28,7 @@
         "enableAttributesToGetSearchResultsHandler": true
     },
     "configurationProperties": {
-        "classpath": ["&{launcher.working.location}samples/groovy-connector-1.4.1.0-RC3/groovy/"],
+        "classpath": ["&{launcher.working.location}samples/groovy-connector-1.4.1.0/groovy/"],
         "authenticateScriptFileName": "AuthenticateScript.groovy",
         "createScriptFileName": "CreateScript.groovy",
         "deleteScriptFileName": "DeleteScript.groovy",
