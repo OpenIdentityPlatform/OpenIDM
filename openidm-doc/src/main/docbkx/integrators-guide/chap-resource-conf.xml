@@ -1896,7 +1896,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
        If successful, the operation returns a reconciliation ID, similar to the
        following:
       </para>
-      <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
+      <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54","state":"ACTIVE"}</screen>
      </step>
      <step>
       <para>
@@ -2761,7 +2761,7 @@ Properties:
        If reconciliation is successful, the command returns a reconciliation run
        ID, similar to the following:
       </para>
-      <screen>{"_id":"0629d920-e29f-4650-889f-4423632481ad"}</screen>
+      <screen>{"_id":"0629d920-e29f-4650-889f-4423632481ad","state":"ACTIVE"}</screen>
      </step>
      <step>
       <para>

@@ -89,7 +89,7 @@ Start OpenIDM with the configuration for sample 4.
 Run reconciliation.
 
     $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=csv_xmlfile"
-    {"reconId":"84b55592-a2d5-438a-ba71-c5e9a7a93938"}
+    {"_id":"84b55592-a2d5-438a-ba71-c5e9a7a93938","state":"ACTIVE"}
 
 #####Step 4
 See the data updated in the XML file:

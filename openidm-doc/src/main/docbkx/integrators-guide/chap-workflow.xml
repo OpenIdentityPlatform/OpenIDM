@@ -1568,7 +1568,7 @@ $ ./startup.sh -p samples/workflow</screen>
       <para>
        Successful reconciliation returns an "_id" object, such as the following:
       </para>
-      <screen>{"_id":"aea493f5-29ee-423d-b4b1-10449c60886c"}</screen>
+      <screen>{"_id":"aea493f5-29ee-423d-b4b1-10449c60886c","state":"ACTIVE"}</screen>
       <para>
        The two users are added to the repository. You can test this with the
        following REST query, which shows the two users,

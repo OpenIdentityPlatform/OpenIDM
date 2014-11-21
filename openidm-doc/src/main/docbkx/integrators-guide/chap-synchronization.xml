@@ -834,7 +834,7 @@ $ <userinput>curl \
     something similar to the following:
    </para>
 
-   <screen>{"_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e"}</screen>
+   <screen>{"_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e","state":"ACTIVE"}</screen>
 
    <para>
     To have the entire reconciliation run complete before the reconciliation
