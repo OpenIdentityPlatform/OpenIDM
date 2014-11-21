@@ -28,7 +28,7 @@ define([
     "text!templates/admin/managed/AddEditManagedTemplate.html",
     "text!templates/admin/ResourcesViewTemplate.html",
     "text!templates/admin/util/ScriptEditor.html",
-    "text!templates/admin/util/ScriptDialog.html"
+    "text!templates/admin/util/AbstractScriptView.html"
 ], function () {
 
     /* an unfortunate need to duplicate the file names here, but I haven't
@@ -38,7 +38,7 @@ define([
             "templates/admin/managed/AddEditManagedTemplate.html",
             "templates/admin/ResourcesViewTemplate.html",
             "templates/admin/util/ScriptEditor.html",
-            "templates/admin/util/ScriptDialog.html"
+            "templates/admin/util/AbstractScriptView.html"
         ],
         deps = arguments;
 
