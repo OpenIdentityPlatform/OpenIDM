@@ -591,10 +591,9 @@ $ ./startup.sh -p samples/sample1
 </screen>
 
   <para>
-   But that is a lot of information. If you need that information for all users,
-   you could substitute <literal>query-all</literal> for
-   <literal>query-all-ids</literal>. But that is too much for most administrators,
-   especially when dealing with more than a couple of users.
+   The complete user record is returned. If you need this level of information
+   for all users, substitute <literal>query-all</literal> for
+   <literal>query-all-ids</literal>.
   </para>
 
   <para>
