@@ -18,9 +18,19 @@ provisioner.openicf-ldap.json
  - sample2c
  - sample2d
  - sample6
+ - openam
 
 provisioner.openicf-scriptedsql.json
  - sample3
+
+provisioner.openicf-scriptedrest.json
+- scriptedrest2dj
+
+provisioner.openicf-scriptedcrest.json
+- scriptedcrest2dj
+
+provisioner.openicf-scriptedazure.json
+- scriptedazure
 
 provisioner.openicf-xml.json
  - sample1
@@ -28,6 +38,3 @@ provisioner.openicf-xml.json
  - sample8
  - sample9
  - audit-sample
-
-provisioner.openicf-adpowershell.json
- - powershell2AD
