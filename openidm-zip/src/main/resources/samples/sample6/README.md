@@ -134,10 +134,10 @@ To run the sample in OpenIDM, follow these steps.
         $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" \
         "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
 
-The way this works is that the reconciliation from step 2 imports the data into managed/user.
-Each change on managed/user triggers a "sync" action for the other mappings which use managed/user
-as a source; in this case, the managedUser_systemLdapAccounts mapping. This mapping updates
-OpenDJ.
+    The way this works is that the reconciliation from step 2 imports the data into managed/user.
+    Each change on managed/user triggers a "sync" action for the other mappings which use managed/user
+    as a source; in this case, the managedUser_systemLdapAccounts mapping. This mapping updates
+    OpenDJ.
 
 4. Edit samples/sample6/conf/schedule-activeSynchroniser_systemAdAccount.json
 to set "enabled" : true. LiveSync causes synchronization to happen as you
