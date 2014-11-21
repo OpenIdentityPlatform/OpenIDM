@@ -1701,7 +1701,7 @@ Starting Directory Server ....... Done.
       Configure the OpenDJ server for replication.
      </para>
      <para>
-      To enable liveSync, this server must be configured for replication, even
+      To enable LiveSync, this server must be configured for replication, even
       if it does not actually participate in a replication topology. The
       following commands configure the server for replication.
      </para>
@@ -3145,22 +3145,130 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
      <title>Prepare OpenDJ For LiveSync</title>
 
      <para>
-      This sample assumes a replicated OpenDJ server. When configured,
-      OpenDJ replication includes an External Change Log (ECL), required to
-      support LiveSync. LiveSync detects changes in OpenDJ by reading the ECL.
+      This sample assumes a replicated OpenDJ server on the localhost system.
+      When configured, OpenDJ replication includes an External Change Log (ECL),
+      required to support LiveSync. LiveSync detects changes in OpenDJ by
+      reading the ECL.
      </para>
 
      <para>
-      To activate the OpenDJ ECL, enable replication as described in the
-      <link xlink:show="new"
-      xlink:href="http://opendj.forgerock.org/opendj-server/doc/admin-guide/index.html#chap-replication">
-      <citetitle>OpenDJ Administration Guide chapter on Managing Data
-      Replication</citetitle></link>
+      Follow these steps to install and configure an OpenDJ instance.
      </para>
+     <procedure>
+     <step>
+      <para>
+       Download and extract the OpenDJ zip archive.
+      </para>
+      <para>
+       Find a link to the OpenDJ download page from the <link xlink:show="new"
+       xlink:href="http://forgerock.com/download-stack/" />.
+      </para>
+     </step>
+     <step>
+      <para>
+       Install OpenDJ using the command-line setup, as follows:
+      </para>
+      <screen><userinput>$ cd /path/to/opendj
+$ ./setup --cli \
+--hostname localhost \
+--ldapPort 1389 \
+--rootUserDN "cn=Directory Manager" \
+--rootUserPassword password \
+--adminConnectorPort 4444 \
+--addBaseEntry \
+--baseDN dc=com \
+--acceptLicense \
+--no-prompt</userinput>
+<computeroutput>...
+Configuring Directory Server ..... Done.
+Creating Base Entry dc=com ..... Done.
+Starting Directory Server ....... Done.
+...</computeroutput>
+      </screen>
+      <para>
+       The sample assumes the following configuration:
+      </para>
+      <itemizedlist>
+       <listitem>
+        <para>
+         The OpenDJ server is installed on the localhost.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The server listens for LDAP connections on port 1389.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The administration connector port is 4444.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The root user DN is <literal>cn=Directory Manager</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The root user password is <literal>password</literal>.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </step>
+     <step>
+      <para>
+       Import the LDIF data file required for the sample.
+      </para>
+      <screen>$ <userinput>cd /path/to/opendj/bin</userinput>
+$ <userinput>./ldapmodify \
+ --bindDN "cn=Directory Manager"
+ --bindPassword password \
+ --hostname localhost \
+ --port 1389 \
+ --filename /path/to/openidm/samples/sample6/data/Example.ldif</userinput></screen>
+     </step>
+     <step>
+      <para>
+       Configure the OpenDJ server for replication.
+      </para>
+      <para>
+       To enable liveSync, this server must be configured for replication, even
+       if it does not actually participate in a replication topology. The
+       following commands configure the server for replication.
+      </para>
+      <screen>$ <userinput>./dsconfig create-replication-server \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --provider-name "Multimaster Synchronization" \
+ --set replication-port:8989 \
+ --set replication-server-id:2 \
+ --type generic \
+ --trustAll \
+ --no-prompt
+
+ $ ./dsconfig create-replication-domain \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --provider-name "Multimaster Synchronization" \
+ --domain-name fakead_com \
+ --set base-dn:dc=fakead,dc=com \
+ --set replication-server:localhost:8989 \
+ --set server-id:3 \
+ --type generic \
+ --trustAll \
+ --no-prompt</userinput>
+      </screen>
+     </step>
+     </procedure>
 
      <para>
-      Once configured, you can proceed with either an active or simulated AD
-      deployment.
+      Once OpenDJ is configured, you can proceed with either an active or
+      simulated AD deployment.
      </para>
 
     </section>
