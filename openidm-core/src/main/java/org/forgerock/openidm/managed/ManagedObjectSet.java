@@ -442,12 +442,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param rev the revision of hte object being modified
      * @param oldValue the old value of the object
      * @param newValue the new value of the object
-     * @param logMessage the audit log message
      * @return the updated resource
      * @throws ResourceException
      */
     private Resource update(final ServerContext context, Request request, String resourceId, String rev,
-            Resource oldValue, JsonValue newValue, String logMessage)
+            Resource oldValue, JsonValue newValue)
             throws ResourceException {
 
         if (newValue.asMap().equals(oldValue.getContent().asMap())) { // object hasn't changed
@@ -531,8 +530,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                                 JsonValue newValue = decrypted.getContent().copy();
                                 JsonValuePatch.apply(newValue, operations);
                                 
-                                Resource response = update(context, request, resource.getId(), resource.getRevision(), 
-                                        decrypted, newValue, "Patch " + operations.toString());
+                                Resource response = update(context, request, resource.getId(), resource.getRevision(),
+                                        decrypted, newValue);
                                 
                                 activityLogger.log(context, request.getRequestType(), "Patch " + operations.toString(), 
                                         managedId(resource.getId()).toString(), resource.getContent(), response.getContent(), 
@@ -638,7 +637,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             Resource resource = connectionFactory.getConnection().read(context, readRequest);
             Resource _old = decrypt(resource);
 
-            handler.handleResult(update(context, request, resourceId, request.getRevision(), _old, _new, "update"));
+            Resource updated = update(context, request, resourceId, request.getRevision(), _old, _new);
+            activityLogger.log(context, request.getRequestType(), "update",
+                    managedId(resource.getId()).toString(), resource.getContent(), updated.getContent(),
+                    Status.SUCCESS);
+            handler.handleResult(updated);
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
@@ -745,7 +748,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     }
                 }
 
-                Resource resource = update(context, request, resourceId, _rev, oldValue, newValue, "Patch " + patchOperations.toString());
+                Resource resource = update(context, request, resourceId, _rev, oldValue, newValue);
+                activityLogger.log(context, request.getRequestType(), "Patch " + patchOperations.toString(),
+                        managedId(resource.getId()).toString(), resource.getContent(), resource.getContent(),
+                        Status.SUCCESS);
                 retry = false;
                 logger.debug("Patch successful!");
                 return resource;
