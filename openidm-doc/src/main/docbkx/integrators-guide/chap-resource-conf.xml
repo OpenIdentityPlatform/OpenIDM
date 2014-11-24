@@ -3156,24 +3156,32 @@ Properties:
   </section>
 
   <section xml:id="powershell-connector">
-   <title>Powershell Connector</title>
+   <title>PowerShell Connector Toolkit</title>
    <para>
-    The PowerShell connector is a generic scripted connector to address the
-    Microsoft Windows ecosystem. You can use this connector to provision any
-    Microsoft system, including, but not limited to, Active Directory, MS SQL,
-    MS Exchange, Sharepoint, Office365, and Azure. Essentially, any task that
-    can be performed with PowerShell can be executed through this connector.
+    The PowerShell Connector Toolkit is not a complete connector, in the
+    traditional sense. Rather, it is a framework within which you must write
+    your own PowerShell scripts to address the requirements of your Microsoft
+    Windows ecosystem. You can use the PowerShell Connector Toolkit to create
+    connectors that can provision any Microsoft system, including, but not
+    limited to, Active Directory, MS SQL, MS Exchange, Sharepoint, Office365,
+    and Azure. Essentially, any task that can be performed with PowerShell can
+    be executed through connectors based on this toolkit.
    </para>
    <para>
-    The PowerShell connector runs on the .NET platform and requires the
-    installation of a .NET connector server on the Windows system. To install
-    the .NET connector, follow the instructions in <xref
-    linkend="install-.net-connector" />. The PowerShell connector requires
+    Connectors created with the PowerShell Connector Toolkit run on the .NET
+    platform and require the installation of a .NET connector server on the
+    Windows system. To install the .NET connector, follow the instructions in
+    <xref linkend="install-.net-connector" />. These connectors also require
     PowerShell V2.
    </para>
    <para>
-    The PowerShell connector is not bundled with OpenIDM, and must be downloaded
-    separately. <!--TODO from where? -->
+    The PowerShell Connector Toolkit is not bundled with OpenIDM, but is
+    available, with a subscription, from <link xlink:show="new"
+    xlink:href="https://backstage.forgerock.com/">ForgeRock Backstage</link>.
+    The <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
+    Download</link> of OpenIDM includes sample connectors and scripts that will
+    enable you to get started with this toolkit.
    </para>
   </section>
 
