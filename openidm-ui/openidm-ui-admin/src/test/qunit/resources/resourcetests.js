@@ -25,7 +25,6 @@
 /*global require, define, QUnit, $ */
 
 define([
-    "../../../../target/test/libs/sinon-1.10.3.js",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -33,7 +32,7 @@ define([
     "org/forgerock/openidm/ui/admin/ResourcesView",
     "../mocks/adminInit",
     "../mocks/resourceDetails"
-], function (sinon, constants, router, eventManager, addEditManagedView, resourcesView, adminInit, resourceDetails) {
+], function (constants, router, eventManager, addEditManagedView, resourcesView, adminInit, resourceDetails) {
 
     return {
         executeAll: function (server) {
@@ -47,13 +46,49 @@ define([
                 resourceDetails(server);
 
                 resourcesView.render([], function () {
+                    QUnit.start();
+
                     var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
 
                     QUnit.equal(resourcesView.$el.find("#resourceConnectorContainer .resource-body").length, 2, "Connectors and add Connector successfully added");
 
                     QUnit.equal(resourcesView.$el.find("#resourceManagedContainer .resource-body").length, 5, "Managed Objects and add Managed Object successfully added");
 
-                    QUnit.start();
+                    QUnit.equal(resourcesView.$el.find(".button-bar button").length, 3, "Button bar with correct number of actions found");
+
+                    QUnit.equal(resourcesView.$el.find(".subtitle-bar a").length, 2, "Help successfully detected");
+
+                    resourcesView.$el.find("#resourceConnectorContainer .resource-body:first").find(".resource-delete").trigger("click");
+
+                    QUnit.equal($(".ui-dialog").length, 1, "Resource delete dialog successfully opened");
+
+                    $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
+
+                    QUnit.stop();
+
+                    //need a timeout to give the dom enough time to be removed
+                    setTimeout(function() {
+                        QUnit.start();
+
+                        QUnit.equal(resourcesView.$el.find("#resourceConnectorContainer .resource-body").length, 1, "Resource successfully removed");
+
+                        resourcesView.$el.find("#resourceManagedContainer .resource-body:first").find(".managed-delete").trigger("click");
+
+                        QUnit.equal($(".ui-dialog").length, 1, "Managed delete dialog successfully opened");
+
+                        $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
+
+                        QUnit.stop();
+
+                        //need a timeout to give the dom enough time to be removed
+                        setTimeout(function() {
+                            QUnit.equal(resourcesView.$el.find("#resourceManagedContainer .resource-body").length, 4, "Managed Object successfully removed");
+
+                            QUnit.start();
+                        } , 10);
+
+                    }, 10);
+
                 });
             });
         }
