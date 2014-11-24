@@ -1426,7 +1426,8 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
    the <literal>"openidm"</literal> and <literal>"context"</literal> objects.
    The only supported action on the <literal>script</literal> endpoint is
    <literal>eval</literal>, so scripts can not be launched from this endpoint,
-   but merely evaluated.
+   but merely evaluated. The last statement that is executed is the value
+   produced by the script, and the expected result of the REST call.
   </para>
   <para>
    The following REST call attempts to evaluate the
