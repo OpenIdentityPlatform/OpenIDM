@@ -24,8 +24,8 @@
         <jetty-version>8.1.9.v20130131</jetty-version>
         <openidm.version>3.1.0</openidm.version>
         <salesforce.api.version>29</salesforce.api.version>
-        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.1a</provisioner.salesforcemodule.version>
-	<restlet.version>2.1.2</restlet.version>
+        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.2-SNAPSHOT</provisioner.salesforcemodule.version>
+        <restlet.version>2.1.2</restlet.version>
         <commons.forgerock-util.version>1.3.3</commons.forgerock-util.version>
     </properties>
 
