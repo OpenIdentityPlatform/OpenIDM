@@ -28,7 +28,7 @@
 
 /*global object */
 
-logger.debug("Invoked effectiveAssignments script on property {}: {}", propertyName, object);
+logger.debug("Invoked effectiveAssignments script on property {}", propertyName);
 
 // Allow for configuration in virtual attribute config, but default
 if (effectiveRolesPropName === undefined) {
