@@ -1404,5 +1404,65 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
             </step>
         </procedure>
     </section>
-
+ <section xml:id="script-endpoint">
+  <title>Validating Scripts Over REST</title>
+  <para>
+   OpenIDM exposes a <literal>script</literal> endpoint over which scripts can
+   be validated, by specifying the script parameters as part of the JSON
+   payload. This functionality enables you to test how a script will operate in
+   your deployment, with complete control over the inputs and outputs. Testing
+   scripts in this way can be useful in debugging.
+  </para>
+  <para>
+   In addition, the script service enables you to call out to other scripts
+   (even scripts written in a different language, such as from JavaScript to
+   Groovy). For example, you might have logic written in Javascript, but also
+   some code available in Groovy. Ordinarily, it would be challenging to
+   interoperate between these two environments, but this script service enables
+   you to call one from the other on the OpenIDM router.
+  </para>
+  <para>
+   Scripts called over the <literal>script</literal> endpoint have access to
+   the <literal>"openidm"</literal> and <literal>"context"</literal> objects.
+   The only supported action on the <literal>script</literal> endpoint is
+   <literal>eval</literal>, so scripts can not be launched from this endpoint,
+   but merely evaluated.
+  </para>
+  <para>
+   The following REST call attempts to evaluate the
+   <literal>autoPurgeAuditRecon.js</literal> script (provided in
+   <filename>openidm/bin/defaults/script/audit</filename>, but provides an
+   incorrect purge type (<literal>"purgeByNumOfRecordsToKeep"</literal> instead
+   of <literal>"purgeByNumOfReconsToKeep"</literal>. The error is picked up in
+   the evaluation. The example assumes that the script exists in the directory
+   reserved for custom scripts (<filename>openidm/script</filename>).
+  </para>
+  <screen>$ <userinput>curl \
+ -cacert self-signed.crt \
+ -header "X-OpenIDM-Username: openidm-admin" \
+ -header "X-OpenIDM-Password: openidm-admin" \
+ -header "Content-Type: application/json" \
+ -request POST \
+ -data '{
+   "type": "text/javascript",
+   "file": "script/autoPurgeAuditRecon.js",
+   "globals": {
+     "input": {
+        "mappings": ["%"],
+        "purgeType": "purgeByNumOfRecordsToKeep",
+        "numOfRecons": 1
+     }
+   }
+ }' \
+ "https://localhost:8443/openidm/script?_action=eval"</userinput>
+<computeroutput>
+"Must choose to either purge by expired or number of recons to keep"</computeroutput></screen>
+  <para>
+   Note that the variables passed into this script are namespaced with the
+   <literal>"globals"</literal> map. It is preferable to namespace variables
+   passed into scripts in this way, to avoid collisions with the top-level
+   reserved words for script maps, such as <literal>file</literal>,
+   <literal>source</literal>, and <literal>type</literal>.
+  </para>
+ </section>
 </appendix>
