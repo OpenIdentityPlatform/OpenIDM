@@ -148,6 +148,11 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private static ServerContext serverContext = null;
 
     /**
+     * Boolean indicating if the scheduler has called shutdown()
+     */
+    private volatile boolean shutdown = false;
+    
+    /**
      * Creates a new <code>RepoJobStore</code>.
      */
     public RepoJobStore() {
@@ -446,7 +451,10 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     @Override
     public void shutdown() {
-        logger.debug("Job Scheduler Stopped");
+        synchronized(lock) {
+            shutdown = true;
+            logger.debug("Job Scheduler Stopped");
+        }
     }
 
     @Override
@@ -630,7 +638,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             logger.debug("Attempting to acquire the next trigger");
             Trigger trigger = null;
             WaitingTriggers waitingTriggers = null;
-            while (trigger == null) {
+            while (trigger == null && !shutdown) {
                 try {
                     waitingTriggers = getWaitingTriggers();
                     trigger = waitingTriggers.getTriggers().first();
@@ -683,6 +691,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     tw.updateTrigger(trigger);
                 } catch (Exception e) {
                     logger.warn("Error serializing trigger", e);
+                    addWaitingTrigger(trigger);
                     throw new JobPersistenceException("Error serializing trigger", e);
                 }
 
@@ -1731,7 +1740,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         synchronized (lock) {
             try {
                 int retries = 0;
-                while (writeRetries == -1 || retries <= writeRetries) {
+                while (writeRetries == -1 || retries <= writeRetries && !shutdown) {
                     try {
                         // update repo
                         addRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()),
@@ -1760,7 +1769,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             try {
                 boolean result = false;
                 int retries = 0;
-                while (writeRetries == -1 || retries <= writeRetries) {
+                while (writeRetries == -1 || retries <= writeRetries && !shutdown) {
                     try {
                         result = removeRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()),
                                 getWaitingTriggersRepoId(), "names");
@@ -1790,7 +1799,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             try {
                 logger.debug("Adding acquired trigger {} for instance {}", trigger.getName(), instanceId);
                 int retries = 0;
-                while (writeRetries == -1 || retries <= writeRetries) {
+                while (writeRetries == -1 || retries <= writeRetries && !shutdown) {
                     try {
                         addRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()),
                                 getAcquiredTriggersRepoId(), instanceId);
@@ -1820,7 +1829,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 logger.debug("Removing acquired trigger {} for instance {}", trigger.getName(), instanceId);
                 boolean result = false;
                 int retries = 0;
-                while (writeRetries == -1 || retries <= writeRetries) {
+                while (writeRetries == -1 || retries <= writeRetries && !shutdown) {
                     try {
                         result = removeRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()),
                                 getAcquiredTriggersRepoId(), instanceId);
@@ -2220,25 +2229,45 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private void cleanUpInstance() {
         synchronized (lock) {
             try {
-                // Make sure all available triggers are "waiting"
                 logger.trace("Cleaning up instance");
+                
+                // Get the list of all stored triggers
+                List<Trigger> storedTriggers = new ArrayList<Trigger>();
+                String[] groupNames = getTriggerGroupNames(null);
+                for (String groupName : groupNames) {
+                    String[] triggerNames = getTriggerNames(null, groupName);
+                    for (String triggerName : triggerNames) {
+                        storedTriggers.add(getTriggerWrapper(groupName, triggerName).getTrigger());
+                    }
+                }
+
+                // Ignore triggers which are already present in the waiting list.
+                WaitingTriggers wt = getWaitingTriggers();
+                TreeSet<Trigger> waitingTriggers = wt.getTriggers();
+                for (Trigger t : waitingTriggers) {
+                    storedTriggers.remove(t);
+                }
+                
+                // Process and release any triggers which are acquired
                 AcquiredTriggers at = getAcquiredTriggers(instanceId);
                 List<Trigger> acquiredTriggers = at.getTriggers();
-                // Clean up any previously acquired triggers
-                for (Iterator<Trigger> it = acquiredTriggers.iterator(); it.hasNext();) {
-                    Trigger t = it.next();
+                for (Trigger t : acquiredTriggers) {
                     if (hasTriggerMisfired(t)) {
                         logger.trace("Trigger {} has misfired", t.getName());
                         processTriggerMisfired(getTriggerWrapper(t.getGroup(), t.getName()));
                         if (t.getNextFireTime() != null) {
-                            // Add the trigger to the "waiting" triggers tree
-                            addWaitingTrigger(t);
                             // Remove the trigger from the "acquired" triggers list
                             removeAcquiredTrigger(t, instanceId);
                         }
                     } else {
                         releaseAcquiredTrigger(null, t);
                     }
+                }
+                
+                // Add remaining triggers to the "waiting" triggers tree
+                for (Trigger t : storedTriggers) {
+                    logger.trace("Adding trigger {} waitingTriggers", t.getName());
+                    addWaitingTrigger(t);
                 }
             } catch (JobPersistenceException e) {
                 logger.warn("Error initializing RepoJobStore", e);
@@ -2353,7 +2382,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     boolean removed = false;
                     int retry = 0;
                     // Remove the acquired trigger
-                    while (writeRetries == -1 || retry <= writeRetries) {
+                    while (writeRetries == -1 || retry <= writeRetries && !shutdown) {
                         try {
                             removed = removeAcquiredTrigger(trigger, eventInstanceId);
                             break;
@@ -2366,7 +2395,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     if (removed) {
                         // Attempt to add to the trigger to the waiting trigger pool
                         retry = 0;
-                        while (writeRetries == -1 || retry <= writeRetries) {
+                        while (writeRetries == -1 || retry <= writeRetries && !shutdown) {
                             try {
                                 addWaitingTrigger(trigger);
                                 break;
