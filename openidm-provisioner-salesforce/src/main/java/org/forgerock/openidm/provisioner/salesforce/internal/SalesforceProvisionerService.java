@@ -476,8 +476,9 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         public void queryCollection(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
 
+            String type = "?";
             try {
-                final String type = getPartition(context);
+                type = getPartition(context);
                 final String queryExpression;
                 if (StringUtils.isNotBlank(request.getQueryId())) {
                     if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
@@ -500,6 +501,19 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
                 executeQuery(handler, queryExpression);
             } catch (Throwable t) {
+                final String queryRequestMessage;
+                if (request.getQueryId() != null) {
+                    queryRequestMessage = "queryId=" + request.getQueryId();
+                } else if (request.getQueryExpression() != null) {
+                    queryRequestMessage = "queryExpression=" + request.getQueryExpression();
+                } else if (request.getQueryFilter() != null) {
+                    queryRequestMessage = "queryFilter=" + request.getQueryFilter().toString();
+                } else {
+                    // can't happen
+                    queryRequestMessage = "unknown query";
+                }
+
+                logger.error(t.getMessage() + " while executing " + queryRequestMessage + " on partition " + type, t);
                 handler.handleError(ResourceUtil.adapt(t));
             }
         }
