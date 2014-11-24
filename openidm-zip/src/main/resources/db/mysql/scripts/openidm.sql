@@ -45,7 +45,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_genericobjectproperties_genericobjects` (`genericobjects_id` ASC) ,
-  INDEX `idx_genericobjectproperties_prop` (`propkey` ASC, `propvalue` ASC) ,
+  INDEX `idx_genericobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
   CONSTRAINT `fk_genericobjectproperties_genericobjects`
     FOREIGN KEY (`genericobjects_id` )
     REFERENCES `openidm`.`genericobjects` (`id` )
@@ -83,8 +83,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_managedobjectproperties_managedobjects` (`managedobjects_id` ASC) ,
-  INDEX `idx_managedobjectproperties_propkey` (`propkey` ASC) ,
-  INDEX `idx_managedobjectproperties_propvalue` (`propvalue` ASC) ,
+  INDEX `idx_managedobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
   CONSTRAINT `fk_managedobjectproperties_managedobjects`
     FOREIGN KEY (`managedobjects_id` )
     REFERENCES `openidm`.`managedobjects` (`id` )
@@ -122,7 +121,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `proptype` VARCHAR(255) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_configobjectproperties_configobjects` (`configobjects_id` ASC) ,
-  INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue` ASC) ,
+  INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
   CONSTRAINT `fk_configobjectproperties_configobjects`
     FOREIGN KEY (`configobjects_id` )
     REFERENCES `openidm`.`configobjects` (`id` )
@@ -307,7 +306,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_schedulerobjectproperties_schedulerobjects` (`schedulerobjects_id` ASC) ,
-  INDEX `idx_schedulerobjectproperties_prop` (`propkey` ASC, `propvalue` ASC) ,
+  INDEX `idx_schedulerobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
   CONSTRAINT `fk_schedulerobjectproperties_schedulerobjects`
     FOREIGN KEY (`schedulerobjects_id` )
     REFERENCES `openidm`.`schedulerobjects` (`id` )
@@ -361,7 +360,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
-  INDEX `idx_clusterobjectproperties_prop` (`propkey` ASC, `propvalue` ASC) ,
+  INDEX `idx_clusterobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
   INDEX `fk_clusterobjectproperties_clusterobjects` (`clusterobjects_id` ASC) ,
   CONSTRAINT `fk_clusterobjectproperties_clusterobjects`
     FOREIGN KEY (`clusterobjects_id` )
