@@ -25,14 +25,13 @@
 /*global require, define, QUnit, $ */
 
 define([
-    "../../../../target/test/libs/sinon-1.10.3",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
     "../mocks/resourceDetails"
-], function (sinon, constants, router, eventManager, addEditManagedView, resourcesView, resourceDetails) {
+], function (constants, router, eventManager, addEditManagedView, resourcesView, resourceDetails) {
 
     return {
         executeAll: function (server) {
@@ -85,7 +84,20 @@ define([
                         addEditManagedView.$el.find("#managedObjectName").val("testname");
                         addEditManagedView.$el.find("#managedObjectName").trigger("blur");
 
+                        $("#managedObjectName").val("role");
+
                         QUnit.ok(addEditManagedView.$el.find("#addEditManaged").is(":disabled") === false, "Submit button enabled");
+
+                        addEditManagedView.$el.find("#addEditManaged").trigger("click");
+
+                        QUnit.equal($("#managedErrorMessage").length, 1, "Duplicate name succesfully detected");
+
+                        QUnit.ok(addEditManagedView.$el.find("#addEditManaged").is(":disabled") === true, "Submit button disabled");
+
+                        $("#managedObjectName").val("test1234");
+                        addEditManagedView.$el.find("#managedObjectName").trigger("blur");
+
+                        QUnit.ok(addEditManagedView.$el.find("#addEditManaged").is(":disabled") === false, "Submit button enabled after new name");
 
                         addEditManagedView.$el.find("#addEditManaged").trigger("click");
 
