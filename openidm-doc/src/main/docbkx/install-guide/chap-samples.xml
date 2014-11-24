@@ -304,7 +304,7 @@ $ ./startup.sh -p samples/sample2</screen>
    <mediaobject>
     <alt>Example of adding a new user</alt>
     <imageobject>
-     <imagedata fileref="images/sample2-bjensen.png" format="PNG" />
+     <imagedata fileref="images/sample2-bjensen" format="PNG" />
     </imageobject>
    </mediaobject>
 
@@ -3220,7 +3220,8 @@ Starting Directory Server ....... Done.
       <para>
        Import the LDIF data file required for the sample.
       </para>
-      <screen>$<userinput> ./ldapmodify \
+      <screen>$<userinput> cd /path/to/opendj/bin
+ $ ./ldapmodify \
  --bindDN "cn=Directory Manager" \
  --bindPassword password \
  --hostname localhost \
@@ -3237,8 +3238,7 @@ Starting Directory Server ....... Done.
        if it does not actually participate in a replication topology. The
        following commands configure the server for replication.
       </para>
-      <screen>$<userinput> cd /path/to/opendj/bin
- $ ./dsconfig create-replication-server \
+      <screen>$<userinput> ./dsconfig create-replication-server \
  --hostname localhost \
  --port 4444 \
  --bindDN "cn=Directory Manager" \
@@ -3278,7 +3278,7 @@ Starting Directory Server ....... Done.
      <title>External Configuration for an Active AD Deployment</title>
 
      <para>
-      To configure an active AD deployment for sample 6, open the
+      To configure an active AD deployment for x`sample 6, open the
       <filename>provisioner.openicf-realad.json</filename> file in
       a text editor. Update it as needed. At minimum, you should check and
       if needed update the following parameters in that file, as shown in the
@@ -4108,6 +4108,18 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
       OpenIDM, with a FQDN of <literal>openidm.example.com</literal>.
      </para>
      <para>
+      You can import the appropriate <filename>Example.ldif</filename> file with
+      the following command.
+     </para>
+     <screen>$ cd /path/to/opendj/bin
+$ ./ldapmodify \
+--bindDN "cn=Directory Manager" \
+--bindPassword password \
+--hostname localhost \
+--port 1389 \
+--filename /path/to/openidm/samples/openam/data/Example.ldif
+     </screen>
+     <para>
       If you set up OpenDJ on a secure port with a self-signed certificate, you
       should import that certificate into the OpenIDM datastore. For more
       information, see <link xlink:show="new"
@@ -4166,15 +4178,16 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
     </listitem>
     <listitem>
      <para>
-      As OpenAM works with FQDNs, you will need to either set up the noted
-      FQDNs <literal>(openam.example.com and openidm.example.com)</literal> in
-      an address database such as a DNS server or the static
-      <filename>hosts</filename> configuration file of both systems.
+      As OpenAM works with FQDNs (and not IP addresses), you will need to set up
+      either the noted FQDNs <literal>(openam.example.com and
+      openidm.example.com)</literal> in an address database such as a DNS server
+      or the static <filename>hosts</filename> configuration file of both
+      systems.
      </para>
     </listitem>
     <listitem>
      <para>
-      Do not start OpenIDM yet. You need to configure it further.
+      Do not start OpenIDM yet. You will need to configure it further.
      </para>
     </listitem>
    </itemizedlist>
@@ -4321,7 +4334,7 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
      <programlisting language="javascript">{
   "name" : "ldap",
   "configurationProperties" : {
-      "host" : "openam.example.com",
+      "host" : "openidm.example.com",
       "port" : 636,
       "ssl" : true,
       "principal" : "cn=Directory Manager",
