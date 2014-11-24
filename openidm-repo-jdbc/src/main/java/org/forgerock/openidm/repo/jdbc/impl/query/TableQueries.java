@@ -325,7 +325,6 @@ public class TableQueries {
             } else if (queryExpression != null) {
                 queryDescription = queryExpression;
             } else {
-                QueryInfo info = queries.getQueryInfo(queryId);
                 queryDescription = queries.getQueryInfo(queryId).getQueryString();
             }
             throw new InternalServerErrorException("DB reported failure preparing query: "
