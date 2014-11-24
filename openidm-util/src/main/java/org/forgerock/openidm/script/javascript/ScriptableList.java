@@ -131,7 +131,7 @@ class ScriptableList implements Scriptable, Wrapper {
 
     @Override
     public void put(int index, Scriptable start, Object value) {
-        if (index <= 0) {
+        if (index < 0) {
             throw Context.reportRuntimeError("index out of bounds");
         }
         if (list.size() < index + 1) {
