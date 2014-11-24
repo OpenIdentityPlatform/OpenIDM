@@ -24,7 +24,6 @@
 
 package org.forgerock.openidm.policy;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +41,9 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceContext;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
@@ -149,7 +148,7 @@ public class PolicyService implements JsonResource {
             for (JsonValue policy : additionalPolicies) {
                 String fileName = policy.asString();
                 try {
-                    list.add(FileUtil.readFile(new File(fileName)));
+                    list.add(FileUtil.readFile(IdentityServer.getFileForProjectPath(fileName)));
                 } catch (Exception e) {
                     logger.error("Error loading additional policy script " + fileName, e);
                 }
