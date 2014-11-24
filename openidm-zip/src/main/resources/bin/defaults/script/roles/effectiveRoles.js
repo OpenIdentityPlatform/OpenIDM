@@ -28,7 +28,7 @@
 
 /*global object */
 
-logger.debug("Invoked effectiveRoles script on {} value: ", propertyName, object);
+logger.debug("Invoked effectiveRoles script on property {}", propertyName);
 // Allow for configuration in virtual attribute config, but default
 if (rolesPropName === undefined) {
     var rolesPropName = "roles";
