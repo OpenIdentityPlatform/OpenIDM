@@ -187,9 +187,12 @@ orientdb&gt; </screen>
    the sample, keep the following in mind.</para>
    <orderedlist>
     <listitem>
-      <para>You must start OpenIDM with the sample configuration 
-      (<command>$ ./startup.sh -p samples/sample1</command>). For more 
-      information, see <xref linkend="sample-running-reconciliation" />.</para>
+      <para>
+       Start OpenIDM with the configuration associated with Sample 1.
+      </para>
+      <screen>$ ./startup.sh -p samples/sample1</screen>
+      <para>
+       For more information, see <xref linkend="install-sample1" />.</para>
     </listitem>
     <listitem>
      <para>OpenIDM regularly scans for any scheduler configuration files in the
@@ -201,9 +204,10 @@ orientdb&gt; </screen>
     <filename>conf/sync.json</filename>.</para>
     </listitem>
     <listitem>
-    <para>Reconciliation runs, querying all users in the source, and then
-    creating, deleting, or modifying users in the local OpenIDM repository
-    according to the synchronization mappings.</para>
+    <para>When you initiate a reconcilitation, OpenIDM queries all users in the
+     source, and then creates, deletes, or modifies users in the local OpenIDM
+     repository as mapped in <filename>conf/sync.json</filename>.
+    </para>
     </listitem>
     <listitem>
     <para>OpenIDM writes all operations to the audit logs in both the internal
@@ -213,7 +217,7 @@ orientdb&gt; </screen>
     <listitem>
      <para>
       The default Sample 1 version of the
-      <filename>conf/authentication.json</filename> file includes several
+      <filename>conf/authentication.json</filename> file includes three
       authentication modules: <literal>MANAGED_USER</literal>,
       <literal>INTERNAL_USER</literal>, and <literal>CLIENT_CERT</literal>. For
       more information, see the Integrator's Guide section on
@@ -299,14 +303,19 @@ orientdb&gt; </screen>
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
      <note>
-      <para>If you do not want to bother with creating a self-signed certificate
-      as noted in <link xlink:show="new"
+      <para>
+       If you want to set up a self-signed certificate, refer to the following
+       section of the Integrator's Guide:<link xlink:show="new"
       xlink:href="integrators-guide#rest-over-https"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict REST
-       Access to the HTTPS Port</citetitle></link>, just substitute a
-      <command>-k</command> or <command>--insecure</command> for
-      <command>--cacert self-signed.crt</command> in the REST call (the
-      <command>curl</command> command).</para>
+       Access to the HTTPS Port</citetitle></link>.
+      </para>
+      <para>
+       Alternatively, just substitute a <command>-k</command> or
+       <command>--insecure</command> for
+       <command>--cacert self-signed.crt</command> in the REST calls (the
+       <command>curl</command> commands) described in the OpenIDM documentation.
+      </para>
      </note>
      
     </listitem>
@@ -433,6 +442,55 @@ orientdb&gt; </screen>
   </variablelist>
  </section>
 
+ <section xml:id="install-sample1">
+  <title>Install the Sample</title>
+
+  <para>
+   Now that OpenDJ is configured, prepare OpenIDM as described in
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="install-guide#preparing-openidm" ><citetitle>Preparing
+   OpenIDM</citetitle></link> You can then start OpenIDM with the configuration
+   for sample 1.
+  </para>
+
+  <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample1</screen>
+ </section>
+
+ <section xml:id="sample1-adminui">
+  <title>Review the Sample in the Administrative User Interface</title>
+
+  <para>
+   OpenIDM includes a web-based Administrative User Interface, known as the
+   "Admin UI". For details, see
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="integrators-guide#ui-admin"><citetitle>Administering
+   OpenIDM from the UI</citetitle></link>.
+  </para>
+
+  <para>
+   After starting OpenIDM, you can access the Admin UI by navigating to
+   <literal>https://localhost:8443/admin</literal>. The first time you log in,
+   use the default administrative credentials, (Login: openidm-admin, Password:
+   openidm-admin). After logging in, OpenIDM asks you to change the credentials
+   for the administrative account, which is a good idea. However, you can bypass
+   this request by closing that window.
+  </para>
+
+  <para>
+   You should now see the Resources screen, with the connectors and managed
+   objects associated with that configuration.
+  </para>
+
+  <mediaobject>
+   <alt>OpenIDM Admin UI with Sample 1</alt>
+   <imageobject>
+    <imagedata fileref="images/admin-ui-sample1.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
+ </section>
+
  <section xml:id="sample-running-reconciliation">
   <title>Running Reconciliation</title>
   
@@ -468,30 +526,35 @@ $ ./startup.sh -p samples/sample1
    operation.
   </para>
 
-  <para>To see what happened, you could look at the CSV format log file,
-  <filename>openidm/audit/recon.csv</filename>. If that file seems difficult
-  to decipher, read the guidance shown in the Integrator's Guide
-  section on <link xlink:show="new"
-  xlink:href="integrators-guide#querying-recon-logs"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
-  Querying the Reconciliation Audit Log</citetitle></link>.</para>
+  <para>
+   Alternatively, you can run the same reconciliation in the Admin UI. To do so,
+   select Mappings. For Sample 1, you should see one mapping,
+   <literal>systemXmlfileAccounts_managedUser</literal>. Select Edit to access
+   configuration options associated with reconciliation. To run the
+   reconciliation, click Reconcile Now.
+  </para>
 
+  <mediaobject>
+   <alt>OpenIDM Admin UI Mappings with Sample 1</alt>
+   <imageobject>
+    <imagedata fileref="images/admin-ui-mappings-sample1.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
  </section>
 
  <section xml:id="sample-viewing-users-logs">
   <title>Viewing Users and Logs</title>
 
   <para>
-   After reconciliation, you can use the UI to review configured users.
-   Navigate to the URL where OpenIDM is installed. If it is local, navigate to
-   <literal>https://localhost:8443/openidmui</literal>. Use the OpenIDM user
-   credentials noted, where the default administrative username and password
-   are <literal>openidm-admin</literal>. When you login with these credentials
-   and select users, you should see the result of the reconciliation:
+   After reconciliation, you can use the Admin UI to display user records in
+   both the source and target resources. Navigate to the URL where OpenIDM is
+   installed. If it is local, navigate to
+   <literal>https://localhost:8443/admin</literal>. Select mappings, you should
+   see the result of the reconciliation.
   </para>
 
   <mediaobject>
-   <alt>List of users after first reconciliation for sample 1</alt>
+   <alt>List of users after first reconciliation for Sample 1</alt>
    <imageobject>
     <imagedata fileref="images/users-recon-sample1.png" format="PNG" />
    </imageobject>
@@ -499,8 +562,8 @@ $ ./startup.sh -p samples/sample1
 
   <para>Alternatively, you can use the REST interface to display
   all users in the local repository. Use a REST client to perform an HTTP 
-  GET on the following URL:
-  <literal>https://localhost:8443/openidm/managed/user?_queryId=query-all-ids</literal>
+  GET on the following URL: <literal>
+  https://localhost:8443/openidm/managed/user?_queryId=query-all-ids</literal>
   with the headers <literal>"X-OpenIDM-Username: openidm-admin"</literal> and 
   <literal>"X-OpenIDM-Password: openidm-admin"</literal>.
   </para>
@@ -664,6 +727,28 @@ $ ./startup.sh -p samples/sample1
    <computeroutput>
 access.csv activity.csv recon.csv
    </computeroutput></screen>
+
+  <para>
+   For more information on what you can find in each of these files, see the
+   Integrator's Guide section on
+   <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+         xlink:href="integrators-guide#audit-log-types"><citetitle>Audit Log
+   Types</citetitle></link>.
+  </para>
+
+  <para>
+   You can get a similar level of information for each user. For example, after
+   reconciliation, you can return to <xref linkend="sample-viewing-users-logs" />,
+   select a user, and review information from the reconciled linked resource.
+  </para>
+
+  <mediaobject>
+   <alt>User data after a reconciliation</alt>
+   <imageobject>
+    <imagedata fileref="images/linked-user.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
  </section>
 
  <section xml:id="sample-adding-users-resource">
