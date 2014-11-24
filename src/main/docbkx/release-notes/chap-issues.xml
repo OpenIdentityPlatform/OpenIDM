@@ -288,6 +288,25 @@
    </para>
    <listitem>
     <para>
+     When you add or edit a connector through the Admin UI, the list of
+     <emphasis>required</emphasis> <literal>Base Connector Details</literal> is
+     not necessarily accurate for your deployment. Some of these details might
+     be required for specific deployment scenarios only. If you need a connector
+     configuration where not all the Base Connector Details are required, you
+     need to create your connector configuration file over REST (see
+     <link xlink:show="new" xlink:href="integrators-guide#connector-wiz"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating
+     Default Connector Configurations</citetitle></link> in the
+     <citetitle>Integrator's Guide</citetitle>) or edit the connector
+     configuration file
+     (<filename>conf/provisioner.openicf-<replaceable>connector-type</replaceable>.json</filename>)
+     directly.
+    </para>
+   </listitem>
+
+   <!-- Check these from 3.0 -->
+   <listitem>
+    <para>
      The Password Synchronization plugins are not currently supported with
      OpenIDM ${docTargetVersion}. An updated version of these plugins will
      be released shortly to align with the OpenIDM ${docTargetVersion}
