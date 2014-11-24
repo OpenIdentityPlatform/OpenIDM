@@ -172,7 +172,7 @@ INSERT INTO organizations VALUES ("0","ENG","Engineering organization",CURRENT_T
 sql.execute("grant all on hrdb.* to root@'%' IDENTIFIED BY 'password';")
 
 // do a query to check it all worked ok
-def results = sql.firstRow("select firstname, lastname from Users where id=1").firstname
+def results = sql.firstRow("select firstname, lastname from users where id=1").firstname
 def expected = "Bob"
 assert results == expected
 
