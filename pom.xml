@@ -31,7 +31,7 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-project</artifactId>
-    <version>3.1.0-RC3-SNAPSHOT</version>
+    <version>3.1.0-RC3</version>
     <packaging>pom</packaging>
     <name>OpenIDM project</name>
     <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution.
@@ -62,9 +62,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/openidm/branches/3.1.0-RC</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/branches/3.1.0-RC</developerConnection>
-        <url>http://sources.forgerock.org/browse/openidm/branches/3.1.0-RC</url>
+        <connection>scm:svn:https://svn.forgerock.org/openidm/tags/3.1.0-RC3</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/tags/3.1.0-RC3</developerConnection>
+        <url>http://sources.forgerock.org/browse/openidm/tags/3.1.0-RC3</url>
     </scm>
     <distributionManagement>
         <site>
