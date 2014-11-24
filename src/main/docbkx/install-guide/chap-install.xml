@@ -709,4 +709,76 @@ Stopping OpenIDM (31391)</computeroutput></screen>
 
   </section>
 
+ <!-- For OPENIDM-3.1, we have two UI endpoints, admin and openidmui. I think
+ this may change in future releases. -->
+
+  <section xml:id="openidm-uis">
+   <title>OpenIDM User Interfaces</title>
+
+   <para>
+    OpenIDM supports configuration from Web-based user interfaces (WUI),
+    hereafter known as the UI.
+   </para>
+
+   <para>
+    OpenIDM includes UIs at two different endpoints,
+    <literal>/openidmui</literal> and <literal>/admin</literal>. We refer to the
+    administrative tools available at each endpoint as the User View UI and the
+    Administrative UI (Admin UI), respectively.
+   </para>
+
+   <para>
+    The User View UI allows regular users to update parts of their own profiles,
+    such as password updates and user data such as addresses. When enabled,
+    anonymous users can self-register and reset their passwords, as described
+    in the following section: <link xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:show="new" xlink:href="integrators-guide#ui-configuring"><citetitle>
+    Configuring the Default User Interface</citetitle></link>.
+   </para>
+
+   <para>
+    Administrative users can do more in the User View UI. They can create and
+    delete user accounts. They can also modify profiles for existing users.
+    To rephrase, in the User View UI, administrative users can configure managed
+    user data that conforms to the core schema of OpenIDM, including default
+    policies set up in the <filename>policy.json</filename> configuration file.
+    For more information, see the following chapter: <link xlink:show="new"
+    xlink:role="http:/docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#chap-policies"><citetitle>Using Policies to
+    Validate Data</citetitle></link>.
+   </para>
+
+   <para>
+    In addition, administrative users can configure and manage workflows in the
+    User View UI. For more information, see the following section:
+    <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+    xlink:href="integrators-guide#ui-managing-workflows"><citetitle>Managing
+    Workflows from the User Interface</citetitle></link>.
+   </para>
+
+   <para>
+    In essence, the User View UI supports day-to-day administrative tasks.
+   </para>
+
+   <para>
+    In contrast, the Admin UI allows an administrator to define the overall
+    OpenIDM system configuration. Adminstrators would access the Admin UI to
+    learn OpenIDM, during initial system setup, and when they identify new
+    requirements.
+   </para>
+
+   <para>
+    Unlike the User View UI, the Admin UI allows you to configure connections to
+    external data stores, as well as the way OpenIDM reconciles information
+    between internal and external data stores.
+   </para>
+
+   <para>
+    When OpenIDM is running on the localhost system, you can access these UIs
+    at <literal>https://localhost:8443/openidmui</literal> and
+    <literal>https://localhost:8443/admin</literal>, respectively.
+   </para>
+
+  </section>
+
  </chapter>
