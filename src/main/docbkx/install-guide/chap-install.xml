@@ -762,7 +762,7 @@ Stopping OpenIDM (31391)</computeroutput></screen>
 
    <para>
     In contrast, the Admin UI allows an administrator to define the overall
-    OpenIDM system configuration. Adminstrators would access the Admin UI to
+    OpenIDM system configuration. Administrators would access the Admin UI to
     learn OpenIDM, during initial system setup, and when they identify new
     requirements.
    </para>
