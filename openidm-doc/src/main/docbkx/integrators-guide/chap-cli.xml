@@ -326,20 +326,20 @@ $ ./cli.sh configimport --user openidm-admin:openidm-admin --replaceAll /tmp/con
   example configures a new XML connector.
   </para>
 
-  <!-- Removed <?eval ${openicfBundleVersion}?> as that doesn't match
-  the version numbers shown in command output. If there is a future mismatch
-   in version numbers, I do not know if that's a "big deal". -->
-
   <screen>$ <userinput>./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector</userinput>
  <computeroutput>Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
-0. Scripted SQL Connector version 1.1.0.1
-1. XML Connector version 1.1.0.1
-2. Database Table Connector version 1.1.0.0
-3. CSV File Connector version 1.1.0.1
-4. LDAP Connector version 1.1.1.2
-5. Exit
-Select [0..5]: 1
+0. CSV File Connector version ${openicf.csvconnector.version}
+1. Database Table Connector version ${openicf.dbtableconnector.version}
+2. Scripted Poolable Groovy Connector version ${openicf.groovyconnector.version}
+3. Scripted Groovy Connector version ${openicf.groovyconnector.version}
+4. Scripted CREST Connector version ${openicf.groovyconnector.version}
+5. Scripted SQL Connector version ${openicf.groovyconnector.version}
+6. Scripted REST Connector version ${openicf.groovyconnector.version}
+7. LDAP Connector version ${openicf.ldapconnector.version}
+8. XML Connector version ${openicf.xmlconnector.version}
+9. Exit
+Select [0..9]: 8
 Edit the configuration file and run the command again. The configuration was 
 saved to /openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput></screen>
   
