@@ -3475,7 +3475,7 @@ Starting Directory Server ....... Done.
      <title>External Configuration for an Active AD Deployment</title>
 
      <para>
-      To configure an active AD deployment for x`sample 6, open the
+      To configure an active AD deployment for sample 6, open the
       <filename>provisioner.openicf-realad.json</filename> file in
       a text editor. Update it as needed. At minimum, you should check and
       if needed update the following parameters in that file, as shown in the
