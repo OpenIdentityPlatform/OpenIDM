@@ -25,16 +25,18 @@
 /*global require, define, QUnit, $ */
 
 define([
-    "./adminbasetests",
-    "./managedobjects/managedobjectstest",
-    "./resources/resourcetests"
-], function (adminbasetest, motest, resourcetest) {
+    "./adminBaseTest",
+    "./managedobjects/managedObjectsTest",
+    "./resources/resourceTest",
+    "./mapping/addMappingTest"
+], function (adminBaseTest, moTest, resourceTest, addMappingTest) {
 
     return {
         executeAll: function (server) {
-            motest.executeAll(server);
-            adminbasetest.executeAll(server);
-            resourcetest.executeAll(server);
+            moTest.executeAll(server);
+            adminBaseTest.executeAll(server);
+            resourceTest.executeAll(server);
+            addMappingTest.executeAll(server);
         }
     };
 });
