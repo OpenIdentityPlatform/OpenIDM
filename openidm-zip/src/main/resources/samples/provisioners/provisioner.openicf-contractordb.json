@@ -3,7 +3,7 @@
    "connectorRef" :
       {
           "bundleName"    : "org.forgerock.openicf.connectors.databasetable-connector",
-          "bundleVersion" : "1.1.0.0",
+          "bundleVersion" : "1.1.0.1",
           "connectorName" : "org.identityconnectors.databasetable.DatabaseTableConnector"
       },
    "poolConfigOption" :
