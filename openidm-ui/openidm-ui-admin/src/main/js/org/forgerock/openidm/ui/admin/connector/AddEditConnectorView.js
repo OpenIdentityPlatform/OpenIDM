@@ -719,18 +719,10 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             ConnectorDelegate.deleteCurrentConnectorsCache();
 
             ConfigDelegate[this.data.editState ? "updateEntity" : "createEntity" ](this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
-                if(this.connectorTypeRef.connectorSaved) {
-                    this.connectorTypeRef.connectorSaved(this.delayReturn, mergedResult);
-                } else {
-                    this.delayReturn();
-                }
+                _.delay(function () {
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                }, 1500);
             }, this));
-        },
-
-        delayReturn: function() {
-            _.delay(function () {
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
-            }, 1500);
         },
 
         oAuthFormSubmit: function(event) {
@@ -745,6 +737,16 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             var mergedResult = this.getProvisioner();
 
+            if(this.connectorTypeRef.connectorSaved) {
+                this.connectorTypeRef.connectorSaved(_.bind(function() {
+                    this.connectorValidate(mergedResult);
+                }, this), mergedResult);
+            } else {
+                this.connectorValidate(mergedResult);
+            }
+        },
+
+        connectorValidate: function(mergedResult) {
             ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (testResult) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
 
