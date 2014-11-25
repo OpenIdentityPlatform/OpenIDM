@@ -77,6 +77,16 @@
     Configuration</citetitle></link> in the <citetitle>Integrator's
     Guide</citetitle>.
    </para>
+
+   <para>
+    The command-line examples in this chapter (and throughout the OpenIDM
+    documentation) assume a UNIX shell. If you are running these samples on
+    Windows, adjust the command-line examples accordingly. For an indication of
+    what the corresponding Windows command would look like, see the examples in
+    the <link xlink:show="new" xlink:href="install-guide#chap-sample"
+    xlink:role="http://docbook.org/xlink/role/olink" ><citetitle>First OpenIDM
+    Sample</citetitle></link>.
+   </para>
   </section>
 
   <section xml:id="preparing-openidm">
@@ -509,7 +519,7 @@ $ ./startup.sh -p samples/sample2</screen>
     <xref linkend="external-ldap-config-2" />. The LDAP user must have write
     access to create users from OpenIDM on the LDAP server. When you configure
     the LDAP server, import the appropriate LDIF file
-    (<filename>/path/to/openidm/samples/sample2b/data/Example.ldif).</filename>
+    (<filename>openidm/samples/sample2b/data/Example.ldif).</filename>
    </para>
   </section>
 
@@ -525,74 +535,115 @@ $ ./startup.sh -p samples/sample2b</screen>
   </section>
 
   <section xml:id="run-sample2b">
-   <title>Running the Sample</title>
+   <title>Run the Sample</title>
+   <para>
+    The mapping configuration file (<filename>sync.json</filename>) for this
+    sample includes two mappings, <literal>systemLdapAccounts_managedUser</literal>,
+    which synchronizes users from the source LDAP server with the target
+    OpenIDM repository, and <literal>managedUser_systemLdapAccounts</literal>,
+    which synchronizes changes from the OpenIDM repository to the LDAP server.
+   </para>
+   <para>
+    You can run this part of the sample by using the <literal>curl</literal>
+    command-line utility, or by using the OpenIDM Administration UI. This
+    section provides instructions for both methods.
+   </para>
 
-   <para>Run reconciliation over the REST interface.</para>
-
-   <screen>$ curl \
+   <procedure>
+    <title>To Run the Sample Using the Command Line</title>
+    <step>
+     <para>
+      Reconcile the repository over the REST interface by running the following
+      command:
+     </para>
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
-
-   <para>
-    The reconciliation operation returns a reconciliation run ID and the status
-    of the operation. Reconciliation creates user objects from LDAP in the
-    OpenIDM repository, assigning the new objects random unique IDs. To list
-    user objects by ID, run a query over the REST interface.
-   </para>
-   <screen>
-$ curl \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</userinput>
+<computeroutput>{
+  "state": "ACTIVE",
+  "_id": "027e25e3-7a33-4858-9080-161c2b40a6bf"
+}</computeroutput></screen>
+     <para>
+      The reconciliation operation returns a reconciliation run ID and the
+      status of the operation. Reconciliation creates user objects from LDAP in
+      the OpenIDM repository, assigning the new objects random unique IDs.
+     </para>
+    </step>
+    <step>
+     <para>
+      To retrieve the users from the repository, query their IDs as follows:
+     </para>
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
-   </screen>
-
-   <para>The resulting JSON object should include content similar to the
-    following.</para>
-
-   <programlisting language="javascript">
-{
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
   "result": [
     {
-      "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d"
       "_rev": "0",
+      "_id": "2cb34789-ee67-4f50-88f2-022460c37253"
     },
     {
-      "_id": "6490489f-bbff-4855-808a-5c1862b09339"
       "_rev": "0",
+      "_id": "625942ac-3cb8-47aa-9de1-217d24967b3b"
     }
-    "resultCount": 2,
-    "pagedResultsCookie": null,
-    "remainingPagedResults": -1,
-],
- }</programlisting>
-
-   <para>
-    To retrieve the user record, log into the UI, on an URI such as
-    <literal>https://localhost:8443/openidmui</literal>, as the administrative
-    user.
-   </para>
-
-   <para>
-    Alternatively, you can make a commons REST call to get a specific user
-    object by ID.</para>
-
-   <screen>$ curl \
+  ]
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      To retrieve individual user objects, include the ID in the URL, for
+      example:
+     </para>
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user/53fbf0c5-aa37-4845-a4b3-92a21810a36d"</screen>
-
-   <para>Test the second mapping by creating a user in the OpenIDM
-   repository. On UNIX:</para>
- 
-   <screen>$ curl \
+ "https://localhost:8443/openidm/managed/user/625942ac-3cb8-47aa-9de1-217d24967b3b"</userinput>
+<computeroutput>{
+  "displayName": "Babara Jensen",
+  "stateProvince": "",
+  "userName": "bjensen",
+  "postalAddress": "",
+  "effectiveAssignments": {},
+  "roles": [
+    "openidm-authorized"
+  ],
+  "country": "",
+  "effectiveRoles": [
+    "openidm-authorized"
+  ],
+  "givenName": "Barbara",
+  "address2": "",
+  "lastPasswordAttempt": "Tue Nov 25 2014 12:29:15 GMT+0200 (SAST)",
+  "passwordAttempts": "0",
+  "sn": "Jensen",
+  "mail": "bjensen@example.com",
+  "city": "",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "_id": "625942ac-3cb8-47aa-9de1-217d24967b3b",
+  "_rev": "1",
+  "description": "Created for OpenIDM",
+  "accountStatus": "active",
+  "telephoneNumber": "1-360-229-7105"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Test the second mapping by creating a user in the OpenIDM repository.
+     </para>
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -606,62 +657,247 @@ $ curl \
     "givenName":"Felicitas",
     "description":"Felicitas Doe",
     "displayName":"fdoe"}' \
- "https://localhost:8443/openidm/managed/user?_action=create"</screen>
- 
- <para>On Windows:</para>
- 
- <screen>$ curl ^
- --cacert self-signed.crt ^
- --header "X-OpenIDM-Username: openidm-admin" ^
- --header "X-OpenIDM-Password: openidm-admin" ^
- --header "Content-Type: application/json" ^
- --request POST ^
- --data "{
-  \"mail\":\"fdoe@example.com\",
-  \"sn\":\"Doe\",
-  \"telephoneNumber"\:\"555-1234\",
-  \"userName\":\"fdoe\",
-  \"givenName\":\"Felicitas\",
-  \"description\":\"Felicitas Doe\",
-  \"displayName\":\"fdoe\"}" ^
- "https://localhost:8443/openidm/managed/user?_action=create"</screen>
+ "https://localhost:8443/openidm/managed/user?_action=create"</userinput>
+<computeroutput>{
+  "displayName": "fdoe",
+  "stateProvince": "",
+  "userName": "fdoe",
+  "postalAddress": "",
+  "effectiveAssignments": {},
+  "roles": [
+    "openidm-authorized"
+  ],
+  "country": "",
+  "effectiveRoles": [
+    "openidm-authorized"
+  ],
+  "givenName": "Felicitas",
+  "address2": "",
+  "lastPasswordAttempt": "Tue Nov 25 2014 12:49:06 GMT+0200 (SAST)",
+  "passwordAttempts": "0",
+  "sn": "Doe",
+  "mail": "fdoe@example.com",
+  "city": "",
+  "_rev": "1",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "_id": "c462fac4-528a-45c5-ba76-d2744952d418",
+  "description": "Felicitas Doe",
+  "accountStatus": "active",
+  "telephoneNumber": "555-1234"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      By default, <emphasis>implicit synchronization</emphasis> is enabled for
+      mappings <emphasis>from</emphasis> the <literal>managed/user</literal>
+      repository <emphasis>to</emphasis> any external resource. This means that
+      when you update a managed object, any mappings defined in the
+      <filename>sync.json</filename> file that have the managed object as the
+      source are automatically executed to update the target system. For more
+      information, see <link xlink:href="integrators-guide#synchronization-mappings-file"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+      Mappings File</citetitle></link> in the <citetitle>Integrator's
+      Guide</citetitle>.
+     </para>
+     <para>
+      Test that the implicit reconciliation has been successful by querying the
+      users in the LDAP directory over REST, as follows:
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "_id": "uid=jdoe,ou=People,dc=example,dc=com",
+      "dn": "uid=jdoe,ou=People,dc=example,dc=com"
+    },
+    {
+      "_id": "uid=bjensen,ou=People,dc=example,dc=com",
+      "dn": "uid=bjensen,ou=People,dc=example,dc=com"
+    },
+    {
+      "_id": "uid=fdoe,ou=People,dc=example,dc=com",
+      "dn": "uid=fdoe,ou=People,dc=example,dc=com"
+    }
+  ]
+}</computeroutput></screen>
+     <para>
+      Note the new entry for user <literal>fdoe</literal>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Query the complete entry by including <literal>fdoe</literal>'s ID in
+      the URL.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/ldap/account/uid=fdoe,ou=People,dc=example,dc=com"</userinput>
+<computeroutput>{
+  "_id": "uid=fdoe,ou=People,dc=example,dc=com",
+  "dn": "uid=fdoe,ou=People,dc=example,dc=com",
+  "mail": "fdoe@example.com",
+  "uid": "fdoe",
+  "ldapGroups": [],
+  "cn": "fdoe",
+  "givenName": "Felicitas",
+  "telephoneNumber": "555-1234",
+  "description": "Felicitas Doe",
+  "sn": "Doe"
+}</computeroutput></screen>
+    </step>
+   </procedure>
 
-   <para>
-    By default, implicit synchronization is enabled. This means that when you
-    update a managed object, any mappings defined in the
-    <filename>sync.json</filename> file that have the managed object as the
-    source are automatically executed to update the target system. For more
-    information, see <link
-    xlink:href="integrators-guide#synchronization-mappings-file"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
-    Mappings File</citetitle></link> in the <citetitle>Integrator's
-    Guide</citetitle>.
-   </para>
-   
-   <para>
-    Test that the implicit reconciliation has been successful by locating the
-    new user in the LDAP directory.
-   </para>
-   
-   <screen>$ <userinput>/path/to/OpenDJ/bin/ldapsearch \
- -bindDN "cn=Directory Manager" \
- -bindPassword password \
- -hostname localhost \
- -port 1389 \
- -baseDN "dc=example,dc=com" \
- "uid=fdoe" </userinput>
-<computeroutput>dn: uid=fdoe,ou=People,dc=example,dc=com
-mail: fdoe@example.com
-givenName: Felicitas
-objectClass: person
-objectClass: organizationalPerson
-objectClass: inetOrgPerson
-objectClass: top
-uid: fdoe
-cn: Felicitas Doe
-sn: Doe</computeroutput>
-   </screen>
-
+   <procedure>
+    <title>To Run the Sample Using the Admin UI</title>
+    <step>
+     <para>
+      Log in to the Admin UI at the URL
+      <literal>https://localhost:8443/admin</literal> as the default
+      administrative user (<literal>openidm-admin</literal>) with password
+      <literal>openidm-admin</literal>.
+     </para>
+     <para>
+      The first time you log into the Admin UI, you are prompted to change your
+      password. If you do not want to change your password at this time, simply
+      click X to close this window, and continue with the sample.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select the Mappings tab.
+     </para>
+     <para>
+      This tab shows two configured mappings, one from the
+      <literal>ldap</literal> server to the OpenIDM repository
+      (<literal>managed/user</literal>) and one from the OpenIDM repository to
+      the <literal>ldap</literal> server.
+     </para>
+     <mediaobject>
+      <alt>Mappings tab showing the mapping for Sample 2b</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2b-mappings.png" format="PNG"/>
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Click anywhere on the first mapping and click Reconcile Now.
+     </para>
+     <mediaobject>
+      <alt>Mappings tab showing reconciliation for Sample 2b</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2b-reconcile.png" format="PNG"/>
+      </imageobject>
+     </mediaobject>
+     <para>
+      The reconciliation operation creates the two users from the LDAP server in
+      the OpenIDM repository.
+     </para>
+    </step>
+    <step>
+     <para>
+      Retrieve the users in the repository by clicking the User View link at the
+      top right of the Admin UI.
+     </para>
+     <para>
+      This link opens the User View UI. If you did not change your password in
+      the first step, you are prompted to change your password again. You can
+      bypass this by simply clicking X to close the password prompt window.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select the Users tab.
+     </para>
+     <mediaobject>
+      <alt>Users tab showing the users in the repo for Sample 2b</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2-users.png" format="PNG"/>
+      </imageobject>
+     </mediaobject>
+     <para>
+      The two users from the LDAP server have been reconciled to the OpenIDM
+      repository.
+     </para>
+    </step>
+    <step>
+     <para>
+      To retrieve the details of a specific user, click that username on the
+      Users tab.
+     </para>
+     <para>
+      The following image shows the details of user <literal>bjensen</literal>.
+     </para>
+     <mediaobject>
+      <alt>User details for a specific user</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2-bjensen.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Add a new user in the OpenIDM repository by clicking Add User on the Users
+      tab.
+     </para>
+     <para>
+      Complete the user details and click Create.
+     </para>
+     <para>
+      The following image shows a new record being created for user
+      <literal>fdoe</literal>.
+     </para>
+     <mediaobject>
+      <alt>New user record for fdoe</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2b-new-user.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      By default, <emphasis>implicit synchronization</emphasis> is enabled for
+      mappings <emphasis>from</emphasis> the <literal>managed/user</literal>
+      repository <emphasis>to</emphasis> any external resource. This means that
+      when you update a managed object, any mappings defined in the
+      <filename>sync.json</filename> file that have the managed object as the
+      source are automatically executed to update the target system. For more
+      information, see <link xlink:href="integrators-guide#synchronization-mappings-file"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+      Mappings File</citetitle></link> in the <citetitle>Integrator's
+      Guide</citetitle>.
+     </para>
+     <para>
+      To test that the implicit reconciliation has been successful, look at
+      <literal>fdoe</literal>'s record in the User View UI. At the bottom of the
+      user profile, the Linked Systems panel indicates the external resource to
+      which this user entry is mapped.
+     </para>
+     <para>
+      The following image shows that <literal>fdoe</literal> now exists in the
+      linked resource <literal>ldap account</literal>, and shows her entry as it
+      appears on the LDAP server.
+     </para>
+     <mediaobject>
+      <alt>New user record for fdoe</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2b-fdoe.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+   </procedure>
   </section>
  </section>
  
