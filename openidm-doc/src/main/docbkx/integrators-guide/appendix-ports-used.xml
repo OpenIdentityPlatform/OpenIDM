@@ -78,7 +78,7 @@
 
  <para>
   The Jetty configuration (in <filename>openidm/conf/jetty.xml</filename>)
-  references the ports that are specified in the <filename>boot.properties</filename>
-  and <filename>config.properties</filename> files.
+  references the ports that are specified in the
+  <filename>boot.properties</filename> file.
  </para>
 </appendix>
