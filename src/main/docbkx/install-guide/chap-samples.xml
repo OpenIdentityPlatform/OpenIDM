@@ -2735,6 +2735,7 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
 
  </section>
 
+ <!-- WIP
  <section xml:id="samples-powershell">
   <title>Using the PowerShell Connector Toolkit to Create Scripted Connectors</title>
   <para>
@@ -2752,15 +2753,16 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
   <section xml:id="more-sample-powershell2AD">
    <title>Sample - Using the PowerShell Connector Toolkit to Connect to Active Directory</title>
    <para>
-    This sample uses a ScriptedSQL implementation of the Groovy Connector
-    Toolkit in which an instance of the ScriptedSQL framework is made to work
-    with the <literal>hrdb</literal> schema. The "connector" in this sample is
-    therefore really an <literal>hrdb</literal> connector that is implemented
-    with the help of the Groovy Connector Toolkit.
+    This sample provides a number of PowerShell scripts that enable you to
+    perform basic CRUD (create, read, update, delete) operations on an Active
+    Directory server. The samples use the MS Active Directory PowerShell module.
+    For more information on this module, see the corresponding <link xlink:show="new"
+    xlink:href="http://technet.microsoft.com/en-us/library/hh852274.aspx">Microsoft
+    documentation</link>.
    </para>
   </section>
 
- </section>
+ </section>     -->
 
  <section xml:id="more-sample4">
   <title>Sample 4 - CSV to XML File</title>
