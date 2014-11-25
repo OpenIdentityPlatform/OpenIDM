@@ -446,7 +446,7 @@
     },
     "connectorRef": {
       "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
-      "bundleVersion": "1.1.0.1",
+      "bundleVersion": "${openicf.xmlconnector.version}",
       "bundleName": "org.forgerock.openicf.connectors.xml-connector"
     },
     "connectorPoolingSupported": true,
