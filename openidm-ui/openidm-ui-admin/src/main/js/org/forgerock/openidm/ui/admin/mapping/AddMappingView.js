@@ -62,9 +62,14 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                     connector.iconSrc = tempIconClass.src;
 
                     if(connector.objectTypes) {
-                        connector.objectTypes = _.sortBy(connector.objectTypes, function(objectType) {
-                            return objectType;
-                        });
+                        connector.objectTypes = _.chain(connector.objectTypes)
+                            .filter(function(objectTypes){
+                                return objectTypes !== "__ALL__";
+                            })
+                            .sortBy(function(objectType) {
+                                return objectType;
+                            })
+                            .value();
 
                         if(connector.objectTypes.length > 2) {
                             connector.displayObjectType = connector.objectTypes[0] +", " +connector.objectTypes[1]+ ", (" +(connector.objectTypes.length - 2) +" " +$.t("templates.mapping.more") +")";
@@ -156,7 +161,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
         },
 
         /*
-            No longer in use but code could be useful if this feature is desired later in different context
+         No longer in use but code could be useful if this feature is desired later in different context
          */
         mappingDetail: function(event){
             var clickedEle = $(event.target),
