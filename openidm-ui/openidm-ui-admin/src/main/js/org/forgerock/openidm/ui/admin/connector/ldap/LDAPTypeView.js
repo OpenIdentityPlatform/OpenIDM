@@ -72,6 +72,8 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
         render: function(args, callback) {
             var base = "templates/admin/connector/";
 
+            this.data.publicKey = "";
+
             $("#connectorDetails").hide();
 
             this.data.connectorDefaults = args.connectorDefaults;
