@@ -43,7 +43,7 @@
     "SearchScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADSearch.ps1",
     "SyncScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADSync.ps1",
     "TestScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADTest.ps1",
-    "UpdateScriptFileName" : "",
+    "UpdateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADUpdate.ps1",
     "VariablesPrefix" : "Connector",
     "QueryFilterType" : "AdPsModule",
     "ReloadScriptOnExecution" : true,
