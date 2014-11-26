@@ -291,16 +291,22 @@ orientdb&gt; </screen>
      ><citetitle>Scheduling Tasks and Events</citetitle></link> in the
      <citetitle>Integrator's Guide</citetitle>.</para>
 
-     <para>Apart from the scheduled reconciliation run, you can also start 
+     <para>
+      Apart from the scheduled reconciliation run, you can also start
      the reconciliation run through the REST interface. The call to the REST 
-     interface is an HTTP POST such as the following.</para>
+     interface is an HTTP POST such as the following.
+     </para>
      <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser&amp;waitForCompletion=true"</screen>
+     <para>
+      The <literal>waitForCompletion=true</literal> parameter specifies that the
+      operation should return only when it has completed.
+     </para>
 
      <note>
       <para>
@@ -514,17 +520,17 @@ $ ./startup.sh -p samples/sample1
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser&amp;waitForCompletion=true"</screen>
  
- <para>Successful reconciliation returns a reconciliation run ID, similar
- to the following:</para>
+ <para>
+  Successful reconciliation returns a reconciliation run ID, and the status of
+  the reconciliation operation, as follows:
+ </para>
  
- <screen>{"_id":"2d87c817-3d00-4776-a705-7de2c65937d8","state":"ACTIVE"}</screen>
-
-  <para>
-   In this case, <literal>"ACTIVE"</literal> is the state of the reconciliation
-   operation.
-  </para>
+ <screen>{
+  "_id":"2d87c817-3d00-4776-a705-7de2c65937d8",
+  "state":"SUCCESS"
+}</screen>
 
   <para>
    Alternatively, you can run the same reconciliation in the Admin UI. To do so,
