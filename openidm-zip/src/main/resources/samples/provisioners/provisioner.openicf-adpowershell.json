@@ -160,7 +160,8 @@
         "name" : {
           "type" : "string",
           "nativeName" : "name",
-          "nativeType" : "string"
+          "nativeType" : "string",
+          "flags" : [ "NOT_CREATABLE", "NOT_UPDATEABLE" ]
         },
         "displayNamePrintable" : {
           "type" : "string",
@@ -364,7 +365,8 @@
         "name" : {
           "type" : "string",
           "nativeName" : "name",
-          "nativeType" : "string"
+          "nativeType" : "string",
+          "flags" : [ "NOT_CREATABLE", "NOT_UPDATEABLE" ]
         },
         "displayNamePrintable" : {
           "type" : "string",
