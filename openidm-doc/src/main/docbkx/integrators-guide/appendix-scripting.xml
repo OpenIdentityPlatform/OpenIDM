@@ -1432,9 +1432,9 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
   <para>
    The following REST call attempts to evaluate the
    <literal>autoPurgeAuditRecon.js</literal> script (provided in
-   <filename>openidm/bin/defaults/script/audit</filename>, but provides an
+   <filename>openidm/bin/defaults/script/audit</filename>), but provides an
    incorrect purge type (<literal>"purgeByNumOfRecordsToKeep"</literal> instead
-   of <literal>"purgeByNumOfReconsToKeep"</literal>. The error is picked up in
+   of <literal>"purgeByNumOfReconsToKeep"</literal>). The error is picked up in
    the evaluation. The example assumes that the script exists in the directory
    reserved for custom scripts (<filename>openidm/script</filename>).
   </para>
@@ -1447,23 +1447,24 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
  -data '{
    "type": "text/javascript",
    "file": "script/autoPurgeAuditRecon.js",
-   "globals": {
-     "input": {
-        "mappings": ["%"],
-        "purgeType": "purgeByNumOfRecordsToKeep",
-        "numOfRecons": 1
-     }
+   <!--
+   "globals": { -->
+   "input": {
+       "mappings": ["%"],
+       "purgeType": "purgeByNumOfRecordsToKeep",
+       "numOfRecons": 1
+    <!-- } -->
    }
  }' \
  "https://localhost:8443/openidm/script?_action=eval"</userinput>
 <computeroutput>
 "Must choose to either purge by expired or number of recons to keep"</computeroutput></screen>
-  <para>
+  <!--Removed pending fix for the namespacing issue <para>
    Note that the variables passed into this script are namespaced with the
    <literal>"globals"</literal> map. It is preferable to namespace variables
    passed into scripts in this way, to avoid collisions with the top-level
    reserved words for script maps, such as <literal>file</literal>,
    <literal>source</literal>, and <literal>type</literal>.
-  </para>
+  </para>                                                  -->
  </section>
 </appendix>
