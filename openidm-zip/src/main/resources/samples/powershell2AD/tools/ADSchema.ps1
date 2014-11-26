@@ -84,7 +84,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	# Standard attributes - single valued
 	$StandardSingle = @("division","primaryInternationalISDNNumber","c","l","department","givenName","telephoneNumber","employeeNumber","displayName",
 	"personalTitle","homeDirectory","postalCode","manager","st","initials","employeeType","streetAddress","co","title","middleName","wWWHomePage","company",
-	"name","comment","scriptPath","mail","displayNamePrintable","ipPhone","homePostalAddress","facsimileTelephoneNumber","homePhone","street","homeDrive",
+	"comment","scriptPath","mail","displayNamePrintable","ipPhone","homePostalAddress","facsimileTelephoneNumber","homePhone","street","homeDrive",
 	"info","assistant","mobile","employeeID","logonWorkstation","logonHours","userWorkstations","userSharedFolder","description")
 	
 	foreach ($attr in $StandardSingle)
@@ -122,7 +122,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	# $ocib.AddAttributeInfo($AttributeInfoBuilder::Build("accountExpires",[int]))
 	
 	$Technical = @("objectGUID","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp","lastLogonTimestamp",
-	"badPwdCount","badPasswordTime","lastLogon","pwdLastSet","logonCount","lockoutTime")
+	"badPwdCount","badPasswordTime","lastLogon","pwdLastSet","logonCount","lockoutTime","name")
 	
 	foreach ($attr in $Technical)
 	{
@@ -173,7 +173,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	}
 	
 	# Standard attributes - single valued
-	$StandardSingle = @("wWWHomePage","name","telephoneNumber","mail","displayNamePrintable","displayName","managedBy","info","description")
+	$StandardSingle = @("wWWHomePage","telephoneNumber","mail","displayNamePrintable","displayName","managedBy","info","description")
 	
 	foreach ($attr in $StandardSingle)
 	{
@@ -205,7 +205,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	}
 	
 	# Technical attributes
-	$Technical = @("objectGUID","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp")
+	$Technical = @("objectGUID","name","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp")
 	
 	foreach ($attr in $Technical)
 	{
