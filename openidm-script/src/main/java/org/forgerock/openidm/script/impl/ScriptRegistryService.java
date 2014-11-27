@@ -560,7 +560,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 SourceUnit.ATTR_TYPE.equals(name) ||
                 SourceUnit.ATTR_VISIBILITY.equals(name) ||
                 SourceUnit.AUTO_DETECT.equals(name) ||
-                SOURCE_FILE.equals(name)) {
+                SOURCE_FILE.equals(name) ||
+                SOURCE_GLOBALS.equals(name)) {
             return true;
         }
         return false;
