@@ -981,12 +981,13 @@ JAVA_TYPE_STRING</screen>
   </para>
   <note>
    <para>
-    OpenIDM ${docTargetVersion} supports version ${connectorServerVersion}
+    OpenIDM ${docTargetVersion} supports version ${openicf.framework.version}
     of the OpenICF Framework. Therefore, you must use version
-    ${connectorServerVersion} of the .NET Connector Server, or the Java Connector
-    Server. The ${connectorServerVersion} Java Connector Server is backward
-    compatible with the version 1.1.x connectors. The ${connectorServerVersion}
-    .NET Connector Server is compatible only with the 1.4.x connectors.
+    ${openicf.framework.version} of the .NET Connector Server, or the Java
+    Connector Server. The ${openicf.framework.version} Java Connector Server is
+    backward compatible with the version 1.1.x connectors. The
+    ${openicf.framework.version} .NET Connector Server is compatible only with
+    the 1.4.x connectors.
    </para>
   </note>
   <para>
