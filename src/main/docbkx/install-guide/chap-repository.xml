@@ -638,10 +638,10 @@ Specification-Version: 4.0
    <screen>$ more sqljdbc4.bnd
 ...
 version=4.0
-Export-Package: *;version=${version}
+Export-Package: *;version=&#36;{version}
 Bundle-Name: Oracle JDBC Driver 4.0 for SQL Server
 Bundle-SymbolicName: Oracle JDBC Driver 4.0 for SQL Server
-Bundle-Version: ${version}</screen>
+Bundle-Version: &#36;{version}</screen>
   </step>
   <step>
    <para>
