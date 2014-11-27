@@ -1439,32 +1439,31 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
    reserved for custom scripts (<filename>openidm/script</filename>).
   </para>
   <screen>$ <userinput>curl \
- -cacert self-signed.crt \
- -header "X-OpenIDM-Username: openidm-admin" \
- -header "X-OpenIDM-Password: openidm-admin" \
- -header "Content-Type: application/json" \
- -request POST \
- -data '{
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
    "type": "text/javascript",
    "file": "script/autoPurgeAuditRecon.js",
-   <!--
-   "globals": { -->
-   "input": {
+   "globals": {
+     "input": {
        "mappings": ["%"],
        "purgeType": "purgeByNumOfRecordsToKeep",
        "numOfRecons": 1
-    <!-- } -->
+     }
    }
  }' \
  "https://localhost:8443/openidm/script?_action=eval"</userinput>
 <computeroutput>
 "Must choose to either purge by expired or number of recons to keep"</computeroutput></screen>
-  <!--Removed pending fix for the namespacing issue <para>
+  <para>
    Note that the variables passed into this script are namespaced with the
    <literal>"globals"</literal> map. It is preferable to namespace variables
    passed into scripts in this way, to avoid collisions with the top-level
    reserved words for script maps, such as <literal>file</literal>,
    <literal>source</literal>, and <literal>type</literal>.
-  </para>                                                  -->
+  </para>
  </section>
 </appendix>
