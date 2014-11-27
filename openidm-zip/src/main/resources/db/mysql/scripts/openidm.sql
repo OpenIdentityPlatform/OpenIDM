@@ -187,14 +187,14 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `message` TEXT NULL ,
   `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
-  `mapping` TEXT NULL ,
+  `mapping` VARCHAR(511) NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`),
   INDEX `idx_auditrecon_reconid` (`reconid` ASC),
   INDEX `idx_auditrecon_targetobjectid` (`targetobjectid`(28) ASC),
   INDEX `idx_auditrecon_sourceobjectid` (`sourceobjectid`(28) ASC),
   INDEX `idx_auditrecon_activitydate` (`activitydate` ASC),
-  INDEX `idx_auditrecon_mapping` (`mapping`(28) ASC),
+  INDEX `idx_auditrecon_mapping` (`mapping`(255) ASC),
   INDEX `idx_auditrecon_entrytype` (`entrytype` ASC),
   INDEX `idx_auditrecon_situation` (`situation` ASC),
   INDEX `idx_auditrecon_status` (`status` ASC) )
@@ -216,7 +216,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `message` TEXT NULL ,
   `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
-  `mapping` TEXT NULL ,
+  `mapping` VARCHAR(511) NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;

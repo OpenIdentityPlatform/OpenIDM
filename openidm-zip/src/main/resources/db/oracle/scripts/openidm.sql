@@ -157,7 +157,7 @@ CREATE TABLE auditrecon (
   message CLOB,
   actionid VARCHAR2(511 CHAR),
   exceptiondetail CLOB,
-  mapping CLOB,
+  mapping VARCHAR2(511 CHAR),
   messagedetail CLOB
 );
 
@@ -190,7 +190,7 @@ CREATE TABLE auditsync (
   message CLOB,
   actionid VARCHAR2(511 CHAR),
   exceptiondetail CLOB,
-  mapping CLOB,
+  mapping VARCHAR2(511 CHAR),
   messagedetail CLOB
 );
 
