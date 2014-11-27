@@ -180,11 +180,10 @@
    <para>
     If you are not sure what to enter in a specific Add Connector text box,
     review the list of <link xlink:show="new"
-                             xlink:role="http://docbook.org/xlink/role/olink"
-                             xlink:href="integrators-guide#openicf-provisioner-conf">
-    <citetitle>Connectors Supported With OpenIDM</citetitle></link>. You should
-    be able to find guidance and or examples on how each supported connector is
-    configured.
+    xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#connectors-with-openidm"><citetitle>Connectors
+    Supported With OpenIDM</citetitle></link>. You should be able to find
+    guidance and or examples on how each supported connector is configured.
    </para>
 
    <para>
