@@ -57,6 +57,12 @@
         "maintainLdapGroupMembership" : false,
         "respectResourcePasswordPolicyChangeAfterReset" : false
     },
+    "resultsHandlerConfig" : {
+        "enableNormalizingResultsHandler" : true,
+        "enableFilteredResultsHandler" : false,
+        "enableCaseInsensitiveFilter" : false,
+        "enableAttributesToGetSearchResultsHandler" : true
+    },
     "poolConfigOption" : {
         "maxObjects" : 10,
         "maxIdle" : 10,
