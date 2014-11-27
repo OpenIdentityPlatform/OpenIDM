@@ -221,7 +221,7 @@ CREATE TABLE openidm.auditrecon (
   message TEXT,
   actionid VARCHAR(255) DEFAULT NULL,
   exceptiondetail TEXT,
-  mapping TEXT,
+  mapping VARCHAR(511) DEFAULT NULL,
   messagedetail TEXT,
   PRIMARY KEY (objectid)
 );
@@ -243,7 +243,7 @@ CREATE TABLE openidm.auditsync (
   message TEXT,
   actionid VARCHAR(255) DEFAULT NULL,
   exceptiondetail TEXT,
-  mapping TEXT,
+  mapping VARCHAR(511) DEFAULT NULL,
   messagedetail TEXT,
   PRIMARY KEY (objectid)
 );
