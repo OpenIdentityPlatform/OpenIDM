@@ -969,9 +969,6 @@ public class ConnectorUtil {
                 }
             } else if (targetClazz.equals(byte[].class)) {
                 if (sourceClass == String.class) {
-                    result = targetClazz.cast(((String) source).getBytes());
-                    coerced = true;
-                } else if (sourceClass == String.class) {
                     result = targetClazz.cast(Base64.decode((String) source));
                     coerced = true;
                 } else if (sourceClass == GuardedByteArray.class) {
