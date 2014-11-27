@@ -160,7 +160,7 @@ public class ReconciliationStatistic {
         if (targetId != null) {
             if (ReconAction.CREATE.equals(action)) {
                 targetCreated.incrementAndGet();
-            } else {
+            } else if (!Situation.MISSING.equals(situation)) {
                 targetProcessed.incrementAndGet();
             }
         }
