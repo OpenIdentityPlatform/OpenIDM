@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter [
-<!ENTITY bookname "install-guide">
-]>
 <!--
   ! CCPL HEADER START!
 ! This work is licensed under the Creative Commons
@@ -32,114 +29,105 @@
   xsi:schemaLocation='http://docbook.org/ns/docbook
   http://docbook.org/xml/5.0/xsd/docbook.xsd'
   xmlns:xlink='http://www.w3.org/1999/xlink'>
- <title>Migrating to OpenIDM 3.0.0</title>
+ <title>Migrating to OpenIDM 3.1.0</title>
 
  <para>
   The migration process is largely dependent on your particular deployment and
-  on the extent to which you have customized OpenIDM. It is recommended that you
+  on the extent to which you have customized OpenIDM. We recommend that you
   engage ForgeRock services for help in migrating an existing deployment.
+ </para>
+ <para>
+  This process assumes that you are migrating a deployment from OpenIDM 3.0.0
+  to OpenIDM 3.1.0. For documentation on migrating a deployment from OpenIDM
+  2.1.0 to 3.0.0, see the following chapter from the OpenIDM 3.0.0 Installation
+  Guide: <link xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="http://docs.forgerock.org/en/openidm/3.0.0/install-guide#chap-upgrade"
+  xlink:show="new"><citetitle>Migrating to OpenIDM 3.0.0</citetitle></link>.
  </para>
  <para>
   The steps outlined in this section indicate how to preserve customizations,
   where possible, and take advantage of the new functionality offered in this
   release. However, you must be aware of the changes made in
-  OpenIDM 3.0.0 that might affect your existing deployment.
+  OpenIDM 3.1.0 that might affect your existing deployment.
   Therefore, before starting this process, see the <link xlink:show="new"
   xlink:href="release-notes#chap-compatibility"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Compatibility
-  chapter</citetitle></link> in the <citetitle>Release Notes</citetitle>, and
-  adjust your scripts and clients accordingly.
+  chapter</citetitle></link> in the Release Notes, and adjust your scripts and
+  clients accordingly.
  </para>
  <para>
-  In particular, for client applications that use the REST API, note that this
-  API has undergone major changes in this release. For information on the new
-  REST API, see the <link xlink:show="new"
-  xlink:href="integrators-guide#appendix-rest"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
-  Reference</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
+  OpenIDM 3.1.0 introduces an Administrative UI (Admin UI), which you can use
+  to define the overall system configuration. You may consider the Admin UI as
+  an option, especially for less complex deployments. For information on the new
+  Admin UI, see the following part of the Integrator's Guide:
+  <link xlink:show="new" xlink:href="integrators-guide#ui-admin"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+   OpenIDM from the Admin UI </citetitle></link>.
  </para>
 
  <procedure>
   <para>
-   To perform a basic migration to OpenIDM 3.0.0, follow these
-   steps. For the purposes of this procedure, the path to the existing 2.1
-   instance is defined as <filename>/path/to/openidm-2.1</filename>. The path to
-   the new instance is defined as <filename>/path/to/openidm-3.0</filename>.
+   To perform a basic migration to OpenIDM 3.1.0, follow these
+   steps. For the purposes of this procedure, the path to the existing 3.0
+   instance is defined as <filename>/path/to/openidm-3.0</filename>. The path to
+   the new instance is defined as <filename>/path/to/openidm-3.1</filename>.
   </para>
   <step>
    <para>
-    Download and extract the OpenIDM 3.0.0 server.
+    Download and extract the OpenIDM 3.1.0 server.
    </para>
   </step>
   <step>
    <para>
-    Stop your existing OpenIDM 2.1 server, if it is running.
+    Stop your existing OpenIDM 3.0.0 server, if it is running.
    </para>
    <screen>
-$ cd /path/to/openidm-2.1
+$ cd /path/to/openidm-3.0
 $ ./shutdown.sh
 Stopping OpenIDM (81491)
    </screen>
   </step>
   <step>
    <para>
-    Back up your existing deployment by zipping up the entire
+    Back up your existing deployment by archiving the entire
     <filename>openidm</filename> directory.
    </para>
   </step>
   <step>
    <para>
-    On the OpenIDM 3.0.0 server, edit the
+    On the OpenIDM 3.1.0 server, edit the
     <filename>conf/boot/boot.properties</filename> file to match any
-    customizations that you made on your 2.1 server. Specifically, check the
-    following elements:
+    customizations that you made on your OpenIDM 3.0.0 server. Specifically,
+    check the following elements:
    </para>
    <itemizedlist>
     <listitem>
      <para>
-      In OpenIDM 2.1, port numbers were specified in the
-      <filename>conf/jetty.xml</filename> file. In OpenIDM
-      ${docTargetVersion}, the HTTP, HTTPS, and mutual authentication
-      ports are specified in the <filename>conf/boot/boot.properties</filename>
-      file. If you changed the default ports in your 2.x deployment, make sure
+      In OpenIDM 3.0.0, port numbers were specified in the
+      <filename>conf/boot/boot.properties</filename> and
+      <filename>conf/config.properties</filename> files. In OpenIDM 3.1, the
+      HTTP, HTTPS, and mutual authentication ports are specified in the
+      <filename>conf/boot/boot.properties</filename> file. If you changed the
+      default ports in your OpenIDM 3.0 deployment, make sure
       that the corresponding ports are specified in this file.
      </para>
     </listitem>
     <listitem>
      <para>
       Check that the keystore and truststore passwords match the current
-      passwords for the keystore and truststore of your 2.x deployment
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      For clustered deployments, certain cluster properties are also now
-      specified in the <filename>boot.properties</filename> file. Therefore, if
-      this migrated OpenIDM instance is going to run in a cluster, set the
-      following properties:
-     </para>
-     <literallayout>openidm.node.id</literallayout>
-     <literallayout>openidm.instance.type</literallayout>
-     <literallayout>openidm.scheduler.execute.persistent.schedules</literallayout>
-     <para>
-      In addition, timeout and checkin settings that were previously defined in
-      the <filename>conf/scheduler.json</filename> file are now defined in a new
-      configuration file, <filename>conf/cluster.json</filename>. Copy any such
-      settings that you had defined in the <filename>scheduler.json</filename>
-      file to the <filename>cluster.json</filename> file in the
-      3.0.0 instance.
+      passwords for the keystore and truststore of your OpenIDM 3.0 deployment
      </para>
     </listitem>
    </itemizedlist>
    <para>
     Depending on the level of customization you have made in your current
-    deployment, it might be simpler to start with your 2.x
+    deployment, it might be simpler to start with your OpenIDM 3.0
     <filename>boot.properties</filename> file, and copy all new settings from
-    the 3.0.0 file to your existing file. However, as a best practice, it is
-    recommended that you keep all configuration customizations (including new
-    properties and changed settings) in a single location in your configuration
-    files, so that these can simply be copy/pasted to the configuration files of
-    the new OpenIDM version.
+    that file to the version associated with OpenIDM 3.1. However, as a best
+    practice, we recommend that you keep all configuration customizations
+    (including new properties and changed settings) in a single location in
+    your configuration files. You can then copy and paste these changes as
+    appropriate.
    </para>
   </step>
   <step>
@@ -147,19 +135,20 @@ Stopping OpenIDM (81491)
     Copy the contents of your original <literal>security/</literal> folder to
     the new instance.
    </para>
-   <screen>$ cd /path/to/openidm-3.0
-$ cp -r /path/to/openidm-2.1/security .
+   <screen>$ cd /path/to/openidm-3.1
+$ cp -r /path/to/openidm-3.0/security .
    </screen>
    <para>
-    You can locate the entire <filename>security/</filename> folder with your
-    project, rather than in the default OpenIDM installation directory, however
-    you must specify the location in your project's
-    <filename>boot.properties</filename> file, <emphasis>relative to the OpenIDM
-    installation directory</emphasis>. For example, if your
-    <filename>security/</filename> folder is located at
-    <filename>/path/to/openidm/myproject/security</filename>, you would need to
-    edit the <filename>boot.properties</filename> file as follows:
-    <screen><userinput>$ more /path/to/openidm/myproject/conf/boot/boot.properties</userinput>
+    Make sure to modify the <filename>boot.properties</filename> file for your
+    project to point to the relative location of your
+    <filename>keystore.jceks</filename> and <filename>truststore</filename>
+    security files.
+   </para>
+   <para>
+    For example, if your <filename>security/</filename> folder is located at
+    <filename>/path/to/openidm-3.1/myproject/security</filename>, edit the
+    <filename>boot.properties</filename> file as follows:
+    <screen><userinput>$ less /path/to/openidm/myproject/conf/boot/boot.properties</userinput>
 <computeroutput>...
 openidm.keystore.type=JCEKS
 openidm.truststore.type=JKS
@@ -168,36 +157,36 @@ openidm.keystore.location=myproject/security/keystore.jceks
 openidm.truststore.location=myproject/security/truststore</computeroutput></screen>
    </para>
    <para>
-    The keystore and truststore locations are automatically prepended with the
-    install location, so you must specify the path relative to the install
-    location, rather than using property substitution.
+    OpenIDM automatically prepends the locations of the
+    <filename>keystore.jceks</filename> and <filename>truststore</filename>
+    files with the installation directory.
    </para>
   </step>
   <step>
    <para>
     Migrate any custom scripts or default scripts that you have modified to the
-    new instance. In general, custom and customized scripts should be located in
-    the <filename>openidm/script</filename> directory on your old instance.
+    directory with OpenIDM 3.1. In general, custom and customized scripts
+    should be located in the <filename>openidm-3.0/script</filename> directory
+    on the OpenIDM 3.0 deployment.
    </para>
    <itemizedlist>
     <listitem>
      <para>
-      For custom scripts (that is, scripts that you have written yourself)
-      review the <link xlink:show="new"
+      For custom scripts, review the <link xlink:show="new"
       xlink:href="release-notes#chap-compatibility"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Compatibility
       chapter</citetitle></link> to ensure that the scripts will work as
       intended with the new version, then copy these scripts to the new
       instance. For example:
      </para>
-     <screen>$ cd /path/to/openidm-3.0
-$ cp /path/to/openidm-2.1/script/my-custom-script.js script/
+     <screen>$ cd /path/to/openidm-3.1
+$ cp /path/to/openidm-3.0/script/my-custom-script.js script/
      </screen>
     </listitem>
     <listitem>
      <para>
-      For OpenIDM scripts that you have modified, compare the modified script
-      against the corresponding script in the new OpenIDM instance. If nothing
+      If you modified an existing OpenIDM 3.0 script, compare that modified
+      script against the corresponding script in OpenIDM 3.1. If nothing
       has changed in the default script, check that your customizations will
       work as intended (by reviewing the <link xlink:show="new"
       xlink:href="release-notes#chap-compatibility"
@@ -205,23 +194,23 @@ $ cp /path/to/openidm-2.1/script/my-custom-script.js script/
       chapter</citetitle></link>) then copy the customized scripts to the new
       <literal>openidm/script</literal> directory. For example:
      </para>
-     <screen>$ cd /path/to/openidm-3.0
-$ cp /path/to/openidm-2.1/script/policy.js script/
+     <screen>$ cd /path/to/openidm-3.1
+$ cp /path/to/openidm-3.0/script/policy.js script/
      </screen>
     </listitem>
     <listitem>
      <para>
-      If the default script has changed since the 2.1 release (for example,
-      <literal>access.js</literal>, copy the new default script to the
-      <filename>openidm-3.0/script</filename> directory.
+      If a default script has changed since the 3.0 release, such as
+      <literal>linkedView.js</literal>, copy the modified script to the
+      <filename>openidm-3.1/script</filename> directory.
      </para>
      <screen>$ cd /path/to/openidm-3.0
-$ cp bin/default/script/access.js script/
+$ cp bin/default/script/linkedView.js script/
      </screen>
      <para>
       Check that your customizations will work as expected, then port your
       customizations to the new script in the
-      <filename>openidm-3.0/script</filename> directory.
+      <filename>openidm-3.1/script</filename> directory.
      </para>
     </listitem>
    </itemizedlist>
@@ -229,7 +218,7 @@ $ cp bin/default/script/access.js script/
   <step>
    <para>
     Several changes have been made to the default configuration in OpenIDM
-    3.0.0. Currently, there is no automated way to migrate a
+    3.1.0. Currently, there is no automated way to migrate a
     customized configuration to the new version. The following strategy is
     recommended:
    </para>
@@ -242,26 +231,28 @@ $ cp bin/default/script/access.js script/
     <listitem>
      <para>
       For each configuration file that you have customized, use a file
-      comparison (<literal>diff</literal>) utility to assess the differences
-      between your customized file and the ${docTargetVersion} file.
+      comparison tool such as the UNIX <command>diff</command> utility to assess
+      the differences between your customized file and the ${docTargetVersion}
+      file.
      </para>
     </listitem>
     <listitem>
      <para>
-      Based on the results of the diff, either use your existing file as a base
-      and port the 3.0.0 changes to that file, or vice
+      Based on the results of the <command>diff</command>, use either your
+      existing file as a base and port the 3.1.0 changes to that file, or vice
       versa. Ultimately, you want to preserve your customizations but ensure
       that you are up to date with the latest default configuration. All files
-      should end up in the <filename>openidm-3.0/conf</filename> directory.
+      should end up in the <filename>openidm-3.1/conf</filename> directory.
      </para>
     </listitem>
     <listitem>
      <para>
       Pay particular attention to the <filename>conf/repo.jdbc.json</filename>
-      file in your existing deployment. If you have customized this file, make
-      sure that these customizations are ported to the corresponding file in the
-      3.0.0 deployment. For example, if you have defined any new queries, add
-      these queries to the OpenIDM 3.0 <filename>repo.jdbc.json</filename> file.
+      file in your existing deployment.
+      If you have customized this file, make sure that these customizations are
+      ported to the corresponding file in the 3.1.0 deployment. For example, if
+      you have defined any new queries, add these queries to the
+      OpenIDM 3.1 instance of the <filename>repo.jdbc.json</filename> file.
      </para>
     </listitem>
    </itemizedlist>
@@ -270,13 +261,13 @@ $ cp bin/default/script/access.js script/
    <para>
     Modify any customized provisioner configurations in your existing project to
     point to the new connectors that are provided with OpenIDM
-    3.0.0. Specifically, check that the
+    3.1.0. Specifically, check that the
     <literal>"connectorRef"</literal> properties reflect the new connectors, for
     example:
    </para>
    <programlisting language="javascript">{
-    "bundleVersion": "[1.4.0.0,2.0.0.0)",
     "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)",
     "displayName": "LDAP Connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
 }, </programlisting>
@@ -294,7 +285,7 @@ $ cp bin/default/script/access.js script/
   </step>
   <step>
    <para>
-    Complete the OpenIDM 3.0.0 installation, as described in the
+    Complete the OpenIDM 3.1.0 installation, as described in the
     <link xlink:show="new" xlink:href="install-guide#chap-install"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
     chapter</citetitle></link>.
@@ -321,33 +312,20 @@ $ cp bin/default/script/access.js script/
     </listitem>
     <listitem>
      <para>
-      The database schema has changed slightly in OpenIDM 3.0.0. The following
-      tables have been added: <literal>security</literal>,
-      <literal>securitykeys</literal>, <literal>clusterobjects</literal>, and
-      <literal>clusterobjectproperties</literal>. In addition, the following
-      columns have been added to the <literal>auditrecon</literal> table:
-      <literal>actionid</literal>, <literal>exceptiondetail</literal>,
-      <literal>mapping</literal>, <literal>messagedetail</literal>, and
-      <literal>_rev</literal>.
+      The database schema has changed slightly for OpenIDM 3.1.0. The following
+      tables have been added: <literal>auditsync</literal>.
      </para>
-    </listitem>
-    <listitem>
      <para>
-      Note that the format of system object <literal>_ids</literal> has changed
-      in OpenIDM 3.0.0 (they are no longer URL-encoded). Therefore, system
-      object <literal>_ids</literal> in an existing links table will not be
-      recognized by an OpenIDM 3.0.0 reconciliation process. For more
-      information, see <link
-      xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2091"
-      xlink:show="new">OPENIDM-2091</link>: Migration script for encoded ids in
-      the links table.
+      The <literal>reconaction</literal> column has been added to the
+      <literal>auditrecon</literal> table. The <literal>userid</literal> column
+      has been added to the <literal>auditaccess</literal> table.
      </para>
     </listitem>
    </itemizedlist>
    <para>
     Your data migration strategy might vary, depending on your repository. You
-    can either migrate your existing 2.1.0 database, or start with a new
-    3.0.0 database and import your existing data.
+    can either migrate your existing 3.0.0 database, or start with a new
+    3.1.0 database and import your existing data.
    </para>
    <itemizedlist>
     <para>
@@ -355,14 +333,14 @@ $ cp bin/default/script/access.js script/
     </para>
     <listitem>
      <para>
-      Using the appropriate schema script from the new OpenIDM 3.0.0 instance
-      (<filename>/path/to/openidm-3.0/db/scripts/<replaceable>repo</replaceable>/openidm.sql</filename>),
+      Using the appropriate schema script from the new OpenIDM 3.1.0 instance
+      (<filename>/path/to/openidm-3.1/db/<replaceable>repo</replaceable>/scripts/openidm.sql</filename>),
       take the changes described above and apply them to your existing database.
      </para>
      <para>
       Use the <literal>--force</literal> option in MySQL (or an equivalent
       option for your repository type) to create the new tables, then edit the
-      <literal>auditrecon</literal> table manually, to add the columns described
+      <literal>auditsync</literal> table manually, to add the columns described
       previously.
      </para>
     </listitem>
@@ -374,8 +352,8 @@ $ cp bin/default/script/access.js script/
     <listitem>
      <para>
       Set up a clean repository, using the appropriate schema script from the
-      new OpenIDM 3.0.0 instance
-      (<filename>/path/to/openidm-3.0/db/scripts/<replaceable>repo</replaceable>/openidm.sql</filename>).
+      new OpenIDM 3.1.0 instance
+      (<filename>/path/to/openidm-3.1/db/<replaceable>repo</replaceable>/scripts/openidm.sql</filename>).
      </para>
     </listitem>
     <listitem>
@@ -400,9 +378,9 @@ $ cp bin/default/script/access.js script/
   </step>
   <step>
    <para>
-    Start up OpenIDM 3.0.0.
+    Start up OpenIDM 3.1.0.
    </para>
-   <screen>$ cd /path/to/openidm-3.0
+   <screen>$ cd /path/to/openidm-3.1
 $ ./startup.sh
    </screen>
   </step>
