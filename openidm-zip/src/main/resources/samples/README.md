@@ -74,11 +74,11 @@ A OpenDJ Connector using the Groovy ScriptedREST Connector Framework.
 
 ### google-connector
 A Google Connector for provisioning google users and groups.
-This sample and the associated connector are only available in the Entreprise Release. 
+This sample and the associated connector are only available in the Enterprise Release.
 
 ### salesforce-connector
 A Salesforce connector to perform recon and sync between Salesforce and the OpenIDM repository.
-This sample and the associated connector are only available in the Entreprise Release.
+This sample and the associated connector are only available in the Enterprise Release.
 
 ### openam
 A sample showing OpenIDM together with OpenAM and OpenDJ. This sample demonstrates the entire ForgeRock Open Identity
