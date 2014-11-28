@@ -2592,11 +2592,11 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
        </listitem>
        </varlistentry>
       </variablelist>
-      <!--TODO Insert link to ICF Config here -->
       <para>
-       For a complete list of all the configuration properties, and their
-       meanings, see the <citetitle>OpenICF Connectors Configuration
-       Reference</citetitle>.
+       For a description of all configurable properties for this connector, see
+       the <link xlink:show="new"
+       xlink:href="http://openicf.forgerock.org/doc/config-reference/index.html">OpenICF
+       Connector Configuration Reference</link>.
       </para>
       <para>The updated configuration is applied immediately.</para>
      </step>
@@ -3120,11 +3120,12 @@ Properties:
      </listitem>
     </varlistentry>
    </variablelist>
-   <!--TODO Add link when the config ref is published
    <para>
     For a description of all configurable properties for this connector, see the
-    OpenICF Connector Configuration Reference
-   </para>                                           -->
+    <link xlink:show="new"
+    xlink:href="http://openicf.forgerock.org/doc/config-reference/index.html">OpenICF
+    Connector Configuration Reference</link>.
+   </para>
   </section>
 
   <section xml:id="groovy-connector">
@@ -3179,12 +3180,36 @@ Properties:
     The PowerShell Connector Toolkit is not bundled with OpenIDM, but is
     available, with a subscription, from <link xlink:show="new"
     xlink:href="https://backstage.forgerock.com/">ForgeRock Backstage</link>.
+    To install the connector, download the archive
+    (<filename>mspowershell-connector-1.4.1.0.zip</filename>) and extract the
+    <filename>MsPowerShell.Connector.dll</filename> to the same folder in which
+    the Connector Server(<filename>connectorserver.exe</filename>) is located.
     The <link xlink:show="new"
     xlink:href="http://www.forgerock.com/download-stack/">Enterprise
     Download</link> of OpenIDM includes sample connectors and scripts that will
     enable you to get started with this toolkit.
    </para>
   </section>
+  <!--
+  <section xml:id="salesforce-connector">
+   <title>Salesforce Connector</title>
+   <para>
+    The <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
+    Download</link> of OpenIDM includes a Salesforce connector, along with a
+    sample connector configuration. The Salesforce connector enables
+    provisioning, reconciliation, and synchronization between Salesforce and the
+    OpenIDM repository.
+   </para>
+   <para>
+    To use this connector, you need a Salesforce account, and a Connected App
+    that has OAuth enabled, which will allow you to retrieve the required
+    consumer key and consumer secret.
+   </para>
+   <para>
+    For additional instructions, and a sample Salesforce configuration, see
+   </para>
+  </section>     -->
 
  </section>
 
