@@ -2136,7 +2136,7 @@ mysql &gt; <userinput>select * from users;</userinput>
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&amp;_fields=id,uid_&amp;_pageSize=2&amp;_sortKeys=timestamp,id'</userinput>
+ 'https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&amp;_fields=id,uid&amp;_pageSize=2&amp;_sortKeys=timestamp,id'</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": "2014-09-10 12:18:46.0,2",
@@ -2758,7 +2758,7 @@ $ ./startup.sh -p samples/scriptedrest2dj/</userinput></screen>
      <para>
       Read the group entry to verify its members.
      </para>
-     <screen><userinput>$ curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3313,39 +3313,601 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
     </step>
    </procedure>
   </section>
-
+ </section>
  </section>
 
- </section>
-
- <!-- WIP
  <section xml:id="samples-powershell">
-  <title>Using the PowerShell Connector Toolkit to Create Scripted Connectors</title>
+  <title>Sample - Using the PowerShell Connector Toolkit to Create Scripted Connectors</title>
   <para>
    OpenICF 1.4 introduces a generic PowerShell Connector Toolkit that enables
    you to run PowerShell scripts on any external resource.
   </para>
-   <para>
-    The PowerShell Connector Toolkit is not a complete connector, in the
-    traditional sense. Rather, it is a framework within which you must write
-    your own PowerShell scripts to address the requirements of your Microsoft
-    Windows ecosystem. You can use the PowerShell Connector Toolkit to create
-    connectors that can provision any Microsoft system.
-   </para>
+  <para>
+   The PowerShell Connector Toolkit is not a complete connector, in the
+   traditional sense. Rather, it is a framework within which you must write
+   your own PowerShell scripts to address the requirements of your Microsoft
+   Windows ecosystem. You can use the PowerShell Connector Toolkit to create
+   connectors that can provision any Microsoft system.
+  </para>
+  <para>
+   The PowerShell Connector Toolkit is available, with a subscription, from
+   <link xlink:show="new" xlink:href="https://backstage.forgerock.com/">ForgeRock
+   Backstage</link>.
+  </para>
+  <para>
+   This sample provides a number of PowerShell scripts that enable you to
+   perform basic CRUD (create, read, update, delete) operations on an Active
+   Directory server. The samples use the MS Active Directory PowerShell module.
+   For more information on this module, see the corresponding <link xlink:show="new"
+   xlink:href="http://technet.microsoft.com/en-us/library/hh852274.aspx">Microsoft
+   documentation</link>.
+  </para>
+  <para>
+   The sample assumes that OpenIDM is running on the localhost, and that Active
+   Directory runs on a remote server. The remote server also runs the OpenICF
+   .NET connector server.
+  </para>
 
-  <section xml:id="more-sample-powershell2AD">
-   <title>Sample - Using the PowerShell Connector Toolkit to Connect to Active Directory</title>
-   <para>
-    This sample provides a number of PowerShell scripts that enable you to
-    perform basic CRUD (create, read, update, delete) operations on an Active
-    Directory server. The samples use the MS Active Directory PowerShell module.
-    For more information on this module, see the corresponding <link xlink:show="new"
-    xlink:href="http://technet.microsoft.com/en-us/library/hh852274.aspx">Microsoft
-    documentation</link>.
-   </para>
+  <section xml:id="powershell-setup">
+   <title>Setting Up the PowerShell Sample</title>
+   <procedure>
+    <step>
+     <para>
+      Install, configure, and start the .NET connector server on the machine
+      that is running an Active Directory Domain Controller or on a workstation
+      on which the Microsoft Active Directory PowerShell module is installed.
+     </para>
+     <para>
+      For instructions on installing the .NET connector server, see <link
+      xlink:show="new" xlink:href="integrators-guide#net-connector-install"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing the
+      .NET Connector Server</citetitle></link> in the <emphasis>Integrator's
+      Guide</emphasis>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Configure OpenIDM to connect to the .NET connector server.
+     </para>
+     <para>
+      To do so, copy the remote connector provisioner file from the
+      <literal>openidm/samples/provisioners</literal> directory to the
+      <literal>openidm/conf</literal> directory, and edit the file according to
+      your configuration.
+     </para>
+     <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/</userinput></screen>
+     <para>
+      For instructions on editing this file, see <link
+      xlink:show="new" xlink:href="integrators-guide#net-connector-openidm"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+      OpenIDM to Connect to the .NET Connector Server</citetitle></link> in the
+      <emphasis>Integrator's Guide</emphasis>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Download the PowerShell Connector Toolkit archive
+      (<filename>mspowershell-connector-1.4.1.0.zip</filename>) from <link
+      xlink:show="new" xlink:href="https://backstage.forgerock.com/">ForgeRock
+      Backstage</link>.
+     </para>
+     <para>
+      Extract the archive and move the <filename>MsPowerShell.Connector.dll</filename>
+      to the folder in which the connector server application
+      (<filename>connectorserver.exe</filename>) is located.
+     </para>
+    </step>
+    <step>
+     <para>
+      Copy the PowerShell scripts from the <literal>tools</literal> folder in
+      this sample directory, to the machine on which the connector server is
+      installed.
+     </para>
+     <screen>C:\><userinput>dir openidm\powershell2AD\tools</userinput>
+<computeroutput>Directory of C:\openidm\powershell2AD\tools
+
+11/27/2014  12:53 PM    &lt;DIR>          .
+11/27/2014  12:53 PM    &lt;DIR>          ..
+11/26/2014  02:32 PM             2,813 ADAuthenticate.ps1
+11/26/2014  02:32 PM             8,546 ADCreate.ps1
+11/26/2014  02:32 PM             2,530 ADDelete.ps1
+11/26/2014  02:32 PM             2,617 ADResolveUsername.ps1
+11/26/2014  02:32 PM             8,644 ADSchema.ps1
+11/26/2014  02:32 PM             3,458 ADSearch.ps1
+11/26/2014  02:32 PM             4,585 ADSync.ps1
+11/26/2014  02:32 PM             2,075 ADTest.ps1
+11/26/2014  02:32 PM             8,488 ADUpdate.ps1
+               9 File(s)         43,756 bytes
+               2 Dir(s)  23,696,863,232 bytes free
+
+C:\></computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Edit the PowerShell search and sync scripts (<filename>ADSearch.ps1</filename>)
+      and (<filename>ADSync.ps1</filename>) to specify the base suffix for your
+      Active Directory Domain Controller.
+     </para>
+     <para>
+      Specifically, change the value of the <literal>$searchBase</literal>
+      parameter in these files to match the suffix in your environment. The
+      default suffix is:
+     </para>
+     <screen>$searchBase = 'CN=Users,DC=example,DC=com'</screen>
+    </step>
+    <step>
+     <para>
+      Copy the sample connector configuration for the PowerShell connector
+      from the samples directory to your <literal>conf</literal> directory.
+     </para>
+     <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>cp samples/provisioners/provisioner.openicf-adpowershell.json conf/</userinput></screen>
+     <para>
+      The sample connector configuration assumes that the scripts are located in
+      <filename>C:/openidm/samples/powershell2AD/tools/</filename>. If you
+      copied your scripts to a different location, adjust your connector
+      configuration file accordingly.
+     </para>
+     <para>
+      Note that the OpenICF framework requires the path to use forward slash
+      characters and not the backslash characters that you would expect in a
+      Windows path.
+     </para>
+     <para>
+      In addition, make sure that the value of the
+      <literal>"connectorHostRef"</literal> property in the connector
+      configuration file matches the value that you specified in the remote
+      connector configuration file, in step 2 of this procedure. For example:
+     </para>
+     <screen>"connectorHostRef" : "dotnet",</screen>
+     <para>
+      The host, port, login and password of the machine on which Active
+      Directory runs do not need to be specified here. By default the Active
+      Directory cmdlets pick up the first available Domain Controller. In
+      addition, the scripts are executed using the credentials of the .Net
+      connector server.
+     </para>
+    </step>
+   </procedure>
   </section>
 
- </section>     -->
+  <section xml:id="powershell-test">
+   <title>Testing the PowerShell Sample</title>
+   <para>
+    Because you have copied all of the required configuration files into the
+    default OpenIDM project, you can start OpenIDM with the default
+    configuration (that is, without the <literal>-p</literal> option).
+   </para>
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh</screen>
+   <para>
+    When OpenIDM has started, you can test the sample by using the
+    <literal>curl</literal> command-line utility. The following examples test
+    the scripts that were provided in the <literal>tools</literal> directory.
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Test the connector configuration, and whether OpenIDM is able to connect
+      to the .NET connector server with the following request.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system?_action=test"</userinput>
+<computeroutput>[
+  {
+    "ok": true,
+    "connectorRef": {
+      "bundleVersion": "1.4.1.0",
+      "bundleName": "MsPowerShell.Connector",
+      "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector"
+    },
+    "objectTypes": [
+      "__ALL__",
+      "group",
+      "account"
+    ],
+    "config": "config/provisioner.openicf/adpowershell",
+    "enabled": true,
+    "name": "adpowershell"
+  }
+]</computeroutput> </screen>
+    </step>
+    <step>
+     <para>
+      Query the users in your Active Directory with the following request:
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/adpowershell/account?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 1257,
+  "result": [
+    {
+      "_id": "7c41496a-9898-4074-a537-bed696b6be92",
+      "distinguishedName": "CN=Administrator,CN=Users,DC=example,DC=com"
+    },
+    {
+      "_id": "f2e08a5c-473f-4798-a2d5-d5cc27c862a9",
+      "distinguishedName": "CN=Guest,CN=Users,DC=example,DC=com"
+    },
+    {
+      "_id": "99de98a3-c125-48dd-a7c2-e21f1488ab06",
+      "distinguishedName": "CN=Ben Travis,CN=Users,DC=example,DC=com"
+    },
+    {
+      "_id": "0f7394cc-c66a-404f-ad6d-38dbb4b6526d",
+      "distinguishedName": "CN=Barbara Jensen,CN=Users,DC=example,DC=com"
+    },
+    {
+      "_id": "3e6fa858-ed3a-4b58-9325-1fca144eb7c7",
+      "distinguishedName": "CN=John Doe,CN=Users,DC=example,DC=com"
+    },
+    {
+      "_id": "6feef4a0-b121-43dc-be68-a96703a49aba",
+      "distinguishedName": "CN=Steven Carter,CN=Users,DC=example,DC=com"
+    },
+...</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      To return the complete record of a specific user, include the ID of the
+      user in the URL. The following request returns the record for Steven
+      Carter.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/adpowershell/account/6feef4a0-b121-43dc-be68-a96703a49aba"</userinput>
+<computeroutput>{
+  "_id": "6feef4a0-b121-43dc-be68-a96703a49aba",
+  "postalCode": null,
+  "passwordNotRequired": false,
+  "cn": "Steven Carter",
+  "name": "Steven Carter",
+  "trustedForDelegation": false,
+  "uSNChanged": "47219",
+  "manager": null,
+  "objectGUID": "6feef4a0-b121-43dc-be68-a96703a49aba",
+  "modifyTimeStamp": "11/27/2014 3:37:16 PM",
+  "employeeNumber": null,
+  "sn": "Carter",
+  "userAccountControl": 512,
+  "passwordNeverExpires": false,
+  "displayName": "Steven Carter",
+  "initials": null,
+  "pwdLastSet": "130615726366949784",
+  "scriptPath": null,
+  "badPasswordTime": "0",
+  "employeeID": null,
+  "badPwdCount": "0",
+  "accountExpirationDate": null,
+  "userPrincipalName": "steve.carter@ad0.example.com",
+  "sAMAccountName": "steve.carter",
+  "mail": "steven.carter@example.com",
+  "logonCount": "0",
+  "cannotChangePassword": false,
+  "division": null,
+  "streetAddress": null,
+  "allowReversiblePasswordEncryption": false,
+  "description": null,
+  "whenChanged": "11/27/2014 3:37:16 PM",
+  "title": null,
+  "lastLogon": "0",
+  "company": null,
+  "homeDirectory": null,
+  "whenCreated": "6/23/2014 2:50:48 PM",
+  "givenName": "Steven",
+  "telephoneNumber": "555-2518",
+  "homeDrive": null,
+  "uSNCreated": "20912",
+  "smartcardLogonRequired": false,
+  "distinguishedName": "CN=Steven Carter,CN=Users,DC=example,DC=com",
+  "createTimeStamp": "6/23/2014 2:50:48 PM",
+  "department": null,
+  "memberOf": [
+    "CN=employees,DC=example,DC=com"
+  ],
+  "homePhone": null
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Test whether you can authenticate as one of the users in your Active
+      Directory. The username that you specify here can be either an ObjectGUID,
+      UPN, sAMAccountname or CN.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/adpowershell/account?_action=authenticate&amp;username=Steven+Carter&amp;password=Passw0rd"</userinput>
+<computeroutput>{
+  "_id": "6feef4a0-b121-43dc-be68-a96703a49aba"
+}</computeroutput></screen>
+     <para>
+      The request returns the ObjectGUID if the authentication is successful.
+     </para>
+    </step>
+    <step>
+     <para>
+      You can return the complete record for a specific user, using the query
+      filter syntax described in <link xlink:show="new"
+      xlink:href="integrators-guide#constructing-queries"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
+      Queries</citetitle></link> in the <emphasis>Integrator's Guide</emphasis>.
+     </para>
+     <para>
+      The following query returns the record for the guest user.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/adpowershell/account?_queryFilter=cn+eq+guest"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 1,
+  "result": [
+    {
+      "_id": "f2e08a5c-473f-4798-a2d5-d5cc27c862a9",
+      "postalCode": null,
+      "passwordNotRequired": true,
+      "cn": "Guest",
+      "name": "Guest",
+      "trustedForDelegation": false,
+      "uSNChanged": "8197",
+      "manager": null,
+      "objectGUID": "f2e08a5c-473f-4798-a2d5-d5cc27c862a9",
+      "modifyTimeStamp": "6/9/2014 12:35:16 PM",
+      "employeeNumber": null,
+      "userAccountControl": 66082,
+      "whenChanged": "6/9/2014 12:35:16 PM",
+      "initials": null,
+      "pwdLastSet": "0",
+      "scriptPath": null,
+      "badPasswordTime": "0",
+      "employeeID": null,
+      "badPwdCount": "0",
+      "accountExpirationDate": null,
+      "sAMAccountName": "Guest",
+      "logonCount": "0",
+      "cannotChangePassword": true,
+      "division": null,
+      "streetAddress": null,
+      "allowReversiblePasswordEncryption": false,
+      "description": "Built-in account for guest access to the computer/domain",
+      "userPrincipalName": null,
+      "title": null,
+      "lastLogon": "0",
+      "company": null,
+      "homeDirectory": null,
+      "whenCreated": "6/9/2014 12:35:16 PM",
+      "givenName": null,
+      "homeDrive": null,
+      "uSNCreated": "8197",
+      "smartcardLogonRequired": false,
+      "distinguishedName": "CN=Guest,CN=Users,DC=example,DC=com",
+      "createTimeStamp": "6/9/2014 12:35:16 PM",
+      "department": null,
+      "memberOf": [
+        "CN=Guests,CN=Builtin,DC=example,DC=com"
+      ],
+      "homePhone": null,
+      "displayName": null,
+      "passwordNeverExpires": true
+    }
+  ]
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Test whether you are able to create a user on the Active Directory server
+      by sending a POST request with the <literal>create</literal> action.
+     </para>
+     <para>
+      The following request creates the user <literal>Jane Doe</literal> on the
+      Active Directory server.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+		 "distinguishedName" : "CN=Jane Doe,CN=Users,DC=example,DC=com",
+		 "sn" : "Doe",
+	 	"cn" : "Jane Doe",
+	 	"sAMAccountName" : "sample",
+	 	"userPrincipalName" : "janedoe@example.com",
+	 	"__ENABLE__" : true,
+	 	"__PASSWORD__" : "Passw0rd",
+	 	"telephoneNumber" : "0052-611-091"
+		}' \
+ "https://localhost:8443/openidm/system/adpowershell/account?_action=create"</userinput>
+<computeroutput>{
+  "_id": "42725210-8dce-4fdf-b0e0-393cf0377fdf",
+  "title": null,
+  "uSNCreated": "47244",
+  "pwdLastSet": "130615892934093041",
+  "cannotChangePassword": false,
+  "telephoneNumber": "0052-611-091",
+  "smartcardLogonRequired": false,
+  "badPwdCount": "0",
+  "department": null,
+  "distinguishedName": "CN=Jane Doe,CN=Users,DC=example,DC=com",
+  "badPasswordTime": "0",
+  "employeeID": null,
+  "cn": "Jane Doe",
+  "division": null,
+  "description": null,
+  "userPrincipalName": "janedoe@example.com",
+  "passwordNeverExpires": false,
+  "company": null,
+  "memberOf": [],
+  "givenName": null,
+  "streetAddress": null,
+  "sn": "Doe",
+  "initials": null,
+  "logonCount": "0",
+  "homeDirectory": null,
+  "employeeNumber": null,
+  "objectGUID": "42725210-8dce-4fdf-b0e0-393cf0377fdf",
+  "manager": null,
+  "lastLogon": "0",
+  "trustedForDelegation": false,
+  "scriptPath": null,
+  "allowReversiblePasswordEncryption": false,
+  "modifyTimeStamp": "11/27/2014 8:14:53 PM",
+  "whenCreated": "11/27/2014 8:14:52 PM",
+  "whenChanged": "11/27/2014 8:14:53 PM",
+  "accountExpirationDate": null,
+  "name": "Jane Doe",
+  "displayName": null,
+  "homeDrive": null,
+  "passwordNotRequired": false,
+  "createTimeStamp": "11/27/2014 8:14:52 PM",
+  "uSNChanged": "47248",
+  "sAMAccountName": "sample",
+  "userAccountControl": 512,
+  "homePhone": null,
+  "postalCode": null
+}
+</computeroutput>     </screen>
+    </step>
+    <step>
+     <para>
+      Test whether you are able to update a user object on the Active Directory
+      server by sending a PUT request with the complete object, and including
+      the user ID in the URL.
+     </para>
+     <para>
+      The following request updates user <literal>Jane Doe</literal>'s entry,
+      including her ID in the request. The update sends the same information
+      that was sent in the <literal>create</literal> request, but adds an
+      <literal>employeeNumber</literal>.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+		 "distinguishedName" : "CN=Jane Doe,CN=Users,DC=example,DC=com",
+		 "sn" : "Doe",
+	 	"cn" : "Jane Doe",
+	 	"sAMAccountName" : "sample",
+	 	"userPrincipalName" : "janedoe@example.com",
+	 	"__ENABLE__" : true,
+	 	"__PASSWORD__" : "Passw0rd",
+	 	"telephoneNumber" : "0052-611-091",
+   "employeeNumber": "567893"
+		}' \
+ "https://localhost:8443/openidm/system/adpowershell/account/42725210-8dce-4fdf-b0e0-393cf0377fdf"</userinput>
+<computeroutput>{
+  "_id": "42725210-8dce-4fdf-b0e0-393cf0377fdf",
+  "title": null,
+  "uSNCreated": "47244",
+  "pwdLastSet": "130615906375709689",
+  "cannotChangePassword": false,
+  "telephoneNumber": "0052-611-091",
+  "smartcardLogonRequired": false,
+  "badPwdCount": "0",
+  "department": null,
+  "distinguishedName": "CN=Jane Doe,CN=Users,DC=example,DC=com",
+  "badPasswordTime": "0",
+  "employeeID": null,
+  "cn": "Jane Doe",
+  "division": null,
+  "description": null,
+  "userPrincipalName": "janedoe@example.com",
+  "passwordNeverExpires": false,
+  "company": null,
+  "memberOf": [],
+  "givenName": null,
+  "streetAddress": null,
+  "sn": "Doe",
+  "initials": null,
+  "logonCount": "0",
+  "homeDirectory": null,
+  "employeeNumber": "567893",
+  "objectGUID": "42725210-8dce-4fdf-b0e0-393cf0377fdf",
+  "manager": null,
+  "lastLogon": "0",
+  "trustedForDelegation": false,
+  "scriptPath": null,
+  "allowReversiblePasswordEncryption": false,
+  "modifyTimeStamp": "11/27/2014 8:37:17 PM",
+  "whenCreated": "11/27/2014 8:14:52 PM",
+  "whenChanged": "11/27/2014 8:37:17 PM",
+  "accountExpirationDate": null,
+  "name": "Jane Doe",
+  "displayName": null,
+  "homeDrive": null,
+  "passwordNotRequired": false,
+  "createTimeStamp": "11/27/2014 8:14:52 PM",
+  "uSNChanged": "47253",
+  "sAMAccountName": "sample",
+  "userAccountControl": 512,
+  "homePhone": null,
+  "postalCode": null
+}</computeroutput>     </screen>
+    </step>
+    <step>
+     <para>
+      Test whether you are able to delete a user object on the Active Directory
+      server by sending a DELETE request with the user ID in the URL.
+     </para>
+     <para>
+      The following request deletes user <literal>Jane Doe</literal>'s entry.
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/system/adpowershell/account/42725210-8dce-4fdf-b0e0-393cf0377fdf"</userinput></screen>
+     <para>
+      The response includes the complete user object that was deleted.
+     </para>
+     <para>
+      You can you attempt to query the user object to confirm that it has been
+      deleted.
+     </para>
+<screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/adpowershell/account/42725210-8dce-4fdf-b0e0-393cf0377fdf"</userinput>
+<computeroutput>{
+  "message": "",
+  "reason": "Not Found",
+  "code": 404
+}</computeroutput></screen>
+    </step>
+   </procedure>
+  </section>
+
+ </section>
 
  <section xml:id="more-sample4">
   <title>Sample 4 - CSV to XML File</title>
@@ -5575,10 +6137,16 @@ $ ./startup.sh -p samples/audit-sample</screen>
   </indexterm>
   <para>
    OpenICF ${openicfBundleVersion} provides a new Google Apps Connector that
-   enables you to interact with Google's web applications. The Google Apps
-   connector is not bundled with OpenIDM, but is available as a separate
-   download, with a subscription.
+   enables you to interact with Google's web applications.
   </para>
+  <note>
+   <para>
+    The Google Apps Connector, and this corresponding sample, are provided only
+    with the <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
+    Download</link> of OpenIDM.
+   </para>
+  </note>
   <para>
    This sample demonstrates the creation of users and groups on an external
    Google system, using OpenIDM's REST interface.
@@ -6004,5 +6572,7 @@ OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
    </procedure>
   </section>
  </section>
+
+
 
 </chapter>
