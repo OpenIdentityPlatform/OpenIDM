@@ -1117,7 +1117,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                             new DB2SQLExceptionHandler(), cryptoServiceAccessor);
         case ORACLE:
             return
-                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
+                    new OracleMappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
         case POSTGRESQL:
             return
