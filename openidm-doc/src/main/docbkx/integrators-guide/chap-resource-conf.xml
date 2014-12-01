@@ -3216,6 +3216,28 @@ Properties:
    </para>
   </section>
 
+  <section xml:id="google-apps-connector">
+   <title>Google Apps Connector</title>
+   <para>
+    The <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
+    Download</link> of OpenIDM includes a Google Apps connector, along with a
+    sample connector configuration. The Google Apps Connector enables you to
+    interact with Google's web applications.
+   </para>
+   <para>
+    To use this connector, you need a Google Apps account.
+   </para>
+   <para>
+    For additional instructions, and a sample Google Apps configuration, see
+    <link xlink:show="new"
+    xlink:href="install-guide#sample-google-connector"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
+    Google With the Google Apps Connector</citetitle></link> in the
+    <emphasis>Installation Guide</emphasis>.
+   </para>
+  </section>
+
  </section>
 
  <section xml:id="connector-wiz">
