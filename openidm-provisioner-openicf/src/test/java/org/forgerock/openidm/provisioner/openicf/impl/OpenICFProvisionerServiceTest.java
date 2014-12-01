@@ -464,7 +464,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
     private static class SyncStub implements SingletonResourceProvider {
 
-        public ArrayList<ActionRequest> requests = new ArrayList<ActionRequest>();
+        final public ArrayList<ActionRequest> requests = new ArrayList<ActionRequest>();
 
         public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
             requests.add(request);
@@ -834,7 +834,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
     public void testSyncWithAllObjectClass(String systemName) throws Exception {
 
         JsonValue stage = new JsonValue(new LinkedHashMap<String, Object>());
-        stage.put("connectorData", ConnectorUtil.convertFromSyncToken(new SyncToken(0)));
+        stage.put("connectorData", ConnectorUtil.convertFromSyncToken(new SyncToken(17)));
         CreateRequest createRequest = Requests
                 .newCreateRequest("repo/synchronisation/pooledSyncStage",
                         ("system" + systemName).toUpperCase(),
@@ -844,11 +844,11 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         SyncStub sync = new SyncStub();
         Route r = router.addRoute("sync", sync);
 
-
         ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName,
                 SystemObjectSetService.SystemAction.liveSync.toString());
 
         stage = connection.action(new RootContext(), actionRequest);
+
         Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 17);
         Assert.assertEquals(sync.requests.size(), 0);
 
