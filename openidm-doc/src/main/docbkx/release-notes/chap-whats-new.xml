@@ -54,6 +54,36 @@
    </varlistentry>
 
    <varlistentry>
+    <term>Addition of an <emphasis>aggregated view</emphasis> to the User View
+     UI</term>
+    <listitem>
+     <para>
+      The User View UI now includes a read-only view of the user account in
+      each of the external resources to which it is linked. For more information,
+      see <link xlink:show="new" xlink:href="integrators-guide#user-linked-view"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To View a
+      User's Account in External Resources</citetitle></link> in the
+      <emphasis>Integrator's Guide</emphasis>.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Reconciliation Performance Improvements</term>
+    <listitem>
+     <para>
+      To improve reconciliation query performance on slower systems, you can now
+      preload the entire result set into memory on the source or target system,
+      or on both systems. For more information, see <link xlink:show="new"
+      xlink:href="integrators-guide#recon-query-optimization"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Improving
+      Reconciliation Query Performance</citetitle></link> in the
+      <emphasis>Integrator's Guide</emphasis>.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
     <term>Updated Connectors, New Connectors and Samples</term>
     <listitem>
      <para>
@@ -106,6 +136,21 @@
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Querying the
       Synchronization Audit Log</citetitle></link> in the <emphasis>Integrator's
       Guide</emphasis>.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Improvements to the Audit Facility</term>
+    <listitem>
+     <para>
+      OpenIDM ${docTargetVersion} provides the ability to purge audit logs at
+      a scheduled interval, or when the logs reach a certain size. For more
+      information, see <link xlink:show="new"
+      xlink:href="integrators-guide#audit-purging"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Purging
+      Obsolete Audit Information</citetitle></link> in the
+      <emphasis>Integrator's Guide</emphasis>.
      </para>
     </listitem>
    </varlistentry>
