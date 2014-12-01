@@ -88,6 +88,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
@@ -953,8 +955,9 @@ public class AuditServiceImpl implements AuditService {
         return formattedEntry;
     }
 
-    public static Map<String, Object> getReconResults(List<Map<String, Object>> entryList, boolean formatted) {
-        Map<String, Object> results = new HashMap<String, Object>();
+    public static JsonValue getReconResults(List<Map<String, Object>> entryList, boolean formatted) {
+        JsonValue results = json(object());
+
         if (formatted) {
             List<Map<String, Object>> resultEntries = new ArrayList<Map<String, Object>>();
             for (Map<String, Object> entry : entryList) {
@@ -967,16 +970,16 @@ public class AuditServiceImpl implements AuditService {
         return results;
     }
 
-    public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList, boolean formatted) {
+    public static JsonValue getActivityResults(List<Map<String, Object>> entryList, boolean formatted) {
         return getResults(entryList, formatted, AuditServiceImpl.TYPE_ACTIVITY);
     }
 
-    public static Map<String, Object> getAccessResults(List<Map<String, Object>> entryList, boolean formatted) {
+    public static JsonValue getAccessResults(List<Map<String, Object>> entryList, boolean formatted) {
         return getResults(entryList, formatted, AuditServiceImpl.TYPE_ACCESS);
     }
     
-    private static Map<String, Object> getResults(List<Map<String, Object>> entryList, boolean formatted, String type) {
-        Map<String, Object> results = new LinkedHashMap<String, Object>();
+    private static JsonValue getResults(List<Map<String, Object>> entryList, boolean formatted, String type) {
+        JsonValue results = json(object());
         if (formatted) {
             List<Map<String, Object>> formattedList = new ArrayList<Map<String, Object>>();
             for (Map<String, Object> entry : entryList) {
@@ -997,14 +1000,11 @@ public class AuditServiceImpl implements AuditService {
     }
 
     protected static JsonValue parseJsonString(String stringified) {
-        JsonValue jsonValue = null;
         try {
-            Map parsedValue = mapper.readValue(stringified, Map.class);
-            jsonValue = new JsonValue(parsedValue);
+            return new JsonValue(mapper.readValue(stringified, Map.class));
         } catch (IOException ex) {
             throw new JsonException("String passed into parsing is not valid JSON", ex);
         }
-        return jsonValue;
     }
 
     private boolean getFormattedValue(Object formatted) {
