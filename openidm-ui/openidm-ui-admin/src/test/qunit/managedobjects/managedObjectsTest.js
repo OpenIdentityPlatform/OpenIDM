@@ -47,12 +47,12 @@ define([
 
                     addEditManagedView.$el.find("#addManagedProperties").trigger("click");
 
-                    QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 1, "Add Object Type property successful");
+                    QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 1, "Add object type property successful");
 
                     addEditManagedView.$el.find(".add-remove-block:visible .remove-btn").trigger("click");
                     $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
 
-                    QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 0, "Delete Object Type property successful");
+                    QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 0, "Delete object type property successful");
 
                     addEditManagedView.$el.find("#addManagedScript").trigger("click");
 
@@ -68,11 +68,11 @@ define([
                         $("#scriptFilePath").val("test");
                         $("#scriptFilePath").trigger("blur");
 
-                        QUnit.ok($("#scriptDialogOkay").is(":disabled") === false, "Script Dialog submit button enabled");
+                        QUnit.ok($("#scriptDialogOkay").is(":disabled") === false, "Script dialog submit button enabled");
 
                         $("#scriptDialogOkay").trigger("click");
 
-                        QUnit.equal(addEditManagedView.$el.find(".event-hook-status").length, 2, "Script Successfully Added");
+                        QUnit.equal(addEditManagedView.$el.find(".event-hook-status").length, 2, "Script successfully Added");
 
                         addEditManagedView.$el.find(".event-hook-status").trigger("click");
 
