@@ -2137,7 +2137,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             return previousStage;
         }
 
-        JsonValue stage = previousStage != null
+        final JsonValue stage = previousStage != null
             ? previousStage.copy()
             : new JsonValue(new LinkedHashMap<String, Object>());
 
@@ -2198,9 +2198,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             final String objectTypeName = getObjectTypeName(syncDelta.getObjectClass());
                                             final String resourceContainer = getSource(objectTypeName == null ? objectType : objectTypeName);
                                             final JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
+
+                                            //rebuild the OperationHelper if the helper is for the __ALL__ object class
+                                            final OperationHelper syncDeltaOperationHelper = helper.getObjectClass().equals(ObjectClass.ALL)
+                                                    ? operationHelperBuilder.build(objectTypeName, stage, cryptoService)
+                                                    : helper;
+
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE: {
-                                                    JsonValue deltaObject = helper.build(syncDelta.getObject());
+                                                    JsonValue deltaObject = syncDeltaOperationHelper.build(syncDelta.getObject());
                                                     content.put("oldValue", null);
                                                     content.put("newValue", deltaObject.getObject());
                                                     // TODO import SynchronizationService.Action.notifyCreate and ACTION_PARAM_ constants
@@ -2217,7 +2223,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                 }
                                                 case UPDATE:
                                                 case CREATE_OR_UPDATE: {
-                                                    JsonValue deltaObject = helper.build(syncDelta.getObject());
+                                                    JsonValue deltaObject = syncDeltaOperationHelper.build(syncDelta.getObject());
                                                     content.put("oldValue", null);
                                                     content.put("newValue", deltaObject.getObject());
                                                     if (null != syncDelta.getPreviousUid()) {

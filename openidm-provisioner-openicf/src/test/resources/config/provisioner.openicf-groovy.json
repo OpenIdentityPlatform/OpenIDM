@@ -138,7 +138,6 @@
                 },
                 "sortKey": {
                     "type": "integer",
-                    "required": true,
                     "nativeName": "sortKey",
                     "nativeType": "integer"
                 }
