@@ -36,8 +36,8 @@
 
  <variablelist>
   <para>
-   For OpenIDM ${docTargetVersion}, the following configurations are
-   supported for use in production.
+   For OpenIDM ${docTargetVersion}, the following configurations are supported
+   for use in production.
   </para>
   <varlistentry>
    <term>Repository</term>
@@ -59,6 +59,11 @@
      <listitem>
       <para>
        Oracle Database 11g
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       PostgreSQL 9.3 or higher
       </para>
      </listitem>
     </itemizedlist>
@@ -87,12 +92,54 @@
      connectors:
     </para>
     <itemizedlist>
-     <listitem><para>CSV File</para></listitem>
-     <listitem><para>Database Table</para></listitem>
-     <listitem><para>LDAP</para></listitem>
-     <listitem><para>Scripted Groovy</para></listitem>
-     <listitem><para>Scripted SQL</para></listitem>
-     <listitem><para>XML File</para></listitem>
+     <listitem>
+      <para>CSV File Connector</para>
+     </listitem>
+     <listitem>
+      <para>Database Table Connector</para>
+     </listitem>
+     <listitem>
+      <para>Generic LDAP Connector</para>
+     </listitem>
+     <listitem>
+      <para>XML File Connector</para>
+     </listitem>
+     <listitem>
+      <para>Scripted SQL Connector</para>
+     </listitem>
+     <listitem>
+      <para>
+       Groovy Connector Toolkit
+      </para>
+      <para>
+       This toolkit enables you to create scripted connectors to virtually any
+       resource
+      </para>
+     </listitem>
+    </itemizedlist>
+    <para>
+     A corresponding PowerShell Connector Toolkit is available for download from
+     <link xlink:show="new"
+     xlink:href="https://backstage.forgerock.com/">ForgeRock Backstage</link>,
+     and enables you to create scripted connectors to address the requirements
+     of your Microsoft Windows ecosystem.
+    </para>
+    <itemizedlist>
+     <para>
+      The following connectors are available only in the <link xlink:show="new"
+      xlink:href="http://www.forgerock.com/download-stack/">Enterprise
+      Download</link> of OpenIDM:
+     </para>
+     <listitem>
+      <para>
+       Google Apps Connector
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       Salesforce Connector
+      </para>
+     </listitem>
     </itemizedlist>
     <para>
      ForgeRock provides additional connectors, as listed on the <link
