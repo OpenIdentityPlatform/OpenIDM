@@ -3190,7 +3190,7 @@ Properties:
     enable you to get started with this toolkit.
    </para>
   </section>
-  <!--
+
   <section xml:id="salesforce-connector">
    <title>Salesforce Connector</title>
    <para>
@@ -3208,8 +3208,13 @@ Properties:
    </para>
    <para>
     For additional instructions, and a sample Salesforce configuration, see
+    <link xlink:show="new"
+    xlink:href="install-guide#sample-salesforce-connector"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
+    Salesforce With the Salesforce Connector</citetitle></link> in the
+    <emphasis>Installation Guide</emphasis>.
    </para>
-  </section>     -->
+  </section>
 
  </section>
 
