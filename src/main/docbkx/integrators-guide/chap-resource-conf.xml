@@ -3304,9 +3304,6 @@ Properties:
     <para>Database Table Connector</para>
    </listitem>
    <listitem>
-    <para>GoogleApps Connector</para>
-   </listitem>
-   <listitem>
     <para>
      Scripted Groovy Connector Toolkit, which includes the following
      sample implementations:
@@ -3330,7 +3327,10 @@ Properties:
     <para>XML Connector</para>
    </listitem>
    <listitem>
-    <para>Salesforce Connector</para>
+    <para>GoogleApps Connector (Enterprise download only)</para>
+   </listitem>
+   <listitem>
+    <para>Salesforce Connector (Enterprise download only)</para>
    </listitem>
   </itemizedlist>
 
