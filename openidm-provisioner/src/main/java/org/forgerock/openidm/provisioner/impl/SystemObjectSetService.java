@@ -466,13 +466,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             updateRequest.setRevision(previousStage.getRevision());
             connectionFactory.getConnection().update(routerContext, updateRequest);
         } catch (ResourceException e) { // NotFoundException?
-            if (null == previousStage) {
-				response = locateService(id).liveSynchronize(id.getObjectType(), null);
+            if (previousStage != null) {
+                throw e;
+            }
+            response = locateService(id).liveSynchronize(id.getObjectType(), null);
+            if (response != null) {
                 CreateRequest createRequest = Requests.newCreateRequest(previousStageResourceContainer, previousStageId, response);
                 connectionFactory.getConnection().create(routerContext, createRequest);
-            }
-            else {
-                throw e;
             }
         }
         if (response != null && !detailedFailure) {
