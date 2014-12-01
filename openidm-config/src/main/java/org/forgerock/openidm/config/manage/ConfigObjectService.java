@@ -711,11 +711,24 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             return new JsonPointer("/" + ConfigObjectService.CONFIG_KEY + field.toString());
         }
     }
-    
+
+    /**
+     * In order to use findExistingConfiguration() you must have a ParsedId.  This method provides that as
+     * a package-private and avoids the "containing class" error.
+     *
+     * @param name
+     * @param id
+     * @return
+     * @throws BadRequestException
+     */
+    ParsedId getParsedId(ResourceName name, String id) throws BadRequestException {
+        return new ParsedId(name, id);
+    }
+
     /**
      * A class for converting resource names and IDs to qualified PIDs that represent managed services.
      */
-    private class ParsedId {
+    class ParsedId {
 
         public String pid;
         public String factoryPid;
