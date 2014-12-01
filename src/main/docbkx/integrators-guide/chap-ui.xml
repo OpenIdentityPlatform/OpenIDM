@@ -1053,6 +1053,71 @@
     </para>
    </step>
   </procedure>
+
+  <procedure xml:id="user-linked-view">
+   <title>To View a User's Account in External Resources</title>
+   <para>
+    The User View UI displays the details of the user account in the OpenIDM
+    repository (managed/user). When a mapping has been configured between the
+    repository and one or more external resources, you can view what that user
+    account looks like in any of the systems to which it is linked. Note that
+    this view is read-only - you cannot update a user record in a linked system
+    from within the User View UI.
+   </para>
+   <para>
+    By default, <emphasis>implicit synchronization</emphasis> is enabled for
+    mappings <emphasis>from</emphasis> the <literal>managed/user</literal>
+    repository <emphasis>to</emphasis> any external resource. This means that
+    when you update a managed object, any mappings defined in the
+    <filename>sync.json</filename> file that have the managed object as the
+    source are automatically executed to update the target system. You can see
+    these changes in the Linked Systems section of a user's profile.
+   </para>
+   <para>
+    To view a user's linked accounts:
+   </para>
+   <step>
+    <para>
+     Log into the User View UI as an administrative user.
+    </para>
+   </step>
+   <step>
+    <para>
+     Select the Users tab.
+    </para>
+   </step>
+   <step>
+    <para>
+     Click the Username of the user whose accounts you want to view.
+    </para>
+   </step>
+   <step>
+    <para>
+     At the bottom of the user profile, the Linked Systems panel indicates the
+     external resource or resources to which this user entry is mapped. .
+    </para>
+   </step>
+   <step>
+    <para>
+     Select the resource in which you want to view the account, from the Linked
+     Resource list.
+    </para>
+    <para>
+     The user record in the linked resource is displayed.
+    </para>
+    <para>
+     The following image shows the user account for a user <literal>fdoe</literal>,
+     as it exists in the LDAP directory to which the managed user repository is
+     mapped.
+    </para>
+     <mediaobject>
+      <alt>New user record for fdoe</alt>
+      <imageobject>
+       <imagedata fileref="images/linked-view-fdoe.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+   </step>
+  </procedure>
  </section>
 
  <section xml:id="ui-managing-workflows">
