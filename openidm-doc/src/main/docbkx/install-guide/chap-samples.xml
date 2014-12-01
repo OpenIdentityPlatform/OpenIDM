@@ -3314,6 +3314,436 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
    </procedure>
   </section>
  </section>
+
+  <section xml:id="samples-azure">
+   <title>Sample - Using the Groovy Connector Toolkit to Connect to
+    Microsoft Azure</title>
+   <indexterm>
+    <primary>Samples</primary>
+    <secondary>Microsoft Azure Connector</secondary>
+   </indexterm>
+   <!-- ref http://azure.microsoft.com/en-us/overview/what-is-azure/ -->
+   <para>
+    This sample uses the Groovy Connector Toolkit to implement a Microsoft Azure
+    connector, which interacts with the ForgeRock Commons REST (CREST) API to
+    connect to an Azure-based instance of Active Directory. The main difference
+    between a CREST-based API and a generic REST API is that the CREST API is
+    inherently recognizable by all ForgeRock products. As such, the sample can
+    leverage CREST resources in the groovy scripts, to create CREST requests.
+   </para>
+   <para>
+    As noted on the <link xlink:show="new"
+    xlink:href="http://azure.microsoft.com/en-us/overview/what-is-azure/">
+    <citetitle>Microsoft Azure web site</citetitle></link>, Azure is
+    Microsoft's cloud platform for building, deploying, and
+    managing applications and services.
+   </para>
+   <para>
+    This section assumes that you have a working knowledge of the Microsoft
+    Azure platform, and can adjust and modify the configuration as needed to
+    get the information needed to configure a Microsoft Azure connector.
+   </para>
+   <para>
+    You will also need to set up OpenIDM as a Microsoft Azure website and as a
+    web application. When you do, retain the values of the URI of the website,
+    <literal>redirectURI</literal>, the <literal>APP ID URI</literal>, which
+    corresponds to the <literal>resourceURI</literal>, the
+    <literal>client ID</literal>, and the <literal>client Secret</literal>.
+   </para>
+   <para>
+    The Groovy Connector Toolkit is bundled with OpenIDM ${docTargetVersion}, in
+    the following JAR file:
+    <filename>openidm/connectors/groovy-connector-${openicf.groovyconnector.version}.jar</filename>.
+   </para>
+   <para>
+    The connector configuration file for this sample
+    (<filename>samples/scriptedazure/conf/provisioner.openicf-scriptedazure.json</filename>)
+    indicates the Scripted Azure implementation of the Groovy Connector Toolkit
+    as follows:
+   </para>
+   <programlisting language="javascript">{
+    "name": "scriptedazure",
+    "connectorRef": {
+    "connectorHostRef": "#LOCAL",
+    "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector",
+    "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)"
+    },
+    ...  </programlisting>
+   <para>
+    The Groovy scripts required for the sample are located in the
+    <filename>samples/scriptedazure/tools</filename> directory. You will need
+    to customize these scripts to address the requirements of your specific
+    deployment, however, the sample scripts are a good starting point on which to
+    base your customization.
+   </para>
+
+   <section xml:id="azure-setup">
+    <title>Identifying Appropriate Information from Microsoft Azure</title>
+
+    <para>
+     Microsoft Azure supports RESTful communication with the <link xlink:show="new"
+     xlink:href="http://msdn.microsoft.com/en-us/library/azure/hh974476.aspx">
+     <citetitle>Azure AD Graph API</citetitle></link>. As suggested by the name,
+     the API supports access to the Azure-based instance of Active Directory.
+    </para>
+
+    <para>
+     To get an OAuth 2 access token, you will need to add information to the
+     Scripted Azure provisioner file,
+     <filename>provisioner.openicf-scriptedazure.json</filename>. Substitute
+     for the <literal>__configureme__</literal> entries shown.
+    </para>
+
+    <programlisting language="javascript">...
+"customConfiguration":"
+     graphServiceUrl = 'https://graph.windows.net/__configureme__';
+     oauth2 {
+         authority = 'https://login.windows.net/__configureme__';
+         redirectURI = '__configureme__';
+         resourceURI = 'https://graph.windows.net'
+     }",
+"customSensitiveConfiguration": "
+     oauth2 {
+         clientId = '__configureme__';
+         clientSecret = '__configureme__';
+         username = '__configureme__';
+         password = '__configureme__'
+     }",... </programlisting>
+
+    <para>
+     The following list assumes that you have configured
+     <literal>contoso.com</literal> as the Azure domain tenant. Substitute
+     appropriately. Except for the first item, the following list of items are
+     required for an OAuth 2 access token.
+    </para>
+
+    <para>
+     You should be able to get some of the items needed for the OAuth 2 token
+     in the Azure configuration menu related to the OpenIDM web application.
+    </para>
+
+    <itemizedlist>
+     <listitem>
+      <para><literal>graphServiceUrl</literal></para>
+      <para>
+       For a domain tenant of <literal>contoso.com</literal>, set this to
+       <literal>'https://graph.windows.net/contoso.onmicrosoft.com</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para><literal>authority</literal></para>
+      <para>
+       Set to <literal>'https://login.windows.net/contoso.onmicrosoft.com'</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para><literal>redirectURI</literal></para>
+      <para>
+       Set to <literal>'https://localhost:8443/admin/index.html#azureCallback'</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para><literal>resourceURI</literal></para>
+      <para>
+       Keep the following Graph API setting:
+       <literal>'https://graph.windows.net'</literal>
+      </para>
+     </listitem>
+     <listitem>
+      <para><literal>clientId</literal></para>
+      <para>
+       Set to the Client ID shown in the Configure menu of the Azure web
+       application.
+      </para>
+     </listitem>
+     <listitem>
+      <para><literal>clientSecret</literal></para>
+      <para>
+       Set to the Client Secret shown when you added or configured the web
+       application. In Azure, the Client Secret is the <literal>key</literal>
+       associated with the Client ID.
+      </para>
+     </listitem>
+     <listitem>
+      <para><literal>username</literal></para>
+      <para>
+       Set to the administrative username for Azure.
+      </para>
+     </listitem>
+     <listitem>
+      <para><literal>password</literal></para>
+      <para>
+       Set to the administrative password for Azure.
+      </para>
+     </listitem>
+    </itemizedlist>
+
+
+   </section>
+
+   <section xml:id="sample-azure-running">
+    <title>Running the Sample</title>
+
+    <para>
+     This section illustrates basic CRUD operations on users and groups using
+     the scripted Azure connector. Note that the power of the Groovy connector
+     is in the associated Groovy scripts, and their application in your specific
+     deployment. The scripts provided with this sample are specific to the
+     sample and customization of the scripts is required.
+    </para>
+
+    <procedure>
+     <step>
+      <para>
+       Start OpenIDM with the configuration for the scripted Azure sample.
+      </para>
+      <screen><userinput>$ cd /path/to/openidm
+ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
+     </step>
+     <step>
+      <para>
+       Check the connector configuration. Obtain its status over REST.
+      </para>
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/scriptedazure?_action=test"</userinput>
+       <computeroutput>
+ {
+     "ok": true,
+     "connectorRef": {
+        "bundleVersion": "[1.4.0.0,2.0.0.0)",
+        "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+        "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector"
+     },
+     "objectTypes": [
+        "User",
+        "Device",
+        "Contact",
+        "DeviceConfiguration",
+        "ServicePrincipal",
+        "Group",
+        "ExtensionProperty",
+        "OAuth2PermissionGrant",
+        "DirectoryRole",
+        "DirectoryObject",
+        "DirectoryRoleTemplate",
+        "AppRoleAssignment",
+        "DirectoryLinkChange",
+        "Application",
+        "__ALL__",
+        "SubscribedSku",
+        "TenantDetail"
+     ],
+     "config": "config/provisioner.openicf/scriptedazure",
+        "enabled": true,
+        "name": "scriptedazure"
+ }</computeroutput>
+      </screen>
+     </step>
+     <step>
+      <para>
+       Create a group entry on the Azure AD server.
+      </para>
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "_id": "fake placeholder value",
+   "mailEnabled": false,
+   "displayName": "Azure Test Group",
+   "mailNickname": "Test_Group",
+   "securityEnabled": "true",
+   "description": "Azure AD Test Group"
+ }' \
+ "https://localhost:8443/openidm/system/scriptedazure/group?_action=create"
+      </userinput>
+      <computeroutput>
+ {
+   "mailEnabled":false,
+   "__NAME__":"ab347420f-4e8e-f045-a437b62c0f3-636e",
+   "mailNickname":"Test_Group",
+   "displayName":"Azure Test Group",
+   "mail":null,
+   "onPremisesSecurityIdentifier":null,
+   "lastDirSyncTime":null,
+   "dirSyncEnabled":null,
+   "description":"Azure AD Test Group",
+   "proxyAddresses":[
+
+   ],
+   "securityEnabled":true,
+   "provisioningErrors":[
+
+   ],
+   "_id":"ab347420f-4e8e-f045-a437b62c0f3-636e"
+ }</computeroutput>
+      </screen>
+     </step>
+     <step>
+      <para>
+       Create a user entry on the Azure AD server.
+      </para>
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "_id": "fake placeholder value",
+   "accountEnabled": true,
+   "displayName": "Alex Wu",
+   "mailNickname": "AlexW",
+   "passwordProfile": { "password" : "Test1234", "forceChangePasswordNextLogin": false },
+   "userPrincipalName": "Alex@contoso.onmicrosoft.com"
+   }' \
+   "https://localhost:8443/openidm/system/scriptedazure/User?_action=create"
+     </userinput><computeroutput>
+ {
+   "userType":"Member",
+   "assignedLicenses":[
+
+   ],
+   "passwordPolicies":null,
+   "immutableId":null,
+   "surname":null,
+   "provisionedPlans":[
+
+   ],
+   "state":null,
+   "accountEnabled":true,
+   "telephoneNumber":null,
+   "physicalDeliveryOfficeName":null,
+   "mail":null,
+   "__NAME__":"744aa30f-55e0-4559-b956-985b77d80814",
+   "proxyAddresses":[
+
+   ],
+   "otherMails":[
+
+   ],
+   "passwordProfile":null,
+   "assignedPlans":[
+
+   ],
+   "facsimileTelephoneNumber":null,
+   "displayName":"Alex Wu",
+   "onPremisesSecurityIdentifier":null,
+   "userPrincipalName":"Alex@contoso.onmicrosoft.com",
+   "mobile":null,
+   "dirSyncEnabled":null,
+   "jobTitle":null,
+   "givenName":null,
+   "department":null,
+   "usageLocation":null,
+   "preferredLanguage":null,
+   "sipProxyAddress":null,
+   "country":null,
+   "mailNickname":"AlexW",
+   "postalCode":null,
+   "lastDirSyncTime":null,
+   "city":null,
+   "provisioningErrors":[
+
+   ],
+   "streetAddress":null,
+   "_id":"744aa30f-55e0-4559-b956-985b77d80814"
+ }</computeroutput></screen>
+     </step>
+     <step>
+      <para>
+       Update Alex Wu's entry, by modifying his telephone number.
+      </para>
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+   "telephoneNumber" : "555-1234"
+ }' \
+ "https://localhost:8443/openidm/system/scriptedazure/User/744aa30f-55e0-4559-b956-985b77d80814"</userinput>
+      <computeroutput>...
+   "telephoneNumber" : "555-1234"
+ ...</computeroutput>
+      </screen>
+     </step>
+     <step>
+      <para>
+       Confirm the result. Get the data for Alex Wu, by <literal>_id</literal>.
+      </para>
+      <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/scriptedazure/User/744aa30f-55e0-4559-b956-985b77d80814"</screen>
+     </step>
+     <step>
+      <para>
+       Get information on the test group, also by <literal>_id</literal>.
+      </para>
+      <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/scriptedazure/Group/ab347420f-4e8e-f045-a437b62c0f3-636e"</screen>
+     </step>
+     <step>
+      <para>
+       Delete the entry for user Alex Wu.
+      </para>
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/system/scriptedazure/User/744aa30f-55e0-4559-b956-985b77d80814"
+      </userinput>
+      <computeroutput>
+ {
+   "_id": "744aa30f-55e0-4559-b956-985b77d80814"
+ }
+}</computeroutput>
+      </screen>
+     </step>
+     <step>
+      <para>
+       Delete the group created earlier.
+      </para>
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/system/scriptedazure/Group/ab347420f-4e8e-f045-a437b62c0f3-636e"
+      </userinput>
+      <computeroutput>
+ {
+   "_id": "ab347420f-4e8e-f045-a437b62c0f3-636e"
+ }</computeroutput></screen>
+     </step>
+    </procedure>
+
+   </section>
+
+  </section>
+
+
  </section>
 
  <section xml:id="samples-powershell">
