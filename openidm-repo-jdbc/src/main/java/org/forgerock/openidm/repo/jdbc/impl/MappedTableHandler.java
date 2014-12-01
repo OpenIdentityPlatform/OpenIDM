@@ -535,7 +535,6 @@ public class MappedTableHandler implements TableHandler {
         if (sortKeys != null && sortKeys.size() > 0) {
             List<String> keys = new ArrayList<String>();
             for (int i = 0; i < sortKeys.size(); i++) {
-            //for (SortKey sortKey : sortKeys) {
                 SortKey sortKey = sortKeys.get(i);
                 String tokenName = "sortKey" + i;
                 keys.add("${" + tokenName + "}" + (sortKey.isAscendingOrder() ? " ASC" : " DESC"));
@@ -546,6 +545,32 @@ public class MappedTableHandler implements TableHandler {
         
         return "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj WHERE "
                 + filter.accept(queryFilterVisitor, replacementTokens) + pageClause;
+    }
+    
+    /**
+     * Loops through sort keys constructing the key statements.
+     * 
+     * @param sortKeys  a {@link List} of sort keys
+     * @param innerJoins a {@link List} to store INNER JOIN statements
+     * @param keys a {@link List} to store ORDER BY keys
+     * @param replacementTokens a {@link Map} containing replacement tokens for the {@link PreparedStatement}
+     */
+    protected void prepareSortKeyStatements(List<SortKey> sortKeys, List<String> keys, Map<String, Object> replacementTokens) {
+        for (int i = 0; i < sortKeys.size(); i++) {
+            SortKey sortKey = sortKeys.get(i);
+            keys.add(explicitMapping.getDbColumnName(sortKey.getField()) + (sortKey.isAscendingOrder() ? " ASC" : " DESC"));
+        }
+    }
+    
+    /**
+     * Returns a query string representing the supplied filter.
+     * 
+     * @param filter the {@link QueryFilter} object
+     * @param replacementTokens replacement tokens for the query string
+     * @return a query string
+     */
+    protected String getFilterString(QueryFilter filter, Map<String, Object> replacementTokens) {
+        return " WHERE " + filter.accept(queryFilterVisitor, replacementTokens);
     }
 }
 
