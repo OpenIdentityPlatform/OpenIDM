@@ -1003,6 +1003,11 @@ var results = openidm.query("system/ScriptedSQL/account", params)
        If the offset points to a page beyond the last of the search results, the
        result set returned is empty.
       </para>
+      <para>
+       Note that the <literal>_remainingPagedResults</literal> parameter is not
+       supported for all queries. Where it is not supported, the returned value
+       is always <literal>-1</literal>.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
