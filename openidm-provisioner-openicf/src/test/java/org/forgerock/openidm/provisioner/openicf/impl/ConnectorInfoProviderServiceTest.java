@@ -46,6 +46,8 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
+import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.common.logging.impl.NoOpLogger;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.ConnectorKey;
@@ -68,6 +70,7 @@ public class ConnectorInfoProviderServiceTest {
 
     @BeforeTest
     public void beforeTest() throws Exception {
+        System.setProperty(Log.LOGSPI_PROP, NoOpLogger.class.getName());
         InputStream inputStream =
                 ConnectorInfoProviderServiceTest.class
                         .getResourceAsStream("/config/provisioner.openicf.connectorinfoprovider.json");
