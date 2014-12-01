@@ -245,11 +245,11 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
         String queryId = request.getQueryId();
         try {
             List<Map<String, Object>> reconEntryList = getEntryList(type);
-            Map<String, Object> result = null;
             if (reconEntryList == null) {
                 throw new NotFoundException(type + " audit log not found");
             }
 
+            JsonValue result = null;
             String reconId = params.get("reconId");
             if (AuditServiceImpl.QUERY_BY_RECON_ID.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
                 result = AuditServiceImpl.getReconResults(reconEntryList, formatted);
@@ -271,19 +271,17 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             } else {
                 throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
             }
-            List<Map<String, Object>> results = (List<Map<String, Object>>) result.get("result");
-            for (Map<String, Object> queryResult : results) {
-                String id = (String) queryResult.get(Resource.FIELD_CONTENT_ID);
-                handler.handleResource(new Resource(id, null, new JsonValue(queryResult)));
+            for (JsonValue queryResult : result.get("result")) {
+                String id = queryResult.get(Resource.FIELD_CONTENT_ID).asString();
+                handler.handleResource(new Resource(id, null, queryResult));
             }
             handler.handleResult(new QueryResult());
         } catch (Exception e) {
-            e.printStackTrace();
             throw new BadRequestException(e);
         }
     }
 
-    private Map<String, Object> getReconQueryResults(List<Map<String, Object>> list, String reconId, String param, String paramValue, boolean formatted) {
+    private JsonValue getReconQueryResults(List<Map<String, Object>> list, String reconId, String param, String paramValue, boolean formatted) {
         List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
         for (Map<String, Object> entry : list) {
             if ((reconId == null || (entry.get("reconId").equals(reconId))) && (param == null || paramValue.equals(entry.get(param)))) {
