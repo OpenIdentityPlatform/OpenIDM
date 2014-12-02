@@ -7230,30 +7230,30 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
       as follows. You will need the Consumer Key and Consumer Secret that you
       obtained in the previous section.
      </para>
-     <substeps>
-      <step>
+     <itemizedlist>
+      <listitem>
        <para>
         Click on the Salesforce connector to open the Edit Connector dialog.
        </para>
-      </step>
-      <step>
+      </listitem>
+      <listitem>
        <para>
         Select True from the Enabled list.
        </para>
-      </step>
-      <step>
+      </listitem>
+      <listitem>
        <para>
         Select Salesforce Connector from the Connector Type list.
        </para>
-      </step>
-      <step>
+      </listitem>
+      <listitem>
        <para>
         Under Basic Connector Details select the Sandbox URL (for the purposes
         of testing the sample) and enter the Connector Key and Secret that you
         obtained in the previous section.
        </para>
-      </step>
-      <step>
+      </listitem>
+      <listitem>
        <para>
         You can leave the default LiveSync details for now. Click Update to
         update the connector configuration.
@@ -7264,8 +7264,8 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
          <imagedata fileref="images/edit-sf-connector.png" format="PNG"/>
         </imageobject>
        </mediaobject>
-      </step>
-      <step>
+      </listitem>
+      <listitem>
        <para>
         On the permission request screen click Allow, to enable OpenIDM to
         access your Salesforce Connected App.
@@ -7279,8 +7279,8 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
          <imagedata fileref="images/active-sf-connector.png" format="PNG"/>
         </imageobject>
        </mediaobject>
-      </step>
-     </substeps>
+      </listitem>
+     </itemizedlist>
     </step>
     <step>
      <para>
@@ -7373,9 +7373,9 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
       <filename>sync.json</filename> file that have the managed object as the
       source are automatically executed to update the target system. For more
       information, see <link xlink:href="integrators-guide#synchronization-mappings-file"
-                             xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
-      Mappings File</citetitle></link> in the <citetitle>Integrator's
-      Guide</citetitle>.
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+      Mappings File</citetitle></link> in the <emphasis>Integrator's
+      Guide</emphasis>.
      </para>
      <para>
       To test that the implicit synchronization has been successful, look at
