@@ -64,8 +64,35 @@ $secutil = [Org.IdentityConnectors.Common.Security.SecurityUtil]
 function Update-Group ($attributes)
 {
 	$accessor = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributesAccessor($attributes)
-	$basic = [Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeUtil]::GetBasicAttributes($attributes)
-	$dic = [Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeUtil]::ToMap($basic)
+	
+	# Change of Name - Needs the special Rename-Object cmdlet
+	# See http://technet.microsoft.com/en-us/library/ee617225.aspx
+	$val = $accessor.FindString("name")
+	if ($val -ne $null) 
+	{ 
+		Rename-ADObject $Connector.Uid.GetUidValue() -NewName $val
+		Write-Verbose -verbose "Name updated to $val"
+	}
+	
+	# Change of DistinguishedName (__NAME__). We need to move the object
+	# with the special Move-ADObject cmdlet
+	# See http://technet.microsoft.com/en-us/library/ee617248.aspx
+	if ($accessor.GetName() -ne $null)
+	{
+		($rdn,$path) = $accessor.GetName().GetNameValue().Split(',',2)
+		Move-ADObject  $Connector.Uid.GetUidValue() -TargetPath $path
+		Write-Verbose -verbose "DN updated: $rdn moved to $path"
+	}
+	
+	#[-SamAccountName] <string> 
+	# We cannot change the SamAccountName of a group instance. 
+	# So we do it with the other way to call Set-ADGroup
+	$val = $accessor.FindString("sAMAccountName")
+	if ($val -ne $null) 
+	{ 
+		Set-ADGroup $Connector.Uid.GetUidValue() -SamAccountName $val
+		Write-Verbose -verbose "SamAccountName updated to $val"
+	}
 
 	# Set-ADGroup 
 	# See http://technet.microsoft.com/en-us/library/ee617199.aspx
@@ -75,7 +102,7 @@ function Update-Group ($attributes)
 	$changes = $FALSE
 	
 	# Standard attributes - single valued
-	$StandardSingle = @("wWWHomePage","name","telephoneNumber","mail","displayNamePrintable","displayName","managedBy","info","description")
+	$StandardSingle = @("wWWHomePage","telephoneNumber","mail","displayNamePrintable","displayName","managedBy","info","description")
 	foreach ($attr in $StandardSingle)
 	{
 		$str = $accessor.FindString($attr)
@@ -86,14 +113,6 @@ function Update-Group ($attributes)
 		}
 	}
 	
-	#[-SamAccountName] <string> 
-	$val = $accessor.FindString("sAMAccountName")
-	if ($val -ne $null) 
-	{ 
-		$groupInstance.SamAccountName = $val
-		$changes = $TRUE
-	}
-
 	#[-GroupScope] <System.Nullable[Microsoft.ActiveDirectory.Management.ADGroupScope]> 
 	# group scope is either 'DomainLocal', 'Universal', 'Global'
 	$val = $accessor.FindString("groupScope")
@@ -112,17 +131,10 @@ function Update-Group ($attributes)
 		$changes = $TRUE
 	}
 	
-	# DistinguishedName
-	$val = $accessor.GetName()
-	if ($val -ne $null) 
-	{ 
-		$groupInstance.DistinguishedName = $val
-		$changes = $TRUE
-	}
-
 	if ($changes)
 	{
 		Set-ADGroup -Instance $groupInstance
+		Write-Verbose -verbose "Group has been updated"
 	}
 	
 	# Members changes
@@ -161,14 +173,15 @@ function Update-Group ($attributes)
 		if ( $newMember.Count -ne 0) 
 		{
 			Add-ADGroupMember $Connector.Uid.GetUidValue() -Members $newMember -Confirm:$false
+			Write-Verbose -verbose "Members $newMember added to the group"
 		}
 
 		if ( $toRemove.Count -ne 0)
 		{
 			Remove-ADGroupMember $Connector.Uid.GetUidValue() -Members $toRemove -Confirm:$false
+			Write-Verbose -verbose "Members $toRemove removed from the group"
 		}
 	}
-	
 	$Connector.Uid
 }
 
@@ -176,8 +189,47 @@ function Update-User ($attributes)
 {
 	$accessor = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributesAccessor($attributes)
 	
+	# Change of Name - Needs the special Rename-Object cmdlet
+	# See http://technet.microsoft.com/en-us/library/ee617225.aspx
+	$val = $accessor.FindString("name")
+	if ($val -ne $null) 
+	{ 
+		Rename-ADObject $Connector.Uid.GetUidValue() -NewName $val
+		Write-Verbose -verbose "Name updated to $val"
+	}
+	
+	# Change of DistinguishedName (__NAME__). We need to move the object
+	if ($accessor.GetName() -ne $null)
+	{
+		($rdn,$path) = $accessor.GetName().GetNameValue().Split(',',2)
+		Move-ADObject  $Connector.Uid.GetUidValue() -TargetPath $path
+		Write-Verbose -verbose "DN updated: $rdn moved to $path"
+	}
+	
+	#[-SamAccountName] <string> 
+	# We cannot change the SamAccountName of a user instance. 
+	# So we do it with the other way to call Set-ADUser
+	$val = $accessor.FindString("sAMAccountName")
+	if ($val -ne $null) 
+	{ 
+		Set-ADUser $Connector.Uid.GetUidValue() -SamAccountName $val
+		Write-Verbose -verbose "SamAccountName updated to $val"
+	}
+
+	# [-AccountPassword <SecureString>] 
+	# Password reset
+	$password = $accessor.GetPassword()
+	If ($password -ne $null)
+	{
+		$dec = $secutil::Decrypt($password)
+		$password = ConvertTo-SecureString -String $dec -AsPlainText -Force
+		Set-ADAccountPassword $Connector.Uid.GetUidValue() -Reset -NewPassword $password
+		Write-Verbose -verbose "Password updated" 
+	}
+	
 	# Get the current instance of the user
 	$aduser = Get-ADUser -Identity $Connector.Uid.GetUidValue() -Properties "*"
+	$changes = $FALSE
 
 	# [-AccountExpirationDate <System.Nullable[System.DateTime]>] 
 	# This corresponds to the AccountExpires attribute
@@ -189,36 +241,26 @@ function Update-User ($attributes)
 	if ($val -ne $null) 
 	{ 
 		$aduser.AccountExpirationDate = [System.DateTime]::Parse($val)
+		$changes = $TRUE
 	}
-
-	# [-Enabled <System.Nullable[bool]>] 
-	$aduser.Enabled = $accessor.GetEnabled($false)
 	
-	# [-AccountPassword <SecureString>] 
-	$password = $accessor.GetPassword()
-	If ($password -ne $null)
-	{
-		$dec = $secutil::Decrypt($password)
-		$password = ConvertTo-SecureString -String $dec -AsPlainText -Force
-		Write-Verbose -verbose "Updating password"
-	}
-
 	# handle UAC boolean attributes
 	$uac = ("allowReversiblePasswordEncryption", "cannotChangePassword", "changePasswordAtLogon",
-	"passwordNeverExpires","passwordNotRequired","smartcardLogonRequired","trustedForDelegation")
+	"passwordNeverExpires","passwordNotRequired","smartcardLogonRequired","trustedForDelegation","enabled")
 	foreach ($control in $uac)
 	{
 		$bool = $accessor.FindBoolean($control)
 		if ($bool -ne $null) 
 		{
 			$aduser.$control = $bool
+			$changes = $TRUE
 		}
 	}
 	
 	# Standard attributes - single valued
 	$StandardSingle = @("division","primaryInternationalISDNNumber","c","l","department","givenName","telephoneNumber","employeeNumber","displayName",
 	"personalTitle","homeDirectory","postalCode","manager","st","initials","employeeType","streetAddress","co","title","middleName","wWWHomePage","company",
-	"name","comment","scriptPath","mail","displayNamePrintable","ipPhone","homePostalAddress","facsimileTelephoneNumber","homePhone","street","homeDrive",
+	"comment","scriptPath","mail","displayNamePrintable","ipPhone","homePostalAddress","facsimileTelephoneNumber","homePhone","street","homeDrive",
 	"info","assistant","mobile","employeeID","logonWorkstation","logonHours","userWorkstations","userSharedFolder","description")
 	foreach ($attr in $StandardSingle)
 	{
@@ -226,6 +268,7 @@ function Update-User ($attributes)
 		if ($str -ne $null) 
 		{
 			$aduser.$attr = $str
+			$changes = $TRUE
 		}
 	}
 	
@@ -238,25 +281,17 @@ function Update-User ($attributes)
 		if ($strs -ne $null)
 		{
 			$aduser.$attr = $strs
+			$changes = $TRUE
 		}
 	}
-	
-	$sam = $accessor.FindString("sAMAccountName") 
-	if ($sam -ne $null)
-	{
-		Set-ADUser -Instance $aduser -SamAccountName $sam
-	}
-	else
+
+	# Do the update
+	if ($changes)
 	{
 		Set-ADUser -Instance $aduser
+		Write-Verbose -verbose "User has been updated"
 	}
 	
-	If ($password -ne $null)
-	{
-		Set-ADAccountPassword $Connector.Uid.GetUidValue() -Reset -NewPassword $password
-		Write-Verbose -verbose "Password updated"
-	}
-
 	$Connector.Uid
 }
 

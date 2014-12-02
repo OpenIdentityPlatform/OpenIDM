@@ -64,6 +64,17 @@
       "type" : "object",
       "nativeType" : "__GROUP__",
       "properties" : {
+        "distinguishedName" : {
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        },
+        "groupScope" : {
+          "type" : "string",
+          "nativeName" : "groupScope",
+          "nativeType" : "string"
+        },
         "member" : {
           "type" : "array",
           "items" : {
@@ -72,6 +83,12 @@
           },
           "nativeName" : "member",
           "nativeType" : "string"
+        },
+        "cn" : {
+          "type" : "string",
+          "nativeName" : "cn",
+          "nativeType" : "string",
+          "flags" : [ "NOT_CREATABLE", "NOT_UPDATEABLE" ]
         },
         "modifyTimeStamp" : {
           "type" : "string",
@@ -86,7 +103,6 @@
         },
         "sAMAccountName" : {
           "type" : "string",
-          "required" : true,
           "nativeName" : "sAMAccountName",
           "nativeType" : "string"
         },
@@ -160,8 +176,7 @@
         "name" : {
           "type" : "string",
           "nativeName" : "name",
-          "nativeType" : "string",
-          "flags" : [ "NOT_CREATABLE", "NOT_UPDATEABLE" ]
+          "nativeType" : "string"
         },
         "displayNamePrintable" : {
           "type" : "string",
@@ -191,26 +206,9 @@
           "nativeType" : "string",
           "flags" : [ "NOT_CREATABLE", "NOT_UPDATEABLE" ]
         },
-        "groupScope" : {
-          "type" : "string",
-          "nativeName" : "groupScope",
-          "nativeType" : "string"
-        },
         "displayName" : {
           "type" : "string",
           "nativeName" : "displayName",
-          "nativeType" : "string"
-        },
-        "distinguishedName" : {
-          "type" : "string",
-          "required" : true,
-          "nativeName" : "__NAME__",
-          "nativeType" : "string"
-        },
-        "cn" : {
-          "type" : "string",
-          "required" : true,
-          "nativeName" : "cn",
           "nativeType" : "string"
         },
         "telephoneNumber" : {
@@ -226,6 +224,18 @@
       "type" : "object",
       "nativeType" : "__ACCOUNT__",
       "properties" : {
+        "distinguishedName" : {
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        },
+        "cn" : {
+          "type" : "string",
+          "nativeName" : "cn",
+          "nativeType" : "string",
+          "flags" : [ "NOT_CREATABLE", "NOT_UPDATEABLE" ]
+        },
         "seeAlso" : {
           "type" : "array",
           "items" : {
@@ -269,9 +279,9 @@
           "nativeName" : "userSharedFolder",
           "nativeType" : "string"
         },
-        "__ENABLE__" : {
+        "enabled" : {
           "type" : "boolean",
-          "nativeName" : "__ENABLE__",
+          "nativeName" : "enabled",
           "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
         },
         "mail" : {
@@ -365,8 +375,7 @@
         "name" : {
           "type" : "string",
           "nativeName" : "name",
-          "nativeType" : "string",
-          "flags" : [ "NOT_CREATABLE", "NOT_UPDATEABLE" ]
+          "nativeType" : "string"
         },
         "displayNamePrintable" : {
           "type" : "string",
@@ -436,12 +445,6 @@
             "nativeType" : "string"
           },
           "nativeName" : "otherMobile",
-          "nativeType" : "string"
-        },
-        "distinguishedName" : {
-          "type" : "string",
-          "required" : true,
-          "nativeName" : "__NAME__",
           "nativeType" : "string"
         },
         "comment" : {
@@ -653,7 +656,6 @@
         },
         "sn" : {
           "type" : "string",
-          "required" : true,
           "nativeName" : "sn",
           "nativeType" : "string"
         },
@@ -714,7 +716,6 @@
         },
         "userPrincipalName" : {
           "type" : "string",
-          "required" : true,
           "nativeName" : "userPrincipalName",
           "nativeType" : "string"
         },
@@ -732,12 +733,6 @@
         "co" : {
           "type" : "string",
           "nativeName" : "co",
-          "nativeType" : "string"
-        },
-        "cn" : {
-          "type" : "string",
-          "required" : true,
-          "nativeName" : "cn",
           "nativeType" : "string"
         },
         "telephoneNumber" : {

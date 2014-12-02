@@ -99,9 +99,21 @@ function Create-NewGroup ($attributes)
 	# [-Path <string>] 
 	($rdn,$path) = $accessor.GetName().GetNameValue().Split(',',2)
 	
+	# the Group Name. If "name" is not set we use the rdn
+	$val = $accessor.FindString("name")
+	if ($val -ne $null) 
+	{ 
+		$rdn = $val
+	}
+	else # Need to get rid of "CN=" in the name
+	{
+		($cn,$rdn) = $rdn.Split('=',2)
+	}
+	
 	# [-OtherAttributes <hashtable>]
 	# we put the remaining attributes here
 	$otherAttrs = @{}
+	$hasOther = $FALSE
 	foreach($h in $dic.GetEnumerator())
 	{
 		if ($h.Value -ne $null)
@@ -112,16 +124,39 @@ function Create-NewGroup ($attributes)
 				$vals += $val
 			}
 			$otherAttrs.Add($h.Key,$vals)
+			$hasOther = $TRUE
 		}
 	}
-	
-	$adgroup = New-ADGroup  -SamAccountName $accessor.FindString("sAMAccountName") `
-							-Name $accessor.FindString("cn") `
+
+	if ($hasOther)
+	{
+		$adgroup = New-ADGroup  -Name $rdn `
 							-GroupScope $groupScope `
 							-GroupCategory $groupCategory `
 							-Path $path `
 							-OtherAttributes $otherAttrs `
 							-PassThru
+	}
+	else 
+	{
+		$adgroup = New-ADGroup  -Name $rdn `
+							-GroupScope $groupScope `
+							-GroupCategory $groupCategory `
+							-Path $path `
+							-PassThru	
+	}
+	Write-Verbose -verbose "Group $rdn created in $path"
+	
+	#[-SamAccountName] <string> 
+	# We cannot change the SamAccountName of a group instance. 
+	# So we do it with the other way to call Set-ADGroup
+	$val = $accessor.FindString("sAMAccountName")
+	if ($val -ne $null) 
+	{ 
+		Set-ADGroup $adgroup.ObjectGUID.ToString() -SamAccountName $val
+		Write-Verbose -verbose "SamAccountName updated to $val"
+	}
+	
 	$adgroup.ObjectGUID.ToString()
 }
 
@@ -191,7 +226,12 @@ function Create-NewUser ($attributes)
 	}
 
 	# [-Enabled <System.Nullable[bool]>] 
-	$aduser.Enabled = $accessor.GetEnabled($false)
+	$bool = $accessor.FindBoolean("enabled")
+	if ($bool -ne $null) 
+	{
+		$aduser.Enabled = $bool
+		$r = $dic.Remove("enabled")
+	}
 
 	# [-PasswordNeverExpires <System.Nullable[bool]>] 
 	$bool = $accessor.FindBoolean("passwordNeverExpires")
@@ -211,6 +251,17 @@ function Create-NewUser ($attributes)
 
 	# [-Path <string>] 
 	($rdn,$path) = $accessor.GetName().GetNameValue().Split(',',2)
+	
+	# the User Name. If "name" is not set we use the rdn
+	$val = $accessor.FindString("name")
+	if ($val -ne $null) 
+	{ 
+		$rdn = $val
+	}
+	else # Need to get rid of "CN=" in the name
+	{
+		($cn,$rdn) = $rdn.Split('=',2)
+	}
 
 	# [-SmartcardLogonRequired <System.Nullable[bool]>] 
 	$bool = $accessor.FindBoolean("smartcardLogonRequired")
@@ -230,6 +281,7 @@ function Create-NewUser ($attributes)
 	# [-OtherAttributes <hashtable>]
 	# we put the remaining attributes here
 	$otherAttrs = @{}
+	$hasOther = $FALSE
 	foreach($h in $dic.GetEnumerator())
 	{
 		if ($h.Value -ne $null)
@@ -240,15 +292,36 @@ function Create-NewUser ($attributes)
 				$vals += $val
 			}
 			$otherAttrs.Add($h.Key,$vals)
+			$hasOther = $TRUE
 		}
 	}
-	$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
-							-AccountPassword $password `
-							-Name $accessor.FindString("cn") `
+	
+	if ($hasOther)
+	{
+		$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
+							-Name $rdn `
 							-Instance $aduser `
 							-Path $path `
 							-OtherAttributes $otherAttrs `
 							-PassThru
+	}
+	else
+	{
+		$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
+							-Name $rdn `
+							-Instance $aduser `
+							-Path $path `
+							-PassThru
+	}
+	
+	Write-Verbose -verbose "User $rdn created in $path"
+	
+	If ($password -ne $null)
+	{
+		Set-ADAccountPassword $aduser.ObjectGUID.ToString() -Reset -NewPassword $password
+		Write-Verbose -verbose "Password updated"
+	}
+	
 	$aduser.ObjectGUID.ToString()
 }
 
