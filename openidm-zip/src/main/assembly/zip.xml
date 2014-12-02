@@ -38,6 +38,8 @@
                 <exclude>**/internal-common/**</exclude>
                 <exclude>${exclude.google.samples}</exclude>
                 <exclude>${exclude.salesforce.samples}</exclude>
+                <exclude>${exclude.google.provisioner}</exclude>
+                <exclude>${exclude.salesforce.provisioner}</exclude>
             </excludes>
         </fileSet>
         <fileSet>
