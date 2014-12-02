@@ -914,7 +914,7 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore</screen>
     keyword, enable you to form arbitrary queries on the repository, using a
     number of supported filter operations. For more information on these filter
     operations, see <link
-    xlink:href="integrators-guide#adding-constructing-queries"
+    xlink:href="integrators-guide#constructing-queries"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
     Queries</citetitle></link>. Parameterized or pre-defined queries and
     commands (using the <literal>_queryId</literal> and
