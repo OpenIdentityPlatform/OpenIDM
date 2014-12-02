@@ -5851,11 +5851,10 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
   </para>
 
   <!--TODO: update if/when OpenAM 11 is updated to work with this sample,
-   ref AME-4386, or when OpenAM 12 is released. I'm hard-coding 12-SNAPSHOT,
-   to avoid adding AM info to the OpenIDM pom file. -->
+   ref AME-4386, or when OpenAM 12 is released.  -->
   <note>
    <para>
-    This sample assumes that you have deployed OpenAM 12-SNAPSHOT.
+    This sample assumes that you have deployed OpenAM 12.
    </para>
   </note>
 
@@ -6649,7 +6648,7 @@ $ ./startup.sh -p samples/audit-sample</screen>
       obtained earlier in this procedure.
      </para>
      <screen><userinput>$ cd admin/
-$ java -jar googleapps-connector-1.4.0.0-SNAPSHOT.jar /path/to/client_secrets.json</userinput>
+$ java -jar googleapps-connector-1.4.0.0.jar /path/to/client_secrets.json</userinput>
 <computeroutput>Please open the following address in your browser:
 https://accounts.google.com/o/oauth2/auth?
 access_type=offline
@@ -6715,7 +6714,7 @@ Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/samples/google-connector/conf/boot/boot.properties
-OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
+OpenIDM version "3.1.0" (revision: 0) null null
 -> OpenIDM ready</computeroutput>
      </screen>
     </step>
