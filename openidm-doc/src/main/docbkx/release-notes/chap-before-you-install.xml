@@ -105,9 +105,6 @@
       <para>XML File Connector</para>
      </listitem>
      <listitem>
-      <para>Scripted SQL Connector</para>
-     </listitem>
-     <listitem>
       <para>
        Groovy Connector Toolkit
       </para>
