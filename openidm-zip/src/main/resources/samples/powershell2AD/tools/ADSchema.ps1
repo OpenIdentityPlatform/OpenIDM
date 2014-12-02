@@ -71,7 +71,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	$ocib.ObjectType = "__ACCOUNT__"
 	
 	# Required Attributes
-	$Required = @("cn","sn","sAMAccountName","userPrincipalName")
+	$Required = @("sAMAccountName")
 	
 	foreach ($attr in $Required)
 	{
@@ -85,7 +85,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	$StandardSingle = @("division","primaryInternationalISDNNumber","c","l","department","givenName","telephoneNumber","employeeNumber","displayName",
 	"personalTitle","homeDirectory","postalCode","manager","st","initials","employeeType","streetAddress","co","title","middleName","wWWHomePage","company",
 	"comment","scriptPath","mail","displayNamePrintable","ipPhone","homePostalAddress","facsimileTelephoneNumber","homePhone","street","homeDrive",
-	"info","assistant","mobile","employeeID","logonWorkstation","logonHours","userWorkstations","userSharedFolder","description")
+	"info","assistant","mobile","employeeID","logonWorkstation","logonHours","userWorkstations","userSharedFolder","description", "name","sn","userPrincipalName")
 	
 	foreach ($attr in $StandardSingle)
 	{
@@ -121,8 +121,8 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("userAccountControl",[int]))
 	# $ocib.AddAttributeInfo($AttributeInfoBuilder::Build("accountExpires",[int]))
 	
-	$Technical = @("objectGUID","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp","lastLogonTimestamp",
-	"badPwdCount","badPasswordTime","lastLogon","pwdLastSet","logonCount","lockoutTime","name")
+	$Technical = @("objectGUID","cn","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp","lastLogonTimestamp",
+	"badPwdCount","badPasswordTime","lastLogon","pwdLastSet","logonCount","lockoutTime")
 	
 	foreach ($attr in $Technical)
 	{
@@ -142,10 +142,10 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("passwordNotRequired",[bool]))
 	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("smartcardLogonRequired",[bool]))
 	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("trustedForDelegation",[bool]))
+	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("enabled",[bool]))
 	
  	# A few operational attributes as well
 	$opAttrs = [Org.IdentityConnectors.Framework.Common.Objects.OperationalAttributeInfos]
-	$ocib.AddAttributeInfo($opAttrs::ENABLE)
 	$ocib.AddAttributeInfo($opAttrs::PASSWORD)
 	$ocib.AddAttributeInfo($opAttrs::LOCK_OUT)
 	$ocib.AddAttributeInfo($opAttrs::PASSWORD_EXPIRED)
@@ -160,20 +160,10 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	###########################
 	$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
 	$ocib.ObjectType = "__GROUP__"
-	
-	# Required Attributes
-	$Required = @("cn","sAMAccountName")
-	
-	foreach ($attr in $Required)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
-		$caib.Required = $TRUE
-		$caib.ValueType = [string];
-		$ocib.AddAttributeInfo($caib.Build())
-	}
-	
+		
 	# Standard attributes - single valued
-	$StandardSingle = @("wWWHomePage","telephoneNumber","mail","displayNamePrintable","displayName","managedBy","info","description")
+	$StandardSingle = @("wWWHomePage","telephoneNumber","mail","displayNamePrintable","displayName",
+						"managedBy","info","description","name","sAMAccountName","groupCategory","groupScope")
 	
 	foreach ($attr in $StandardSingle)
 	{
@@ -205,7 +195,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	}
 	
 	# Technical attributes
-	$Technical = @("objectGUID","name","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp")
+	$Technical = @("objectGUID","cn","uSNCreated","uSNChanged","whenCreated","whenChanged","createTimeStamp","modifyTimeStamp")
 	
 	foreach ($attr in $Technical)
 	{
@@ -215,12 +205,6 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 		$caib.ValueType = [string];
 		$ocib.AddAttributeInfo($caib.Build())
 	}
-	
-	# A few custom attributes we want to add here
-	# group category is either 'security' or 'distribution'
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("groupCategory",[string]))
-	# group scope is either 'DomainLocal', 'Universal', 'Global'
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("groupScope",[string]))
 	
 	$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
  }
