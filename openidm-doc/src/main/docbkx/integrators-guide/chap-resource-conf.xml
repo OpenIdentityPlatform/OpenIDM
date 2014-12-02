@@ -699,11 +699,21 @@
  "https://localhost:8443/openidm/system/ldap?_action=liveSync"</userinput></screen>
    <note>
     <para>
-     The <literal>__ALL__</literal> object type requires the use of time stamps
-     to ensure that changes are processed in the correct order. For the
-     <xref linkend="ldap-connector" />, you must set
-     <literal>useTimestampsForSync</literal> to true, to make use of this
-     object type.
+     The use of the <literal>__ALL__</literal> object type requires a mechanism
+     to ensure the order in which synchronization changes are processed. Servers
+     that use the <literal>cn=changelog</literal> mechanism to order sync
+     changes (such as OpenDJ, Oracle DSEE and the legacy Sun Directory Server)
+     cannot use the <literal>__ALL__</literal> object type by default, and must
+     be forced to use time stamps to order their sync changes. For these LDAP
+     server types, set <literal>useTimestampsForSync</literal> to
+     <literal>true</literal> in the provisioner configuration.
+    </para>
+    <para>
+     LDAP servers that use timestamps by default (such as Active Directory GCs
+     and OpenLDAP) can use the <literal>__ALL__</literal> object type without
+     any additional configuration. Active Directory and Active Directory LDS,
+     which use Update Sequence Numbers, can also use the
+     <literal>__ALL__</literal> object type without additional configuration.
     </para>
    </note>
 
