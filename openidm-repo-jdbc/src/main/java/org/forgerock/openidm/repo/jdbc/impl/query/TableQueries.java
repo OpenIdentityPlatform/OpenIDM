@@ -162,12 +162,25 @@ public class TableQueries {
     final String mainTableName;
     final String propTableName;
     final String dbSchemaName;
+
+    /** Max length of a property. Used for trimming incoming query values */
     final int maxPropLen;
+
     final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
     final QueryResultMapper resultMapper;
     
     private TableHandler tableHandler;
 
+    /**
+     *
+     * @param tableHandler
+     * @param mainTableName
+     * @param propTableName
+     * @param dbSchemaName
+     * @param maxPropLen Max length of propvalues. Used for trimming values if > 0.
+     * @param queryFilterVisitor
+     * @param resultMapper
+     */
     public TableQueries(TableHandler tableHandler, String mainTableName, String propTableName, String dbSchemaName, int maxPropLen,
             QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, QueryResultMapper resultMapper) {
         this.tableHandler = tableHandler;
@@ -658,6 +671,6 @@ public class TableQueries {
     }
 
     private String trimValue(Object param) {
-        return StringUtils.left(param.toString(), maxPropLen);
+        return maxPropLen <= 0 ? param.toString() : StringUtils.left(param.toString(), maxPropLen);
     }
 }

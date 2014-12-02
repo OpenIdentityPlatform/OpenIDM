@@ -60,11 +60,10 @@ public class OracleTableHandler extends GenericTableHandler {
                     @Override
                     String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
                         // validate type is integer or double cast all numeric types to decimal
-                        if (valueAssertion instanceof Integer || valueAssertion instanceof Long
-                                || valueAssertion instanceof Float || valueAssertion instanceof Double) {
+                        if (isNumeric(valueAssertion)) {
                             return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
                                     + "AND TO_NUMBER(prop.propvalue) " + operand + " ${" + placeholder + "}";
-                        } else if (valueAssertion instanceof Boolean) {
+                        } else if (isBoolean(valueAssertion)) {
                             // validate type is boolean if valueAssertion is a boolean
                             return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
                         } else {

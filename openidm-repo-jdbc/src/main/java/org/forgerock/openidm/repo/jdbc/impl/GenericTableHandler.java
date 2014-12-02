@@ -75,22 +75,32 @@ public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);
 
     /**
-     * Maximum length of a property value.
-     * This is used to truncate possible CLOB values so they fit in an index.
+     * Maximum length of searchable properties.
+     * This is used to trim values due to database index size limitations.
      */
-    static final int PROP_VALUE_MAX_LEN = 2000;
+    private static final int SEARCHABLE_LENGTH = 2000;
 
     /**
      * QueryFilterVisitor for generating WHERE clause SQL queries against generic table schema.
      */
     static class GenericSQLQueryFilterVisitor extends SQLQueryFilterVisitor<Map<String, Object>> {
 
-        private boolean isNumeric(final Object valueAssertion) {
+        private final int searchableLength;
+
+        GenericSQLQueryFilterVisitor(final int searchableLength){
+            this.searchableLength = searchableLength;
+        }
+
+        GenericSQLQueryFilterVisitor() {
+            this(SEARCHABLE_LENGTH);
+        }
+
+        boolean isNumeric(final Object valueAssertion) {
             return  valueAssertion instanceof Integer || valueAssertion instanceof Long
                     || valueAssertion instanceof Float || valueAssertion instanceof Double;
         }
 
-        private boolean isBoolean(final Object valueAssertion) {
+        boolean isBoolean(final Object valueAssertion) {
             return valueAssertion instanceof Boolean;
         }
 
@@ -99,7 +109,7 @@ public class GenericTableHandler implements TableHandler {
             if (isNumeric(value) || isBoolean(value)) {
                 return value;
             } else {
-                return StringUtils.left(value.toString(), PROP_VALUE_MAX_LEN);
+                return StringUtils.left(value.toString(), searchableLength);
             }
         }
 
@@ -186,7 +196,7 @@ public class GenericTableHandler implements TableHandler {
     GenericTableConfig cfg;
 
     final String mainTableName;
-    String propTableName;
+    final String propTableName;
     final String dbSchemaName;
 
     // Jackson parser
@@ -247,7 +257,7 @@ public class GenericTableHandler implements TableHandler {
      * @param queryFilterVisitor the {@link QueryFilterVisitor} for converting a query filter to an SQL statement
      * @param sqlExceptionHandler a handler for SQLExceptions
      */
-    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, SQLExceptionHandler sqlExceptionHandler) {
+    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
 
         this.mainTableName = cfg.mainTableName;
@@ -266,8 +276,8 @@ public class GenericTableHandler implements TableHandler {
         }
 
         this.queryFilterVisitor = queryFilterVisitor;
-        
-        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, PROP_VALUE_MAX_LEN, queryFilterVisitor, new GenericQueryResultMapper());
+
+        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, getSearchableLength(), queryFilterVisitor, new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(queriesConfig, commandsConfig, queryMap);
 
@@ -283,6 +293,13 @@ public class GenericTableHandler implements TableHandler {
         } else {
             logger.info("JDBC statement batching disabled.");
         }
+    }
+
+    /**
+     * Get the length of the searchable index.
+     */
+    int getSearchableLength() {
+        return SEARCHABLE_LENGTH;
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
@@ -458,7 +475,7 @@ public class GenericTableHandler implements TableHandler {
                     String propvalue = null;
                     Object val = entry.getObject();
                     if (val != null) {
-                        propvalue = StringUtils.left(val.toString(), PROP_VALUE_MAX_LEN);
+                        propvalue = StringUtils.left(val.toString(), getSearchableLength());
                     }
                     String proptype = null;
                     if (propvalue != null) {
