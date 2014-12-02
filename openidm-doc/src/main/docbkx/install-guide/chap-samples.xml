@@ -3499,7 +3499,7 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
        Start OpenIDM with the configuration for the scripted Azure sample.
       </para>
       <screen><userinput>$ cd /path/to/openidm
- $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
+$ ./startup.sh -p samples/scriptedazure/</userinput></screen>
      </step>
      <step>
       <para>
