@@ -48,6 +48,8 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                 splitConfig,
                 tempIconClass;
 
+            this.data.docHelpUrl = constants.DOC_URL;
+
             connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
             iconPromise = connectorUtils.getIconList();

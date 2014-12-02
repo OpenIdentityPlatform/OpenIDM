@@ -58,6 +58,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
 
             syncConfig.then(_.bind(function(sync) {
                 this.data.mappingConfig = sync.mappings;
+                this.data.docHelpUrl = constants.DOC_URL;
+                
                 this.cleanConfig = _.chain(sync.mappings)
                     .map(function (m) {
                         return _.clone(_.omit(m, "recon"));
