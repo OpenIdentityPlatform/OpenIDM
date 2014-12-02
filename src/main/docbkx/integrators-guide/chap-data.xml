@@ -58,7 +58,7 @@
    manipulated in the same way, using the Resource API. The URL or URI that is
    used to identify the target object for an operation depends on the object
    type. For an explanation of object types, see the
-   <link xlink:href="integrators-guide#appendix-obects"
+   <link xlink:href="integrators-guide#appendix-objects"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
    Objects Reference</citetitle></link>. For more information about scripts and
    the objects available to scripts, see the
