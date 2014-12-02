@@ -6569,9 +6569,9 @@ $ ./startup.sh -p samples/audit-sample</screen>
   <note>
    <para>
     The Google Apps Connector, and this corresponding sample, are provided only
-    with the <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
-    Download</link> of OpenIDM.
+    with <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
+    Enterprise</link>.
    </para>
   </note>
   <para>
@@ -7015,9 +7015,9 @@ OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
   <note>
    <para>
     The Salesforce Connector, and this corresponding sample, are provided only
-    with the <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
-    Download</link> of OpenIDM.
+    with <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
+    Enterprise</link>.
    </para>
   </note>
   <para>
