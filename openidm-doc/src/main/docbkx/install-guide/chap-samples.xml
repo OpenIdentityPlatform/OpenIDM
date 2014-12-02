@@ -7267,6 +7267,14 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
         On the permission request screen click Allow, to enable OpenIDM to
         access your Salesforce Connected App.
        </para>
+       <note>
+        <para>
+         In the current OpenIDM release, an issue is occasionally seen where the
+         system appears to time out while retrieving the refresh token from
+         Salesforce, at this stage. If this happens, refresh your browser and
+         attempt the connector setup again.
+        </para>
+       </note>
        <para>
         On the Resources tab, your Salesforce Connector should now be Active.
        </para>
