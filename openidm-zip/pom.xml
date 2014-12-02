@@ -56,6 +56,8 @@
         <!-- The SaaS connectors samples must be excluded from the community build -->
         <exclude.google.samples>samples/google-connector/**</exclude.google.samples>
         <exclude.salesforce.samples>samples/salesforce-connector/**</exclude.salesforce.samples>
+        <exclude.google.provisioner>samples/provisioners/provisioner.openicf-google.json</exclude.google.provisioner>
+        <exclude.salesforce.provisioner>samples/provisioners/provisioner.salesforce-salesforce.json</exclude.salesforce.provisioner>
     </properties>
     <dependencies>
         <dependency>
@@ -762,8 +764,10 @@
            </dependencies>
            <properties>
                <!-- We reset these 2 properties to include the SaaS connectors samples in the commercial build -->
-               <exclude.google.samples />
-               <exclude.salesforce.samples />
+               <exclude.google.samples/>
+               <exclude.salesforce.samples/>
+               <exclude.google.provisioner/>
+               <exclude.salesforce.provisioner/>
                <!-- Properties to include the SaaS connectors in the commercial build -->
                <google.provisioner>provisioner.openicf-google.json</google.provisioner>
                <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
