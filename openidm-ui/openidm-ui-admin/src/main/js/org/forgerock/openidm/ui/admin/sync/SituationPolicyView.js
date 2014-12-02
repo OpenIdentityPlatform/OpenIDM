@@ -93,6 +93,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
             this.model.sync = args.sync;
             this.model.mapping = args.mapping;
             this.model.mappingName = args.mappingName;
+            this.data.docHelpUrl = constants.DOC_URL;
 
             this.parentRender(function () {
                 this.getPatterns();

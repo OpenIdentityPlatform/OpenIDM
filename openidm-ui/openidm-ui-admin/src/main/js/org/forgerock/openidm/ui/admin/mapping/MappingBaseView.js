@@ -132,6 +132,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 cleanName;
             
             this.route = { url: window.location.hash.replace(/^#/, '') };
+            this.data.docHelpUrl = constants.DOC_URL;
                 
             //because there are relatively slow queries being called which would slow down the interface if they were called each time
             //decide here whether we want to render all of this view or only the child

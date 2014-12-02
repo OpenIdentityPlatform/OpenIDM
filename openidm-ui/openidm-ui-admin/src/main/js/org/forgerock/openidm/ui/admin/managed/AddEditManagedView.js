@@ -60,7 +60,8 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             this.data = {
                 selectEvents: [],
                 addedEvents: [],
-                propertiesEventList: propertiesEventList
+                propertiesEventList: propertiesEventList,
+                docHelpUrl : constants.DOC_URL
             };
 
             this.eventHooks = [];
