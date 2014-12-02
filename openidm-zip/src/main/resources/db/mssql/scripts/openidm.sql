@@ -98,7 +98,7 @@ CREATE  TABLE [openidm].[genericobjectproperties]
   genericobjects_id NUMERIC(19,0) NOT NULL ,
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
-  propvalue NVARCHAR(max) NULL ,
+  propvalue NVARCHAR(195) NULL ,
   CONSTRAINT fk_genericobjectproperties_genericobjects
     FOREIGN KEY (genericobjects_id)
     REFERENCES [openidm].[genericobjects] (id)
@@ -144,7 +144,7 @@ CREATE  TABLE [openidm].[managedobjectproperties]
   managedobjects_id NUMERIC(19,0) NOT NULL ,
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
-  propvalue NVARCHAR(max) NULL ,
+  propvalue NVARCHAR(195) NULL ,
   CONSTRAINT fk_managedobjectproperties_managedobjects
     FOREIGN KEY (managedobjects_id)
     REFERENCES [openidm].[managedobjects] (id)
@@ -189,7 +189,7 @@ CREATE  TABLE [openidm].[configobjectproperties] (
   configobjects_id NUMERIC(19,0) NOT NULL ,
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(255) NULL ,
-  propvalue NVARCHAR(MAX) NULL ,
+  propvalue NVARCHAR(195) NULL ,
   CONSTRAINT fk_configobjectproperties_configobjects
     FOREIGN KEY (configobjects_id)
     REFERENCES [openidm].[configobjects] (id)
@@ -406,7 +406,7 @@ CREATE  TABLE [openidm].[schedulerobjectproperties] (
   schedulerobjects_id NUMERIC(19,0) NOT NULL ,
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
-  propvalue NVARCHAR(MAX) NULL ,
+  propvalue NVARCHAR(195) NULL ,
   CONSTRAINT fk_schedulerobjectproperties_schedulerobjects
     FOREIGN KEY (schedulerobjects_id)
     REFERENCES [openidm].[schedulerobjects] (id)
@@ -451,7 +451,7 @@ CREATE  TABLE [openidm].[clusterobjectproperties] (
   clusterobjects_id NUMERIC(19,0) NOT NULL ,
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
-  propvalue NVARCHAR(MAX) NULL ,
+  propvalue NVARCHAR(195) NULL ,
   CONSTRAINT fk_clusterobjectproperties_clusterobjects
     FOREIGN KEY (clusterobjects_id)
     REFERENCES [openidm].[clusterobjects] (id)
