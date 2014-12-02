@@ -763,7 +763,7 @@
               </dependency>
            </dependencies>
            <properties>
-               <!-- We reset these 2 properties to include the SaaS connectors samples in the commercial build -->
+               <!-- We reset these properties to include the SaaS connectors samples in the commercial build -->
                <exclude.google.samples/>
                <exclude.salesforce.samples/>
                <exclude.google.provisioner/>
