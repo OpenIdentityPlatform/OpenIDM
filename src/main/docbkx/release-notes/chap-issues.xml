@@ -47,118 +47,67 @@
    OpenIDM ${docTargetVersion} includes the following major fixes and
    improvements.
   </para>
-  <!-- List generated at 23:26:24 20141201 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+resolution+%3D+fixed+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+fixVersion+%3D+%22OpenIDM+3.1.0%22+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+AND+type+%3D+Bug&startAt=0&maxResults=500&fields=summary-->
+  <!-- List generated at 16:27:57 20141202 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+resolution+%3D+fixed+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+fixVersion+%3D+%22OpenIDM+3.1.0%22+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+AND+type+%3D+Bug&startAt=0&maxResults=500&fields=summary-->
   <itemizedlist>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2611" xlink:show="new">OPENIDM-2611</link>: QueryFilter with explicit tables in Oracle fails when referring to CLOB field</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2611" xlink:show="new">OPENIDM-2611</link>: review queries using QueryFilter with explicit tables in Oracle referring to CLOB field</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2610" xlink:show="new">OPENIDM-2610</link>: QueryFilter used with explicitTables not working with Oracle or MS SQL Server</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2605" xlink:show="new">OPENIDM-2605</link>: Missing queries from Oracle repo.jdbc.json</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2603" xlink:show="new">OPENIDM-2603</link>: REST command to reset database failed in sample3</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2599" xlink:show="new">OPENIDM-2599</link>: sample6 with fake AD broken since we moved from OpenICF 1.4.1.0-RC1 to 1.4.1.0</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2596" xlink:show="new">OPENIDM-2596</link>: Update/Patch of managed objects not audited anymore in activity audit</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2589" xlink:show="new">OPENIDM-2589</link>: provisioner files in sample2x do not have enableFilteredResultsHandler set to false</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2588" xlink:show="new">OPENIDM-2588</link>: reconResults endpoint fails when there are records in "MISSING" situation</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2586" xlink:show="new">OPENIDM-2586</link>: Default ldap provisioner config used in Admin UI based on wrong version</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2559" xlink:show="new">OPENIDM-2559</link>: OpenIDM does not store provisioner in MySQL repo</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2557" xlink:show="new">OPENIDM-2557</link>: Sample1 : Unknown error shown in Attribute mapping page when using the Sample Source box</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2552" xlink:show="new">OPENIDM-2552</link>: Current Mappings / Edit page includes inconsistent terminology (Reconcile / Sync)</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2549" xlink:show="new">OPENIDM-2549</link>: unexpected results for queryFilters on integer properties when using JDBC repo</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2547" xlink:show="new">OPENIDM-2547</link>: Base64 encoded attributes are not properly decoded to byte[]</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2544" xlink:show="new">OPENIDM-2544</link>: SOURCE_MISSING records result in error in Data Grid in Admin UI</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2538" xlink:show="new">OPENIDM-2538</link>: Unable to login after changing the Session timeout setting via the UI</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2535" xlink:show="new">OPENIDM-2535</link>: Audit Sample not working anymore (missing properties in provisioner file)</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2531" xlink:show="new">OPENIDM-2531</link>: QueryFilter-generated SQL for OrientDB for sw "" is incorrect</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2530" xlink:show="new">OPENIDM-2530</link>: PowerShell2AD sample update script is missing.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2529" xlink:show="new">OPENIDM-2529</link>: searchBases in powershell2AD sample are not aligned among the scripts</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2528" xlink:show="new">OPENIDM-2528</link>: JPDA is broken in startup.bat</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2526" xlink:show="new">OPENIDM-2526</link>: Repo README.txt files need to be updated</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2525" xlink:show="new">OPENIDM-2525</link>: QueryFilter-generated SQL for OrientDB does not parse</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2523" xlink:show="new">OPENIDM-2523</link>: Active / Inactive connector status in connector page not consistent with provisioner file</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2522" xlink:show="new">OPENIDM-2522</link>: Admin UI recon detail panel not showing all situations, some are showing incorrect values</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2520" xlink:show="new">OPENIDM-2520</link>: Exception during startup java.lang.ClassNotFoundException: org.forgerock.openidm.jetty.Param not found by org.ops4j.pax.web.pax-web-jetty-bundle</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2508" xlink:show="new">OPENIDM-2508</link>: transform/condition script for one property would be written to other property</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2505" xlink:show="new">OPENIDM-2505</link>: Change Your Password screen appears when selecting default summary / in progress links, after / during the sync process</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2503" xlink:show="new">OPENIDM-2503</link>: Certain mapping properties from managed user to ldap account has extra "condition: null" when configured from UI  and caused the property page not editable </para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2500" xlink:show="new">OPENIDM-2500</link>: properties set as encrypted in managed.json written in plain text in activity audit when new and old values are the same</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2499" xlink:show="new">OPENIDM-2499</link>: After configured a AD LDAP connector and AD to managed user mapping, AD users were not accessible from openidm </para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2497" xlink:show="new">OPENIDM-2497</link>: Query queryId=audit-by-recon-id not working on MS-SQL</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2492" xlink:show="new">OPENIDM-2492</link>: "Save Object" button in Edit objectType page doesn't have visual effect when applied</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2489" xlink:show="new">OPENIDM-2489</link>: Task scanner does not work using MS-SQL repository</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2488" xlink:show="new">OPENIDM-2488</link>: LiveSync retry is not working anymore</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2487" xlink:show="new">OPENIDM-2487</link>: Reading audit via REST on CSV files instead of repo (useForQueries set to False) fails with error 400</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2485" xlink:show="new">OPENIDM-2485</link>: Country Empty, but State is filled in</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2484" xlink:show="new">OPENIDM-2484</link>: Multiple provisioner instances created for the same name</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2481" xlink:show="new">OPENIDM-2481</link>: PostgreSQL query using wrong value</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2480" xlink:show="new">OPENIDM-2480</link>: Enable READ_COMITTED_SNAPSHOT isolation w/MSSQL</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2469" xlink:show="new">OPENIDM-2469</link>: Use JsonValue#getObject instead of deprecated getWrappedObject in RouterAuditLogger</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2463" xlink:show="new">OPENIDM-2463</link>: SEVERE felix wiring errors related to org.eclipse.jetty.clien shown on the console when starting OpenIDM</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2458" xlink:show="new">OPENIDM-2458</link>: Scripted REST and CREST throws random encryption errors</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2456" xlink:show="new">OPENIDM-2456</link>: Workflow Sample not working with MS-SQL as repo</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2446" xlink:show="new">OPENIDM-2446</link>: The exception attribute in the audit sync entries is not being pre-formatted before the entry is created.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2437" xlink:show="new">OPENIDM-2437</link>: TaskScannerContext should store the ScriptEntry</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2430" xlink:show="new">OPENIDM-2430</link>: Various fixes to the Admin UI</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2429" xlink:show="new">OPENIDM-2429</link>: disabled connectors returned from system?action=test need to return connectorRef details</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2425" xlink:show="new">OPENIDM-2425</link>: Query with queryFilter on managed users fails when using MS-SQL as repo</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2424" xlink:show="new">OPENIDM-2424</link>: The __ALL__ object class should use a default object class endpoint if it is not defined in the provisioner config.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2421" xlink:show="new">OPENIDM-2421</link>: Consider making the ObjectType properties value in provisioner configs not required or allow it to be empty.</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2419" xlink:show="new">OPENIDM-2419</link>: Admin UI, Connector Config, LiveSync schedules error in message</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2417" xlink:show="new">OPENIDM-2417</link>: Scripted CREST sample sync script is not correct</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2411" xlink:show="new">OPENIDM-2411</link>: Change URL to "resources" once password is changed on first login</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2406" xlink:show="new">OPENIDM-2406</link>: Update UID and DN of an ldap entry returns status 500 and Internal Server Error</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2404" xlink:show="new">OPENIDM-2404</link>: Sample1 : Unknown error shown in Attribute mapping page when using the Sample Source box</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2396" xlink:show="new">OPENIDM-2396</link>: In admin UI "New Connector" and "New Managed Object" buttons not working anymore</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2395" xlink:show="new">OPENIDM-2395</link>: query-all-ids not supported within scriptedcrest2dj sample</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2394" xlink:show="new">OPENIDM-2394</link>: Cannot REST query with a single quote in parameter value</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2386" xlink:show="new">OPENIDM-2386</link>: Service creation scripts hard-code memory options to 1024m</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2385" xlink:show="new">OPENIDM-2385</link>: queryFilter support for _id fields</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2381" xlink:show="new">OPENIDM-2381</link>: condition on route config entries are ignored</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2375" xlink:show="new">OPENIDM-2375</link>: obsolete router.json file in samples/misc and openidm-api-servlet/src/tests</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2366" xlink:show="new">OPENIDM-2366</link>: Samples provisioners have the wrong connector version number </para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2365" xlink:show="new">OPENIDM-2365</link>: startup fails with PostgreSQL repo</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2364" xlink:show="new">OPENIDM-2364</link>: update main samples README with last additions/modifications</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2360" xlink:show="new">OPENIDM-2360</link>: Update button doesn't work when editing a Connector</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2355" xlink:show="new">OPENIDM-2355</link>: Update linkedView to use queryFilter</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2344" xlink:show="new">OPENIDM-2344</link>: OpenAM sample UI is not working</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2341" xlink:show="new">OPENIDM-2341</link>: ScriptedREST 1.4 - _action=createFullConfig throws null pointer exception</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2337" xlink:show="new">OPENIDM-2337</link>: Sample2b fails when tested against system?_action=CREATECONFIGURATION</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2330" xlink:show="new">OPENIDM-2330</link>: system?action=test disabled connectors need to return with the same details as an broken/active connector.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2324" xlink:show="new">OPENIDM-2324</link>: ScriptedRest connector 1.4 sample scripts exceptions are not properly thrown</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2323" xlink:show="new">OPENIDM-2323</link>: ScriptedRest connector 1.4 - GET_LATEST_SYNC_TOKEN throws exception - /changelog doesn't support paged search</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2321" xlink:show="new">OPENIDM-2321</link>: external/rest calls to SSL endpoints result in jetty exception</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2318" xlink:show="new">OPENIDM-2318</link>: Newly created ldap connector doesn't show up in resources screen</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2315" xlink:show="new">OPENIDM-2315</link>: linkedView throws null exception when there is no sync defined</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2314" xlink:show="new">OPENIDM-2314</link>: Script launched from router.json by onResponse hook is unable to update response data</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2313" xlink:show="new">OPENIDM-2313</link>: Creation of schedule via REST is returning 404 status even though the schedule is well created</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2312" xlink:show="new">OPENIDM-2312</link>: SmartEvent framework maintains a unbounded event name cache which consumes the entire heap</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2311" xlink:show="new">OPENIDM-2311</link>: In Admin UI, navigation back to the list of mapping is not obvious</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2310" xlink:show="new">OPENIDM-2310</link>: Editing authentication module does not work well</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2309" xlink:show="new">OPENIDM-2309</link>: In Admin UI, it should not be possible to create a managed object with already existing name</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2308" xlink:show="new">OPENIDM-2308</link>: In Admin UI, enhance handling of connector in errors</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2307" xlink:show="new">OPENIDM-2307</link>: in Admin UI, change password pop-up messages should be reviewed</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2306" xlink:show="new">OPENIDM-2306</link>: non-admin users should get an error message when failing to log in Admin UI</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2288" xlink:show="new">OPENIDM-2288</link>: Single Quote character in managed object causes OrientDB error</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2286" xlink:show="new">OPENIDM-2286</link>: CLI.SH not working anymore</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2283" xlink:show="new">OPENIDM-2283</link>: A node in a cluster doesn't currently listen for configuration changes</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2269" xlink:show="new">OPENIDM-2269</link>: unable to use a ScriptTaskListener</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2240" xlink:show="new">OPENIDM-2240</link>: Recon with situation MISSING and action CREATE behave differently in MySQL and PostgreSQL</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2238" xlink:show="new">OPENIDM-2238</link>: Sync Audit Log record storage in PostgreSQL fails with error 'column "rev" of relation "auditsync" does not exist'</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2237" xlink:show="new">OPENIDM-2237</link>: Create default connector configuration for Scripted SQL connector version 1.4.0.0 raises a 500 error</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2233" xlink:show="new">OPENIDM-2233</link>: ScriptedSQL sample3 - liveSync doesn't work</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2231" xlink:show="new">OPENIDM-2231</link>: logout button does not send automatically and immediately user back to login page</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2230" xlink:show="new">OPENIDM-2230</link>: Failure on writing sync audit log when action is exception with MySQL as repo (issue with column "mapping")</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2229" xlink:show="new">OPENIDM-2229</link>: RouterAuditLogger throws InternalServerErrorException on no security context</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2224" xlink:show="new">OPENIDM-2224</link>: Enhance recon service to return a result indicating the status of the request reconciliation run</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2223" xlink:show="new">OPENIDM-2223</link>: Update of connector info provider causes all remote connectors unavailable.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2203" xlink:show="new">OPENIDM-2203</link>: Pagination on managed users not working with PostgreSQL as repo</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2202" xlink:show="new">OPENIDM-2202</link>: TaskScanner not working with PostgreSQL as repo</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2201" xlink:show="new">OPENIDM-2201</link>: In Recon Summary the situation FOUND_ALREADY_LINKED is missing</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2200" xlink:show="new">OPENIDM-2200</link>: Failure on writing sync audit log when action is exception with MySQL as repo</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2199" xlink:show="new">OPENIDM-2199</link>: sample5b failing with MySQL as a repo (onSync script encountering exception)</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2190" xlink:show="new">OPENIDM-2190</link>: With PostgreSQL as repo, creating same user twice gets a 500 instead of 412</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2189" xlink:show="new">OPENIDM-2189</link>: With PostgreSQL as repo, DELETE on managed user is not working</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2184" xlink:show="new">OPENIDM-2184</link>: NPE thrown from within ObjectMapping$SyncOperation.isValidSource() during reconciliation.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2180" xlink:show="new">OPENIDM-2180</link>: Repo command action should be disallowed via HTTP</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2179" xlink:show="new">OPENIDM-2179</link>: Sample 6 : The sample LDIF file provided is not valid</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2168" xlink:show="new">OPENIDM-2168</link>: read cert in truststore via REST not working anymore (returning 500)</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2166" xlink:show="new">OPENIDM-2166</link>: Update Schedule with PUT not working anymore (returns 404)</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2165" xlink:show="new">OPENIDM-2165</link>: sourceCondition must work with maps</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2154" xlink:show="new">OPENIDM-2154</link>: Use effectiveRoles of managed user instead of roles attribute in UI workflow scripts</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2153" xlink:show="new">OPENIDM-2153</link>: Column name mismatch for notification tables when using SQLServer repository</para></listitem>
@@ -171,7 +120,6 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2079" xlink:show="new">OPENIDM-2079</link>: Cannot PATCH managed user when ID contains special characters.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2078" xlink:show="new">OPENIDM-2078</link>: PermGen leak in "source" scripts</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2074" xlink:show="new">OPENIDM-2074</link>: When the workflow module is disabled, shutdown errors are displayed on the console</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2073" xlink:show="new">OPENIDM-2073</link>: Reconciliation by Queries are not working anymore</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2067" xlink:show="new">OPENIDM-2067</link>: For an MS SQL repository, queries in the repo config file containing concatenation functions do not work</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2062" xlink:show="new">OPENIDM-2062</link>: openidm/system/NAME?_action=createFullConfig does not properly handle encrypted values causing the tests to fail. </para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2061" xlink:show="new">OPENIDM-2061</link>: Recon Fails to create users from AD "REV" : invalid identifier [Oracle]</para></listitem>
@@ -180,7 +128,6 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2056" xlink:show="new">OPENIDM-2056</link>: Recon audit log entry formatting has issues (missing entries and extra entries)</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2055" xlink:show="new">OPENIDM-2055</link>: Issues on status code and response content for REST API of Scheduler with query, put, and delete</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2046" xlink:show="new">OPENIDM-2046</link>: Failed to start user onboarding workflow in usercase2 when external repo(MSSQL) was used. </para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2045" xlink:show="new">OPENIDM-2045</link>: sample5, 5B and 7 are broken (recon failing)</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2021" xlink:show="new">OPENIDM-2021</link>: If a query is made on an attribute that is not part of the object schema, OpenIDM returns an inaccurate message</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2002" xlink:show="new">OPENIDM-2002</link>: Failed to Decrypt Jwt errors (badPaddingException)</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1990" xlink:show="new">OPENIDM-1990</link>: OpenIDM ignoring min/max pool sizes in orient repo config</para></listitem>
@@ -188,15 +135,13 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1959" xlink:show="new">OPENIDM-1959</link>: cli.bat fails to export configuration when we give an absolute path in argument on Windows</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1954" xlink:show="new">OPENIDM-1954</link>: Enabling the OrientDB Studio UI doesn't take effect until the second restart of OpenIDM</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1949" xlink:show="new">OPENIDM-1949</link>: Update managed user with patch by query in POST should return modified object instead of null</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1946" xlink:show="new">OPENIDM-1946</link>: working location flag (-w) documented to include writing logs directory and contents, but system doesn't</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1946" xlink:show="new">OPENIDM-1946</link>: Working location flag (-w) not working as documented</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1935" xlink:show="new">OPENIDM-1935</link>: The ICF 1.4's RetryableException is wrapped incorrectly by IDM.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1889" xlink:show="new">OPENIDM-1889</link>: UI failed to recover from password changing failure</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1878" xlink:show="new">OPENIDM-1878</link>: DELETE situation-actions on managed objects in bidirectional mappings result in incorrect LINK_ONLY</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1866" xlink:show="new">OPENIDM-1866</link>: Delete of workflow definitions and instances via REST should return the deleted object</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1784" xlink:show="new">OPENIDM-1784</link>: OpenIDM doesn't throw error on startup for provisioner's incorrect connectorRef</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1756" xlink:show="new">OPENIDM-1756</link>: Cancelling "completed" taskscanner task sets its state to "cancelled" whereas it should have no effect</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1658" xlink:show="new">OPENIDM-1658</link>: Hard-coded reference to database schema and table name in jdbc config files</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1641" xlink:show="new">OPENIDM-1641</link>: Obfuscation of bootstrap information for Keystore not working</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1560" xlink:show="new">OPENIDM-1560</link>: when starting OpenIDM with -p option logging.properties file is not taken in project location</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1409" xlink:show="new">OPENIDM-1409</link>: The query-all and get-users-of-direct-role queries are not consistent across different repos</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1365" xlink:show="new">OPENIDM-1365</link>: Recon Audit Log Entries Should Contain "messageDetails" for ScriptExceptions During Reconciliation</para></listitem>
@@ -233,14 +178,10 @@
      directly.
     </para>
    </listitem>
-
-   <!-- Check these from 3.0 -->
    <listitem>
     <para>
-     The Password Synchronization plugins are not currently supported with
-     OpenIDM ${docTargetVersion}. An updated version of these plugins will
-     be released shortly to align with the OpenIDM ${docTargetVersion}
-     release.
+     For OracleDB repositories, queries that use the <literal>queryFilter</literal>
+     syntax do not work on CLOB columns in explicit tables.
     </para>
    </listitem>
    <listitem>
