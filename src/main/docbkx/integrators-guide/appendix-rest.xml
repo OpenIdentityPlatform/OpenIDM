@@ -1144,7 +1144,7 @@ Content-Length: 89
   </section>
 
   <section xml:id="managing-system-objects-REST">
-   <title>Managing System Objects Over Rest</title>
+   <title>Managing System Objects Over REST</title>
    <para>
     System objects, that is, objects that are stored in remote systems, are
     exposed under the <literal>/openidm/system</literal> context. OpenIDM
@@ -1486,7 +1486,7 @@ Content-Length: 89
   </section>
 
   <section xml:id="managing-workflows-over-REST">
-   <title>Managing Workflows Over Rest</title>
+   <title>Managing Workflows Over REST</title>
 
     <para>
      Workflow objects are exposed under the <literal>/openidm/workflow</literal>
@@ -1508,14 +1508,9 @@ Content-Length: 89
       </thead>
       <tbody>
        <row>
-        <entry>/openidm/workflow/processdefinition</entry>
-        <entry>GET</entry>
-        <entry>Lists the defined workflow definitions</entry>
-       </row>
-       <row>
         <entry>/openidm/workflow/processdefinition?_queryId=<replaceable>id</replaceable></entry>
         <entry>GET</entry>
-        <entry>Performs a filtered search for a process definition</entry>
+        <entry>Lists workflow definitions based on filtering criteria</entry>
        </row>
        <row>
         <entry>/openidm/workflow/processdefinition/<replaceable>id</replaceable></entry>
@@ -1525,7 +1520,7 @@ Content-Length: 89
        <row>
         <entry>/openidm/workflow/processinstance?_queryId=query-all-ids</entry>
         <entry>GET</entry>
-        <entry>Lists the running workflow process instances</entry>
+        <entry>Lists the available running workflows, by IDs</entry>
        </row>
        <row>
         <entry>/openidm/workflow/processinstance/<replaceable>id</replaceable></entry>
@@ -1533,49 +1528,40 @@ Content-Length: 89
         <entry>Provides detailed information of a running process instance</entry>
        </row>
        <row>
-        <entry>/openidm/workflow/taskdefinition</entry>
+        <entry>/openidm/workflow/processdefinition/<replaceable>id</replaceable>/taskdefinition</entry>
         <entry>GET</entry>
-        <entry>Returns detailed information about the task definition</entry>
+        <entry>Returns detailed information about the task definition, when you
+         include an <replaceable>id</replaceable> or a query for all IDs,
+         <literal>?_queryId=query-all-ids</literal></entry>
        </row>
        <row>
-        <entry>/openidm/workflow/taskinstance</entry>
-        <entry>GET</entry>
-        <entry>Returns detailed information about the task instance</entry>
-       </row>
-       <row>
-        <entry>/openidm/workflow/task?_queryId=query-all-ids</entry>
+        <entry>/openidm/workflow/taskinstance?_queryId=query-all-ids</entry>
         <entry>GET</entry>
         <entry>Lists all active tasks</entry>
        </row>
        <row>
-        <entry>/openidm/workflow/task?_queryId=filteredQuery&amp;<replaceable>filter
+        <entry>/openidm/workflow/taskinstance?_queryId=filteredQuery&amp;<replaceable>filter
         </replaceable></entry>
         <entry>GET</entry>
         <entry>Lists the tasks according to the specified filter</entry>
        </row>
        <row>
-        <entry>/openidm/workflow/task?_queryId=user-task-summary&amp;id=<replaceable>id
-        </replaceable></entry>
-        <entry>GET</entry>
-        <entry>Lists the summary of tasks assigned to the specified user</entry>
-       </row>
-       <row>
-        <entry>/openidm/workflow/processinstance_action=create</entry>
+        <entry>/openidm/workflow/processinstance?_action=create</entry>
         <entry>POST</entry>
         <entry>Start a new workflow. Parameters are included in the request body.</entry>
        </row>
        <row>
-        <entry>/openidm/workflow/task/<replaceable>id</replaceable></entry>
+        <entry>/openidm/workflow/taskinstance/<replaceable>id</replaceable></entry>
         <entry>PUT</entry>
         <entry>Update task data</entry>
        </row>
        <row>
         <entry>/openidm/workflow/processinstance/<replaceable>id</replaceable></entry>
         <entry>DELETE</entry>
-        <entry>Delete a process instance</entry>
+        <entry>Stops a process instance</entry>
        </row>
        <row>
-        <entry>/openidm/workflow/task/<replaceable>id</replaceable>?_action=claim</entry>
+        <entry>/openidm/workflow/taskinstance/<replaceable>id</replaceable>?_action=claim</entry>
         <entry>POST</entry>
         <entry>Claim or complete a task. Parameters are included in the request body.
         Specifically for user tasks, a user can <emphasis>claim</emphasis> a specific
@@ -1614,7 +1600,7 @@ Content-Length: 89
 
     <para>The following example invokes a workflow named "myWorkflow". The
      <literal>foo</literal> parameter is given the value <literal>bar</literal>
-     in the workflow invokation.</para>
+     in the workflow invocation.</para>
 
      <screen>$ <userinput>curl \
  --cacert self-signed.crt \
