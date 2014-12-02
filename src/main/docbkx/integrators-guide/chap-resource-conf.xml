@@ -3194,9 +3194,9 @@ Properties:
     (<filename>mspowershell-connector-1.4.1.0.zip</filename>) and extract the
     <filename>MsPowerShell.Connector.dll</filename> to the same folder in which
     the Connector Server(<filename>connectorserver.exe</filename>) is located.
-    The <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
-    Download</link> of OpenIDM includes sample connectors and scripts that will
+    <link xlink:show="new"
+          xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
+     Enterprise</link> includes sample connectors and scripts that will
     enable you to get started with this toolkit.
    </para>
   </section>
@@ -3204,9 +3204,9 @@ Properties:
   <section xml:id="salesforce-connector">
    <title>Salesforce Connector</title>
    <para>
-    The <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
-    Download</link> of OpenIDM includes a Salesforce connector, along with a
+    <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
+     Enterprise</link> includes a Salesforce connector, along with a
     sample connector configuration. The Salesforce connector enables
     provisioning, reconciliation, and synchronization between Salesforce and the
     OpenIDM repository.
@@ -3229,9 +3229,9 @@ Properties:
   <section xml:id="google-apps-connector">
    <title>Google Apps Connector</title>
    <para>
-    The <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">Enterprise
-    Download</link> of OpenIDM includes a Google Apps connector, along with a
+    <link xlink:show="new"
+    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
+     Enterprise</link> includes a Google Apps connector, along with a
     sample connector configuration. The Google Apps Connector enables you to
     interact with Google's web applications.
    </para>
@@ -3239,13 +3239,104 @@ Properties:
     To use this connector, you need a Google Apps account.
    </para>
    <para>
-    For additional instructions, and a sample Google Apps configuration, see
-    <link xlink:show="new"
-    xlink:href="install-guide#sample-google-connector"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
-    Google With the Google Apps Connector</citetitle></link> in the
-    <emphasis>Installation Guide</emphasis>.
+    If you have OpenIDM Enterprise, you can view a sample
+    Google Apps connector configuration file in
+    <filename>samples/provisioners/provisioner.openicf-google.json</filename>
    </para>
+   <para>
+    The following is an excerpt of the provisioner configuration file. This
+    example shows an excerpt of the provisioner configuration. The
+    default location of the connector .jar is
+    <filename>openidm/connectors</filename>. Therefore the value of the
+    <literal>connectorHostRef</literal> property must be
+    <literal>"#LOCAL"</literal>.
+   </para>
+   <programlisting language="javascript">
+{
+    "connectorHostRef": "#LOCAL",
+    "connectorName": "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
+    "bundleName": "org.forgerock.openicf.connectors.googleapps-connector",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)"
+}, </programlisting>
+   <para>
+    The following excerpt shows required configuration properties.
+   </para>
+   <programlisting language="javascript">
+"configurationProperties": {
+    "domain": "",
+    "clientId": "",
+    "clientSecret": null,
+    "refreshToken": null
+}, </programlisting>
+
+   <para>
+    These configuration properties are fairly straightforward.
+   </para>
+
+   <variablelist>
+    <varlistentry>
+     <term><literal>domain</literal></term>
+     <listitem>
+      <para>
+       Set to the domain name for OAuth 2-based authorization.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>clientId</literal></term>
+     <listitem>
+      <para>
+       A client identifier, as issued by the OAuth 2 authorization server. For
+       more information, see the following section of RFC 6749:
+       <link xlink:show="new"
+       xlink:href="http://tools.ietf.org/html/rfc6749#section-2.2">
+       <citetitle>Client Identifier</citetitle></link>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>clientSecret</literal></term>
+     <listitem>
+      <para>
+       Sometimes also known as the client password. OAuth 2 authorization
+       servers can support the use of <literal>clientId</literal> and
+       <literal>clientSecret</literal> credentials, as noted in the following
+       section of RFC 6749: <link xlink:show="new"
+       xlink:href="http://tools.ietf.org/html/rfc6749#section-2.3.1">
+       <citetitle>Client Password</citetitle></link>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>refreshToken</term>
+     <listitem>
+      <para>
+       A client can use an OAuth 2 refresh token to continue accessing
+       resources. For more information, see the following section of RFC 6749:
+       <link xlink:show="new"
+             xlink:href="http://tools.ietf.org/html/rfc6749#section-10.4">
+        <citetitle>Refresh Tokens</citetitle></link>.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <para>
+    The following section in the <emphasis>Installation Guide</emphasis>,
+    <link xlink:show="new" xlink:href="install-guide#sample-google-connector"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
+    Google With the Google Apps Connector</citetitle></link>, includes a Google
+    Apps configuration, including example OAuth 2-based entries for
+    <literal>configurationProperties</literal>.
+   </para>
+
+   <para>
+    For a description of all configurable properties for this connector, see
+    the <link xlink:show="new"
+    xlink:href="http://openicf.forgerock.org/doc/config-reference/index.html">OpenICF
+    Connector Configuration Reference</link>.
+   </para>
+
   </section>
 
  </section>
@@ -3337,10 +3428,10 @@ Properties:
     <para>XML Connector</para>
    </listitem>
    <listitem>
-    <para>GoogleApps Connector (Enterprise download only)</para>
+    <para>GoogleApps Connector (OpenIDM Enterprise only)</para>
    </listitem>
    <listitem>
-    <para>Salesforce Connector (Enterprise download only)</para>
+    <para>Salesforce Connector (OpenIDM Enterprise only)</para>
    </listitem>
   </itemizedlist>
 

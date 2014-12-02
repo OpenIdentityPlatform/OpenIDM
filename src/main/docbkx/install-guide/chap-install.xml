@@ -163,9 +163,10 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</computeroutp
       </para>
       <listitem>
        <para>
-        <link xlink:show="new" xlink:href="http://www.forgerock.com/download-stack/">
-        Enterprise Downloads</link> has the latest stable, supported release of
-        OpenIDM and the other products in the ForgeRock identity stack.
+        The <link xlink:show="new" xlink:href="http://www.forgerock.com/download-stack/">
+        Forgerock.com Download Stack</link> page has the latest stable,
+        supported release of OpenIDM Enterprise along with the other products
+        in the ForgeRock identity stack.
        </para>
       </listitem>
       <listitem>
