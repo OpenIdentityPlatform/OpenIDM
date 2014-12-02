@@ -96,8 +96,8 @@
      <para>
       The way in which you generate connector configurations for access to
       external resources has changed. There are now three separate actions
-      involved creating the connector configuration. For more information, see
-      <link xlink:show="new" xlink:href="integrators-guide#connector-wiz"
+      involved in creating the connector configuration. For more information,
+      see <link xlink:show="new" xlink:href="integrators-guide#connector-wiz"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating
       Default Connector Configurations</citetitle></link> in the
       <emphasis>Integrator's Guide</emphasis>.
