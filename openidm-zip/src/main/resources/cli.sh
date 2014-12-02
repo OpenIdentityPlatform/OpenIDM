@@ -1,6 +1,6 @@
 #!/bin/sh
 # 
-# Copyright 2013 ForgeRock, Inc.
+# Copyright 2015 ForgeRock, Inc.
 #
 # The contents of this file are subject to the terms of the Common Development and
 # Distribution License (the License). You may not use this file except in compliance 
@@ -34,7 +34,7 @@ echo "Executing $PRG..."
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-OPENIDM_HOME=${OPENIDM_HOME:-`(cd $PRGDIR; pwd)`}
+OPENIDM_HOME=${OPENIDM_HOME:-`(cd "$PRGDIR"; pwd)`}
 echo "Starting shell in $OPENIDM_HOME"
 
 java -classpath "$OPENIDM_HOME/bin/*:$OPENIDM_HOME/bundle/*" \
