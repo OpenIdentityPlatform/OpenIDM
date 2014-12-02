@@ -542,21 +542,16 @@ Id   State          Name
  <title>To Set Up OpenIDM With Oracle Database</title>
 
   <para>
-   This section assumes that you have configured an Oracle
-   Database with <link xlink:show="new"
-   xlink:href="http://docs.oracle.com/cd/B28359_01/network.111/b28317/tnsnames.htm"
-   >Local Naming Parameters (tnsnames.ora)</link>, a schema owner, and
-   optionally a service user and its associated credentials for use by OpenIDM.
+   When implementing an Oracle database for OpenIDM, confer with an Oracle DBA
+   when creating the database schema, tables, and users. This section assumes
+   that you have configured an Oracle Database with
+   <link xlink:show="new"
+   xlink:href="http://docs.oracle.com/cd/B28359_01/network.111/b28317/tnsnames.htm">
+    <citetitle>Local Naming Parameters (tnsnames.ora)</citetitle> </link> and a
+   service user for use by OpenIDM.
   </para>
 
  <procedure>
-
-  <para>
-   For more information on connecting to an Oracle database, see
-   <link xlink:show="new"
-   xlink:href="http://docs.oracle.com/cd/E11882_01/appdev.112/e10766/tdddg_connecting.htm"
-   >Connecting to Oracle Database</link>.
-  </para>
 
   <para>
    Import the OpenIDM schema using the data definition language script
@@ -748,8 +743,7 @@ $ cp db/oracle/conf/repo.jdbc.json conf/</screen>
     <para>
      The <literal>"username"</literal> and <literal>"password"</literal>
      corresponds to the credentials of the service user that connects from
-     OpenIDM. Use the username of the service user you have created with grants
-     to the OpenIDM tables you created earlier.
+     OpenIDM.
     </para>
    </listitem>
    <listitem>
