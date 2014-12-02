@@ -140,7 +140,7 @@ public class MappedTableHandler implements TableHandler {
                     }
                 };
 
-        queries = new TableQueries(this, tableName, null, dbSchemaName, GenericTableHandler.PROP_VALUE_MAX_LEN, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
+        queries = new TableQueries(this, tableName, null, dbSchemaName, 0, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
         String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
@@ -551,7 +551,6 @@ public class MappedTableHandler implements TableHandler {
      * Loops through sort keys constructing the key statements.
      * 
      * @param sortKeys  a {@link List} of sort keys
-     * @param innerJoins a {@link List} to store INNER JOIN statements
      * @param keys a {@link List} to store ORDER BY keys
      * @param replacementTokens a {@link Map} containing replacement tokens for the {@link PreparedStatement}
      */

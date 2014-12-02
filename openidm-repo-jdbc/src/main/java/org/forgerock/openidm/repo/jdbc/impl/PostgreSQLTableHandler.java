@@ -52,7 +52,7 @@ import org.forgerock.util.promise.NeverThrowsException;
 public class PostgreSQLTableHandler extends GenericTableHandler {
 
     private static final QueryFilterVisitor<String, Map<String, Object>> JSON_EXTRACT_PATH_QUERY_FILTER_VISITOR =
-            new SQLQueryFilterVisitor<Map<String, Object>>() {
+            new GenericSQLQueryFilterVisitor() {
                 // value number for each value placeholder
                 int objectNumber = 0;
 
@@ -117,8 +117,7 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
      */
     public PostgreSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize,
-                JSON_EXTRACT_PATH_QUERY_FILTER_VISITOR, sqlExceptionHandler);
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, JSON_EXTRACT_PATH_QUERY_FILTER_VISITOR, sqlExceptionHandler);
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {

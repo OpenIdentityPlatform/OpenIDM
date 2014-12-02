@@ -41,23 +41,29 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 
 public class MSSQLTableHandler extends GenericTableHandler {
 
+    /**
+     * Max length of searchable properties for MSSQL.
+     * Anything larger than 195 will overflow the max index size and error.
+     */
+    private static final int SEARCHABLE_LENGTH = 195;
+
     public MSSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
         super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize,
-                new GenericSQLQueryFilterVisitor() {
+                new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH) {
                     @Override
                     String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
                         // validate type is integer or double cast all numeric types to decimal
-                        if (valueAssertion instanceof Integer || valueAssertion instanceof Long
-                                || valueAssertion instanceof Float || valueAssertion instanceof Double) {
+                        if (isNumeric(valueAssertion)) {
                             return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
                                     + "AND (CASE ISNUMERIC(propvalue) WHEN 1 THEN CAST(propvalue AS FLOAT) ELSE null END) " + operand + " ${" + placeholder + "}";
-                        } else if (valueAssertion instanceof Boolean) {
+                        } else if (isBoolean(valueAssertion)) {
                             // validate type is boolean if valueAssertion is a boolean
                             return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
                         } else {
@@ -68,6 +74,12 @@ public class MSSQLTableHandler extends GenericTableHandler {
                 }, sqlExceptionHandler);
     }
 
+    @Override
+    int getSearchableLength() {
+        return SEARCHABLE_LENGTH;
+    }
+
+    @Override
     protected Map<QueryDefinition, String> initializeQueryMap() {
         Map<QueryDefinition, String> result = super.initializeQueryMap();
         String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
