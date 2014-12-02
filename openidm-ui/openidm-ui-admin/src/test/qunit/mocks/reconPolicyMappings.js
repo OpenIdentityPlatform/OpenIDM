@@ -22,23 +22,31 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, QUnit, $ */
-
+/*global require, define*/
 define([
-    "./adminBaseTest",
-    "./managedobjects/managedObjectsTest",
-    "./resources/resourceTest",
-    "./mapping/reconTests",
-    "./mapping/addMappingTest"
-], function (adminBaseTest, moTest, resourceTest, reconTests, addMappingTest) {
+    "text!templates/admin/sync/SituationPolicyViewTemplate.html",
+    "text!templates/admin/sync/situationalPolicyPatterns.json"
+], function () {
 
-    return {
-        executeAll: function (server) {
-            moTest.executeAll(server);
-            adminBaseTest.executeAll(server);
-            resourceTest.executeAll(server);
-            reconTests.executeAll(server);
-            addMappingTest.executeAll(server);
-        }
+    /* an unfortunate need to duplicate the file names here, but I haven't
+     yet found a way to fool requirejs into doing dynamic dependencies */
+    var staticFiles = [
+            "templates/admin/sync/SituationPolicyViewTemplate.html",
+            "templates/admin/sync/situationalPolicyPatterns.json"
+        ],
+        deps = arguments;
+
+    return function (server) {
+        _.each(staticFiles, function (file, i) {
+            server.respondWith(
+                "GET",
+                new RegExp(file.replace(/([\/\.\-])/g, "\\$1") + "$"),
+                [
+                    200,
+                    {},
+                    deps[i]
+                ]
+            );
+        });
     };
 });
