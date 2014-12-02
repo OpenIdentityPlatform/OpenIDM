@@ -89,14 +89,18 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
          *      mappingName {string}
          *
          */
-        render: function(args) {
+        render: function(args, callback) {
             this.model.sync = args.sync;
             this.model.mapping = args.mapping;
             this.model.mappingName = args.mappingName;
             this.data.docHelpUrl = constants.DOC_URL;
 
             this.parentRender(function () {
-                this.getPatterns();
+                this.getPatterns().then(function() {
+                    if (callback) {
+                        callback();
+                    }
+                });
             });
         },
 
@@ -109,7 +113,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                 return policy.situation;
             }
 
-            $.getJSON("templates/admin/sync/situationalPolicyPatterns.json", _.bind(function(patterns) {
+            return $.getJSON("templates/admin/sync/situationalPolicyPatterns.json", _.bind(function(patterns) {
                 this.model.allPatterns = patterns;
 
                 _(patterns).each(_.bind(function(pattern, name) {
