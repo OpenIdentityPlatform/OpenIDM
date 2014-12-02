@@ -50,6 +50,8 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                 splitConfig,
                 tempIconClass;
 
+            this.data.docHelpUrl = constants.DOC_URL;
+
             connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
             repoCheckPromise = ConfigDelegate.getConfigList();

@@ -83,6 +83,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
         render: function(args, callback) {
             this.data = {};
+            this.data.docHelpUrl = constants.DOC_URL;
             this.data.versionDisplay = {};
             this.data.currentMainVersion = null;
             this.oAuthConnector = false;
