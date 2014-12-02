@@ -3713,10 +3713,8 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
  --request DELETE \
  "https://localhost:8443/openidm/system/scriptedazure/User/744aa30f-55e0-4559-b956-985b77d80814"
       </userinput>
-      <computeroutput>
- {
+<computeroutput>{
    "_id": "744aa30f-55e0-4559-b956-985b77d80814"
- }
 }</computeroutput>
       </screen>
      </step>
@@ -3732,10 +3730,9 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
  --request DELETE \
  "https://localhost:8443/openidm/system/scriptedazure/Group/ab347420f-4e8e-f045-a437b62c0f3-636e"
       </userinput>
-      <computeroutput>
- {
+<computeroutput>{
    "_id": "ab347420f-4e8e-f045-a437b62c0f3-636e"
- }</computeroutput></screen>
+}</computeroutput></screen>
      </step>
     </procedure>
 
