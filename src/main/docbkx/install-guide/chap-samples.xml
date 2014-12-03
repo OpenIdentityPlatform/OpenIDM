@@ -3317,15 +3317,15 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
 
   <section xml:id="samples-azure">
    <title>Sample - Using the Groovy Connector Toolkit to Connect to
-    Microsoft Azure</title>
+    Microsoft Azure AD</title>
    <indexterm>
     <primary>Samples</primary>
-    <secondary>Microsoft Azure Connector</secondary>
+    <secondary>Microsoft Azure AD Connector</secondary>
    </indexterm>
    <!-- ref http://azure.microsoft.com/en-us/overview/what-is-azure/ -->
    <para>
     This sample uses the Groovy Connector Toolkit to implement a Microsoft Azure
-    connector, which interacts with the ForgeRock Commons REST (CREST) API to
+    AD connector, which interacts with the ForgeRock Commons REST (CREST) API to
     connect to an Azure-based instance of Active Directory. The main difference
     between a CREST-based API and a generic REST API is that the CREST API is
     inherently recognizable by all ForgeRock products. As such, the sample can
@@ -3334,18 +3334,18 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
    <para>
     As noted on the <link xlink:show="new"
     xlink:href="http://azure.microsoft.com/en-us/overview/what-is-azure/">
-    <citetitle>Microsoft Azure web site</citetitle></link>, Azure is
+    <citetitle>Microsoft Azure AD web site</citetitle></link>, Azure is
     Microsoft's cloud platform for building, deploying, and
     managing applications and services.
    </para>
    <para>
     This section assumes that you have a working knowledge of the Microsoft
-    Azure platform, and can adjust and modify the configuration as needed to
-    get the information needed to configure a Microsoft Azure connector.
+    Azure AD platform, and can adjust and modify the configuration as needed to
+    get the information needed to configure a Microsoft Azure AD connector.
    </para>
    <para>
-    You will also need to set up OpenIDM as a Microsoft Azure website and as a
-    web application. When you do, retain the values of the URI of the website,
+    You will also need to set up OpenIDM as a Microsoft Azure AD website and as
+    a web application. When you do, retain the values of the URI of the website,
     <literal>redirectURI</literal>, the <literal>APP ID URI</literal>, which
     corresponds to the <literal>resourceURI</literal>, the
     <literal>client ID</literal>, and the <literal>client Secret</literal>.
@@ -3358,8 +3358,8 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
    <para>
     The connector configuration file for this sample
     (<filename>samples/scriptedazure/conf/provisioner.openicf-scriptedazure.json</filename>)
-    indicates the Scripted Azure implementation of the Groovy Connector Toolkit
-    as follows:
+    indicates the Scripted Azure AD implementation of the Groovy Connector
+    Toolkit as follows:
    </para>
    <programlisting language="javascript">{
     "name": "scriptedazure",
@@ -3379,10 +3379,10 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
    </para>
 
    <section xml:id="azure-setup">
-    <title>Identifying Appropriate Information from Microsoft Azure</title>
+    <title>Identifying Appropriate Information from Microsoft Azure AD</title>
 
     <para>
-     Microsoft Azure supports RESTful communication with the <link xlink:show="new"
+     Microsoft Azure AD supports RESTful communication with the <link xlink:show="new"
      xlink:href="http://msdn.microsoft.com/en-us/library/azure/hh974476.aspx">
      <citetitle>Azure AD Graph API</citetitle></link>. As suggested by the name,
      the API supports access to the Azure-based instance of Active Directory.
@@ -3390,7 +3390,7 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
 
     <para>
      To get an OAuth 2 access token, you will need to add information to the
-     Scripted Azure provisioner file,
+     Scripted Azure AD provisioner file,
      <filename>provisioner.openicf-scriptedazure.json</filename>. Substitute
      for the <literal>__configureme__</literal> entries shown.
     </para>
@@ -3413,14 +3413,14 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
 
     <para>
      The following list assumes that you have configured
-     <literal>contoso.com</literal> as the Azure domain tenant. Substitute
+     <literal>contoso.com</literal> as the Azure AD domain tenant. Substitute
      appropriately. Except for the first item, the following list of items are
      required for an OAuth 2 access token.
     </para>
 
     <para>
      You should be able to get some of the items needed for the OAuth 2 token
-     in the Azure configuration menu related to the OpenIDM web application.
+     in the Azure AD configuration menu related to the OpenIDM web application.
     </para>
 
     <itemizedlist>
@@ -3453,7 +3453,7 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
      <listitem>
       <para><literal>clientId</literal></para>
       <para>
-       Set to the Client ID shown in the Configure menu of the Azure web
+       Set to the Client ID shown in the Configure menu of the Azure AD web
        application.
       </para>
      </listitem>
@@ -3461,20 +3461,20 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
       <para><literal>clientSecret</literal></para>
       <para>
        Set to the Client Secret shown when you added or configured the web
-       application. In Azure, the Client Secret is the <literal>key</literal>
+       application. In Azure AD, the Client Secret is the <literal>key</literal>
        associated with the Client ID.
       </para>
      </listitem>
      <listitem>
       <para><literal>username</literal></para>
       <para>
-       Set to the administrative username for Azure.
+       Set to the administrative username for Azure AD.
       </para>
      </listitem>
      <listitem>
       <para><literal>password</literal></para>
       <para>
-       Set to the administrative password for Azure.
+       Set to the administrative password for Azure AD.
       </para>
      </listitem>
     </itemizedlist>
@@ -3487,16 +3487,16 @@ $ ./startup.sh -p samples/scriptedcrest2dj/</userinput></screen>
 
     <para>
      This section illustrates basic CRUD operations on users and groups using
-     the scripted Azure connector. Note that the power of the Groovy connector
-     is in the associated Groovy scripts, and their application in your specific
-     deployment. The scripts provided with this sample are specific to the
-     sample and customization of the scripts is required.
+     the scripted Azure AD connector. Note that the power of the Groovy
+     connector is in the associated Groovy scripts, and their application in
+     your specific deployment. The scripts provided with this sample are
+     specific to the sample and customization of the scripts is required.
     </para>
 
     <procedure>
      <step>
       <para>
-       Start OpenIDM with the configuration for the scripted Azure sample.
+       Start OpenIDM with the configuration for the scripted Azure AD sample.
       </para>
       <screen><userinput>$ cd /path/to/openidm
 $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
@@ -3558,7 +3558,7 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
  --data '{
    "_id": "fake placeholder value",
    "mailEnabled": false,
-   "displayName": "Azure Test Group",
+   "displayName": "Azure AD Test Group",
    "mailNickname": "Test_Group",
    "securityEnabled": "true",
    "description": "Azure AD Test Group"
@@ -3570,7 +3570,7 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
    "mailEnabled":false,
    "__NAME__":"ab347420f-4e8e-f045-a437b62c0f3-636e",
    "mailNickname":"Test_Group",
-   "displayName":"Azure Test Group",
+   "displayName":"Azure AD Test Group",
    "mail":null,
    "onPremisesSecurityIdentifier":null,
    "lastDirSyncTime":null,
