@@ -1,29 +1,29 @@
-/** 
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
- *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
- *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- */
+    /**
+     * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+     *
+     * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+     *
+     * The contents of this file are subject to the terms
+     * of the Common Development and Distribution License
+     * (the License). You may not use this file except in
+     * compliance with the License.
+     *
+     * You can obtain a copy of the License at
+     * http://forgerock.org/license/CDDLv1.0.html
+     * See the License for the specific language governing
+     * permission and limitations under the License.
+     *
+     * When distributing Covered Code, include this CDDL
+     * Header Notice in each file and include the License file
+     * at http://forgerock.org/license/CDDLv1.0.html
+     * If applicable, add the following below the CDDL Header,
+     * with the fields enclosed by brackets [] replaced by
+     * your own identifying information:
+     * "Portions Copyrighted [year] [name of copyright owner]"
+     */
 
 Sample 3 - Scripted SQL
------------------------
+=======================
 
 This sample demonstrates an example configuration for a scripted SQL
 connector, a connector that communicates with a database through configurable
@@ -46,11 +46,11 @@ user is created or updated in the external repo. In both cases the script is
 explicitly included in the sync.json file but could just as easily have referenced
 an external file for the script source instead. For more information see:
 
-http://openidm.forgerock.org/doc/integrators-guide/index.html#appendix-scripting
+http://openidm.forgerock.org/doc/webhelp/integrators-guide/appendix-scripting.html
 
 The scripted connector supports any number of custom scripted endpoints. These are
 configured via the provisioner script and currently support only Groovy. See
-provisioner.openicf-scriptedsql.json and tools/ResetDatabaseScript.groovy for the
+provisioner.openicf-scriptedsql.json and tools/ResetDatabaseScript.groovy for a
 sample implementation. Step 6 below executes this script.
 
 CAVEAT: Because MySQL cannot "un-hash" user passwords there is no way for a recon
@@ -63,25 +63,28 @@ passwords. Some additional scripting may be required to handle this situation
 depending on the requirements of your deployment.
 
 
-To try the example, follow these steps.
+Setup the Database
+------------------
 
-    1. Copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
+1. Copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
 
     $ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/
 
-    3. Set up MySQL to listen on localhost:3306, connecting as root:password.
+2. Set up MySQL to listen on localhost:3306, connecting as root:password.
 
-    4. Create the initial database OpenIDM will sync with.
+3. Create the initial database OpenIDM will sync with.
 
     mysql> CREATE DATABASE hrdb CHARACTER SET utf8 COLLATE utf8_bin;
 
-    5. Start OpenIDM with the configuration for sample 3.
+4. Start OpenIDM with the configuration for sample 3.
 
     $ /path/to/openidm/startup.sh -p samples/sample3
 
-    6. Populate the MySQL database with sample data. Use REST to execute a custom script that, in this case, resets
-    and populates the database.  This script may be re-run at any time to reset the database.
-       $ curl -k --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --header "Content-Type: application/json" --request POST "https://localhost:8443/openidm/system/scriptedsql?_action=script&scriptId=ResetDatabase"
+5. Populate the MySQL database with sample data. Use REST to execute a custom
+   script that, in this case, resets and populates the database.  This script
+   may be re-run at any time to reset the database.
+
+   $ curl -k --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --header "Content-Type: application/json" --request POST "https://localhost:8443/openidm/system/scriptedsql?_action=script&scriptId=ResetDatabase"
        {
          "actions": [
            {
@@ -90,31 +93,39 @@ To try the example, follow these steps.
          ]
        }
 
-       At this point the MySQL database should be fully populated.
-       mysql> USE hrdb;
-       Database changed
-       mysql> SELECT * FROM users;
-       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-       | id | uid    | password                                 | firstname | lastname | fullname      | email                     | organization | timestamp           |
-       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-       |  1 | bob    | e38ad214943daad1d64c102faec29de4afe9da3d | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2014-10-30 08:55:41 |
-       |  2 | rowley | 2aa60a8ff7fcd473d321e0146afd9e26df395147 | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2014-10-30 08:55:41 |
-       |  3 | louis  | 1119cfd37ee247357e034a08d844eea25f6fd20f | Louis     | Balfour  | Louis Balfour | Louis.Balfor@example.com  | SALES        | 2014-10-30 08:55:41 |
-       |  4 | john   | a1d7584daaca4738d499ad7082886b01117275d8 | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2014-10-30 08:55:41 |
-       |  5 | jdoe   | edba955d0ea15fdef4f61726ef97e5af507430c0 | John      | Doe      | John Doe      | John.Doe@example.com      | ENG          | 2014-10-30 08:55:41 |
-       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-       5 rows in set (0.00 sec)
+   At this point the MySQL database should be fully populated.
 
-       * Note that these passwords are hashed, and not available to be read into OpenIDM as cleartext.
-       * sha1 is used to hash these passwords for compatibility reasons; in production, use more secure algorithms.
+   mysql> USE hrdb;
+   Database changed
+   mysql> SELECT * FROM users;
+   +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+   | id | uid    | password                                 | firstname | lastname | fullname      | email                     | organization | timestamp           |
+   +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+   |  1 | bob    | e38ad214943daad1d64c102faec29de4afe9da3d | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2014-10-30 08:55:41 |
+   |  2 | rowley | 2aa60a8ff7fcd473d321e0146afd9e26df395147 | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2014-10-30 08:55:41 |
+   |  3 | louis  | 1119cfd37ee247357e034a08d844eea25f6fd20f | Louis     | Balfour  | Louis Balfour | Louis.Balfor@example.com  | SALES        | 2014-10-30 08:55:41 |
+   |  4 | john   | a1d7584daaca4738d499ad7082886b01117275d8 | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2014-10-30 08:55:41 |
+   |  5 | jdoe   | edba955d0ea15fdef4f61726ef97e5af507430c0 | John      | Doe      | John Doe      | John.Doe@example.com      | ENG          | 2014-10-30 08:55:41 |
+   +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+   5 rows in set (0.00 sec)
 
-    7. Run reconciliation:
+   * Note that these passwords are hashed, and not available to be read into
+     OpenIDM as cleartext.
+   * sha1 is used to hash these passwords for compatibility reasons; in
+     production, use more secure algorithms.
+
+
+Run the Sample
+--------------
+
+1. Run reconciliation:
 
     $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
 
-    8. Retrieve the list of users from OpenIDM's internal repository:
+2. Retrieve the list of users from OpenIDM's internal repository:
 
     $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&_prettyPrint=true"
+
     {
       "remainingPagedResults": -1,
       "pagedResultsCookie": null,
@@ -143,9 +154,10 @@ To try the example, follow these steps.
       ]
     }
 
-    9. Query for an individual user (by userName):
+3. Query for an individual user (by userName):
 
     $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user?_queryId=for-userName&uid=rowley&_prettyPrint=true"
+
     {
       "result" : [ {
         "mail" : "Rowley.Birkin@example.com",
@@ -184,22 +196,28 @@ To try the example, follow these steps.
       "remainingPagedResults" : -1
     }
 
-    Note the "cars" list containing multiple objects. This structure is displayed in the admin UI as well. The name
-    "cars" was used to help differentiate what matters to the complex type versus what is required by OpenIDM/OpenICF
-    in the Groovy scripts.
+    Note the "cars" list containing multiple objects. This structure is
+    displayed in the admin UI as well. The name "cars" was used to help
+    differentiate what matters to the complex type versus what is required
+    by OpenIDM/OpenICF in the Groovy scripts.
 
-    In the database the 'car' table joins to the 'users' table via the cars.users_id column. The Groovy scripts are
-    responsible for reading this data from MySQL and repackaging it in a way that OpenIDM can understand. With
-    support for complex types this data is passed through to OpenIDM in the same form: as a list of 'car' objects.
-    Likewise, data is synced from OpenIDM to MySQL in the same form.
+    In the database the 'car' table joins to the 'users' table via the
+    cars.users_id column. The Groovy scripts are responsible for reading this
+    data from MySQL and repackaging it in a way that OpenIDM can understand.
+    With support for complex types this data is passed through to OpenIDM in
+    the same form: as a list of 'car' objects. Likewise, data is synced from
+    OpenIDM to MySQL in the same form.
 
-    Group membership (not shown here) is maintained with a traditional "join table" in MySQL ('groups_users'). OpenIDM
-    does not maintain group membership this way so the Groovy scripts do the work to translate between the two. This
-    demonstrates another form of complex object though the sky is the limit. Complex objects may also be nested to any
-    depth.
+    Group membership (not shown here) is maintained with a traditional
+    "join table" in MySQL ('groups_users'). OpenIDM does not maintain group
+    membership this way so the Groovy scripts do the work to translate between
+    the two. This demonstrates another form of complex object though the sky
+    is the limit. Complex objects may also be nested to any depth.
 
-    10. Show paging results with page size of 2
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id"
+4. Show paging results with page size of 2
+
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET 'https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id'
+
     {
       "result":[
         {
@@ -215,8 +233,11 @@ To try the example, follow these steps.
       "remainingPagedResults":-1
     }
 
-    11. Use the pagedResultsCookie from the result in step 10 for the next query to retrieve the next result set. Make sure you encode the date:time.
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2"
+5. Use the pagedResultsCookie from the result in step 10 for the next query to
+   retrieve the next result set. Make sure you encode the date:time.
+
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET 'https://localhost:8443/openidm/system/scriptedsql/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2'
+
     {
       "result":[
         {
@@ -231,6 +252,7 @@ To try the example, follow these steps.
       "pagedResultsCookie":"2014-09-11 10:07:57.0,4",
       "remainingPagedResults":-1
     }
+
 
 You can log in to the OpenIDM UI (https://localhost:8443/openidmui) with any of
 the users that were created in the repository by the reconciliation operation.
