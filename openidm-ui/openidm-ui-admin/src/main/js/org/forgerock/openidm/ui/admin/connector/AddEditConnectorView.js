@@ -148,31 +148,43 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         }
                     }, this));
                 } else {
-                    var splitDetails = args[0].split("_"),
+                    var splitDetails = args[0].match(/(.*?)_(.*)/).splice(1),
                         urlArgs = uiUtils.convertCurrentUrlToJSON();
 
                     this.data.editState = true;
                     this.data.systemType = splitDetails[0];
-                    this.data.connectorName = this.name = splitDetails[1];
+                    this.data.connectorId = this.name = splitDetails[1];
 
                     // FIXME support multiple provisioners based on systemType
-                    ConfigDelegate.readEntity(this.data.systemType +"/" +splitDetails[1]).then(_.bind(function(data){
+                    ConfigDelegate.readEntity(this.data.systemType +"/" + this.data.connectorId).then(_.bind(function(data){
                         var tempVersion,
                             urlName;
 
-                        data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(data.connectorRef.connectorName));
-                        this.data.connectorType = data.connectorRef.connectorName;
+                        this.data.connectorName = data.name;
+                        this.data.connectorTypeName = data.connectorRef.connectorName;
                         this.data.enabled = data.enabled;
                         this.data.addEditTitle = $.t("templates.connector.editTitle");
                         this.data.addEditSubmitTitle = $.t("templates.connector.updateButtonTitle");
                         this.data.addEditObjectTypeTitle = $.t("templates.connector.editObjectTypeTitle");
                         this.data.addEditSubmitTitle = $.t("common.form.update");
 
+                        data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.connectorTypeName));
+
+                        _.each(this.data.versionDisplay, function (group) {
+                            group.versions = _.map(group.versions, function (v) {
+                                v.selected = v.connectorName === this.data.connectorTypeName &&
+                                             v.bundleVersion === data.connectorRef.bundleVersion &&
+                                             v.systemType === this.data.systemType;
+                                return v;
+                            }, this);
+                        }, this);
+
+
                         this.objectTypes = data.objectTypes;
 
                         //Filter down to the current edited connector Type
                         this.data.versionDisplay = _.filter(this.data.versionDisplay, function(connector){
-                            return $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.connectorType)) === connector.groupName;
+                            return $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.connectorTypeName)) === connector.groupName;
                         }, this);
 
                         data.connectorRef.bundleVersion = this.versionRangeCheck(data.connectorRef.bundleVersion);
@@ -188,9 +200,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         if (urlArgs.params && urlArgs.params.code) {
                             this.oAuthCode = urlArgs.params.code;
 
-                            this.connectorTypeRef = ConnectorRegistry.getConnectorModule(data.connectorRef.connectorName +"_" +this.data.currentMainVersion);
+                            this.connectorTypeRef = ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" +this.data.currentMainVersion);
                             this.connectorTypeRef.getToken(data, this.oAuthCode).then(_.bind(function(tokenDetails) {
-                                this.connectorTypeRef.setToken(tokenDetails, data, this.data.systemType +"/" +this.data.connectorName, urlArgs);
+                                this.connectorTypeRef.setToken(tokenDetails, data, this.data.systemType + "/" +this.data.connectorId, urlArgs);
                             }, this));
                         } else {
                             this.parentRender(_.bind(function () {
@@ -224,14 +236,12 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                                 validatorsManager.bindValidators(this.$el);
 
-                                $("#connectorType").val(this.data.connectorType + "_" + data.connectorRef.bundleVersion + "_" + this.data.systemType);
-
                                 if (this.data.rangeFound) {
                                     this.$el.find("#connectorErrorMessage .alert-message .message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range": this.data.oldVersion, "version": data.connectorRef.bundleVersion}));
                                     this.$el.find("#connectorErrorMessage").show();
                                 }
 
-                                this.connectorTypeRef = ConnectorRegistry.getConnectorModule(data.connectorRef.connectorName + "_" + this.data.currentMainVersion);
+                                this.connectorTypeRef = ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" + this.data.currentMainVersion);
 
                                 if (this.connectorTypeRef.oAuthConnector) {
                                     this.oAuthConnector = true;
@@ -240,7 +250,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                                     this.setConnectorState();
                                 }
 
-                                this.connectorTypeRef.render({"connectorType": data.connectorRef.connectorName + "_" + this.data.currentMainVersion,
+                                this.connectorTypeRef.render({"connectorType": this.data.connectorTypeName + "_" + this.data.currentMainVersion,
                                         "animate": true,
                                         "connectorDefaults": data,
                                         "editState": this.data.editState,
@@ -596,11 +606,11 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
         loadConnectorTemplate: function() {
             var connectorData,
                 connectorTemplate,
-                selectedValue = this.$el.find("#connectorType").val().split("_"),
+                selectedValue = this.$el.find("#connectorType option:selected"),
                 mainVersion,
                 connectorRef;
 
-            connectorData = _.findWhere(this.data.connectors, {"connectorName": selectedValue[0], "bundleVersion": selectedValue[1]});
+            connectorData = _.findWhere(this.data.connectors, {"connectorName": selectedValue.attr('connectorTypeName'), "bundleVersion": selectedValue.attr('bundleVersion')});
 
 
             // For each schedule on the page
@@ -619,9 +629,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 mainVersion = this.findMainVersion(connectorData.bundleVersion);
 
                 //Checking to ensure we don't reload the page if a minor version is changed
-                if(this.data.currentMainVersion === null || (parseFloat(this.data.currentMainVersion) !== parseFloat(mainVersion)) || this.data.connectorType !==  selectedValue[0]) {
-                    this.data.connectorType = selectedValue[0];
-                    this.data.systemType = selectedValue[2];
+                if(this.data.currentMainVersion === null || (parseFloat(this.data.currentMainVersion) !== parseFloat(mainVersion)) || this.data.connectorTypeName !== selectedValue.attr('connectorTypeName')) {
+                    this.data.connectorTypeName = selectedValue.attr('connectorTypeName');
+                    this.data.systemType = selectedValue.attr('systemType');
                     this.data.currentMainVersion = this.findMainVersion(connectorData.bundleVersion);
 
                     connectorTemplate = connectorData.connectorName +"_" +mainVersion;
@@ -654,7 +664,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     }, this));
                 } else {
                     //Set the bundle version on a minor version change so it saves
-                    this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = selectedValue[1];
+                    this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = selectedValue.attr('bundleVersion');
                 }
             }
         },
@@ -709,8 +719,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             var mergedResult = this.getProvisioner(),
                 urlName;
 
-            if(this.data.connectorName) {
-                urlName = this.data.connectorName;
+            if(this.data.connectorId) {
+                urlName = this.data.connectorId;
             } else {
                 urlName = mergedResult.name;
             }
