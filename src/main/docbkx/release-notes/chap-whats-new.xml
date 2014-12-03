@@ -127,31 +127,51 @@
    </varlistentry>
 
    <varlistentry>
-    <term>Audit Logs for Synchronization Operations</term>
-    <listitem>
-     <para>
-      The reconciliation audit facility has been extended to LiveSync and
-      implicit sync operations. For more information, see <link xlink:show="new"
-      xlink:href="integrators-guide#querying-sync-logs"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Querying the
-      Synchronization Audit Log</citetitle></link> in the <emphasis>Integrator's
-      Guide</emphasis>.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <varlistentry>
     <term>Improvements to the Audit Facility</term>
     <listitem>
-     <para>
-      OpenIDM ${docTargetVersion} provides the ability to purge audit logs at
-      a scheduled interval, or when the logs reach a certain size. For more
-      information, see <link xlink:show="new"
-      xlink:href="integrators-guide#audit-purging"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Purging
-      Obsolete Audit Information</citetitle></link> in the
-      <emphasis>Integrator's Guide</emphasis>.
-     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Audit logs for synchronization operations
+       </para>
+       <para>
+        The reconciliation audit facility has been extended to LiveSync and
+        implicit sync operations. For more information, see <link xlink:show="new"
+        xlink:href="integrators-guide#querying-sync-logs"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Querying the
+        Synchronization Audit Log</citetitle></link> in the <emphasis>Integrator's
+        Guide</emphasis>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Ability to purge audit logs
+       </para>
+       <para>
+        OpenIDM ${docTargetVersion} provides the ability to purge audit logs at
+        a scheduled interval, or when the logs reach a certain size. For more
+        information, see <link xlink:show="new"
+        xlink:href="integrators-guide#audit-purging"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Purging
+        Obsolete Audit Information</citetitle></link> in the
+        <emphasis>Integrator's Guide</emphasis>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Ability to filter audit logs
+       </para>
+       <para>
+        The audit facility provides a new mechanism that enables you to filter
+        audit data, thereby reducing the volume of data that is logged. For more
+        information, see <link xlink:show="new"
+        xlink:href="integrators-guide#audit-filtering"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Filtering
+        Data for Audits</citetitle></link> in the <emphasis>Integrator's
+        Guide</emphasis>.
+       </para>
+      </listitem>
+     </itemizedlist>
     </listitem>
    </varlistentry>
 
