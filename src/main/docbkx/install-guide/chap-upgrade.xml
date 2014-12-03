@@ -311,14 +311,27 @@ $ cp bin/default/script/linkedView.js script/
     </listitem>
     <listitem>
      <para>
-      The database schema has changed slightly for OpenIDM 3.1.0. The following
-      tables have been added: <literal>auditsync</literal>.
+      The database schema has changed slightly for OpenIDM 3.1.0:
      </para>
-     <para>
-      The <literal>reconaction</literal> column has been added to the
-      <literal>auditrecon</literal> table. The <literal>userid</literal> column
-      has been added to the <literal>auditaccess</literal> table.
-     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        The <literal>auditsync</literal> table has been added.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The <literal>reconaction</literal> column has been added to the
+        <literal>auditrecon</literal> table.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The <literal>userid</literal> column has been added to the
+        <literal>auditaccess</literal> table.
+       </para>
+      </listitem>
+     </itemizedlist>
     </listitem>
    </itemizedlist>
    <para>
