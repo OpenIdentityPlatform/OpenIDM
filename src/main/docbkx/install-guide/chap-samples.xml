@@ -7365,7 +7365,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
     <step>
      <para>
       To test the second mapping (from OpenIDM to Salesforce), update any user
-      in the OpenIDM repository.
+      in the OpenIDM repository. For example, update Babs Jensen's username.
      </para>
     </step>
     <step>
@@ -7383,9 +7383,9 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
      </para>
      <para>
       To test that the implicit synchronization has been successful, look at
-      Steven Carter's record in the User View UI. At the bottom of the user
-      profile, the Linked Systems panel indicates Steven Carter's record in the
-      Salesforce data store. Note the changed telephone number.
+      Babs Jensen's record in the User View UI. At the bottom of the user
+      profile, the Linked Systems panel indicates Babs Jensen's record in the
+      Salesforce data store. Note the changed Username.
      </para>
      <para>
       Alternatively, check the updated user record in Salesforce.
@@ -7418,7 +7418,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
      </para>
      <para>
 <link xlink:show="new"
-      xlink:href="https://login.salesforce.com/services/oauth2/authorize?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=https://localhost:8443/admin/oauth2&amp;scope=id%20api%20refresh_token" />
+      xlink:href="https://login.salesforce.com/services/oauth2/authorize?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=https://localhost:8443/admin/oauth.html&amp;scope=id%20api%20refresh_token" />
      </para>
     </step>
     <step>
@@ -7480,12 +7480,13 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
       Secret (<literal>clientSecret</literal>), and refresh token.
      </para>
      <para>
-      In addition, set the <literal>"enabled"</literal> property in the
-      connector configuration file to <literal>true</literal>.
+      In addition, set the <literal>"instanceUrl"</literal> to the value
+      returned in the previous step, and set the <literal>"enabled"</literal>
+      property to <literal>true</literal>.
      </para>
      <para>
       The relevant excerpts of the <filename>provisioner.salesforce-salesforce.json</filename>
-      file follows:
+      file are as follows:
      </para>
      <programlisting width="pagewide">{
     "name" : "salesforce",
@@ -7499,7 +7500,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
         "refreshToken" : "5Aep861KIwKdekr90I4iHdtDgWwRoG7O_6uHrgJ.yVtMS0UaGxRqE6WFM77W7wCV4muVMgdqKjuWI2i5S6sjN2X",
         "clientSecret" : "4850xxxxxxxxxxxxx425",
         "clientId" : "3MVG98dostKihXN7Is8Q0g5q1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxPdB5f5ATwmaMuWxl",
-        "instanceUrl" : null,
+        "instanceUrl" : "https://example-com.cs1.my.salesforce.com",
         "version" : 29
     }
 ... </programlisting>
