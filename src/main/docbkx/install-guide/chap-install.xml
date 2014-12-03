@@ -243,33 +243,28 @@ inflating: openidm/bin/openidm.jar</computeroutput>
       <step>
        <para>Start OpenIDM (UNIX).</para>
        <screen><userinput>$ ./startup.sh</userinput>
-        <computeroutput>
+<computeroutput>
 Using OPENIDM_HOME:   /path/to/openidm
+Using PROJECT_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
-Using LOGGING_CONFIG:
- -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 OpenIDM version "${docTargetVersion}" (revision: XXXX)
--> OpenIDM ready
-        </computeroutput>
-       </screen>
+-> OpenIDM ready</computeroutput></screen>
       </step>
       <step>
        <para>Start OpenIDM (Windows).</para>
        <screen><userinput>C:\&gt; cd \path\to\openidm
-C:\&gt; startup.bat
-        </userinput>
-        <computeroutput>
+C:\&gt; startup.bat</userinput>
+<computeroutput>
 "Using OPENIDM_HOME:   \path\to\openidm"
+"Using PROJECT_HOME:   \path\to\openidm"
 "Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
-"Using LOGGING_CONFIG:
- -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
+"Using LOGGING_CONFIG: -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
 OpenIDM version "${docTargetVersion}" (revision: XXXX)
 -> OpenIDM ready
--&gt;
-        </computeroutput>
-       </screen>
+-&gt; </computeroutput></screen>
       </step>
      </stepalternatives>
      <para>At the resulting <literal>-&gt;</literal> prompt, you can enter
