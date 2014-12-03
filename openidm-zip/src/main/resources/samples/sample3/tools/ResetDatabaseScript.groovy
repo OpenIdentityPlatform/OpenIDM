@@ -37,7 +37,20 @@ import java.sql.Connection
 // action: String correponding to the action ("RUNSCRIPTONCONNECTOR" here)
 // log: a handler to the Log facility
 // options: a handler to the OperationOptions Map
-// scriptArguments: a Map<String,Object> containing the arguments that are passed by the initial caller
+//
+// Arguments can be passed to the script in the REST call, e.g.:
+//
+// curl -k --header "X-OpenIDM-Username: openidm-admin" \
+// --header "X-OpenIDM-Password: openidm-admin" \
+// --header "Content-Type: application/json" \
+// --request POST "https://localhost:8443/openidm/system/scriptedsql?_action=script&scriptId=ResetDatabase" \
+// -d "{\"arg1\":\"foo\",\"arg2\":\"bar\"}"
+//
+// These arguments can be accessed here by name, e.g.
+//
+// def firstArg = arg1 as String;
+//
+// Note that these can be complex types; Arguments are passed in as Object type.
 
 def operation = operation as OperationType
 def connection = connection as Connection
