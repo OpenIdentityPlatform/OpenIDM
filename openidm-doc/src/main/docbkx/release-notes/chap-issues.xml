@@ -221,9 +221,10 @@
   <!--Workarounds to add:
   OPENIDM-2569 <para>Workaround : Add a space or a line to the
   <filename>provisioner.openicf.connectorinfoprovider.json</filename> file,
-  which reloads the associated bundle.</para> -->
+  which reloads the associated bundle.</para>
+  -->
 
-  <!-- List generated at 22:05:51 20141202 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OpenIDM+AND+resolution+%3D+Unresolved+AND+affectedVersion+in+%28%22OpenIDM+2.1.0%22%2C+%22OpenIDM+2.1.1%22%2C+%22OpenIDM+3.0.0%22%2C+%22OpenIDM+3.1.0%22%29+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+priority+in+%28Blocker%2C+Critical%2C+Major%29+AND+type%3DBug+AND+%28component+is+EMPTY+or+component+not+in+%28documentation%2C++Documentation%29%29&startAt=0&maxResults=500&fields=summary-->
+  <!-- List generated at 11:09:53 20141203 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OpenIDM+AND+resolution+%3D+Unresolved+AND+affectedVersion+in+%28%22OpenIDM+2.1.0%22%2C+%22OpenIDM+2.1.1%22%2C+%22OpenIDM+3.0.0%22%2C+%22OpenIDM+3.1.0%22%29+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+priority+in+%28Blocker%2C+Critical%2C+Major%29+AND+type%3DBug+AND+%28component+is+EMPTY+or+component+not+in+%28documentation%2C++Documentation%29%29&startAt=0&maxResults=500&fields=summary-->
   <itemizedlist>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2627" xlink:show="new">OPENIDM-2627</link>: Connectors with an underscore in the ID cannot be edited via Admin UI</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2626" xlink:show="new">OPENIDM-2626</link>: On IE11 update of a users profile throws Unknown error</para></listitem>
@@ -236,9 +237,7 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2590" xlink:show="new">OPENIDM-2590</link>: Missing records in LDAP cause Data Association Management grid to fail</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2580" xlink:show="new">OPENIDM-2580</link>: Workflow can not be started by key by a non-admin user</para></listitem>
    <listitem>
-    <para>
-    <link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2569" xlink:show="new">OPENIDM-2569</link>: When OpenIDM is started with a provisioner.openicf.connectorinfoprovider.json file, the required bundle is not loaded correctly
-    </para>
+    <para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2569" xlink:show="new">OPENIDM-2569</link>: When OpenIDM is started with a provisioner.openicf.connectorinfoprovider.json file, the required bundle is not loaded correctly</para>
     <para>
      Workaround : Add a space or a line to the
      <filename>provisioner.openicf.connectorinfoprovider.json</filename> file,
@@ -247,7 +246,7 @@
    </listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2568" xlink:show="new">OPENIDM-2568</link>: Reconcile Duration counter remains at 0:00 until reconciliation is complete</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2560" xlink:show="new">OPENIDM-2560</link>: Required script file fields for Scripted Groovy Connector configuration preventing validation</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2515" xlink:show="new">OPENIDM-2515</link>: OpenAM Sample: 500 error </para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2502" xlink:show="new">OPENIDM-2502</link>: Instructions associated with RC init creation script are incomplete</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2496" xlink:show="new">OPENIDM-2496</link>: When SSL is enabled on LDAP connector with right  CA certificate, validation failed on UI </para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2460" xlink:show="new">OPENIDM-2460</link>: JAVA_TYPE_DATE nativeType not supported</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2454" xlink:show="new">OPENIDM-2454</link>: REST errors (4xx and 5xx) interfere with CORS response headers</para></listitem>
@@ -259,7 +258,6 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2244" xlink:show="new">OPENIDM-2244</link>: AD PW Sync Setup script wizard fails when browsing for a PKCS12 format certificate file</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2141" xlink:show="new">OPENIDM-2141</link>: When creating a provisioner with CREST no errors are thrown when a provisioner already exists </para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2107" xlink:show="new">OPENIDM-2107</link>: Deleting managed/user via REST or UI leaves links records behind</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2068" xlink:show="new">OPENIDM-2068</link>: Audit service does not pass cREST paging parameters along with other query details</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2034" xlink:show="new">OPENIDM-2034</link>: Support arbitrary [commons] auth modules via className</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2028" xlink:show="new">OPENIDM-2028</link>: The .NET Connector Server Exception displays an incorrect connector error</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2016" xlink:show="new">OPENIDM-2016</link>: sync on unsupported object class with remote java connector returns 500 instead of 400</para></listitem>
@@ -296,7 +294,9 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1074" xlink:show="new">OPENIDM-1074</link>: disabling automatic polling for changes of config file not possible on new install</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-848" xlink:show="new">OPENIDM-848</link>: Conflicting behavior might be observed between the default fields set by the onCreate script and policy enforcement</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-662" xlink:show="new">OPENIDM-662</link>: query-all-ids always returns the revision as 0, even after the object has been updated to a newer revision</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-470" xlink:show="new">OPENIDM-470</link>: OpenIDM cannot rename objects - if the identifier of the object changes, the associated link breaks</para></listitem>
   </itemizedlist>
+
 
  </section>
 </chapter>
