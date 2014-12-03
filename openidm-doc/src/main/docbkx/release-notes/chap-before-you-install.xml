@@ -184,8 +184,8 @@
    <term>Operating Systems</term>
    <listitem>
     <para>
-     OpenIDM ${docTargetVersion} has been tested on most variations of
-     Linux and on Windows 2008 R2 and Windows 2012 R2.
+     OpenIDM ${docTargetVersion} is supported on CentOS Linux 6.5 and on Windows
+     2008 R2 and Windows 2012 R2. It has been tested on most variations of Linux.
     </para>
    </listitem>
   </varlistentry>
