@@ -91,7 +91,7 @@
     </varlistentry>
 
    <varlistentry>
-    <term>Changes to Connector Configuration Creation</term>
+    <term>Changes to connector configuration creation</term>
     <listitem>
      <para>
       The way in which you generate connector configurations for access to
@@ -105,6 +105,20 @@
      <para>
       The previous method of creating a connector configuration is retained in
       this release, for compatibility.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>New location for sample JDBC repository configurations</term>
+    <listitem>
+     <para>
+      The sample JDBC repository configurations, previously located at
+      <filename>openidm/samples/misc/repo.jdbc-<replaceable>repo-type</replaceable>.json</filename>,
+      are now located at
+      <filename>openidm/db/<replaceable>repo-type</replaceable>/conf/repo.jdbc.json</filename>.
+      The files no longer need to be renamed before being copied to your
+      project's <literal>conf</literal> directory.
      </para>
     </listitem>
    </varlistentry>
