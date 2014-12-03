@@ -132,10 +132,6 @@ orientdb&gt; </screen>
   <para>
    This command updates both the repository and the repository configuration file.
   </para>
-  <para>
-   For more information about OrientDB Studio, see
-   the <link xlink:href="http://code.google.com/p/orient/wiki/OrientDB_Studio">
-   OrientDB Studio documentation</link>.</para>
  </section>
 
  <section xml:id="about-the-sample">
