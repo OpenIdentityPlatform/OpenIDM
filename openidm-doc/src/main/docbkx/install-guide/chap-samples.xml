@@ -1594,6 +1594,15 @@ $ ./startup.sh -p samples/sample2d</screen>
    Toolkit can be used. These scripts cannot be used "as is" in your deployment,
    but are a good starting point on which to base your customization.
   </para>
+  <!--
+  <note>
+   <para>
+    ForgeRock supports connectors that are based on the configurations shown in
+    the ScriptedSQL, ScriptedREST and ScriptedCREST samples. Scripted Groovy
+    connectors that you create outside of these samples are inherently specific
+    to your deployment. They are therefore supported on a best effort basis.
+   </para>
+  </note> -->
 
   <section xml:id="more-sample3">
    <title>Sample 3 - Using the Groovy Connector Toolkit to Connect to MySQL With ScriptedSQL</title>
@@ -3756,6 +3765,15 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
    Windows ecosystem. You can use the PowerShell Connector Toolkit to create
    connectors that can provision any Microsoft system.
   </para>
+  <!--
+  <note>
+   <para>
+    ForgeRock supports connectors that are based on the configuration shown in
+    this sample. Scripted PowerShell connectors that you create outside of this
+    sample are inherently specific to your deployment. They are therefore
+    supported on a best effort basis.
+   </para>
+  </note> -->
   <para>
    The PowerShell Connector Toolkit is available, with a subscription, from
    <link xlink:show="new" xlink:href="https://backstage.forgerock.com/">ForgeRock
@@ -3871,6 +3889,33 @@ C:\></computeroutput></screen>
      <screen>$ <userinput>cd /path/to/openidm</userinput>
 $ <userinput>cp samples/provisioners/provisioner.openicf-adpowershell.json conf/</userinput></screen>
      <para>
+      The following excerpt of the sample connector configuration shows the
+      configuration properties:
+     </para>
+     <programlisting>  "configurationProperties" : {
+    "AuthenticateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADAuthenticate.ps1",
+    "CreateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADCreate.ps1",
+    "DeleteScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADDelete.ps1",
+    "ResolveUsernameScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADResolveUsername.ps1",
+    "SchemaScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADSchema.ps1",
+    "SearchScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADSearch.ps1",
+    "SyncScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADSync.ps1",
+    "TestScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADTest.ps1",
+    "UpdateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADUpdate.ps1",
+    "VariablesPrefix" : "Connector",
+    "QueryFilterType" : "AdPsModule",
+    "ReloadScriptOnExecution" : true,
+    "UseInterpretersPool" : true,
+    "SubstituteUidAndNameInQueryFilter" : true,
+    "UidAttributeName" : "ObjectGUID",
+    "NameAttributeName" : "DistinguishedName",
+    "PsModulesToImport" : [ "ActiveDirectory" ],
+    "Host" : "",
+    "Port" : null,
+    "Login" : "",
+    "Password" : null
+  },</programlisting>
+     <para>
       The sample connector configuration assumes that the scripts are located in
       <filename>C:/openidm/samples/powershell2AD/tools/</filename>. If you
       copied your scripts to a different location, adjust your connector
@@ -3882,19 +3927,30 @@ $ <userinput>cp samples/provisioners/provisioner.openicf-adpowershell.json conf/
       Windows path.
      </para>
      <para>
-      In addition, make sure that the value of the
-      <literal>"connectorHostRef"</literal> property in the connector
-      configuration file matches the value that you specified in the remote
-      connector configuration file, in step 2 of this procedure. For example:
-     </para>
-     <screen>"connectorHostRef" : "dotnet",</screen>
-     <para>
       The host, port, login and password of the machine on which Active
       Directory runs do not need to be specified here. By default the Active
       Directory cmdlets pick up the first available Domain Controller. In
       addition, the scripts are executed using the credentials of the .Net
       connector server.
      </para>
+     <note>
+      <para>
+       The <literal>"ReloadScriptOnExecution"</literal> property is set to
+       <literal>true</literal> in this sample configuration. This setting causes
+       script files to be reloaded each time the script is invoked. Having
+       script files reloaded each time is suitable for debugging purposes.
+       However, this property should be set to <literal>false</literal> in
+       production environments, as the script reloading can have a negative
+       performance impact.
+      </para>
+     </note>
+     <para>
+      In addition, make sure that the value of the
+      <literal>"connectorHostRef"</literal> property in the connector
+      configuration file matches the value that you specified in the remote
+      connector configuration file, in step 2 of this procedure. For example:
+     </para>
+     <screen>"connectorHostRef" : "dotnet",</screen>
     </step>
    </procedure>
   </section>
