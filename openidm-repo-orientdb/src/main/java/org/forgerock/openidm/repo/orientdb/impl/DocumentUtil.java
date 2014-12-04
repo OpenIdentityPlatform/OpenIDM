@@ -28,7 +28,6 @@ import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -41,6 +40,8 @@ import org.forgerock.json.resource.ConflictException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.forgerock.json.fluent.JsonValue.json;
 
 /**
  * A utility class for handling and converting OrientDB ODocuments
@@ -67,8 +68,6 @@ public class DocumentUtil  {
      *            the OrientDB document to convert
      * @return the Resource with the id, rev, and the doc converted into maps, lists, 
      *         java types; or null if the doc was null
-     * @throws JsonException
-     *             when the JSON can not be parsed
      */
     public static Resource toResource(ODocument doc) {
         Resource result = null;
@@ -134,10 +133,10 @@ public class DocumentUtil  {
      * Modifies the passed in objToClean where possible (List, Map), 
      * returns new types where it is not (ODocument, Set)
      * 
-     * @param objToClean
+     * @param objToClean the object to clean/bind
      * @return the object in JSON object model representation
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static Object asSimpleBinding(Object objToClean) {
         if (objToClean instanceof ODocument) {
             logger.trace("Converting embedded ODocument {} to map ", objToClean);
@@ -165,6 +164,7 @@ public class DocumentUtil  {
      * @param listToClean list to modify if necessary
      * @return the modified list
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static List toSimpleModel(List listToClean) {
         ListIterator<Object> listIter = listToClean.listIterator();
         while(listIter.hasNext()) {
@@ -185,6 +185,7 @@ public class DocumentUtil  {
      * @param setToClean set to convert to List and modify if necessary
      * @return the modified list
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static List toSimpleModel(Set setToClean) {
         // In JSON there are ordered lists, not Set
         List replacementList = new ArrayList();
@@ -199,6 +200,7 @@ public class DocumentUtil  {
      * @param mapToClean map to modify if necessary
      * @return the modified map
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static Map toSimpleModel(Map<String, Object> mapToClean) {
         for(Map.Entry<String, Object> entry : mapToClean.entrySet()) {
             entry.setValue(asSimpleBinding(entry.getValue()));
@@ -326,7 +328,7 @@ public class DocumentUtil  {
                     logger.trace("Instantiate new ODocument to represent embedded map for {}.", key);
                     existingDoc = new ODocument(); 
                     //} 
-                    ODocument converted = toDocument((Map<String, Object>) value, existingDoc, db, null, patch, false);
+                    ODocument converted = toDocument(json(value).asMap(), existingDoc, db, null, patch, false);
                     result.field(entry.getKey(), converted, OType.EMBEDDED);
                 } else {
                     logger.trace("Setting field {} to value {}", key, value);
