@@ -145,14 +145,79 @@
     </para>
     <para>
      When using the LDAP connector to provision to Active Directory, OpenIDM
-     ${docTargetVersion} supports Active Directory Domain Controllers and
-     Active Directory Global Catalogues. This release also provides support for
-     Active Directory Lightweight Directory Services (LDS).
+     ${docTargetVersion} supports Active Directory Domain Controllers, Active
+     Directory Global Catalogues, and Active Directory Lightweight Directory
+     Services (LDS).
     </para>
     <para>
      OpenIDM ${docTargetVersion} also provides support for Windows 2012 R2
      as the remote system for connectors and password synchronization plugins.
     </para>
+    <para>
+     The following table lists the supported connector, connector server, and
+     password synchronization plugins for this OpenIDM release.
+    </para>
+    <table xml:id="idm-icf-compatibility">
+      <title>OpenIDM ${serverDocTargetVersion} Supported Connectors</title>
+      <tgroup cols="2">
+       <thead>
+        <row>
+         <entry>Connector</entry>
+         <entry>Version</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>CSV File Connector</entry>
+         <entry>1.1.0.2</entry>
+        </row>
+        <row>
+         <entry>Database Table Connector</entry>
+         <entry>1.1.0.1</entry>
+        </row>
+        <row>
+         <entry>Google Apps Connector</entry>
+         <entry>1.4.0.0</entry>
+        </row>
+        <row>
+         <entry>Scripted Groovy Connector Toolkit</entry>
+         <entry>1.4.1.0</entry>
+        </row>
+        <row>
+         <entry>Generic LDAP Connector</entry>
+         <entry>1.4.0.0</entry>
+        </row>
+        <row>
+         <entry>XML Connector</entry>
+         <entry>1.1.0.2</entry>
+        </row>
+        <row>
+         <entry>PowerShell Connector Toolkit</entry>
+         <entry>1.4.1.0</entry>
+        </row>
+        <row>
+         <entry>Active Directory Connector</entry>
+         <entry>1.4.0.0</entry>
+        </row>
+        <row>
+         <entry>Java Connector Server</entry>
+         <entry>1.4.1.0</entry>
+        </row>
+        <row>
+         <entry>.NET Connector Server</entry>
+         <entry>1.4.1.0</entry>
+        </row>
+        <row>
+         <entry>OpenDJ Password Synchronization Plugin</entry>
+         <entry>1.0.3</entry>
+        </row>
+        <row>
+         <entry>Active Directory Password Synchronization Plugin</entry>
+         <entry>1.0.3</entry>
+        </row>
+       </tbody>
+      </tgroup>
+     </table>
    </listitem>
   </varlistentry>
 
