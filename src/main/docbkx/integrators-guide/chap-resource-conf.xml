@@ -2982,12 +2982,15 @@ Properties:
    <title>Scripted SQL Connector</title>
    <para>
     The Scripted SQL Connector uses customizable Groovy scripts to interact with
-    the database.
+    the database. This connector is not bundled with OpenIDM ${docTargetVersion}
+    but can be downloaded from the <link xlink:show="new"
+    xlink:href="http://openicf.forgerock.org/connectors/index.html">OpenICF
+    Connectors</link> page.
    </para>
    <itemizedlist>
     <para>
-     The connector uses one script for each of the following actions on the
-     external database.
+     The Scripted SQL connector uses one script for each of the following
+     actions on the external database.
     </para>
     <listitem>
      <para>
@@ -3195,9 +3198,9 @@ Properties:
     <filename>MsPowerShell.Connector.dll</filename> to the same folder in which
     the Connector Server(<filename>connectorserver.exe</filename>) is located.
     <link xlink:show="new"
-          xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-     Enterprise</link> includes sample connectors and scripts that will
-    enable you to get started with this toolkit.
+    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
+    Enterprise</link> includes sample connectors for Active Directory, and
+    scripts that will enable you to get started with this toolkit.
    </para>
   </section>
 
