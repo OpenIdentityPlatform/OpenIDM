@@ -25,9 +25,11 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.openidm.config.enhanced.InvalidException;
@@ -40,7 +42,6 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.index.OIndexManager;
-import com.orientechnologies.orient.core.index.OIndexManagerProxy;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
@@ -52,6 +53,9 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
 import java.util.Collection;
 import java.util.Set;
+
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * A Helper to interact with the OrientDB
@@ -95,7 +99,7 @@ public class DBHelper {
             logger.debug("Getting pool {}", dbURL);
             pool = pools.get(dbURL);
             if (pool == null) {
-                pool = initPool(dbURL, user, password, minSize, maxSize, completeConfig);
+                pool = initPool(dbURL, user, password, minSize, maxSize);
                 pools.put(dbURL, pool);
             }
         } finally {
@@ -113,12 +117,11 @@ public class DBHelper {
      * @param dbURL the orientdb URL
      * @param oldUser the old orientdb user to update
      * @param oldPassword the old orientdb password to update
-     * @param oldUser the new orientdb user
-     * @param oldPassword the new orientdb password
-     * @throws org.forgerock.openidm.config.InvalidException
+     * @param newUser the new orientdb user
+     * @param newPassword the new orientdb password
      */
     public synchronized static void updateDbCredentials(String dbURL, String oldUser, String oldPassword, 
-            String newUser, String newPassword) throws InvalidException {
+            String newUser, String newPassword) {
 
         ODatabaseDocumentTx db = null;
         try {
@@ -152,7 +155,9 @@ public class DBHelper {
                 logger.info("Faillure reported in closing pool {}", pool, ex);
             }
         }
-        pools = new HashMap(); // release all our closed pool references
+        // release all our closed pool references
+        pools.clear();
+        pools = new HashMap<String, ODatabaseDocumentPool>();
     }
     
     /**
@@ -165,7 +170,7 @@ public class DBHelper {
             pool.close();
             logger.trace("Closed pool for {} {}", dbUrl, pool);
         } catch (Exception ex) {
-            logger.info("Failure reported in closing pool {} {}", new Object[] {dbUrl, pool, ex});
+            logger.info("Failure reported in closing pool {} {}", dbUrl, pool, ex);
         }
     }
     
@@ -176,12 +181,11 @@ public class DBHelper {
      * @param password the orientdb password to connect
      * @param minSize the orientdb pool minimum size
      * @param maxSize the orientdb pool maximum size
-     * @param completeConfig
      * @return the initialized pool
      * @throws org.forgerock.openidm.config.enhanced.InvalidException
      */
-    private static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
-            int minSize, int maxSize, JsonValue completeConfig) throws InvalidException {
+    private static ODatabaseDocumentPool initPool(String dbURL, String user, String password,  int minSize, int maxSize)
+            throws InvalidException {
         logger.trace("Initializing DB Pool {}", dbURL);
         
         // Enable transaction log
@@ -234,7 +238,7 @@ public class DBHelper {
         try {
             logger.info("Verifying the DB.");
             db = pool.acquire(dbURL, user, password);
-            java.util.Iterator iter = db.browseClass("config"); // Config always should exist
+            Iterator<ODocument> iter = db.browseClass("config"); // Config always should exist
             if (iter.hasNext()) {
                 iter.next();
             }
@@ -293,7 +297,6 @@ public class DBHelper {
         
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
         ODatabaseDocumentTx db = new ODatabaseDocumentTx(dbURL);
-        boolean dbExists = false;
 
         // To add support for remote DB checking/creation one 
         // would need to use OServerAdmin instead
@@ -360,36 +363,33 @@ public class DBHelper {
             
             // Default always to create Config class for bootstrapping
             if (orientDBClasses == null || orientDBClasses.isNull()) {
-                orientDBClasses = new JsonValue(new java.util.HashMap());
+                orientDBClasses = json(object());
             }
             
-            Map cfgIndexes = new java.util.HashMap();
-            orientDBClasses.put("config", cfgIndexes);
+            orientDBClasses.put("config", object());
                             
             logger.info("Setting up database");
             for (Object key : orientDBClasses.keys()) {
                 String orientClassName = (String) key;
-                JsonValue orientClassConfig = (JsonValue) orientDBClasses.get(orientClassName);
+                JsonValue orientClassConfig = orientDBClasses.get(orientClassName);
 
                 boolean classAlreadyExists = schema.existsClass(orientClassName);
                 createOrUpdateOrientDBClass(db, schema, orientClassName, orientClassConfig);
-                if (!classAlreadyExists && "internal_user".equals(orientClassName))
-                {
-                    populateDefaultUsers(orientClassName, db, completeConfig);
+                if (!classAlreadyExists && "internal_user".equals(orientClassName)) {
+                    populateDefaultUsers(orientClassName, db);
                 }
             }
         }
     }
     
     // Populates the default user, the pwd needs to be changed by the installer
-    private static void populateDefaultUsers(String defaultTableName, ODatabaseDocumentTx db, 
-            JsonValue completeConfig) throws InvalidException {
+    private static void populateDefaultUsers(String defaultTableName, ODatabaseDocumentTx db) throws InvalidException {
         
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
         String defaultAdminPwd = "openidm-admin";
         String defaultAdminRoles = "openidm-admin,openidm-authorized";
-        populateDefaultUser(defaultTableName, db, completeConfig, defaultAdminUser, 
+        populateDefaultUser(defaultTableName, db, defaultAdminUser,
                 defaultAdminPwd, defaultAdminRoles);
         logger.trace("Created default user {}. Please change the assigned default password.", 
                 defaultAdminUser);
@@ -397,12 +397,12 @@ public class DBHelper {
         String anonymousUser = "anonymous";
         String anonymousPwd = "anonymous";
         String anonymousRoles = "openidm-reg";
-        populateDefaultUser(defaultTableName, db, completeConfig, anonymousUser, anonymousPwd, anonymousRoles);
+        populateDefaultUser(defaultTableName, db, anonymousUser, anonymousPwd, anonymousRoles);
         logger.trace("Created default user {} for registration purposes.", anonymousUser);
     }    
     
-    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, 
-            JsonValue completeConfig, String user, String pwd, String roles) throws InvalidException {        
+    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db,
+            String user, String pwd, String roles) throws InvalidException {
         
         JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
         defaultAdmin.put("_openidm_id", user);
@@ -432,24 +432,23 @@ public class DBHelper {
     }
 
     private static void createProperty(OClass orientClass, String propName, String propertyType) {
-        OType orientPropertyType = null;
         try {
             // Create property type object
-            orientPropertyType = OType.valueOf(propertyType.toUpperCase());
+            OType orientPropertyType = OType.valueOf(propertyType.toUpperCase());
+            // Create property
+            orientClass.createProperty(propName, orientPropertyType);
         } catch (IllegalArgumentException ex) {
             throw new InvalidException("Invalid property type '"
                     + propertyType + "' in configuration for property '" 
-                    + propName + " on " +orientClass.getName() 
-                    + " valid values: " + OType.values() 
+                    + propName + " on " + orientClass.getName()
+                    + " valid values: { " + StringUtils.join(OType.values(), ", ") + " }"
                     + " failure message: " + ex.getMessage(), ex);
         }
-        // Create property
-        orientClass.createProperty((String)propName, orientPropertyType);
-    }    
+    }
 
     private static void createIndex(OClass orientClass, String indexType, String[] propertyNames, String propertyType) {
             logger.info("Creating index on properties {} of type {} with index type {} on {} for OrientDB class ", 
-                    new Object[] {propertyNames, propertyType, indexType, orientClass.getName()});
+                    propertyNames, propertyType, indexType, orientClass.getName());
             try {
                 // Create the index
                 String indexName = uniqueIndexName(orientClass.getName(), propertyNames);
@@ -459,7 +458,8 @@ public class DBHelper {
                 throw new InvalidException("Invalid index type '" + indexType + 
                         "' in configuration on properties "
                         + propertyNames + " of type " + propertyType + " on " 
-                        + orientClass.getName() + " valid values: " + OClass.INDEX_TYPE.values() 
+                        + orientClass.getName() + " valid values: { "
+                        + StringUtils.join(OClass.INDEX_TYPE.values(), ", ") + " }"
                         + " failure message: " + ex.getMessage(), ex);
             }
         }
@@ -487,8 +487,8 @@ public class DBHelper {
                 propNamesList.add(propertyName);
             } else {
                 propNamesList.addAll(index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList(String.class));
-                if (propNamesList == null) {
-                    throw new InvalidException("Invalid index configuration. " 
+                if (propNamesList.isEmpty()) {
+                    throw new InvalidException("Invalid index configuration. "
                             + "Missing property name(s) on index configuration for property type "
                             + propertyType + " with index type " + indexType + " on " + orientClassName);
                 }
@@ -496,7 +496,7 @@ public class DBHelper {
             
             // Add new Class properties
             for (String propName : propNamesList) {
-                if (orientClass.existsProperty(propName) == false) {
+                if (!orientClass.existsProperty(propName)) {
                     logger.info("Creating property {} of type {}", new Object[] {propName, propertyType});
                     createProperty(orientClass, propName, propertyType);
                 }
@@ -504,11 +504,11 @@ public class DBHelper {
 
             // Add or re-create indexes. No need to rebuild indexes as automatic
             // indexes are rebuilt by OrientDB when they are created.
-            String[] propertyNames = (String[]) propNamesList.toArray(new String[0]);
+            String[] propertyNames = propNamesList.toArray(new String[propNamesList.size()]);
             if (propertyNames.length > 0) {
                 String indexName = uniqueIndexName(orientClass.getName(), propertyNames);
-                OIndex oIndex = orientClass.getClassIndex(indexName);
-                if (oIndex != null && oIndex.getType().equalsIgnoreCase(indexType) == false) {
+                OIndex<?> oIndex = orientClass.getClassIndex(indexName);
+                if (oIndex != null && !oIndex.getType().equalsIgnoreCase(indexType)) {
                     indexManager.dropIndex(indexName);
                     oIndex = null;
                 }
@@ -529,7 +529,7 @@ public class DBHelper {
             if (!indexProperties.contains(propName))
             {
                 Set<OIndex<?>> propIndexes = indexManager.getClassInvolvedIndexes(orientClass.getName(), propName);
-                for (OIndex propIndex : propIndexes) {
+                for (OIndex<?> propIndex : propIndexes) {
                     // Ensure that we only drop indexes which we created and
                     // match the OpenIDM index naming convention
                     String indexRegex = uniqueIndexName(orientClass.getName(), new String[]{".*"});

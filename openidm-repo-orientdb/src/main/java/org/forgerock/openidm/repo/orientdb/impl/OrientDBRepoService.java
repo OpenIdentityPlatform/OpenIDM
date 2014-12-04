@@ -795,7 +795,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * of checking recursiveness
      * @return whether the root cause is the specified exception
      */
-    private boolean isCauseException(Throwable ex, Class clazz, int maxLevels) {
+    private boolean isCauseException(Throwable ex, Class<?> clazz, int maxLevels) {
         if (maxLevels > 0) {
             Throwable cause = ex.getCause();
             if (cause != null) {
@@ -811,7 +811,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @param repoConfig the bootstrap configuration
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
-    static OrientDBRepoService getRepoBootService(Map repoConfig) {
+    static OrientDBRepoService getRepoBootService(Map<String, Object> repoConfig) {
         if (bootRepo == null) {
             bootRepo = new OrientDBRepoService();
         }
