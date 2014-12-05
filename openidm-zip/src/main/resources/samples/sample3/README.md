@@ -51,7 +51,7 @@ http://openidm.forgerock.org/doc/webhelp/integrators-guide/appendix-scripting.ht
 The scripted connector supports any number of custom scripted endpoints. These are
 configured via the provisioner script and currently support only Groovy. See
 provisioner.openicf-scriptedsql.json and tools/ResetDatabaseScript.groovy for a
-sample implementation. Step 6 below executes this script.
+sample implementation. Step 5 below executes this script.
 
 CAVEAT: Because MySQL cannot "un-hash" user passwords there is no way for a recon
 to retrieve and store the password in the managed user object in OpenIDM. This may
