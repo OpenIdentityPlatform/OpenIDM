@@ -1422,17 +1422,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
                         operationOptionsBuilder.setAttributesToGet(Uid.NAME);
                     } else {
-                        handler.handleError(new BadRequestException("Unsupported _queryId: "
-                                + request.getQueryId()));
-                        return;
+                        throw new BadRequestException("Unsupported _queryId: " + request.getQueryId());
                     }
                 } else if (request.getQueryExpression() != null) {
                     filter = QueryFilter.valueOf(request.getQueryExpression()).accept(
                             RESOURCE_FILTER, objectClassInfoHelper);
 
-                } else {
+                } else if (request.getQueryFilter() != null) {
                     // No filtering or query by filter.
                     filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
+                } else {
+                    throw new BadRequestException("One of _queryId, _queryExpression, or _queryFilter is required.");
                 }
 
                 // If paged results are requested then decode the cookie in
