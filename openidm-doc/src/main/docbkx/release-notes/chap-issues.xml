@@ -139,6 +139,7 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1935" xlink:show="new">OPENIDM-1935</link>: The ICF 1.4's RetryableException is wrapped incorrectly by IDM.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1889" xlink:show="new">OPENIDM-1889</link>: UI failed to recover from password changing failure</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1866" xlink:show="new">OPENIDM-1866</link>: Delete of workflow definitions and instances via REST should return the deleted object</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1821" xlink:show="new">OPENIDM-1821</link>: Deleting a role assigned to user(s) should not be possible</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1784" xlink:show="new">OPENIDM-1784</link>: OpenIDM doesn't throw error on startup for provisioner's incorrect connectorRef</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1756" xlink:show="new">OPENIDM-1756</link>: Cancelling "completed" taskscanner task sets its state to "cancelled" whereas it should have no effect</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1658" xlink:show="new">OPENIDM-1658</link>: Hard-coded reference to database schema and table name in jdbc config files</para></listitem>
@@ -201,8 +202,7 @@
     <para>
      The OpenIDM implementation of roles does not enforce referential integrity.
      In other words, you can set up users with a hypothetical role x, before you
-     create that referential role x. Conversely, if you delete an existing
-     referential role y, users with that role will retain that role.
+     create that referential role x.
     </para>
     <para>
      When dynamically assigned roles are added, OpenIDM does not set up
