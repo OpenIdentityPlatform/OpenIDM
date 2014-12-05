@@ -228,7 +228,7 @@
   <itemizedlist>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2637" xlink:show="new">OPENIDM-2637</link>: OpenID Connect Auth Module is shown in the Admin UI, but is not supported</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2627" xlink:show="new">OPENIDM-2627</link>: Connectors with an underscore in the ID cannot be edited via Admin UI</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2626" xlink:show="new">OPENIDM-2626</link>: On IE11 update of a users profile throws Unknown error</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2626" xlink:show="new">OPENIDM-2626</link>: The User View UI does not currently work with Internet Explorer</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2622" xlink:show="new">OPENIDM-2622</link>: For JDBC repos, accessing the audit log over REST shows incorrect "userid" and "roles" attribute values</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2621" xlink:show="new">OPENIDM-2621</link>: Attempting to read a non-existent audit record over REST raises an exception in the console</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2612" xlink:show="new">OPENIDM-2612</link>: queryFilter command in sample3 fails with status 500</para></listitem>
