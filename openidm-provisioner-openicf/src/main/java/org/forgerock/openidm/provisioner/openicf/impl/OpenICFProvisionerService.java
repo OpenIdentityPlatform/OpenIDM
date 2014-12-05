@@ -2258,10 +2258,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             }
                                         } catch (Exception e) {
                                             failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
-                                            if (logger.isDebugEnabled()) {
-                                                logger.error("Failed to synchronize {} object, handle failure using {}",
-                                                        syncDelta.getUid(), syncFailureHandler, e);
-                                            }
+                                            logger.debug("Failed to synchronize {} object, handle failure using {}",
+                                                    syncDelta.getUid(), syncFailureHandler, e);
                                             Map<String, Object> syncFailureMap = new HashMap<String, Object>(6);
                                             syncFailureMap.put("token", syncDelta.getToken().getValue());
                                             syncFailureMap.put("systemIdentifier", systemIdentifier.getName());
@@ -2299,10 +2297,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 lastException.put("syncDelta", failedRecord[0]);
                             }
                             stage.put("lastException", lastException);
-                            if (logger.isDebugEnabled()) {
-                                logger.error("Live synchronization of {} failed on {}",
-                                        new Object[] { objectType, systemIdentifier.getName() }, throwable);
-                            }
+                            logger.debug("Live synchronization of {} failed on {}",
+                                    new Object[] { objectType, systemIdentifier.getName() }, throwable);
                         } else {
                             if (syncToken != null) {
                                 lastToken[0] = syncToken;
