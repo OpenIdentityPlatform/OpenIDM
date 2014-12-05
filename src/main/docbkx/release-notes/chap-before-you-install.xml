@@ -158,7 +158,7 @@
      password synchronization plugins for this OpenIDM release.
     </para>
     <table xml:id="idm-icf-compatibility">
-      <title>OpenIDM ${DocTargetVersion} Supported Connectors</title>
+      <title>Supported Connectors, Connector Servers, and Plugins</title>
       <tgroup cols="2">
        <thead>
         <row>
