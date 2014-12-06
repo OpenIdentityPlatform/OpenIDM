@@ -28,9 +28,9 @@ define([
     "./adminBaseTest",
     "./managedobjects/managedObjectsTest",
     "./resources/resourceTest",
-    "./mapping/reconTests",
-    "./mapping/addMappingTest"
-], function (adminBaseTest, moTest, resourceTest, reconTests, addMappingTest) {
+    "./mapping/addMappingTest",
+    "./mapping/reconTests"
+], function (adminBaseTest, moTest, resourceTest, addMappingTest, reconTests) {
 
     return {
         executeAll: function (server) {

@@ -139,13 +139,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     this.parentRender(_.bind(function () {
                         validatorsManager.bindValidators(this.$el);
 
-                        this.loadConnectorTemplate();
+                        this.loadConnectorTemplate(callback);
 
                         this.setupLiveSync();
-
-                        if(callback){
-                            callback();
-                        }
                     }, this));
                 } else {
                     var splitDetails = args[0].match(/(.*?)_(.*)/).splice(1),
@@ -262,14 +258,14 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                                         //Set the current newest version incase there is a range
                                         this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
+
+
+                                        if (callback) {
+                                            callback();
+                                        }
                                     }, this));
 
                                 this.setupLiveSync();
-
-                                if (callback) {
-                                    callback();
-                                }
-
                             }, this));
                         }
                     }, this));
@@ -603,7 +599,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             }
         },
 
-        loadConnectorTemplate: function() {
+        loadConnectorTemplate: function(callback) {
             var connectorData,
                 connectorTemplate,
                 selectedValue = this.$el.find("#connectorType option:selected"),
@@ -660,6 +656,11 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                                 this.setSubmitFlow();
 
                                 validatorsManager.validateAllFields(this.$el);
+
+                                if(_.isFunction(callback)){
+                                    callback();
+                                }
+
                             }, this));
                     }, this));
                 } else {

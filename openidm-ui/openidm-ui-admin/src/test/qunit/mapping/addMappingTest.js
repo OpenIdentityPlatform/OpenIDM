@@ -62,7 +62,6 @@ define([
                     setTimeout(function(){
                         QUnit.start();
 
-                        console.log(addMappingView.$el.find("#mappingSource .mapping-resource").html());
                         QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource:visible").length, 1, "Add mapping source successful");
                         QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource:visible").length, 1, "Add target source successful");
 
