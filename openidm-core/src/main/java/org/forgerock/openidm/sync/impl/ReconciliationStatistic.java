@@ -212,10 +212,10 @@ public class ReconciliationStatistic {
     }
 
     /**
-     * @return the duration, in millisconds, that the reconciliation took, -1 if unavailable
+     * @return the duration, in millisconds, that the reconciliation took, or the duration of the current run
      */
     public long getDuration() {
-        return getDuration(this.startTime, this.endTime);
+        return getDuration(this.startTime, hasEnded() ? this.endTime : System.currentTimeMillis());
     }
 
     /**
