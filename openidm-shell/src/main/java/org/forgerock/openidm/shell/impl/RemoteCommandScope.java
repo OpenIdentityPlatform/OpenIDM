@@ -49,6 +49,7 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
@@ -233,22 +234,24 @@ public class RemoteCommandScope extends CustomCommandScope {
                 return;
             }
 
+            final ResourceName configResource = ResourceName.valueOf("config");
             for (Map.Entry<String, File> entry : localConfigSet.entrySet()) {
                 try {
                     if (remoteConfigSet.containsKey(entry.getKey())) {
                         // Update
-                        UpdateRequest updateRequest = Requests.newUpdateRequest("config", entry.getKey(), new JsonValue(
-                                mapper.readValue(entry.getValue(), Map.class)));
+                        UpdateRequest updateRequest = Requests.newUpdateRequest(configResource.concat(entry.getKey()),
+                                new JsonValue(mapper.readValue(entry.getValue(), Map.class)));
 
                         resource.update(null, updateRequest);
-                        // Do not remove the remote old config if the update
-                        // seceded otherwise remove the old config.
+                        // If the update succeeded, remove the entry from 'remoteConfigSet' - this prevents it
+                        // from being deleted below.  If this update fails, the entry will remain in remoteConfigSet
+                        // and will be deleted from the remote IDM instance.
                         remoteConfigSet.remove(entry.getKey());
                     } else {
                         // Create
-                        CreateRequest createRequest = Requests.newCreateRequest("config", entry.getKey(), new JsonValue(
-                                mapper.readValue(entry.getValue(), Map.class)));
-                        Resource createdResource = resource.create(null, createRequest);
+                        CreateRequest createRequest = Requests.newCreateRequest(configResource.concat(entry.getKey()),
+                                new JsonValue(mapper.readValue(entry.getValue(), Map.class)));
+                        resource.create(null, createRequest);
                     }
                     prettyPrint(console, "ConfigImport", entry.getKey(), null);
                 } catch (Exception e) {
@@ -259,14 +262,16 @@ public class RemoteCommandScope extends CustomCommandScope {
             // Delete all additional config objects
             if (replaceall) {
                 for (String configId : remoteConfigSet.keySet()) {
-                    if ("authentication".equals(configId) || "router".equals(configId)
-                            || "audit".equals(configId) || configId.startsWith("repo")) {
+                    if ("authentication".equals(configId)
+                            || "router".equals(configId)
+                            || "audit".equals(configId)
+                            || configId.startsWith("repo")) {
                         prettyPrint(console, "ConfigDelete", configId, "Protected configuration can not be deleted");
                         continue;
                     }
 
                     try {
-                        resource.delete(null, Requests.newDeleteRequest("config", configId));
+                        resource.delete(null, Requests.newDeleteRequest(configResource, configId));
                         prettyPrint(console, "ConfigDelete", configId, null);
                     } catch (Exception e) {
                         prettyPrint(console, "ConfigDelete", configId, e.getMessage());
