@@ -55,44 +55,48 @@
 	Active Directory Administration with Windows PowerShell
 	http://technet.microsoft.com/en-us/library/dd378937(v=ws.10).aspx
 #>
+# We need this global Boolean to handle the case where the search handler returns false 
+# and we don't want to break the pipe because of https://bugster.forgerock.org/jira/browse/OPENIDM-2650
+$proceed = $TRUE
 
 # We define a filter to process results through a pipe and feed the result handler
 filter Process-Results {
-	$result = @{"__UID__" = $_.ObjectGUID; "__NAME__" = $_.DistinguishedName}
-			
-	foreach($attrName in $Connector.Options.AttributesToGet)
+	if ($proceed)
 	{
-		if ($_.Contains($attrName))
+		$result = @{"__UID__" = $_.ObjectGUID; "__NAME__" = $_.DistinguishedName}
+
+		foreach($attrName in $Connector.Options.AttributesToGet)
 		{
-			if ($_.$attrName -eq $null)
+			if ($_.Contains($attrName))
 			{
-				$result.Add($attrName, $null)
-			}
-			elseif ($_.$attrName.GetType().Name -eq "ADPropertyValueCollection")
-			{
-				$values = @();
-				foreach($val in $_.$attrName) 
+			
+				if ($_.$attrName -eq $null)
 				{
-					$values += $val.ToString()
+					$result.Add($attrName, $null)
 				}
-				$result.Add($attrName, $values)
-			}
-			else
-			{
-				$result.Add($attrName, $_.$attrName.ToString())
+				elseif ($_.$attrName.GetType().Name -eq "ADPropertyValueCollection")
+				{
+					$values = @();
+					foreach($val in $_.$attrName) 
+					{
+						$values += $val.ToString()
+					}
+					$result.Add($attrName, $values)
+				}
+				else
+				{
+					$result.Add($attrName, $_.$attrName.ToString())
+				}
 			}
 		}
-	}
-	if (!$Connector.Result.Process($result))
-	{
-		break
+		$proceed = $Connector.Result.Process($result)
 	}
 }
 
 # Always put code in try/catch statement and make sure exceptions are re-thrown to connector
 try
 {
-	$searchBase = 'CN=Users,DC=example,DC=com'
+	$searchBase = "CN=Users,DC=example,DC=com"
 	$attrsToGet = "*"
 	$filter = "*"
 
