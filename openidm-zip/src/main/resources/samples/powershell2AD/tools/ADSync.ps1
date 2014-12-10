@@ -70,31 +70,35 @@
 	http://technet.microsoft.com/en-us/library/dd378937(v=ws.10).aspx
 #>
 
+# We need this global Boolean to handle the case where the sync handler returns false 
+# and we don't want to break the pipe because of https://bugster.forgerock.org/jira/browse/OPENIDM-2650
+$proceed = $TRUE
+
 # We define a filter to process results through a pipe and feed the sync result handler
 filter Process-Sync {
-	$object = @{"__NAME__" = $_.DistinguishedName; "__UID__" = $_.ObjectGUID.ToString();}
-	foreach($attr in $_.GetEnumerator())
+	if ($proceed)
 	{
-		if ($attr.Value.GetType().Name -eq "ADPropertyValueCollection")
+		$object = @{"__NAME__" = $_.DistinguishedName; "__UID__" = $_.ObjectGUID.ToString();}
+		foreach($attr in $_.GetEnumerator())
 		{
-			$values = @();
-			foreach($val in $attr.Value) 
+			if ($attr.Value.GetType().Name -eq "ADPropertyValueCollection")
 			{
-				$values += $val
+				$values = @();
+				foreach($val in $attr.Value) 
+				{
+					$values += $val
+				}
+				$object.Add($attr.Key, $values)
 			}
-			$object.Add($attr.Key, $values)
+			else
+			{
+				$object.Add($attr.Key, $attr.Value)
+			}
 		}
-		else
-		{
-			$object.Add($attr.Key, $attr.Value)
-		}
-	}
-	
-	$result = @{"SyncToken" = $_.uSNChanged; "DeltaType" = "CREATE_OR_UPDATE"; "Uid" = $_.ObjectGUID.ToString(); "Object" = $object}
-	
-	if (!$Connector.Result.Process($result))
-	{
-		break
+		
+		$result = @{"SyncToken" = $_.uSNChanged; "DeltaType" = "CREATE_OR_UPDATE"; "Uid" = $_.ObjectGUID.ToString(); "Object" = $object}
+		
+		$proceed = $Connector.Result.Process($result)
 	}
 }
 

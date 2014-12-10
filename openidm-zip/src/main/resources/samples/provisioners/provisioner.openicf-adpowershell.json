@@ -382,11 +382,6 @@
           "nativeName" : "displayNamePrintable",
           "nativeType" : "string"
         },
-        "logonHours" : {
-          "type" : "string",
-          "nativeName" : "logonHours",
-          "nativeType" : "string"
-        },
         "createTimeStamp" : {
           "type" : "string",
           "nativeName" : "createTimeStamp",
@@ -547,11 +542,6 @@
           "nativeName" : "homeDrive",
           "nativeType" : "string"
         },
-        "__DISABLE_DATE__" : {
-          "type" : "number",
-          "nativeName" : "__DISABLE_DATE__",
-          "nativeType" : "JAVA_TYPE_PRIMITIVE_LONG"
-        },
         "postOfficeBox" : {
           "type" : "array",
           "items" : {
@@ -667,11 +657,6 @@
           },
           "nativeName" : "ou",
           "nativeType" : "string"
-        },
-        "__ENABLE_DATE__" : {
-          "type" : "number",
-          "nativeName" : "__ENABLE_DATE__",
-          "nativeType" : "JAVA_TYPE_PRIMITIVE_LONG"
         },
         "__PASSWORD_EXPIRED__" : {
           "type" : "boolean",

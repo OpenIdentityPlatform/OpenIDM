@@ -85,7 +85,7 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	$StandardSingle = @("division","primaryInternationalISDNNumber","c","l","department","givenName","telephoneNumber","employeeNumber","displayName",
 	"personalTitle","homeDirectory","postalCode","manager","st","initials","employeeType","streetAddress","co","title","middleName","wWWHomePage","company",
 	"comment","scriptPath","mail","displayNamePrintable","ipPhone","homePostalAddress","facsimileTelephoneNumber","homePhone","street","homeDrive",
-	"info","assistant","mobile","employeeID","logonWorkstation","logonHours","userWorkstations","userSharedFolder","description", "name","sn","userPrincipalName")
+	"info","assistant","mobile","employeeID","logonWorkstation","userWorkstations","userSharedFolder","description", "name","sn","userPrincipalName")
 	
 	foreach ($attr in $StandardSingle)
 	{
@@ -149,8 +149,6 @@ $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.Connect
 	$ocib.AddAttributeInfo($opAttrs::PASSWORD)
 	$ocib.AddAttributeInfo($opAttrs::LOCK_OUT)
 	$ocib.AddAttributeInfo($opAttrs::PASSWORD_EXPIRED)
-	$ocib.AddAttributeInfo($opAttrs::DISABLE_DATE)
-	$ocib.AddAttributeInfo($opAttrs::ENABLE_DATE)
 	
 	$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
 	
