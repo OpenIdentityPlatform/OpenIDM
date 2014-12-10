@@ -446,7 +446,6 @@ public class AuditServiceImpl implements AuditService {
             Map<String, Object> r = auditLogger.read(context, type, id);
             handler.handleResult(new Resource((String)r.get(Resource.FIELD_CONTENT_ID), null, new JsonValue(r)));
         } catch (Throwable t) {
-            t.printStackTrace();
             handler.handleError(ResourceUtil.adapt(t));
         }
     }
