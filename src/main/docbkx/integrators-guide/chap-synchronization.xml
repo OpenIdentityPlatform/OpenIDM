@@ -2959,6 +2959,15 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        Other valid actions: <literal>CREATE, UNLINK, IGNORE, REPORT, NOREPORT.
       ASYNC</literal>
       </para>
+      <para>
+       Note that when a target object is deleted, the link from the target to
+       the corresponding source object is not deleted automatically. This
+       enables OpenIDM to detect and report on items that might have been
+       removed without permission or that might need review. If your deployment
+       requires that deleting a target object removes the corresponding link,
+       you must define a back-mapping that enables OpenIDM to identify the
+       deleted object as a source object, and remove the link.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
