@@ -46,6 +46,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.JsonResourceContext;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetContext;
@@ -811,6 +812,30 @@ class ObjectMapping implements SynchronizationListener {
 
 // TODO: cleanup orphan link objects (no matching source or target) here
     }
+    
+    public void setReconEntryMessage(ReconEntry entry, Exception syncException) {
+        JsonValue messageDetail = null;  // top level ObjectSetException
+        Throwable cause = syncException; // Root cause
+        
+        // Loop to find original cause and top level ObjectSetException (if any)
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+            if (messageDetail == null && cause instanceof ObjectSetException) {
+                messageDetail = ((ObjectSetException) cause).toJsonValue();
+                // Check if there is a detail field to use
+                if (!messageDetail.get("detail").isNull()) {
+                	messageDetail = messageDetail.get("detail");
+                }
+            }
+        }
+        
+        // Set message and messageDetail
+        String causeDetail = cause.getMessage() != null ? cause.getMessage() : cause.toString();
+        entry.messageDetail = messageDetail;
+        entry.message = syncException != cause 
+                ? syncException.getMessage() + ". Root cause: " + causeDetail
+                : causeDetail;
+    }
 
     private final ReconAction sourceRecon = new ReconAction() {
         /**
@@ -841,15 +866,7 @@ class ObjectMapping implements SynchronizationListener {
                     entry.status = Status.FAILURE; // exception was not intentional
                     LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
                 }
-                Throwable throwable = se;
-                while (throwable.getCause() != null) { // want message associated with original cause
-                    throwable = throwable.getCause();
-                }
-                if (se != throwable) {
-                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                } else {
-                    entry.message = throwable.getMessage();
-                }
+                setReconEntryMessage(entry, se);
             }
             String[] targetIds = op.getTargetIds();
             for (String handledId : targetIds) {
@@ -904,15 +921,7 @@ class ObjectMapping implements SynchronizationListener {
                     entry.status = Status.FAILURE; // exception was not intentional
                     LOGGER.warn("Unexpected failure during target reconciliation {}", reconContext.getReconId(), se);
                 }
-                Throwable throwable = se;
-                while (throwable.getCause() != null) { // want message associated with original cause
-                    throwable = throwable.getCause();
-                }
-                if (se != throwable) {
-                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                } else {
-                    entry.message = throwable.getMessage();
-                }
+                setReconEntryMessage(entry, se);
             }
             if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
@@ -2057,6 +2066,8 @@ class ObjectMapping implements SynchronizationListener {
         /** TODO: Description. */
         public String message;
         /** TODO: Description. */
+        public JsonValue messageDetail;
+        /** TODO: Description. */
         public String actionId;
 
         private DateUtil dateUtil;
@@ -2120,6 +2131,7 @@ class ObjectMapping implements SynchronizationListener {
             jv.put("action", ((op == null || op.action == null) ? null : op.action.toString()));
             jv.put("status", (status == null ? null : status.toString()));
             jv.put("message", message);
+            jv.put("messageDetail", messageDetail);
             jv.put("actionId", actionId);
             return jv;
         }
