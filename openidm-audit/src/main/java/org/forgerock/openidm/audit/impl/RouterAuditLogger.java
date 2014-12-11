@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2013-2014 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -49,14 +49,11 @@ import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Audit logger that logs to a router target.
- *
- * @author brmiller
  */
 public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(RouterAuditLogger.class);
@@ -131,16 +128,17 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
 
             List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
             for (Resource entry : results) {
-                entries.add(
-                        AuditServiceImpl.formatLogEntry(
-                            unflattenActivityEntry(entry.getContent().asMap()), type));
+                AuditServiceImpl.unflattenEntry(entry.getContent().asMap());
+                        entries.add(
+                                AuditServiceImpl.formatLogEntry(entry.getContent().asMap(), type));
             }
             result.put("entries", entries);
         } else {
             ReadRequest request = Requests.newReadRequest(getRouterLocation(type), id);
             Map<String, Object> entry = connectionFactory.getConnection().read(createAuditContext(context), request)
                     .getContent().asMap();
-            result = AuditServiceImpl.formatLogEntry(unflattenActivityEntry(entry), type);
+            AuditServiceImpl.unflattenEntry(entry);
+            result = AuditServiceImpl.formatLogEntry(entry, type);
         }
 
         return result;
@@ -205,45 +203,6 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
         }
     }
 
-
-    /**
-     * As a consequence of "santizeObject" (below), certain structures may be
-     * "flattened" on write, and must be re-inflated on read.  This is a list of
-     * attributes known to be Maps that were flattened.
-     */
-    private static final String[] MAP_ATTRIBUTES_TO_UNFLATTEN = new String[] {
-            "before", "after", "messageDetail"
-    };
-
-    /**
-     * Format the activity entry by unflattening JSON-Maps.
-     *
-     * @param entry the Map of attributes read from the router that may contain
-     *              JSON-Map data as values
-     * @return the unflattened entry
-     */
-    private Map<String, Object> unflattenActivityEntry(Map<String, Object> entry) {
-        for (String attribute : MAP_ATTRIBUTES_TO_UNFLATTEN) {
-            if (entry.get(attribute) != null) {
-                entry.put(attribute, AuditServiceImpl.parseJsonString((String) entry.get(attribute)).getObject());
-            }
-        }
-        return entry;
-    }
-
-    /**
-     * format each activity entry in the list by unflattening JSON-Maps.
-     *
-     * @param entryList the list of activity entries
-     * @return the list of unflattened entries
-     */
-    private List<Map<String, Object>> unflattenActivityList(List<Map<String, Object>> entryList) {
-        for (Map<String, Object> entry : entryList) {
-            unflattenActivityEntry(entry);
-        }
-        return entryList;
-    }
-
     /**
      * Pre-sanitize data types that need special handling before being sent to the router.
      *
@@ -260,6 +219,8 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             // i.e, if it's just an OpenICF thing, we should continue moving it to the
             // OpenICFProvisionerService
             if (entry.getValue() instanceof Map) {
+                sanitized.put(entry.getKey(), mapper.writeValueAsString(entry.getValue()));
+            } else if (entry.getValue() instanceof List) {
                 sanitized.put(entry.getKey(), mapper.writeValueAsString(entry.getValue()));
             }
             else {
