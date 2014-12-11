@@ -57,7 +57,9 @@ public class DocumentUtil  {
     public final static String TAG_REV = "_rev";
     
     // Identifier in the DB representation
-    public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id"; 
+    public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id";
+
+    public final static String ORIENTDB_VERSION_KEY = "version";
     
     /**
      * Convert to JSON object structures (akin to simple binding), composed of
@@ -110,8 +112,14 @@ public class DocumentUtil  {
                     logger.trace("Setting primary key to value {}", value);
                     result.put(TAG_ID, value);
                     String revision = Integer.toString(doc.getVersion());
-                    logger.trace("Setting revision to {}", revision);
-                    result.put(TAG_REV, revision);
+                    if (!result.containsKey(TAG_REV)) {
+                        //don't overwrite the rev value if it is already in the result
+                        logger.trace("Setting revision to {}", revision);
+                        result.put(TAG_REV, revision);
+                    }
+                } else if (key.equals(ORIENTDB_VERSION_KEY)) {
+                    logger.trace("Setting revision to {}", value.toString());
+                    result.put(TAG_REV, value.toString());
                 } else {
                     // TODO: optimization switch: if we know that no embedded ODocuments are used 
                     // (i.e. only embedded Maps, Lists) then we would not need to traverse the whole graph
