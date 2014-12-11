@@ -65,11 +65,6 @@ public class ObjectClassInfoHelperFactory {
                             }
                             attributes0.add(helper);
                         }
-                        //TODO Should we throw exceptions or ??
-                        if (null == __NAME__) {
-                            logger.warn("Required __NAME__ attribute definition is not configured. The CREATE operation will be disabled");
-                            //throw new IllegalArgumentException("Required __NAME__ attribute is not configured");
-                        }
                         return new ObjectClassInfoHelper(objectClass, __NAME__, attributes0, defaultAttributes, properties);
                     } catch (JsonValueException jsonValueException) {
                         throw new SchemaException(schema, jsonValueException);
