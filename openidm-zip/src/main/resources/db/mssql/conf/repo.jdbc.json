@@ -226,7 +226,8 @@
                     "principal" : "principal",
                     "roles" : "roles",
                     "status" : "status",
-                    "timestamp" : "activitydate"
+                    "timestamp" : "activitydate",
+                    "userid" : "userid"
                 }
             },
             "security" : {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -47,15 +47,11 @@ import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Audit logger that logs to a repository
- *
- * @author aegloff
- * @author brmiller
  */
 public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(RepoAuditLogger.class);
@@ -103,12 +99,12 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
             for (Resource entry : r) {
                 entries.add(AuditServiceImpl.formatLogEntry(entry.getContent().asMap(), type));
             }
-            formatActivityList(entries);
+            unflattenEntryList(entries);
             result.put("entries", entries);
         } else {
             ReadRequest request = Requests.newReadRequest(getRepoTarget(type), id);
             Map<String, Object> entry = connectionFactory.getConnection().read(context, request).getContent().asMap();
-            formatActivityEntry(entry);
+            AuditServiceImpl.unflattenEntry(entry);
             result = AuditServiceImpl.formatLogEntry(entry, type);
         }
 
@@ -155,20 +151,9 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
         }
     }
 
-    public void formatActivityList(List<Map<String, Object>> entryList) {
+    private void unflattenEntryList(List<Map<String, Object>> entryList) {
         for (Map<String, Object> entry : entryList) {
-            formatActivityEntry(entry);
-        }
-    }
-
-    public void formatActivityEntry(Map<String, Object> entry) {
-        Object beforeValue = entry.get("before");
-        Object afterValue = entry.get("after");
-        if (beforeValue != null) {
-            entry.put("before", AuditServiceImpl.parseJsonString((String)beforeValue).getObject());
-        }
-        if (afterValue != null) {
-            entry.put("after", AuditServiceImpl.parseJsonString((String)afterValue).getObject());
+            AuditServiceImpl.unflattenEntry(entry);
         }
     }
 

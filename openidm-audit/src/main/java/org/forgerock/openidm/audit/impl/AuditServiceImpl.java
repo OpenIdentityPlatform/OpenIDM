@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -58,7 +58,6 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
@@ -115,9 +114,6 @@ import static org.forgerock.openidm.audit.util.ActivityLogger.TIMESTAMP;
 
 /**
  * This audit service is the entry point for audit logging on the router.
- *
- * @author aegloff
- * @author brmiller
  */
 @Component(name = "org.forgerock.openidm.audit", immediate=true, policy=ConfigurationPolicy.REQUIRE)
 @Service
@@ -998,9 +994,9 @@ public class AuditServiceImpl implements AuditService {
         return results;
     }
 
-    protected static JsonValue parseJsonString(String stringified) {
+    protected static JsonValue parseJsonString(String stringified, Class<?> jsonStructureType) {
         try {
-            return new JsonValue(mapper.readValue(stringified, Map.class));
+            return new JsonValue(mapper.readValue(stringified, jsonStructureType));
         } catch (IOException ex) {
             throw new JsonException("String passed into parsing is not valid JSON", ex);
         }
@@ -1015,6 +1011,25 @@ public class AuditServiceImpl implements AuditService {
             return Boolean.valueOf((Boolean)formatted);
         } else {
             return false;
+        }
+    }
+
+    protected static void unflattenEntry(Map<String, Object> entry) {
+        if (entry.get(BEFORE) instanceof String) {
+            entry.put(BEFORE, parseJsonString((String)entry.get(BEFORE), Map.class).getObject());
+        }
+        if (entry.get(AFTER) instanceof String) {
+            entry.put(AFTER, parseJsonString((String)entry.get(AFTER), Map.class).getObject());
+        }
+        if (entry.get(ACCESS_LOG_ROLES) instanceof String) {
+            entry.put(ACCESS_LOG_ROLES, parseJsonString((String)entry.get(ACCESS_LOG_ROLES), List.class).getObject());
+        }
+        if (entry.get(RECON_LOG_MESSAGE_DETAIL) instanceof String) {
+            entry.put(RECON_LOG_MESSAGE_DETAIL,
+                parseJsonString((String)entry.get(RECON_LOG_MESSAGE_DETAIL), Map.class).getObject());
+        }
+        if (entry.get(CHANGED_FIELDS) instanceof String) {
+            entry.put(CHANGED_FIELDS, parseJsonString((String)entry.get(CHANGED_FIELDS), List.class).getObject());
         }
     }
 }

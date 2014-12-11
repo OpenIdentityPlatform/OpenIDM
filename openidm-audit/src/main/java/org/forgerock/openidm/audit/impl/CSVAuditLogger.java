@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -64,8 +64,6 @@ import org.supercsv.util.CsvContext;
 
 /**
  * Comma delimited audit logger
- *
- * @author aegloff
  */
 public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(CSVAuditLogger.class);
@@ -451,7 +449,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             // Check if value is JSON object
             if (((String)value).startsWith("{") && ((String)value).endsWith("}")) {
                 try {
-                    jv = AuditServiceImpl.parseJsonString(((String)value));
+                    jv = AuditServiceImpl.parseJsonString(((String)value), Map.class);
                 } catch (Exception e) {
                     logger.debug("Error parsing JSON string: " + e.getMessage());
                 }
