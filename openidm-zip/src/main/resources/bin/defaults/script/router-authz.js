@@ -190,7 +190,7 @@ function canUpdateTask() {
     return isMyTask() || isUserCandidateForTask(taskInstanceId);
 }
 
-function isProcessOnUsersList(processDefinitionId) {
+function isProcessOnUsersList(processFilter) {
     var processesForUserQueryParams = {
             "_queryId": "query-processes-for-user",
             "userId": context.security.authorizationId.id
@@ -202,7 +202,7 @@ function isProcessOnUsersList(processDefinitionId) {
     
     for (i = 0; i < processesForUser.result.length; i++) {
         processForUser = processesForUser.result[i];
-        if (processDefinitionId === processForUser._id) {
+        if (processFilter(processForUser)) {
             isProcessOneOfUserProcesses = true;
         }
     }
@@ -212,12 +212,15 @@ function isProcessOnUsersList(processDefinitionId) {
 
 function isAllowedToStartProcess() {
     var processDefinitionId = request.content._processDefinitionId;
-    return isProcessOnUsersList(processDefinitionId);
+    var key = request.content._key;
+    return isProcessOnUsersList(function (process) { 
+        return (process._id === processDefinitionId) || (process.key === key); 
+    });
 }
 
 function isOneOfMyWorkflows() {
     var processDefinitionId = request.resourceName.split("/")[2];
-    return isProcessOnUsersList(processDefinitionId);
+    return isProcessOnUsersList(function (process) {return (process._id === processDefinitionId); });
 }
 
 function isQueryOneOf(allowedQueries) {
