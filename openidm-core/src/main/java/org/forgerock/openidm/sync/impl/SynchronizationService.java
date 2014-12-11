@@ -79,7 +79,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(
     name = "org.forgerock.openidm.sync",
-    policy = ConfigurationPolicy.REQUIRE,
+    policy = ConfigurationPolicy.OPTIONAL,
     immediate = true
 )
 @Properties({
