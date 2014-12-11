@@ -91,11 +91,6 @@ public class ObjectClassInfoHelper {
         return objectClass;
     }
 
-
-    public boolean isCreateable() {
-        return null != nameAttribute;
-    }
-
     /**
      * Get a read only set of attributes should return by default.
      * <p/>
@@ -183,14 +178,11 @@ public class ObjectClassInfoHelper {
         JsonValue content = request.getContent().required().expect(Map.class);
         String nameValue = getCreateResourceId(request);
 
-        if (StringUtils.isBlank(nameValue)) {
-            throw new BadRequestException("Required '_id' or '" + nameAttribute
-                    + "' attribute is missing");
-        }
-
         Set<String> keySet = content.keys();
         Map<String,Attribute> result = new HashMap<String, Attribute>(keySet.size());
-        result.put(Name.NAME, new Name(nameValue));
+        if (!StringUtils.isBlank(nameValue)) {
+            result.put(Name.NAME, new Name(nameValue));
+        }
         for (AttributeInfoHelper attributeInfo : attributes) {
             if (Name.NAME.equals(attributeInfo.getAttributeInfo().getName())
                     || Uid.NAME.equals(attributeInfo.getAttributeInfo().getName())
