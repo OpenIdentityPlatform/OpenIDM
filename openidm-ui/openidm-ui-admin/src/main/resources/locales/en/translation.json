@@ -817,7 +817,7 @@
     "common" : {
         "form" : {
             "add" : "Add",
-            "userView" : "User View",
+            "userView" : "Data Management View",
             "ok" : "Okay",
             "confirm" :"Confirmation",
             "true" : "True",
