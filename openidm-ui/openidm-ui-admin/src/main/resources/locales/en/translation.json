@@ -221,7 +221,8 @@
             "encrypted" : "Encrypted",
             "private" : "Private",
             "virtual" : "Virtual",
-            "duplicateNameError" : "Duplicate name detected. Please provide a unique name."
+            "duplicateNameError" : "Duplicate name detected. Please provide a unique name.",
+            "managedSchema": "Schema"
         },
         "scriptEditor": {
             "scriptDelete" : "Are you sure you want to delete this script?",
