@@ -129,10 +129,23 @@
  <section xml:id="deprecation">
   <title>Deprecated Functionality</title>
   <para>
-   No functionality has been deprecated in OpenIDM ${docTargetVersion}.
+   The following functionality has been deprecated in
+   OpenIDM ${docTargetVersion}, and is likely to be removed in a future release.
   </para>
+  
+  <itemizedlist>
+   <listitem>
+    <para>
+     When <link xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:show="new" xlink:href="integrators-guide#openicf-provisioner-conf">
+     <citetitle>Configuring Connectors</citetitle></link>, you can set up
+     <literal>nativeType</literal> property level extensions. The
+     <literal>JAVA_TYPE_DATE</literal> extension is deprecated.
+    </para>
+   </listitem>
+  </itemizedlist>
   <para>
-   No additional functionality is planned to be deprecated at this time.
+   No additional functionality is deprecated at this time.
   </para>
  </section>
 
@@ -142,7 +155,7 @@
    No functionality has been removed in OpenIDM ${docTargetVersion}.
   </para>
   <para>
-   No functionality is planned to be removed at this time.
+   No functionality has been removed at this time.
   </para>
  </section>
  
