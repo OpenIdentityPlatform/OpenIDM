@@ -336,6 +336,7 @@
                     }
                 ]
             },
+            "audit_sync" : {},
             "_studio_bookmark" : {}
         }
     },
