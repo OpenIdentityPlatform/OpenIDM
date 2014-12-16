@@ -205,6 +205,22 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new NotNull(), // timestamp
                     new Optional() // userid
             };
+        } else if (AuditServiceImpl.TYPE_SYNC.equals(type)) {
+            processors = new CellProcessor[]{
+                    new NotNull(), // _id
+                    new Optional(), // action
+                    new Optional(), // actionId
+                    new Optional(), // exception
+                    new Optional(), // mapping
+                    new Optional(), // message
+                    new Optional(new ParseJsonValue()), // messageDetail
+                    new Optional(), // rootActionId
+                    new Optional(), // situation
+                    new Optional(), // sourceObjectId
+                    new Optional(), // status
+                    new Optional(), // targetObjectId
+                    new Optional(), // timestamp
+            };
         } else {
             throw new InternalServerErrorException("Error parsing entries: unknown type " + type);
         }
