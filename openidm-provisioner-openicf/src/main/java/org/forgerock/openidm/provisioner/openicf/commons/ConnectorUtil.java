@@ -59,10 +59,7 @@ import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
- * Sample Class Doc
- *
- * @author $author$
- * @version $Revision$ $Date$
+ * Contains openicf connector utilities for the OpenICF provisioner.
  */
 public class ConnectorUtil {
 
@@ -152,7 +149,7 @@ public class ConnectorUtil {
         typeMap.put(JAVA_TYPE_BYTE_ARRAY, byte[].class);
         typeMap.put(JAVA_TYPE_CHAR, char.class);
         typeMap.put(JAVA_TYPE_CHARACTER, Character.class);
-        typeMap.put(JAVA_TYPE_DATE, Date.class);
+        typeMap.put(JAVA_TYPE_DATE, String.class);
         typeMap.put(JAVA_TYPE_PRIMITIVE_DOUBLE, double.class);
         typeMap.put(JAVA_TYPE_DOUBLE, Double.class);
         typeMap.put(JAVA_TYPE_FILE, File.class);
@@ -191,7 +188,7 @@ public class ConnectorUtil {
      * <tr><td>JAVA_TYPE_BYTE_ARRAY</td><td>{@link byte[]}</td></tr>
      * <tr><td>JAVA_TYPE_CHAR</td><td>{@link char}</td></tr>
      * <tr><td>JAVA_TYPE_CHARACTER</td><td>{@link Character}</td></tr>
-     * <tr><td>JAVA_TYPE_DATE</td><td>{@link Date}</td></tr>
+     * <tr><td>JAVA_TYPE_DATE</td><td>{@link String}</td></tr>
      * <tr><td>JAVA_TYPE_PRIMITIVE_DOUBLE</td><td>{@link double}</td></tr>
      * <tr><td>JAVA_TYPE_DOUBLE</td><td>{@link Double}</td></tr>
      * <tr><td>JAVA_TYPE_FILE</td><td>{@link File}</td></tr>
