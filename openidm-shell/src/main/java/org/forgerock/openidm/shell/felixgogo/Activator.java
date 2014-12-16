@@ -21,7 +21,11 @@ package org.forgerock.openidm.shell.felixgogo;
 import org.apache.felix.service.command.CommandProcessor;
 import org.forgerock.openidm.shell.CustomCommandScope;
 import org.forgerock.openidm.shell.felixgogo.debug.DebugCommands;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -35,7 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Felix GoGo shell adapter activator
+ * Felix GoGo shell adapter activator.
  *
  * Based on Apache License 2.0 licensed osgilab org.knowhowlab.osgi.shell.felixgogo
  */
@@ -49,36 +53,50 @@ public class Activator implements BundleActivator {
      * Felix GoGo shell API supports groups.
      * Filter requires shell commands description and group id
      */
-    private static final String SHELL_COMMANDS_SERVICE_FILTER = "(&" +
-            "(" + COMMANDS_DESCRIPTION_PROPERTY + "=*)" +
-            "(" + GROUP_ID_PROPERTY + "=*)" +
-            ")";
+    private static final String SHELL_COMMANDS_SERVICE_FILTER = "(&"
+            + "(" + COMMANDS_DESCRIPTION_PROPERTY + "=*)"
+            + "(" + GROUP_ID_PROPERTY + "=*)"
+            + ")";
 
 
     /**
-     * Bundle Context
+     * Bundle Context.
      */
     private BundleContext bc;
 
     /**
-     * Command provides service tracker
+     * Command provides service tracker.
      */
-    private ServiceTracker shellCommandsTracker;
+    private ServiceTracker<CustomCommandScope, CustomCommandScope> shellCommandsTracker;
 
-    private Map<ServiceReference, ServiceRegistration> commandRegistrations = new HashMap<ServiceReference, ServiceRegistration>();
+    private Map<ServiceReference<CustomCommandScope>, ServiceRegistration<?>> commandRegistrations =
+            new HashMap<ServiceReference<CustomCommandScope>, ServiceRegistration<?>>();
 
+    /**
+     * Start the bundle.
+     *
+     * @param context the bundle context
+     * @throws Exception on failure to create the service tracker for the provided filter
+     */
     public void start(BundleContext context) throws Exception {
         bc = context;
-        shellCommandsTracker = new ServiceTracker(bc, bc.createFilter("(objectClass=" + CustomCommandScope.class.getName() + ")"),
+        shellCommandsTracker = new ServiceTracker<CustomCommandScope, CustomCommandScope>(
+                bc, bc.createFilter("(objectClass=" + CustomCommandScope.class.getName() + ")"),
                 new ShellCommandsCustomizer());
         shellCommandsTracker.open();
 
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         props.put(CommandProcessor.COMMAND_SCOPE, "debug");
-        props.put(CommandProcessor.COMMAND_FUNCTION, DebugCommands.functions);
+        props.put(CommandProcessor.COMMAND_FUNCTION, DebugCommands.FUNCTIONS);
         bc.registerService(DebugCommands.class.getName(), new DebugCommands(bc), props);
     }
 
+    /**
+     * Stop the bundle.
+     *
+     * @param bundleContext the bundle context
+     * @throws Exception on errors
+     */
     public void stop(BundleContext bundleContext) throws Exception {
         shellCommandsTracker.close();
         shellCommandsTracker = null;
@@ -87,7 +105,7 @@ public class Activator implements BundleActivator {
     }
 
     /**
-     * Validate Command method
+     * Validate Command method.
      *
      * @param service     service newBuilder
      * @param commandName command method name
@@ -104,12 +122,12 @@ public class Activator implements BundleActivator {
     }
 
     /**
-     * Command provides service tracker customizer
+     * Command provides service tracker customizer.
      */
-    private class ShellCommandsCustomizer implements ServiceTrackerCustomizer {
+    private class ShellCommandsCustomizer implements ServiceTrackerCustomizer<CustomCommandScope, CustomCommandScope> {
 
-        public Object addingService(ServiceReference reference) {
-            CustomCommandScope service = (CustomCommandScope) bc.getService(reference);
+        public CustomCommandScope addingService(ServiceReference<CustomCommandScope> reference) {
+            CustomCommandScope service = bc.getService(reference);
             Object groupId = service.getScope();
             // if property value null or not String - ignore service
             if (groupId == null || !(groupId instanceof String)) {
@@ -126,10 +144,12 @@ public class Activator implements BundleActivator {
                     props.put(Constants.SERVICE_RANKING, ranking);
                 }
                 props.put(CommandProcessor.COMMAND_SCOPE, groupId);
-                props.put(CommandProcessor.COMMAND_FUNCTION, commandMap.keySet().toArray(new String[commandMap.size()]));
+                props.put(CommandProcessor.COMMAND_FUNCTION,
+                        commandMap.keySet().toArray(new String[commandMap.size()]));
                 try {
                     // generate class
-                    Object commandsProvider = FelixGogoCommandsServiceGenerator.generate(service, commandMap, serviceId.toString());
+                    Object commandsProvider =
+                            FelixGogoCommandsServiceGenerator.generate(service, commandMap, serviceId.toString());
                     commandRegistrations.put(reference,
                             bc.registerService(commandsProvider.getClass().getName(), commandsProvider, props));
                 } catch (Exception e) {
@@ -141,16 +161,16 @@ public class Activator implements BundleActivator {
             }
         }
 
-        public void modifiedService(ServiceReference reference, Object service) {
+        public void modifiedService(ServiceReference<CustomCommandScope> reference, CustomCommandScope service) {
             // ignore
         }
 
-        public void removedService(ServiceReference reference, Object service) {
+        public void removedService(ServiceReference<CustomCommandScope> reference, CustomCommandScope service) {
             // unregister CommandGroup services that belongs to this service registration
             Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
             // detach class
             FelixGogoCommandsServiceGenerator.clean(serviceId.toString());
-            ServiceRegistration registration = commandRegistrations.remove(reference);
+            ServiceRegistration<?> registration = commandRegistrations.remove(reference);
             if (registration != null) {
                 registration.unregister();
             }

@@ -68,11 +68,9 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * A {@link Connection} to the remote OpenIDM instance.
  */
 public class HttpRemoteJsonResource implements Connection {
 
@@ -87,18 +85,20 @@ public class HttpRemoteJsonResource implements Connection {
      */
     public static final Method PATCH = new Method("PATCH");
 
-    /**
-     * Base reference used for requesting this resource
-     */
+    /**Base reference used for requesting this resource. */
     private Reference baseReference;
 
-    /** Username used for authentication when accessing the resource */
+    /** Username used for authentication when accessing the resource. */
     private String username = "";
 
-    /** Password used for authentication when accessing the resource */
+    /** Password used for authentication when accessing the resource. */
     private String password = "";
 
-    public HttpRemoteJsonResource() { }
+    /**
+     * Construct the HttpRemoteJsonResource.
+     */
+    public HttpRemoteJsonResource() {
+    }
 
     /**
      * Create a HttpRemoteJsonResource with credentials.
@@ -114,168 +114,198 @@ public class HttpRemoteJsonResource implements Connection {
         baseReference = new Reference(uri);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public JsonValue action(org.forgerock.json.resource.Context context, ActionRequest request)
-            throws org.forgerock.json.resource.ResourceException {
+        throws org.forgerock.json.resource.ResourceException {
         JsonValue params = new JsonValue(request.getAdditionalParameters());
         JsonValue result = handle(request, request.getResourceName(), params);
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FutureResult<JsonValue> actionAsync(org.forgerock.json.resource.Context context,
             ActionRequest request, ResultHandler<? super JsonValue> handler) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void close() {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Resource create(org.forgerock.json.resource.Context context, CreateRequest request)
-            throws org.forgerock.json.resource.ResourceException {
+        throws org.forgerock.json.resource.ResourceException {
         JsonValue result = handle(request, request.getResourceName() + "/" + request.getNewResourceId(), null);
         return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FutureResult<Resource> createAsync(org.forgerock.json.resource.Context context,
             CreateRequest request, ResultHandler<? super Resource> handler) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Resource delete(org.forgerock.json.resource.Context context, DeleteRequest request)
-            throws org.forgerock.json.resource.ResourceException {
+        throws org.forgerock.json.resource.ResourceException {
         handle(request, request.getResourceName(), null);
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FutureResult<Resource> deleteAsync(org.forgerock.json.resource.Context context,
             DeleteRequest request, ResultHandler<? super Resource> handler) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isClosed() {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isValid() {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Resource patch(org.forgerock.json.resource.Context context, PatchRequest request)
-            throws org.forgerock.json.resource.ResourceException {
-        throw new NotImplementedException();
+        throws org.forgerock.json.resource.ResourceException {
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FutureResult<Resource> patchAsync(org.forgerock.json.resource.Context context,
             PatchRequest request, ResultHandler<? super Resource> handler) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public QueryResult query(org.forgerock.json.resource.Context context, QueryRequest request,
             QueryResultHandler handler) throws org.forgerock.json.resource.ResourceException {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public QueryResult query(org.forgerock.json.resource.Context context, QueryRequest request,
             Collection<? super Resource> results)
-            throws org.forgerock.json.resource.ResourceException {
+        throws org.forgerock.json.resource.ResourceException {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FutureResult<QueryResult> queryAsync(org.forgerock.json.resource.Context context,
             QueryRequest request, QueryResultHandler handler) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Resource read(org.forgerock.json.resource.Context context, ReadRequest request)
-            throws org.forgerock.json.resource.ResourceException {
+        throws org.forgerock.json.resource.ResourceException {
         JsonValue result = handle(request, request.getResourceName(), null);
         return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FutureResult<Resource> readAsync(org.forgerock.json.resource.Context context,
             ReadRequest request, ResultHandler<? super Resource> handler) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Resource update(org.forgerock.json.resource.Context context, UpdateRequest request)
-            throws org.forgerock.json.resource.ResourceException {
+        throws org.forgerock.json.resource.ResourceException {
         JsonValue result = handle(request, request.getResourceName(), null);
         return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FutureResult<Resource> updateAsync(org.forgerock.json.resource.Context context,
             UpdateRequest request, ResultHandler<? super Resource> handler) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
-    
-    public ClientResource getClientResource(Reference ref) {
+
+    private ClientResource getClientResource(Reference ref) {
         ClientResource clientResource = new ClientResource(new Context(), new Reference(baseReference, ref));
 
         List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
         acceptedMediaTypes.add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
         clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
         clientResource.getLogger().setLevel(Level.WARNING);
-        
+
         ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
         clientResource.setChallengeResponse(rc);
 
         return clientResource;
     }
-    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public JsonValue getResponse(ClientResource clientResource, Representation response) 
-            throws org.forgerock.json.resource.ResourceException {
-        // Check if the request failed
-        if (!clientResource.getStatus().isSuccess()) {
-            throw org.forgerock.json.resource.ResourceException.getException(clientResource
-                    .getStatus().getCode(), clientResource.getStatus().getDescription(),
-                    clientResource.getStatus().getThrowable());
-        }
 
-        JsonValue result = null;
-        if (null != response && response instanceof EmptyRepresentation == false) {
-            try {
-                // Parse the response
-                result = new JsonValue(new JacksonRepresentation(response, Map.class).getObject());
-            } catch (IOException e) {
-                throw new InternalServerErrorException(e);
-            }
-        } else {
-            result = new JsonValue(null);
-        }
-        return result;
-    }
-
-    public JsonValue handle(Request request, String id, JsonValue params)
-            throws org.forgerock.json.resource.ResourceException {
+    private JsonValue handle(Request request, String id, JsonValue params)
+        throws org.forgerock.json.resource.ResourceException {
         Representation response = null;
         ClientResource clientResource = null;
         try {
             Reference remoteRef = new Reference(id);
-            
+
             // Get the client resource corresponding to this request's resource name
             clientResource = getClientResource(remoteRef);
 
             // Prepare query params
             if (params != null && !params.isNull()) {
-                for (Map.Entry<String, Object> entry : params.expect(Map.class).asMap().entrySet()) {
+                for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
                     if (entry.getValue() instanceof String) {
                         clientResource.addQueryParameter(entry.getKey(), (String) entry.getValue());
                     }
@@ -286,7 +316,7 @@ public class HttpRemoteJsonResource implements Connection {
             Representation representation = null;
             JsonValue value = getRequestValue(request);
             if (!value.isNull()) {
-                representation = new JacksonRepresentation<Map>(value.expect(Map.class).asMap());
+                representation = new JacksonRepresentation<Map<String, Object>>(value.asMap());
             }
 
             // ETag
@@ -302,7 +332,7 @@ public class HttpRemoteJsonResource implements Connection {
                 response = clientResource.get();
                 break;
             case UPDATE:
-                conditions.setMatch(getTag(((UpdateRequest)request).getRevision()));
+                conditions.setMatch(getTag(((UpdateRequest) request).getRevision()));
                 clientResource.getRequest().setConditions(conditions);
                 response = clientResource.put(representation);
                 break;
@@ -312,7 +342,7 @@ public class HttpRemoteJsonResource implements Connection {
                 response = clientResource.delete();
                 break;
             case PATCH:
-                conditions.setMatch(getTag(((PatchRequest)request).getRevision()));
+                conditions.setMatch(getTag(((PatchRequest) request).getRevision()));
                 clientResource.getRequest().setConditions(conditions);
                 clientResource.setMethod(PATCH);
                 clientResource.getRequest().setEntity(representation);
@@ -337,8 +367,8 @@ public class HttpRemoteJsonResource implements Connection {
 
             JsonValue result = null;
 
-            if (null != response && response instanceof EmptyRepresentation == false) {
-                result = new JsonValue(new JacksonRepresentation(response, Map.class).getObject());
+            if (null != response && !(response instanceof EmptyRepresentation)) {
+                result = new JsonValue(getJacksonObject(response));
             } else {
                 result = new JsonValue(null);
             }
@@ -351,10 +381,11 @@ public class HttpRemoteJsonResource implements Connection {
                 try {
                     sb.append(" ").append(clientResource.getResponse().getEntity().getText());
                 } catch (IOException e1) {
+                    // unable to add response text to exception message, proceed without
                 }
             }
-            throw org.forgerock.json.resource.ResourceException.getException(e.getStatus()
-                    .getCode(), sb.toString(), e.getCause());
+            throw org.forgerock.json.resource.ResourceException.getException(
+                    e.getStatus().getCode(), sb.toString(), e.getCause());
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
         } finally {
@@ -363,23 +394,28 @@ public class HttpRemoteJsonResource implements Connection {
             }
         }
     }
-    
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Map<String, Object> getJacksonObject(Representation response) throws IOException {
+        return (Map<String, Object>) new JacksonRepresentation<Map>(response, Map.class).getObject();
+    }
+
     private JsonValue getRequestValue(Request request) throws Exception {
         switch (request.getRequestType()) {
         case CREATE:
-            return ((CreateRequest)request).getContent();
+            return ((CreateRequest) request).getContent();
         case UPDATE:
-            return new JsonValue(((UpdateRequest)request).getContent());
+            return new JsonValue(((UpdateRequest) request).getContent());
         case PATCH:
             ObjectMapper mapper = new ObjectMapper();
-            List<PatchOperation> ops = ((PatchRequest)request).getPatchOperations();
+            List<PatchOperation> ops = ((PatchRequest) request).getPatchOperations();
             JsonValue value = new JsonValue(new ArrayList<Object>());
             for (PatchOperation op : ops) {
-               value.add(new JsonValue(mapper.readValue(op.toString(), Object.class)));
+                value.add(new JsonValue(mapper.readValue(op.toString(), Object.class)));
             }
             return value;
         case ACTION:
-            JsonValue content = ((ActionRequest)request).getContent();
+            JsonValue content = ((ActionRequest) request).getContent();
             if (content != null && !content.isNull()) {
                 return content;
             } else {
@@ -397,27 +433,57 @@ public class HttpRemoteJsonResource implements Connection {
         return result;
     }
 
+    /**
+     * Gets the username.
+     *
+     * @return the username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Sets the username.
+     *
+     * @param username the username
+     */
     public void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * Gets the password.
+     *
+     * @return the password
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Sets the password.
+     *
+     * @param password the password
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Sets the port.
+     *
+     * @param port the port
+     */
     public void setPort(int port) {
         baseReference.setHostPort(port);
     }
 
+    /**
+     * Sets the base URI.
+     *
+     * @param baseUri the base URI
+     */
     public void setBaseUri(final String baseUri) {
-       baseReference = new Reference(baseUri);
+        baseReference = new Reference(baseUri);
     }
 }

@@ -25,11 +25,16 @@ import org.forgerock.openidm.shell.CustomCommandScope;
 
 import java.io.PrintStream;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.TreeMap;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * A basic command scope for the Felix Gogo command processor.
  */
 public class BasicCommandScope extends CustomCommandScope {
     /**
@@ -51,6 +56,11 @@ public class BasicCommandScope extends CustomCommandScope {
     }
 
 
+    /**
+     * Produce help text.
+     *
+     * @param session the command session.
+     */
     @Descriptor("Displays available commands.")
     public void help(CommandSession session) {
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
@@ -88,11 +98,20 @@ public class BasicCommandScope extends CustomCommandScope {
         }
     }
 
+    /**
+     * Exit the console.
+     */
     @Descriptor("Exit from the console.")
     public void exit() {
         System.exit(0);
     }
 
+    /**
+     * Display information about a specific command.
+     *
+     * @param session the command session
+     * @param name the command name
+     */
     @Descriptor("Displays information about a specific command.")
     public void help(CommandSession session, @Descriptor("target command") String name) {
         Map<String, List<Method>> commands = getCommands();
@@ -106,14 +125,12 @@ public class BasicCommandScope extends CustomCommandScope {
             for (Map.Entry<String, List<Method>> entry : commands.entrySet()) {
                 String k = entry.getKey().substring(entry.getKey().indexOf(':') + 1);
                 if (name.equals(k)) {
-                    name = entry.getKey();
                     methods = entry.getValue();
                     break;
                 }
             }
-        }
         // Otherwise directly look up matching methods.
-        else {
+        } else {
             methods = commands.get(name);
         }
 
@@ -132,14 +149,14 @@ public class BasicCommandScope extends CustomCommandScope {
     }
 
     private Map<String, List<Method>> getCommands() {
-        Map<String, List<Method>> commands = new TreeMap();
+        Map<String, List<Method>> commands = new TreeMap<String, List<Method>>();
 
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
         for (CustomCommandScope cmdScope : ldr) {
             if (null != cmdScope.getScope() && null != cmdScope.getFunctionMap()) {
 
                 for (String func : cmdScope.getFunctionMap().keySet()) {
-                    commands.put(cmdScope.getScope() + ":" + func, new ArrayList());
+                    commands.put(cmdScope.getScope() + ":" + func, new ArrayList<Method>());
                 }
 
                 if (!commands.isEmpty()) {

@@ -35,18 +35,23 @@ import org.forgerock.openidm.shell.CustomCommandScope;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.ServiceLoader;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Main entry point for command-line interface.
  */
-public class Main {
+public final class Main {
+    /** the command processor. */
     protected static CommandProcessorImpl processor;
 
+    /**
+     * Program main!
+     *
+     * @param args the command-line arguments
+     * @throws Exception on failure to execute shell/command-line
+     */
     public static void main(String[] args) throws Exception {
         initProcessor();
         CommandSession session = processor.createSession(System.in, System.out, System.err);
@@ -87,11 +92,22 @@ public class Main {
         }
     }
 
+    /**
+     * Locate the command method.
+     *
+     * @param commandsProvider the command provider (scope)
+     * @param methodName the method name
+     * @return the method
+     */
     public static Method findCommandMethod(Class<? extends CustomCommandScope> commandsProvider, String methodName) {
         try {
             return commandsProvider.getMethod(methodName, InputStream.class, PrintStream.class, String[].class);
         } catch (NoSuchMethodException e) {
             return null;
         }
+    }
+
+    // do not instantiate
+    private Main() {
     }
 }

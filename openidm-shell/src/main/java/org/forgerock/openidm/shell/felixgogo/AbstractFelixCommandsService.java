@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * Abstract class of Felix GoGo Commands Service
+ * Abstract class of Felix GoGo Commands Service.
  *
  * Based on Apache License 2.0 licensed osgilab org.knowhowlab.osgi.shell.felixgogo
  */
@@ -40,24 +40,31 @@ public class AbstractFelixCommandsService {
 
     private Object service;
 
+    /**
+     * Construct the Felix command service.
+     *
+     * @param service the command service
+     */
     public AbstractFelixCommandsService(Object service) {
         this.service = service;
     }
 
     /**
-     * Run command method
+     * Run command method.
      *
      * @param commandName command name
+     * @param session     command session
      * @param params      command parameters
      */
     protected void runCommand(String commandName, CommandSession session, String[] params) {
         try {
-            Method method = service.getClass().getMethod(commandName, InputStream.class, PrintStream.class, String[].class);
+            Method method = service.getClass().getMethod(
+                    commandName, InputStream.class, PrintStream.class, String[].class);
             method.invoke(service, session.getKeyboard(), session.getConsole(), params);
         } catch (NoSuchMethodException e) {
             session.getConsole().println("No such command: " + commandName);
         } catch (Exception e) {
-            logger.warn("Unable to execute command: {} with args: {}", new Object[]{commandName, Arrays.toString(params)}, e);
+            logger.warn("Unable to execute command: {} with args: {}", commandName, Arrays.toString(params), e);
             e.printStackTrace(session.getConsole());
         }
     }

@@ -27,18 +27,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Based on gogo shell command proxy
+ * Based on gogo shell command proxy.
  */
 public class CommandProxy implements Function {
 
     private CustomCommandScope tgt;
     private String function;
 
+    /**
+     * Construct teh command proxy.
+     *
+     * @param tgt the command scope
+     * @param function the name of the function to execute
+     */
     public CommandProxy(CustomCommandScope tgt, String function) {
         this.tgt = tgt;
         this.function = function;
     }
 
+    /**
+     * Execute the command.
+     *
+     * @param session the command session
+     * @param arguments the command arguments
+     * @return the result of the command execution
+     * @throws Exception from command execution / invocation
+     */
     public Object execute(CommandSession session, List<Object> arguments) throws Exception {
         try {
             if (tgt instanceof Function) {
@@ -46,12 +60,11 @@ public class CommandProxy implements Function {
             } else {
                 return Reflective.invoke(session, tgt, function, arguments);
             }
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             List<Object> method = new ArrayList<Object>();
             method.add(function);
             session.getConsole().println(Reflective.invoke(session, tgt, "getUsage", method));
             return null;
-        } finally {
         }
     }
 }

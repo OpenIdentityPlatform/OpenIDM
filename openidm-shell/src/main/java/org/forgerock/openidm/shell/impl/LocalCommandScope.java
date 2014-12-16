@@ -55,12 +55,11 @@ import org.forgerock.openidm.shell.CustomCommandScope;
 import org.forgerock.openidm.util.FileUtil;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Command scope for local operations.
  */
 public class LocalCommandScope extends CustomCommandScope {
 
-    private static String DOTTED_PLACEHOLDER = "............................................";
+    private static final String DOTTED_PLACEHOLDER = "............................................";
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
@@ -81,10 +80,19 @@ public class LocalCommandScope extends CustomCommandScope {
         return "local";
     }
 
-    @Descriptor("Export or import a SecretKeyEntry. The Java Keytool does not allow for exporting or importing SecretKeyEntries.")
-    public void keytool(CommandSession session, @Parameter(names = { "-i", "--import" },
-            presentValue = "true", absentValue = "false") boolean doImport, @Parameter(names = {
-        "-e", "--export" }, presentValue = "true", absentValue = "false") boolean doExport,
+    /**
+     * Run keytool to export/import a secret key entry.
+     *
+     * @param session the command session
+     * @param doImport whether to import
+     * @param doExport whether to export
+     * @param alias the alias of the key
+     */
+    @Descriptor("Export or import a SecretKeyEntry. "
+            + "The Java Keytool does not allow for exporting or importing SecretKeyEntries.")
+    public void keytool(CommandSession session,
+            @Parameter(names = { "-i", "--import" }, presentValue = "true",  absentValue = "false") boolean doImport,
+            @Parameter(names = { "-e", "--export" }, presentValue = "true", absentValue = "false") boolean doExport,
             @Descriptor("key alias") String alias) {
         if (doImport ^ doExport) {
             String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
@@ -92,7 +100,9 @@ public class LocalCommandScope extends CustomCommandScope {
             String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
 
             try {
-                KeyStore ks = (provider == null || provider.trim().length() == 0 ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
+                KeyStore ks = (provider == null || provider.trim().length() == 0)
+                        ? KeyStore.getInstance(type)
+                        : KeyStore.getInstance(type, provider);
                 if (location != null) {
                     File configFile = IdentityServer.getFileForInstallPath(location);
                     if (configFile.exists()) {
@@ -100,7 +110,8 @@ public class LocalCommandScope extends CustomCommandScope {
                         try {
                             in = new FileInputStream(configFile);
                             if (null != in) {
-                                session.getConsole().append("Use KeyStore from: ").println(configFile.getAbsolutePath());
+                                session.getConsole().append("Use KeyStore from: ")
+                                        .println(configFile.getAbsolutePath());
                                 // TODO Don't use the System in OSGi.
                                 char[] passwordArray = System.console().readPassword("Please enter the password: ");
                                 char[] passwordCopy = Arrays.copyOf(passwordArray, passwordArray.length);
@@ -111,15 +122,20 @@ public class LocalCommandScope extends CustomCommandScope {
                                     in = null;
                                 }
                                 if (doExport) {
-                                    KeyStore.Entry key = ks.getEntry(alias, new KeyStore.PasswordProtection(passwordCopy));
+                                    KeyStore.Entry key =
+                                            ks.getEntry(alias, new KeyStore.PasswordProtection(passwordCopy));
                                     if (key instanceof KeyStore.SecretKeyEntry) {
                                         KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) key;
                                         session.getConsole().append("[OK] ").println(secretKeyEntry);
-                                        StringBuilder sb = new StringBuilder(secretKeyEntry.getSecretKey().getAlgorithm());
-                                        sb.append(":").append(new BigInteger(1, secretKeyEntry.getSecretKey().getEncoded()).toString(16));
+                                        StringBuilder sb =
+                                                new StringBuilder(secretKeyEntry.getSecretKey().getAlgorithm());
+                                        sb.append(":").append(
+                                                new BigInteger(1, secretKeyEntry.getSecretKey().getEncoded())
+                                                        .toString(16));
                                         session.getConsole().println(sb);
                                     } else {
-                                        session.getConsole().println("SecretKeyEntry with this alias is not in KeyStore");
+                                        session.getConsole().println(
+                                                "SecretKeyEntry with this alias is not in KeyStore");
                                     }
                                 } else if (doImport) {
                                     if (ks.containsAlias(alias)) {
@@ -154,7 +170,9 @@ public class LocalCommandScope extends CustomCommandScope {
                             }
                         }
                     } else {
-                        session.getConsole().append("KeyStore file: ").append(configFile.getAbsolutePath()).println(" does not exists.");
+                        session.getConsole()
+                                .append("KeyStore file: ")
+                                .append(configFile.getAbsolutePath()).println(" does not exists.");
                     }
                 }
             } catch (Exception e) {
@@ -165,6 +183,11 @@ public class LocalCommandScope extends CustomCommandScope {
         }
     }
 
+    /**
+     * Validate the json configuration files in the configuration folder.
+     *
+     * @param session command session
+     */
     @Descriptor("Validates all json configuration files in the configuration (default: /conf) folder.")
     public void validate(CommandSession session) {
         File file = IdentityServer.getFileForProjectPath("conf");
@@ -181,8 +204,9 @@ public class LocalCommandScope extends CustomCommandScope {
             ObjectMapper mapper = new ObjectMapper();
             File[] files = file.listFiles(filter);
             for (File subFile : files) {
-                if (subFile.isDirectory())
+                if (subFile.isDirectory()) {
                     continue;
+                }
                 // TODO pretty print
                 try {
                     String json = FileUtil.readFile(subFile);
@@ -201,27 +225,40 @@ public class LocalCommandScope extends CustomCommandScope {
         }
     }
 
+    /**
+     * Encrypt the input string.
+     *
+     * @param session command session
+     * @param isString whether the input is a string
+     */
     @Descriptor("Encrypt the input string.")
-    public void encrypt(CommandSession session, @Parameter(names = { "-j", "--json" },
-            presentValue = "false", absentValue = "true") boolean isString) {
-        session.getConsole().append("Enter the ").append(isString ? "String" : "Json").println(
-                " value");
+    public void encrypt(CommandSession session,
+            @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString) {
+        session.getConsole().append("Enter the ").append(isString ? "String" : "Json").println(" value");
         encrypt(session, isString, loadFromConsole(session));
     }
 
+    /**
+     * Encrypt the input string.
+     *
+     * @param session command session,
+     * @param isString whether the input is a string
+     * @param name the name of the string to encrypt
+     */
     @Descriptor("Encrypt the input string.")
-    public void encrypt(CommandSession session, @Parameter(names = { "-j", "--json" },
-            presentValue = "false", absentValue = "true") boolean isString,
+    public void encrypt(CommandSession session,
+            @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
             @Descriptor("source string to encrypt") String name) {
         try {
             CryptoServiceImpl cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
             cryptoSvc.activate(null);
-            
+
             JsonValue value = new JsonValue(isString ? name : mapper.readValue(name, Object.class));
             String cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
-            String alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default");
+            String alias =
+                    IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default");
             JsonValue secure = cryptoSvc.encrypt(value, cipher, alias);
-                            
+
             StringWriter wr = new StringWriter();
             mapper.writerWithDefaultPrettyPrinter().writeValue(wr, secure.getObject());
             session.getConsole().println("-----BEGIN ENCRYPTED VALUE-----");
