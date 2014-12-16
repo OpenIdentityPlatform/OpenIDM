@@ -35,7 +35,8 @@ import java.lang.annotation.Target;
  * Will result in generated help of "--user USERNAME"
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PARAMETER})
+@Target({ ElementType.PARAMETER })
 public @interface MetaVar {
+    /** the value. */
     String value();
 }

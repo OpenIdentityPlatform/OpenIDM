@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -44,7 +43,6 @@ import org.apache.felix.service.command.Parameter;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
@@ -57,15 +55,15 @@ import org.forgerock.openidm.shell.CustomCommandScope;
 import org.forgerock.openidm.shell.felixgogo.MetaVar;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Command scope for remote operations.
  */
 public class RemoteCommandScope extends CustomCommandScope {
 
-    private static String DOTTED_PLACEHOLDER = "............................................";
+    private static final String DOTTED_PLACEHOLDER = "............................................";
 
     private static final String IDM_PORT_DEFAULT = "8080";
-    private static final String IDM_PORT_DESC = "Port of OpenIDM REST service. This will override any port in --url. Default " + IDM_PORT_DEFAULT;
+    private static final String IDM_PORT_DESC =
+            "Port of OpenIDM REST service. This will override any port in --url. Default " + IDM_PORT_DEFAULT;
     private static final String IDM_PORT_METAVAR = "PORT";
 
     private static final String IDM_URL_DEFAULT = "http://localhost:8080/openidm/";
@@ -76,7 +74,8 @@ public class RemoteCommandScope extends CustomCommandScope {
     private static final String USER_PASS_METAVAR = "USER[:PASSWORD]";
     private static final String USER_PASS_DEFAULT = "";
 
-    private static final String REPLACE_ALL_DESC = "Replace the entire config set by deleting the additional configuration";
+    private static final String REPLACE_ALL_DESC =
+            "Replace the entire config set by deleting the additional configuration";
 
     private final HttpRemoteJsonResource resource = new HttpRemoteJsonResource();
 
@@ -120,7 +119,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
 
         if (StringUtils.isNotBlank(idmUrl)) {
-            resource.setBaseUri( idmUrl.endsWith("/") ? idmUrl : idmUrl + "/" );
+            resource.setBaseUri(idmUrl.endsWith("/") ? idmUrl : idmUrl + "/");
         }
 
         if (StringUtils.isNotBlank(idmPort)) {
@@ -132,13 +131,22 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
     }
 
+    /**
+     * Import the configuration set from a local "conf" directory.
+     *
+     * @param session the command session
+     * @param userPass the username/password
+     * @param idmUrl the url of the OpenIDM instance
+     * @param idmPort the OpenIDM instance's port
+     * @param replaceall whether or not to replace the config
+     */
     @Descriptor("Imports the configuration set from local 'conf' directory.")
     public void configimport(
             final CommandSession session,
 
             @Descriptor(USER_PASS_DESC)
             @MetaVar(USER_PASS_METAVAR)
-            @Parameter( names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
+            @Parameter(names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
             final String userPass,
 
             @Descriptor(IDM_URL_DESC)
@@ -152,19 +160,28 @@ public class RemoteCommandScope extends CustomCommandScope {
             final String idmPort,
 
             @Descriptor(REPLACE_ALL_DESC)
-            @Parameter( names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false" )
-            final boolean replaceall)
-    {
+            @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false")
+            final boolean replaceall) {
         configimport(session, userPass, idmUrl, idmPort, replaceall, "conf");
     }
 
+    /**
+     * Imports the configuration set from a local file or directory.
+     *
+     * @param session the command session
+     * @param userPass the username/password
+     * @param idmUrl the url of the OpenIDM instance
+     * @param idmPort the OpenIDM instance's port
+     * @param replaceall whether or not to replace the config
+     * @param source the source directory
+     */
     @Descriptor("Imports the configuration set from local file/directory.")
     public void configimport(
             final CommandSession session,
 
             @Descriptor(USER_PASS_DESC)
             @MetaVar(USER_PASS_METAVAR)
-            @Parameter( names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
+            @Parameter(names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
             final String userPass,
 
             @Descriptor(IDM_URL_DESC)
@@ -182,8 +199,7 @@ public class RemoteCommandScope extends CustomCommandScope {
             final boolean replaceall,
 
             @Descriptor("source directory")
-            final String source)
-    {
+            final String source) {
         processOptions(userPass, idmUrl, idmPort);
 
         PrintStream console = session.getConsole();
@@ -202,12 +218,14 @@ public class RemoteCommandScope extends CustomCommandScope {
             File[] files = file.listFiles(filter);
             Map<String, File> localConfigSet = new HashMap<String, File>(files.length);
             for (File subFile : files) {
-                if (subFile.isDirectory())
+                if (subFile.isDirectory()) {
                     continue;
+                }
                 String configName = subFile.getName().replaceFirst("-", "/");
                 configName = ConfigBootstrapHelper.unqualifyPid(configName.substring(0, configName.length() - 5));
                 if (configName.indexOf("-") > -1) {
-                    console.append("[WARN] Invalid file name found with multiple '-' character. The normalized config id: ");
+                    console.append(
+                            "[WARN] Invalid file name found with multiple '-' character. The normalized config id: ");
                     console.println(configName);
                 }
                 localConfigSet.put(configName, subFile);
@@ -288,13 +306,21 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
     }
 
+    /**
+     * Exports all configuration to the "conf" folder.
+     *
+     * @param session the command session
+     * @param userPass the username/password
+     * @param idmUrl the url of the OpenIDM instance
+     * @param idmPort the OpenIDM instance's port
+     */
     @Descriptor("Exports all configurations to 'conf' folder.")
     public void configexport(
             CommandSession session,
 
             @Descriptor(USER_PASS_DESC)
             @MetaVar(USER_PASS_METAVAR)
-            @Parameter( names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
+            @Parameter(names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
             final String userPass,
 
             @Descriptor(IDM_URL_DESC)
@@ -305,18 +331,27 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
             @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
-            final String idmPort)
-    {
+            final String idmPort) {
         configexport(session, userPass, idmUrl, idmPort, "conf");
     }
 
+
+    /**
+     * Exports all configurations.
+     *
+     * @param session the command session
+     * @param userPass the username/password
+     * @param idmUrl the url of the OpenIDM instance
+     * @param idmPort the OpenIDM instance's port
+     * @param target the target directory
+     */
     @Descriptor("Exports all configurations.")
     public void configexport(
             CommandSession session,
 
             @Descriptor(USER_PASS_DESC)
             @MetaVar(USER_PASS_METAVAR)
-            @Parameter( names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
+            @Parameter(names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
             final String userPass,
 
             @Descriptor(IDM_URL_DESC)
@@ -330,8 +365,7 @@ public class RemoteCommandScope extends CustomCommandScope {
             final String idmPort,
 
             @Descriptor("target directory")
-            String target)
-    {
+            String target) {
         processOptions(userPass, idmUrl, idmPort);
 
         File targetDir = IdentityServer.getFileForPath(target);
@@ -355,7 +389,8 @@ public class RemoteCommandScope extends CustomCommandScope {
                                 && !responseValue.getContent().isNull()) {
                             File configFile = new File(targetDir, id.replace("/", "-") + ".json");
                             if (configFile.exists()) {
-                                configFile.renameTo(new File(configFile.getParentFile(), configFile.getName() + bkpPostfix));
+                                configFile.renameTo(
+                                        new File(configFile.getParentFile(), configFile.getName() + bkpPostfix));
                             }
                             mapper.writerWithDefaultPrettyPrinter().writeValue(configFile,
                                     responseValue.getContent().getObject());
@@ -373,17 +408,26 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
     }
 
-    public void export(InputStream console, PrintStream out, String[] args) {
+    private void export(InputStream console, PrintStream out, String[] args) {
         out.println("Exported");
     }
 
+    /**
+     * Generate connector configuration.
+     *
+     * @param session the command session
+     * @param userPass the username/password
+     * @param idmUrl the url of the OpenIDM instance
+     * @param idmPort the OpenIDM instance's port
+     * @param name the connector name
+     */
     @Descriptor("Generate connector configuration.")
     public void configureconnector(
             CommandSession session,
 
             @Descriptor(USER_PASS_DESC)
             @MetaVar(USER_PASS_METAVAR)
-            @Parameter( names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
+            @Parameter(names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
             final String userPass,
 
             @Descriptor(IDM_URL_DESC)
@@ -394,13 +438,13 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
             @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
-            final String port,
+            final String idmPort,
 
             @Descriptor("Name of the new connector configuration.")
             @MetaVar("CONNECTOR")
-            String name)
-    {
-        processOptions(userPass, idmUrl, port);
+            @Parameter(names = { "-n", "--name" }, absentValue = "test")
+            String name) {
+        processOptions(userPass, idmUrl, idmPort);
 
         try {
             // Prepare temp folder and file
@@ -431,44 +475,45 @@ public class RemoteCommandScope extends CustomCommandScope {
 
                 JsonValue connectorRef = responseValue.get("connectorRef");
                 if (!connectorRef.isNull() && connectorRef.isList()) {
-                    List<Object> connectorRefs = connectorRef.asList();
-                    if (connectorRefs.size() > 0) {
-                        for (int i = 0; i < connectorRefs.size(); i++) {
-                            Map<String, String> connectorKey = (Map<String, String>) connectorRefs.get(i);
-                            String displayName = connectorKey.get("displayName");
-                            if (null == displayName) {
-                                displayName = connectorKey.get("connectorName");
-                            }
-                            String version = connectorKey.get("bundleVersion");
-                            String connectorHostRef = connectorKey.get("connectorHostRef");
-
-                            session.getConsole().append(Integer.toString(i)).append(". ").append(displayName);
-                            if (null != connectorHostRef) {
-                                session.getConsole().append(" Remote (").append(connectorHostRef).append(")");
-                            }
-                            session.getConsole().append(" version ").println(version);
+                    int i = 0;
+                    for (JsonValue connector : connectorRef) {
+                        String displayName = connector.get("displayName").asString();
+                        if (null == displayName) {
+                            displayName = connector.get("connectorName").asString();
                         }
+                        String version = connector.get("bundleVersion").asString();
+                        String connectorHostRef = connector.get("connectorHostRef").asString();
 
-                        session.getConsole().append(Integer.toString(connectorRef.size())).println(". Exit");
-                        Scanner input = new Scanner(session.getKeyboard());
-                        int index = -1;
-                        do {
-                            session.getConsole().append("Select [0..").append(
-                                    Integer.toString(connectorRef.size())).append("]: ");
-                            index = input.nextInt();
-                        } while (index < 0 || index > connectorRefs.size());
-                        if (index == connectorRefs.size()) {
-                            return;
+                        session.getConsole().append(Integer.toString(i)).append(". ").append(displayName);
+                        if (null != connectorHostRef) {
+                            session.getConsole().append(" Remote (").append(connectorHostRef).append(")");
                         }
-                        configuration = (Map<String, Object>) responseValue.getObject();
-                        configuration.put("connectorRef", connectorRefs.get(index));
+                        session.getConsole().append(" version ").println(version);
+                        i++;
                     }
+
+                    session.getConsole().append(Integer.toString(connectorRef.size())).println(". Exit");
+                    Scanner input = new Scanner(session.getKeyboard());
+                    int index = -1;
+                    do {
+                        session.getConsole()
+                                .append("Select [0..")
+                                .append(Integer.toString(connectorRef.size()))
+                                .append("]: ");
+                        index = input.nextInt();
+                    } while (index < 0 || index > connectorRef.size());
+                    if (index == connectorRef.size()) {
+                        return;
+                    }
+                    configuration = responseValue.asMap();
+                    configuration.put("connectorRef", connectorRef.get(index));
                 } else {
-                    session.getConsole().println("There is no available connector!");
+                    session.getConsole().println("There are no available connector!");
                 }
             } else {
-                configuration = mapper.readValue(finalConfig, Map.class);
-                session.getConsole().append("Configuration was found and read from: ").println(finalConfig.getAbsolutePath());
+                configuration = new JsonValue(mapper.readValue(finalConfig, Map.class)).asMap();
+                session.getConsole().append("Configuration was found and read from: ")
+                        .println(finalConfig.getAbsolutePath());
             }
 
             if (null == configuration) {
@@ -479,9 +524,10 @@ public class RemoteCommandScope extends CustomCommandScope {
             request.setContent(new JsonValue(configuration));
 
             responseValue = resource.action(null, request);
-            ((Map<String, Object>)responseValue.getObject()).put("name", name);
+            responseValue.put("name", name);
             mapper.writerWithDefaultPrettyPrinter().writeValue(finalConfig, responseValue.getObject());
-            session.getConsole().append("Edit the configuration file and run the command again. The configuration was saved to ")
+            session.getConsole()
+                    .append("Edit the configuration file and run the command again. The configuration was saved to ")
                     .println(finalConfig.getAbsolutePath());
 
         } catch (ResourceException e) {

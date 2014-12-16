@@ -36,32 +36,40 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Debug commands.
  */
 public class DebugCommands {
 
-    public static final String[] functions = {"mockservice", "help"};
+    /** the supported functions. */
+    public static final String[] FUNCTIONS = {"mockservice", "help"};
 
-    /**
-     * Bundle Context
-     */
+    /** Bundle Context. */
     private BundleContext context;
 
-
+    /**
+     * Construct the debug commands.
+     * @param context the bundle context.
+     */
     public DebugCommands(BundleContext context) {
         this.context = context;
     }
 
 
+    /**
+     * Starts a new object service and registers it with the router.
+     *
+     * @param session the command session
+     * @param params the parameters
+     */
     @Descriptor("Start a new object service and register into the router service")
     public void mockservice(CommandSession session, @Descriptor("URL Prefix") String[] params) {
         try {
-            InteractiveObjectSetService debugRouter = new InteractiveObjectSetService(Thread.currentThread(), context, session);
+            InteractiveObjectSetService debugRouter =
+                    new InteractiveObjectSetService(Thread.currentThread(), context, session);
             context.addServiceListener(debugRouter, InteractiveObjectSetService.ROUTER_SERVICE_FILTER);
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put(ServerConstants.ROUTER_PREFIX, params.length > 0 ? params[0] : "debugrouter");
-            ServiceRegistration srv = context.registerService(RequestHandler.class.getName(), debugRouter, props);
+            ServiceRegistration<?> srv = context.registerService(RequestHandler.class.getName(), debugRouter, props);
             boolean run = true;
             while (run) {
                 try {
@@ -79,6 +87,11 @@ public class DebugCommands {
         }
     }
 
+    /**
+     * Displays help message.
+     *
+     * @return the help string
+     */
     @Descriptor("Display help messages")
     public String help() {
         return "mockservice\t Start new service";

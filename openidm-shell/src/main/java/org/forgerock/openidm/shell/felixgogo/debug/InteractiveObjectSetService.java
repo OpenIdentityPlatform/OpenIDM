@@ -44,11 +44,13 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * A ServiceListener.
  */
-public class InteractiveObjectSetService implements /* RequestHandler, */ServiceListener {
+class InteractiveObjectSetService implements /* RequestHandler, */ServiceListener {
 
     private final static Logger TRACE = LoggerFactory.getLogger(InteractiveObjectSetService.class);
 
@@ -68,15 +70,14 @@ public class InteractiveObjectSetService implements /* RequestHandler, */Service
         this.context = context;
         this.session = session;
         try {
-            ServiceReference[] ref =
-                    context.getServiceReferences(ConnectionProvider.class.getName(),
-                            ROUTER_SERVICE_FILTER);
+            ServiceReference<?>[] ref =
+                    context.getServiceReferences(ConnectionProvider.class.getName(), ROUTER_SERVICE_FILTER);
             if (null != ref && ref.length > 0) {
                 router = (ConnectionProvider) context.getService(ref[0]);
             }
         } catch (InvalidSyntaxException e) {
+            // couldn't attach router
         }
-
     }
 
     /**
@@ -101,7 +102,7 @@ public class InteractiveObjectSetService implements /* RequestHandler, */Service
             Scanner input = new Scanner(session.getKeyboard());
             do {
                 switch (printInputHelp(input)) {
-                case 1: {
+                case 1:
                     if (null != router) {
                         return redirect(request, input);
                     } else {
@@ -109,27 +110,21 @@ public class InteractiveObjectSetService implements /* RequestHandler, */Service
                                 "Router is not available, please select something else.");
                     }
                     break;
-                }
-                case 2: {
+                case 2:
                     break;
-                }
-                case 3: {
+                case 3:
                     response = loadFromConsole(input);
                     break;
-                }
-                case 4: {
+                case 4:
                     return null;
-                }
-                case 5: {
+                case 5:
                     printExceptionHelp(input);
-                }
-                case 6: {
+                    break;
+                case 6:
                     parent.interrupt();
                     return new JsonValue(new HashMap<String, Object>());
-                }
-                default: {
+                default:
                     session.getConsole().println("Your should select something [1..6]");
-                }
                 }
             } while (null == response);
             return response;
@@ -156,7 +151,7 @@ public class InteractiveObjectSetService implements /* RequestHandler, */Service
         session.getConsole().print("Type in the new id: ");
         String id = input.next();
         request.put("id", id);
-        return null;// getRouter().handle(request);
+        return null;  // getRouter().handle(request);
     }
 
     private JsonValue readFile(File inputFile) throws Exception {
@@ -169,7 +164,7 @@ public class InteractiveObjectSetService implements /* RequestHandler, */Service
             session.getConsole().format("Error reading file: %s. Exception: %s",
                     inputFile.getAbsolutePath(), e.getMessage());
         }
-        return new JsonValue(new HashMap());
+        return json(object());
     }
 
     private JsonValue loadFromConsole(Scanner scanner) {
@@ -205,7 +200,7 @@ public class InteractiveObjectSetService implements /* RequestHandler, */Service
 
     @Override
     public void serviceChanged(ServiceEvent event) {
-        ServiceReference sr = event.getServiceReference();
+        ServiceReference<?> sr = event.getServiceReference();
         switch (event.getType()) {
         case ServiceEvent.REGISTERED: {
             router = (ConnectionProvider) context.getService(sr);

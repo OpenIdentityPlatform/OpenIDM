@@ -38,12 +38,12 @@ import org.apache.felix.service.command.Parameter;
 import org.forgerock.openidm.shell.felixgogo.MetaVar;
 
 /**
- *
- * @author $author$
- * @version $Revision$ $Date$
+ * An abstract command scope for the Felix Gogo command processor.
  */
 public abstract class CustomCommandScope {
+    /** formatting whitespace constant to insert before the option. */
     protected static final String LEAD_OPTION_SPACE = "  ";
+    /** formatting whitespace constant used to pad the option's description. */
     protected static final String OPTIONS_SPACE = "                                  ";
 
     /**
@@ -60,12 +60,13 @@ public abstract class CustomCommandScope {
      * <p/>
      * TODO add description
      *
-     * @return
+     * @return the scope value
      */
     public abstract String getScope();
 
     /**
      * Gets usage information for method by name. Fetches the method with the longest list of arguments.
+     *
      * @param name Name of the method to search for
      * @return String containing usage information
      * @throws NoSuchMethodException if no such method can be found
@@ -77,6 +78,7 @@ public abstract class CustomCommandScope {
 
     /**
      * Gets usage information for a specified method.
+     *
      * @param method Method object to pull information from.
      * @return String containing usage information.
      */
@@ -90,7 +92,7 @@ public abstract class CustomCommandScope {
         }
 
         for (String arg : args) {
-            usage.append(" <"+arg+">");
+            usage.append(" <").append(arg).append(">");
         }
 
         usage.append("\nScope: ").append(getScope());
@@ -107,7 +109,8 @@ public abstract class CustomCommandScope {
     }
 
     /**
-     * Fetches the header for the method with the longest argument list
+     * Fetches the header for the method with the longest argument list.
+     *
      * @param name Name of the method to search for
      * @return String containing header information for the method
      */
@@ -123,7 +126,8 @@ public abstract class CustomCommandScope {
     }
 
     /**
-     * Fetches the header for the method with the shortest argument list
+     * Fetches the header for the method with the shortest argument list.
+     *
      * @param name Name of the method to search for
      * @return String containing header information for the method
      */
@@ -139,7 +143,8 @@ public abstract class CustomCommandScope {
     }
 
     /**
-     * Fetches the header from a specified method
+     * Fetches the header from a specified method.
+     *
      * @param method method to pull a header from
      * @return String containing the header for the specified method
      */
@@ -180,7 +185,9 @@ public abstract class CustomCommandScope {
 
     /**
      * Fetches the list of parameters from a specified method.
+     * <p>
      * Parameters are defined as by method arguments annotated with @Parameter
+     *
      * @param method method to fetch the list of parameters from
      * @return a list of Strings containing parameter descriptions
      */
@@ -209,9 +216,10 @@ public abstract class CustomCommandScope {
             String namesWithMeta = StringUtils.isBlank(metaVar) ? names : names + " " + metaVar;
 
             if (names != null) {
-                String str = LEAD_OPTION_SPACE + namesWithMeta +
-                             OPTIONS_SPACE.substring(Math.min(namesWithMeta.length(), OPTIONS_SPACE.length())) +
-                             desc;
+                String str = LEAD_OPTION_SPACE
+                        + namesWithMeta
+                        + OPTIONS_SPACE.substring(Math.min(namesWithMeta.length(), OPTIONS_SPACE.length()))
+                        + desc;
                 opts.add(str);
             }
         }
@@ -220,6 +228,7 @@ public abstract class CustomCommandScope {
 
     /**
      * Fetches a sorted list of methods all sharing a specified name.
+     *
      * This list is returned in increasing order of parameters.
      * @param name the name of the method list to retrieve
      * @return a sorted list of methods
@@ -246,6 +255,7 @@ public abstract class CustomCommandScope {
 
     /**
      * Fetch a method specified by name (gets the method with the largest number of parameters).
+     *
      * @param name of the method to fetch
      * @return the method with the largest number of parameters by name
      * @throws NoSuchMethodException if no such method exists
@@ -260,6 +270,7 @@ public abstract class CustomCommandScope {
 
     /**
      * Fetch a method specified by name (gets the method with the shortest number of parameters).
+     *
      * @param name of the method to fetch
      * @return the method with the largest number of parameters by name
      * @throws NoSuchMethodException if no such method exists

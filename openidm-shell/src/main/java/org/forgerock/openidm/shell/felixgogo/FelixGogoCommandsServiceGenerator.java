@@ -62,7 +62,7 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
     private static StubClassLoader classLoader = new StubClassLoader();
 
     /**
-     * Generate CommandProvider class and newBuilder for this class based on parameters
+     * Generate CommandProvider class and newBuilder for this class based on parameters.
      *
      * @param service  commands service
      * @param commands commands map (name=help)
@@ -70,7 +70,8 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
      * @return generated CommandProvider newBuilder
      * @throws Exception if something went wrong
      */
-    public static Object generate(CustomCommandScope service, Map<String, String> commands, String suffix) throws Exception {
+    public static Object generate(CustomCommandScope service, Map<String, String> commands, String suffix)
+        throws Exception {
         // generate class with unique name
         //javassist.CtClass ctClass = POOL.makeClass(AbstractFelixCommandsService.class.getName() + suffix);
 
@@ -79,30 +80,30 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
             MethodVisitor mv;
             AnnotationVisitor av0;
             String className = AbstractFelixCommandsService.class.getName().replace('.', '/') + suffix;
-            cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, className, null, AbstractFelixCommandsService.class.getName().replace('.', '/'), null);
+            cw.visit(V1_5, ACC_PUBLIC + ACC_SUPER, className, null,
+                    AbstractFelixCommandsService.class.getName().replace('.', '/'), null);
 
             //cw.visitSource("AbstractFelixCommandsServiceSample.java", null);
 
-            {
-                mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(Ljava/lang/Object;)V", null, null);
-                mv.visitCode();
-                Label l0 = new Label();
-                mv.visitLabel(l0);
-                mv.visitLineNumber(10, l0);
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(ALOAD, 1);
-                mv.visitMethodInsn(INVOKESPECIAL, AbstractFelixCommandsService.class.getName().replace('.', '/'), "<init>", "(Ljava/lang/Object;)V");
-                Label l1 = new Label();
-                mv.visitLabel(l1);
-                mv.visitLineNumber(11, l1);
-                mv.visitInsn(RETURN);
-                Label l2 = new Label();
-                mv.visitLabel(l2);
-                mv.visitLocalVariable("this", "L" + className + ";", null, l0, l2, 0);
-                mv.visitLocalVariable("service", "Ljava/lang/Object;", null, l0, l2, 1);
-                mv.visitMaxs(2, 2);
-                mv.visitEnd();
-            }
+            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(Ljava/lang/Object;)V", null, null);
+            mv.visitCode();
+            Label l0 = new Label();
+            mv.visitLabel(l0);
+            mv.visitLineNumber(10, l0);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitMethodInsn(INVOKESPECIAL, AbstractFelixCommandsService.class.getName().replace('.', '/'),
+                    "<init>", "(Ljava/lang/Object;)V");
+            Label l1 = new Label();
+            mv.visitLabel(l1);
+            mv.visitLineNumber(11, l1);
+            mv.visitInsn(RETURN);
+            Label l2 = new Label();
+            mv.visitLabel(l2);
+            mv.visitLocalVariable("this", "L" + className + ";", null, l0, l2, 0);
+            mv.visitLocalVariable("service", "Ljava/lang/Object;", null, l0, l2, 1);
+            mv.visitMaxs(2, 2);
+            mv.visitEnd();
 
             /*javassist.bytecode.ClassFile ccFile = ctClass.getClassFile();
             ccFile.setVersionToJava5();
@@ -114,7 +115,8 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
 
             // add constructor
             javassist.CtClass serviceCtClass = POOL.getCtClass(Object.class.getName());
-            javassist.CtConstructor ctConstructor = new javassist.CtConstructor(new javassist.CtClass[]{serviceCtClass}, ctClass);
+            javassist.CtConstructor ctConstructor = new javassist.CtConstructor(new javassist.CtClass[]{serviceCtClass},
+                    ctClass);
             ctConstructor.setModifiers(javassist.Modifier.PUBLIC);
             ctConstructor.setBody("super($1);");
             ctClass.addConstructor(ctConstructor);
@@ -125,44 +127,53 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
             Set<String> names = commands.keySet();
             for (String name : names) {
                 if (isMethodAvailable(service, name)) {
-                    mv = cw.visitMethod(ACC_PUBLIC, name, "(Lorg/apache/felix/service/command/CommandSession;[Ljava/lang/String;)V", null, null);
-                    {
-                        av0 = mv.visitAnnotation("Lorg/apache/felix/service/command/Descriptor;", true);
-                        av0.visit("value", commands.get(name));
-                        av0.visitEnd();
-                    }
+                    mv = cw.visitMethod(ACC_PUBLIC, name,
+                            "(Lorg/apache/felix/service/command/CommandSession;[Ljava/lang/String;)V", null, null);
+
+                    av0 = mv.visitAnnotation("Lorg/apache/felix/service/command/Descriptor;", true);
+                    av0.visit("value", commands.get(name));
+                    av0.visitEnd();
+
                     mv.visitCode();
-                    Label l0 = new Label();
+                    l0 = new Label();
                     mv.visitLabel(l0);
                     mv.visitLineNumber(15, l0);
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitLdcInsn(name);
                     mv.visitVarInsn(ALOAD, 1);
                     mv.visitVarInsn(ALOAD, 2);
-                    mv.visitMethodInsn(INVOKEVIRTUAL, className, "runCommand", "(Ljava/lang/String;Lorg/apache/felix/service/command/CommandSession;[Ljava/lang/String;)V");
-                    Label l1 = new Label();
+                    mv.visitMethodInsn(INVOKEVIRTUAL, className, "runCommand",
+                            "(Ljava/lang/String;Lorg/apache/felix/service/command/CommandSession;"
+                                    + "[Ljava/lang/String;)V");
+                    l1 = new Label();
                     mv.visitLabel(l1);
                     mv.visitLineNumber(16, l1);
                     mv.visitInsn(RETURN);
-                    Label l2 = new Label();
+                    l2 = new Label();
                     mv.visitLabel(l2);
                     mv.visitLocalVariable("this", "L" + className + ";", null, l0, l2, 0);
-                    mv.visitLocalVariable("session", "Lorg/apache/felix/service/command/CommandSession;", null, l0, l2, 1);
+                    mv.visitLocalVariable("session",
+                            "Lorg/apache/felix/service/command/CommandSession;", null, l0, l2, 1);
                     mv.visitLocalVariable("args", "[Ljava/lang/String;", null, l0, l2, 2);
                     mv.visitMaxs(4, 3);
                     mv.visitEnd();
 
-                    /*javassist.CtMethod ctMethod = new javassist.CtMethod(javassist.CtClass.voidType, name, new javassist.CtClass[]{
-                            sessionCtClass, stringArrayCtClass
-                    }, ctClass);
+                    /*javassist.CtMethod ctMethod = new javassist.CtMethod(javassist.CtClass.voidType, name,
+                            new javassist.CtClass[]{
+                                sessionCtClass, stringArrayCtClass
+                            }, ctClass);
                     ctMethod.setModifiers(javassist.Modifier.PUBLIC);
                     ctMethod.setBody("runCommand(\"" + name + "\", $1, $2);");
                     ctClass.addMethod(ctMethod);
 
                     // add GoGo descriptor for this shell command
-                    javassist.bytecode.AnnotationsAttribute annotationsAttribute = new javassist.bytecode.AnnotationsAttribute(constPool, javassist.bytecode.AnnotationsAttribute.visibleTag);
-                    javassist.bytecode.annotation.Annotation annotation = new javassist.bytecode.annotation.Annotation(Descriptor.class.getName(), constPool);
-                    annotation.addMemberValue("value", new javassist.bytecode.annotation.StringMemberValue(commands.get(name), constPool));
+                    javassist.bytecode.AnnotationsAttribute annotationsAttribute =
+                            new javassist.bytecode.AnnotationsAttribute(constPool,
+                                javassist.bytecode.AnnotationsAttribute.visibleTag);
+                    javassist.bytecode.annotation.Annotation annotation =
+                            new javassist.bytecode.annotation.Annotation(Descriptor.class.getName(), constPool);
+                    annotation.addMemberValue("value",
+                            new javassist.bytecode.annotation.StringMemberValue(commands.get(name), constPool));
                     annotationsAttribute.addAnnotation(annotation);
                     ctMethod.getMethodInfo().addAttribute(annotationsAttribute);*/
                 }
@@ -187,7 +198,7 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
 
 
     /**
-     * Detach generated class
+     * Detach generated class.
      *
      * @param suffix unique class suffix
      */
@@ -203,7 +214,7 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
 
 
     static class StubClassLoader extends ClassLoader {
-        public Class defineClass(String name, byte[] b) {
+        public Class<?> defineClass(String name, byte[] b) {
             return defineClass(name.replace('/', '.'), b, 0, b.length);
         }
     }
