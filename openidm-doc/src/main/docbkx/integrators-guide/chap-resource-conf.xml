@@ -775,6 +775,14 @@ JAVA_TYPE_PRIMITIVE_DOUBLE
 JAVA_TYPE_PRIMITIVE_FLOAT
 JAVA_TYPE_PRIMITIVE_LONG
 JAVA_TYPE_STRING</screen>
+        <note>
+         <para>
+          The <literal>JAVA_TYPE_DATE</literal> property is deprecated.
+          Functionality may be removed in a future release. It is a property
+          level extension that is an alias for <literal>string</literal>.
+          Any dates assigned to this extension should be formatted per ISO 8601.
+         </para>
+        </note>
        </listitem>
       </varlistentry>
       <varlistentry>
