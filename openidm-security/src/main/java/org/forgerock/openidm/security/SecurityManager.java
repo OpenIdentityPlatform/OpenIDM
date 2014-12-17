@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2013-2014 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -45,13 +45,17 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
@@ -75,8 +79,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A Security Manager Service which handles operations on the java security
  * keystore and truststore files.
- *
- * @author ckienle
  */
 @Component(name = SecurityManager.PID, policy = ConfigurationPolicy.IGNORE, metatype = true, 
         description = "OpenIDM Security Management Service", immediate = true)
@@ -151,31 +153,51 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         
         String propValue = Param.getProperty("openidm.https.keystore.cert.alias");
         String privateKeyAlias = (propValue == null) ? "openidm-localhost" : propValue;
-        
+
         try {
             if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_ADDITIONAL)) {
                 // Load keystore and truststore from the repository
                 keystoreProvider.loadStoreFromRepo();
                 truststoreProvider.loadStoreFromRepo();
+
                 // Reload the SSL context
                 reload();
                 // Update CryptoService
                 cryptoUpdateService.updateKeySelector(keyStoreHandler.getStore(), keyStorePassword);
             } else {
-                // Check if the default private key alias exists
-                if (!privateKeyProvider.hasEntry(privateKeyAlias)) {
+                // Check if the default alias exists in keystore and truststore
+                final boolean defaultPrivateKeyEntryExists = privateKeyProvider.hasEntry(privateKeyAlias);
+                final boolean defaultTruststoreEntryExists = truststoreCertProvider.hasEntry(privateKeyAlias);
+                if (!defaultPrivateKeyEntryExists && !defaultTruststoreEntryExists) {
+                    // dafault keystore/truststore entries do not exist
                     // Create the default private key
-                    privateKeyProvider.createDefaultEntry(privateKeyAlias);
+                    createDefaultKeystoreAndTruststoreEntries(privateKeyAlias, privateKeyProvider, keystoreCertProvider,
+                            truststoreCertProvider);
+
                     // Reload the SSL context
                     reload();
 
-                    try {
-                        Config.updateConfig(null);
-                    } catch (NullPointerException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    Config.updateConfig(null);
+                } else if (!defaultPrivateKeyEntryExists && defaultTruststoreEntryExists) {
+                    // no default keystore entry, but truststore has default entry
+                    // this should only happen if the enduser is manually editing the keystore/truststore
+                    logger.error("Keystore and truststore out of sync. The keystore doesn't contain the default "
+                            + "entry, but the truststore does.");
+                    throw new InternalServerErrorException("Keystore and truststore out of sync. The keystore "
+                            + "doesn't contain the default entry, but the truststore does.");
+
+                } else if (defaultPrivateKeyEntryExists && !defaultTruststoreEntryExists) {
+                    // default keystore entry exists, but truststore default entry does not exist
+                    // this should only happen if the enduser is manually editing the keystore/truststore
+                    logger.error("Keystore and truststore out of sync. The keystore contains the default entry, but "
+                            + "the truststore doesn't");
+                    throw new InternalServerErrorException("Keystore and truststore out of sync. The keystore "
+                            + "contains the default entry, but the truststore doesn't");
+                } else {
+                    // the default entry exists in both the truststore and keystore
+                    // do nothing
                 }
+
                 // If this is the first/primary node in a cluster, then save the keystore and truststore to the repository
                 if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
                     keystoreProvider.saveStoreToRepo();
@@ -252,5 +274,45 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
     public void handleUpdate(final ServerContext context, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
         router.handleUpdate(context, request, handler);
+    }
+
+    private void createDefaultKeystoreAndTruststoreEntries(final String alias,
+            final EntryResourceProvider privateKeyProvider,
+            final EntryResourceProvider keystoreCertProvider,
+            final EntryResourceProvider truststoreCertProvider)
+    throws Exception {
+
+        //create the keystore default entry
+        privateKeyProvider.createDefaultEntry(alias);
+
+        final DefaultEntriesResultHandler defaultEntriesResultHandler = new DefaultEntriesResultHandler();
+
+        //get the keystore default entry cert
+        final ReadRequest readRequest = Requests.newReadRequest("/keystore/cert");
+        keystoreCertProvider.readInstance(
+            new ServerContext(new RootContext()), alias, readRequest, defaultEntriesResultHandler);
+
+        //add the keystore default entry cert to the truststore
+        final CreateRequest createRequest = Requests.newCreateRequest("/truststore/cert", alias,
+                defaultEntriesResultHandler.result.getContent());
+        truststoreCertProvider.createInstance(
+                new ServerContext(new RootContext()), createRequest, defaultEntriesResultHandler);
+
+    }
+
+    private final static class DefaultEntriesResultHandler implements ResultHandler<Resource> {
+
+        private Resource result;
+
+        @Override
+        public void handleError(ResourceException e) {
+            logger.error("Unable to create default keystore/truststore entries", e);
+            throw new RuntimeException("Unable to create default keystore/truststore entries", e);
+        }
+
+        @Override
+        public void handleResult(Resource resource) {
+            result = resource;
+        }
     }
 }
