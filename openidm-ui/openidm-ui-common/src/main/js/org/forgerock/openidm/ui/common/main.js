@@ -26,11 +26,14 @@
 
 define("org/forgerock/openidm/ui/common/main", [
     "./MandatoryPasswordChangeDialog",
+    "./managed/ListManagedObjectView",
+    "./managed/EditManagedObjectView",
     
     "./delegates/ConfigDelegate",
     "./delegates/InternalUserDelegate",
     "./delegates/PolicyDelegate",
     "./delegates/SiteConfigurationDelegate",
+    "./delegates/ManagedObjectDelegate",
 
     "./login/InternalLoginHelper",
     

@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,21 +22,30 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/* css basic configuration */
-@import "common/config.less";
+/*global $, define, _ */
 
-/* helpers, functions, columns */
-@import "common/helpers.less";
-@import "fontawesome/less/font-awesome.less"; 
+/**
+ * @author huck.elliott
+ */
+define("org/forgerock/openidm/ui/user/delegates/SiteConfigurationDelegate", [
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
+    "org/forgerock/openidm/ui/admin/ManagedObjectNavigation"
+], function(conf, commonSiteConfigurationDelegate, managedObjectNavigation) {
 
-/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
-@import "common/layout.less";
+    var obj = commonSiteConfigurationDelegate;
+    
+    obj.checkForDifferences = function(){
+        if(_.contains(conf.loggedUser && conf.loggedUser.roles,"ui-admin")){
+            return managedObjectNavigation.build();
+        } else {
+            return $.Deferred().resolve();
+        }
+    };
 
-/* specific css used in specific modules */
-@import "common/forms.less";
-@import "admin/task-table.less";
-@import "admin/notifications.less";
-@import "admin/contentflow.less";
-@import "admin/linkedview.less";
-@import "admin/idmTooltip.less";
-@import "jsonEditor.less";
+    
+    return obj;
+});
+
+
+

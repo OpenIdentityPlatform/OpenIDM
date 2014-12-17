@@ -27,6 +27,7 @@
 define("org/forgerock/openidm/ui/user/main", [
     "./delegates/RoleDelegate",
     "./delegates/SiteIdentificationDelegate",
+    "./delegates/SiteConfigurationDelegate",
 
     "./UserRegistrationView",
     "./profile/UserProfileView",
