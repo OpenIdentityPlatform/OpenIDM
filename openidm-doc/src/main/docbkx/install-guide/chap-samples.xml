@@ -444,13 +444,14 @@ $ ./startup.sh -p samples/sample2</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the User View link at the
-      top right of the Admin UI.
+      Retrieve the users in the repository by clicking the Data Management View
+      link at the top right of the Admin UI.
      </para>
      <para>
-      This link opens the User View UI. If you did not change your password in
-      the first step, you are prompted to change your password again. You can
-      bypass this by simply clicking X to close the password prompt window.
+      This link opens the Data Management UI. If you did not change your
+      password in the first step, you are prompted to change your password
+      again. You can bypass this by clicking X to close the password
+      prompt window.
      </para>
     </step>
     <step>
@@ -797,13 +798,14 @@ $ ./startup.sh -p samples/sample2b</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the User View link at the
-      top right of the Admin UI.
+      Retrieve the users in the repository by clicking the Data Management View
+      link at the top right of the Admin UI.
      </para>
      <para>
-      This link opens the User View UI. If you did not change your password in
-      the first step, you are prompted to change your password again. You can
-      bypass this by simply clicking X to close the password prompt window.
+      This link opens the Data Management UI. If you did not change your
+      password in the first step, you are prompted to change your password
+      again. You can bypass this by clicking X to close the password prompt
+      window.
      </para>
     </step>
     <step>
@@ -870,9 +872,9 @@ $ ./startup.sh -p samples/sample2b</screen>
      </para>
      <para>
       To test that the implicit reconciliation has been successful, look at
-      <literal>fdoe</literal>'s record in the User View UI. At the bottom of the
-      user profile, the Linked Systems panel indicates the external resource to
-      which this user entry is mapped.
+      <literal>fdoe</literal>'s record in the Data Management UI. At the
+      bottom of the user profile, the Linked Systems panel indicates the
+      external resource to which this user entry is mapped.
      </para>
      <para>
       The following image shows that <literal>fdoe</literal> now exists in the
@@ -1202,13 +1204,14 @@ $ ./startup.sh -p samples/sample2c</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the User View link at the
-      top right of the Admin UI.
+      Retrieve the users in the repository by clicking the Data Management View
+      link at the top right of the Admin UI.
      </para>
      <para>
-      This link opens the User View UI. If you did not change your password in
-      the first step, you are prompted to change your password again. You can
-      bypass this by simply clicking X to close the password prompt window.
+      This link opens the Data Management UI. If you did not change your
+      password in the first step, you are prompted to change your password
+      again. You can bypass this by clicking X to close the password prompt
+      window.
      </para>
     </step>
     <step>
@@ -1258,7 +1261,7 @@ $ ./startup.sh -p samples/sample2c</screen>
       group to the <literal>openidm2</literal> group.
      </para>
      <para>
-      In the current default version of the User View UI, only specific
+      In the current default version of the Data Management UI, only specific
       properties of a managed object can be edited. It is therefore not possible
       to update John Doe's <literal>ldapGroups</literal> property using the UI.
      </para>
@@ -1323,8 +1326,8 @@ $ ./startup.sh -p samples/sample2c</screen>
     <step>
      <para>
       You can verify this change by reloading John Doe's user profile in the
-      User View UI, and looking at the value of his <literal>ldapGroups</literal>
-      property in the Linked Systems panel.
+      Data Management UI, and looking at the value of his
+      <literal>ldapGroups</literal> property in the Linked Systems panel.
      </para>
      <para>
       The following image shows the updated record for John Doe, with a new
@@ -1957,7 +1960,7 @@ mysql &gt; <userinput>select * from users;</userinput>
        <orderedlist>
         <listitem>
          <para>
-          Click the User View link at the top right of the Admin UI.
+          Click the Data Management View link at the top right of the Admin UI.
          </para>
          <para>
           This opens the regular OpenIDM UI. If you did not change your password
@@ -7357,13 +7360,14 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the User View link at the
-      top right of the Admin UI.
+      Retrieve the users in the repository by clicking the Data Management View
+      link at the top right of the Admin UI.
      </para>
      <para>
-      This link opens the User View UI. If you did not change your password in
-      the first step, you are prompted to change your password again. You can
-      bypass this by simply clicking X to close the password prompt window.
+      This link opens the Data Management UI. If you did not change your
+      password in the first step, you are prompted to change your password
+      again. You can bypass this by clicking X to close the password prompt
+      window.
      </para>
     </step>
     <step>
@@ -7421,9 +7425,9 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
      </para>
      <para>
       To test that the implicit synchronization has been successful, look at
-      Babs Jensen's record in the User View UI. At the bottom of the user
-      profile, the Linked Systems panel indicates Babs Jensen's record in the
-      Salesforce data store. Note the changed Username.
+      Babs Jensen's record in the Data Management UI. At the bottom of the
+      user profile, the Linked Systems panel indicates Babs Jensen's record in
+      the Salesforce data store. Note the changed Username.
      </para>
      <para>
       Alternatively, check the updated user record in Salesforce.
