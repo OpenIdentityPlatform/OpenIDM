@@ -80,6 +80,24 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: /^tasks\/([0-9]+)/,
             pattern: "tasks/?/"
+        },
+        "adminListManagedObjectView" : {
+            view: "org/forgerock/openidm/ui/common/managed/ListManagedObjectView",
+            role: "ui-admin",
+            url: /^managed\/(.+)\/$/, 
+            pattern: "managed/?/"
+        },
+        "adminEditManagedObjectView" : {
+            view: "org/forgerock/openidm/ui/common/managed/EditManagedObjectView",
+            role: "ui-admin",
+            url: /^managed\/(.+)\/edit\/(.+)\/$/, 
+            pattern: "managed/?/edit/?/"
+        },
+        "adminNewManagedObjectView" : {
+            view: "org/forgerock/openidm/ui/common/managed/EditManagedObjectView",
+            role: "ui-admin",
+            url: /^managed\/(.+)\/add\/$/, 
+            pattern: "managed/?/add/"
         }
     };
 

@@ -1,0 +1,22 @@
+<div id="{{grid_id}}_container" class="content-bg">
+    <div class="clearfix">
+        {{#if validObject}}
+        <h1 class="float-left">{{pageTitle}} {{t "common.form.list"}}</h1>
+        <div class="float-right">
+            <a href="#managed/{{objectName}}/add/" class="button" title="{{t "common.form.add"}} {{pageTitle}}">{{t "common.form.add"}} {{pageTitle}}</a>
+            {{#if hasData}}
+            <input type="button"  class="button"  id="reloadGridBtn" value="{{t 'common.form.reloadGrid'}}" />
+            <input type="button"  class="button"  id="clearFiltersBtn" value="{{t 'common.form.clearFilters'}}" disabled />
+            {{/if}}
+        </div>
+        {{else}}
+        <h3>{{t "templates.admin.ManagedObjectList.invalidObject"}}</h3>
+        {{/if}}
+    </div>
+        
+    <table id="{{grid_id}}">
+        <tr><td>{{t "templates.admin.ManagedObjectList.noData"}}</td></tr>
+    </table>
+    <div id="{{grid_id}}_pager"></div>
+       
+</div>

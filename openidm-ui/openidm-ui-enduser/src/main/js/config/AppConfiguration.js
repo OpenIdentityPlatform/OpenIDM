@@ -53,7 +53,7 @@ define("config/AppConfiguration", [
                     moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                     configuration: {
                         remoteConfig: true,
-                        delegate: "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
+                        delegate: "org/forgerock/openidm/ui/user/delegates/SiteConfigurationDelegate"
                     }
                 },
                 {
