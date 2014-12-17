@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.managed;
@@ -180,6 +180,10 @@ class ManagedObjectProperty {
      */
     void onStore(JsonValue value) throws InternalServerErrorException {
         execScript("onStore", onStore, value);
+        encrypt(value);
+    }
+
+    void encrypt(JsonValue value) throws InternalServerErrorException{
         if (encryptor != null && value.isDefined(name)) {
             if (service.getCryptoService() == null) {
                 String msg = name + "property encryption service not available";

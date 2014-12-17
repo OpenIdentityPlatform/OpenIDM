@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.managed;
@@ -276,6 +276,9 @@ class ManagedObjectSet extends ObjectSetJsonResource {
 
     private void update(String id, String rev, JsonValue oldValue, JsonValue newValue) throws ObjectSetException {
         if (newValue.asMap().equals(oldValue.asMap())) { // object hasn't changed
+            for (ManagedObjectProperty property : properties) {
+                property.encrypt(newValue);
+            }
             return; // do nothing
         }
         if (onUpdate != null) {
