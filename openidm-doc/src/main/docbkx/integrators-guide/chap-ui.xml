@@ -34,8 +34,9 @@
 
  <para>
   OpenIDM provides a customizable, browser-based user interface, known as the
-  User View UI. To take full advantage of this interface, you can configure
-  OpenIDM <link xlink:show="new" xlink:href="integrators-guide#managed-objects"
+  Data Management UI. To take full advantage of this interface, you can
+  configure OpenIDM <link xlink:show="new"
+                          xlink:href="integrators-guide#managed-objects"
         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
   Objects</citetitle></link> under <literal>managed/user</literal>. Most of the
   <link xlink:show="new" xlink:href="install-guide#chap-samples"
@@ -45,11 +46,11 @@
  </para>
 
  <para>
-  The User View UI interface enables administrative users to create, modify,
-  and delete user accounts. It provides role-based access to tasks based on
-  BPMN2 workflows, and allows users to manage certain aspects of their own
-  accounts, including configurable self-service registration. When OpenIDM
-  starts, you can access the User View UI at
+  The Data Management UI interface enables administrative users to create,
+  modify, and delete user and other accounts. It provides role-based access to
+  tasks based on BPMN2 workflows, and allows users to manage certain aspects of
+  their own accounts, including configurable self-service registration. When
+  OpenIDM starts, you can access the Data Management UI at
   <literal>https://localhost:8443/openidmui</literal>.
  </para>
 
@@ -78,11 +79,6 @@
  <section xml:id="ui-admin">
   <title>Configuring OpenIDM from the Admin UI</title>
 
-  <!-- commented out para: a potential intro to a future getting started guide
-  <para>
-   OpenIDM offers flexible, open source services for automating management of
-   the identity life cycle.
-  </para>                                                                 -->
   <para>
    You can set up a basic configuration for OpenIDM with the Administrative User
    Interface (Admin UI).
@@ -124,17 +120,18 @@
    As shown in the initial screen, the Admin UI supports: <link
    xlink:role="http://docbook.org/xlink/role/olink"
    xlink:href="integrators-guide#chap-resource-conf" xlink:show="new">
-   Connecting to External Resources</link> and <link xlink:show="new"
-                                                     xlink:role="http://docbook.org/xlink/role/olink"
-                                                     xlink:href="integrators-guide#chap-users-groups-roles">Managing Users,
+   Connecting to External Resources</link> and
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="integrators-guide#chap-users-groups-roles">Managing Users,
    Groups, and Roles</link>.
   </para>
 
   <para>
    Scroll up and down the Admin UI screen. Review configured
    connectors and managed objects. The screenshots in this section assume that
-   you have started OpenIDM with <link xlink:href="install-guide#more-sample2b"
-                                       xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
+   you have started OpenIDM with
+   <link xlink:href="install-guide#more-sample2b"
+   xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
    <citetitle>Sample 2b - LDAP Two Way</citetitle></link>.
   </para>
 
@@ -167,7 +164,7 @@
    </para>
 
    <para>
-    Remember, every connector serves as a conduit to an external data store.
+    Every connector serves as a conduit to an external data store.
    </para>
 
    <mediaobject>
@@ -204,15 +201,26 @@
    <para>
     You can set up Managed Objects in a fashion similar to the way you set up
     connectors. Typically, OpenIDM uses managed objects as defined in
-    <link xlink:role="http://docbook.org/xlink/role/olink"
-          xlink:href="integrators-guide#chap-users-groups-roles" xlink:show="new">
+    <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+          xlink:href="integrators-guide#chap-users-groups-roles">
      <citetitle>Managing Users, Groups, and Roles</citetitle>.</link>
    </para>
 
    <para>
-    To access details of a Managed Object, go to the Resources screen. Select
-    the Edit icon associated with the desired Managed Object, such as user,
-    group, or role.
+    To set up a new Managed Object, navigate to the URL for the Admin UI,
+    <literal>https://localhost:8443/admin</literal>.
+   </para>
+
+   <para>
+    You can set up Managed Objects for any item that can be collected in a
+    data set. For example, with the right schema, you can set up a coffee
+    maker.
+   </para>
+
+   <para>
+    To access details of a Managed Object, navigate to the Resources screen.
+    Select the Edit icon associated with the desired Managed Object, such as
+    user, group, role, part, or something else.
    </para>
 
    <mediaobject>
@@ -221,6 +229,98 @@
      <imagedata fileref="images/admin-ui-managed.png" format="PNG" />
     </imageobject>
    </mediaobject>
+
+   <section xml:id="ui-admin-mo-schema">
+    <title>Managed Object Schema</title>
+
+    <para>
+     When you set up a Managed Object, you should set up associated schema. When
+     you Add or Edit a Managed Object, scroll down the window to the Schema
+     section, where you can add properties and fields.
+    </para>
+
+    <mediaobject>
+     <alt>Managed Object Schema UI Screen</alt>
+     <imageobject>
+      <imagedata fileref="images/admin-schema-title.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+
+    <para>
+     Start with the <literal>Object Title</literal> and
+     <literal>Object Description</literal>. The <literal>Object Title</literal>
+     is a "human-readable" version of the name of the Managed Object. The
+     <literal>Object Description</literal> allows you to elaborate on the
+     Managed Object.
+    </para>
+
+    <mediaobject>
+     <alt>Managed Object Schema Properties</alt>
+     <imageobject>
+      <imagedata fileref="images/admin-schema-prop.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+
+    <para>
+     Next, add the properties of your choice. In the screen shown here,
+     the administrator has added properties for the coffee maker
+     <literal>function</literal> and <literal>partNumber</literal>. When you
+     enter a Property Name, OpenIDM substitutes that name in the left-hand
+     column.
+    </para>
+
+    <para>
+     Each property typically includes several fields as follows:
+    </para>
+
+   <itemizedlist>
+    <listitem>
+     <para><literal>Property Name</literal></para>
+     <para>Name of the property</para>
+    </listitem>
+    <listitem>
+     <para><literal>Readable Title</literal></para>
+     <para>Name of the property, in human-readable language</para>
+    </listitem>
+    <listitem>
+     <para><literal>Description</literal></para>
+     <para>Description of the property</para>
+    </listitem>
+    <listitem>
+     <para><literal>Viewable</literal></para>
+     <para>Determines whether this property is viewable in the
+      Data Management UI, in the profile for the Managed Object. May be
+      true or false.</para>
+    </listitem>
+    <listitem>
+     <para><literal>Searchable</literal></para>
+     <para>Determines whether this property is searchable from the
+     OpenIDM repository. A searchable property should be visible within
+     the Managed Object data grid in the Data Management UI. May be true
+     or false.</para>
+    </listitem>
+    <listitem>
+     <para><literal>Required</literal></para>
+     <para>Specifies whether or not this property is required for the
+      OpenIDM repository. May be true or false.</para>
+    </listitem>
+    <listitem>
+     <para><literal>Type</literal></para>
+     <para>Type of property; could be <literal>boolean</literal>,
+      <literal>integer</literal>, <literal>null</literal>,
+      <literal>number</literal>, <literal>object</literal>,
+      <literal>string</literal>, or <literal>Resource Collection</literal>.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+   <para>
+    After you create a new Managed Object, you can review and manage associated
+    information in the Data Management UI. For more information, see
+    <xref linkend="ui-managing-users" />.
+   </para>
+
+   </section>
 
   </section>
 
@@ -364,9 +464,6 @@
      relationship between a source and a target entry.
     </para>
 
-    <!-- Content largely borrowed from IC 1.0.4 doc, "Managing User Associations"
-    may include more, depending on how the Analysis template develops -->
-
     <para>
      You can set up such data associations for individual entries, as well as
      different situations shown in the section on
@@ -457,7 +554,7 @@
      scripts against the entire data set. For example, you can
      <link xlink:href="integrators-guide#recon-by-id" xlink:show="new"
            xlink:role="http://docbook.org/xlink/role/olink">
-      <citetitle>Restrict Reconciliation to a Specific ID</citetitle></link>
+      <citetitle>Restrict Reconciliation to a Specific ID</citetitle></link>.
     </para>
 
     <mediaobject>
@@ -550,20 +647,23 @@
  </section>
 
  <section xml:id="ui-overview">
-  <title>Overview of the User View UI</title>
+  <title>Overview of the Data Management UI</title>
   <para>
-   For all users, the User View UI includes a Dashboard tab, which lists
-   any tasks assigned to the user who as logged in, processes available to be
-   invoked, and any notifications for that user.
+   For all users, the Data Management UI includes a Dashboard tab, which
+   lists any tasks assigned to the user who as logged in, processes available
+   to be invoked, and any notifications for that user.
   </para>
   <para>
    For the administrative user, (role <literal>openidm-admin</literal>), the
-   User View UI also includes a Users tab, which provides an interface for
-   user entries, if you have configured managed users in the OpenIDM repository.
+   Data Management UI also includes a Users option in the top menu bar,
+   which provides an interface for user entries, if you have configured managed
+   users in the OpenIDM repository. If you have created additional Managed
+   Objects as defined in <xref linkend="ui-admin-managedobjects" />, you can
+   also see and select those Managed Objects in the top menu bar.
   </para>
   <para>
-   To access the User View UI, install and start OpenIDM, then point your
-   browser to <link xlink:href="https://localhost:8443/openidmui" />. If you
+   To access the Data Management UI, start OpenIDM, then navigate to
+   <link xlink:href="https://localhost:8443/openidmui" />. If you
    have not installed a certificate that is trusted by a certificate authority,
    you are prompted with an "Untrusted Connection" warning the first time you
    log in to the UI.
@@ -573,7 +673,7 @@
    no tasks, processes, or notifications are available.
   </para>
   <mediaobject>
-   <alt>OpenIDM User View UI Administrator View - Dashboard</alt>
+   <alt>OpenIDM Data Management UI Administrator View - Dashboard</alt>
    <imageobject>
    <imagedata fileref="images/ui-admin-view.png" format="PNG" />
    </imageobject>
@@ -583,7 +683,7 @@
    after a reconciliation associated with Sample 2b.
   </para>
   <mediaobject>
-   <alt>OpenIDM User View UI Administrator View - Users</alt>
+   <alt>OpenIDM Data Management UI Administrator View - Users</alt>
    <imageobject>
    <imagedata fileref="images/ui-users-tab.png" format="PNG" />
    </imageobject>
@@ -614,13 +714,13 @@
    tab is not displayed. By default, regular users cannot manage user accounts,
    except for certain aspects of their own accounts.
   </para>
- </section>
 
  <section xml:id="ui-configuring">
-  <title>Configuring the User View UI</title>
+  <title>Configuring the Data Management UI</title>
     
   <para>
-   The following sections outline the configurable aspects of the User View UI.
+   The following sections outline the configurable aspects of the Data
+   Management View UI.
   </para>
   
   <section xml:id="ui-self-registration">
@@ -691,7 +791,7 @@
     self registration page.
    </para>
    <mediaobject>
-    <alt>OpenIDM User View UI - Security Questions</alt>
+    <alt>OpenIDM Data Management UI - Security Questions</alt>
     <imageobject>
     <imagedata fileref="images/ui-security-questions.png" format="PNG" />
     </imageobject>
@@ -703,7 +803,7 @@
     response to the security question that she set up during registration.
    </para>
    <mediaobject>
-    <alt>OpenIDM User View UI - Reset Password</alt>
+    <alt>OpenIDM Data Management UI - Reset Password</alt>
     <imageobject>
     <imagedata fileref="images/ui-reset-password.png" format="PNG" />
     </imageobject>
@@ -715,6 +815,7 @@
      password reset functionality.
     </para>
    </note>
+  </section>
   </section>
 
   <section xml:id="ui-minimum-length">
@@ -743,7 +844,7 @@
 },</programlisting>
 
   </section>
-  
+
   <section xml:id="ui-site-identification">
    <title>Enabling Site Identification</title>
    <para>
@@ -862,18 +963,33 @@
  </section>
 
  <section xml:id="ui-managing-users">
-  <title>Managing User Accounts With the User View UI</title>
+  <title>Managing Data Accounts With the Data Management UI</title>
+
   <para>
    Only administrative users (with the role <literal>openidm-admin</literal>)
-   can add, modify, and delete user accounts. Regular users can modify certain
+   can add, modify, and delete data accounts. Regular users can modify certain
    aspects of their own accounts.
+  </para>
+
+  <para>
+   With the following procedures, you can add, update, and deactivate accounts
+   for Managed Objects such as users, or even something else.
+  </para>
+
+  <para>
+   The Managed Object does not have to be a user. It can even be something
+   different like a coffee maker. The basic process for adding, modifying,
+   deactivating, and deleting data accounts is the same. However, the details
+   may vary; for example, most coffee makers do not have telephone numbers.
   </para>
 
   <procedure xml:id="add-user-account">
    <title>To Add a User Account</title>
    <step>
     <para>
-     Log into the user interface as an administrative user.
+     Log into the Data Management UI at
+     <literal>https://localhost:8443/openidmui</literal> as an administrative
+     user.
     </para>
    </step>
    <step>
@@ -920,17 +1036,106 @@
   </procedure>
 
   <mediaobject>
-   <alt>OpenIDM User View UI - Create User Account</alt>
+   <alt>OpenIDM Data Management UI - Create User Account</alt>
    <imageobject>
     <imagedata fileref="images/ui-create-account.png" format="PNG" />
    </imageobject>
   </mediaobject>
 
+  <para>
+   In a similar fashion, you can create accounts for other managed objects. If
+   you followed the instructions discussed in section
+   <xref linkend="ui-admin-mo-schema" />, you should now see a Coffee Maker
+   managed object in the Data Management UI.
+  </para>
+
+  <mediaobject>
+   <alt>OpenIDM Data Management UI - With Another Managed Object</alt>
+   <imageobject>
+    <imagedata fileref="images/ui-coffee-maker-mo.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
+  <procedure xml:id="ui-add-coffee-account">
+   <title>To Add an Entry for a Non-User Managed Object</title>
+
+   <para>
+    This procedure applies if you created a Managed Object for something other
+    than users. This procedure assumes that you've set up a Managed Object with
+    an object title of <literal>Coffee Maker</literal>.
+   </para>
+
+   <para>
+    The first time you create an entry for a new Managed Object, you will see a
+    relatively blank screen:
+   </para>
+
+   <mediaobject>
+    <alt>OpenIDM Data Management UI - New Managed Object</alt>
+    <imageobject>
+     <imagedata fileref="images/ui-initial-mo.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+
+   <para>
+    The items that you can add to the new Managed Object depends on the
+    associated properties, as discussed in <xref linkend="ui-admin-mo-schema" />.
+    This procedure assumes that your new Managed Object is a coffee maker.
+   </para>
+
+   <step>
+    <para>
+     Select Add Coffee Maker.
+    </para>
+   </step>
+   <step>
+    <para>
+     You should see entries for those property fields configured for the
+     <literal>coffeeMaker</literal> Managed Object. The information tooltips
+     that appear is set to the <literal>Description</literal> of the object or
+     the <literal>Property</literal>.
+    </para>
+    <mediaobject>
+     <alt>OpenIDM Data Management UI - Required Properties</alt>
+     <imageobject>
+      <imagedata fileref="images/ui-mo-allprop.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+   </step>
+   <step>
+    <para>
+     After you save the properties for the new Coffee Maker, OpenIDM saves your
+     entries in its internal repository. You can continue adding Coffee Makers
+     into the internal OpenIDM repository.
+    </para>
+    <mediaobject>
+     <alt>OpenIDM Data Management UI - All Properties</alt>
+     <imageobject>
+      <imagedata fileref="images/ui-mo-coffee.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+   </step>
+   <step>
+    <para>
+     You can continue adding new elements to the Coffee Maker Managed Object,
+     or reconcile that Managed Object with another data store.
+    </para>
+   </step>
+
+  </procedure>
+
+  <para>
+   In the following procedures, you can see how to update, deactivate, and
+   delete user accounts, as well as how to view that account in different user
+   resources. You can follow essentially the same procedures for other Managed
+   Objects such as coffee makers.
+  </para>
+
   <procedure xml:id="ui-update-account">
    <title>To Update a User Account</title>  
    <step>
     <para>
-     Log into the User View UI at
+     Log into the Data Management UI at
      <literal>https://localhost:8443/openidmui</literal> as an administrative
      user.
     </para>
@@ -947,8 +1152,8 @@
    </step>
    <step>
     <para>
-     On the user's profile page, modify the fields you want to change and click
-     Update.
+     On the profile page for the user, modify the fields you want to change and
+     click Update.
     </para>
     <para>
      The user account is updated in the OpenIDM repository.
@@ -1026,7 +1231,9 @@
    <title>To Delete a User Account</title>  
    <step>
     <para>
-     Log into the user interface as an administrative user.
+     Log into the Data Management UI at
+     <literal>https://localhost:8443/openidmui</literal> as an administrative
+     user.
     </para>
    </step>
    <step>
@@ -1055,14 +1262,14 @@
   </procedure>
 
   <procedure xml:id="user-linked-view">
-   <title>To View a User's Account in External Resources</title>
+   <title>To View an Account in External Resources</title>
    <para>
-    The User View UI displays the details of the user account in the OpenIDM
-    repository (managed/user). When a mapping has been configured between the
-    repository and one or more external resources, you can view what that user
-    account looks like in any of the systems to which it is linked. Note that
-    this view is read-only - you cannot update a user record in a linked system
-    from within the User View UI.
+    The Data Management UI displays the details of the account in the
+    OpenIDM repository (managed/user). When a mapping has been configured
+    between the repository and one or more external resources, you can view what
+    that user account looks like in any of the systems to which it is linked.
+    Note that this view is read-only - you cannot update a user record in a
+    linked system from within the Data Management UI.
    </para>
    <para>
     By default, <emphasis>implicit synchronization</emphasis> is enabled for
@@ -1078,7 +1285,9 @@
    </para>
    <step>
     <para>
-     Log into the User View UI as an administrative user.
+     Log into the Data Management UI at
+     <literal>https://localhost:8443/openidmui</literal> as an administrative
+     user.
     </para>
    </step>
    <step>
@@ -1121,16 +1330,16 @@
  </section>
 
  <section xml:id="ui-managing-workflows">
-  <title>Managing Workflows From the User View UI</title>
+  <title>Managing Workflows From the Data Management UI</title>
   <para>
-   The User View UI is integrated with the embedded Activiti worfklow engine,
-   enabling users to interact with workflows. Available workflows are displayed
-   under the Processes item on the Dashboard. In order for a workflow to be
-   displayed here, the workflow definition file must be present in the
+   The Data Management UI is integrated with the embedded Activiti worfklow
+   engine, enabling users to interact with workflows. Available workflows are
+   displayed under the Processes item on the Dashboard. In order for a workflow
+   to be displayed here, the workflow definition file must be present in the
    <filename>openidm/workflow</filename> directory.
   </para>
   <para>
-   A sample workflow integration with the User View UI is provided in
+   A sample workflow integration with the Data Management UI is provided in
    <filename>openidm/samples/workflow</filename>, and documented in <link
    xlink:href="integrators-guide#example-provisioning-workflow"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample Workflow -
