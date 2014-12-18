@@ -16,24 +16,16 @@ GO
 
 -- -----------------------------------------------------
 -- Login openidm
--- Login openidm_proxy
 -- -----------------------------------------------------
 IF (NOT EXISTS (select loginname from master.dbo.syslogins where name = N'openidm' and dbname = N'openidm'))
 CREATE LOGIN [openidm] WITH PASSWORD=N'Passw0rd', DEFAULT_DATABASE=[openidm], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
 GO
-IF (NOT EXISTS (select loginname from master.dbo.syslogins where name = N'openidm_proxy' and dbname = N'openidm'))
-CREATE LOGIN [openidm_proxy] WITH PASSWORD=N'Passw0rd', DEFAULT_DATABASE=[openidm], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
-GO
 
 -- -----------------------------------------------------
 -- User openidm - Database owner user
--- User openidm_proxy - More restricted user to access the data only
 -- -----------------------------------------------------
 IF (NOT EXISTS (select name from dbo.sysusers where name = N'openidm'))
 CREATE USER [openidm]		  FOR LOGIN [openidm] WITH DEFAULT_SCHEMA = [openidm]
-GO
-IF (NOT EXISTS (select name from dbo.sysusers where name = N'openidm_proxy'))
-CREATE USER [openidm_proxy]   FOR LOGIN [openidm_proxy] with DEFAULT_SCHEMA = [openidm]
 GO
 
 -- -----------------------------------------------------
@@ -43,8 +35,6 @@ IF (NOT EXISTS (SELECT name FROM sys.schemas WHERE name = N'openidm'))
 EXECUTE sp_executesql N'CREATE SCHEMA [openidm] AUTHORIZATION [openidm]'
 
 EXEC sp_addrolemember N'db_owner', N'openidm'
-GO
-EXEC sp_addrolemember N'db_datawriter', N'openidm_proxy'
 GO
 
 BEGIN TRANSACTION
