@@ -204,7 +204,7 @@ public class MappedTableHandler implements TableHandler {
                 JsonValue rev = resultValue.get("_rev");
                 logger.debug(" full id: {}, rev: {}, obj {}", new Object[] { fullId, rev,
                     resultValue });
-                result = new Resource(fullId, rev.asString(), resultValue);
+                result = new Resource(localId, rev.asString(), resultValue);
             } else {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }

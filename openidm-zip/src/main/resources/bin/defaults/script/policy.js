@@ -224,13 +224,11 @@ policyImpl = (function (){
         var queryParams,existing,requestId,requestBaseArray;
         if (value && value.length) {
             queryParams = {
-                "_queryId": "get-by-field-value",
-                "field": property,
-                "value": value
+                "_queryFilter": property + ' eq "' + value + '"'
             };
 
             requestId = resourceName.leaf();
-            existing = openidm.query(resourceName.parent().toString(),  queryParams);
+            existing = openidm.query(resourceName.parent().toString(), queryParams);
 
             if (existing.result.length !== 0 && (!requestId || (existing.result[0]._id != requestId))) {
                 return [{"policyRequirement": "UNIQUE"}];
