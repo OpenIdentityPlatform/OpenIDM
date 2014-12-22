@@ -78,7 +78,7 @@ if (!request.additionalParameters || (!request.additionalParameters.userId && !r
         return false;
     },
     
-    isProcessAvalibleForUser = function(processAccessPolicies, processDefinition, userRoles) {
+    isProcessAvailableForUser = function(processAccessPolicies, processDefinition, userRoles) {
         var i,
             props,
             property,
@@ -100,19 +100,19 @@ if (!request.additionalParameters || (!request.additionalParameters.userId && !r
         return false;
     },
     
-    getProcessesAvalibleForUser = function(processDefinitions, userRoles) {
-        var processesAvalibleToUser = [],
+    getProcessesAvailableForUser = function(processDefinitions, userRoles) {
+        var processesAvailableToUser = [],
             processAccessPolicies = openidm.read("config/process/access").workflowAccess,
             processDefinition,
             i;
         
         for (i = 0; i < processDefinitions.length; i++) {
             processDefinition = processDefinitions[i];
-            if (isProcessAvalibleForUser(processAccessPolicies, processDefinition, userRoles)) {
-                processesAvalibleToUser.push(processDefinition);
+            if (isProcessAvailableForUser(processAccessPolicies, processDefinition, userRoles)) {
+                processesAvailableToUser.push(processDefinition);
             }
         }
-        return processesAvalibleToUser;
+        return processesAvailableToUser;
     },
     processDefinitions = {},
     user = {},
@@ -135,7 +135,7 @@ if (!request.additionalParameters || (!request.additionalParameters.userId && !r
     
     processDefinitions = openidm.query("workflow/processdefinition", processDefinitionsQueryParams).result;
     
-    processesForUser = getProcessesAvalibleForUser(processDefinitions, roles);
+    processesForUser = getProcessesAvailableForUser(processDefinitions, roles);
     
     //return value
     return processesForUser;
