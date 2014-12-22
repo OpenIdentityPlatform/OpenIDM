@@ -1049,18 +1049,18 @@
   <para>
    In a similar fashion, you can create accounts for other managed objects. If
    you followed the instructions discussed in section
-   <xref linkend="ui-admin-mo-schema" />, you should now see a Coffee Maker
+   <xref linkend="ui-admin-mo-schema" />, you should now see a Wearable Device
    managed object in the Data Management UI.
   </para>
 
   <mediaobject>
    <alt>OpenIDM Data Management UI - With Another Managed Object</alt>
    <imageobject>
-    <imagedata fileref="images/ui-coffee-maker-mo.png" format="PNG" />
+    <imagedata fileref="images/ui-wearable-device-mo.png" format="PNG" />
    </imageobject>
   </mediaobject>
 
-  <procedure xml:id="ui-add-coffee-account">
+  <procedure xml:id="ui-add-wearable-account">
    <title>To Add an Entry for a Non-User Managed Object</title>
 
    <para>
@@ -1116,7 +1116,7 @@
     <mediaobject>
      <alt>OpenIDM Data Management UI - All Properties</alt>
      <imageobject>
-      <imagedata fileref="images/ui-mo-coffee.png" format="PNG" />
+      <imagedata fileref="images/ui-mo-wearable.png" format="PNG" />
      </imageobject>
     </mediaobject>
    </step>
