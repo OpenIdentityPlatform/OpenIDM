@@ -4119,7 +4119,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    can be used as the basis for a correlation query.
   </para>
   <programlisting language="javascript">
-"for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid}"
+"for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}"
   </programlisting>
   <para>
    By default, a <literal>${value}</literal> token replacement is assumed to be
