@@ -1822,23 +1822,23 @@ Content-Length: 89
      </thead>
      <tbody>
       <row>
-       <entry>/openidm/repo/synchronisation/deadLetterQueue/<replaceable>resource</replaceable>?_queryId=query-all-ids"</entry>
+       <entry>/openidm/repo/synchronisation/deadLetterQueue/<replaceable>resource</replaceable>?_queryId=query-all-ids</entry>
        <entry>GET</entry>
        <entry>Lists any failed synchronisation records for that resource, that
         have been placed in the dead letter queue.</entry>
       </row>
       <row>
-       <entry>/openidm/repo/link?_queryId=query-all-ids"</entry>
+       <entry>/openidm/repo/link?_queryId=query-all-ids</entry>
        <entry>GET</entry>
        <entry>Lists entries in the links table</entry>
       </row>
       <row>
-       <entry>/openidm/repo/internal/user?_queryId=query-all-ids"</entry>
+       <entry>/openidm/repo/internal/user?_queryId=query-all-ids</entry>
        <entry>GET</entry>
        <entry>Lists the internal users</entry>
       </row>
       <row>
-       <entry>/openidm/repo/internal/user/<replaceable>username</replaceable>"</entry>
+       <entry>/openidm/repo/internal/user/<replaceable>username</replaceable></entry>
        <entry>PUT</entry>
        <entry>Enables you to change the username or password of an internal user</entry>
       </row>
