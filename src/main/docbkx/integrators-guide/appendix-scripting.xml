@@ -225,7 +225,7 @@
        <term>groovy.disabled.global.ast.transformations</term>
        <listitem>
         <para>
-         Notes whether Groovy Abstract Syntax Transformations (AST)s are 
+         Notes whether Groovy Abstract Syntax Transformations (AST) are 
          disabled.
         </para>
        </listitem>
