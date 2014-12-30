@@ -748,7 +748,7 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
             <itemizedlist>
                 <title>Returns</title>
                 <listitem>
-                    <para>The result of the action. May be <literal>null</literal> if
+                    <para>The result of the action may be <literal>null</literal> if
                         no result is provided.
                     </para>
                 </listitem>
