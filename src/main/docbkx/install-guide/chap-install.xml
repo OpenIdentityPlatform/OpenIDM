@@ -361,7 +361,9 @@ OpenIDM version "${docTargetVersion}" (revision: XXXX)
     </indexterm>
     <step>
      <para>You can stop OpenIDM Services from the <literal>-&gt;</literal>
-      prompt, or through the Felix console.</para>
+      prompt, or through the Felix console. All of these options do so by
+      stopping the Felix container.
+     </para>
      <stepalternatives>
       <step>
        <para>Either enter the <command>shutdown</command> command at the
