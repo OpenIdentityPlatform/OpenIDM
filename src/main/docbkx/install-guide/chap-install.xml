@@ -267,8 +267,8 @@ OpenIDM version "${docTargetVersion}" (revision: XXXX)
 -&gt; </computeroutput></screen>
       </step>
      </stepalternatives>
-     <para>At the resulting <literal>-&gt;</literal> prompt, you can enter
-     commands such as <command>help</command> for usage, or
+     <para>At the resulting Felix console <literal>-&gt;</literal> prompt, you
+      can enter commands such as <command>help</command> for usage, or
      <command>ps</command> to view the bundles installed. To see a list of all
      the OpenIDM core services and their states, enter the following
      command.</para>
