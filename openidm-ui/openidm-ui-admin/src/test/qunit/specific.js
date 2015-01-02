@@ -29,16 +29,18 @@ define([
     "./managedobjects/managedObjectsTest",
     "./resources/resourceTest",
     "./mapping/addMappingTest",
-    "./mapping/reconTests"
-], function (adminBaseTest, moTest, resourceTest, addMappingTest, reconTests) {
+    "./mapping/reconTests",
+    "./mapping/propertyMappingTest"
+], function (adminBaseTest, moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest) {
 
     return {
         executeAll: function (server) {
             moTest.executeAll(server);
-            adminBaseTest.executeAll(server);
             resourceTest.executeAll(server);
             reconTests.executeAll(server);
             addMappingTest.executeAll(server);
+            propertyMappingTest.executeAll(server);
+            adminBaseTest.executeAll(server);
         }
     };
 });

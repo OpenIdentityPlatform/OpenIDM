@@ -55,6 +55,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/MappingUtils",
     "./util/ReconDetailsView",
     "./util/QueryFilterUtils",
+    "./util/AutoCompleteUtils",
 
     "./objectTypes/ObjectTypesDialog",
 
