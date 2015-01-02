@@ -376,8 +376,6 @@ $</screen>
        <para>Or click Stop on the System Information tab of the Felix console,
         by default <link xlink:show="new"
         xlink:href='http://localhost:8080/system/console' />.</para>
-       <para>This stops the Servlet container as well, and the console is
-        no longer accessible.</para>
       </step>
       <step>
        <para>
