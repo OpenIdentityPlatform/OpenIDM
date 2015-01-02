@@ -14,7 +14,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
-    "org/forgerock/openidm/ui/admin/util/AutoCompletUtils"
+    "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils"
 ], function(AbstractView, conf, uiUtils, eventManager, constants, browserStorageDelegate, autoCompleteUtils) {
     var AddPropertyMappingDialog = AbstractView.extend({
         template: "templates/admin/mapping/PropertyMappingDialogAddTemplate.html",
@@ -88,7 +88,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 return _.contains(_.pluck(this.data.currentProperties,"target"), p);
             },this));
         },
-        render: function(params) {
+        render: function(params, callback) {
             var _this = this,
                 settings;
 
@@ -128,6 +128,9 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                                             function () {
                                                 settings.postRender();
                                                 $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
+                                                if(callback){
+                                                    callback();
+                                                }
                                             }, "append");
                 }
             });

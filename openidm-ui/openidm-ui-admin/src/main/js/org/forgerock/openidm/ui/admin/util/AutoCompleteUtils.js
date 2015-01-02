@@ -24,7 +24,7 @@
 
 /*global $, define, _ */
 
-define("org/forgerock/openidm/ui/admin/util/AutoCompletUtils", [], function() {
+define("org/forgerock/openidm/ui/admin/util/AutoCompleteUtils", [], function() {
 
     var obj = {},
         createShowAllItemsButton = function(input){

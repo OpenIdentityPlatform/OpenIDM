@@ -17,7 +17,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
-    "org/forgerock/openidm/ui/admin/util/AutoCompletUtils",
+    "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
 ], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, inlineScriptEditor) {
     var EditPropertyMappingDialog = AbstractView.extend({
@@ -254,7 +254,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 this.currentDialog.dialog('destroy').remove();
             }
         },
-        render: function(params) {
+        render: function(params, callback) {
             var _this = this,
                 dialogPromise = $.Deferred(),
                 currentProperties,
@@ -300,6 +300,9 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                         function () {
                             settings.postRender();
                             $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
+                            if(callback){
+                                callback();
+                            }
                         }, "append");
                 }
             });
