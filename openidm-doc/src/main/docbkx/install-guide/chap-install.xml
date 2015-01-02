@@ -347,10 +347,6 @@ OpenIDM version "${docTargetVersion}" (revision: XXXX)
        respective states.</para>
       </listitem>
       <listitem>
-       <para>Select the Shell tab to access the <literal>-&gt;</literal>
-       prompt.</para>
-      </listitem>
-      <listitem>
        <para>Select the System Information tab to stop or restart the
        container.</para>
       </listitem>
