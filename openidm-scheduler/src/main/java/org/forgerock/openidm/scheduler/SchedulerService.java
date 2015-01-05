@@ -231,6 +231,13 @@ public class SchedulerService implements RequestHandler {
         }
     }
 
+    /**
+     * Registers a {@link ScheduleConfigService} and adds the scheduler if the scheduler has been started.
+     * 
+     * @param service the {@link ScheduleConfigService} to register.
+     * @throws SchedulerException
+     * @throws ParseException
+     */
     public void registerConfigService(ScheduleConfigService service) throws SchedulerException, ParseException {
         synchronized (CONFIG_SERVICE_LOCK) {
             logger.debug("Registering new ScheduleConfigService");
@@ -238,8 +245,8 @@ public class SchedulerService implements RequestHandler {
             if (!started) {
                 logger.debug("The Scheduler Service has not been started yet, storing new Schedule {}", service.getJobName());
             } else {
-                logger.debug("Adding schedule {}", service.getJobName());
                 try {
+                    logger.debug("Adding schedule {}", service.getJobName());
                     addSchedule(service.getScheduleConfig(), service.getJobName(), true);
                 } catch (ObjectAlreadyExistsException e) {
                     logger.debug("Job {} already scheduled", service.getJobName());
@@ -249,12 +256,24 @@ public class SchedulerService implements RequestHandler {
         }
     }
 
+    /**
+     * Unregisters a {@link ScheduleConfigService} and deletes the schedule if the scheduler has been started.
+     * 
+     * @param service the {@link ScheduleConfigService} to register.
+     * @throws SchedulerException
+     * @throws ParseException
+     */
     public void unregisterConfigService(ScheduleConfigService service) {
         synchronized (CONFIG_SERVICE_LOCK) {
-            if (!started) {
-                configMap.remove(service.getJobName());
-            } else {
-
+            logger.debug("Unregistering ScheduleConfigService");
+            configMap.remove(service.getJobName());
+            if (started) {
+                try {
+                    logger.debug("Deleting schedule {}", service.getJobName());
+                    deleteSchedule(service.getJobName());
+                } catch (SchedulerException e) {
+                    logger.warn("Error deleting schedule {}: {}", service.getJobName(), e.getMessage());
+                }
             }
         }
     }
@@ -356,6 +375,7 @@ public class SchedulerService implements RequestHandler {
     /**
      * Deletes a schedule from the scheduler
      * 
+     * @param jobName the job name associated with this schedule.
      * @throws SchedulerException 
      */
     public void deleteSchedule(String jobName) throws SchedulerException {
