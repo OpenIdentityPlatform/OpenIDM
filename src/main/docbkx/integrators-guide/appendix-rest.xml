@@ -212,13 +212,26 @@
   </para>
   <variablelist>
    <varlistentry>
-    <term><literal>_debug=[true,false]</literal></term>
+    <term><literal>_fields</literal></term>
     <listitem>
      <para>
-      If <literal>_debug=true</literal>, the <literal>HttpServlet</literal>
-      dumps the <literal>HttpServletRequest</literal> to the embedded
-      Jetty Servlet log file.
+      The <literal>_fields</literal> parameter can be used to return multiple
+      common attributes.
      </para>
+     <para>
+      For example, you can use <literal>GET</literal> to read specific
+      attributes for a user as follows:
+     </para>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET
+ "https://localhost:8443/openidm/managed/user/james?_fields=userName,mail"</userinput>
+ <computeroutput>{
+  "mail": "james@example.com",
+  "userName": "james"
+ }</computeroutput></screen>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -261,29 +274,6 @@
       parameter, although the output in the examples is formatted for
       readability.
      </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>_fields</term>
-    <listitem>
-     <para>
-      The <literal>_fields</literal> parameter can be used to return multiple
-      common attributes.
-     </para>
-     <para>
-      For example, you can use <literal>GET</literal> to read specific
-      attributes for a user as follows:
-     </para>
-     <screen>$ <userinput>curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET
- "https://localhost:8443/openidm/managed/user/james?_fields=userName,mail"</userinput>
-<computeroutput>{
-  "mail": "james@example.com",
-  "userName": "james"
-}</computeroutput></screen>
     </listitem>
    </varlistentry>
   </variablelist>
