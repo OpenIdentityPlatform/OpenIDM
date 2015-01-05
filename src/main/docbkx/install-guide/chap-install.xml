@@ -470,6 +470,7 @@ Stopping OpenIDM (31391)</computeroutput></screen>
      <screen>$ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
  http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</screen>
 
      <para>When you first install OpenIDM with an empty repository, no users
