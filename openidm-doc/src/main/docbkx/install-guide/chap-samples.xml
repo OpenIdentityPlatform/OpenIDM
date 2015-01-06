@@ -1678,17 +1678,6 @@ $ ./startup.sh -p samples/sample2d</screen>
     however, the sample scripts are a good starting point on which to base your
     customization.
    </para>
-   <note>
-    <para>
-     This sample is supported with Java version 7 only. The dependencies
-     required for the sample are provided in the
-     <literal>openidm/bundle</literal> folder and do not require a separate
-     download. If you are using the ScriptedSQL connector implementation with
-     Java version 6, you must download the related dependencies. For more
-     information, see <xref linkend="sample-3-java-6" /> at the end of this
-     section.
-    </para>
-   </note>
    <para>
     Prepare a fresh installation of OpenIDM before trying this sample.
    </para>
@@ -2282,68 +2271,6 @@ mysql &gt; <userinput>select * from users;</userinput>
    </procedure>
   </section>
 
-  <section xml:id="sample-3-java-6">
-   <title>Using Sample 3 With Java Version 6</title>
-   <para>
-    The default sample works only with Java Version 7, and bundles the required
-    dependencies in the <literal>openidm/bundle</literal> folder. To use the
-    sample with Java Version 6, you must remove these dependencies and download
-    the dependencies specific to Java 6. Follow these steps:
-   </para>
-   <procedure>
-    <step>
-     <para>
-      Remove the following jar files from the <literal>openidm/bundle</literal>
-      folder:
-     </para>
-     <itemizedlist>
-       <listitem>
-        <para>
-         <filename>tomcat-juli-8.0.12.jar</filename>
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <filename>tomcat-jdbc-8.0.12.jar</filename>
-        </para>
-       </listitem>
-     </itemizedlist>
-    </step>
-    <step>
-     <para>
-      Create a <filename>lib</filename> folder in the OpenIDM installation
-      directory.
-     </para>
-     <screen><userinput>$ cd /path/to/openidm
-$ mkdir lib</userinput></screen>
-    </step>
-    <step>
-     <para>
-      Download the following dependencies to the <filename>openidm/lib</filename>
-      directory:
-     </para>
-     <itemizedlist>
-      <listitem>
-       <para>
-        Apache Geronimo Tomcat fork (Juli), <filename>juli-7.0.39.2.jar</filename>
-        <link xlink:href="http://search.maven.org/#artifactdetails%7Corg.apache.geronimo.ext.tomcat%7Cjuli%7C7.0.39.2%7Cbundle"
-              xlink:show="new">(org.apache.geronimo.ext.tomcat:juli:7.0.39.2)</link>
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        Tomcat JDBC Pool Package, <filename>tomcat-jdbc-7.0.53.jar</filename>
-        <link xlink:href="http://search.maven.org/#artifactdetails%7Corg.apache.tomcat%7Ctomcat-jdbc%7C7.0.53%7Cjar"
-              xlink:show="new">(org.apache.tomcat:tomcat-jdbc:7.0.53)</link>
-       </para>
-      </listitem>
-     </itemizedlist>
-    </step>
-   </procedure>
-   <para>
-    The remainder of the sample should work as for Java Version 7.
-   </para>
-  </section>
  </section>
 
   <section xml:id="sample-scripted-rest">
