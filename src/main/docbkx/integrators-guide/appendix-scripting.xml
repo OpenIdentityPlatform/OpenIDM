@@ -448,9 +448,12 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
                     <term>rev</term>
                     <listitem>
                         <para>string</para>
-                        <para>The revision of the object to be updated, or
-                        <literal>null</literal> if the object is not subject
-                        to revision control.
+                        <para>
+                         The revision of the object to be updated. Use
+                         <literal>null</literal> if the object is not subject
+                         to revision control, or if you want to skip the
+                         revision check and update the object, regardless of the
+                         revision.
                         </para>
                     </listitem>
                 </varlistentry>
