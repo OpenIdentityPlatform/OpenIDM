@@ -411,7 +411,7 @@ Id   State          Name
       </para>
       <para>
        Copy the Java archive file to
-       <filename>openidm\db\scripts\mssql</filename>.
+       <filename>openidm\db\mssql\scripts</filename>.
       </para>
      </step>
      <step>
