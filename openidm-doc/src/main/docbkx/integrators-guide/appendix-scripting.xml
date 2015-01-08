@@ -582,7 +582,7 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
                     <listitem>
                         <para>string</para>
                         <para>
-                         The revision of the object to be updated. Use
+                         The revision of the object to be deleted. Use
                          <literal>null</literal> if the object is not subject
                          to revision control, or if you want to skip the
                          revision check and delete the object, regardless of the
