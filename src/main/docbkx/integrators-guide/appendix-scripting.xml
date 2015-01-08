@@ -528,8 +528,12 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
                     <term>rev</term>
                     <listitem>
                         <para>string</para>
-                        <para>The revision of the object to be updated, or
-                            <literal>null</literal> if the object is not subject to revision control.
+                        <para>
+                         The revision of the object to be updated. Use
+                         <literal>null</literal> if the object is not subject
+                         to revision control, or if you want to skip the
+                         revision check and update the object, regardless of the
+                         revision.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -577,8 +581,12 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
                     <term>rev</term>
                     <listitem>
                         <para>string</para>
-                        <para>The revision of the object to be deleted, or
-                            <literal>null</literal> if the object is not subject to revision control.
+                        <para>
+                         The revision of the object to be updated. Use
+                         <literal>null</literal> if the object is not subject
+                         to revision control, or if you want to skip the
+                         revision check and delete the object, regardless of the
+                         revision.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -848,6 +856,48 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
                     </para>
                 </listitem>
             </itemizedlist>
+        </section>
+
+        <section xml:id="function-isencrypted">
+         <title>openidm.isEncrypted(object)</title>
+
+         <para>
+          This function determines if a value is encrypted.
+         </para>
+
+         <variablelist>
+          <title>Parameters</title>
+          <varlistentry>
+           <term>object to check</term>
+           <listitem>
+            <para>any</para>
+            <para>
+             The object whose value should be checked to determine if it is
+             encrypted.
+            </para>
+           </listitem>
+          </varlistentry>
+         </variablelist>
+
+         <itemizedlist>
+          <title>Returns</title>
+          <listitem>
+           <para>
+            Boolean, <literal>true</literal> if the value is encrypted, and
+            <literal>false</literal> if it is not encrypted.
+           </para>
+          </listitem>
+         </itemizedlist>
+
+         <itemizedlist>
+          <title>Throws</title>
+          <listitem>
+           <para>
+            An exception is thrown if the server is unable to detect whether the
+            value is encrypted, for any reason.
+           </para>
+          </listitem>
+         </itemizedlist>
         </section>
 
         <section xml:id="function-logger-debug">
