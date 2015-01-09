@@ -27,12 +27,12 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>2.1.2-SNAPSHOT</version>
+        <version>2.1.2</version>
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-webapp</artifactId>
     <packaging>war</packaging>
-    <version>2.1.2-SNAPSHOT</version>
+    <version>2.1.2</version>
     <name>OpenIDM Webapp - (Embedded Felix)</name>
     <description>Sample web application with embedded OpenIDM. It shows how to embedded the OpenIDM into any legacy web application.</description>
     <properties>
