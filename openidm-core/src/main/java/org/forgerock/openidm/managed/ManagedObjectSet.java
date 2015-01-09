@@ -342,7 +342,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
                 throw new InternalServerErrorException(jve);
             }
         }
-        patch(_id, _rev, new JsonPatchWrapper(decrypt(params.get("_entity"))));
+        patch(_id, _rev, new JsonPatchWrapper(params.get("_entity")));
         return new JsonValue(null); // empty response (and lack of exception) indicates success
     }
 
@@ -429,7 +429,6 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     // TODO: Consider dropping this Patch object abstraction and just process a patch document directly?
     @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        // FIXME: There's no way to decrypt a patch document. :-(  Luckily, it'll work for now with patch action.
         boolean forceUpdate = (rev == null);
         boolean retry = forceUpdate;
         String _rev = rev;
@@ -465,7 +464,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
             }
 
             try {
-                update(id, _rev, decrypted, newValue);
+                update(id, _rev, decrypted, decrypt(newValue));
                 retry = false;
                 LOGGER.debug("Patch successful!");
                 logActivity(id, "Patch " + patch, oldValue, newValue);
