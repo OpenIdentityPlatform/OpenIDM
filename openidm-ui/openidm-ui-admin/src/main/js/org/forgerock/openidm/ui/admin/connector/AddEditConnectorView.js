@@ -99,11 +99,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             ConnectorDelegate.availableConnectors().then(_.bind(function(connectors){
                 this.data.connectors = connectors.connectorRef;
 
-                //Clean up display names to use translated names
-                _.each(this.data.connectors , function(connector){
-                    connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorName));
-                }, this);
-
                 //Build Connector type selection
                 this.data.versionDisplay = _.chain(this.data.connectors)
                     .groupBy( function(connectorRef) {
