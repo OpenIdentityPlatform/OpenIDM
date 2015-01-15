@@ -1602,7 +1602,7 @@ $ ./startup.sh -p samples/workflow</screen>
        <literal>Welcome1</literal>. For information about logging in to the user
        interface, see <link xlink:href="integrators-guide#ui-overview"
        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Overview of
-       the Default User Interface</citetitle></link>.
+       the Data Management UI</citetitle></link>.
       </para>
      </step>
      <step>
@@ -3143,7 +3143,7 @@ $ more schedule-certificationEntitlements.json</userinput>
      <para>
       For more information about managed roles and assignment and unassignment
       operations, see <link xlink:show="new"
-      xlink:href="integrators-guide##configuring-custom-roles"
+      xlink:href="integrators-guide#configuring-custom-roles"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
       Custom Roles</citetitle></link>.
      </para>

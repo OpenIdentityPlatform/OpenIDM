@@ -1952,7 +1952,7 @@ mysql &gt; <userinput>select * from users;</userinput>
           Click the Data Management View link at the top right of the Admin UI.
          </para>
          <para>
-          This opens the regular OpenIDM UI. If you did not change your password
+          This opens the Data Management UI. If you did not change your password
           in the first step, you are prompted to change your password again.
           You can bypass this by simply clicking X to close the password prompt
           window.
