@@ -54,11 +54,11 @@
    </varlistentry>
 
    <varlistentry>
-    <term>Addition of an <emphasis>aggregated view</emphasis> to the User View
-     UI</term>
+    <term>Addition of an <emphasis>aggregated view</emphasis> to the Data
+     Management UI</term>
     <listitem>
      <para>
-      The User View UI now includes a read-only view of the user account in
+      The Data Management UI now includes a read-only view of the user account in
       each of the external resources to which it is linked. For more information,
       see <link xlink:show="new" xlink:href="integrators-guide#user-linked-view"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To View a
