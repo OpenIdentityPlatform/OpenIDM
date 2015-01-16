@@ -459,6 +459,12 @@ Stopping OpenIDM (31391)</computeroutput></screen>
       In general, server-assigned UUIDs are better in production, as they can be
       generated easily in clustered environments.
      </para>
+     <para>
+      For some versions of Mac OS X, the stock version of the
+      <command>curl</command> command with the <command>--cacert</command>
+      option may lead to error messages. You may use the <command>-k</command>
+      or <command>--insecure</command> options as a workaround.
+     </para>
     </note>
 
    <procedure xml:id="first-rest-steps">
