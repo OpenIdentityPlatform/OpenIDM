@@ -67,7 +67,6 @@
         </div>
     </div>
 </fieldset>
-
 <fieldset>
     <legend><span>{{t "templates.connector.ldapConnector.baseContextTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
     <div class="group-body connector-array-component" id="baseContextWrapper">
@@ -76,31 +75,69 @@
             <button type="button" field_type="baseContext" id="addBaseContextButton" name="addBaseContextButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-lg fa-plus"></i></button>
         </div>
         {{#if connectorDefaults.configurationProperties.baseContexts.length}}
-            {{#each_with_index connectorDefaults.configurationProperties.baseContexts}}
-                <div class="field group-field-block">
-                    <div class="separate-message outside-element">
-                        <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
-                        <div class="inline">
-                            <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                            <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
-                            <span></span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
+        {{#each_with_index connectorDefaults.configurationProperties.baseContexts}}
+        <div class="field group-field-block">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                    <span></span>
                 </div>
-            {{/each_with_index}}
-        {{else}}
-            <div class="field group-field-block">
-                <div class="separate-message outside-element">
-                    <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
-                    <div class="inline">
-                        <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                        <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
-                        <span></span>
-                    </div>
-                    <div class="validation-message"></div>
-                </div>
+                <div class="validation-message"></div>
             </div>
+        </div>
+        {{/each_with_index}}
+        {{else}}
+        <div class="field group-field-block">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                    <span></span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+    <div class="group-field-block group-note-lead">
+        <p class="note">{{t "templates.connector.ldapConnector.syncMessage"}} <input {{#if baseContextsSameResults}}checked{{/if}} type="checkbox" id="syncBaseContext"></p>
+    </div>
+</fieldset>
+<fieldset id="baseContextsToSynchronizeHolder" {{#if baseContextsSameResults}} style="display:none;" {{/if}}>
+    <legend><span>{{t "templates.connector.ldapConnector.baseContextSyncTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body connector-array-component" id="baseContextsToSynchronizeWrapper">
+        <div class="group-field-block group-note-lead">
+            <button type="button" field_type="baseContextsToSynchronize" id="addBaseContextToSynchronizeButton" name="addBaseContextToSynchronizeButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-lg fa-plus"></i></button>
+        </div>
+        {{#if connectorDefaults.configurationProperties.baseContextsToSynchronize.length}}
+        {{#each_with_index connectorDefaults.configurationProperties.baseContextsToSynchronize}}
+        <div class="field group-field-block">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContextsToSynchronize" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                    <span></span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        {{/each_with_index}}
+        {{else}}
+        <div class="field group-field-block">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContextsToSynchronize" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                    <span></span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
         {{/if}}
     </div>
 </fieldset>
