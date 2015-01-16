@@ -721,6 +721,11 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 urlName = mergedResult.name;
             }
 
+            //Checks for connector specific save function to do any additional changes to data
+            if(this.connectorTypeRef.connectorSaved) {
+                mergedResult = this.connectorTypeRef.connectorSaved(mergedResult);
+            }
+
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
             ConnectorDelegate.deleteCurrentConnectorsCache();
@@ -744,9 +749,10 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             var mergedResult = this.getProvisioner();
 
-            if(this.connectorTypeRef.connectorSaved) {
-                this.connectorTypeRef.connectorSaved(_.bind(function() {
-                    this.connectorValidate(mergedResult);
+            //checks for any additional validation functions to allow a connector specific validation adjustment
+            if(this.connectorTypeRef.connectorValidate) {
+                this.connectorTypeRef.connectorValidate(_.bind(function(result) {
+                    this.connectorValidate(result);
                 }, this), mergedResult);
             } else {
                 this.connectorValidate(mergedResult);

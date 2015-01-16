@@ -39,6 +39,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
             "click .remove-btn": "removeField",
             "focus .filter": "showFilterDialog",
             "click #ssl": "toggleSSLPort",
+            "click #syncBaseContext" : "toggleSyncBaseContext",
             "click #toggleCert": "toggleCert",
             "change #ldapTemplateType" : "changeLdapType"
         },
@@ -98,15 +99,38 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                 }
             }
 
+            this.data.baseContextsSameResults = this.compareBaseContext(this.data.connectorDefaults.configurationProperties.baseContexts, this.data.connectorDefaults.configurationProperties.baseContextsToSynchronize);
+
             if(this.data.editState) {
                 securityDelegate.getPublicKeyCert("truststore", "openidm_" +args.connectorDefaults.name).then(_.bind(function(cert){
                     this.data.publicKey = cert;
-                    this.ldapParentRender(args, callback);
+                    this.ldapParentRender(args, _.bind(function(){
+                        this.fieldButtonCheck();
+                        callback();
+                    }, this));
                 }, this));
             } else {
-                this.ldapParentRender(args, callback);
+                this.ldapParentRender(args, _.bind(function(){
+                    this.fieldButtonCheck();
+                    callback();
+                }, this));
+            }
+        },
+        compareBaseContext : function(base, sync) {
+            var sameResults = true,
+                compare;
+
+            if(base.length === sync.length) {
+                compare = _.difference(base, sync);
+
+                if(compare.length !== 0) {
+                    sameResults = false;
+                }
+            } else {
+                sameResults = false;
             }
 
+            return sameResults;
         },
         ldapParentRender : function(args, callback) {
             this.parentRender(_.bind(function() {
@@ -125,6 +149,12 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                 }
 
                 validatorsManager.bindValidators(this.$el, "config/provisioner.openicf/ldap", _.bind(function () {
+                    if(this.$el.find("#syncBaseContext")) {
+                        this.$el.find("#baseContextsToSynchronizeHolder input").attr("data-validator", "");
+                        this.$el.find("#baseContextsToSynchronizeHolder input").attr("data-validation-status", "");
+                        this.$el.find("#baseContextsToSynchronizeHolder input").unbind("blur");
+                    }
+
                     validatorsManager.validateAllFields(this.$el);
                 }, this));
 
@@ -185,7 +215,20 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                 $("#" + filterProp).val(filterString);
             }, this));
         },
+        toggleSyncBaseContext : function(event) {
+            if (!$(event.target).is(":checked")) {
+                this.$el.find("#baseContextsToSynchronizeHolder").show();
+                this.$el.find("#baseContextsToSynchronizeHolder input").attr("data-validator", "required");
+                validatorsManager.bindValidators(this.$el.find('#baseContextsToSynchronizeHolder'));
+            } else {
+                this.$el.find("#baseContextsToSynchronizeHolder").hide();
+                this.$el.find("#baseContextsToSynchronizeHolder input").attr("data-validator", "");
+                this.$el.find("#baseContextsToSynchronizeHolder input").attr("data-validation-status", "");
+                this.$el.find("#baseContextsToSynchronizeHolder input").unbind("blur");
+            }
 
+            validatorsManager.validateAllFields(this.$el);
+        },
         toggleSSLPort: function (event) {
             if ($(event.target).is(":checked")) {
                 this.$el.find("#port").val("636").trigger("change");
@@ -262,20 +305,32 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
             });
         },
 
-        connectorSaved: function(callback, details) {
+        connectorValidate: function(callback, details) {
+            if(this.$el.find("#syncBaseContext").is(":checked")) {
+                details.configurationProperties.baseContextsToSynchronize = details.configurationProperties.baseContexts;
+            }
+
             if (this.$el.find("#certificate").val().length) {
                 securityDelegate.uploadCert("truststore", "openidm_" +details.name, this.$el.find("#certificate").val()).then(function () {
                     if(callback) {
-                        callback();
+                        callback(details);
                     }
                 });
             } else {
                 securityDelegate.deleteCert("truststore", "openidm_" +details.name).always(function () {
                     if(callback) {
-                        callback();
+                        callback(details);
                     }
                 });
             }
+        },
+
+        connectorSaved: function(details) {
+            if(this.$el.find("#syncBaseContext").is(":checked")) {
+                details.configurationProperties.baseContextsToSynchronize = details.configurationProperties.baseContexts;
+            }
+
+            return details;
         }
     });
 
