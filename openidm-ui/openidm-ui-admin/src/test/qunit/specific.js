@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,22 +25,24 @@
 /*global require, define, QUnit, $ */
 
 define([
-    "./adminBaseTest",
+    "./mocks/adminInit",
     "./managedobjects/managedObjectsTest",
     "./resources/resourceTest",
     "./mapping/addMappingTest",
     "./mapping/reconTests",
     "./mapping/propertyMappingTest"
-], function (adminBaseTest, moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest) {
+], function (adminInit, moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest) {
 
     return {
         executeAll: function (server) {
+
+            adminInit(server);
+
             moTest.executeAll(server);
             resourceTest.executeAll(server);
             reconTests.executeAll(server);
             addMappingTest.executeAll(server);
             propertyMappingTest.executeAll(server);
-            adminBaseTest.executeAll(server);
         }
     };
 });

@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -41,7 +41,7 @@
             <outputDirectory>/</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/CodeMirror-4.5.0</directory>
+            <directory>${project.build.directory}/codemirror-4.10</directory>
             <outputDirectory>/libs/codemirror</outputDirectory>
             <includes>
               <include>lib/codemirror.js</include>
@@ -52,7 +52,7 @@
             <fileMode>0640</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/CodeMirror-4.5.0/lib</directory>
+            <directory>${project.build.directory}/codemirror-4.10/lib</directory>
             <outputDirectory>/css/codemirror</outputDirectory>
             <includes>
               <include>codemirror.css</include>

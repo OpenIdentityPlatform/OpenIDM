@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -95,35 +95,38 @@ define([
                 });
             });
             
+
             QUnit.asyncTest("AddPropertyMappingDialog Tests", function () {
                 var browserStorageDelegate = require("org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate");
                 propertiesViewLoadMock(server);
                 mappingBaseView.data = {};
                 browserStorageDelegate.remove(mappingName + "_Properties");
+                delete PropertiesView.route;
                
-               PropertiesView.render([mappingName], function () {
+                PropertiesView.render([mappingName], function () {
                     //addPropertyMappingDialog tests
                    addPropertyMappingDialog.render([mappingName],function(){
-                       var propsBefore = browserStorageDelegate.get(mappingName + "_Properties");
                        QUnit.equal($("#propertyAddForm").length, 1, "Add Property Dialog successfully loaded");
                        addPropertyMappingDialog.$el.find("[name=propertyList]").val("test");
                        addPropertyMappingDialog.$el.find("input[type=submit]").click();
-                       QUnit.notEqual(browserStorageDelegate.get(mappingName + "_Properties").length,propsBefore.length,"Property mapping successfully added");
-                       QUnit.equal(window.location.hash, "#property/" + mappingName + "/test","After adding new property mapping the url changes to correct route")
-                       $(".ui-dialog-titlebar-close").click();
+
+                       QUnit.equal(_.last(browserStorageDelegate.get(mappingName + "_Properties")).target,"test","Property mapping successfully added");
+                       QUnit.equal(window.location.hash, "#property/" + mappingName + "/test","After adding new property mapping the url changes to correct route");
+
                        QUnit.equal($("#propertyAddForm").length, 0, "Add Property Dialog successfully closed");
-                       
+
                        QUnit.start();
                    });
                 });
             });
-            
+
             QUnit.asyncTest("EditPropertyMappingDialog Tests", function () {
                 var browserStorageDelegate = require("org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate");
                 propertiesViewLoadMock(server);
                 mappingBaseView.data = {};
                 browserStorageDelegate.remove(mappingName + "_Properties");
-                
+                delete PropertiesView.route;
+
                 PropertiesView.render([mappingName], function () {
                     //editPropertyMappingDialog tests
                     editPropertyMappingDialog.render([mappingName, "displayName"], function(){
@@ -142,13 +145,13 @@ define([
                             propEditForm.find("input[type=submit]").click();
                             QUnit.notDeepEqual(browserStorageDelegate.get(mappingName + "_Properties"),propsBefore,"Property mapping successfully updated");
                             
-                            $(".ui-dialog-titlebar-close").click();
                             QUnit.equal($("#propertyEditForm:visible").length, 0, "Edit Property Dialog successfully closed");
                             
                             QUnit.start();
                     });
                 });
             });
+
         }
     };
 

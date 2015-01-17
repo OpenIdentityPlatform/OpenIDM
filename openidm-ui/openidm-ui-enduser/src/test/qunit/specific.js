@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -47,6 +47,7 @@ define([
                 conf.globalData.siteIdentification = true;
 
                 LoginView.element = $("<div>")[0];
+                delete LoginView.route;
                 LoginView.render([], function () {
 
                     var siteIdStub = sinon.stub(siteIdentificationDelegate, "getSiteIdentificationForLogin", function (login, callback) {

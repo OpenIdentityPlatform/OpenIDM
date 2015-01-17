@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  */
 
 /*global define, $, _, Handlebars, form2js, window */
@@ -280,9 +280,9 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
 
             this.currentDialog = $('<div id="propertyDialog"></div>');
             this.setElement(this.currentDialog);
-            $('#dialogs').append(this.currentDialog);
 
             this.currentDialog.dialog({
+                appendTo: $("#dialogs"),
                 title: settings.title,
                 position: ['center',25],
                 modal: true,

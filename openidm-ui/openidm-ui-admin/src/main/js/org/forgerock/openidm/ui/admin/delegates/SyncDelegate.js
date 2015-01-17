@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -181,7 +181,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
         
         doServiceCall()
         .fail(function (xhr) {
-                if(xhr.responseJSON.code === 404){
+                if(xhr.status === 404){
                     configDelegate.createEntity("endpoint/mappingDetails", {
                             "context" : "endpoint/mappingDetails",
                             "type" : "text/javascript",

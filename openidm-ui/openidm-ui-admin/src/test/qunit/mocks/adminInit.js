@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +24,9 @@
 
 /*global require, define*/
 define([
+
+    "text!templates/admin/AdminBaseTemplate.html",
+
     "text!css/config/adminConfig.less",
     "text!css/config/adminStyle.less",
     "text!css/config/resourcesView.less",
@@ -45,6 +48,9 @@ define([
     /* an unfortunate need to duplicate the file names here, but I haven't
      yet found a way to fool requirejs into doing dynamic dependencies */
     var staticFiles = [
+
+            "templates/admin/AdminBaseTemplate.html",
+
             "css/config/adminConfig.less",
             "css/config/adminStyle.less",
             "css/config/resourcesView.less",

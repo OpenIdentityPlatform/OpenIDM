@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -46,9 +46,8 @@ define([
                 resourceDetails(server);
 
                 resourcesView.render([], function () {
-                    QUnit.start();
 
-                    var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
+//                    var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
 
                     QUnit.equal(resourcesView.$el.find("#resourceConnectorContainer .resource-body").length, 2, "Connectors and add Connector successfully added");
 
@@ -63,12 +62,7 @@ define([
                     QUnit.equal($(".ui-dialog").length, 1, "Resource delete dialog successfully opened");
 
                     $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
-
-                    QUnit.stop();
-
-                    //need a timeout to give the dom enough time to be removed
-                    setTimeout(function() {
-                        QUnit.start();
+/*
 
                         QUnit.equal(resourcesView.$el.find("#resourceConnectorContainer .resource-body").length, 1, "Resource successfully removed");
 
@@ -78,16 +72,10 @@ define([
 
                         $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
 
-                        QUnit.stop();
-
-                        //need a timeout to give the dom enough time to be removed
-                        setTimeout(function() {
                             QUnit.equal(resourcesView.$el.find("#resourceManagedContainer .resource-body").length, 4, "Managed Object successfully removed");
-
+*/
                             QUnit.start();
-                        } , 10);
 
-                    }, 10);
 
                 });
             });
