@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,32 +23,9 @@
  */
 
 /*global require, define*/
-define([
-    "text!templates/admin/AdminBaseTemplate.html",
-    "text!templates/admin/ResourcesViewTemplate.html"
-], function () {
-
-    /* an unfortunate need to duplicate the file names here, but I haven't
-     yet found a way to fool requirejs into doing dynamic dependencies */
-    var staticFiles = [
-            "templates/admin/AdminBaseTemplate.html",
-            "templates/admin/ResourcesViewTemplate.html"
-        ],
-        deps = arguments;
+define([ ], function () {
 
     return function (server) {
-    
-        _.each(staticFiles, function (file, i) {
-            server.respondWith(
-                "GET",
-                new RegExp(file.replace(/([\/\.\-])/g, "\\$1") + "$"),
-                [
-                    200,
-                    { },
-                    deps[i]
-                ]
-            );
-        });
             
         server.respondWith(
             "GET",   

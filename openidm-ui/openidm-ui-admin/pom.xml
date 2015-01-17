@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>CodeMirror</artifactId>
-            <version>4.5.0</version>
+            <version>4.10</version>
             <type>zip</type>
         </dependency>
 
@@ -220,7 +220,6 @@
                                         <artifactItem>
                                             <groupId>org.forgerock.commons.ui.libs</groupId>
                                             <artifactId>CodeMirror</artifactId>
-                                            <version>4.5.0</version>
                                             <type>zip</type>
                                         </artifactItem>
                                     </artifactItems>

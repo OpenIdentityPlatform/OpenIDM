@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,7 +34,7 @@ require.config({
         js2form: "libs/js2form-2.0",
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
-        jquery: "libs/jquery-1.11.1-min",
+        jquery: "libs/jquery-2.1.1-min",
         jqueryui: "libs/jquery-ui-1.11.1-min",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         gentleSelect: "libs/jquery-gentleSelect-0.1.3.1-min",
