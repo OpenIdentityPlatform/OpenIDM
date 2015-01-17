@@ -2093,8 +2093,8 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
      <listitem>
       <para>
        One or more starting points in the LDAP tree that will be used to
-       determine if a change should be synchronized. The base contexts attribute
-       will be used to synchronize a change if this property is not set.
+       determine if a change should be synchronized. During LiveSync operations,
+       OpenIDM searches through this property for changes.
       </para>
      </listitem>
     </varlistentry>
