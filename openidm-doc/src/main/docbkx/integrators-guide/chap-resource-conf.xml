@@ -2094,7 +2094,8 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
       <para>
        One or more starting points in the LDAP tree that will be used to
        determine if a change should be synchronized. During LiveSync operations,
-       OpenIDM searches through this property for changes.
+       OpenIDM searches through the base contexts listed in this property for
+       changes.
       </para>
      </listitem>
     </varlistentry>
