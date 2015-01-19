@@ -515,8 +515,8 @@ openidm.create('workflow/processinstance', null, params);
 "sendNotificationProcess:1:104";
     </programlisting>
     <para>
-     You can obtain the <literal>processDefinitionId</literal> by querying the
-     available workflows, for example:
+     To obtain the <literal>processDefinitionId</literal>, query the available
+     workflows, for example:
     </para>
     <programlisting language="javascript">
  {
@@ -540,11 +540,11 @@ openidm.create('workflow/processinstance', null, params);
   </itemizedlist>
 
   <para>
-   You can use the optional <literal>_businessKey</literal> parameter to add
-   specific business logic information to the workflow when it is invoked. For
-   example, the following workflow invocation assigns the workflow a business
-   key of <literal>"newOrder"</literal>. This business key can later be used to
-   query "newOrder" processes.
+   Use the optional <literal>_businessKey</literal> parameter to add specific
+   business logic information to the workflow when it is invoked. For example,
+   the following workflow invocation assigns the workflow a business key of
+   <literal>"newOrder"</literal>. This business key can later be used to query
+   "newOrder" processes.
   </para>
   <screen><userinput>$ curl \
  --cacert self-signed.crt \
@@ -553,6 +553,14 @@ openidm.create('workflow/processinstance', null, params);
  --request POST \
  --data '{"_key":"myWorkflow", "_businessKey":"newOrder"}' \
  "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput></screen>
+
+  <para>
+   Access to workflows is based on OpenIDM roles, and is configured in the file
+   <filename>conf/process-access.json</filename>. For more information, see
+   <link xlink:show="new" xlink:href="integrators-guide#ui-managing-workflows"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
+   Workflows From the Data Management UI</citetitle></link>.
+  </para>
  </section>
 
  <section xml:id="querying-activiti-workflows">
