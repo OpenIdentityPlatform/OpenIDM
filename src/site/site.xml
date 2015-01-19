@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <project name="${project.name}"
@@ -58,6 +58,7 @@
   </menu>
 
   <menu name="Released Documentation">
+   <item name="OpenIDM 3.1.0" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=3.1.0" />
    <item name="OpenIDM 3.0.0" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=3.0.0" />
    <item name="OpenIDM 2.1.0" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=2.1.0" />
    <item name="OpenIDM 2.0.3" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=2.0.3" />
