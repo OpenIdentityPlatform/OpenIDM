@@ -315,13 +315,17 @@
   </para>
 
   <programlisting language="javascript">{
- "name"                    : "xml",
- "connectorRef"            : <link linkend="connector-reference">connector-ref-object</link>,
- "poolConfigOption"        : <link linkend="pool-configuration-option">pool-config-option-object</link>,
- "operationTimeout"        : <link linkend="operation-timeout">operation-timeout-object</link>,
- "configurationProperties" : <link linkend="configuration-properties">configuration-properties-object</link>,
- "objectTypes"             : <link linkend="object-types">object-types-object</link>,
- "operationOptions"        : <link linkend="operation-options">operation-options-object</link>
+ "name"                      : "xml",
+ "connectorRef"              : <link linkend="connector-reference">connector-ref-object</link>,
+ "producerBufferSize"        : <replaceable>integer</replaceable>,
+ "connectorPoolingSupported" : <replaceable>boolean, true/false</replaceable>,
+ "poolConfigOption"          : <link linkend="pool-configuration-option">pool-config-option-object</link>,
+ "operationTimeout"          : <link linkend="operation-timeout">operation-timeout-object</link>,
+ "configurationProperties"   : <link linkend="configuration-properties">configuration-properties-object</link>,
+ "syncFailureHandler"        : sync-failure-handler-object,
+ "resultsHandlerConfig"      : results-handler-config-object,
+ "objectTypes"               : <link linkend="object-types">object-types-object</link>,
+ "operationOptions"          : <link linkend="operation-options">operation-options-object</link>
 }</programlisting>
 
   <para>
@@ -575,6 +579,151 @@
     <term><replaceable>property</replaceable></term>
     <listitem>
      <para>Individual properties depend on the type of connector.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="sync-failure-handler">
+   <title>Sync Failure Handler Object</title>
+   <para>
+    This object enables you to specify what should happen if a LiveSync
+    operation reports a failure for an operation. The following example shows a
+    sync failure handler object.
+   </para>
+   <programlisting language="javascript">{
+    "maxRetries" : 5,
+    "postRetryAction" : "logged-ignore"
+}  </programlisting>
+   <varlistentry>
+    <term>maxRetries</term>
+    <listitem>
+     <para>positive integer or <literal>-1</literal>, required</para>
+     <para>
+      The number of attempts that OpenIDM should make to process a failed
+      modification. A value of zero indicates that failed modifications should
+      not be reattempted. In this case, the post retry action is executed
+      immediately when a LiveSync operation fails. A value of -1 (or omitting
+      the <literal>maxRetries</literal> property, or the entire
+      <literal>syncFailureHandler</literal> object) indicates that failed
+      modifications should be retried an infinite number of times. In this case,
+      no post retry action is executed.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>postRetryAction</term>
+    <listitem>
+     <para>string, required</para>
+     <para>
+      The action that should be taken if the synchronization operation fails,
+      after the specified number of attempts. The post retry action can be one
+      of the following:
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        <literal>logged-ignore</literal> indicates that OpenIDM should ignore
+        the failed modification, and log its occurrence.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>dead-letter-queue</literal> indicates that OpenIDM should save
+        the details of the failed modification in a table in the repository
+        (accessible over REST at
+        <literal>repo/synchronisation/deadLetterQueue/<replaceable>provisioner-name</replaceable></literal>).
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>script</literal> specifies a custom script that should be
+        executed when the maximum number of retries has been reached.
+       </para>
+      </listitem>
+     </itemizedlist>
+     <para>
+      For more information, see <link xlink:show="new"
+      xlink:href="integrators-guide#livesync-retry-strategy"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+      the LiveSync Retry Policy</citetitle></link>.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="results-handler-config">
+   <title>Results Handler Config Object</title>
+   <para>
+    These configuration properties depend on the connector type and on the
+    interfaces that are implemented by that connector type. For more
+    information, about implemented interfaces, see the <link xlink:show="new"
+    xlink:href="http://openicf.forgerock.org/doc/config-reference">OpenICF
+    Connector Configuration Reference</link>.
+   </para>
+   <para>
+    The following example shows a results handler configuration object.
+   </para>
+   <programlisting language="javascript">{
+    "enableNormalizingResultsHandler" : true,
+    "enableFilteredResultsHandler" : false,
+    "enableCaseInsensitiveFilter" : false,
+    "enableAttributesToGetSearchResultsHandler" : false
+}  </programlisting>
+   <varlistentry>
+    <term>enableNormalizingResultsHandler</term>
+    <listitem>
+     <para>boolean</para>
+     <para>
+      If the connector implements the attribute normalizer interface, you can
+      enable this interface by setting this configuration property to
+      <literal>true</literal>. If the connector does not implement the attribute
+      normalizer interface, the value of this property has no effect.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>enableFilteredResultsHandler</term>
+    <listitem>
+     <para>boolean</para>
+     <para>
+      If the connector uses the filtering and search capabilities of the remote
+      connected system, you can set this property to <literal>false</literal>.
+      If the connector does not use the remote system's filtering and search
+      capabilities (for example, the CSV file connector), you
+      <emphasis>must</emphasis> set this property to <literal>true</literal>,
+      otherwise the connector performs an additional, case-sensitive search,
+      which can cause problems.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>enableCaseInsensitiveFilter</term>
+    <listitem>
+     <para>boolean</para>
+     <para>
+      By default, the filtered results handler (described previously) is case
+      sensitive. If the filtered results handler is enabled this property allows
+      you to enable case insensitive filtering. When case insensitive filtering
+      is not enabled, a search will not return results unless the case matches
+      exactly. For example, a search for <literal>lastName = "Jensen"</literal>
+      will not match a stored user with <literal>lastName : jensen</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>enableAttributesToGetSearchResultsHandler</term>
+    <listitem>
+     <para>boolean</para>
+     <para>
+      By default, OpenIDM determines which attributes that should be retrieved
+      in a search. If the
+      <literal>enableAttributesToGetSearchResultsHandler</literal> property is
+      set to <literal>true</literal> the OpenICF framework removes all
+      attributes from the READ/QUERY response, except for those that are
+      specifically requested. For performance reasons, it is recommended that
+      you set this property to <literal>false</literal> for local connectors,
+      and to <literal>true</literal> for remote connectors.
+     </para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -2864,7 +3013,7 @@ Properties:
      <programlisting language="javascript">
  "systemActions" : [
      {
-         "_scriptId" : "ConnectorScriptName",
+         "scriptId" : "ConnectorScriptName",
          "actions" : [
              {
                  "systemType" : ".*ActiveDirectoryConnector",
