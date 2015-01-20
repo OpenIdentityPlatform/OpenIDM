@@ -902,11 +902,10 @@ openidm.scheduler.execute.persistent.schedules=true
        <para>
         If you are using a JDBC repository, with a generic mapping, you must
         explicitly set this property as searchable so that it can be queried by
-        the task scanner. For more information, see <link xlink:show="new"
-        xlink:href="install-guide#generic-mappings"
+        the task scanner. For more information, see the following section:
+        <link xlink:show="new" xlink:href="integrators-guide#generic-mappings"
         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using
-        Generic Mappings</citetitle></link> in the <citetitle>Installation
-        Guide</citetitle>.
+        Generic Mappings</citetitle></link>.
        </para>
       </listitem>
      </varlistentry>
