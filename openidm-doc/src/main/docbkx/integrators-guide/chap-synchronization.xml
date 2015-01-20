@@ -63,13 +63,12 @@
 
   <variablelist>
    <para>
-    OpenIDM discovers and synchronizes changes from external resources
-    through reconciliation and LiveSync.
+    OpenIDM discovers and synchronizes changes from external resources by using
+    <emphasis>reconciliation</emphasis> and <emphasis>LiveSync</emphasis>.
    </para>
-
    <para>
-    In contrast, OpenIDM synchronizes changes from internal resources to
-    external targets using automatic sync.
+    OpenIDM synchronizes changes to its internal repository with external
+    resources by using <emphasis>implicit synchronization</emphasis>.
    </para>
 
    <varlistentry>
@@ -78,21 +77,19 @@
      <indexterm>
       <primary>Reconciliation</primary>
      </indexterm>
-
      <para>
       In identity management, <firstterm>reconciliation</firstterm> is the
       process of bidirectional synchronization of objects between different data
-      stores. Reconciliation applies mainly to user objects, although OpenIDM
-      can reconcile any objects, including groups and roles.
+      stores. Traditionally, reconciliation applies mainly to user objects, but
+      OpenIDM can reconcile any objects, such as groups, roles, devices, and so
+      forth.
      </para>
-
      <para>
       To perform reconciliation, OpenIDM analyzes both source and target systems
       to uncover the differences that it must reconcile. Reconciliation can
       therefore be a heavyweight process. When working with large data sets,
       finding all changes can be more work than processing the changes.
      </para>
-
      <para>
       Reconciliation is, however, thorough. It recognizes system error
       conditions and catches changes that might be missed by the more
@@ -108,7 +105,6 @@
      <indexterm>
       <primary>LiveSync</primary>
      </indexterm>
-
      <para>
       <firstterm>LiveSync</firstterm> captures the changes that occur on a
       remote system, then pushes those changes to OpenIDM. OpenIDM uses the
@@ -121,14 +117,13 @@
       To perform this polling, LiveSync relies on a change detection mechanism
       on the external resource to determine which objects have changed. The
       change detection mechanism is specific to the external resource, and can
-      be a time stamp, a sequence number, a change vector or other any method of
+      be a time stamp, a sequence number, a change vector or any other method of
       recording changes that have occurred on the system. For example, OpenDJ
       implements a change log that provides OpenIDM with a list of objects that
       have changed since the last request. Active Directory implements a change
       sequence number, and certain databases might have a
       <literal>lastChange</literal> attribute.
      </para>
-
     </listitem>
    </varlistentry>
 
@@ -136,13 +131,14 @@
     <term>Implicit synchronization</term>
     <listitem>
      <para>
-      <firstterm>Implicit synchronization</firstterm> automatically pushes changes made in
-      the OpenIDM internal repository to external systems.
+      <firstterm>Implicit synchronization</firstterm> automatically pushes
+      changes that are made in the OpenIDM internal repository to external
+      systems.
      </para>
      <para>
-      Note that implicit synchronization only pushes changes out to the external
-      data sources. To synchronize a complete data set, you should start with a
-      reconciliation operation.
+      Note that implicit synchronization only pushes <emphasis>changes</emphasis>
+      out to the external data sources. To synchronize a complete data set, you
+      must start with a reconciliation operation.
      </para>
      <para>
       To disable implicit synchronization, see
@@ -155,8 +151,8 @@
   <para>
    To determine what to synchronize, and how to carry out synchronization,
    OpenIDM relies on mappings configured in the
-   <literal>/path/to/conf/sync.json</literal> file. LiveSync and implicit sync
-   rely on the mappings configured once per OpenIDM server.
+   <literal>/path/to/openidm/conf/sync.json</literal> file. LiveSync and
+   implicit sync rely on the mappings configured once per OpenIDM server.
   </para>
 
   <para>
@@ -232,49 +228,66 @@
 
  <section xml:id="basic-flow">
   <title>Basic Data Flow Configuration</title>
-
-  <para>Data flow for synchronization involves the following elements:
+  <para>
+   Data flow for synchronization involves the following elements:
   </para>
   <itemizedlist>
-  <listitem><para>Connector configuration files
-  (<filename>conf/provisioner-*.json</filename>), with one file per external
-  resource.</para></listitem>
-  <listitem><para>Synchronization mappings file
-  (<filename>conf/sync.json</filename>), with one file per OpenIDM instance.
-  </para></listitem>
-  <listitem><para>A links table that OpenIDM maintains in its repository.</para></listitem>
-  <listitem><para>The scripts required to check objects and manipulate attributes.</para></listitem>
+  <listitem>
+   <para>
+    Connector configuration files (<filename>conf/provisioner-*.json</filename>),
+    with one file per external resource.
+   </para>
+  </listitem>
+  <listitem>
+   <para>
+    Synchronization mappings file (<filename>conf/sync.json</filename>), with
+    one file per OpenIDM instance.
+   </para>
+  </listitem>
+  <listitem>
+   <para>
+    A links table that OpenIDM maintains in its repository.
+   </para>
+  </listitem>
+  <listitem>
+   <para>
+    The scripts required to check objects and manipulate attributes.
+   </para>
+  </listitem>
   </itemizedlist>
 
   <section xml:id="connector-config-files">
-    <title>Connector Configuration Files</title>
+   <title>Connector Configuration Files</title>
 
-     <indexterm>
-      <primary>Synchronization</primary>
-      <secondary>Connectors</secondary>
-     </indexterm>
+   <indexterm>
+    <primary>Synchronization</primary>
+    <secondary>Connectors</secondary>
+   </indexterm>
 
-     <para>Connector configuration files map external resource objects to OpenIDM
-     objects, and are described in detail in the chapter on <link
-      xlink:href="integrators-guide#chap-resource-conf"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
-     External Resources</citetitle></link>. Connector configuration files are
-     named <filename>openidm/conf/provisioner.<replaceable
-      >resource-name</replaceable>.json</filename>,
-     where <replaceable>resource-name</replaceable> reflects the connector
-     technology and external resource, such as
-     <literal>openicf-xml</literal>.</para>
+   <para>
+    Connector configuration files map external resource objects to OpenIDM
+    objects, and are described in detail in the chapter on <link
+    xlink:href="integrators-guide#chap-resource-conf"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
+    External Resources</citetitle></link>. Connector configuration files are
+    named <filename>openidm/conf/provisioner.<replaceable>resource-name</replaceable>.json</filename>,
+    where <replaceable>resource-name</replaceable> reflects the connector
+    technology and the external resource, for example,
+    <literal>openicf-xml</literal>.
+   </para>
 
-     <para>An excerpt from an example connector configuration follows. The
-     example shows the name for the connector and two attributes of an account
-     object type. In the attribute mapping definitions, the attribute name is
-     mapped from the <literal>nativeName</literal>, the attribute name used on
-     the external resource, to the attribute name used in OpenIDM. Thus the
-     example shows that the <literal>sn</literal> attribute in LDAP is mapped to
-     <literal>lastName</literal> in OpenIDM. The <literal>homePhone</literal>
-     attribute can have multiple values.</para>
+   <para>
+    An excerpt from an example connector configuration follows. The example
+    shows the name for the connector and two attributes of an account object
+    type. In the attribute mapping definitions, the attribute name is mapped
+    from the <literal>nativeName</literal> (the attribute name used on the
+    external resource) to the attribute name that is used in OpenIDM. The
+    example shows that the <literal>sn</literal> attribute in LDAP is mapped to
+    <literal>lastName</literal> in OpenIDM. The <literal>homePhone</literal>
+    attribute is defined as an array, because it can have multiple values.
+   </para>
 
-     <programlisting language="javascript">
+   <programlisting language="javascript">
 {
     "name": "MyLDAP",
     "objectTypes": {
@@ -298,11 +311,13 @@
     }
 }</programlisting>
 
-    <para>In order for OpenIDM to access external resource objects and
-    attributes, the object and its attributes must match the connector
-    configuration. Note that the connector file only maps external resource
-    objects to OpenIDM objects. To construct attributes and to manipulate
-    their values, you use the synchronization mappings file.</para>
+    <para>
+     For OpenIDM to access external resource objects and attributes, the object
+     and its attributes must match the connector configuration. Note that the
+     connector file only maps external resource objects to OpenIDM objects. To
+     construct attributes and to manipulate their values, you use the
+     synchronization mappings file, described in the following section.
+    </para>
    </section>
 
   <section xml:id="synchronization-mappings-file">
@@ -319,29 +334,31 @@
     <para>
      The synchronization mappings file (<filename>openidm/conf/sync.json</filename>)
      represents the core configuration for OpenIDM synchronization.
-     </para>
-
-     <para>The <filename>sync.json</filename> file describes a set of mappings.
-     Each mapping specifies how attributes from source objects correspond to
+    </para>
+    <para>
+     The <filename>sync.json</filename> file describes a set of mappings. Each
+     mapping specifies how attributes from source objects correspond to
      attributes on target objects. The source and target indicate the direction
      for the data flow, so you must define a separate mapping for each data
      flow. For example, if you want data flows from an LDAP server to the
      repository and also from the repository to the LDAP server, you must
-     define two separate mappings.</para>
-
-     <para>You identify external resource sources and targets as
+     define two separate mappings.
+    </para>
+    <para>
+     You identify external resource sources and targets as
      <literal>system/<replaceable>name</replaceable>/<replaceable
-     >object-type</replaceable></literal>, where
-     <replaceable>name</replaceable> is the name used in the connector
-     configuration file, and <replaceable>object-type</replaceable> is the
-     object defined in the connector configuration file list of object types.
-     For objects in OpenIDM's internal repository, you use
+     >object-type</replaceable></literal>, where <replaceable>name</replaceable>
+     is the name used in the connector configuration file, and
+     <replaceable>object-type</replaceable> is the object defined in the
+     connector configuration file list of object types. For objects in OpenIDM's
+     internal repository, you use
      <literal>managed/<replaceable>object-type</replaceable></literal>, where
      <replaceable>object-type</replaceable> is defined in
      <filename>openidm/conf/managed.json</filename>. The name for the mapping
      by convention is set to a string of the form
      <literal><replaceable>source</replaceable>_<replaceable
-     >target</replaceable></literal>, as shown in the following example.</para>
+     >target</replaceable></literal>, as shown in the following example.
+    </para>
 
     <programlisting language="javascript" xml:id="basic-ldap-mapping">
 {
