@@ -26,7 +26,7 @@
         "explicitTables" : {
             "get-users-of-role" : "select objectid from ${_dbSchema}.${_table} where roles regexp concat('^(.*,)?',${role},'(,.*)?$')",
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
-            "for-internalcredentials" : "select * FROM openidm.internaluser WHERE objectid = ${uid}",
+            "for-internalcredentials" : "select * FROM ${_dbSchema}.${_table} WHERE objectid = ${uid}",
             "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",        
             
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
