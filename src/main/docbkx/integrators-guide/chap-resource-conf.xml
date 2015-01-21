@@ -739,7 +739,7 @@
     on) that are supported by the connector. The property name defines the
     <literal>objectType</literal>, used in the URI:
    </para>
-   <programlisting>system/$<replaceable>systemName</replaceable>/$<replaceable>objectType</replaceable></programlisting>
+   <programlisting>system/<replaceable>systemName</replaceable>/<replaceable>objectType</replaceable></programlisting>
    <para>
     The configuration is based on the <link xlink:show="new"
     xlink:href="http://tools.ietf.org/html/draft-zyp-json-schema-03">JSON
