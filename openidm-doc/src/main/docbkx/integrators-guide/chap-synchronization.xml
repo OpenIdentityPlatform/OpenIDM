@@ -4059,13 +4059,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    </para>
    <para>
     To configure a correlation query, define a script whose source returns a
-    query that uses one of these keywords. For example:
+    query that uses either the <literal>_queryFilter</literal> or the
+    <literal>_queryId</literal> keyword. For example:
    </para>
-   <programlisting>{ "_queryId" : "query-all-ids" }</programlisting>
+   <programlisting>{ "_queryFilter" : "uid eq \"" + source.userName + "\"" }</programlisting>
    <para>
     or
    </para>
-   <programlisting>{ "_queryFilter" : "uid eq \"" + source.userName + "\"" }</programlisting>
+   <programlisting>{'_queryId' : 'for-userName', 'uid' : source.name}</programlisting>
    <para>
     A sample correlation query definition, inside a mapping object, follows:
    </para>
@@ -4083,8 +4084,10 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
             },
 ...
    </programlisting>
+
+   <bridgehead>Using Filtered Queries to Correlate Objects</bridgehead>
    <para>
-    The script that is defined or referenced in the
+    For filtered queries, the script that is defined or referenced in the
     <literal>correlationQuery</literal> property must return an object with the
     following elements:
    </para>
@@ -4153,9 +4156,11 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    </programlisting>
    <para>
     The query can return zero or more objects. The situation that OpenIDM
-    assigns to the source object depends on the number of target objects that are
-    returned.
+    assigns to the source object depends on the number of target objects that
+    are returned. For more information, see <xref linkend="sync-situations" />.
    </para>
+
+   <bridgehead>Using Predefined Queries to Correlate Objects</bridgehead>
    <para>
     Correlation queries that do not use common query filter syntax must be
     defined in the configuration file for the repository, either
