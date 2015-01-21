@@ -407,15 +407,15 @@
      For more information on correlation, see the section on
      <link xlink:href="integrators-guide#correlation"
      xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Correlation Queries</citetitle></link>.
+     <citetitle>Correlating Existing Target Objects</citetitle></link>.
     </para>
 
     <para>
      You can add reconciliation query filters, with queries on the source and
      target objects. For more information, see the section on
      <link xlink:show="new" xlink:href="integrators-guide#constructing-queries"
-           xlink:role="http://docbook.org/xlink/role/link">
-      <citetitle>Constructing Queries</citetitle></link>. You can set up queries
+     xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>Constructing Queries</citetitle></link>. You can set up queries
      on properties such as <literal>userName</literal> and parameters such as
      <literal>Smith</literal>.
     </para>
