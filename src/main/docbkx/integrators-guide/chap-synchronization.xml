@@ -4054,8 +4054,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    </para>
    <para>
     The preferred syntax for a correlation query is a filtered query, using the
-    <literal>_queryFilter</literal> keyword. However, predefined queries (using
-    <literal>_queryId</literal>) are also supported for correlation queries.
+    <literal>_queryFilter</literal> keyword. Filtered queries should work in the
+    same way on any backend, whereas other query types are generally specific to
+    the targeted backend. Predefined queries (using <literal>_queryId</literal>)
+    and native queries (using <literal>_queryExpression</literal>) can also be
+    used for correlation queries. Note, however, that <literal>system</literal>
+    objects do not support predefined queries, other than
+    <literal>query-all-ids</literal>, which serves no purpose in a correlation
+    query.
    </para>
    <para>
     To configure a correlation query, define a script whose source returns a
