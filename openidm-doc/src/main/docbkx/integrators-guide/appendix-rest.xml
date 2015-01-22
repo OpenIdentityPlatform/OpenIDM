@@ -1002,7 +1002,12 @@ Content-Length: 89
        <row>
         <entry>/openidm/managed/user?_queryId=query-all-ids</entry>
         <entry>GET</entry>
-        <entry>List all the managed users in the repository</entry>
+        <entry>List the IDs of all the managed users in the repository</entry>
+       </row>
+       <row>
+        <entry>/openidm/managed/user?_queryId=query-all</entry>
+        <entry>GET</entry>
+        <entry>List all info for the managed users in the repository</entry>
        </row>
        <row>
         <entry>/openidm/managed/user?_queryFilter=<replaceable>filter</replaceable></entry>
