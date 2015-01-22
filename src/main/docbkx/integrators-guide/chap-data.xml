@@ -300,16 +300,13 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
  "https://localhost:8443/openidm/managed/user?_queryExpression=select+from+managed_user"
    </screen>
    <para>
-    Unless you have specifically enabled native queries, the previous command
-    returns a 403 access denied error message. Native queries should not be
-    enabled in production environments, as they are not portable and do not
-    guard against injection attacks.
-   </para>
-   <para>
-    Such query expressions should therefore not be used or made accessible over
-    the REST interface or over HTTP, other than for development, and should be
-    used only via the internal Resource API. If you want to enable such
-    native queries for development, see the section on
+    Unless you have specifically enabled native queries over REST, the previous
+    command returns a 403 access denied error message. Native queries are not
+    portable and do not guard against injection attacks. Such query expressions
+    should therefore not be used or made accessible over the REST interface or
+    over HTTP, in production environments. They should be used only via the
+    internal Resource API. If you want to enable native queries over REST for
+    development, see the section on
     <link xlink:href="integrators-guide#security-urls"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Protecting
     Sensitive REST Interface URLs</citetitle></link>.
