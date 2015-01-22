@@ -2379,15 +2379,29 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <varlistentry>
      <term>passwordDecryptionInitializationVector</term>
      <listitem>
-      <para>Initialization vector used to decrypt passwords when performing
-      password synchronization</para>
+      <para>
+       This is a legacy attribute, and its value should remain set to
+       <literal>null</literal>. To configure password synchronization between
+       an LDAP server and OpenIDM, use one of the password synchronization
+       plugins, described in the <link xlink:show="new"
+       xlink:href="integrators-guide#password-sync"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Password
+       Synchronization</citetitle></link> section.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>passwordDecryptionKey</term>
      <listitem>
-      <para>Key used to decrypt passwords when performing password
-      synchronization</para>
+      <para>
+       This is a legacy attribute, and its value should remain set to
+       <literal>null</literal>. To configure password synchronization between
+       an LDAP server and OpenIDM, use one of the password synchronization
+       plugins, described in the <link xlink:show="new"
+       xlink:href="integrators-guide#password-sync"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Password
+       Synchronization</citetitle></link> section.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2471,7 +2485,15 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <varlistentry>
      <term>synchronizePasswords</term>
      <listitem>
-      <para>If <literal>true</literal>, synchronize passwords.</para>
+      <para>
+       This is a legacy attribute, and its value should remain set to
+       <literal>false</literal>. To configure password synchronization between
+       an LDAP server and OpenIDM, use one of the password synchronization
+       plugins, described in the <link xlink:show="new"
+       xlink:href="integrators-guide#password-sync"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Password
+       Synchronization</citetitle></link> section.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
