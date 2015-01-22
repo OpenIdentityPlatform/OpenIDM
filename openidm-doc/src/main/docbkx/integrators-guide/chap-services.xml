@@ -270,16 +270,16 @@ Stopping OpenIDM (454)</screen>
  
  <section xml:id="info-service">
   <title>Obtaining Information About an OpenIDM Instance</title>
-  
+
   <para>
    OpenIDM includes a customizable information service that provides detailed
    information about a running OpenIDM instance. The information can be accessed
    over the REST interface, under the context
    <literal>https://localhost:8443/openidm/info</literal>.
   </para>
-  
+
   <para>By default, OpenIDM provides the following information:</para>
-  
+
   <itemizedlist>
    <listitem>
     <para>
@@ -345,7 +345,7 @@ Stopping OpenIDM (454)</screen>
     </para>
    </listitem>
   </itemizedlist>
-  
+
   <para>
    You can extend or override the default information that is provided by
    creating your own script file and its corresponding configuration file in
@@ -357,7 +357,7 @@ Stopping OpenIDM (454)</screen>
    The corresponding configuration file is provided in
    <filename>openidm/samples/infoservice/conf/info-customping.json</filename>.
   </para>
-  
+
   <para>
    The configuration file has the following syntax:
   </para>
@@ -366,9 +366,9 @@ Stopping OpenIDM (454)</screen>
     "infocontext" : "ping",
     "type" : "text/javascript",
     "file" : "script/info/customping.js"
-} 
+}
   </programlisting>
-  
+
   <para>
    The parameters in the configuration file are as follows:
   </para>
@@ -403,7 +403,7 @@ Stopping OpenIDM (454)</screen>
     </para>
    </listitem>
   </itemizedlist>
-  
+
   <para>
    Additional properties can be passed to the script as depicted in this
    configuration file
@@ -414,14 +414,14 @@ Stopping OpenIDM (454)</screen>
    Script files in <filename>openidm/samples/infoservice/script/info/</filename>
    have access to the following objects:
   </para>
-  
+
   <itemizedlist>
     <listitem>
-      <para><literal>request</literal> - the request details, including the 
+      <para><literal>request</literal> - the request details, including the
       method called and any parameters passed.</para>
     </listitem>
     <listitem>
-      <para><literal>healthinfo</literal> - the current health status of the 
+      <para><literal>healthinfo</literal> - the current health status of the
       system.</para>
     </listitem>
     <listitem>
@@ -433,7 +433,7 @@ Stopping OpenIDM (454)</screen>
       <filename>openidm/samples/infoservice/conf/info-<replaceable>name</replaceable>.json</filename>.)
       </para>
     </listitem>
-  </itemizedlist> 
+  </itemizedlist>
  </section>
 
  <section xml:id="system-healthcheck">
@@ -443,22 +443,55 @@ Stopping OpenIDM (454)</screen>
    <primary>healthcheck</primary>
   </indexterm>
   
-  <para>Due to the highly modular, configurable nature of OpenIDM, it is often 
-  difficult to assess whether a system has started up successfully, or whether 
-  the system is ready and stable after dynamic configuration changes have been 
-  made.</para>
+  <para>
+   Due to the highly modular, configurable nature of OpenIDM, it is often
+   difficult to assess whether a system has started up successfully, or whether
+   the system is ready and stable after dynamic configuration changes have been
+   made.
+  </para>
+
+  <itemizedlist>
+   <para>
+    To assess the status of OpenIDM and external resources, take the following
+    steps:
+   </para>
+   <listitem>
+    <para>
+     To review the health of the core OpenIDM installation, use the customizable
+     information service. For more information, see
+     <xref linkend="info-service" />.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     To monitor the status of external resources such as LDAP servers and
+     external databases, use the commands described in the following section:
+     <link xlink:href="integrators-guide#systems-over-rest"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Checking the
+     Status of External Systems Over REST</citetitle></link>.
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   OpenIDM includes significant detail in its health check service.
+  </para>
+
+  <para>
+   OpenIDM provides a configurable health check service that verifies
+   that the required modules and services for an operational system are up and
+   running. During system startup, OpenIDM checks that these modules and
+   services are available and reports on whether any requirements for an
+   operational system have not been met. If dynamic configuration changes are
+   made, OpenIDM rechecks that the required modules and services are functioning
+   so that system operation is monitored on an ongoing basis.
+  </para>
   
-  <para>OpenIDM provides a configurable health check service that verifies 
-  that the required modules and services for an operational system are up and 
-  running. During system startup, OpenIDM checks that these modules and 
-  services are available and reports on whether any requirements for an 
-  operational system have not been met. If dynamic configuration changes are 
-  made, OpenIDM rechecks that the required modules and services are functioning 
-  so that system operation is monitored on an ongoing basis.</para>
-  
-  <para>The health check service reports on the state of the OpenIDM system and 
-  outputs this state to the console and to the log files. The system can be in 
-  one of the following states:</para>
+  <para>
+   The health check service reports on the state of the OpenIDM system and
+   outputs this state to the console and to the log files. The system can be in
+   one of the following states:
+  </para>
   
   <simplelist>
    <member><literal>STARTING</literal> - OpenIDM is starting up</member>
@@ -541,7 +574,7 @@ Stopping OpenIDM (454)</screen>
    specified as a list of symbolic names, separated by commas.</member>
   </simplelist>
   
-  <para>By default, OpenIDM gives the system ten seconds to start up all 
+  <para>By default, OpenIDM gives the system 15 seconds to start up all
   the required bundles and services, before the system readiness is assessed. 
   Note that this is not the total start time, but the time required to complete 
   the service startup after the framework has started. You can change this 
@@ -551,20 +584,6 @@ Stopping OpenIDM (454)</screen>
   sets the startup time to five seconds.</para>
     
   <screen>openidm.healthservice.servicestartmax=5000</screen>
-  
-  <para>
-   The health check service works in tandem with the scriptable information
-   service. For more information see <xref linkend="info-service" />.
-  </para>
-
-  <para>
-   Do not use the health check service to monitor the status of external
-   resources, such as LDAP servers, or external databases. Rather, monitor these
-   resources over the REST interface, as described in <link
-   xlink:href="integrators-guide#systems-over-rest"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Checking the
-   Status of External Systems Over REST</citetitle></link>.
-  </para>
   
  </section>
 
