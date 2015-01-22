@@ -204,8 +204,8 @@ public class SchedulerService extends ObjectSetJsonResource {
 
     public void registerConfigService(ScheduleConfigService service) throws SchedulerException, ParseException {
         synchronized (CONFIG_SERVICE_LOCK) {
-            logger.debug("Registering ScheduleConfigService");
-
+            logger.debug("Registering new ScheduleConfigService");
+            configMap.put(service.getJobName(), service);
             if (!started) {
                 logger.debug("The Scheduler Service has not been started yet, storing new Schedule {}", service.getJobName());
             } else {
@@ -216,7 +216,7 @@ public class SchedulerService extends ObjectSetJsonResource {
                     logger.debug("Job {} already scheduled", service.getJobName());
                 }
             }
-           configMap.put(service.getJobName(), service);
+
         }
     }
 
@@ -264,7 +264,6 @@ public class SchedulerService extends ObjectSetJsonResource {
      */
     public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update)
             throws SchedulerException, ParseException, ObjectAlreadyExistsException {
-        
         try {
             // Lock access to the scheduler so that a schedule is not added during a config update
             synchronized (LOCK) {
@@ -275,26 +274,23 @@ public class SchedulerService extends ObjectSetJsonResource {
                 } else {
                     scheduleClass = StatefulSchedulerServiceJob.class;
                 }
-
+                
                 // Attempt to add the scheduler
-               if (scheduleConfig.getCronSchedule() != null
+                if (scheduleConfig.getCronSchedule() != null
                         && scheduleConfig.getCronSchedule().length() > 0) {
                     JobDetail job = new JobDetail(jobName, GROUP_NAME, scheduleClass);
-                    job.setVolatility(scheduleConfig.getPersisted());
+                    job.setVolatility(scheduleConfig.isPersisted());
                     job.setJobDataMap(createJobDataMap(scheduleConfig));
                     Trigger trigger = createTrigger(scheduleConfig, jobName);
-                    Scheduler scheduler = getScheduler(scheduleConfig);
+                    final Scheduler scheduler = scheduleConfig.isPersisted() ? persistentScheduler : inMemoryScheduler;
                     
                     if (update) {
-                       // Update the job by first deleting it, then scheduling the new version
-                       Scheduler previousJobScheduler = getScheduler(jobName);
-                       if (previousJobScheduler != null) {
-                           previousJobScheduler.deleteJob(jobName, GROUP_NAME);
-                        }
+                        // Update the job by first deleting it, then scheduling the new version
+                        deleteSchedule(jobName);
                     }
 
                     // check if it is enabled
-                    if (scheduleConfig.getEnabled()) {
+                    if (scheduleConfig.isEnabled()) {
                         // Set to non-durable so that jobs won't persist after last firing
                         job.setDurability(false);
                         // Schedule the Job (with trigger)
@@ -328,6 +324,21 @@ public class SchedulerService extends ObjectSetJsonResource {
         return true;
     }
 
+   
+   /**
+    * Deletes a schedule from the scheduler
+    * 
+    * @throws SchedulerException 
+    */
+   public void deleteSchedule(String jobName) throws SchedulerException {
+       if (inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
+           inMemoryScheduler.deleteJob(jobName, GROUP_NAME);
+       }
+       if (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
+           persistentScheduler.deleteJob(jobName, GROUP_NAME);
+       }
+   }
+    
     /**
      * Creates and returns a CronTrigger using the supplied schedule configuration.
      *
@@ -385,50 +396,6 @@ public class SchedulerService extends ObjectSetJsonResource {
         return map;
     }
 
-   /**
-    * Returns the Scheduler corresponding to the supplied job name.
-    *
-    * @param jobName           The job name
-    * @return                  The Scheduler
-    */
-   private Scheduler getScheduler(String jobName) throws SchedulerException {
-       Scheduler scheduler = null;
-
-       if (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
-           scheduler = persistentScheduler;
-       } else if (inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
-           scheduler = inMemoryScheduler;
-         }
-       return scheduler;
-   }
- 
-   /**
-    * Returns the Scheduler corresponding to the supplied schedule configuration.
-    *
-    * @param scheduleConfig    The schedule configuration
-    * @return                  The Scheduler
-    */
-   private Scheduler getScheduler(ScheduleConfig scheduleConfig) throws SchedulerException {
-       Scheduler scheduler = null;
-       if (scheduleConfig != null && scheduleConfig.getPersisted()) {
-           scheduler = persistentScheduler;
-       } else if (scheduleConfig != null && !scheduleConfig.getPersisted()) {
-           scheduler = inMemoryScheduler;
-       }
-       return scheduler;
-   }
-   
-   /**
-    * Determines if a schedule already exists for a given job name.
-    *
-    * @param jobName       The name of the job
-    * @return              True if the job exists, false otherwise
-    * @throws SchedulerException
-    */
-   private boolean scheduleExists(String jobName) throws SchedulerException {
-       return configMap.containsKey(jobName);
-   }
-
     /**
      * Creates a random Job name.
      *
@@ -440,6 +407,20 @@ public class SchedulerService extends ObjectSetJsonResource {
         return sb.toString();
     }
 
+    /**
+     * Determines if a job already exists.
+     *
+     * @param jobName       The name of the job
+     * @param persisted     If the job is persisted or not
+     * @return              True if the job exists, false otherwise
+     * @throws SchedulerException
+     */
+   private boolean jobExists(String jobName) throws SchedulerException {
+       final boolean existsInMemory = inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null;
+       final boolean existsInPersistent = persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null;
+       return existsInMemory || existsInPersistent;
+    }
+
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         try {
@@ -449,13 +430,14 @@ public class SchedulerService extends ObjectSetJsonResource {
                 id = trimTrailingSlash(id);
             }
             object.put("_id", id);
+            
             ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
 
             // Check defaults
-            if (scheduleConfig.getEnabled() == null) {
+            if (scheduleConfig.isEnabled() == null) {
                 scheduleConfig.setEnabled(true);
             }
-            if (scheduleConfig.getPersisted() == null) {
+            if (scheduleConfig.isPersisted() == null) {
                 scheduleConfig.setPersisted(true);
             }
 
@@ -477,17 +459,7 @@ public class SchedulerService extends ObjectSetJsonResource {
     public Map<String, Object> read(String id) throws ObjectSetException {
         Map<String, Object> resultMap = null;
         try {
-            Scheduler scheduler = getScheduler(id);
-            if (scheduler == null) {
-                throw new NotFoundException("Schedule does not exist");
-            }
-            JobDetail job = scheduler.getJobDetail(id, GROUP_NAME);
-            job = scheduler.getJobDetail(id, GROUP_NAME);
-            JobDataMap dataMap = job.getJobDataMap();
-            ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
-            resultMap = (Map<String, Object>)config.getConfig().getObject();
-            resultMap.put("_id", id);
-
+            resultMap = getSchedule(id);
         } catch (SchedulerException e) {
             e.printStackTrace();
             throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
@@ -516,7 +488,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
 
             try {
-                if (!scheduleExists(id)) {
+                if (!jobExists(id)) {
                     throw new NotFoundException();
                 } else {
                     // Update the Job
@@ -541,12 +513,10 @@ public class SchedulerService extends ObjectSetJsonResource {
                 throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "No ID specified");
             }
             try {
-                Scheduler scheduler = getScheduler(id);
-                if (scheduler != null) {
-                    scheduler.deleteJob(id, GROUP_NAME);
-                } else {
+                if (!jobExists(id)) {
                     throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Schedule does not exist");
                 }
+                deleteSchedule(id);
             } catch (SchedulerException e) {
                 throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
             }
@@ -619,7 +589,7 @@ public class SchedulerService extends ObjectSetJsonResource {
                 id = createJobName();
                 params.put("_id", id);
                 try {
-                    if (scheduleExists(id)) {
+                    if (jobExists(id)) {
                         throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Schedule already exists");
                     }
                     create(id, params);
@@ -698,6 +668,31 @@ public class SchedulerService extends ObjectSetJsonResource {
             throw ex;
         }
         logger.info("Scheduler facility started");
+    }
+    
+    /**
+     * Returns a JsonValue representation of a schedule with the supplied name from the supplied scheduler.
+     * 
+     * @param scheduleName the name of the scheduler
+     * @return the JsonValue representation of the schedule
+     * @throws SchedulerException
+     * @throws ResourceException
+     */
+    private Map<String, Object> getSchedule(String scheduleName) throws SchedulerException {
+        Scheduler scheduler = null;
+        if (inMemoryScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
+            scheduler = inMemoryScheduler;
+        } else if (persistentScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
+            scheduler = persistentScheduler;
+        } else {
+            throw new SchedulerException("Schedule does not exist");
+        }
+        JobDetail job = scheduler.getJobDetail(scheduleName, GROUP_NAME);
+        JobDataMap dataMap = job.getJobDataMap();
+        ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
+        Map<String, Object> resultMap = (Map<String, Object>) config.getConfig().getObject();
+        resultMap.put("_id", scheduleName);
+        return resultMap;
     }
     
     private JsonValue parseStringified(String stringified) {

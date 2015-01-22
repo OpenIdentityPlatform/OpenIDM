@@ -148,8 +148,8 @@ public class ScheduleConfig {
 
     public JsonValue getConfig() {
         HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put(SchedulerService.SCHEDULE_ENABLED, getEnabled());
-        map.put(SchedulerService.SCHEDULE_PERSISTED, getPersisted());
+        map.put(SchedulerService.SCHEDULE_ENABLED, isEnabled());
+        map.put(SchedulerService.SCHEDULE_PERSISTED, isPersisted());
         map.put(SchedulerService.SCHEDULE_MISFIRE_POLICY, getMisfirePolicy());
         map.put(SchedulerService.SCHEDULE_CRON_SCHEDULE, getCronSchedule());
         map.put(SchedulerService.SCHEDULE_TYPE, getScheduleType());
@@ -163,11 +163,11 @@ public class ScheduleConfig {
         return new JsonValue(map);
     }
 
-    public Boolean getEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
     
-    public Boolean getPersisted() {
+    public Boolean isPersisted() {
         return persisted;
     }
     
