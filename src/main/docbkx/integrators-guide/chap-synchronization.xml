@@ -3212,7 +3212,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <term>SOURCE_MISSING (qualifies=1, link=1, source=0)</term>
      <listitem>
       <para>
-       The target object qualifies and a link is found. But the source object is
+       The target object qualifies and a link is found, but the source object is
        missing. This situation is detected during change events and
        reconciliation.
       </para>
