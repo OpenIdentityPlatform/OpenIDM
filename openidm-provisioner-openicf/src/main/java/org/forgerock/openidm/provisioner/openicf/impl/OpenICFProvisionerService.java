@@ -1989,9 +1989,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         jv.put("enabled", jsonConfiguration.get("enabled").defaultTo(Boolean.TRUE).asBoolean());
         jv.put("config", "config/provisioner.openicf/" + factoryPid);
         jv.put("objectTypes", ConnectorUtil.getObjectTypes(jsonConfiguration).keySet());
-        if (ConnectorUtil.getConnectorReference(jsonConfiguration) != null) {
-            jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF,
-                    ConnectorUtil.getConnectorKey(ConnectorUtil.getConnectorReference(jsonConfiguration).getConnectorKey()));
+        ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
+        if (connectorReference != null) {
+            jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF, ConnectorUtil.getConnectorKey(connectorReference.getConnectorKey()));
+            ConnectorInfo connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
+            if (connectorInfo != null) {
+                jv.put("displayName", connectorInfo.getConnectorDisplayName());
+            }
         }
 
         try {
