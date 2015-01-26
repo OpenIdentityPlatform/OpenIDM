@@ -282,6 +282,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         jv.put("enabled", jsonConfiguration.get("enabled").defaultTo(Boolean.TRUE).asBoolean());
         jv.put("config", "config/provisioner.salesforce/" + factoryPid);
         jv.put("objectTypes", SchemaHelper.getObjectSchema().keys());
+        jv.put("displayName", "Salesforce Connector");
 
         try {
             jv.put(ConnectorConfigurationHelper.CONNECTOR_REF,
