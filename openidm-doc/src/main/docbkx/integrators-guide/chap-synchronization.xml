@@ -456,6 +456,13 @@
      to calculate the <literal>displayName</literal>, the example specifies
      <literal>"source" : ""</literal>.</para>
 
+      <para>
+    You can update mappings in the synchronization configuration file
+    (<filename>sync.json</filename>) while the server is running, provided you
+    do not update a mapping that is currently in use by a reconciliation
+    process.
+   </para>
+
      <para>To add a flow from the repository to <literal>MyLDAP</literal>,
      you would define a mapping with source <literal>managed/user</literal>
      and target <literal>system/MyLDAP/account</literal>, named for example
@@ -480,6 +487,8 @@
       </caption>
      </mediaobject>
 
+    <section xml:id="filtering-source-and-target">
+     <title>Filtering Synchronization Objects By Using Scripts</title>
      <variablelist>
       <indexterm>
        <primary>Synchronization</primary>
@@ -560,7 +569,10 @@
      <para>See the <link xlink:href="integrators-guide#appendix-scripting"
                          xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
      Reference</citetitle></link> appendix for more on scripting.</para>
+   </section>
 
+  <section xml:id="preventing-accidental-deleteion">
+   <title>Preventing Accidental Deletion of a Target System</title>
    <para>
     If a source resource is empty, the default behavior is for a reconciliation
     operation to exit, without failure, and to log a warning, similar to the
@@ -598,12 +610,7 @@
    <para>
     Reconciliation of an empty source effectively wipes out the target.
    </para>
-   <para>
-    You can update mappings in the synchronization configuration file
-    (<filename>sync.json</filename>) while the server is running, provided you
-    do not update a mapping that is currently in use by a reconciliation
-    process.
-   </para>
+  </section>
   </section>
 
   <section xml:id="sync-encrypted-values">
