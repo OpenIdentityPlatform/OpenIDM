@@ -394,30 +394,28 @@
 
     <para>
      OpenIDM can match existing records on the target system to records
-     on the source system. This matching is known as correlation.
-    </para>
-
-    <para>
-     Before activating reconciliation, you may choose to configure various
-     correlation options, including reconciliation query filters, individual
-     record validation, association rules, and data association management.
-    </para>
-
-    <para>
-     For more information on correlation, see the section on
-     <link xlink:href="integrators-guide#correlation"
+     on the source system. This matching is known as
+     <emphasis>correlation</emphasis>. For more information about correlation,
+     see the section on <link xlink:href="integrators-guide#correlation"
      xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
      <citetitle>Correlating Existing Target Objects</citetitle></link>.
     </para>
 
     <para>
-     You can add reconciliation query filters, with queries on the source and
-     target objects. For more information, see the section on
-     <link xlink:show="new" xlink:href="integrators-guide#constructing-queries"
+     Before you activate reconciliation, you can configure various correlation
+     options, including reconciliation query filters, individual record
+     validation, association rules, and data association management.
+    </para>         <!-- I don't think these are all correlation options -->
+
+    <para>
+     By default, all entries on a source and target system are considered
+     candidates for reconciliation. Reconciliation query filters enable you to
+     restrict reconciliation operations to specific entries by defining explicit
+     queries that are run on the source or on the target. For more information,
+     see the section on
+     <link xlink:show="new" xlink:href="integrators-guide#recon-by-query"
      xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Constructing Queries</citetitle></link>. You can set up queries
-     on properties such as <literal>userName</literal> and parameters such as
-     <literal>Smith</literal>.
+     <citetitle>Restricting Reconciliation by Using Queries</citetitle></link>.
     </para>
 
     <mediaobject>
@@ -428,14 +426,13 @@
     </mediaobject>
 
     <para>
-     You can add individual record validation scripts, based on the
-     <literal>validSource</literal> and <literal>validTarget</literal>
-     script objects. For more information on these objects, see the Appendix on
-     <link xlink:show="new" xlink:href="integrators-guide#sync-object-mapping"
-           xlink:role="http://docbook.org/xlink/role/olink">
-      <citetitle>Object-Mapping Objects</citetitle></link>. With these scripts,
-     you can set up criteria for OpenIDM to validate source and target objects
-     for reconciliation.
+     By default, OpenIDM synchronizes all objects that match those defined in
+     the connector configuration for the resource. You can filter what is
+     considered a valid source or valid target for synchronization by using
+     individual record validation scripts. For more information, see the <link
+     xlink:show="new" xlink:href="integrators-guide#filtering-source-and-target"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Filtering
+     Synchronization Objects By Using Scripts</citetitle></link>.
     </para>
 
     <mediaobject>
