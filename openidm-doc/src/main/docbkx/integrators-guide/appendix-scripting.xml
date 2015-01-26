@@ -375,19 +375,19 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
         </para>
 
         <section xml:id="function-create">
-            <title>openidm.create(container, id, value)</title>
+            <title>openidm.create(resource, id, value)</title>
 
             <para>This function creates a new resource object.</para>
 
             <variablelist>
                 <title>Parameters</title>
                 <varlistentry>
-                    <term>container</term>
+                    <term>resource</term>
                     <listitem>
                         <para>string</para>
                         <para>
-                         The resource container in which the object will be
-                         created, for example, <literal>managed/user</literal>.
+                         The container in which the object will be created,
+                         for example, <literal>managed/user</literal>.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -724,43 +724,61 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
         </section>
 
         <section xml:id="function-action">
-            <title>openidm.action(id, params, value)</title>
+            <title>openidm.action(resource, actionName, content, params)</title>
 
-            <para>This function performs an action on the specified OpenIDM resource
-                object.
+            <para>
+             This function performs an action on the specified OpenIDM resource
+             object. The <literal>container</literal> and
+             <literal>actionName</literal> are required. In contrast, the
+             <literal>value</literal> and <literal>params</literal> are
+             optional.
             </para>
 
             <variablelist>
-                <title>Parameters</title>
-                <varlistentry>
-                    <term>id</term>
-                    <listitem>
-                        <para>string</para>
-                        <para>The identifier of the object on which the action should be
-                            performed.</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>params</term>
-                    <listitem>
-                        <para>object</para>
-                        <para>An object containing the parameters to pass to the action.</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>value</term>
-                    <listitem>
-                        <para>object</para>
-                        <para>A value that can be provided to the action for processing.</para>
-                    </listitem>
-                </varlistentry>
+             <title>Parameters</title>
+             <varlistentry>
+              <term>resource</term>
+              <listitem>
+               <para>string</para>
+               <para>
+                The resource that the function acts upon, such
+                as managed/user.
+               </para>
+              </listitem>
+             </varlistentry>
+             <varlistentry>
+              <term>actionName</term>
+              <listitem>
+               <para>string</para>
+               <para>The action to execute.</para>
+              </listitem>
+             </varlistentry>
+             <varlistentry>
+              <term>value</term>
+              <listitem>
+               <para>object</para>
+               <para>
+                Content given to the action for processing.
+               </para>
+              </listitem>
+             </varlistentry>
+             <varlistentry>
+              <term>params</term>
+              <listitem>
+               <para>object</para>
+               <para>Parameters are key/value strings. You may see them in
+                JavaScript files with entries such as
+                <literal>request.additionalParameters.userId</literal> and
+                <literal>request.additionalParameters.mapping</literal>.  </para>
+              </listitem>
+             </varlistentry>
             </variablelist>
 
             <itemizedlist>
                 <title>Returns</title>
                 <listitem>
-                    <para>The result of the action may be <literal>null</literal> if
-                        no result is provided.
+                    <para>
+                     The result of the action may be <literal>null</literal>.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -768,8 +786,8 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
             <itemizedlist>
                 <title>Throws</title>
                 <listitem>
-                    <para>An exception is thrown if the given action could not be executed
-                        for any reason.
+                    <para>
+                     If the action cannot be executed, an exception is thrown.
                     </para>
                 </listitem>
             </itemizedlist>
