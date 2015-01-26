@@ -200,7 +200,7 @@ orientdb&gt; </screen>
     <filename>conf/sync.json</filename>.</para>
     </listitem>
     <listitem>
-    <para>When you initiate a reconcilitation, OpenIDM queries all users in the
+    <para>When you initiate a reconciliation, OpenIDM queries all users in the
      source, and then creates, deletes, or modifies users in the local OpenIDM
      repository as mapped in <filename>conf/sync.json</filename>.
     </para>
