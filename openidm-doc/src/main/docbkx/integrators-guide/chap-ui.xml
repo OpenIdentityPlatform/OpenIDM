@@ -466,11 +466,24 @@
     </para>
 
     <para>
-     You can set up such data associations for individual entries, as well as
-     different situations shown in the section on
-     <link xlink:show="new" xlink:href="integrators-guide#sync-situations"
-           xlink:role="http://docboook.org/xlink/role/olink">
-      <citetitle>Synchronization Situations</citetitle></link>.
+     The association rules that are configured in the previous section enable
+     automatic linking of source and target objects, in accordance with a set of
+     defined criteria. These rules might not always link the correct target
+     objects to the corresponding source objects. In this case, the Data
+     Association Management panel enables you to manipulate links between
+     individual source and target objects, manually. You need to have run at
+     least one reconciliation for any data to appear here. When a reconciliation
+     has been run, select the source object that has been incorrectly mapped and
+     select Change Source to Target Association, to specify the correct target
+     object that should be linked to that source object.
+    </para>
+    <para>
+     To limit the list of records displayed here, select the synchronization
+     situation from the View list. For more information on the situations in
+     this list, see <link xlink:show="new"
+     xlink:href="integrators-guide#sync-situations"
+     xlink:role="http://docboook.org/xlink/role/olink">
+     <citetitle>Synchronization Situations</citetitle></link>.
     </para>
 
     <mediaobject>
