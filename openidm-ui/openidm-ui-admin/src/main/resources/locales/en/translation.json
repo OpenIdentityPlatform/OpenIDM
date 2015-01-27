@@ -769,6 +769,8 @@
                 "analysis": "Analysis",
                 "all": "All",
                 "view": "View",
+                "linkQualifier" : "Link Qualifier:",
+                "noLinkQualifier" : "No Link Qualifier",
                 "allSituations": "ALL SITUATIONS",
                 "clickToAnalyze": " to start analyzing relationships between Source and Target data.",
                 "enterSearchTerms": "Enter Search Terms",
