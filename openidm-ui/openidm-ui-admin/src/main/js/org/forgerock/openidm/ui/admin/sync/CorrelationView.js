@@ -60,6 +60,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
                 this.loadData(args, callback);
             }, this));
         },
+
         loadData: function(args, callback){
             this.dataModel.sync = MappingBaseView.data.syncConfig;
             this.dataModel.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
@@ -80,8 +81,8 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
 
             this.parentRender(_.bind(function () {
                 AnalysisView.render(this.dataModel);
-                CorrelationQueryView.render(_.extend({startSync: this.sync}, this.dataModel));
                 ObjectFiltersView.render(this.dataModel);
+                CorrelationQueryView.render(_.extend({startSync: this.sync}, this.dataModel));
                 ReconQueriesView.render(this.dataModel);
                 MappingBaseView.moveSubmenu();
                 if(callback){
