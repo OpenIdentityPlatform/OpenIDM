@@ -1,5 +1,14 @@
 <form id="changeAssociationForm" class="form">
-
+    <div id="linkTypeHolder">
+        <label>
+            {{t 'templates.mapping.analysis.linkQualifier'}}
+            <select id="linkTypeSelect" {{#unless linkQualifiers.length}} disabled="true" {{/unless}}>
+            {{#each linkQualifiers}}
+            <option value="{{linkQualifier}}">{{linkQualifier}}</option>
+            {{/each}}
+            </select>
+        </label>
+    </div>
     {{#if sourceObj}}
     <input type="hidden" name="sourceId" value="{{sourceObj._id}}">
     {{{sourceObjRep}}}
@@ -9,10 +18,9 @@
         <button class="button" id="targetSearchBtn">{{t 'templates.mapping.analysis.searchTarget'}}</button>
     </fieldset>
     {{/if}}
-
     {{#if results}}
 
-        <ul id="search_results">
+    <ul id="search_results">
         {{#each results}}
         <li>
             <span style="display:none;">
@@ -23,19 +31,19 @@
             </span>
         </li>
         {{/each}}
-        </ul>
+    </ul>
 
-        <button class="button float-right" id="linkObjectBtn" style="display:none;" title="{{t 'templates.mapping.analysis.linkToSourceObject'}}"><span class="fa fa-chain"> </span> {{t 'templates.mapping.analysis.linkToSourceObject'}}</button>
-    
+    <button class="button float-right" id="linkObjectBtn" style="display:none;" title="{{t 'templates.mapping.analysis.linkToSourceObject'}}"><span class="fa fa-chain"> </span> {{t 'templates.mapping.analysis.linkToSourceObject'}}</button>
+
     {{else}}
 
-        {{#if searching}}
-        <ul id="search_results">
-            <li>
-                {{t "templates.mapping.analysis.noResultsFound" }}
-            </li>
-        </ul>
-        {{/if}}
+    {{#if searching}}
+    <ul id="search_results">
+        <li>
+            {{t "templates.mapping.analysis.noResultsFound" }}
+        </li>
+    </ul>
+    {{/if}}
 
     {{/if}}
 </form>
