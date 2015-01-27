@@ -1298,12 +1298,14 @@ Content-Length: 89
 <computeroutput>[
   {
     "ok": true,
+    "displayName": "LDAP Connector",
     "connectorRef": {
       "bundleVersion": "[1.4.0.0,2.0.0.0)",
       "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
       "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
     "objectTypes": [
+      "__ALL__",
       "group",
       "account"
     ],

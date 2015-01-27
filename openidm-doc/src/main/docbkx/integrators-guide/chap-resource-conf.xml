@@ -3888,12 +3888,14 @@ Properties:
 <computeroutput>[
   {
     "ok": true,
+    "displayName": "LDAP Connector",
     "connectorRef": {
       "bundleVersion": "[1.4.0.0,2.0.0.0)",
       "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
       "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
     "objectTypes": [
+      "__ALL__",
       "group",
       "account"
     ],
@@ -3920,12 +3922,14 @@ Properties:
  "https://localhost:8443/openidm/system/ldap?_action=test"</userinput>
 <computeroutput>{
   "ok": true,
+  "displayName": "LDAP Connector",
   "connectorRef": {
     "bundleVersion": "[1.4.0.0,2.0.0.0)",
     "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
   },
   "objectTypes": [
+    "__ALL__",
     "group",
     "account"
   ],
@@ -3950,12 +3954,14 @@ Properties:
 <computeroutput>{
   "ok": false,
   "error": "localhost:1389",
+  "displayName": "LDAP Connector",
   "connectorRef": {
     "bundleVersion": "[1.4.0.0,2.0.0.0)",
     "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
   },
   "objectTypes": [
+    "__ALL__",
     "group",
     "account"
   ],
