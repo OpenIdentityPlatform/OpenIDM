@@ -1,4 +1,199 @@
-#correlationTitle {
+#correlationQueryWarning {
+  width: 510px;
+  margin-top: 5px;
+}
+
+#correlationQuerySubmit {
+  opacity: 1 !important;
+}
+
+#correlationQueryView, #correlationQueryBuilderView {
+  padding: 10px;
+
+  * {
+    font-size: 13px;
+  }
+
+  .group-body {
+    padding: 10px 0 ;
+  }
+
+  .saveCorrelationQuery {
+    float: right;
+  }
+
+  #addNewCorrelationQuery {
+    border: dashed 1px #999;
+    text-align: center;
+    padding: 10px 0 20px;
+    margin: -1px 0 0;
+    cursor: pointer;
+    z-index: 0;
+
+    h3 {
+      border: none;
+      span {
+        color: #bbb;
+      }
+    }
+
+    &:hover {
+      border-color: #5a646d;
+      span {
+        color: #5a646d;
+      }
+    }
+  }
+
+  h3 {
+    height: 28px;
+    margin: -1px 0 0;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    border: 1px solid #5a646d;
+    background: none;
+    background-color: #fff;
+    color: #5a646d;
+    position: relative;
+
+    i {
+      height: 23px;
+      width: 28px;
+      border-right: 1px solid #5a646d;
+      position: absolute;
+      padding-top: 6px;
+      text-align: center;
+
+      &:hover {
+        background-color: #80b7ab;
+      }
+    }
+
+    .trash {
+      left: 29px;
+    }
+
+    .edit {
+      left: 0;
+    }
+
+    .ui-state-hover {
+      background: none;
+      background-color: #fff;
+    }
+
+    .linkQualifierName {
+      position: absolute;
+      left: 70px;
+      line-height: 13px;
+      padding-top: 7px;
+      font-weight: normal;
+    }
+  }
+
+  .linkQualifier {
+    margin: 0 0 10px 10px;
+  }
+
+  .error {
+    text-align: left;
+    padding: 5px 0 0 5px;
+    float: right;
+  }
+
+  .queryTypeTitle {
+    font-weight: bold;
+    margin: 0 0 0 4px;
+    display: inline;
+    float: none;
+    font-size: inherit;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  input[type="radio"] {
+    cursor: pointer;
+  }
+
+  .queryContainer {
+    margin: 5px 0 15px 21px
+  }
+
+  .expressionTree {
+    .removeBtn {
+      margin-right: 7px;
+      margin-top: 10px;
+      height: 15px;
+    }
+    &>ul{
+      width: 600px;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    ul {
+      div.node {
+        margin: 15px 0 15px 20px;
+      }
+
+      li {
+        margin-left: 10px;
+        clear:right;
+        line-height: 30px;
+        position: relative;
+
+        input, select {
+          width: 200px;
+        }
+        button,input[type=button] {
+          width: 26px;
+          line-height: 10px;
+          float: right;
+          font-size: 8px;
+
+          i {
+            margin-left: -2px;
+          }
+
+        }
+        label {
+          padding-left:0;
+        }
+
+        .expressionMenu {
+          width: 100px;
+          z-index: 10;
+          display:none;
+          position: absolute;
+          right: -40px;
+          top: 30px;
+          padding: 5px;
+          cursor: pointer;
+
+          li {
+            margin-left: 0;
+            a {
+              color: #5d6871;
+            }
+          }
+        }
+      }
+    }
+  }
+  .queryScript {
+
+    .event-hook-piece {
+      label {
+        display: block;
+        margin: 0;
+        padding: 0;
+        float: none;
+        text-align: left;
+        font-size: inherit;
+      }
+    }
+  }
 }
 
 .correlationBody {
@@ -37,7 +232,7 @@
     }
 
     .group-body {
-      padding: 10px;
+      padding: 10px ;
     }
   }
 
@@ -45,118 +240,7 @@
     margin-top: 15px;
   }
 
-  .error {
-    text-align: left;
-    padding: 5px 0 0 5px;
-    float: right;
-  }
-
-  #correlationQueryError {
-    width: 878px;
-  }
-
   #scriptQueryRadio {
     margin-bottom: 10px;
-  }
-
-  #correlationQueryView {
-    .queryTypeTitle {
-      font-weight: bold;
-      margin: 0 0 0 4px;
-      display: inline;
-      float: none;
-      font-size: inherit;
-      cursor: pointer;
-      vertical-align: middle;
-    }
-
-    input[type="radio"] {
-      cursor: pointer;
-    }
-
-    .queryContainer {
-      margin: 5px 0 15px 21px
-    }
-
-    .saveCorrelationQuery {
-      float: right;
-      margin: 0 0 10px;
-    }
-
-    .expressionTree {
-      .removeBtn {
-        margin-right: 7px;
-        margin-top: 10px;
-        height: 15px;
-      }
-      &>ul{
-        width: 600px;
-        border: 1px solid #ddd;
-        padding: 10px;
-      }
-
-      ul {
-        div.node {
-          margin: 15px 0 15px 20px;
-        }
-
-        li {
-          margin-left: 10px;
-          clear:right;
-          line-height: 30px;
-          position: relative;
-
-          input, select {
-            width: 200px;
-          }
-          button,input[type=button] {
-            width: 26px;
-            line-height: 10px;
-            float: right;
-            font-size: 8px;
-
-            i {
-              margin-left: -2px;
-            }
-
-          }
-          label {
-            padding-left:0;
-          }
-
-          .expressionMenu {
-            width: 100px;
-            z-index: 10;
-            display:none;
-            position: absolute;
-            right: -40px;
-            top: 30px;
-            padding: 5px;
-            cursor: pointer;
-
-            li {
-              margin-left: 0;
-              a {
-                color: #5d6871;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    .queryScript {
-
-      .event-hook-piece {
-        label {
-          display: block;
-          margin: 0;
-          padding: 0;
-          float: none;
-          text-align: left;
-          font-size: inherit;
-        }
-      }
-    }
   }
 }
