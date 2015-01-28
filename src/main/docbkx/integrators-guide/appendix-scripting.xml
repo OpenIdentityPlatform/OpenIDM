@@ -728,9 +728,9 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
 
             <para>
              This function performs an action on the specified OpenIDM resource
-             object. The <literal>container</literal> and
+             object. The <literal>resource</literal> and
              <literal>actionName</literal> are required. In contrast, the
-             <literal>value</literal> and <literal>params</literal> are
+             <literal>content</literal> and <literal>params</literal> are
              optional.
             </para>
 
@@ -754,7 +754,7 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
               </listitem>
              </varlistentry>
              <varlistentry>
-              <term>value</term>
+              <term>content</term>
               <listitem>
                <para>object</para>
                <para>
