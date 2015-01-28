@@ -371,7 +371,7 @@
     "ldapGroups": [
         "cn=openidm2,ou=Groups,dc=example,dc=com"
     ],
-    "cn": "Babara Jensen",
+    "cn": "Barbara Jensen",
     "uid": "bjensen",
     "sn": "Jensen",
     "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
@@ -409,7 +409,7 @@
     "ldapGroups": [
         "cn=openidm2,ou=Groups,dc=example,dc=com"
     ],
-    "cn": "Babara Jensen",
+    "cn": "Barbara Jensen",
     "uid": "bjensen",
     "sn": "Jensen",
     "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"

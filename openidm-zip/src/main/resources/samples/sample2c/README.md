@@ -108,7 +108,7 @@ Run The Sample In OpenIDM
           "postalAddress" : "",
           "stateProvince" : "",
           "userName" : "bjensen",
-          "displayName" : "Babara Jensen"
+          "displayName" : "Barbara Jensen"
         }
 
     You will see the user is in group "openidm2".
