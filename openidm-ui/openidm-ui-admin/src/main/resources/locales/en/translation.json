@@ -297,6 +297,7 @@
             "runReconcile": "Save and Reconcile",
             "queryFilters": "Query Filters",
             "linkQualifier": "Link Qualifier",
+            "legacy": "defaultLinkQualifier",
             "query": {
                 "correlationDescription": "List the fields which will be used to match existing items in your source to items in your target:",
                 "correlationAny": "Any of the below fields",

@@ -92,10 +92,10 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryDialog", [
                                 if (valid) {
                                     this.$el.parent().find("#correlationQuerySubmit").prop('disabled', false);
                                     this.$el.parent().find("#correlationQuerySubmit").prop('opacity', 1);
-                                    this.$el.parent().find("#correlationQueryError").hide();
+                                    this.$el.parent().find("#correlationQueryWarning").hide();
                                 } else {
                                     this.$el.parent().find("#correlationQuerySubmit").prop('disabled', true);
-                                    this.$el.parent().find("#correlationQueryError").show();
+                                    this.$el.parent().find("#correlationQueryWarning").show();
                                 }
                             }, this);
 
