@@ -30,14 +30,17 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "../mocks/resourceDetails"
-], function (constants, router, eventManager, addEditManagedView, resourcesView, resourceDetails) {
+], function (constants, router, eventManager, addEditManagedView, resourcesView, ConfigDelegate, resourceDetails) {
 
     return {
         executeAll: function (server) {
             module('Admin Managed Object UI Functions');
 
             QUnit.asyncTest("Managed Objects Add/Edit", function () {
+                var stubbedSave,
+                    saveCheck = false;
 
                 resourceDetails(server);
 
@@ -99,7 +102,30 @@ define([
 
                         QUnit.ok(addEditManagedView.$el.find("#addEditManaged").is(":disabled") === false, "Submit button enabled after new name");
 
+                        // Create a complex Schema with nested values and set that to the JSONEditor instance
+                        var jsonEditorFormat = {"title":"testTitle","description":"Test Description","properties":[{"propertyName":"stringString","title":"Test String","description":"Test string desciption","viewable":false,"searchable":false,"required":true,"type":""},{"propertyName":"testArrayOfStrings","title":"Test Array of String","description":"Description of the test array of strings","viewable":true,"searchable":true,"required":true,"type":{"itemType":""}},{"propertyName":"testBoolean","title":"Test Boolean","description":"Test boolean description","viewable":false,"searchable":true,"required":false,"type":""},{"propertyName":"testInteger","title":"Test Integer","description":"Description of the test integer","viewable":false,"searchable":false,"required":false,"type":""},{"propertyName":"testNumber","title":"Test Number","description":"Test Number description","viewable":true,"searchable":false,"required":false,"type":""},{"propertyName":"testObjectWithComplexProperties","title":"Test Object with Complex Properties","description":"The description for the test object containing complex properties","viewable":false,"searchable":false,"required":false,"type":[{"propertyName":"simpleProp","title":"","description":"","viewable":false,"searchable":false,"required":false,"type":""},{"propertyName":"complexArrayProp","title":"","description":"An array with an array of strings","viewable":false,"searchable":false,"required":false,"type":{"itemType":{"itemType":""}}}]},{"propertyName":"testResourceCollection","title":"Test Resource Collection","description":"Description of the test resource collection","viewable":false,"searchable":false,"required":false,"type":{"path":"test/path","query":{"queryFilter":"testQueryFilter","fields":["testField"],"sortKeys":["testKey","testKey2"]}}}]};
+                        var jsonSchema = {"$schema":"http://forgerock.org/json-schema#","type":"object","title":"testTitle","description":"Test Description","properties":{"stringString":{"description":"Test string desciption","title":"Test String","viewable":false,"searchable":false,"type":"string"},"testArrayOfStrings":{"description":"Description of the test array of strings","title":"Test Array of String","viewable":true,"searchable":true,"type":"string"},"testBoolean":{"description":"Test boolean description","title":"Test Boolean","viewable":false,"searchable":true,"type":"string"},"testInteger":{"description":"Description of the test integer","title":"Test Integer","viewable":false,"searchable":false,"type":"string"},"testNumber":{"description":"Test Number description","title":"Test Number","viewable":true,"searchable":false,"type":"string"},"testObjectWithComplexProperties":{"description":"The description for the test object containing complex properties","title":"Test Object with Complex Properties","viewable":false,"searchable":false,"type":"string"},"testResourceCollection":{"description":"Description of the test resource collection","title":"Test Resource Collection","viewable":false,"searchable":false,"resourceCollection":{"path":"test/path","query":{"queryFilter":"testQueryFilter","fields":["testField"],"sortKeys":["testKey","testKey2"]}},"type":"string"}},"required":["stringString","testArrayOfStrings"],"order":["stringString","testArrayOfStrings","testBoolean","testInteger","testNumber","testObjectWithComplexProperties","testResourceCollection"]};
+
+                        addEditManagedView.data.managedObjectSchema.setValue(jsonEditorFormat);
+
+                        // On save JSONEditor format is converted into valid schema: http://forgerock.org/json-schema
+                        stubbedSave = sinon.stub(ConfigDelegate, "updateEntity", function(name, managedObject){
+                            if (name === "managed") {
+                                var savedObj = _.find(managedObject.objects, function(obj) {
+                                    return obj.name === "test1234";
+                                });
+
+                                QUnit.deepEqual(savedObj.schema, jsonSchema, "JSONEditor JSON has converted properly into ForgeRock Schema");
+                            }
+
+                            saveCheck = true;
+                        });
+
                         addEditManagedView.$el.find("#addEditManaged").trigger("click");
+
+                        QUnit.ok(saveCheck, "Save successful");
+
+                        stubbedSave.restore();
 
                         QUnit.start();
                     }, 100);
