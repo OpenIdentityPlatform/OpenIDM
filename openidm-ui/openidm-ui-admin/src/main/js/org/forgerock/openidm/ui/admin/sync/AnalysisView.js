@@ -72,15 +72,15 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                     }
                     return mappingUtils.buildObjectRepresentation(obj, this.data.targetProps);
                 }, this),
-                linkTypes = this.mapping.correlationQuery;
+                correlationQueries = this.mapping.correlationQuery;
 
             e.preventDefault();
 
-            if(!_.isArray(linkTypes)){
-                linkTypes = [linkTypes];
+            if(!_.isArray(correlationQueries)){
+                correlationQueries = [correlationQueries];
             }
 
-            linkTypes = _.filter(linkTypes, function(link){
+            correlationQueries = _.filter(correlationQueries, function(link){
                 return link.linkQualifier !== undefined;
             });
 
@@ -92,10 +92,10 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                 targetProps: $.extend({},this.data.targetProps),
                 ambiguousTargetObjectIds: selectedRow.ambiguousTargetObjectIds,
                 recon: $.extend({},this.data.recon),
+                linkQualifiers : correlationQueries,
                 reloadAnalysisGrid: _.bind(function(){
                     this.renderReconResults(this.$el.find("#situationSelection").val().split(","), null);
-                }, this),
-                linkTypes: linkTypes
+                }, this)
             };
 
             changeAssociationDialog.render(args);
@@ -228,7 +228,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                             if(reconRecord.hasLink){
 
                                                 if(!reconRecord.linkQualifier) {
-                                                    reconRecord.linkQualifier = $.t("templates.mapping.noLinkQualifier");
+                                                    reconRecord.linkQualifier = $.t("templates.mapping.analysis.noLinkQualifier");
                                                 }
 
                                                 txt = "<span class='float-right fa fa-chain fa-lg linkIcon' title='" + reconRecord.linkQualifier + "'></span>" + txt;
