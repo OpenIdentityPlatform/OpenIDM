@@ -95,8 +95,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                 linkQualifiers : correlationQueries,
                 reloadAnalysisGrid: _.bind(function(){
                     this.renderReconResults(this.$el.find("#situationSelection").val().split(","), null);
-                }, this),
-                correlationQueries: correlationQueries
+                }, this)
             };
 
             changeAssociationDialog.render(args);
