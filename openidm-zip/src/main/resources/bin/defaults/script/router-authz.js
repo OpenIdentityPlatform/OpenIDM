@@ -408,7 +408,7 @@ function allow() {
             return false;
         }
         
-        logger.debug("Access Check for HTTP request for resource id: " + request.resourceName);
+        logger.debug("Access Check for HTTP request for resource id: {}, role: {}, method: {}, action: {}", request.resourceName, roles, request.method, action);
 
         if (passesAccessConfig(request.resourceName, roles, request.method, action)) {
 
