@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2014 ForgeRock Inc. All rights reserved.
+ * Copyright 2011-2015 ForgeRock Inc. All rights reserved.
  */
 
 package org.forgerock.openidm.jaspi.auth;
@@ -83,24 +83,27 @@ public class ResourceQueryAuthenticator implements Authenticator {
      * @param context the ServerContext to use
      * @return True if authentication is successful, otherwise false.
      */
-    public boolean authenticate(String username, String password, ServerContext context) throws ResourceException {
+    public AuthenticatorResult authenticate(String username, String password, ServerContext context) throws ResourceException {
 
         Reject.ifNull(username, "Provided username was null");
         Reject.ifNull(context, "Router context was null");
 
-        final UserInfo userInfo = getRepoUserInfo(username, context);
+        final Resource resource = getResource(username, context);
+        final UserInfo userInfo = getRepoUserInfo(username, resource);
+
         if (userInfo == null) {
-            return false; // getRepoUserInfo already logged why
+             // getResource already logged why
+            return AuthenticatorResult.FAILED;
         } else if (userInfo.checkCredential(password)) {
             logger.debug("Authentication succeeded for {}", username);
-            return true;
+            return AuthenticatorResult.authenticationSuccess(resource);
         } else {
             logger.debug("Authentication failed for {} due to invalid credentials", username);
-            return false;
+            return AuthenticatorResult.FAILED;
         }
     }
 
-    private UserInfo getRepoUserInfo(String username, ServerContext context) throws ResourceException {
+    private Resource getResource(String username, ServerContext context) throws ResourceException {
         QueryRequest request = Requests.newQueryRequest(queryOnResource)
                 .setQueryId(queryId)
                 .setAdditionalParameter(authenticationIdProperty, username);
@@ -121,7 +124,14 @@ public class ResourceQueryAuthenticator implements Authenticator {
             throw ResourceException.getException(401, "Access denied, user detail retrieved was ambiguous.");
         }
 
-        final Resource resource = result.iterator().next();
+        return result.iterator().next(); // the retrieved resource
+    }
+
+    private UserInfo getRepoUserInfo(String username, Resource resource) throws ResourceException {
+        if (username == null || resource == null) {
+            return null;
+        }
+
         final String retrievedCred =
                 cryptoService.decryptIfNecessary(resource.getContent().get(userCredentialProperty)).asString();
 

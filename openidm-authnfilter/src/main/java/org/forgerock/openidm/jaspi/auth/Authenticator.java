@@ -11,27 +11,67 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.jaspi.auth;
 
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 
 /**
  * Authenticates a user given a username and password combination.
- *
- * @author brmiller
  */
 public interface Authenticator {
+
+    /**
+     * The result of the Authenticator#authenticate.
+     */
+    class AuthenticatorResult {
+        private final boolean authenticated;
+        private final Resource resource;
+
+        private AuthenticatorResult(boolean authenticated, Resource resource) {
+            this.authenticated = authenticated;
+            this.resource = resource;
+        }
+
+        /**
+         * Return whether the authentication was successful.
+         * @return whether the user is authenticated
+         */
+        public boolean isAuthenticated() {
+            return authenticated;
+        }
+
+        /**
+         * Return the resource for the authenticated user.
+         * @return the resource for the authenticated user.
+         */
+        public Resource getResource() {
+            return resource;
+        }
+
+        /** a failed authentication */
+        public static final AuthenticatorResult FAILED = new AuthenticatorResult(false, null);
+
+        /** a successful authentication */
+        public static final AuthenticatorResult SUCCESS = new AuthenticatorResult(true, null);
+
+        /** create a successful authentication with a resource */
+        public static AuthenticatorResult authenticationSuccess(Resource resource) {
+            return new AuthenticatorResult(true, resource);
+        }
+    }
+
     /**
      * Delegates authentication to the implemented endpoint, repository, or service.
      *
      * @param username The user's username
      * @param password The user's password.
      * @param context the ServerContext to use when making requests on the router
-     * @return <code>true</code> if authentication is successful.
+     * @return the result of the authentication (success/failure and, optionally, the associated resource)
      * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */
-    boolean authenticate(String username, String password, ServerContext context) throws ResourceException;
+    AuthenticatorResult authenticate(String username, String password, ServerContext context) throws ResourceException;
 }
