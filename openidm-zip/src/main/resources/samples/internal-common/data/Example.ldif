@@ -34,7 +34,7 @@ objectClass: inetOrgPerson
 objectClass: top
 givenName: Barbara
 uid: bjensen
-cn: Babara Jensen
+cn: Barbara Jensen
 telephoneNumber: 1-360-229-7105
 sn: Jensen
 mail: bjensen@example.com

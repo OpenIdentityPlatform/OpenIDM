@@ -895,7 +895,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
       "dn": "uid=bjensen,ou=People,dc=example,dc=com",
       "givenName": "Barbara",
       "description": "Created for OpenIDM",
-      "cn": "Babara Jensen",
+      "cn": "Barbara Jensen",
       "uid": "bjensen",
       "ldapGroups": [
         "cn=openidm2,ou=Groups,dc=example,dc=com"

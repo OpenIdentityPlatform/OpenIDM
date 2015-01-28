@@ -306,7 +306,7 @@
  "https://localhost:8443/openidm/managed/user/2e78fd22-a7cb-4585-9570-5f649e8abd25"
     </userinput>
 <computeroutput>{
-  "displayName": "Babara Jensen",
+  "displayName": "Barbara Jensen",
   "stateProvince": "",
   "userName": "bjensen",
   "postalAddress": "",
@@ -1088,7 +1088,7 @@
     "postalAddress": "",
     "userName": "bjensen",
     "stateProvince": "",
-    "displayName": "Babara Jensen"
+    "displayName": "Barbara Jensen"
 }</computeroutput>
      </screen>
     </step>

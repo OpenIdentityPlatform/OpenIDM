@@ -373,7 +373,7 @@ $ ./startup.sh -p samples/sample2</screen>
  --request GET \
  "https://localhost:8443/openidm/managed/user/0a5546d6-149b-4f8b-b3be-4afa8a267d45"</userinput>
 <computeroutput>{
-  "displayName": "Babara Jensen",
+  "displayName": "Barbara Jensen",
   "stateProvince": "",
   "userName": "bjensen",
   "postalAddress": "",
@@ -601,7 +601,7 @@ $ ./startup.sh -p samples/sample2b</screen>
  --request GET \
  "https://localhost:8443/openidm/managed/user/625942ac-3cb8-47aa-9de1-217d24967b3b"</userinput>
 <computeroutput>{
-  "displayName": "Babara Jensen",
+  "displayName": "Barbara Jensen",
   "stateProvince": "",
   "userName": "bjensen",
   "postalAddress": "",
