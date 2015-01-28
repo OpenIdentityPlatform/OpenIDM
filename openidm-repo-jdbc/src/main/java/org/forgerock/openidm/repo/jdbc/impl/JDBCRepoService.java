@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,6 +27,8 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.resource.Resource.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.Resource.FIELD_CONTENT_REVISION;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
@@ -106,9 +108,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Repository service implementation using JDBC
- *
- * @author aegloff
- * @author brmiller
  */
 @Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
         enabled = true)
@@ -236,7 +235,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 : request.getNewResourceId();
         final String fullId = type + "/" + localId;
 
-        Map<String, Object> obj = request.getContent().asMap();
+        final JsonValue obj = request.getContent();
 
         Connection connection = null;
         boolean retry = false;
@@ -253,7 +252,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 connection = getConnection();
                 connection.setAutoCommit(false);
 
-                handler.create(fullId, type, localId, obj, connection);
+                handler.create(fullId, type, localId, obj.asMap(), connection);
 
                 connection.commit();
                 logger.debug("Commited created object for id: {}", fullId);
@@ -301,8 +300,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         } while (retry);
 
         // Return the newly created resource
-        return read(Requests.newReadRequest(fullId));
-
+        return new Resource(obj.get(FIELD_CONTENT_ID).asString(), obj.get(FIELD_CONTENT_REVISION).asString(), obj);
     }
 
     @Override
