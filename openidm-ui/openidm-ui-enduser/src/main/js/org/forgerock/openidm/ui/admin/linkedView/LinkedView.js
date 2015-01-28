@@ -42,7 +42,7 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
                 this.data.linkedResources = [];
 
                 _.each(this.data.linkedData.linkedTo, function(resource, index){
-                    this.data.linkedResources.push(this.cleanLinkName(resource.resourceName));
+                    this.data.linkedResources.push(this.cleanLinkName(resource.resourceName, resource.linkQualifier));
 
                     //This second loop is to ensure that null returned first level values actually display in JSON editor
                     //Without this it will not display the textfields
@@ -64,7 +64,7 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
             }, this));
         },
 
-        cleanLinkName: function(name){
+        cleanLinkName: function(name, linkQualifier){
             var cleanName = name.split("/");
 
             if(cleanName[0] === "system" || cleanName[0] === "managed") {
@@ -73,7 +73,13 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
 
             cleanName.pop();
 
-            return cleanName.join(" ");
+            cleanName = cleanName.join(" ");
+
+            if(linkQualifier) {
+                cleanName = cleanName +" - " +linkQualifier;
+            }
+
+            return cleanName;
         },
 
         changeResource: function(target) {

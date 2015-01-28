@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
@@ -49,7 +49,7 @@
 
     There should only ever either be one or two mapping entries.
  */
- 
+
 exports.fetch = function (resourceName) {
 
     var _ = require('lib/lodash'),
@@ -81,7 +81,7 @@ exports.fetch = function (resourceName) {
                         })
                         .map(function (m) {
                             return [m.name, {
-                                "firstContainer": m.source, 
+                                "firstContainer": m.source,
                                 "secondContainer": m.target
                             }];
                         })
@@ -109,7 +109,7 @@ exports.fetch = function (resourceName) {
                     return _.has(resourceMap, l.linkType);
                 })
 
-                // For each of the found links, determine the full linked resourceName and return some useful 
+                // For each of the found links, determine the full linked resourceName and return some useful
                 // information about it.
                 .map(function (l) {
                     var linkedResourceName,
@@ -130,20 +130,21 @@ exports.fetch = function (resourceName) {
                     return {
                         "resourceName": linkedResourceName,
                         "content": linkedResource,
+                        "linkQualifier" : l.linkQualifier,
                         "linkType": l.linkType,
                         "mappings": _(syncConfig.mappings)
-                                        .filter(function (m) {
-                                            return m.name === l.linkType || m.links === l.linkType;
-                                        })
-                                        .map(function (m) {
-                                            return {
-                                                "name": m.name,
-                                                // the type is how the linkedResourceName relates to the main 
-                                                // resourceName in the context of a particular mapping.
-                                                "type": (component === m.source) ? "target" : "source"
-                                            }
-                                        })
-                                        .value()
+                                    .filter(function (m) {
+                                        return m.name === l.linkType || m.links === l.linkType;
+                                    })
+                                    .map(function (m) {
+                                        return {
+                                            "name": m.name,
+                                            // the type is how the linkedResourceName relates to the main
+                                            // resourceName in the context of a particular mapping.
+                                            "type": (component === m.source) ? "target" : "source"
+                                        }
+                                    })
+                                    .value()
                     };
                 })
                 .value()

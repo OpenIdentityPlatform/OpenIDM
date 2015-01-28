@@ -57,9 +57,9 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
             searchDelegate.searchResults(MappingBaseView.currentMapping().target, this.data.targetProps, searchCriteria).then(_.bind(function (results) {
                 dialogData.results = _.chain(results)
                                         .map(_.bind(function(result){
-                                            return { 
+                                            return {
                                                 _id: result._id,
-                                                objRep: mappingUtils.buildObjectRepresentation(result, this.data.targetProps) 
+                                                objRep: mappingUtils.buildObjectRepresentation(result, this.data.targetProps)
                                             };
                                         },this))
                                         .value();
@@ -72,12 +72,14 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
         linkObject: function(e){
             var sourceId = this.$el.find("[name=sourceId]").val(),
                 linkId = this.$el.find("[name=found]:checked").val(),
-                mapping = MappingBaseView.currentMapping().name;
-            
+                mapping = MappingBaseView.currentMapping().name,
+                linkType = this.$el.find("linkTypeSelect").val();
+
             e.preventDefault();
-            
+
             syncDelegate.deleteLinks(mapping, sourceId, "firstId").then(_.bind(function(){
-                syncDelegate.performAction(this.data.recon._id, mapping, "LINK", sourceId, linkId).then(_.bind(function(){
+                //Get selected linkQualifiers
+                syncDelegate.performAction(this.data.recon._id, mapping, "LINK", sourceId, linkId, linkType).then(_.bind(function(){
                     this.data.reloadAnalysisGrid();
                     this.currentDialog.dialog('destroy').remove();
                 }, this));
@@ -86,19 +88,19 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
         getAmbiguousMatches: function(){
             var ids = this.data.ambiguousTargetObjectIds.split(", "),
                 prom = $.Deferred();
-            
+
             _.each(ids,_.bind(function(id, i){
                 searchDelegate.searchResults(MappingBaseView.currentMapping().target, ["_id"], id, "eq").then(_.bind(function(result){
-                    this.data.results.push({ 
-                        _id: result[0]._id, 
-                        objRep: mappingUtils.buildObjectRepresentation(result[0], this.data.targetProps) 
+                    this.data.results.push({
+                        _id: result[0]._id,
+                        objRep: mappingUtils.buildObjectRepresentation(result[0], this.data.targetProps)
                     });
                     if(i === ids.length - 1){
                         prom.resolve();
                     }
                 }, this));
             },this));
-            
+
             return prom;
         },
         reloadData: function(data){
@@ -107,27 +109,26 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
                 this.$el.find("#targetSearchInput").focus().val(data.searchCriteria);
             }
         },
-        render: function(args,callback) {
+        render: function(args, callback) {
             var readyProm = $.Deferred();
-            
+
             this.currentDialog = $('<div id="changeAssociationDialog"></div>');
             this.setElement(this.currentDialog);
             $('#dialogs').append(this.currentDialog);
-
             _.extend(this.data,args);
-            
+
             this.data.results = [];
-            
+
             if(_.keys(this.data.targetObj).length){
                 this.data.results.push({ _id: this.data.targetObj._id , objRep: this.data.targetObjRep });
             }
-            
+
             if(this.data.ambiguousTargetObjectIds.length){
                 this.getAmbiguousMatches().then(readyProm.resolve);
             } else {
                 readyProm.resolve();
             }
-            
+
             readyProm.then(_.bind(function(){
                 this.currentDialog.dialog({
                     title: $.t("templates.mapping.analysis.changeAssociation"),
@@ -149,7 +150,9 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
                             this.$el,
                             _.extend({}, conf.globalData, this.data),
                             _.bind(function() {
-                                
+                                if(callback) {
+                                    callback();
+                                }
                             }, this),
                             "replace");
                     }, this)

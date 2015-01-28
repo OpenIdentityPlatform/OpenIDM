@@ -1,0 +1,70 @@
+<label class="queryTypeTitle">{{t "templates.correlation.linkQualifier"}}:
+    <input type="text" name="linkQualifier" class="linkQualifier" />
+</label>
+
+<!--<div>-->
+<!--<input type="radio" name="queryType" id="expressionTreeQueryRadio" value="expression" class="queryType" checked="checked">-->
+<!--<label for="expressionTreeQueryRadio" class="queryTypeTitle">{{t "templates.correlation.expressionBuilder"}}</label>-->
+
+<!--<div class="expressionTree queryContainer">-->
+<!--<p>{{t "templates.correlation.query.correlationDescription"}}</p>-->
+
+<!--<ul>-->
+<!--<li index="{{#if isAny}}any{{else}}all{{/if}}" class="node">-->
+<!--#expressionDisplay expressionTree fieldNames-->
+
+<!--<select>-->
+<!--{{#each types}}-->
+<!--<option {{#if selected}} selected{{/if}} value="{{value}}">{{label}}</option>-->
+<!--{{/each}}-->
+<!--</select>-->
+
+<!--<button class="button remove object" title="{{t "templates.correlation.query.removeTitle"}}"><i class="fa fa-lg fa-minus"></i></button>-->
+<!--<button class="button add" title="{{t "templates.correlation.query.addTitle"}}"><i class="fa fa-lg fa-plus"></i></button>-->
+
+<!--<ul class="expressionMenu">-->
+<!--<li>-->
+<!--<a class="parentMenuChoice">{{t "templates.correlation.query.addField"}}</a>-->
+<!--<ul>-->
+<!--{{#each filteredFieldNames}}-->
+<!--<li><a href="#" class="addField">{{.}}</a></li>-->
+<!--{{/each}}-->
+<!--</ul>-->
+<!--</li>-->
+<!--<li><a class="addGroup">{{t "templates.correlation.query.addGroup"}}</a></li>-->
+<!--</ul>-->
+
+
+<!--{{#if expressionTree.length}}-->
+<!--<ul>-->
+<!--{{#each expressionTree}}-->
+<!--{{#if isObject}}-->
+<!--<li index="{{index}}" class="node">-->
+<!--<div index="{{#if isAny}}any{{else}}all{{/if}}" class="node">-->
+<!--expressionDisplay req fieldNames-->
+<!--</div>-->
+<!--</li>-->
+<!--{{else}}-->
+<!--<li field="{{req}}" index="{{index}}" class="node">-->
+<!--{{req}}-->
+<!--{{#if notLast}}-->
+<!--{{../../../term}}-->
+<!--{{/if}}-->
+<!--<button class="button remove" title="{{t "templates.correlation.query.removeTitle"}}"><i class="fa fa-lg fa-minus"></i></button>-->
+
+<!--</li>-->
+<!--{{/if}}-->
+<!--{{/each}}-->
+<!--</ul>-->
+<!--{{/if}}-->
+<!--/expressionDisplay-->
+<!--</li>-->
+<!--</ul>-->
+<!--</div>-->
+<!--</div>-->
+
+<div>
+    <!--<input type="radio" name="queryType" id="scriptQueryRadio" value="script" class="queryType">-->
+    <!--<label for="scriptQueryRadio" class="queryTypeTitle">{{t "templates.correlation.script"}}</label>-->
+    <div class="queryScript queryContainer"></div>
+</div>
