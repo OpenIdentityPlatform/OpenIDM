@@ -35,24 +35,32 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
 
     var obj = new AbstractDelegate(constants.host + "/openidm/sync");
 
-    obj.performAction = function (reconId, mapping, action, sourceId, targetId) {
+    obj.performAction = function (reconId, mapping, action, sourceId, targetId, linkType) {
         var params = {
                 _action: "performAction",
                 reconId: reconId,
                 mapping: mapping,
                 action: action
             };
+
         if (sourceId) {
             params.sourceId = sourceId;
         } else {
             params.target = true;
-        }           
+        }
+
+        if(linkType) {
+            params.linkType = linkType;
+        }
+
         if (targetId) {
             params.targetId = targetId;
         }
+
         if (!sourceId && !targetId) {
             return $.Deferred().resolve();
         }
+
         return obj.serviceCall({
             url: "?" + $.param(params),
             type: "POST"

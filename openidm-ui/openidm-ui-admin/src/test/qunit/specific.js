@@ -30,8 +30,9 @@ define([
     "./resources/resourceTest",
     "./mapping/addMappingTest",
     "./mapping/reconTests",
-    "./mapping/propertyMappingTest"
-], function (adminInit, moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest) {
+    "./mapping/propertyMappingTest",
+    "./mapping/correlationTest"
+], function (adminInit, moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest, correlationTest) {
 
     return {
         executeAll: function (server) {
@@ -43,6 +44,7 @@ define([
             reconTests.executeAll(server);
             addMappingTest.executeAll(server);
             propertyMappingTest.executeAll(server);
+            correlationTest.executeAll(server);
         }
     };
 });
