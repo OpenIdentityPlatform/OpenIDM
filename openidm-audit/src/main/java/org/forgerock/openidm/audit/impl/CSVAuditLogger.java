@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.audit.impl;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -68,10 +69,11 @@ import org.supercsv.util.CsvContext;
 public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(CSVAuditLogger.class);
 
-    public final static String CONFIG_LOG_LOCATION = "location";
-    public final static String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
+    public static final String CONFIG_LOG_LOCATION = "location";
+    public static final String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
+    public static final String CONFIG_LOG_BUFFER_SIZE = "bufferSize";
 
-    private static Object lock = new Object();
+    private static final Object createLock = new Object();
 
     /**
      * Event names for monitoring audit behavior
@@ -80,7 +82,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
 
     File auditLogDir;
     String recordDelim;
-    final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
+    int bufferSize;
+
+    final Map<String, BufferedWriter> fileWriters = new HashMap<String, BufferedWriter>();
 
     public void setConfig(JsonValue config) throws InvalidException {
         String location = null;
@@ -95,6 +99,8 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 recordDelim = "";
             }
             recordDelim += ServerConstants.EOL;
+            // Maintain FileWriter's 1024 byte write buffer default unless config overrides it.
+            bufferSize = config.get(CONFIG_LOG_BUFFER_SIZE).defaultTo(1024).asInteger();
         } catch (Exception ex) {
             logger.error("ERROR - Configured CSV file location must be a directory and {} is invalid.", auditLogDir.getAbsolutePath(), ex);
             throw new InvalidException("Configured CSV file location must be a directory and '" + location
@@ -103,9 +109,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     }
 
     public void cleanup() {
-        for (Map.Entry<String, FileWriter> entry : fileWriters.entrySet()) {
+        for (Map.Entry<String, BufferedWriter> entry : fileWriters.entrySet()) {
             try {
-                FileWriter fileWriter = entry.getValue();
+                BufferedWriter fileWriter = entry.getValue();
                 if (fileWriter != null) {
                     fileWriter.close();
                 }
@@ -311,14 +317,14 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     @Override
     public void create(ServerContext context, String type, Map<String, Object> obj) throws ResourceException {
         EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
-        // Synchronize writes so that simultaneous writes don't corrupt the file
-        synchronized (lock) {
-            try {
-                AuditServiceImpl.preformatLogEntry(type, obj);
+        try {
+            AuditServiceImpl.preformatLogEntry(type, obj);
+            // Synchronize writes so that simultaneous writes don't corrupt the file
+            synchronized (createLock) {
                 createImpl(type, obj);
-            } finally {
-                measure.end();
             }
+        } finally {
+            measure.end();
         }
     }
 
@@ -330,24 +336,23 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
         int retryCount = 0;
         do {
             retry = false;
-            FileWriter fileWriter = null;
-            // TODO: optimize buffered, cached writing
+            BufferedWriter fileWriter = null;
             try {
                 // TODO: Optimize ordering etc.
-                Collection<String> fieldOrder =
-                        new TreeSet<String>(Collator.getInstance());
+                Collection<String> fieldOrder = new TreeSet<String>(Collator.getInstance());
                 fieldOrder.addAll(obj.keySet());
 
                 File auditFile = getAuditLogFile(type);
                 // Create header if creating a new file
                 if (!auditFile.exists()) {
-                    synchronized (this) {
-                        FileWriter existingFileWriter = getWriter(type, auditFile, false);
+                    synchronized (fileWriters) {
+                        BufferedWriter existingFileWriter = getWriter(type, auditFile, false);
                         File auditTmpFile = new File(auditLogDir, type + ".tmp");
                         // This is atomic, so only one caller will succeed with created
                         boolean created = auditTmpFile.createNewFile();
                         if (created) {
-                            FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);
+                            BufferedWriter tmpFileWriter = new BufferedWriter(
+                                    new FileWriter(auditTmpFile, true), bufferSize);
                             writeHeaders(fieldOrder, tmpFileWriter);
                             tmpFileWriter.close();
                             auditTmpFile.renameTo(auditFile);
@@ -361,9 +366,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 if (retryCount == 0) {
                     retry = true;
                     logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
-                    synchronized (this) {
-                        resetWriter(type, fileWriter);
-                    }
+                    resetWriter(type, fileWriter);
                 } else {
                     throw new BadRequestException(ex);
                 }
@@ -376,7 +379,8 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
         return new File(auditLogDir, type + ".csv");
     }
 
-    private void writeEntry(FileWriter fileWriter, String type, File auditFile, Map<String, Object> obj, Collection<String> fieldOrder)
+    private void writeEntry(BufferedWriter fileWriter, String type, File auditFile, Map<String, Object> obj,
+                            Collection<String> fieldOrder)
             throws IOException{
 
         String key = null;
@@ -400,10 +404,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             }
         }
         fileWriter.append(recordDelim);
-        fileWriter.flush();
     }
 
-    private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter)
+    private void writeHeaders(Collection<String> fieldOrder, BufferedWriter fileWriter)
             throws IOException {
         Iterator<String> iter = fieldOrder.iterator();
         while (iter.hasNext()) {
@@ -419,12 +422,12 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
         fileWriter.append(recordDelim);
     }
 
-    private FileWriter getWriter(String type, File auditFile, boolean createIfMissing) throws IOException {
+    private BufferedWriter getWriter(String type, File auditFile, boolean createIfMissing) throws IOException {
         // TODO: optimize synchronization strategy
         synchronized (fileWriters) {
-            FileWriter existingWriter = fileWriters.get(type);
+            BufferedWriter existingWriter = fileWriters.get(type);
             if (existingWriter == null && createIfMissing) {
-                existingWriter = new FileWriter(auditFile, true);
+                existingWriter = new BufferedWriter(new FileWriter(auditFile, true), bufferSize);
                 fileWriters.put(type, existingWriter);
             }
             return existingWriter;
@@ -436,8 +439,8 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     // In other words, it does not synchronize on the use of the writer
     // If the writerToReset doesn't exist in the fileWriters (anymore) then
     // another thread already reset it, and no action is taken
-    private void resetWriter(String type, FileWriter writerToReset) {
-        FileWriter existingWriter = null;
+    private void resetWriter(String type, BufferedWriter writerToReset) {
+        BufferedWriter existingWriter = null;
         // TODO: optimize synchronization strategy
         synchronized (fileWriters) {
             existingWriter = fileWriters.get(type);
