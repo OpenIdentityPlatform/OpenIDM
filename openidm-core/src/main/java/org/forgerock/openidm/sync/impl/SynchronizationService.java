@@ -1,28 +1,32 @@
-/**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*
-*/
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
 package org.forgerock.openidm.sync.impl;
+
+import static org.forgerock.json.fluent.JsonValue.array;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 import static org.forgerock.util.Iterables.filter;
 
@@ -255,12 +259,14 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         };
 
         for (final ObjectMapping mapping : filter(mappings, thatMatchSource)) {
-            JsonValue mappingResult = new JsonValue(new HashMap<String,Object>());
+            JsonValue mappingResults = json(array());
             MappingSyncResult result = MappingSyncResult.SUCCESSFUL;
             try {
                 if (exceptionPending == null) {
-                    // no failures yet, sync this one
-                    mappingResult = action.sync(context, mapping);
+                    // No failures yet, perform sync
+                    // This operation returns a list which will contain more than one result if 
+                    // there are multiple targets to sync the source to
+                    mappingResults = action.sync(context, mapping);
                 } else {
                     // we've already failed, skip the sync attempt
                     result = MappingSyncResult.SKIPPED;
@@ -269,14 +275,18 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                 // failed to sync; store the exception and mark as failed
                 exceptionPending = new SynchronizationException(e.getMessage(), e.getCause());
                 // the exception detail contains the mapping result
-                mappingResult = e.getDetail();
-                mappingResult.put("cause", exceptionPending.toJsonValue().getObject());
+                JsonValue failedResult = e.getDetail();
+                failedResult.put("cause", exceptionPending.toJsonValue().getObject());
+                mappingResults.add(failedResult);
                 result = MappingSyncResult.FAILED;
             } finally {
-                mappingResult.put("result", result.name());
-                mappingResult.put("mapping", mapping.getName());
-                mappingResult.put("targetObjectSet", mapping.getTargetObjectSet());
-                syncDetails.add(mappingResult);
+                // Loop over each result, setting result fields and adding to syncDetails list
+                for (JsonValue mappingResult : mappingResults) {
+                    mappingResult.put("result", result.name());
+                    mappingResult.put("mapping", mapping.getName());
+                    mappingResult.put("targetObjectSet", mapping.getTargetObjectSet());
+                    syncDetails.add(mappingResult);
+                }
             }
         }
 

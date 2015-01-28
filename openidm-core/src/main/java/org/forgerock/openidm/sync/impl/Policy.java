@@ -1,19 +1,26 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
@@ -63,11 +70,11 @@ class Policy {
     private Script postAction;
 
     /**
-     * TODO: Description.
+     * A Constructor for the Policy class
      *
-     * @param service
-     * @param config TODO.
-     * @throws JsonValueException TODO.
+     * @param service the SynchronizationService
+     * @param config a {@link JsonValue} object representing the policy configuration.
+     * @throws JsonValueException
      */
     public Policy(SynchronizationService service, JsonValue config) throws JsonValueException {
         this.service = service;
@@ -79,7 +86,7 @@ class Policy {
             this.scriptScope = null;
         } else {
             this.action = null;
-            this.script = Scripts.newInstance("Policy", action);
+            this.script = Scripts.newInstance(action);
             if (action.isMap() && action.asMap().size() > 2) {
                 // If there is additional attributes then copy them
                 scriptScope = action.copy().asMap();
@@ -94,25 +101,26 @@ class Policy {
         if (pAction.isNull()) {
             this.postAction = null;
         } else {
-            this.postAction = Scripts.newInstance("PostAction", pAction);
+            this.postAction = Scripts.newInstance(pAction);
         }
     }
 
     /**
-     * TODO: Description.
-     * @return
+     * Returns the situation for this policy.
+     * 
+     * @return a {@link Situation} object representing the situation for this policy
      */
     public Situation getSituation() {
         return situation;
     }
 
     /**
-     * TODO: Description.
+     * Returns the action for this policy. The action may be dynamically determined by a script.
      *
-     * @param source
-     * @param target
+     * @param source a {@link LazyObjectAccessor} representing the source object
+     * @param target a {@link LazyObjectAccessor} representing the target object
      * @param syncOperation the parent {@link ObjectMapping.SyncOperation} instance
-     * @return TODO.
+     * @return a {@link ReconAction} object representing the action for this policy
      * @throws SynchronizationException TODO.
      */
     public ReconAction getAction(LazyObjectAccessor source, LazyObjectAccessor target, final ObjectMapping.SyncOperation syncOperation) throws SynchronizationException {
@@ -165,6 +173,15 @@ class Policy {
         return result;
     }
 
+    /**
+     * Evaluates a post action script, if present.
+     * 
+     * @param source a {@link LazyObjectAccessor} representing the source object
+     * @param target a {@link LazyObjectAccessor} representing the target object
+     * @param action the {@link ReconAction} that was performed
+     * @param sourceAction true if this is a source sync operation, false if it is a target sync operation
+     * @throws SynchronizationException
+     */
     public void evaluatePostAction(LazyObjectAccessor source, LazyObjectAccessor target, ReconAction action, boolean sourceAction) throws SynchronizationException {
         if (postAction != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
