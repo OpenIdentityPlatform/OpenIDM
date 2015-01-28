@@ -61,6 +61,13 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             this.model.startSync = args.startSync;
             this.data.linkQualifiers = _.pluck(args.mapping.correlationQuery, "linkQualifier");
 
+            // Legacy Support
+            if(_.has(this.model.mapping, "correlationQuery") && !_.isArray(this.model.mapping.correlationQuery)) {
+                args.mapping.correlationQuery.linkQualifier = $.t("templates.correlation.legacy");
+                this.model.mapping.correlationQuery = [args.mapping.correlationQuery];
+                this.data.linkQualifiers = _.pluck(this.model.mapping.correlationQuery, "linkQualifier");
+            }
+
             this.parentRender(function () {
                 if(_.has(this.model.mapping, "correlationQuery")) {
                     this.$el.find(".correlationQueryType").val("queries");
