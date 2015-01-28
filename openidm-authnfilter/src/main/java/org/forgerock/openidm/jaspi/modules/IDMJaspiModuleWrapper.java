@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -52,7 +52,9 @@ import java.util.Map;
 
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.resource.Resource.FIELD_CONTENT;
 import static org.forgerock.json.resource.Resource.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.Resource.FIELD_CONTENT_REVISION;
 import static org.forgerock.openidm.jaspi.modules.MappingRoleCalculator.GroupComparison;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
 
@@ -83,6 +85,9 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
     /** Authentication without a session header. */
     public static final String NO_SESSION = "X-OpenIDM-NoSession";
+
+    /** Key in Messages Map for the cached resource detail */
+    public static final String AUTHENTICATED_RESOURCE = "org.forgerock.openidm.authentication.resource";
 
     private final OSGiAuthnFilterHelper authnFilterHelper;
     private final AuthModuleConstructor authModuleConstructor;
@@ -284,8 +289,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         // user is authenticated; populate security context
 
         try {
-            // Attempt to read the user object; will return null if any of the pieces are null
-            final Resource resource = queryExecutor.apply(queryBuilder.forPrincipal(principalName).build());
+            final Resource resource = getAuthenticatedResource(principalName, messageInfo);
 
             final SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo)
                     .setAuthenticationId(principalName);
@@ -330,6 +334,21 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         }
 
         return authStatus;
+    }
+
+    private Resource getAuthenticatedResource(String principalName, MessageInfo messageInfo) throws ResourceException {
+        // see if the resource was stored in the MessageInfo by the Authenticator
+        if (messageInfo.getMap().containsKey(AUTHENTICATED_RESOURCE)) {
+            JsonValue resourceDetail = new JsonValue(messageInfo.getMap().get(AUTHENTICATED_RESOURCE));
+            if (resourceDetail.isMap()) {
+                return new Resource(resourceDetail.get(FIELD_CONTENT_ID).asString(),
+                        resourceDetail.get(FIELD_CONTENT_REVISION).asString(),
+                        resourceDetail.get(FIELD_CONTENT));
+            }
+        }
+
+        // attempt to read the user object; will return null if any of the pieces are null
+        return queryExecutor.apply(queryBuilder.forPrincipal(principalName).build());
     }
 
     private void setClientIPAddress(MessageInfo messageInfo) {

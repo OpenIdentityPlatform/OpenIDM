@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock Inc.
+ * Copyright 2013-2015 ForgeRock AS
  */
 
 package org.forgerock.openidm.jaspi.auth;
@@ -74,9 +74,6 @@ import static org.forgerock.util.Iterables.from;
 
 /**
  * An implementation of the AuthenticationConfig that reads and holds the authentication configuration.
- *
- * @author Phill Cunnington
- * @author brmiller
  */
 @Component(name = AuthenticationService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
@@ -225,7 +222,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
 
                     for (Authenticator authenticator : authenticators) {
                         try {
-                            if (authenticator.authenticate(authcid, password, context)) {
+                            if (authenticator.authenticate(authcid, password, context).isAuthenticated()) {
                                 JsonValue result = new JsonValue(new HashMap<String, Object>());
                                 result.put("reauthenticated", true);
                                 handler.handleResult(result);

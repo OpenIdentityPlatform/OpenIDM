@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.AuditTrail;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
@@ -41,6 +42,9 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.Credential;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.BASIC_AUTH_CRED_HELPER;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_AUTH_CRED_HELPER;
@@ -48,9 +52,6 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_A
 /**
  * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
  * to a OpenICF Connector.
- *
- * @author Phill Cunnington
- * @author brmiller
  */
 public class DelegatedAuthModule implements ServerAuthModule {
 
@@ -164,8 +165,19 @@ public class DelegatedAuthModule implements ServerAuthModule {
         securityContextMapper.setAuthenticationId(credential.username);
 
         try {
-            return authenticator.authenticate(credential.username, credential.password,
-                    authnFilterHelper.getRouter().createServerContext());
+            Authenticator.AuthenticatorResult result = authenticator.authenticate(
+                    credential.username, credential.password, authnFilterHelper.getRouter().createServerContext());
+            final Resource resource = result.getResource();
+            if (resource != null) {
+                final JsonValue messageMap = new JsonValue(messageInfo.getMap());
+                messageMap.put(IDMJaspiModuleWrapper.AUTHENTICATED_RESOURCE,
+                        json(object(
+                                field(Resource.FIELD_CONTENT_ID, resource.getId()),
+                                field(Resource.FIELD_CONTENT_REVISION, resource.getRevision()),
+                                field(Resource.FIELD_CONTENT, resource.getContent().asMap())))
+                        .asMap());
+            }
+            return result.isAuthenticated();
         } catch (ResourceException e) {
             logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
             messageInfo.getMap().put(AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());

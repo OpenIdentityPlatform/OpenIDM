@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -20,6 +20,7 @@ import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
+import org.forgerock.openidm.jaspi.auth.Authenticator.AuthenticatorResult;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.router.RouteService;
 import org.mockito.Matchers;
@@ -40,7 +41,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
-* @author Phill Cunnington
+* Test the DelegatedAuthModule.
 */
 public class DelegatedAuthModuleTest {
 
@@ -159,6 +160,7 @@ public class DelegatedAuthModuleTest {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
+        AuthenticatorResult authResult = mock(AuthenticatorResult.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
@@ -172,8 +174,9 @@ public class DelegatedAuthModuleTest {
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 
+        given(authResult.isAuthenticated()).willReturn(true);
         given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
-                Matchers.<ServerContext>anyObject())).willReturn(true);
+                Matchers.<ServerContext>anyObject())).willReturn(authResult);
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -188,6 +191,7 @@ public class DelegatedAuthModuleTest {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
+        AuthenticatorResult authResult = mock(AuthenticatorResult.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
@@ -201,8 +205,9 @@ public class DelegatedAuthModuleTest {
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 
+        given(authResult.isAuthenticated()).willReturn(false);
         given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
-                Matchers.<ServerContext>anyObject())).willReturn(false);
+                Matchers.<ServerContext>anyObject())).willReturn(authResult);
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);

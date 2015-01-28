@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.auth;
@@ -26,9 +26,6 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * Contains logic to perform authentication by passing the request through to be authenticated against a OpenICF
  * connector, or an endpoint accepting an "authenticate" action with supplied username and password parameters.
- *
- * @author Phill Cunnington
- * @author brmiller
  */
 public class PassthroughAuthenticator implements Authenticator {
 
@@ -57,14 +54,17 @@ public class PassthroughAuthenticator implements Authenticator {
      * @return <code>true</code> if authentication is successful.
      * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */
-    public boolean authenticate(String username, String password, ServerContext context) throws ResourceException {
+    public AuthenticatorResult authenticate(String username, String password, ServerContext context) throws ResourceException {
 
         final JsonValue result = connectionFactory.getConnection().action(context,
                 Requests.newActionRequest(passThroughAuth, "authenticate")
                         .setAdditionalParameter("username", username)
                         .setAdditionalParameter("password", password));
 
-        // pass-through authentication is successful if _id exists in result
-        return result.isDefined(Resource.FIELD_CONTENT_ID);
+        // pass-through authentication is successful if _id exists in result; no resource is provided
+        return result.isDefined(Resource.FIELD_CONTENT_ID)
+                ? AuthenticatorResult.SUCCESS
+                : AuthenticatorResult.FAILED;
+
     }
 }
