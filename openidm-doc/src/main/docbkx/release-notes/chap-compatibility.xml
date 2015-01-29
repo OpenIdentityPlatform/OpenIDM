@@ -45,7 +45,7 @@
    The following changes will have an impact on existing deployments. Read these
    changes carefully and adjust existing scripts and clients accordingly.
   </para>
-  
+  <!--
   <variablelist>
    <varlistentry>
     <term>Changes to indexing for JDBC repositories</term>
@@ -65,7 +65,7 @@
      </para>
     </listitem>
    </varlistentry>
-  </variablelist>
+  </variablelist>  -->
  </section> 
   
  <section xml:id="minor-changes">
@@ -77,53 +77,27 @@
   </para>
   <variablelist>
    <varlistentry>
-    <term>Change to roles assignment operation scripts</term>
-     <listitem>
-      <para>
-       The scripts that specify how role values are assigned
-       (<literal>replaceTarget.js</literal> and
-       <literal>mergeWithTarget.js</literal>) now pass back a map containing the
-       new value for the target object field and, optionally, an updated
-       <literal>attributesInfo</literal> object. Previously, these scripts
-       simply returned the new value of the target object field.
-      </para>
-     </listitem>
-    </varlistentry>
-
-   <varlistentry>
-    <term>Changes to connector configuration creation</term>
+    <term>Changes to the database schema</term>
     <listitem>
      <para>
-      The way in which you generate connector configurations for access to
-      external resources has changed. There are now three separate actions
-      involved in creating the connector configuration. For more information,
-      see <link xlink:show="new" xlink:href="integrators-guide#connector-wiz"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating
-      Default Connector Configurations</citetitle></link> in the
-      <emphasis>Integrator's Guide</emphasis>.
-     </para>
-     <para>
-      The previous method of creating a connector configuration is retained in
-      this release, for compatibility.
+      A new column, <literal>linkQualifier</literal>, has been added to the
+      <literal>links</literal> table. This column enables correlation between
+      a single source object and multiple target objects. Predefined queries on
+      the links table have been adjusted accordingly.
      </para>
     </listitem>
    </varlistentry>
-
    <varlistentry>
-    <term>New location for sample JDBC repository configurations</term>
+    <term>Changes to Logging Output</term>
     <listitem>
      <para>
-      The sample JDBC repository configurations, previously located at
-      <filename>openidm/samples/misc/repo.jdbc-<replaceable>repo-type</replaceable>.json</filename>,
-      are now located at
-      <filename>openidm/db/<replaceable>repo-type</replaceable>/conf/repo.jdbc.json</filename>.
-      The files no longer need to be renamed before being copied to your
-      project's <literal>conf</literal> directory.
+      The reconciliation and synchronization logs now include an additional
+      <literal>linkQualifier</literal> field, which is used in the context of
+      mapping a single source object to multiple target objects.
      </para>
     </listitem>
    </varlistentry>
-
-   </variablelist>
+  </variablelist>
  </section>
  
  <section xml:id="deprecation">
@@ -132,7 +106,7 @@
    The following functionality has been deprecated in
    OpenIDM ${docTargetVersion}, and is likely to be removed in a future release.
   </para>
-  
+  <!--
   <itemizedlist>
    <listitem>
     <para>
@@ -143,7 +117,7 @@
      <literal>JAVA_TYPE_DATE</literal> extension is deprecated.
     </para>
    </listitem>
-  </itemizedlist>
+  </itemizedlist>         -->
   <para>
    No additional functionality is deprecated at this time.
   </para>

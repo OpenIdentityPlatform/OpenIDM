@@ -393,20 +393,90 @@
     <title>Correlation Options</title>
 
     <para>
-     OpenIDM can match existing records on the target system to records
-     on the source system. This matching is known as
-     <emphasis>correlation</emphasis>. For more information about correlation,
-     see the section on <link xlink:href="integrators-guide#correlation"
-     xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Correlating Existing Target Objects</citetitle></link>.
+     If you are reconciling objects in a source system, with
+     <emphasis>existing</emphasis> objects in a target system, OpenIDM uses
+     <emphasis>correlation</emphasis> to determine whether the objects on the
+     target system match the objects on the source system. Correlation involves
+     writing a query to specify how OpenIDM should attempt to match the existing
+     records.
+    </para>
+    <para>
+     The Correlation panel in the UI enables you to create correlation queries
+     and to associate source and target objects manually.
+    </para>
+    <para>
+     To configure a correlation query for a mapping, use the Expression Builder,
+     type your JavaScript or Groovy script inline, or reference a file. For more
+     information about correlation, see the section on <link
+     xlink:href="integrators-guide#correlation" xlink:show="new"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+     Existing Target Objects</citetitle></link>. If there is more than one
+     potential target object that should be linked to each source object, use
+     the Link Qualifier field to indicate how OpenIDM should create links to
+     each target object. For more information about mapping to multiple
+     accounts, see <link xlink:show="new"
+     xlink:href="integrators-guide#correlating-multiple-targets"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+     Multiple Target Objects</citetitle></link>.
+    </para>
+    <para>
+     When a reconciliation operation finds a matching target entry, the process
+     creates a link between the source and the target entries. This is also known
+     as a Data Association. Data associations serve two purposes - they speed up
+     future reconciliation operations, and they serve as a record of the
+     relationship between a source and a target entry.
     </para>
 
-    <para>
-     Before you activate reconciliation, you can configure various correlation
-     options, including reconciliation query filters, individual record
-     validation, association rules, and data association management.
-    </para>         <!-- I don't think these are all correlation options -->
+    <mediaobject>
+     <alt>Admin UI Screen, Correlation Queries</alt>
+     <imageobject>
+      <imagedata fileref="images/admin-ui-corr.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
 
+    <para>
+     The association rules that are configured in the previous section enable
+     automatic linking of source and target objects, in accordance with a set of
+     defined criteria. These rules might not always link the correct target
+     objects to the corresponding source objects. In this case, the Data
+     Association Management panel enables you to manipulate links between
+     individual source and target objects, manually. You must have run at least
+     one reconciliation for any data to appear here. When a reconciliation has
+     been run, select the source object that has been incorrectly mapped and
+     select Change Source to Target Association, to specify the correct target
+     object that should be linked to that source object.
+    </para>
+    <para>
+     To limit the list of records displayed here, select the synchronization
+     situation from the View list. For more information on the situations in
+     this list, see <link xlink:show="new"
+     xlink:href="integrators-guide#sync-situations"
+     xlink:role="http://docboook.org/xlink/role/olink">
+     <citetitle>Synchronization Situations</citetitle></link>.
+    </para>
+    <para>
+     In the case of multiple target objects, if the source object has been
+     linked to the incorrect corresponding target object, or if OpenIDM was
+     unable to determine the correct target object, select the correct link
+     qualifier from the dropdown list. For more information about mapping to
+     multiple accounts, see <link xlink:show="new"
+     xlink:href="integrators-guide#correlating-multiple-targets"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+     Multiple Target Objects</citetitle></link>.
+    </para>
+
+    <mediaobject>
+     <alt>Admin UI Screen, Data Association Management</alt>
+     <imageobject>
+      <imagedata fileref="images/admin-ui-data-assoc.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+
+    <para>
+     The Correlation panel also enables you to configure reconciliation query
+     filters, and to define scripts to determine which individual source and
+     target objects should be assessed in a reconciliation operation.
+    </para>
     <para>
      By default, all entries on a source and target system are considered
      candidates for reconciliation. Reconciliation query filters enable you to
@@ -439,57 +509,6 @@
      <alt>Admin UI Screen, Individual Record Validation</alt>
      <imageobject>
       <imagedata fileref="images/admin-ui-recon-validation.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     If desired, you can set up
-     <link xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:href="integrators-guide#correlation" xlink:show="new">
-     <citetitle>Correlation Queries</citetitle></link>, with an expression
-     builder or with a JavaScript or Groovy-based script.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Correlation Queries</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-corr.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     When a reconciliation operation finds a matching target entry, the process
-     creates a link between the source and the target entries. This is also known
-     as a Data Association. Data associations serve two purposes - they speed up
-     future reconciliation operations, and they serve as a record of the
-     relationship between a source and a target entry.
-    </para>
-
-    <para>
-     The association rules that are configured in the previous section enable
-     automatic linking of source and target objects, in accordance with a set of
-     defined criteria. These rules might not always link the correct target
-     objects to the corresponding source objects. In this case, the Data
-     Association Management panel enables you to manipulate links between
-     individual source and target objects, manually. You need to have run at
-     least one reconciliation for any data to appear here. When a reconciliation
-     has been run, select the source object that has been incorrectly mapped and
-     select Change Source to Target Association, to specify the correct target
-     object that should be linked to that source object.
-    </para>
-    <para>
-     To limit the list of records displayed here, select the synchronization
-     situation from the View list. For more information on the situations in
-     this list, see <link xlink:show="new"
-     xlink:href="integrators-guide#sync-situations"
-     xlink:role="http://docboook.org/xlink/role/olink">
-     <citetitle>Synchronization Situations</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Data Association Management</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-data-assoc.png" format="PNG" />
      </imageobject>
     </mediaobject>
 
