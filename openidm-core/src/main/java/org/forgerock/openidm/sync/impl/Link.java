@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
  */
 
 // TODO: Extend from something like FieldMap to handle the Java ↔ JSON translations.
@@ -89,12 +89,30 @@ class Link {
     public boolean initialized = false;
 
     /**
+     * Default link qualifier if no link qualifier was specified.
+     */
+    public static final String DEFAULT_LINK_QUALIFIER = "defaultLinkQualifier";
+
+    /**
+     * Link qualifier.
+     */
+    public String linkQualifier;
+
+    /**
      * TODO: Description.
      *
      * @param mapping TODO.
      */
     public Link(ObjectMapping mapping) {
         this.mapping = mapping;
+    }
+
+    /**
+     * Sets the linkQualifier.
+     * @param linkQualifier return linkQualifier
+     */
+    void setLinkQualifier(String linkQualifier) {
+        this.linkQualifier = linkQualifier;
     }
 
     /**
@@ -191,9 +209,9 @@ class Link {
     }
 
     /**
-     * TODO: Description.
+     * Transforms the current instance of this class into a JsonValue object.
      *
-     * @return TODO.
+     * @return JsonValue object of this current instance.
      */
     private JsonValue toJsonValue() {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
@@ -202,6 +220,7 @@ class Link {
         targetId = mapping.getLinkType().normalizeTargetId(targetId);
 
         jv.put("linkType", mapping.getLinkType().getName());
+        jv.put("linkQualifier", linkQualifier);
         if (mapping.getLinkType().useReverse()) {
             jv.put("secondId", sourceId);
             jv.put("firstId", targetId);
@@ -213,7 +232,7 @@ class Link {
     }
 
     /**
-     * TODO: Description.
+     * Clear link.
      */
     void clear() {
         this._id = null;
@@ -251,6 +270,7 @@ class Link {
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(PARAM_QUERY_ID, "links-for-firstId");
+            query.put("linkQualifier", linkQualifier);
             query.put("linkType", mapping.getLinkType().getName());
             query.put("firstId", id);
             getLink(query);
@@ -286,6 +306,7 @@ class Link {
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(PARAM_QUERY_ID, "links-for-secondId");
+            query.put("linkQualifier", linkQualifier);
             query.put("linkType", mapping.getLinkType().getName());
             query.put("secondId", id);
             getLink(query);
@@ -302,11 +323,12 @@ class Link {
      * @throws SynchronizationException if the query could not be performed.
      * @return the mapping from source identifier to the link object for it
      */
-    public static Map<String, Link> getLinksForMapping(ObjectMapping mapping) throws SynchronizationException {
+    public static Map<String, Link> getLinksForMapping(ObjectMapping mapping, String linkQualifier) throws SynchronizationException {
         Map<String, Link> sourceIdToLink = new ConcurrentHashMap<String, Link>();
         if (mapping != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(PARAM_QUERY_ID, "links-for-linkType");
+            query.put("linkQualifier", linkQualifier);
             query.put("linkType", mapping.getLinkType().getName());
             JsonValue queryResults = linkQuery(mapping.getService().getServerContext(), mapping.getService().getConnectionFactory(), query);
             for (JsonValue entry : queryResults) {
@@ -373,9 +395,9 @@ class Link {
     }
 
     /**
-     * TODO: Description.
+     * Update a link.
      *
-     * @throws SynchronizationException TODO.
+     * @throws SynchronizationException if updating link fails
      */
     void update() throws SynchronizationException {
         if (_id == null) {
@@ -385,11 +407,11 @@ class Link {
         try {
             UpdateRequest r = Requests.newUpdateRequest(linkId(_id), jv);
             r.setRevision(_rev);
-            mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getServerContext(),r);
+            Resource resource = mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getServerContext(),r);
+            _rev =  resource.getRevision();
         } catch (ResourceException ose) {
             LOGGER.warn("Failed to update link", ose);
             throw new SynchronizationException(ose);
         }
-        this._rev = jv.get("_rev").asString(); // optional
     }
 }

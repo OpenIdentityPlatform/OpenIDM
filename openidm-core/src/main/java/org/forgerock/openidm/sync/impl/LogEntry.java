@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -100,6 +100,11 @@ class LogEntry {
     protected DateUtil dateUtil;
 
     /**
+     * The name of the link qualifier.
+     */
+    protected String linkQualifier;
+
+    /**
      * Construct a log entry for the provided {@link SyncOperation} and mapping name.
      *
      * @param op the sync operation
@@ -125,6 +130,7 @@ class LogEntry {
         jv.put("rootActionId", rootContext.getId());
         jv.put("sourceObjectId", sourceObjectId);
         jv.put("targetObjectId", targetObjectId);
+        jv.put("linkQualifier", linkQualifier);
         jv.put("timestamp", dateUtil.formatDateTime(timestamp));
         jv.put("situation", ((op == null || op.situation == null) ? null : op.situation.toString()));
         jv.put("action", ((op == null || op.action == null) ? null : op.action.toString()));

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2014 ForgeRock AS.
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -176,6 +176,7 @@ public class AuditServiceImpl implements AuditService {
     public static final String RECON_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
     public static final String RECON_LOG_TARGET_OBJECT_ID = "targetObjectId";
     public static final String RECON_LOG_MAPPING = "mapping";
+    public static final String RECON_LOG_LINK_QUALIFIER = "linkQualifier";
 
     public static final String SYNC_LOG_TIMESTAMP = "timestamp";
     public static final String SYNC_LOG_ACTION_ID = "actionId";
@@ -189,6 +190,7 @@ public class AuditServiceImpl implements AuditService {
     public static final String SYNC_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
     public static final String SYNC_LOG_TARGET_OBJECT_ID = "targetObjectId";
     public static final String SYNC_LOG_MAPPING = "mapping";
+    public static final String SYNC_LOG_LINK_QUALIFIER = "linkQualifier";
 
     // ----- Declarative Service Implementation
 
@@ -915,6 +917,7 @@ public class AuditServiceImpl implements AuditService {
         formattedEntry.put(SYNC_LOG_SOURCE_OBJECT_ID, entry.get(SYNC_LOG_SOURCE_OBJECT_ID));
         formattedEntry.put(SYNC_LOG_TARGET_OBJECT_ID, entry.get(SYNC_LOG_TARGET_OBJECT_ID));
         formattedEntry.put(SYNC_LOG_MAPPING, entry.get(SYNC_LOG_MAPPING));
+        formattedEntry.put(SYNC_LOG_LINK_QUALIFIER, entry.get(SYNC_LOG_LINK_QUALIFIER));
         return formattedEntry;
     }
 
@@ -945,6 +948,7 @@ public class AuditServiceImpl implements AuditService {
             formattedEntry.put(RECON_LOG_SITUATION, entry.get(RECON_LOG_SITUATION));
             formattedEntry.put(RECON_LOG_SOURCE_OBJECT_ID, entry.get(RECON_LOG_SOURCE_OBJECT_ID));
             formattedEntry.put(RECON_LOG_TARGET_OBJECT_ID, entry.get(RECON_LOG_TARGET_OBJECT_ID));
+            formattedEntry.put(RECON_LOG_LINK_QUALIFIER, entry.get(RECON_LOG_LINK_QUALIFIER));
         }
         formattedEntry.put(RECON_LOG_MAPPING, entry.get(RECON_LOG_MAPPING));
         return formattedEntry;

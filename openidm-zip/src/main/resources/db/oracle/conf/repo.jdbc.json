@@ -40,9 +40,9 @@
             "get-notifications-for-user" : "SELECT * FROM ${_table} WHERE receiverId = ${userId} order by createDate desc",
             "credential-query" : "SELECT * FROM ${_table} WHERE objectid = ${username}",
             "credential-internaluser-query" : "SELECT * FROM ${_table} WHERE objectid = ${username}",
-            "links-for-firstId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
-            "links-for-secondId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
-            "links-for-linkType" : "SELECT * FROM ${_table} WHERE linkType = ${linkType}",
+            "links-for-firstId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND secondid = ${secondId}",
+            "links-for-linkType" : "SELECT * FROM ${_table} WHERE linkQualifier = ${linkQualifier} AND linkType = ${linkType}",
             "scan-tasks" : "SELECT * FROM ${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
             "audit-by-mapping" : "SELECT * FROM auditrecon WHERE mapping = ${mappingName}",
             "audit-by-recon-id" : "SELECT * FROM auditrecon WHERE reconId = ${reconId}",
@@ -123,7 +123,8 @@
                     "_rev" : "rev",
                     "linkType" : "linktype",
                     "firstId" : "firstid",
-                    "secondId" : "secondid"
+                    "secondId" : "secondid",
+                    "linkQualifier": "linkQualifier"
                 }
             },
             "ui/notification" : {
@@ -178,6 +179,7 @@
                     "rootActionId" : "rootactionid",
                     "action" : "activity",
                     "message" : "message",
+                    "linkQualifier": "linkQualifier",
                     "reconciling" : "reconciling",
                     "reconId" : "reconid",
                     "reconAction" : "reconaction",
@@ -204,6 +206,7 @@
                     "rootActionId" : "rootactionid",
                     "sourceObjectId" : "sourceobjectid",
                     "targetObjectId" : "targetobjectid",
+                    "linkQualifier": "linkQualifier",
                     "timestamp" : "activitydate",
                     "mapping" : "mapping",
                     "exception" : "exceptiondetail",
