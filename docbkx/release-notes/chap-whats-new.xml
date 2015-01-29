@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-whats-new'
@@ -29,80 +29,76 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>What's New in OpenIDM <?eval ${docTargetVersion}?></title>
+ <title>What's New in OpenIDM ${docTargetVersion}</title>
  
-    <para>OpenIDM <?eval ${docTargetVersion}?> is a maintenance release that
-    resolves a number of issues, including security issues in OpenIDM. It is
-    strongly recommended that you update to this release to make your
-    deployment more secure, and to take advantage of important functional
-    fixes. ForgeRock customers can contact support for help and further
-    information.</para>
-    
-    <para>Before you install OpenIDM or update your existing OpenIDM
-    installation, read these release notes. Then update or install
-    OpenIDM.</para>
+ <para>
+  OpenIDM ${docTargetVersion} is a maintenance release that resolves a number of
+  issues, including security issues in OpenIDM. It is strongly recommended that
+  you update to this release to make your deployment more secure, and to take
+  advantage of important functional fixes. ForgeRock customers can contact
+  support for help and further information.
+ </para>
+ <para>
+  Before you install OpenIDM or update your existing OpenIDM installation, read
+  these release notes. Then update or install OpenIDM.
+ </para>
+ <para>
+  For installation instructions and several samples to familiarize you with the
+  features, see the <link xlink:show="new"
+  xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/install-guide/index.html"
+  ><citetitle>OpenIDM 2.1.0 Installation Guide</citetitle></link>.
+ </para>
+ <para>
+  For an architectural overview and high-level presentation of OpenIDM, see the
+  <link xlink:show="new"
+  xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/integrators-guide/index.html#chap-overview"
+  ><citetitle>Architectural Overview</citetitle></link> chapter in the
+  <emphasis>OpenIDM 2.1.0 Integrator's Guide</emphasis>.
+ </para>
 
-    <para>For installation instructions and several samples to familiarize you
-    with the features, see the <link xlink:href="install-guide#chap-install"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
-    Guide</citetitle></link>.</para>
+ <section xml:id="product-enhancements">
+  <title>New Features</title>
+  <para>
+   Compared to the OpenIDM 2.1.1 release, OpenIDM ${docTargetVersion} fixes a
+   number of issues and provides the following new features:
+  </para>
+  <itemizedlist>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-957" xlink:show="new">OPENIDM-957</link>: Ability to launch startup.sh and cli.sh from any directory</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1764" xlink:show="new">OPENIDM-1764</link>: New launcher.bat override, including install-service.bat</para></listitem>
+  </itemizedlist>
+ </section>
 
-    <para>For an architectural overview and high-level presentation of OpenIDM,
-    see the <link xlink:href="integrators-guide#chap-overview"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Architectural
-    Overview</citetitle></link> chapter in the <citetitle>Integrator's Guide</citetitle>.</para>
-
-    <section xml:id="product-enhancements">
-        <title>New Features</title>
-        <para>Compared to the OpenIDM 2.1.0 release, OpenIDM 2.1.1 fixes a
-        number of issues. OpenIDM 2.1.1 also provides the following new features.</para>
-        <itemizedlist>
-            <listitem>
-                <para>The maximum number of retries can now be specified for a
-                liveSync operation, and a dead letter queue can be configured
-                for failed liveSync records.
-                (<link xlink:show="new"
-                 xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1326">OPENIDM-1326</link>)</para>
-            </listitem>
-            <listitem>
-                <para>The audit service REST API has been extended to support
-                read and query operations on audit log entries.
-                (<link xlink:show="new"
-                 xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1282">OPENIDM-1282</link>)</para>
-            </listitem>
-            <listitem>
-                <para>OpenIDM now supports resource renaming.
-                (<link xlink:show="new"
-                xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1200">OPENIDM-1200</link>)</para>
-            </listitem>
-            <listitem>
-                <para>Support for Oracle DB as an internal repository.</para>
-            </listitem>
-        </itemizedlist>
-    </section>
-
-    <section xml:id="openidm-docs">
-        <title>OpenIDM Documentation</title>
-        <para>You can read the following additional
-        <link xlink:show="new" xlink:href="http://docs.forgerock.org/en/openid/2.1.0/">product documentation</link>.
-        for OpenIDM 2.1.0 online at <link xlink:show="new" xlink:href="http://docs.forgerock.org" />.</para>
-        <itemizedlist>
-            <listitem>
-                <para><link xlink:show="new"
-                xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/release-notes/index/index.html"
-                >OpenIDM 2.1.0 Release Notes</link></para>
-            </listitem>
-            <listitem>
-                <para><link
-                xlink:show="new" xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/install-guide/index/index.html"
-                >OpenIDM 2.1.0 Installation Guide</link></para>
-            </listitem>
-            <listitem>
-                <para><link
-                xlink:show="new" xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/integrators-guide/index/index.html"
-                >OpenIDM 2.1.0 Integrator's Guide</link></para>
-            </listitem>
-        </itemizedlist>
-    </section>
+ <section xml:id="openidm-docs">
+  <title>OpenIDM Documentation</title>
+  <para>
+   You can read the following additional <link xlink:show="new"
+   xlink:href="http://docs.forgerock.org/en/openid/2.1.0/">product
+   documentation</link> for OpenIDM 2.1.0 online at <link xlink:show="new"
+   xlink:href="http://docs.forgerock.org" />.
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     <link xlink:show="new"
+     xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/release-notes/index/index.html"
+     >OpenIDM 2.1.0 Release Notes</link>
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <link xlink:show="new"
+     xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/install-guide/index/index.html"
+     >OpenIDM 2.1.0 Installation Guide</link>
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <link xlink:show="new"
+     xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/integrators-guide/index/index.html"
+     >OpenIDM 2.1.0 Integrator's Guide</link>
+    </para>
+   </listitem>
+  </itemizedlist>
+ </section>
 
 </chapter>

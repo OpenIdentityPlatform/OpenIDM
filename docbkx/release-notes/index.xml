@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <book xml:id='release-notes'
@@ -30,14 +30,16 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
-  <title>OpenIDM <?eval ${docTargetVersion}?> Release Notes</title>
+  <title>OpenIDM ${docTargetVersion} Release Notes</title>
   <abstract>
-   <para>Notes covering OpenIDM software requirements, fixes, known issues.
-   The OpenIDM project offers flexible, open source services for automating
-   management of the identity life cycle.</para>
+   <para>
+    Notes covering OpenIDM software requirements, fixes, known issues. The
+    OpenIDM project offers flexible, open source services for automating
+    management of the identity life cycle.
+   </para>
   </abstract>
   <copyright>
-   <year>2011-2013</year>
+   <year>2011-2015</year>
    <holder>ForgeRock AS</holder>
   </copyright>
   <authorgroup>
@@ -60,7 +62,7 @@
   <xinclude:include href="../legal.xml" />
   <date><?dbtimestamp format="B d, Y"?></date>
   <pubdate>Publication date: <?dbtimestamp format="B d, Y"?></pubdate>
-  <releaseinfo><?eval ${softwareReleaseDate}?></releaseinfo>
+  <releaseinfo>${softwareReleaseDate}</releaseinfo>
  </info>
 
  <toc />
@@ -68,7 +70,7 @@
  <xinclude:include href="chap-whats-new.xml" />
  <xinclude:include href="chap-before-you-install.xml" />
  <xinclude:include href="chap-issues.xml" />
- <!--<xinclude:include href="chap-compatibility.xml" /> -->
+ <xinclude:include href="chap-compatibility.xml" />
  <xinclude:include href="chap-feedback.xml" />
  <xinclude:include href="chap-support.xml" />
 </book>
