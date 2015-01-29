@@ -137,10 +137,11 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   `objectid` VARCHAR(38) NOT NULL ,
   `rev` VARCHAR(38) NOT NULL ,
   `linktype` VARCHAR(255) NOT NULL ,
+  `linkqualifier` VARCHAR(255) NOT NULL ,
   `firstid` VARCHAR(255) NOT NULL ,
   `secondid` VARCHAR(255) NOT NULL ,
-  UNIQUE INDEX `idx_links_first` (`linktype` ASC, `firstid` ASC) ,
-  UNIQUE INDEX `idx_links_second` (`linktype` ASC, `secondid` ASC) ,
+  UNIQUE INDEX `idx_links_first` (`linktype` ASC, `linkqualifer` ASC, `firstid` ASC) ,
+  UNIQUE INDEX `idx_links_second` (`linktype` ASC, `linkqualifier` ASC, `secondid` ASC) ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
@@ -165,6 +166,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `actionid` VARCHAR(511) NULL ,
   `exceptiondetail` TEXT NULL ,
   `mapping` TEXT NULL ,
+  `linkqualifier` VARCHAR(255) NOT NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
