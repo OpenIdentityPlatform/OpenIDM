@@ -124,13 +124,14 @@ CREATE TABLE openidm.links (
   objectid VARCHAR(38) NOT NULL,
   rev VARCHAR(38) NOT NULL,
   linktype VARCHAR(510) NOT NULL,
+  linkqualifier VARCHAR(255) NOT NULL,
   firstid VARCHAR(255) NOT NULL,
   secondid VARCHAR(255) NOT NULL,
   PRIMARY KEY (objectid)
 );
 
-CREATE UNIQUE INDEX idx_links_first ON openidm.links (linktype, firstid);
-CREATE UNIQUE INDEX idx_links_second ON openidm.links (linktype, secondid);
+CREATE UNIQUE INDEX idx_links_first ON openidm.links (linktype, linkqualifier, firstid);
+CREATE UNIQUE INDEX idx_links_second ON openidm.links (linktype, linkqualifier, secondid);
 
 
 -- -----------------------------------------------------
@@ -222,6 +223,7 @@ CREATE TABLE openidm.auditrecon (
   actionid VARCHAR(255) DEFAULT NULL,
   exceptiondetail TEXT,
   mapping VARCHAR(511) DEFAULT NULL,
+  linkqualifier VARCHAR(255) DEFAULT NULL,
   messagedetail TEXT,
   PRIMARY KEY (objectid)
 );
@@ -244,6 +246,7 @@ CREATE TABLE openidm.auditsync (
   actionid VARCHAR(255) DEFAULT NULL,
   exceptiondetail TEXT,
   mapping VARCHAR(511) DEFAULT NULL,
+  linkqualifier VARCHAR(255) DEFAULT NULL,
   messagedetail TEXT,
   PRIMARY KEY (objectid)
 );

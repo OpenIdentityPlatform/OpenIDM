@@ -201,12 +201,13 @@ CREATE  TABLE  [openidm].[links]
   objectid NVARCHAR(38) NOT NULL ,
   rev NVARCHAR(38) NOT NULL ,
   linktype NVARCHAR(195) NOT NULL ,
+  linkqualifier NVARCHAR(255) NOT NULL ,
   firstid NVARCHAR(255) NOT NULL ,
   secondid NVARCHAR(255) NOT NULL ,
   PRIMARY KEY CLUSTERED (objectid)
 );
-CREATE UNIQUE INDEX idx_links_first ON [openidm].[links] (linktype ASC, firstid ASC);
-CREATE UNIQUE INDEX idx_links_second ON [openidm].[links] (linktype ASC, secondid ASC);
+CREATE UNIQUE INDEX idx_links_first ON [openidm].[links] (linktype ASC, linkqualifier ASC, firstid ASC);
+CREATE UNIQUE INDEX idx_links_second ON [openidm].[links] (linktype ASC, linkqualifier ASC, secondid ASC);
 END
 
 
@@ -264,6 +265,7 @@ CREATE  TABLE  [openidm].[auditrecon]
   actionid NVARCHAR(511) NULL ,
   exceptiondetail NTEXT NULL ,
   mapping NVARCHAR(511) NULL ,
+  linkqualifier NVARCHAR(255) NULL ,
   messagedetail NTEXT NULL ,
   PRIMARY KEY CLUSTERED (objectid),
 );
@@ -290,6 +292,7 @@ CREATE  TABLE  [openidm].[auditsync]
   actionid NVARCHAR(511) NULL ,
   exceptiondetail NTEXT NULL ,
   mapping NVARCHAR(511) NULL ,
+  linkqualifier NVARCHAR(255) NULL ,
   messagedetail NTEXT NULL ,
   PRIMARY KEY CLUSTERED (objectid),
 );

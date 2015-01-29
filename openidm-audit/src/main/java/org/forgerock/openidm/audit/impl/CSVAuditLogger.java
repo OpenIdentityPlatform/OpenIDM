@@ -163,6 +163,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(), // ambiguousTargetObjectIds
                     new Optional(), // entryType
                     new Optional(), // exception
+                    new Optional(), // linkQualifier
                     new Optional(), // mapping
                     new Optional(), // message
                     new Optional(new ParseJsonValue()), // messageDetail
@@ -211,6 +212,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(), // action
                     new Optional(), // actionId
                     new Optional(), // exception
+                    new Optional(), // linkQualifier
                     new Optional(), // mapping
                     new Optional(), // message
                     new Optional(new ParseJsonValue()), // messageDetail
