@@ -280,7 +280,7 @@
 
         <!-- Documentation and site properties -->
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-        <docTargetVersion>2.1.0</docTargetVersion>
+        <docTargetVersion>2.1.2</docTargetVersion>
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
         <commonsJsonCryptoVersion>${commons.json-crypto.version}</commonsJsonCryptoVersion>
@@ -814,30 +814,53 @@
             <plugin>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-doc-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>2.1.5</version>
                 <inherited>false</inherited>
                 <configuration>
                  <projectName>OpenIDM</projectName>
-                 <googleAnalyticsId>${gaId}</googleAnalyticsId>
+                  <projectVersion>${docTargetVersion}</projectVersion>
+                  <releaseVersion>${docTargetVersion}</releaseVersion>
+                  <latestJson>http://docs.forgerock.org/latest.json</latestJson>
+                  <googleAnalyticsId>${gaId}</googleAnalyticsId>
                 </configuration>
-                <executions>
+                 <executions>
                     <execution>
-                        <id>build-doc</id>
-                        <phase>pre-site</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>layout-doc</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>layout</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-			
+                      <id>copy-common</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                     <goal>boilerplate</goal>
+                    </goals>
+                   </execution>
+                   <execution>
+                    <id>filter-sources</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                     <goal>filter</goal>
+                    </goals>
+                   </execution>
+                   <execution>
+                    <id>prepare-sources</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                     <goal>prepare</goal>
+                    </goals>
+                   </execution>
+                   <execution>
+                    <id>build-doc</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                     <goal>build</goal>
+                    </goals>
+                   </execution>
+                   <execution>
+                    <id>layout-doc</id>
+                    <phase>site</phase>
+                     <goals>
+                      <goal>layout</goal>
+                     </goals>
+                   </execution>
+                  </executions>
+                 </plugin>
         </plugins>
     </build>
     <reporting>
