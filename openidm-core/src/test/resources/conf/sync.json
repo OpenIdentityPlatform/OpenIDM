@@ -9,7 +9,18 @@
                 "json/pointer/key" : "foo"
             },
             "target" : "system/ldap/account",
-            
+            "correlationQuery" : [
+                {
+                    "linkQualifier" : "user",
+                    "type" : "text/javascript",
+                    "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
+                },
+                {
+                    "linkQualifier" : "test",
+                    "type" : "text/javascript",
+                    "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '-test\"'}; qry"
+                }
+            ],
             "properties" : [],
             "policies" : [
                 {

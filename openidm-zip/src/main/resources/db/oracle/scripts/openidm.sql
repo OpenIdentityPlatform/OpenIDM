@@ -158,6 +158,7 @@ CREATE TABLE auditrecon (
   actionid VARCHAR2(511 CHAR),
   exceptiondetail CLOB,
   mapping VARCHAR2(511 CHAR),
+  linkqualifier VARCHAR2(255 CHAR),
   messagedetail CLOB
 );
 
@@ -191,6 +192,7 @@ CREATE TABLE auditsync (
   actionid VARCHAR2(511 CHAR),
   exceptiondetail CLOB,
   mapping VARCHAR2(511 CHAR),
+  linkqualifier VARCHAR2(255 CHAR),
   messagedetail CLOB
 );
 
@@ -358,6 +360,7 @@ CREATE TABLE links (
   objectid VARCHAR2(38 CHAR) NOT NULL,
   rev VARCHAR2(38 CHAR) NOT NULL,
   linktype VARCHAR2(510 CHAR) NOT NULL,
+  linkqualifier VARCHAR2(255 CHAR) NOT NULL,
   firstid VARCHAR2(255 CHAR) NOT NULL,
   secondid VARCHAR2(255 CHAR) NOT NULL
 );
@@ -375,6 +378,7 @@ PROMPT Creating Index idx_links_first on links ...
 CREATE INDEX idx_links_first ON links
 (
   linktype,
+  linkqualifier,
   firstid
 ) 
 ;
@@ -382,6 +386,7 @@ PROMPT Creating Index idx_links_second on links ...
 CREATE INDEX idx_links_second ON links
 (
   linktype,
+  linkqualifier,
   secondid
 ) 
 ;
