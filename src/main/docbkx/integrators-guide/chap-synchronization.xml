@@ -3743,52 +3743,66 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
  </section>
 
  <section xml:id="asynchronous-reconciliation">
-   <title>Asynchronous Reconciliation</title>
-
-   <para>Reconciliation can work in tandem with workflows to provide
-   additional business logic to the reconciliation process. You can define
-   scripts to determine the action that should be taken for a particular
-   reconciliation situation. A reconciliation process can launch a workflow
-   after it has assessed a situation, and then perform the reconciliation, or
-   some other action.</para>
-   <para>For example, you might want a reconciliation process to assess new user
+  <title>Asynchronous Reconciliation</title>
+  <para>
+   Reconciliation can work in tandem with workflows to provide additional
+   business logic to the reconciliation process. You can define scripts to
+   determine the action that should be taken for a particular reconciliation
+   situation. A reconciliation process can launch a workflow after it has
+   assessed a situation, and then perform the reconciliation, or some other
+   action.
+  </para>
+  <para>
+   For example, you might want a reconciliation process to assess new user
    accounts that need to be created on a target resource. However, new user
    account creation might require some kind of approval from a manager before
    the accounts are actually created. The initial reconciliation process can
    assess the accounts that need to be created, launch a workflow to request
    management approval for those accounts, and then relaunch the reconciliation
-   process to create the accounts, once the management approval has been
-   received.</para>
-   <para>In this scenario, the defined script returns <literal>IGNORE</literal>
-   for new accounts and the reconciliation engine does not continue processing
-   the given object. The script then initiates an asynchronous process which
-   calls back and completes the reconciliation process at a later stage.</para>
-   <para>A sample configuration for this scenario is available in
+   process to create the accounts, after the management approval has been
+   received.
+  </para>
+  <para>
+   In this scenario, the defined script returns <literal>IGNORE</literal> for
+   new accounts and the reconciliation engine does not continue processing the
+   given object. The script then initiates an asynchronous process which calls
+   back and completes the reconciliation process at a later stage.
+  </para>
+  <para>
+   A sample configuration for this scenario is available in
    <filename>openidm/samples/sample9</filename>, and described in <link
    xlink:href="install-guide#more-sample9"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample 9 -
    Asynchronous Reconciliation Using Workflows</citetitle></link> in the
-   <citetitle>Installation Guide</citetitle>.</para>
+   <citetitle>Installation Guide</citetitle>.
+  </para>
 
-   <orderedlist>
-     <para>Configuring asynchronous reconciliation involves the following
-     steps:</para>
-     <listitem>
-       <para>Create the workflow definition file (<literal>.xml or .bar</literal> file)
-       and place it in the <filename>openidm/workflow</filename> directory.
-       For more information about creating workflows, see <link
-       xlink:href="integrators-guide#chap-workflow" xlink:role="http://docbook.org/xlink/role/olink">
-       <citetitle>Integrating Business Processes and Workflows</citetitle></link>.
-       </para>
-     </listitem>
-     <listitem>
-       <para>Modify the <filename>conf/sync.json</filename> file for the
-       situation or situations that should call the workflow. Reference the
-       workflow name in the configuration for that situation.</para>
-       <para>For example, the following <filename>sync.json</filename> extract
-       calls the <literal>managedUserApproval</literal> workflow if the
-       situation is assessed as <literal>ABSENT</literal>:</para>
-       <programlisting language="javascript">
+  <orderedlist>
+   <para>
+    Configuring asynchronous reconciliation involves the following steps:
+   </para>
+   <listitem>
+    <para>
+     Create the workflow definition file (<literal>.xml or .bar</literal> file)
+     and place it in the <filename>openidm/workflow</filename> directory. For
+     more information about creating workflows, see <link
+     xlink:href="integrators-guide#chap-workflow"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Integrating
+     Business Processes and Workflows</citetitle></link>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Modify the <filename>conf/sync.json</filename> file for the situation or
+     situations that should call the workflow. Reference the workflow name in
+     the configuration for that situation.
+    </para>
+    <para>
+     For example, the following <filename>sync.json</filename> extract calls the
+     <literal>managedUserApproval</literal> workflow if the situation is
+     assessed as <literal>ABSENT</literal>:
+    </para>
+    <programlisting language="javascript">
 {
     "situation" : "ABSENT",
     "action" : {
@@ -3796,43 +3810,42 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
         "type" : "text/javascript",
         "file" : "workflow/triggerWorkflowFromSync.js"
     }
-},    </programlisting>
-     </listitem>
-     <listitem>
-      <para>
-       In the sample configuration, the workflow calls a second, explicit
-       reconciliation process as a final step. This reconciliation process is
-       called on the <literal>sync</literal> context path, with the
-       <literal>performAction</literal> action
-       (<literal>openidm.action('sync', 'performAction', params)</literal>).
-      </para>
-      <para>
-       You can also use this kind of explicit reconciliation to perform a
-       specific action on a source or target record, regardless of the assessed
-       situation.
-      </para>
-      <para>
-       You can call such an operation over the REST interface, specifying the
-       source, and/or target IDs, the mapping, and the action to be taken. The
-       action can be any one of the supported reconciliation actions, that is,
-       <literal>CREATE, UPDATE, DELETE, LINK, UNLINK, EXCEPTION, REPORT,
-       NOREPORT, ASYNC, IGNORE</literal>. In addition, if you specify a
-       <literal>reconId</literal>, the action that is taken is logged in the
-       <literal>audit/recon</literal> log, along with the the other audit data
-       for that reconciliation run.
-      </para>
-      <para>
-       The following sample command calls the DELETE action on user
-       <literal>bjensen</literal>, whose <literal>_id</literal> in the LDAP
-       directory is <literal>uid=bjensen,ou=People,dc=example,dc=com</literal>.
-       The user is deleted in the target resource, in this case, the
-       OpenIDM repository.
-      </para>
-      <para>
-       Note that the <literal>_id</literal> must be URL-encoded in the REST
-       call.
-      </para>
-      <screen><userinput>$ curl \
+},  </programlisting>
+   </listitem>
+   <listitem>
+    <para>
+     In the sample configuration, the workflow calls a second, explicit
+     reconciliation process as a final step. This reconciliation process is
+     called on the <literal>sync</literal> context path, with the
+     <literal>performAction</literal> action
+     (<literal>openidm.action('sync', 'performAction', params)</literal>).
+    </para>
+    <para>
+     You can also use this kind of explicit reconciliation to perform a
+     specific action on a source or target record, regardless of the assessed
+     situation.
+    </para>
+    <para>
+     You can call such an operation over the REST interface, specifying the
+     source, and/or target IDs, the mapping, and the action to be taken. The
+     action can be any one of the supported reconciliation actions, that is,
+     <literal>CREATE, UPDATE, DELETE, LINK, UNLINK, EXCEPTION, REPORT, NOREPORT,
+     ASYNC, IGNORE</literal>. In addition, if you specify a
+     <literal>reconId</literal>, the action that is taken is logged in the
+     <literal>audit/recon</literal> log, along with the the other audit data for
+     that reconciliation run.
+    </para>
+    <para>
+     The following sample command calls the DELETE action on user
+     <literal>bjensen</literal>, whose <literal>_id</literal> in the LDAP
+     directory is <literal>uid=bjensen,ou=People,dc=example,dc=com</literal>.
+     The user is deleted in the target resource, in this case, the OpenIDM
+     repository.
+    </para>
+    <para>
+     Note that the <literal>_id</literal> must be URL-encoded in the REST call.
+    </para>
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3841,8 +3854,8 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
  "https://localhost:8443/openidm/sync?_action=performAction&amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom&amp;mapping=
  systemLdapAccounts_ManagedUser&amp;action=DELETE"</userinput>
 <computeroutput>{}</computeroutput></screen>
-     </listitem>
-   </orderedlist>
+   </listitem>
+  </orderedlist>
  </section>
 
  <section xml:id="case-sensitivity">
