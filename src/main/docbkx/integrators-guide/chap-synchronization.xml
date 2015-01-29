@@ -4072,14 +4072,22 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    </para>
    <para>
     To configure a correlation query, define a script whose source returns a
-    query that uses either the <literal>_queryFilter</literal> or the
-    <literal>_queryId</literal> keyword. For example:
+    query that uses the <literal>_queryFilter</literal>,
+    <literal>_queryId</literal>, or <literal>_queryExpression</literal> keyword.
+    For example:
    </para>
-   <programlisting>{ "_queryFilter" : "uid eq \"" + source.userName + "\"" }</programlisting>
+   <programlisting>
+{ "_queryFilter" : "uid eq \"" + source.userName + "\"" }</programlisting>
    <para>
     or
    </para>
-   <programlisting>{'_queryId' : 'for-userName', 'uid' : source.name}</programlisting>
+   <programlisting>
+{'_queryId' : 'for-userName', 'uid' : source.name}</programlisting>
+   <para>
+    or
+   </para>
+   <programlisting>
+{'_queryExpression': 'select * from managed_user where givenName = \"' + source.firstname + '\"' }</programlisting>
    <para>
     A sample correlation query definition, inside a mapping object, follows:
    </para>
@@ -4251,6 +4259,61 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     The logic in the expression builder is in the script
     <filename>openidm/bin/defaults/script/ui/correlateTreeToQueryFilter.js</filename>
     which converts the expression into the required query filter.
+   </para>
+  </section>
+
+  <section xml:id="correlating-multiple-targets">
+   <title>Correlating Multiple Target Objects</title>
+   <para>
+    OpenIDM supports mapping a single source object to more than one object in
+    a target system. For example, you might have one managed user,
+    <literal>scarter</literal> who has two distinct accounts in an Active
+    Directory forest, <literal>scarter.admin</literal> and
+    <literal>scarter.user</literal>. Both of these Active Directory accounts
+    should be linked to the single managed user object,
+    <literal>scarter</literal>.
+   </para>
+   <para>
+    To correlate a single source entry with multiple target entries, you
+    indicate how the source entry should be linked to the target entries, based
+    on the distinguishing attribute of the target object. Effectively, a
+    separate correlation query is created for each potential target object to
+    which a single source object is mapped. These correlation queries are
+    distinguished by using a <literal>link qualifier</literal> for each distinct
+    link that will be created.
+   </para>
+   <para>
+    In the previous example, the correlation query might be constructed as
+    follows.
+   </para>
+   <programlisting>"correlationQuery" : [
+    {
+        "linkQualifier" : "user",
+        "type" : "text/javascript",
+        "source" : "var map = {'_queryFilter': 'name eq \"' + source.userName + '.user\"'}; map;"
+    },
+    {
+        "linkQualifier" : "admin",
+        "type" : "text/javascript",
+        "source" : "var map = {'_queryFilter': 'name eq \"' + source.userName + '.admin\"'}; map;"
+    },
+]  </programlisting>
+   <para>
+    The link qualifier is assigned to the link, during correlation. In this
+    example, if the <literal>name</literal> of the target object matches the
+    <literal>userName</literal> of the source object, and is appended with
+    <literal>.user</literal>, a link with the qualifier <literal>user</literal>
+    is created between the source and target object. If
+    the <literal>name</literal> of the target object matches the
+    <literal>userName</literal> of the source object, and is appended with
+    <literal>.admin</literal>, a link with the qualifier
+    <literal>admin</literal> is created between the source and target object.
+   </para>
+   <para>
+    Each <literal>linkQualifier</literal> within a specific mapping must be
+    unique. If no link qualifier is specified (in the case where there is only
+    one possible correlating target object) a default link qualifier,
+    <literal>defaultLinkQualifier</literal>, is used.
    </para>
   </section>
 
