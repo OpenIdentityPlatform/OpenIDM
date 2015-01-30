@@ -146,14 +146,6 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
         });
 
     };
-
-    obj.getLastReconForMapping = function(mapping, suppressSpinner) {
-        return obj.serviceCall({
-            "suppressSpinner": suppressSpinner,
-            "serviceUrl": "/openidm/audit/recon",
-            "url": "?_queryId=audit-last-recon-for-mapping&formatted=false&mapping=" + mapping
-        });
-    };
     
     obj.stopRecon = function (id, suppressSpinner) {
         return obj.serviceCall({

@@ -36,8 +36,9 @@
         
         if(!mapping || mapping === m.name){
             lastRecon = openidm.query("audit/recon", {
-                "_queryId": "audit-last-recon-for-mapping",
-                "mapping": m.name,
+                "_queryFilter": '/entryType eq "start" AND !(/reconAction eq "reconById") AND /mapping eq "' + m.name + '"',
+                "_sortKeys" : '-timestamp',
+                "_pageSize" : 1,
                 "formatted": false
             });
             

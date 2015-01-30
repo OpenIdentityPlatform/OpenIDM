@@ -33,8 +33,7 @@
             "get-managed-users" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} orderby on obj.id = orderby.managedobjects_id and orderby.propkey = CONCAT('/',${orderBy}) ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN orderby.propvalue END asc, CASE WHEN ${orderByDir} = 'desc' THEN orderby.propvalue END desc  LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
             "get-managed-users-filtered" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} orderby on obj.id = orderby.managedobjects_id and orderby.propkey = CONCAT('/',${orderBy}) INNER JOIN ${_dbSchema}.${_propTable} userName on obj.id = userName.${_mainTable}_id and userName.propkey = '/userName' INNER JOIN ${_dbSchema}.${_propTable} givenName on obj.id = givenName.${_mainTable}_id and givenName.propkey = '/givenName' INNER JOIN ${_dbSchema}.${_propTable} sn on obj.id = sn.${_mainTable}_id and sn.propkey = '/sn' INNER JOIN ${_dbSchema}.${_propTable} mail on obj.id = mail.${_mainTable}_id and mail.propkey = '/mail' INNER JOIN ${_dbSchema}.${_propTable} accountStatus on obj.id = accountStatus.${_mainTable}_id and accountStatus.propkey = '/accountStatus' WHERE userName.propvalue LIKE concat(${userName},'%') AND mail.propvalue LIKE concat(${mail},'%') AND givenName.propvalue LIKE concat(${givenName},'%') AND sn.propvalue LIKE concat(${sn},'%') AND accountStatus.propvalue LIKE concat(${accountStatus},'%') ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN orderby.propvalue END asc, CASE WHEN ${orderByDir} = 'desc' THEN orderby.propvalue END desc  LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
             "get-managed-users-count" : "SELECT concat('{ \"total\":',COUNT(*),'}') as fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource}",
-            "get-managed-users-filtered-count" : "SELECT concat('{ \"total\":',COUNT(*),'}') as fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} userName on obj.id = userName.${_mainTable}_id and userName.propkey = '/userName' INNER JOIN ${_dbSchema}.${_propTable} givenName on obj.id = givenName.${_mainTable}_id and givenName.propkey = '/givenName' INNER JOIN ${_dbSchema}.${_propTable} sn on obj.id = sn.${_mainTable}_id and sn.propkey = '/sn' INNER JOIN ${_dbSchema}.${_propTable} mail on obj.id = mail.${_mainTable}_id and mail.propkey = '/mail' INNER JOIN ${_dbSchema}.${_propTable} accountStatus on obj.id = accountStatus.${_mainTable}_id and accountStatus.propkey = '/accountStatus' WHERE userName.propvalue LIKE concat(${userName},'%') AND mail.propvalue LIKE concat(${mail},'%') AND givenName.propvalue LIKE concat(${givenName},'%') AND sn.propvalue LIKE concat(${sn},'%') AND accountStatus.propvalue LIKE concat(${accountStatus},'%')",
-            "get-managers-of-department" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} department ON obj.id = department.${_mainTable}_id WHERE (prop.propkey = '/title' AND prop.propvalue = 'manager') AND (department.propkey = '/department' AND department.propvalue = ${department})"
+            "get-managed-users-filtered-count" : "SELECT concat('{ \"total\":',COUNT(*),'}') as fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} userName on obj.id = userName.${_mainTable}_id and userName.propkey = '/userName' INNER JOIN ${_dbSchema}.${_propTable} givenName on obj.id = givenName.${_mainTable}_id and givenName.propkey = '/givenName' INNER JOIN ${_dbSchema}.${_propTable} sn on obj.id = sn.${_mainTable}_id and sn.propkey = '/sn' INNER JOIN ${_dbSchema}.${_propTable} mail on obj.id = mail.${_mainTable}_id and mail.propkey = '/mail' INNER JOIN ${_dbSchema}.${_propTable} accountStatus on obj.id = accountStatus.${_mainTable}_id and accountStatus.propkey = '/accountStatus' WHERE userName.propvalue LIKE concat(${userName},'%') AND mail.propvalue LIKE concat(${mail},'%') AND givenName.propvalue LIKE concat(${givenName},'%') AND sn.propvalue LIKE concat(${sn},'%') AND accountStatus.propvalue LIKE concat(${accountStatus},'%')"
         },
         "explicitTables" : {
             "get-users-of-direct-role" : "select objectid from ${_dbSchema}.${_table} where find_in_set(${role},replace(substring(roles,2,(length(roles) - 2)),'\"',''))",
@@ -60,15 +59,10 @@
             "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.${_table} WHERE parentactionid = ${parentActionId}",
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",            
             
-            "audit-last-recon-for-mapping" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE entryType = 'start' AND mapping = ${mapping} and reconaction <> 'reconById' ORDER BY activitydate DESC LIMIT 1",
-            "audit-by-recon-id-situations-latest" : "SELECT * FROM (SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND (${completed} = '' OR activitydate <= ${completed}) AND situation IN (${list:situations})) t ORDER BY activitydate DESC LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
-            "audit-by-recon-id-situations-latest-filtered" : "SELECT * FROM (SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND (${completed} = '' OR activitydate <= ${completed}) AND situation IN (${list:situations}) AND (sourceObjectId IN (${list:filteredIds}) OR targetObjectId IN (${list:filteredIds}))) t ORDER BY activitydate DESC LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
-            
             "get-managed-users" : "call ${_dbSchema}.getAllFromTable('${_dbSchema}','${_table}',${orderBy},${orderByDir},${int:_pageSize},${int:_pagedResultsOffset},'userName,givenName,sn,mail,accountStatus')",
             "get-managed-users-filtered" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%') ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END asc, CASE WHEN ${orderByDir} = 'desc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END desc LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
             "get-managed-users-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table}",
-            "get-managed-users-filtered-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%')",
-            "get-managers-of-department" : "SELECT * FROM ${_dbSchema}.${_table} WHERE title = 'manager' AND department = ${department}"
+            "get-managed-users-filtered-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%')"
         }
     },
     "commands" : {
@@ -141,7 +135,7 @@
                 "searchableDefault" : true
             }
         },
-        "explicitMapping" : {
+        "explicitMapping" : { 
             "link" : {
                 "table" : "links",
                 "objectToColumn" : {
@@ -217,7 +211,7 @@
                     "exception" : "exceptiondetail",
                     "mapping" : "mapping",
                     "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
-                    }
+                }
             },
             "audit/sync" : {
                 "table" : "auditsync",
@@ -246,7 +240,8 @@
                     "principal" : "principal",
                     "roles" : "roles",
                     "status" : "status",
-                    "timestamp" : "activitydate"
+                    "timestamp" : "activitydate",
+                    "userid" : "userid"
                 }
             },
             "security" : {
