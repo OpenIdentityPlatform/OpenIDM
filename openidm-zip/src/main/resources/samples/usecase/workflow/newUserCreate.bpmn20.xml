@@ -77,7 +77,7 @@
 
         <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
             <script><![CDATA[ 
-                params = [_queryId:"get-managers-of-department", department : department];
+                params = [_queryFilter:'/department eq "' + department + '" and /title eq "manager"'];
                 manager = openidm.query("managed/user", params)
 
                 candidateUsers = []
