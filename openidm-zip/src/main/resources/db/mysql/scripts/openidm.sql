@@ -189,7 +189,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
   `mapping` VARCHAR(511) NULL ,
-  `linkqualifier` VARCHAR(255) NOT NULL ,
+  `linkqualifier` VARCHAR(255) NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`),
   INDEX `idx_auditrecon_reconid` (`reconid` ASC),
@@ -219,7 +219,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
   `mapping` VARCHAR(511) NULL ,
-  `linkqualifier` VARCHAR(255) NOT NULL ,
+  `linkqualifier` VARCHAR(255) NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
