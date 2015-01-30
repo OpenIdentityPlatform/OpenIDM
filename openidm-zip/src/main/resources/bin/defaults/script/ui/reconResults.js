@@ -25,9 +25,8 @@
 
     var _ = require('lib/lodash'),
         reconAudit,
-        sourceSearchResults,
-        targetSearchResults,
-        filteredIds = ['NOOP'],
+        sourceSearchResults = [],
+        targetSearchResults = [],
         i = 0, j = 0,
         offset,
 
@@ -41,7 +40,7 @@
 
         syncConfig,
         result = [],
-        queryId = "audit-by-recon-id-situations-latest",
+        queryFilter = '/reconId eq "'+reconId+'" AND /entryType eq "entry"',
         buildQueryFilter = function(props,searchString){
             var conditions = _.chain(props.split(","))
                                 .reject(function(p){ return !p; })
@@ -52,6 +51,19 @@
             
             return conditions.join(" or (") + new Array(conditions.length).join(")");
         },
+        buildINClause = function (array, fieldName) {
+            var inClause = ' AND (';
+                
+            inClause += _.map(array,
+                                    function (val) {
+                                        return fieldName + ' eq "' + val + '"';
+                                    })
+                            .join(" OR ");
+
+            inClause += ')';
+
+            return inClause;
+        },
         recon = openidm.read("recon/" + reconId);
     
     limit = parseInt(limit || 20);
@@ -59,20 +71,16 @@
 
     offset = limit*(parseInt(page || 1)-1);
 
-    if (!searching) {
+    if (recon.ended) {
+        queryFilter += ' AND /timestamp LE "'+recon.ended+'"'
+    }
 
-        reconAudit = openidm.query("repo/audit/recon", {
-            "_queryId": queryId,
-            "reconId": reconId,
-            "situations": situations ? situations : '',
-            "completed": recon.ended,
-            "_pageSize": limit,
-            "_pagedResultsOffset": offset,
-            "orderBy": orderBy,
-            "orderByDir": orderByDir,
-            "formatted": false
-        });
-    } else {
+    if (situations) {
+        queryFilter += buildINClause(situations.split(','), '/situation');
+    }
+
+
+    if (searching) {
 
         if (sourceCriteria && sourceCriteria.length) {
 
@@ -80,9 +88,18 @@
                 "_queryFilter" : buildQueryFilter(sourceProps, sourceCriteria)
             }).result;
 
-            for (i=0;i<sourceSearchResults.length;i++) {
-                filteredIds.push(source + "/" + sourceSearchResults[i]._id);
+            if (sourceSearchResults.length) {
+                queryFilter += buildINClause(
+
+                                _(sourceSearchResults)
+                                 .pluck('_id')
+                                 .map(function (id) { return source + "/" + id; })
+                                 .value(),
+
+                                '/sourceObjectId'
+                            );
             }
+
         }
 
         if (targetCriteria && targetCriteria.length) {
@@ -91,32 +108,51 @@
                 "_queryFilter" : buildQueryFilter(targetProps, targetCriteria)
             }).result;
 
-            for (i=0;i<targetSearchResults.length;i++) {
-                filteredIds.push(target + "/" + targetSearchResults[i]._id);
+            if (targetSearchResults.length) {
+                queryFilter += buildINClause(
+
+                                _(targetSearchResults)
+                                 .pluck('_id')
+                                 .map(function (id) { return target + "/" + id; })
+                                 .value(),
+
+                                '/targetObjectId'
+                            );
             }
+
         }
 
-        reconAudit = openidm.query("repo/audit/recon", {
-                "_queryId": queryId + "-filtered",
-                "reconId": reconId,
-                "situations": situations ? situations : '',
-                "filteredIds":  filteredIds.join(","),
-                "completed": recon.ended,
-                "_pageSize": limit,
-                "_pagedResultsOffset": offset,
-                "orderBy": orderBy,
-                "orderByDir": orderByDir,
-                "formatted": false
-            });     
+        if (!sourceSearchResults.length && !targetSearchResults.length) {
+            // if they are searching for records but there are no results found for them, 
+            // there is no point in querying the audit data; give up and return nothing.
+
+            return [{
+                "limit": limit,
+                "page": 1,
+                "rows": [],
+                "id": "_id"
+            }];
+        }
     }
 
+    reconAudit = openidm.query("audit/recon", {
+        "_queryFilter": queryFilter,
+        "_pageSize": limit,
+        "_pagedResultsOffset": offset,
+        "_sortKeys": "-timestamp",
+        "_fields": "sourceObjectId,targetObjectId,ambiguousTargetObjectIds,timestamp,situation,linkQualifier",
+        "situations": situations ? situations : '',
+        "completed": recon.ended,
+        "formatted": false
+    });
+
     if (!reconAudit.result) {
-        return {
+        return [{
             "limit": limit,
             "page": 1,
             "rows": [],
             "id": "_id"
-        };
+        }];
     }
 
     for (i = 0; i<reconAudit.result.length; i++) {

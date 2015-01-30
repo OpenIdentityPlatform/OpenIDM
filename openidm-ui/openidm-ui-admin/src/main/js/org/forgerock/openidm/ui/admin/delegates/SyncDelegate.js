@@ -176,7 +176,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
                     "errorsHandlers": {
                         "missing": {
                             status: 404
-                        }                
+                        }
                     }
                 }).done(function (mappingDetails) {
                     promise.resolve(mappingDetails);

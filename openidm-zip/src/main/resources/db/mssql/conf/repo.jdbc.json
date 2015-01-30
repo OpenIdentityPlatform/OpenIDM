@@ -56,11 +56,7 @@
             "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND situation = ${situation}",
             "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentactionid = ${parentActionId}",
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
-            "get-recons" : "SELECT reconid, activitydate, mapping, message FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entrytype = 'summary' ORDER BY activitydate DESC",
-            
-            "audit-last-recon-for-mapping" : "SELECT TOP 1 * FROM ${_dbSchema}.auditrecon WHERE entrytype = 'start' AND mapping LIKE ${mapping} and reconaction <> 'reconById' ORDER BY activitydate DESC",
-            "audit-by-recon-id-situations-latest" : "SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY activitydate DESC) AS RowNum FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND (${completed} = '' OR activitydate <= ${completed}) AND situation IN (${list:situations})) AS t WHERE t.RowNum BETWEEN ${int:_pagedResultsOffset}+1 AND ${int:_pagedResultsOffset}+${int:_pageSize}",
-            "audit-by-recon-id-situations-latest-filtered" : "SELECT * FROM (SELECT *, ROW_NUMBER() OVER (ORDER BY activitydate DESC) AS RowNum FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND (${completed} = '' OR activitydate <= ${completed}) AND situation IN (${list:situations}) AND (sourceobjectid IN (${list:filteredIds}) OR targetobjectid IN (${list:filteredIds}))) AS t WHERE t.RowNum BETWEEN ${int:_pagedResultsOffset}+1 AND ${int:_pagedResultsOffset}+${int:_pageSize}"
+            "get-recons" : "SELECT reconid, activitydate, mapping, message FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entrytype = 'summary' ORDER BY activitydate DESC"
         }
     },
     "commands" : {
