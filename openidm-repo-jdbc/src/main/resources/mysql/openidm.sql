@@ -166,7 +166,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `actionid` VARCHAR(511) NULL ,
   `exceptiondetail` TEXT NULL ,
   `mapping` TEXT NULL ,
-  `linkqualifier` VARCHAR(255) NOT NULL ,
+  `linkqualifier` VARCHAR(255) NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
