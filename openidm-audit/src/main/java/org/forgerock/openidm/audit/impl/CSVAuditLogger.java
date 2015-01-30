@@ -72,6 +72,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     public static final String CONFIG_LOG_LOCATION = "location";
     public static final String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
     public static final String CONFIG_LOG_BUFFER_SIZE = "bufferSize";
+    public static final String CONFIG_LOG_MAX_FLUSH_DELAY = "maxFlushDelay";
 
     private static final Object createLock = new Object();
 
@@ -83,6 +84,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     File auditLogDir;
     String recordDelim;
     int bufferSize;
+    long maxFlushDelay;
+    WriteBufferFlushTimer flushTimer = new WriteBufferFlushTimer();
+
 
     final Map<String, BufferedWriter> fileWriters = new HashMap<String, BufferedWriter>();
 
@@ -99,8 +103,15 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 recordDelim = "";
             }
             recordDelim += ServerConstants.EOL;
+
             // Maintain FileWriter's 1024 byte write buffer default unless config overrides it.
             bufferSize = config.get(CONFIG_LOG_BUFFER_SIZE).defaultTo(1024).asInteger();
+
+            // The file buffer may take a long time during slow periods to reach <bufferSize> and
+            // trigger a flush.  maxFlushDelay will ensure that the buffer is flushed at least
+            // once every <maxFlushDelay> seconds.
+            maxFlushDelay = config.get(CONFIG_LOG_MAX_FLUSH_DELAY).defaultTo(0).asInteger();
+            flushTimer.setSleepSeconds(maxFlushDelay);
         } catch (Exception ex) {
             logger.error("ERROR - Configured CSV file location must be a directory and {} is invalid.", auditLogDir.getAbsolutePath(), ex);
             throw new InvalidException("Configured CSV file location must be a directory and '" + location
@@ -364,6 +375,13 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 }
                 fileWriter = getWriter(type, auditFile, true);
                 writeEntry(fileWriter, type, auditFile, obj, fieldOrder);
+
+                if (maxFlushDelay > 0) {
+                    flushTimer.interrupt();
+                    flushTimer.start();
+                } else {
+                    fileWriter.flush();
+                }
             } catch (IOException ex) {
                 if (retryCount == 0) {
                     retry = true;
@@ -481,5 +499,32 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             return jv.asMap();
         }
 
+    }
+
+    private class WriteBufferFlushTimer extends Thread {
+        long sleepSeconds;
+
+        public void setSleepSeconds(long sleepSeconds) {
+            this.sleepSeconds = sleepSeconds;
+        }
+
+        @Override
+        public void run() {
+            try {
+                sleep(sleepSeconds * 1000);
+
+                synchronized (fileWriters) {
+                    for (BufferedWriter writer : fileWriters.values()) {
+                        try {
+                            writer.flush();
+                        } catch (IOException e) {
+                            logger.debug("Failed to flush CSV audit write buffer", e);
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                // This is expected if the timer is reset or IDM is shut down
+            }
+        }
     }
 }
