@@ -46,7 +46,7 @@
             
             "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND firstid = ${firstId}",
             "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND secondid = ${secondId}",
-            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkQualifier = ${linkQualifier} AND linkType = ${linkType}",
+            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier}",
 
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
             
