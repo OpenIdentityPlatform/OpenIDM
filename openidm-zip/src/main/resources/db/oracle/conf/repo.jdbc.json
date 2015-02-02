@@ -42,7 +42,7 @@
             "credential-internaluser-query" : "SELECT * FROM ${_table} WHERE objectid = ${username}",
             "links-for-firstId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND firstid = ${firstId}",
             "links-for-secondId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND secondid = ${secondId}",
-            "links-for-linkType" : "SELECT * FROM ${_table} WHERE linkQualifier = ${linkQualifier} AND linkType = ${linkType}",
+            "links-for-linkType" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier}",
             "scan-tasks" : "SELECT * FROM ${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
             "audit-by-mapping" : "SELECT * FROM auditrecon WHERE mapping = ${mappingName}",
             "audit-by-recon-id" : "SELECT * FROM auditrecon WHERE reconId = ${reconId}",
