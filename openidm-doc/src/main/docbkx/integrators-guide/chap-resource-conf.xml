@@ -2174,7 +2174,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     ],
     "groupMemberAttribute" : "uniqueMember",
     "passwordHashAlgorithm" : null,
-    "usePagedResultControl" : false,
+    "usePagedResultControl" : true,
     "blockSize" : 100,
     "uidAttribute" : "dn",
     "maintainLdapGroupMembership" : false,
