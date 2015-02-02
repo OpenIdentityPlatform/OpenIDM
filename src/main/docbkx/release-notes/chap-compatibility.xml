@@ -27,8 +27,7 @@
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook
- http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'>
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'>
  <title>OpenIDM Compatibility</title>
 
  <para>
@@ -76,6 +75,19 @@
    configurations.
   </para>
   <variablelist>
+   <varlistentry>
+    <term>Removal of predefined queries for audits</term>
+    <listitem>
+     <para>
+      As the functionality exists with <literal>queryFilter</literal>, the
+      following pre-defined queries have been removed from the default
+      configuration: <literal>get-recons</literal>,
+      <literal>audit-last-recon-for-mapping</literal>,
+      <literal>audit-by-recon-id-situations-latest</literal>, and
+      <literal>audit-by-recon-id-situations-latest-filtered</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>Changes to the database schema</term>
     <listitem>
