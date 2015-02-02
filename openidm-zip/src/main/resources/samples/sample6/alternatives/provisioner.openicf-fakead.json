@@ -70,7 +70,7 @@
         "groupMemberAttribute" : "uniqueMember",
         "accountSearchFilter" : null,
         "passwordHashAlgorithm" : null,
-        "usePagedResultControl" : false,
+        "usePagedResultControl" : true,
         "blockSize" : 100,
         "uidAttribute" : "uid",
         "maintainLdapGroupMembership" : false,
