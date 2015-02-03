@@ -2159,6 +2159,7 @@ mysql &gt; <userinput>select * from users;</userinput>
     in the <literal>"pagedResultsCookie"</literal> value, with
     <literal>%20</literal>, as shown in the following example:
    </para>
+   <informalexample><?dbfo pgwide="1"?>
    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -2180,6 +2181,7 @@ mysql &gt; <userinput>select * from users;</userinput>
     }
   ]
 }</computeroutput></screen>
+   </informalexample>
    <para>
     For more information about paging support, see <link xlink:show="new"
     xlink:href="integrators-guide#paging-query-results"
@@ -2292,7 +2294,8 @@ mysql &gt; <userinput>select * from users;</userinput>
    (<filename>samples/scriptedrest2dj/conf/provisioner.openicf-scriptedrest.json</filename>)
    indicates the ScriptedREST implementation of the Groovy connector as follows:
   </para>
-  <programlisting language="javascript">{
+  <informalexample><?dbfo pgwide="1"?>
+   <programlisting language="javascript">{
     "name": "scriptedrest",
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
@@ -2301,6 +2304,7 @@ mysql &gt; <userinput>select * from users;</userinput>
         "bundleVersion": "[1.4.0.0,2.0.0.0)"
     },
 ...  </programlisting>
+  </informalexample>
   <para>
    The Groovy scripts required for the sample are located in the
    <filename>samples/scriptedrest2dj/tools</filename> directory. You will need to
@@ -2767,6 +2771,7 @@ $ ./startup.sh -p samples/scriptedrest2dj/</userinput></screen>
    indicates the ScriptedCREST implementation of the Groovy Connector Toolkit
    as follows:
   </para>
+  <informalexample><?dbfo pgwide="1"?>
   <programlisting language="javascript">{
     "name": "scriptedcrest",
     "connectorRef": {
@@ -2776,6 +2781,7 @@ $ ./startup.sh -p samples/scriptedrest2dj/</userinput></screen>
         "bundleVersion": "[1.4.0.0,2.0.0.0)"
     },
 ...  </programlisting>
+  </informalexample>
   <para>
    The Groovy scripts required for the sample are located in the
    <filename>samples/scriptedcrest2dj/tools</filename> directory. You will need
@@ -3611,6 +3617,7 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
       <para>
        Confirm the result. Get the data for Alex Wu, by <literal>_id</literal>.
       </para>
+      <informalexample><?dbfo pgwide="1"?>
       <screen>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
@@ -3618,11 +3625,13 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/system/scriptedazure/User/744aa30f-55e0-4559-b956-985b77d80814"</screen>
+      </informalexample>
      </step>
      <step>
       <para>
        Get information on the test group, also by <literal>_id</literal>.
       </para>
+      <informalexample><?dbfo pgwide="1"?>
       <screen>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
@@ -3630,6 +3639,7 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/system/scriptedazure/Group/ab347420f-4e8e-f045-a437b62c0f3-636e"</screen>
+      </informalexample>
      </step>
      <step>
       <para>
@@ -3804,6 +3814,7 @@ $ <userinput>cp samples/provisioners/provisioner.openicf-adpowershell.json conf/
       The following excerpt of the sample connector configuration shows the
       configuration properties:
      </para>
+     <informalexample><?dbfo pgwide="1"?>
      <programlisting>  "configurationProperties" : {
     "AuthenticateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADAuthenticate.ps1",
     "CreateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADCreate.ps1",
@@ -3827,6 +3838,7 @@ $ <userinput>cp samples/provisioners/provisioner.openicf-adpowershell.json conf/
     "Login" : "",
     "Password" : null
   },</programlisting>
+     </informalexample>
      <para>
       The sample connector configuration assumes that the scripts are located in
       <filename>C:/openidm/samples/powershell2AD/tools/</filename>. If you
@@ -4557,7 +4569,8 @@ $ ./startup.sh -p samples/sample5</screen>
     shown here:
    </para>
 
-   <programlisting language="xml" width="120">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+   <informalexample><?dbfo pgwide="1"?>
+   <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;icf:OpenICFContainer
     xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
     xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
@@ -4585,6 +4598,7 @@ $ ./startup.sh -p samples/sample5</screen>
        &lt;ri:lastname&gt;Doe&lt;/ri:lastname&gt;
     &lt;/ri:__ACCOUNT__&gt;
 &lt;/icf:OpenICFContainer&gt;</programlisting>
+   </informalexample>
 
    <para>
     Rerun the reconciliation and query REST commands shown previously. The
@@ -7396,7 +7410,10 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
       access to your Salesforce account. When you have given consent, you should
       receive a response URL that looks similar to the following:
      </para>
-<screen width="pagewide">https://localhost:8443/admin/index.html#connectors/edit//&amp;code=aPrxJZTK7Rs03PU634VK8Jn9o_U3ZY1ERxM7IiklFzbmVpZ1TTJlU1TiETXKhNHqpr4SlyCkpg%3D%3D</screen>
+     <informalexample><?dbfo pgwide="1"?>
+      <screen>
+https://localhost:8443/admin/index.html#connectors/edit//&amp;code=aPrxJZTK7Rs03PU634VK8Jn9o_U3ZY1ERxM7IiklF...</screen>
+     </informalexample>
      <para>
       The <literal>&amp;code</literal> part of this URL is an authorization
       code, that you need for the following step.
@@ -7416,7 +7433,8 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
       will also need to supply your Consumer Key and Consumer Secret in this
       call.
      </para>
-     <screen width="pagewide">$ <userinput> curl \
+     <informalexample><?dbfo pgwide="1"?>
+     <screen>$ <userinput> curl \
  --verbose \
  --data "grant_type=authorization_code" \
  --data "client_id=<replaceable>consumer-key</replaceable>" \
@@ -7425,7 +7443,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
  --data "code=<replaceable>access-token-code</replaceable>" \
  "https://login.salesforce.com/services/oauth2/token"</userinput>
 <computeroutput>{
-  "access_token": "00DS0000003K4fU!AQMAQOzEU.8tCjg8Wk79yKPKCtrtaszX5jrHtoT4NBpJ8x2NFZGjg3PNuc0TWq0EgiGS_mVkfg5f4pVN5uhXbmAx6hRyk80Z",
+  "access_token": "00DS0000003K4fU!AQMAQOzEU.8tCjg8Wk79yKPKCtrtaszX5jrHtoT4NBpJ8x2NFZGjg3PNuc0TWq0EgiGS_mVkfg5f4pVN5...",
   "signature": "2uREX1lseXdg3Vng/2+Hrlo/KHOWYoim+poj74wKFtw=",
   "refresh_token": "5Aep861KIwKdekr90I4iHdtDgWwRoG7O_6uHrgJ.yVtMS0UaGxRqE6WFM77W7wCV4muVMgdqKjuWI2i5S6sjN2X",
   "token_type": "Bearer",
@@ -7434,6 +7452,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
   "issued_at": "1417182949781",
   "id": "https://login.salesforce.com/id/00DS0000003K4fUMAS/00530000009hWLcAAM"
 }</computeroutput></screen>
+     </informalexample>
      <para>
       The output includes an <literal>access_token</literal> and a
       <literal>refresh_token</literal>. You will need the
