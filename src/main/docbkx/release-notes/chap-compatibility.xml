@@ -81,8 +81,7 @@
      <para>
       As the functionality exists with <literal>queryFilter</literal>, the
       following pre-defined queries have been removed from the default
-      configuration: <literal>get-recons</literal>,
-      <literal>audit-last-recon-for-mapping</literal>,
+      configuration: <literal>audit-last-recon-for-mapping</literal>,
       <literal>audit-by-recon-id-situations-latest</literal>, and
       <literal>audit-by-recon-id-situations-latest-filtered</literal>.
      </para>
