@@ -1097,7 +1097,6 @@
                     <projectName>OpenIDM</projectName>
                     <projectVersion>${docTargetVersion}</projectVersion>
                     <releaseVersion>${docTargetVersion}</releaseVersion>
-                    <latestJson>http://docs.forgerock.org/latest.json</latestJson>
                     <googleAnalyticsId>${gaId}</googleAnalyticsId>
                 </configuration>
                 <executions>
