@@ -762,6 +762,20 @@ $ <userinput>curl \
     an object is about to be stored in the repository (onStore). Similar scripts
     are available for when a link is created (onLink) or removed (onUnlink).
    </para>
+   <note>
+    <para>
+     The <literal>onUpdate</literal> script is <emphasis>always</emphasis>
+     called for an UPDATE situation, even if the synchronization process
+     determines that there is no difference between the source and target
+     objects, and that the target object will not, in fact, be updated.
+    </para>
+    <para>
+     If, subsequent to the <literal>onUpdate</literal> script running, the
+     synchronization process determines that the target value to set is the same
+     as its existing value, the change is prevented from being synchronized to
+     the target.
+    </para>
+   </note>
 
    <para>The following example derives a DN for an LDAP entry when the entry
    is created in the internal repository.</para>
@@ -1363,7 +1377,7 @@ $ <userinput>curl \
          "name" : "managedUser_systemLdapAccounts",
          "source" : "managed/user",
          "target" : "system/ldap/account",
-         "sourceQuery" : : {
+         "sourceQuery" {
                 "queryFilter" : "employeeType eq \"Permanent\""
             },
 ...</programlisting>
@@ -3779,7 +3793,8 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
 
   <orderedlist>
    <para>
-    Configuring asynchronous reconciliation involves the following steps:
+    Configuring asynchronous reconciliation using a workflow involves the
+    following steps:
    </para>
    <listitem>
     <para>
@@ -3820,32 +3835,30 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <literal>performAction</literal> action
      (<literal>openidm.action('sync', 'performAction', params)</literal>).
     </para>
-    <para>
-     You can also use this kind of explicit reconciliation to perform a
-     specific action on a source or target record, regardless of the assessed
-     situation.
-    </para>
-    <para>
-     You can call such an operation over the REST interface, specifying the
-     source, and/or target IDs, the mapping, and the action to be taken. The
-     action can be any one of the supported reconciliation actions, that is,
-     <literal>CREATE, UPDATE, DELETE, LINK, UNLINK, EXCEPTION, REPORT, NOREPORT,
-     ASYNC, IGNORE</literal>. In addition, if you specify a
-     <literal>reconId</literal>, the action that is taken is logged in the
-     <literal>audit/recon</literal> log, along with the the other audit data for
-     that reconciliation run.
-    </para>
-    <para>
-     The following sample command calls the DELETE action on user
-     <literal>bjensen</literal>, whose <literal>_id</literal> in the LDAP
-     directory is <literal>uid=bjensen,ou=People,dc=example,dc=com</literal>.
-     The user is deleted in the target resource, in this case, the OpenIDM
-     repository.
-    </para>
-    <para>
-     Note that the <literal>_id</literal> must be URL-encoded in the REST call.
-    </para>
-    <screen><userinput>$ curl \
+   </listitem>
+  </orderedlist>
+  <para>
+   You can also use this kind of explicit reconciliation to perform a specific
+   action on a source or target record, regardless of the assessed situation.
+  </para>
+  <para>
+   You can call such an operation over the REST interface, specifying the
+   source, and/or target IDs, the mapping, and the action to be taken. The
+   action can be any one of the supported reconciliation actions, that is,
+   <literal>CREATE, UPDATE, DELETE, LINK, UNLINK, EXCEPTION, REPORT, NOREPORT,
+   ASYNC, IGNORE</literal>.
+  </para>
+  <para>
+   The following sample command calls the DELETE action on user
+   <literal>bjensen</literal>, whose <literal>_id</literal> in the LDAP
+   directory is <literal>uid=bjensen,ou=People,dc=example,dc=com</literal>.
+   The user is deleted in the target resource, in this case, the OpenIDM
+   repository.
+  </para>
+  <para>
+   Note that the <literal>_id</literal> must be URL-encoded in the REST call.
+  </para>
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3854,8 +3867,31 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
  "https://localhost:8443/openidm/sync?_action=performAction&amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom&amp;mapping=
  systemLdapAccounts_ManagedUser&amp;action=DELETE"</userinput>
 <computeroutput>{}</computeroutput></screen>
-   </listitem>
-  </orderedlist>
+  <para>
+   The following example creates a link between a managed object and its
+   corresponding system object. Such a call is useful in the context of manual
+   data association, when a correlation query has linked an incorrect object, or
+   when OpenIDM has been unable to determine the correct target object.
+  </para>
+  <para>
+   In this example, there are two separate target accounts
+   (<literal>scarter.user</literal> and <literal>scarter.admin</literal>) that
+   should be mapped to the managed object. This call creates a link to the
+   <literal>user</literal> account and specifies a
+   <emphasis>link qualifier</emphasis> that indicates the type of link that
+   will be created. For more information about mapping to multiple accounts,
+   see <xref linkend="correlating-multiple-targets" />.
+  </para>
+  <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/sync?_action=performAction&amp;action=LINK
+   &amp;sourceId=4b39f74d-92c1-4346-9322-d86cb2d828a8&amp;targetId=scarter.user
+   &amp;mapping=managedUser_systemXmlfileAccounts&amp;linkQualifier=user"</userinput>
+<computeroutput>{}</computeroutput></screen>
  </section>
 
  <section xml:id="case-sensitivity">
@@ -4119,160 +4155,167 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
 ...
    </programlisting>
 
-   <bridgehead>Using Filtered Queries to Correlate Objects</bridgehead>
-   <para>
-    For filtered queries, the script that is defined or referenced in the
-    <literal>correlationQuery</literal> property must return an object with the
-    following elements:
-   </para>
-   <itemizedlist>
-    <listitem>
-     <para>
-      A condition, such as "Equals", "Starts with", or "Greater than".
-     </para>
-     <para>
-      For examples of query conditions, see <link xlink:show="new"
-      xlink:href="integrators-guide#constructing-queries"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
-      Queries</citetitle></link>.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      The element that is being compared, on the target object, for example,
-      <literal>uid</literal>.
-     </para>
-     <para>
-      Note that this element on the target object is not necessarily a single
-      attribute. Your query filter can be as simple, or as complex, as you need
-      it to be, from a single operator to an entire boolean expression tree.
-     </para>
-     <para>
-      If the target object is a system object, this attribute must be referred
-      to by its OpenIDM name, rather than its OpenICF
-      <literal>nativeName</literal>. For example, given the following
-      provisioner configuration excerpt, the name to use in the correlation
-      query would be <literal>uid</literal> and not <literal>__NAME__</literal>:
-     </para>
-     <programlisting language="javascript">"uid" : {
-     "type" : "string",
-     "nativeName" : "__NAME__",
-     "required" : true,
-     "nativeType" : "string"
- }
- ... </programlisting>
-    </listitem>
-    <listitem>
-     <para>
-      The value to search for in the query.
-     </para>
-     <para>
-      This value is generally based on one or more values from the source object,
-      but is not necessarily the value of a single source object property. The
-      way in which your script uses the values from the source object to find a
-      matching record in the target system is up to you. It might be a
-      transformation of a source object property (for example,
-      <literal>toUpperCase()</literal>), concatenated with other strings or
-      properties. You can also use this value to call an external REST endpoint,
-      the response from which would be the final "value" portion of the query.
-     </para>
-    </listitem>
-   </itemizedlist>
-   <para>
-    The following query finds objects on the target whose <literal>uid</literal>
-    is the same as the <literal>userName</literal> of a source object.
-   </para>
-   <programlisting language="javascript">
-     "correlationQuery" : {
-         "type" : "text/javascript",
-         "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
-     },
-   </programlisting>
-   <para>
-    The query can return zero or more objects. The situation that OpenIDM
-    assigns to the source object depends on the number of target objects that
-    are returned. For more information, see <xref linkend="sync-situations" />.
-   </para>
+   <section xml:id="correlation-filtered-queries">
+    <title>Using Filtered Queries to Correlate Objects</title>
+    <para>
+     For filtered queries, the script that is defined or referenced in the
+     <literal>correlationQuery</literal> property must return an object with the
+     following elements:
+    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       The element that is being compared, on the target object, for example,
+       <literal>uid</literal>.
+      </para>
+      <para>
+       Note that this element on the target object is not necessarily a single
+       attribute. Your query filter can be as simple, or as complex, as you need
+       it to be, from a single operator to an entire boolean expression tree.
+      </para>
+      <para>
+       If the target object is a system object, this attribute must be referred
+       to by its OpenIDM name, rather than its OpenICF
+       <literal>nativeName</literal>. For example, given the following
+       provisioner configuration excerpt, the name to use in the correlation
+       query would be <literal>uid</literal> and not <literal>__NAME__</literal>:
+      </para>
+      <programlisting language="javascript">"uid" : {
+    "type" : "string",
+    "nativeName" : "__NAME__",
+    "required" : true,
+    "nativeType" : "string"
+}
+...   </programlisting>
+     </listitem>
+     <listitem>
+      <para>
+       A condition, such as "Equals", "Starts with", or "Greater than".
+      </para>
+      <para>
+       For examples of query conditions, see <link xlink:show="new"
+       xlink:href="integrators-guide#constructing-queries"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
+       Queries</citetitle></link>.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The value to search for in the query.
+      </para>
+      <para>
+       This value is generally based on one or more values from the source object,
+       but is not necessarily the value of a single source object property. The
+       way in which your script uses the values from the source object to find a
+       matching record in the target system is up to you. It might be a
+       transformation of a source object property (for example,
+       <literal>toUpperCase()</literal>), concatenated with other strings or
+       properties. You can also use this value to call an external REST endpoint,
+       the response from which would be the final "value" portion of the query.
+      </para>
+     </listitem>
+    </itemizedlist>
+    <para>
+     The following query finds objects on the target whose <literal>uid</literal>
+     is the same as the <literal>userName</literal> of a source object.
+    </para>
+    <programlisting language="javascript">"correlationQuery" : {
+    "type" : "text/javascript",
+    "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
+},
+    </programlisting>
+    <para>
+     The query can return zero or more objects. The situation that OpenIDM
+     assigns to the source object depends on the number of target objects that
+     are returned. For more information, see <xref linkend="sync-situations" />.
+    </para>
+   </section>
 
-   <bridgehead>Using Predefined Queries to Correlate Objects</bridgehead>
-   <para>
-    Correlation queries that do not use common query filter syntax must be
-    defined in the configuration file for the repository, either
-    <filename>openidm/conf/repo.jdbc.json</filename> or
-    <filename>openidm/conf/repo.orientdb.json</filename>, and must be referenced
-    in the mapping (<literal>sync.json</literal>) file.
-   </para>
-   <para>
-    The following example shows a query, defined in the OrientDB repository
-    configuration (<filename>openidm/conf/repo.orientdb.json</filename>), that
-    can be used as the basis for a correlation query.
-   </para>
-   <programlisting language="javascript">
- "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}"
-   </programlisting>
-   <para>
-    By default, a <literal>${value}</literal> token replacement is assumed to be
-    a quoted string. If the value is not a quoted string, use the
-    <literal>unquoted:</literal> prefix, as shown above.
-   </para>
-   <para>
-    You would call this query in the mapping (<literal>sync.json</literal>) file
-    as follows:
-   </para>
-   <programlisting language="javascript">
- {
-   "correlationQuery": {
-     "type": "text/javascript",
-     "source":
-       "var qry = {'_queryId' : 'for-userName', 'uid' : source.name}; qry;"
-   }
- }</programlisting>
-   <para>
-   The <literal>_queryId</literal> property
-   value (<literal>for-userName</literal>) matches the name of the query
-   specified in <filename>openidm/conf/repo.orientdb.json</filename>. The
-   <literal>source.name</literal> value replaces <literal>${uid}</literal> in
-   the query. OpenIDM replaces <literal>${unquoted:_resource}</literal> in the
-   query with the name of the table that holds managed objects.
-   </para>
-   <para>
-    OpenIDM ${docTargetVersion} provides a declarative correlation option, named
-    the expression builder, that makes it easier to configure correlation
-    queries. The easiest way to use the expression builder to build up a
-    correlation query is by using the Admin UI. The following image shows how the
-    expression builder is used to build up a correlation query for a mapping from
-    <literal>system/ldap/accounts</literal> to <literal>managed/user</literal>
-    objects. The query essentially states that, in order for a match to exist
-    between the source (LDAP) object and the target (managed) object, both the
-    <literal>userName</literal> and <literal>telephoneNumber</literal> of those
-    objects must match.
-   </para>
-   <mediaobject>
-    <alt>Admin UI mapping screen showing correlation query</alt>
-    <imageobject>
-     <imagedata fileref="images/expression-builder.png" format="PNG"/>
-    </imageobject>
-   </mediaobject>
-   <para>
-    The resulting correlation query, in the mapping configuration
-    (<literal>sync.json</literal>) is as follows:
-   </para>
-   <programlisting language="javascript">"correlationQuery" : {
-     "type" : "text/javascript",
-     "expressionTree" : {
-         "all" : [
-             "givenName",
-             "telephoneNumber"
-         ]
-     },
-     "mapping" : "systemLdapAccounts_managedUser",
-     "file" : "ui/correlateTreeToQueryFilter.js"
- },</programlisting>
-   <para>
-    The logic in the expression builder is in the script
-    <filename>openidm/bin/defaults/script/ui/correlateTreeToQueryFilter.js</filename>
-    which converts the expression into the required query filter.
-   </para>
+   <section xml:id="correlation-predefined-queries">
+    <title>Using Predefined Queries to Correlate Objects</title>
+    <para>
+     Correlation queries that use predefined queries must be defined in the
+     configuration file for the repository, either
+     <filename>openidm/conf/repo.jdbc.json</filename> or
+     <filename>openidm/conf/repo.orientdb.json</filename>, and must be referenced
+     in the mapping (<literal>sync.json</literal>) file.
+    </para>
+    <para>
+     The following example shows a query, defined in the OrientDB repository
+     configuration (<filename>openidm/conf/repo.orientdb.json</filename>), that
+     can be used as the basis for a correlation query.
+    </para>
+    <programlisting language="javascript">
+  "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}"
+    </programlisting>
+    <para>
+     By default, a <literal>${value}</literal> token replacement is assumed to be
+     a quoted string. If the value is not a quoted string, use the
+     <literal>unquoted:</literal> prefix, as shown above.
+    </para>
+    <para>
+     You would call this query in the mapping (<literal>sync.json</literal>) file
+     as follows:
+    </para>
+    <programlisting language="javascript">
+  {
+    "correlationQuery": {
+      "type": "text/javascript",
+      "source":
+        "var qry = {'_queryId' : 'for-userName', 'uid' : source.name}; qry;"
+    }
+  }</programlisting>
+    <para>
+    The <literal>_queryId</literal> property
+    value (<literal>for-userName</literal>) matches the name of the query
+    specified in <filename>openidm/conf/repo.orientdb.json</filename>. The
+    <literal>source.name</literal> value replaces <literal>${uid}</literal> in
+    the query. OpenIDM replaces <literal>${unquoted:_resource}</literal> in the
+    query with the name of the table that holds managed objects.
+    </para>
+   </section>
+
+   <section xml:id="correlation-expression-builder">
+    <title>Using the Expression Builder to Create Correlation Queries</title>
+    <para>
+     OpenIDM ${docTargetVersion} provides a declarative correlation option, named
+     the expression builder, that makes it easier to configure correlation
+     queries. The easiest way to use the expression builder to build up a
+     correlation query is by using the Admin UI. The following image shows how the
+     expression builder is used to build up a correlation query for a mapping from
+     <literal>system/ldap/accounts</literal> to <literal>managed/user</literal>
+     objects. The query essentially states that, in order for a match to exist
+     between the source (LDAP) object and the target (managed) object, both the
+     <literal>userName</literal> and <literal>telephoneNumber</literal> of those
+     objects must match.
+    </para>
+    <mediaobject>
+     <alt>Admin UI mapping screen showing correlation query</alt>
+     <imageobject>
+      <imagedata fileref="images/expression-builder.png" format="PNG"/>
+     </imageobject>
+    </mediaobject>
+    <para>
+     The resulting correlation query, in the mapping configuration
+     (<literal>sync.json</literal>) is as follows:
+    </para>
+    <programlisting language="javascript">"correlationQuery" : {
+      "type" : "text/javascript",
+      "expressionTree" : {
+          "all" : [
+              "givenName",
+              "telephoneNumber"
+          ]
+      },
+      "mapping" : "systemLdapAccounts_managedUser",
+      "file" : "ui/correlateTreeToQueryFilter.js"
+  },</programlisting>
+    <para>
+     The logic in the expression builder is in the script
+     <filename>openidm/bin/defaults/script/ui/correlateTreeToQueryFilter.js</filename>
+     which converts the expression into the required query filter.
+    </para>
+   </section>
   </section>
 
   <section xml:id="correlating-multiple-targets">
@@ -4309,7 +4352,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
         "linkQualifier" : "admin",
         "type" : "text/javascript",
         "source" : "var map = {'_queryFilter': 'name eq \"' + source.userName + '.admin\"'}; map;"
-    },
+    }
 ]  </programlisting>
    <para>
     The link qualifier is assigned to the link, during correlation. In this
