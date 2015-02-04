@@ -28,7 +28,7 @@
         <div class="group-field-block">
             <div class="separate-message">
                 <label for="password" title="{{t "templates.connector.scriptedSQLConnector.password"}}" class="light">{{t "templates.connector.scriptedSQLConnector.password"}}</label>
-                <input id="password" class="form-size-l" data-validator="required" type="password" name="configurationProperties.password" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.password}}" required>
+                <input id="password" class="form-size-l" type="password" name="configurationProperties.password" data-validator-event="keyup blur" value="" {{#if connectorDefaults.configurationProperties.password}} placeholder="********" {{/if}} />
                 <span></span>
                 <div class="validation-message"></div>
             </div>
@@ -107,47 +107,47 @@
         <div class="group-field-block">
             <div class="separate-message">
                 <label for="searchScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.searchScriptFileName"}}</label>
-                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" required>
+                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.searchScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="searchScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.authenticateScriptFileName"}}</label>
-                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.authenticateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" required>
+                <label for="authenticateScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.authenticateScriptFileName"}}</label>
+                <input id="authenticateScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.authenticateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="searchScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.deleteScriptFileName"}}</label>
-                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.deleteScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" required>
+                <label for="deleteScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.deleteScriptFileName"}}</label>
+                <input id="deleteScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.deleteScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="searchScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.updateScriptFileName"}}</label>
-                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.updateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" required>
+                <label for="updateScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.updateScriptFileName"}}</label>
+                <input id="updateScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.updateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="searchScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.syncScriptFileName"}}</label>
-                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.syncScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" required>
+                <label for="syncScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.syncScriptFileName"}}</label>
+                <input id="syncScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.syncScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="searchScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.schemaScriptFileName"}}</label>
-                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.schemaScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" required>
+                <label for="schemaScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.schemaScriptFileName"}}</label>
+                <input id="schemaScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.schemaScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>

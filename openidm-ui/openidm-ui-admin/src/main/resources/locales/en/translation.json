@@ -407,7 +407,7 @@
         "connector" : {
             "groovy_ScriptedConnector":"Groovy Connector",
             "groovy_ScriptedPoolableConnector":"Groovy Poolable Connector",
-            "scriptedsql_ScriptedSQLConnector":"SQL Connector",
+            "scriptedsql_ScriptedSQLConnector":"Scripted SQL Connector",
             "xml_XMLConnector":"XML Connector",
             "csvfile_CSVFileConnector":"CSV Connector",
             "googleapps_GoogleAppsConnector" : "Google Connector",

@@ -31,6 +31,7 @@ import org.identityconnectors.common.logging.Log
 import java.sql.Connection
 
 import static org.identityconnectors.framework.common.objects.AttributeInfo.Flags.REQUIRED
+import static org.identityconnectors.framework.common.objects.AttributeInfo.Flags.MULTIVALUED
 
 def operation = operation as OperationType
 def configuration = configuration as ScriptedSQLConfiguration
@@ -47,7 +48,7 @@ builder.schema({
             lastname String.class, REQUIRED
             fullname String.class, REQUIRED
             email String.class, REQUIRED
-            cars ArrayList.class
+            cars Map.class, MULTIVALUED
             organization String.class, REQUIRED
         }
     }
@@ -57,7 +58,7 @@ builder.schema({
             name String.class, REQUIRED
             gid String.class, REQUIRED
             description String.class, REQUIRED
-            users ArrayList.class
+            users Map.class, MULTIVALUED
         }
     }
     objectClass {
