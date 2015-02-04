@@ -889,6 +889,65 @@
    </para>
   </section>
 
+  <section xml:id="audit-write-adjustments">
+   <title>Adjust Audit Write Behavior</title>
+
+   <para>
+    You can change the way information is written to audit logs with the
+    <literal>bufferSize</literal>. The default is 1024 bytes.
+   </para>
+
+   <para>
+    To make use of the expanded buffer size, set the
+    <literal>maxFlushDelay</literal> to a value greater than the default of 0.
+    If you leave the <literal>maxFlushDelay</literal> at 0, audit entries are
+    written to disk immediately, regardless of buffer size.
+   </para>
+
+   <para>
+    When you set a non-zero <literal>maxFlushDelay</literal>, you are setting
+    the maximum amount of time audit entries remain in the cache without being
+    written to disk, unless the buffer fills up first.
+   </para>
+
+   <para>
+    If you have configured OpenIDM logging with higher throughput, you may want
+    to try a higher <literal>bufferSize</literal>. In that case, you may also
+    want to experiment with different non-zero values for
+    <literal>maxFlushDelay</literal> to make sure logs are actually written
+    before they are flushed from memory.
+   </para>
+
+   <note>
+    <para>
+     If you set a non-zero value for <literal>maxFlushDelay</literal>, you risk
+     the loss of audit data. If the OpenIDM process is killed uncleanly, audit
+     data will be lost. However, a clean shutdown of OpenIDM will flush audit
+     data in buffers to disk.
+    </para>
+   </note>
+
+   <para>
+    The following sample code reflects the defaults, and illustrate where you
+    would configure these properties in the <filename>audit.json</filename>
+    file.
+   </para>
+
+   <programlisting language="javascript">...
+    "logTo" : [
+    ...
+        {
+            "logType" : "csv",
+            "location" : "audit",
+            "recordDelimiter" : ":",
+            "bufferSize" : "1024",
+            "maxFlushDelay" : "0"
+        }
+    ...
+   </programlisting>
+
+  </section>
+
  </section>
 
  <section xml:id="audit-reports">
