@@ -898,9 +898,9 @@
    </para>
 
    <para>
-    To make use of the expanded buffer size, set the
-    <literal>maxFlushDelay</literal> to a value greater than the default of 0.
-    If you leave the <literal>maxFlushDelay</literal> at 0, audit entries are
+    To make use of an audit buffer, set the <literal>maxFlushDelay</literal>
+    to a value greater than the default of 0. If you leave the
+    <literal>maxFlushDelay</literal> at 0, audit entries are
     written to disk immediately, regardless of buffer size.
    </para>
 
