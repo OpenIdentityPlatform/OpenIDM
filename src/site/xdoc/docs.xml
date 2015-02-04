@@ -41,19 +41,19 @@
    <dl>
     <dt>Release Notes</dt>
     <dd>
-     <a href="./doc/release-notes/index.html">HTML</a>,
+     <a href="./doc/bootstrap/release-notes/index.html">HTML</a>,
      <a href="./doc/OpenIDM-Release-Notes.pdf">PDF</a>
     </dd>
 
     <dt>Installation Guide</dt>
     <dd>
-     <a href="./doc/install-guide/index.html">HTML</a>,
+     <a href="./doc/bootstrap/install-guide/index.html">HTML</a>,
      <a href="./doc/OpenIDM-Install-Guide.pdf">PDF</a>
     </dd>
 
     <dt>Integrator's Guide</dt>
     <dd>
-     <a href="./doc/integrators-guide/index.html">HTML</a>,
+     <a href="./doc/bootstrap/integrators-guide/index.html">HTML</a>,
      <a href="./doc/OpenIDM-Integrators-Guide.pdf">PDF</a>
     </dd>
 
