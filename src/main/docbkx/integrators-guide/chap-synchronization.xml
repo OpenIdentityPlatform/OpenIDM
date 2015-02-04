@@ -1378,8 +1378,8 @@ $ <userinput>curl \
          "source" : "managed/user",
          "target" : "system/ldap/account",
          "sourceQuery" {
-                "queryFilter" : "employeeType eq \"Permanent\""
-            },
+            "_queryFilter" : "employeeType eq \"Permanent\""
+         },
 ...</programlisting>
   <para>
    The format of the query can be any query type that is supported by the
