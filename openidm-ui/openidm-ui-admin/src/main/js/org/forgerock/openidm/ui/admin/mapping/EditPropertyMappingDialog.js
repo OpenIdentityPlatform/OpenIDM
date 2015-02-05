@@ -253,6 +253,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             if(this.currentDialog) {
                 this.currentDialog.dialog('destroy').remove();
             }
+            $("#dialogs").hide();
         },
         render: function(params, callback) {
             var _this = this,
@@ -291,6 +292,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 width:'850px',
                 dialogClass: "overflow-visible",
                 close: _.bind(function(){
+                    $("#dialogs").hide();
                     eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
                 }, this),
                 open: function(){
@@ -300,6 +302,9 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                         function () {
                             settings.postRender();
                             $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
+
+                            _this.$el.parents(".ui-dialog,#dialogs").show();
+
                             if(callback){
                                 callback();
                             }

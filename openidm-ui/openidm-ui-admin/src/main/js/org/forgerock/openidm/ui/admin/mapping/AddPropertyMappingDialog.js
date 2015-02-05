@@ -74,6 +74,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
             if(this.currentDialog) {
                 this.currentDialog.dialog('destroy').remove();
             }
+            $("#dialogs").hide();
         },
         getAvailableTargetProps: function(){
             var availableProps;
@@ -113,12 +114,14 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
             this.currentDialog.dialog({
                 appendTo: $('#dialogs'),
                 title: settings.title,
+                position: ['center',25],
                 modal: true,
                 resizable: true,
                 bgiframe: true,
                 width:'850px',
                 dialogClass: "overflow-visible",
                 close: _.bind(function(){
+                    $("#dialogs").hide();
                     eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
                 },this),
                 open: function(){
@@ -128,6 +131,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                                             function () {
                                                 settings.postRender();
                                                 $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
+                                                _this.$el.parents(".ui-dialog,#dialogs").show();
                                                 if(callback){
                                                     callback();
                                                 }
