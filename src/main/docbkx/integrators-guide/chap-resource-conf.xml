@@ -2266,11 +2266,16 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <varlistentry>
      <term>accountObjectClasses</term>
      <listitem>
-      <para>The object classes used when creating new LDAP user objects.
-      When specifying more than one object class, add each object class as its
-      own property. For object classes that inherit from parents other than
-      <literal>top</literal>, such as <literal>inetOrgPerson</literal>, specify
-      all object classes in the class hierarchy.</para>
+      <para>
+       This property lists all the object classes that represent an account. If
+       this property has multiple values, an <literal>OR</literal> filter is
+       used to determine the affected entries. For example, if the value of this
+       property is <literal>["organizationalPerson", "inetOrgPerson"]</literal>,
+       any entry with the object class <literal>organizationalPerson</literal>
+       OR the object class <literal>inetOrgPerson</literal> is considered as an
+       account entry. The value of this property must not include the
+       <literal>top</literal> object class.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2305,7 +2310,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
      <listitem>
       <para>
        Block size for simple paged results and VLV index searches, reflecting
-       the maximum number of objects retrieved at any one time
+       the maximum number of entries retrieved at any one time
       </para>
      </listitem>
     </varlistentry>
@@ -2537,15 +2542,27 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <varlistentry>
      <term>useBlocks</term>
      <listitem>
-      <para>If <literal>true</literal>, use block-based LDAP controls like
-      simple paged results and virtual list view.</para>
+      <para>
+       If <literal>useBlocks</literal> is <literal>false</literal>, no
+       pagination is used. If <literal>useBlocks</literal> is
+       <literal>true</literal>, the connector uses block-based LDAP controls,
+       either the simple paged results control, or the virtual list view
+       control, depending on the setting of the
+       <literal>usePagedResultControl</literal> property.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>usePagedResultControl</term>
      <listitem>
-      <para>If <literal>true</literal>, use simple paged results rather than
-      virtual list view when both are available.</para>
+      <para>
+       Taken into account only if <literal>useBlocks</literal> is
+       <literal>true</literal>. If <literal>usePagedResultControl</literal> is
+       <literal>false</literal>, the connector uses the virtual list view (VLV)
+       control, if it is available. If <literal>usePagedResultControl</literal>
+       is <literal>true</literal>, the connector uses the simple paged results
+       control for search operations.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2679,6 +2696,10 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
     <varlistentry>
      <term>modifiersNamesToFilterOut</term>
      <listitem>
+      <para>
+       This property enables you to define a list of DNs. During synchronization
+       operations, the connector ignores changes made by these DNs.
+      </para>
       <para>
        When a managed user object is updated, and that change is synchronized to
        the LDAP server, the change made on the LDAP server is recorded in the
