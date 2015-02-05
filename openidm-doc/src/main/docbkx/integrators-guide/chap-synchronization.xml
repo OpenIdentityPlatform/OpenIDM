@@ -1440,7 +1440,7 @@ $ <userinput>curl \
         "target" : "system/ldap/account",
         "sourceQuery" : {
             "resourceName" : "endpoint/scriptedQuery"
-            "queryFilter" : "employeeType eq \"Permanent\""
+            "_queryFilter" : "employeeType eq \"Permanent\""
         },
 ...</programlisting>
   <para>
@@ -1473,7 +1473,7 @@ $ <userinput>curl \
             "source" : "system/ldap/account",
             "target" : "managed/user",
             "sourceQuery" : {
-                "queryFilter" : "employeeType eq \"Permanent\""
+                "_queryFilter" : "employeeType eq \"Permanent\""
             },
             "runTargetPhase" : false,
    ...  </programlisting>
