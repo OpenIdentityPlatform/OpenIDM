@@ -940,8 +940,8 @@
             "logType" : "csv",
             "location" : "audit",
             "recordDelimiter" : ":",
-            "bufferSize" : "1024",
-            "maxFlushDelay" : "0"
+            "bufferSize" : 1024,
+            "maxFlushDelay" : 0
         }
     ...
    </programlisting>
