@@ -2125,7 +2125,9 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
 }</programlisting>
    <para>
     The following excerpt shows the settings for the connector configuration
-    properties in the sample LDAP connector.
+    properties in the sample LDAP connector. For additional information on the
+    properties that affect synchronization, see
+    <xref linkend="ldap-connector-sync-controls" />.
    </para>
    <programlisting language="javascript">
 "configurationProperties" : {
@@ -2233,7 +2235,9 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
        One or more starting points in the LDAP tree that will be used when
        searching the tree. Searches are performed when discovering users from
        the LDAP server or when looking for the groups of which a user is a
-       member.
+       member. During reconciliation operations, OpenIDM searches through the
+       base contexts listed in this property for changes. (See also
+       <xref linkend="ldap-connector-sync-controls" />).
       </para>
      </listitem>
     </varlistentry>
@@ -2244,15 +2248,19 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
        One or more starting points in the LDAP tree that will be used to
        determine if a change should be synchronized. During LiveSync operations,
        OpenIDM searches through the base contexts listed in this property for
-       changes.
+       changes. If no value is specified here, the values in listed in the
+       <literal>baseContexts</literal> property are used. (See also
+       <xref linkend="ldap-connector-sync-controls" />).
       </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>accountSynchronizationFilter</term>
      <listitem>
-      <para>Used during synchronization actions to filter out LDAP
-      accounts</para>
+      <para>
+       Used during synchronization actions to filter out LDAP accounts. (See
+       also <xref linkend="ldap-connector-sync-controls" />).
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2268,7 +2276,10 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <varlistentry>
      <term>accountSearchFilter</term>
      <listitem>
-      <para>Search filter that accounts must match</para>
+      <para>
+       Search filter that user accounts must match. (See also
+       <xref linkend="ldap-connector-sync-controls" />).
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2281,16 +2292,21 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <varlistentry>
      <term>attributesToSynchronize</term>
      <listitem>
-      <para>List of attributes used during object synchronization. OpenIDM
-      ignores change log updates that do not include any of the specified
-      attributes. If empty, OpenIDM considers all changes.</para>
+      <para>
+       List of attributes used during object synchronization. OpenIDM ignores
+       change log updates that do not include any of the specified attributes.
+       If empty, OpenIDM considers all changes. (See also
+       <xref linkend="ldap-connector-sync-controls" />).
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>blockSize</term>
      <listitem>
-      <para>Block size for simple paged results and VLV index searches,
-      reflecting the maximum number of accounts retrieved at any one time</para>
+      <para>
+       Block size for simple paged results and VLV index searches, reflecting
+       the maximum number of objects retrieved at any one time
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2328,6 +2344,12 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
      </listitem>
     </varlistentry>
     <varlistentry>
+     <term>groupSearchFilter</term>
+     <listitem>
+      <para>Search filter that group entries must match</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
      <term>maintainLdapGroupMembership</term>
      <listitem>
       <para>If <literal>true</literal>, OpenIDM modifies group membership when
@@ -2353,14 +2375,20 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <varlistentry>
      <term>modifiersNamesToFilterOut</term>
      <listitem>
-      <para>Use to avoid loops caused by OpenIDM's own changes</para>
+      <para>
+       Use this property to avoid loops caused by changes made to managed user
+       objects being synchronized. For more information, see
+       <xref linkend="ldap-connector-sync-controls" />.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>objectClassesToSynchronize</term>
      <listitem>
-      <para>OpenIDM synchronizes only entries having these object
-      classes.</para>
+      <para>
+       OpenIDM synchronizes only entries that have these object classes. See
+       also <xref linkend="ldap-connector-sync-controls" />.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2426,7 +2454,6 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
          Directory
         </para>
        </listitem>
-
        <listitem>
         <para>
          <literal>SHA</literal> - Secure Hash Algorithm
@@ -2481,7 +2508,6 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
       appropriately.</para>
      </listitem>
     </varlistentry>
-
     <varlistentry>
      <term>synchronizePasswords</term>
      <listitem>
@@ -2556,11 +2582,133 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     substituting the path to your own truststore if you do not want to use the
     default.
    </para>
-
    <programlisting>
 # Set the truststore
 javax.net.ssl.trustStore=/path/to/openidm/security/truststore
    </programlisting>
+
+   <section xml:id="ldap-connector-sync-controls">
+    <title>Controlling What is Synchronized With the LDAP Connector</title>
+    <para>
+     To control the set of LDAP entries that are affected by reconciliation and
+     automatic synchronization operations, set the following properties in the
+     provisioner configuration. Automatic synchronization operations includes
+     LiveSync (synchronization of changes from the LDAP server to OpenIDM) and
+     implicit sync (synchronization from the OpenIDM repository to the LDAP
+     server).
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term>baseContexts</term>
+      <listitem>
+       <para>
+        The starting points in the LDAP tree that are used when searching the
+        directory tree, for example, <literal>dc=example,dc=com</literal>. These
+        base contexts must include the set of users <emphasis>and the set of
+        groups</emphasis> that must be searched during reconciliation
+        operations.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>baseContextsToSynchronize</term>
+      <listitem>
+       <para>
+        The starting points in the LDAP tree that are used to determine if a
+        change should be synchronized. This property is used only for automatic
+        synchronization operations. Only entries that fall under these base
+        contexts are considered during synchronization operations.
+       </para>
+      </listitem>
+     </varlistentry>
+    <varlistentry>
+     <term>accountSearchFilter</term>
+     <listitem>
+      <para>
+       Only user accounts that match this filter are searched, and therefore
+       affected by reconciliation and synchronization operations. If you do not
+       set this property, all accounts within the base contexts specified
+       previously are searched.
+      </para>
+     </listitem>
+    </varlistentry>
+     <varlistentry>
+      <term>accountSynchronizationFilter</term>
+      <listitem>
+       <para>
+        This property is used during reconciliation and automatic
+        synchronization operations, and filters out any LDAP accounts that you
+        specifically want to exclude from these operations.
+       </para>
+      </listitem>
+     </varlistentry>
+    <varlistentry>
+     <term>objectClassesToSynchronize</term>
+     <listitem>
+      <para>
+       During automatic synchronization operations, only the object classes
+       listed here are considered for changes. OpenIDM ignores change log
+       updates (or changes to managed objects) which do not have any of the
+       object classes listed here. If this property is not set, OpenIDM
+       considers changes to all attributes specified in the mapping.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>attributesToSynchronize</term>
+     <listitem>
+      <para>
+       During automatic synchronization operations, <emphasis>only</emphasis>
+       the attributes listed here are considered for changes. Objects that
+       include these attributes are synchronized. Objects that do not include
+       these attributes are ignored. If this property is not set, OpenIDM
+       considers changes to all attributes specified in the mapping. Automatic
+       synchronization includes LiveSync and implicit synchronization
+       operations. For more information, see <link xlink:show="new"
+       xlink:href="integrators-guide#sync-types"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Types of
+       Synchronization</citetitle>.</link>
+      </para>
+      <para>
+       This attribute works only with LDAP servers that log changes in a change
+       log, not with servers (such as Active Directory) that use other
+       mechanisms to track changes.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>modifiersNamesToFilterOut</term>
+     <listitem>
+      <para>
+       When a managed user object is updated, and that change is synchronized to
+       the LDAP server, the change made on the LDAP server is recorded in the
+       change log. A LiveSync operation picks up the change, and attempts to
+       replay the change on the managed user object, effectively resulting in
+       a loop of updates.
+      </para>
+      <para>
+       To avoid this situation, you can specify a unique user in your LDAP
+       directory, that will be used <emphasis>only</emphasis> for the LDAP
+       connector. The unique user must be something other than
+       <literal>cn=directory manager</literal>, for example
+       <literal>cn=openidmuser</literal>. You can then include that user DN as
+       the value of <literal>modifiersNamesToFilterOut</literal>. When a change
+       is made through the LDAP connector, and that change is recorded in the
+       change log, the modifier's name (<literal>cn=openidmuser</literal>) is
+       flagged and OpenIDM does not attempt to replay the change back to the
+       managed user repository. So you are effectively indicating that OpenIDM
+       should not synchronized changes back to managed user that originated from
+       managed user, thus preventing the update loop.
+      </para>
+      <para>
+       This attribute works only with LDAP servers that log changes in a change
+       log, not with servers (such as Active Directory) that use other
+       mechanisms to track changes.
+      </para>
+     </listitem>
+    </varlistentry>
+    </variablelist>
+   </section>
 
   </section>
 
@@ -2573,15 +2721,36 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
     The connector therefore requires a connector server that has access to the
     ADSI .dll files.
    </para>
+   <itemizedlist>
+    <para>
+     In general, the generic LDAP connector is preferable to the Active
+     Directory connector for the following reasons:
+    </para>
+    <listitem>
+     <para>
+      There is no requirement for a .NET connector server, so the deployment is
+      simpler, and less intrusive
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Better performance is observed with the LDAP connector
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      The LDAP connector is easier to configure
+     </para>
+    </listitem>
+   </itemizedlist>
    <para>
-    In general, the generic LDAP connector has better performance than the
-    Active Directory connector. Unfortunately, Active Directory has some
-    limitations when you use the LDAP connector, and the LDAP connector might
-    therefore not be suitable in all Active Directory deployments. However, if
-    your deployment can use the LDAP connector, it is preferable to do so.
+    If your Active Directory environment is simple, deals with regular
+    attributes, you should definitely use the LDAP connector. Unfortunately,
+    in complex Active Directory environments, there are some limitations when
+    you use the LDAP connector, which might make it unsuitable for your
+    deployments.
    </para>
-   <!--TODO Gael Allioux is writing up a note comparing the two connectors -
-   include this content here when it is complete -->
+   <!--TODO update to recommend the PowerShell Connector IDME-336 -->
    <para>
     Before you configure the Active Directory Connector, make sure that the
     .NET Connector Server is installed, configured and started, and that OpenIDM
