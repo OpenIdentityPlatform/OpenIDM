@@ -27,7 +27,8 @@
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook
- http://docbook.org/xml/5.0/xsd/docbook.xsd'>
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Compatibility</title>
 
  <para>
@@ -147,8 +148,23 @@
  <section xml:id="changing-functionality">
   <title>Functionality That Will Change in the Future</title>
   <para>
-   No major functionality is planned to change at this time.
+   The <link xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#active-directory-connector" xlink:show="new">
+   <citetitle>Active Directory (AD) Connector</citetitle></link> may be
+   deprecated in a future release of OpenICF, and support for its use with
+   OpenIDM may be discontinued.
   </para>
+  <para>
+   For new deployments, you can use the
+   <link xlink:show="new" xlink:href="integrators-guide#ldap-connector"
+         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Generic
+    LDAP Connector</citetitle></link>, the
+   <link xlink:show="new" xlink:href="integrators-guide#powershell-connector"
+         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Powershell
+    Connector Toolkit</citetitle></link>, or the AD Lightweight Directory
+   Services connector.
+  </para>
+
  </section>
 
 </chapter>
