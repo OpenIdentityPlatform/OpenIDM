@@ -11,24 +11,8 @@
             "taskThreads" : 0,
             "properties" : [
                 {
-                    "source" : "employeeNumber",
-                    "transform" : {
-                        "type" : "text/javascript",
-                        "source" : "(source.substring(0,1) === '6') ? 'openidm-admin,openidm-authorized' : 'openidm-authorized';"
-                    },
-                    "target" : "roles"
-                },
-                {
-                    "source" : "mail",
-                    "target" : "email"
-                },
-                {
                     "source" : "mail",
                     "target" : "name"
-                },
-                {
-                    "source" : "password",
-                    "target" : "password"
                 },
                 {
                     "source" : "lastName",
@@ -37,6 +21,18 @@
                 {
                     "source" : "givenName",
                     "target" : "firstname"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "employeeNumber",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "(source.substring(0,1) === '6') ? 'openidm-admin,openidm-authorized' : 'openidm-authorized';"
+                    },
+                    "target" : "roles"
                 },
                 {
                     "default" : "N/A",

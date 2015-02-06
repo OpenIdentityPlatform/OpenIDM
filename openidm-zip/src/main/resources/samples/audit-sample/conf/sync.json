@@ -30,7 +30,7 @@
                     "target" : "userName"
                 },
                 {
-                    "source" : "password",
+                    "default" : "Passw0rd",
                     "target" : "password"
                 },
                 {
@@ -106,14 +106,6 @@
                 {
                     "source" : "userName",
                     "target" : "name"
-                },
-                {
-                    "source" : "password",
-                    "target" : "password",
-                    "transform" : {
-                        "type" : "text/javascript",
-                        "source" : "openidm.decrypt(source)"
-                    }
                 },
                 {
                     "source" : "telephoneNumber",

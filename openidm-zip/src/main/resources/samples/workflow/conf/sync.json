@@ -54,7 +54,7 @@
                     "target" : "endDate"
                 },
                 {
-                    "source" : "password",
+                    "default" : "Welcome1",
                     "target" : "password"
                 },
                 {
