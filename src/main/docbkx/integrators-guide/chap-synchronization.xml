@@ -1377,7 +1377,7 @@ $ <userinput>curl \
          "name" : "managedUser_systemLdapAccounts",
          "source" : "managed/user",
          "target" : "system/ldap/account",
-         "sourceQuery" {
+         "sourceQuery" : {
             "_queryFilter" : "employeeType eq \"Permanent\""
          },
 ...</programlisting>
