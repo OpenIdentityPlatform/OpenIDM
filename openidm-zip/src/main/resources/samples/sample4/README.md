@@ -56,7 +56,6 @@ XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xm
        <ri:__ACCOUNT__>
           <icf:__UID__>bjensen</icf:__UID__>
           <icf:__NAME__>bjensen@example.com</icf:__NAME__>
-          <ri:password>TestPassw0rd#</ri:password>
           <ri:firstname>Barbara</ri:firstname>
           <ri:lastname>Jensen</ri:lastname>
           <ri:email>bjensen@example.com</ri:email>
@@ -67,7 +66,6 @@ XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xm
        <ri:__ACCOUNT__>
           <icf:__UID__>scarter</icf:__UID__>
           <icf:__NAME__>scarter@example.com</icf:__NAME__>
-          <ri:password>TestPassw0rd#</ri:password>
           <ri:firstname>Steven</ri:firstname>
           <ri:lastname>Carter</ri:lastname>
           <ri:email>scarter@example.com</ri:email>
