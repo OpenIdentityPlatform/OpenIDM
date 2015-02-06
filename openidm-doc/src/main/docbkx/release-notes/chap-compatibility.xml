@@ -150,21 +150,21 @@
   <para>
    The <link xlink:role="http://docbook.org/xlink/role/olink"
    xlink:href="integrators-guide#active-directory-connector" xlink:show="new">
-   <citetitle>Active Directory (AD) Connector</citetitle></link> may be
-   deprecated in a future release of OpenICF, and support for its use with
-   OpenIDM may be discontinued.
+   <citetitle>Active Directory (AD) .NET Connector</citetitle></link> will be
+   deprecated in a future OpenICF release, and, ultimately, support for its use
+   with OpenIDM will be discontinued.
   </para>
   <para>
-   For new deployments, you can use the
+   For simple Active Directory (and Active Directory LDS) deployments, the
    <link xlink:show="new" xlink:href="integrators-guide#ldap-connector"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Generic
-    LDAP Connector</citetitle></link>, the
-   <link xlink:show="new" xlink:href="integrators-guide#powershell-connector"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Powershell
-    Connector Toolkit</citetitle></link>, or the AD Lightweight Directory
-   Services connector.
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Generic
+   LDAP Connector</citetitle></link> works better than the Active Directory
+   connector, in most circumstances. For more complex Active Directory
+   deployments, use the <link xlink:show="new"
+   xlink:href="integrators-guide#powershell-connector"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Powershell
+   Connector Toolkit</citetitle></link>.
   </para>
-
  </section>
 
 </chapter>
