@@ -108,7 +108,6 @@ See the data updated in the XML file:
           <ri:roles>openidm-admin,openidm-authorized</ri:roles>
           <icf:__NAME__>scarter@example.com</icf:__NAME__>
           <ri:email>scarter@example.com</ri:email>
-          <ri:password>Z29vZA==</ri:password>
           <ri:lastname>Carter</ri:lastname>
        </ri:__ACCOUNT__>
        <ri:__ACCOUNT__>
@@ -119,7 +118,6 @@ See the data updated in the XML file:
           <icf:__UID__>492f28f8-dc03-43e1-aaed-abd33f265ecb</icf:__UID__>
           <icf:__NAME__>doe@example.org</icf:__NAME__>
           <ri:email>doe@example.org</ri:email>
-          <ri:password>Z29vZA==</ri:password>
           <ri:lastname>Doe</ri:lastname>
        </ri:__ACCOUNT__>
     </icf:OpenICFContainer>
