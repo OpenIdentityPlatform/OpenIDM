@@ -39,9 +39,9 @@ CSV data for this sample is in the file samples/sample4/data/hr.csv.
 
     $ cd /path/to/openidm
     $ cat samples/sample4/data/hr.csv
-    "firstName", "uid", "lastName", "email", "employeeNumber", "password"
-    "Don", "DDOE", "Doe", "doe@example.org", "123456", "Z29vZA=="
-    "Stephen", "SCARTER", "Carter", "scarter@example.com", "654321", "Z29vZA=="
+    "firstName", "uid", "lastName", "email", "employeeNumber"
+    "Don", "DDOE", "Doe", "doe@example.org", "123456"
+    "Stephen", "SCARTER", "Carter", "scarter@example.com", "654321"
 
 XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xml
 
