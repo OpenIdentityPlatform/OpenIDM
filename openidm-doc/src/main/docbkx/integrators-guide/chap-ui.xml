@@ -34,10 +34,10 @@
 
  <para>
   OpenIDM provides a customizable, browser-based user interface, known as the
-  Data Management UI. To take full advantage of this interface, you can
-  configure OpenIDM <link xlink:show="new"
-                          xlink:href="integrators-guide#managed-objects"
-        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
+  Data Management UI. The Data Management UI provides a graphical view of the
+  OpenIDM <link xlink:show="new"
+  xlink:href="integrators-guide#managed-objects"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
   Objects</citetitle></link> under <literal>managed/user</literal>. Most of the
   <link xlink:show="new" xlink:href="install-guide#chap-samples"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
@@ -46,8 +46,8 @@
  </para>
 
  <para>
-  The Data Management UI interface enables administrative users to create,
-  modify, and delete user and other accounts. It provides role-based access to
+  The Data Management UI enables administrative users to create, modify, and
+  delete user and other accounts. It also provides role-based access to
   tasks based on BPMN2 workflows, and allows users to manage certain aspects of
   their own accounts, including configurable self-service registration. When
   OpenIDM starts, you can access the Data Management UI at
@@ -189,7 +189,7 @@
    </para>
 
    <para>
-    Once you fill in all required text boxes, the Admin UI allows you
+    When you have filled in all required text boxes, the Admin UI allows you
     to validate the connector configuration.
    </para>
 
@@ -332,9 +332,11 @@
    <title>Configuring a Resource Mapping from the UI</title>
 
    <para>
-    You may have multiple connectors and managed objects. You can configure a
-    mapping between any two of these resources. Connectors represent an external
-    data store, as specified in the following section:
+    Your deployment might include multiple external systems that you need to
+    connect, either to each other, or to the OpenIDM managed object repository.
+    You can use the Admin UI to configure mappings between any two sets of
+    resources. In the Admin UI terminology, a connector represents an external
+    data store. The connectors supported for use with OpenIDM are described in
     <link xlink:role="http://docbook.org/xlink/role/olink"
     xlink:show="new" xlink:href="integrators-guide#openicf-provisioner-conf">
     <citetitle>Connectors Supported with OpenIDM</citetitle></link>. In
@@ -342,21 +344,23 @@
    </para>
 
    <para>
-    Resource mapping requires a source and a target. Generally, each resource
-    includes properties such as username, address, surname, and title.
-    Resource mapping can go beyond user information to other types of data.
+    Resource mapping requires a source and a target. Generally, a resource
+    contains user accounts, which include properties such as username, address,
+    surname, and title. Resources can contain other types of data, however,
+    such as groups, or devices.
    </para>
 
    <para>
-    Once you create a mapping, you can identify properties that you wish to
-    control in the target. With this part of the Admin UI, you can configure
-    how OpenIDM uses matching properties in the source.
+    When you create a mapping between two resources, you identify the properties
+    that you want to control in the target. With this part of the Admin UI, you
+    configure how OpenIDM matches properties in the source resource to
+    properties in the target resource.
    </para>
 
    <para>
     The following screenshot illustrates a property mapping between two
     resources. Every resource includes identifiers for each attribute. For
-    example, different resources may use one of the following identifiers for
+    example, different resources might use one of the following identifiers for
     usernames: un, uid, user, sAMAccountName, and account. For more information
     on property mappings, see the following section on the
     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
@@ -372,10 +376,10 @@
    </mediaobject>
 
    <para>
-    The bold black line is used solely by the UI to determine what data is
-    shown from these data stores. It does not affect reconciliation. In the
-    Admin UI, you can change the location of the line, or move a desired
-    property above or below the line.
+    The bold black line determines which properties are displayed for each
+    object in the Data Association Management panel, under the Correlation menu.
+    A maximum of four properties can be displayed. To include a property in the
+    display, drag it above the bold line.
    </para>
 
   </section>
