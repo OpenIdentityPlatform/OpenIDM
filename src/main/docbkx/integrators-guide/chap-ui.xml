@@ -135,22 +135,14 @@
    <citetitle>Sample 2b - LDAP Two Way</citetitle></link>.
   </para>
 
-  <note>
-   <para>
-    While a connector is not a resource, it provides a connection to remote
-    resources such as LDAP data stores, XML files, and other databases.
-   </para>
-  </note>
-
   <para>
-   Connectors are used to communicate with remote resources, such as a
-   database, an identity store, or another organized data store.
-  </para>
-
-  <para>
-   Once you connect one or more data stores and managed objects, you can
-   create a mapping between two resources. You can then configure property
-   mapping between those resources, for later synchronization.
+   Connectors facilitate communication between OpenIDM and a remote resource,
+   such as a database, an identity store, or another organized data store. The
+   Admin UI uses the term <emphasis>connector</emphasis> to refer to the remote
+   resource to which you are connecting. When you have connected two resources,
+   you can create a mapping between the objects that are stored in those
+   resources. Mapping the individual object properties enables synchronization
+   between the resources.
   </para>
 
   <section xml:id="ui-admin-connectors">
@@ -161,10 +153,6 @@
     Select the option to create a new connector. Try some of the different
     connector types in the screen that appears. Observe as the Admin UI changes
     the configuration options to match the requirements of the connector type.
-   </para>
-
-   <para>
-    Every connector serves as a conduit to an external data store.
    </para>
 
    <mediaobject>
