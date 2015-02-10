@@ -14,7 +14,7 @@
                 <xsd:element name="manager" type="xsd:string" />
                 <xsd:element name="department" type="xsd:string" minOccurs="0"/>
                 <xsd:element name="jobTitle" type="xsd:string" minOccurs="0"/>
-                <xsd:element name="mobileTelephoneNumber" type="xsd:string" />
+                <xsd:element name="mobileTelephoneNumber" type="xsd:string" minOccurs="0" />
                 <xsd:element name="email" type="xsd:string" />
                 <xsd:element name="startDate" type="xsd:string" minOccurs="0"/> <!--YYYY-MM-DD-->
                 <xsd:element name="endDate" type="xsd:string" minOccurs="0"/> <!--YYYY-MM-DD-->
