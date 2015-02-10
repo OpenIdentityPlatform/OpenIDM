@@ -428,7 +428,10 @@ addPolicy(policy);
 
 function notNull(fullObject, value, params, property) {
    if (value == null) {
-       return [ {"policyRequirement": "NOT_NULL"}];
+      var requireNotNull = [
+        {"policyRequirement": "NOT_NULL"}
+      ];
+      return requireNotNull;
    }
    return [];
 } 
