@@ -69,19 +69,22 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
         
         render: function(args, callback) {
             var landingView = require(router.configuration.routes.landingPage.view);
+
             if (landingView.baseTemplate) {
                 this.baseTemplate = landingView.baseTemplate;
             }
 
             this.actions = [];
+            this.addAction($.t("common.form.update"), "submit");
 
             $("#dialogs").hide();
+
+            this.addTitle($.t("templates.MandatoryChangePassword.title"));
 
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
                     $("#dialogs").show();
-                    $("#dialogs .dialogActions").hide();
-
+                    this.$el.find("input[type=submit]").prop('disabled', true);
                     this.$el.find("[name=password]").focus();
 
                     if (callback) {

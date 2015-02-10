@@ -87,6 +87,8 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog", [
         render: function() {
             this.actions = [];
             this.addAction($.t("common.form.save"), "submit");
+            this.addTitle($.t("common.user.siteImage"));
+
             this.show(_.bind(function() {
                 this.siteImageCounter = 0;
                 $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));

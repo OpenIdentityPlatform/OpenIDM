@@ -93,17 +93,17 @@
                 "securityDataChange" : "Security data change",
                 "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password.",
                 "selectQuestionAndAnserIfYouWant" : "Please select question and enter your answer if you want to set up a one.",
-                "securityQuestionAndAnserExplanation" : "The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password."
+                "securityQuestionAndAnserExplanation" : "Select a Security Question. Enter an answer. If you forget your password, you'll be prompted with that question."
             },
             "ChangeSiteIdentificationDialogTemplate" : {
-                "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
+                "siteImageAndPhaseExplanation" : "Select a Site Image. Enter a Site Phrase. You'll see both when you log into the genuine website."
             },
             "EnterOldPasswordDialog" : {
                 "passwordAndSecurityQuestionChange" : "Password and security question change",
                 "enterYourOldPassword" : "Please enter your old password"
             },
             "ForgottenPasswordTemplate" : {
-                "forgottenPasswordQuestion" : "Forgotten password?",
+                "forgottenPasswordQuestion" : "Did you forget your password?",
                 "enterLogin" : "Please enter your login in the field below to continue."
             },
             "TermsOfUseTemplate" : {
