@@ -54,6 +54,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             modules: {},
             defaultAuth: {},
             module_types: {
+                "STATIC_USER" : null,
                 "CLIENT_CERT": null,
                 "IWA": null,
                 "MANAGED_USER": null,
@@ -119,8 +120,8 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
 
                                     // The following code updates the enum values for the queryOnResource property
-                                    // Internal User Modules will only need access to the internal repo and can be excluded as that value is set in the template.
-                                    if (jsonTemplate.templateName !== "INTERNAL_USER" &&
+                                    // Internal/Anonymous User Modules will only need access to the internal repo and can be excluded as that value is set in the template.
+                                    if (jsonTemplate.templateName !== "INTERNAL_USER" && jsonTemplate.templateName !== "STATIC_USER" &&
                                         _.has(jsonTemplate.mainSchema, "properties") &&
                                         _.has(jsonTemplate.mainSchema.properties, "queryOnResource") &&
                                         _.has(jsonTemplate.mainSchema.properties.queryOnResource, "enum")) {
@@ -404,19 +405,21 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 // The conditional display of roles or groupmembership doesn't load as expected from JsonEditor, custom code to show and hide is necessary
                 if (this.model.modules[tempKey]) {
                     userGroupEditorNode = this.model.modules[tempKey].basicEditor.getEditor("root.propertyMapping.userorgroup") || this.model.modules[tempKey].advancedEditor.getEditor("root.propertyMapping.userorgroup");
-                    userorgroup = userGroupEditorNode.value;
+                    if (typeof userGroupEditorNode !== "undefined" && userGroupEditorNode !== null) {
+                        userorgroup = userGroupEditorNode.value;
 
-                    if (_(userorgroup).isString() && userorgroup.length > 0) {
-                        userGroupEditorNode.switchEditor(1);
-                        this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.userRoles"));
+                        if (_(userorgroup).isString() && userorgroup.length > 0) {
+                            userGroupEditorNode.switchEditor(1);
+                            this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.userRoles"));
 
-                    } else if (_(userorgroup).isObject()) {
-                        userGroupEditorNode.switchEditor(2);
-                        this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.groupMembership"));
+                        } else if (_(userorgroup).isObject()) {
+                            userGroupEditorNode.switchEditor(2);
+                            this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.groupMembership"));
 
-                    } else {
-                        userGroupEditorNode.switchEditor(0);
-                        this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.selectOption"));
+                        } else {
+                            userGroupEditorNode.switchEditor(0);
+                            this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.selectOption"));
+                        }
                     }
                 }
             }
@@ -454,7 +457,9 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 authMod = this.model.modules[toUpdate].name;
                 errors = this.model.modules[toUpdate].module.find(".ui-state-error:visible");
 
-                if(_.has(basicEditor, "queryOnResource")) {
+                if (authMod === "STATIC_USER" && _.has(basicEditor, "username")) {
+                    this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + basicEditor.username);
+                } else if(_.has(basicEditor, "queryOnResource")) {
                     this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + basicEditor.queryOnResource);
                 } else if(_.has(advancedEditor, "queryOnResource")) {
                     this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + advancedEditor.queryOnResource);
@@ -545,16 +550,23 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         tempModule.properties.augmentSecurityContext = this.model.modules[tempID].scriptEditor.getScriptHook().script;
                     }
 
-                    if (tempEditor.propertyMapping.userorgroup.length > 0) {
-                        tempModule.properties.propertyMapping.userRoles = tempEditor.propertyMapping.userorgroup;
+                    // these are undefined for the STATIC_USER module which has no propertyMapping
+                    if (typeof tempEditor.propertyMapping !== "undefined"
+                            && tempEditor.propertyMapping !== null
+                            && typeof tempEditor.propertyMapping.userorgroup !== "undefined"
+                            && tempEditor.propertyMapping.userorgroup !== null) {
 
-                    } else if (!_.isUndefined(tempEditor.propertyMapping.userorgroup.grpMembership)) {
-                        tempModule.properties.propertyMapping.groupMembership = tempEditor.propertyMapping.userorgroup.grpMembership;
-                        tempModule.properties.groupRoleMapping = {};
+                        if (tempEditor.propertyMapping.userorgroup.length > 0) {
+                            tempModule.properties.propertyMapping.userRoles = tempEditor.propertyMapping.userorgroup;
 
-                        _(tempEditor.propertyMapping.userorgroup.groupRoleMapping).each(function (mapping) {
-                            tempModule.properties.groupRoleMapping[mapping.roleName] = mapping.groupMapping;
-                        });
+                        } else if (!_.isUndefined(tempEditor.propertyMapping.userorgroup.grpMembership)) {
+                            tempModule.properties.propertyMapping.groupMembership = tempEditor.propertyMapping.userorgroup.grpMembership;
+                            tempModule.properties.groupRoleMapping = {};
+
+                            _(tempEditor.propertyMapping.userorgroup.groupRoleMapping).each(function (mapping) {
+                                tempModule.properties.groupRoleMapping[mapping.roleName] = mapping.groupMapping;
+                            });
+                        }
                     }
 
                     if (_(this.model.modules[tempID].scriptEditor.getScriptHook().script).isObject()) {

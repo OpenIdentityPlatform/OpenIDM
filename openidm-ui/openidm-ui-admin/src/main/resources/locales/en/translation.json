@@ -355,6 +355,11 @@
             "defaultUserRole": "Default User Roles",
             "role": "Role",
             "propertyMapping": "Property Mappings",
+            "static" : {
+                "username" : "Static user name",
+                "password" : "Static user password",
+                "userRole" : "Static user role"
+            },
             "authId": "Authentication ID",
             "userCred": "User Credential",
             "userOrGroup": "User Roles or Group Membership",
