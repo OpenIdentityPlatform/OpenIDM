@@ -15,6 +15,16 @@
         },
         "authModules" : [
             {
+                "name" : "STATIC_USER",
+                "properties" : {
+                    "queryOnResource" : "repo/internal/user",
+                    "username" : "anonymous",
+                    "password" : "anonymous",
+                    "defaultUserRoles" : [ "openidm-reg" ]
+                },
+                "enabled" : true
+            },
+            {
                 "name" : "MANAGED_USER",
                 "properties" : {
                     "queryId" : "credential-query",
