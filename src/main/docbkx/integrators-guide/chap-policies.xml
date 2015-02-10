@@ -402,22 +402,23 @@ function required(fullObject, value, params, propName) {
   </section>
   
   <section xml:id="extending-policies">
-    <title>Extending the Policy Service</title>
-    
-    <para>You can extend the policy service by adding your own scripted 
-    policies in <filename>openidm/script</filename> and referencing them in 
-    the policy configuration file (<filename>conf/policy.json</filename>). 
-    Avoid manipulating the default policy script file (in 
-    <literal>bin/defaults/script</literal>) as doing so might result in 
-    interoperability issues in a future release. To reference additional 
-    policy scripts, set the <literal>"additionalFiles"</literal> property in 
-    <filename>conf/policy.json</filename>.</para>
-    
-    <para>The following example creates a custom policy that rejects 
-    properties with null values. The policy is defined in a script named 
-    <literal>mypolicy.js</literal>.</para>
-    
-    <programlisting language="javascript">
+   <title>Extending the Policy Service</title>
+   <para>
+    You can extend the policy service by adding your own scripted policies in
+    <filename>openidm/script</filename> and referencing them in the policy
+    configuration file (<filename>conf/policy.json</filename>). Avoid
+    manipulating the default policy script file (in
+    <literal>bin/defaults/script</literal>) as doing so might result in
+    interoperability issues in a future release. To reference additional policy
+    scripts, set the <literal>"additionalFiles"</literal> property in
+    <filename>conf/policy.json</filename>.
+   </para>
+   <para>
+    The following example creates a custom policy that rejects properties with
+    null values. The policy is defined in a script named
+    <literal>mypolicy.js</literal>.
+   </para>
+   <programlisting language="javascript">
 var policy = {   "policyId" : "notNull",
        "policyExec" : "notNull",  
        "policyRequirements" : ["NOT_NULL"]
@@ -431,13 +432,12 @@ function notNull(fullObject, value, params, property) {
    }
    return [];
 } 
-    </programlisting>
-    
-    <para>The <filename>mypolicy.js</filename> policy is referenced in the
-     <filename>policy.json</filename> configuration file as follows:
-    </para>
-    
-    <programlisting language="javascript">
+   </programlisting>
+   <para>
+    The <filename>mypolicy.js</filename> policy is referenced in the
+    <filename>policy.json</filename> configuration file as follows:
+   </para>
+   <programlisting language="javascript">
 {
     "type" : "text/javascript",
     "file" : "bin/defaults/script/policy.js",
@@ -445,13 +445,13 @@ function notNull(fullObject, value, params, property) {
     "resources" : [
         {
 ...
-    </programlisting>
-
-   <para>You can also configure policies for managed object properties as
-    part of the property definition in the <filename>conf/managed.json</filename>
-    file. For example, the following extract of a managed.json file shows a
-    policy configuration for the <literal>password</literal> property.</para>
-
+   </programlisting>
+   <para>
+    You can also configure policies for managed object properties as part of the
+    property definition in the <filename>conf/managed.json</filename> file. For
+    example, the following extract of a managed.json file shows a policy
+    configuration for the <literal>password</literal> property.
+   </para>
    <programlisting language="javascript">
 ...
 "properties" : [
