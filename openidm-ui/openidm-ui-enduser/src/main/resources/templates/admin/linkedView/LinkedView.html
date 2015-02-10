@@ -1,19 +1,24 @@
-<h2>{{t "templates.admin.LinkedTemplate.linkedSystems"}}</h2>
-
+<div class="page-header">
+    <h3>{{t "templates.admin.LinkedTemplate.linkedSystems"}}</h3>
+</div>
 {{#if linkedResources}}
-    <div class="group-field-block">
-        <label class="light">{{t "templates.admin.LinkedTemplate.linkedResource"}}</label>
-        <select id="linkedViewSelect">
-            {{#each_with_index linkedResources}}
+<form role="form" class="form-horizontal">
+    <div class="form-group">
+        <label style="margin-left:15px;" class="pull-left control-label" for="linkedViewSelect">{{t "templates.admin.LinkedTemplate.linkedResource"}}</label>
+        <div class="col-sm-6">
+            <select class="form-control" id="linkedViewSelect" name="linkedViewSelect">
+                {{#each_with_index linkedResources}}
                 <option value="{{index}}">{{value}}</option>
-            {{/each_with_index}}
-            </each_with_index>
-        </select>
+                {{/each_with_index}}
+            </select>
+            <div class="validation-message"></div>
+        </div>
     </div>
-
-    <div id="linkedViewContent"></div>
+</form>
+<div style="clear:both;"></div>
+<div id="linkedViewContent"></div>
 {{else}}
-    <div class="data-not-found">
-        {{t "templates.admin.LinkedTemplate.noLinkedSystems"}}
-    </div>
+<h4 class="no-details">
+    {{t "templates.admin.LinkedTemplate.noLinkedSystems"}}
+</h4>
 {{/if}}

@@ -110,6 +110,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
         render: function() {
             this.actions = [];
             this.addAction($.t("common.form.update"), "submit");
+            this.addTitle ($.t("templates.MandatoryChangePassword.title"));
 
             this.delegate = conf.globalData.userComponent === "repo/internal/user" ? internalUserDelegate : userDelegate;
 

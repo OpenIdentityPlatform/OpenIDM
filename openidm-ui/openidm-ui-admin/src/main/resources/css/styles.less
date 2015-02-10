@@ -22,17 +22,26 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+
 /* css basic configuration */
-@import "common/config.less";
+@import "common/variables.less";
+@import "common/common.less";
 
-/* helpers, functions, columns */
-@import "common/helpers.less";
-@import "fontawesome/less/font-awesome.less";
+/*
+  Library css
+*/
+@import "common/jquery-ui-1.10.3.custom.css";
+@import "common/bootstrap.min.css";
+@import "fontawesome/css/font-awesome.min.css";
+@import "fontawesome/less/variables.less";
+//@import "common/jquery-ui-1.10.3.custom.css";
 
-/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
-@import "common/layout.less";
+/*
+  Specific libraries
+*/
+@import "jqgrid-override.less";
 
-/* specific css used in specific modules */
+/* specific css used in specific modules
 @import "config/adminConfig.less";
 @import "config/adminStyle.less";
 @import "config/objectTypes.less";
@@ -52,6 +61,6 @@
 @import "config/mappingScripts.less";
 @import "config/testSync.less";
 @import "jsonEditor.less";
-
+*/
 
 

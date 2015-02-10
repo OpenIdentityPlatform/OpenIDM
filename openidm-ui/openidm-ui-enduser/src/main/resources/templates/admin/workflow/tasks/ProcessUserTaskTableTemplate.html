@@ -1,30 +1,20 @@
-<h3>
-    {{taskName}}
-    <div style="float: right;">
-        {{#count}}
-            {{p this key="templates.admin.tasks.ProcessUserTaskTableTemplate.requestCount"}}
-        {{/count}}
-    </div>
-</h3>
-<div>
-    <table>
-        <thead>
-	        <tr>
-	            {{#headers}}
-	                <th>{{.}}</th>
-	            {{/headers}}
-	        </tr>
-        </thead>
-        <tbody>
-	        {{#tasks}}
-	        <tr>
-	            {{#.}}
-	                <td>{{{.}}}</td>
-	            {{/.}}
-	        </tr>
-	        
-	        {{/tasks}}
-        </tbody>
-    </table>   
-    <div class="clear"></div>
-</div>
+<table class="table">
+    <thead class="table-header">
+        <tr>
+            {{#headers}}
+                <th>{{.}}</th>
+            {{/headers}}
+        </tr>
+    </thead>
+    <tbody>
+        {{#tasks}}
+        <tr>
+            {{#.}}
+                <td>{{{.}}}</td>
+            {{/.}}
+        </tr>
+
+        {{/tasks}}
+    </tbody>
+</table>
+<div class="clear"></div>

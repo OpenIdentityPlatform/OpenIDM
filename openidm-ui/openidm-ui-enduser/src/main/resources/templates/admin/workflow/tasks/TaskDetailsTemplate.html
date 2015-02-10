@@ -1,18 +1,19 @@
-<div class="column-layout">
-	<div class="column offset20">
-		<form class="form center shadow round bg-gradient" style="padding: 15px; margin-top: 20px;">
-			<fieldset>
-			    <!-- close action <a href="#" class="img-close">a</a> -->
-			    <div id="taskContent" class="bg-white border-gray round" style="padding: 15px"></div>
-			    {{#equals category "assigned"}}
-			    <div id="actions" class="field field-submit" style="margin-bottom: 0">
-			        <a href="#" class="closeLink">{{t "common.form.close"}}</a>
-			        {{#if showRequeue}}<button name="requeueButton" class="button active gray">{{t "common.task.requeue"}}</button>{{/if}}
-			        <input type="submit" name="saveButton" value='{{t "common.form.complete"}}' class="button">
-			    </div>
-			    {{/equals}}
-		    </fieldset>
-		</form>
-	</div>
-</div>
+<form role="form" class="form-horizontal">
+    <fieldset>
+        <div id="taskContent"></div>
+
+        {{#equals category "assigned"}}
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-9">
+                <a href="#" class="closeLink">{{t "common.form.close"}}</a>
+                {{#if showRequeue}}
+                <input type="button" name="requeueButton" value="{{t "common.task.requeue"}}"  class="btn btn-primary" />
+                {{/if}}
+                <input type="submit" name="saveButton" value="{{t "common.form.complete"}}"  class="btn btn-primary" />
+            </div>
+        </div>
+        {{/equals}}
+    </fieldset>
+</form>
+
 

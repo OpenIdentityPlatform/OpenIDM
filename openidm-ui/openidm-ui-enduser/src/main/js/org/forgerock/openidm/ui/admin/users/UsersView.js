@@ -141,14 +141,14 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             "editoptions": { "value": ":All;active:Active;inactive:Inactive"},
                             "formatter": function(val, options, row_data){
                                 var val_escaped = Handlebars.Utils.escapeExpression(val),
-                                    img_src = (val_escaped === 'active') ? 'images/span_ok.png' : 'images/span_error.png',
-                                    html = '<img style="padding-top:5px;cursor:pointer;" src="' + img_src + '" title="' + val_escaped + '"/>';
+                                    img_src = (val_escaped === 'active') ? 'fa-check' : 'fa-times',
+                                    html = '<i style="padding-top:5px;cursor:pointer;" class="fa ' + img_src + '" title="' + val_escaped + '"></i>';
                                 return (val_escaped && val_escaped.length > 0) ? html : '';
                             }
                         }
                 ],
                 rowNum = cookieHelper.getCookie("userGridRows");
-                
+
                 $('#' + grid_id).jqGrid('GridUnload');
                 $('#' + pager_id).remove();
                 

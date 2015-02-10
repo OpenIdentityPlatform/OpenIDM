@@ -1,31 +1,23 @@
-<h1>{{t "common.user.siteImage"}}</h1>
-<p>{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
+<form id="siteImageChange" role="form" action="" class="form-horizontal" method="post" onsubmit="return false">
+    <fieldset class="fieldset">
 
-<form id="siteImageChange" action="" class="form" method="post" onsubmit="return false">
+        <input type="hidden" name="oldSiteImage" />
 
-    <fieldset>
-   
-        <input type="hidden" name="oldSiteImage" /> 
-               
-        <div class="ContentFlow" id="siteImageFlow">
-            <div class="loadIndicator"><div class="indicator"></div></div>
-            <div class="flow">{{siteImages siteImages}}</div>
-            <div class="scrollbar"><div class="slider"></div></div>
-        </div>   
+        <p>{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
 
-        <input type="hidden" name="siteImage" data-validator="siteImage" data-validation-status="disabled" /> 
-
-        <input type="hidden" name="oldPassPhrase" />
-        <div class="group-field-block center"  id="securityPassword">
-            <label for="passPhrase" class="light align-right">{{t "common.user.sitePhrase"}}</label>
-            <div class="float-left separate-message">
-                <div class="group-input-span">
-                    <input type="text" id="passPhrase" name="passPhrase"  required autofocus >
-                    <span class="error">x</span>
-                </div>
-                <div class="validation-message"></div>
+        <div id="passPhrasePictures" class="site-image-select" style="padding-bottom:20px;">
+            <div class="btn-group" data-toggle="buttons">
+                {{siteImages siteImages}}
             </div>
         </div>
-        
+
+        <input type="hidden" name="siteImage" data-validator="siteImage" data-validation-status="disabled" />
+
+        <div class="form-group col-md-9 has-feedback">
+            <label for="passPhrase">{{t "common.user.sitePhrase"}}</label>
+            <input class="form-control" type="text" name="passPhrase" value=""  data-validator="oldPassword" id="passPhrase" required autofocus/>
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
     </fieldset>
 </form>

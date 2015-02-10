@@ -99,7 +99,7 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
                     this.editor = new JSONEditor(
                         this.$el.find("#linkedViewContent")[0],
                         {
-                            theme: "jqueryui",
+                            theme: "bootstrap3",
                             disable_edit_json: true,
                             disable_properties: true,
                             disable_array_delete: true,
@@ -119,8 +119,8 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
                     this.editor.setValue(this.data.linkedData.linkedTo[selection].content);
 
                     this.$el.find("#linkedViewContent h3:first").hide();
-                    this.$el.find(".ui-widget-content .row select").hide();
-                    this.$el.find(".ui-widget-content .row input").attr("disabled", true);
+                    this.$el.find(".row select").hide();
+                    this.$el.find(".row input").attr("disabled", true);
                 } else {
                     this.$el.find("#linkedViewContent").text($.t("templates.admin.LinkedTemplate.recordMissing") + ': ' + this.data.linkedData.linkedTo[selection].resourceName);
                 }

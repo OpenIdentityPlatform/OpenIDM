@@ -1,19 +1,127 @@
-<div class="content" id="task-dashboard">
-	<div class="column-layout">
-	    <div class="column5">
-	        <h2 class="header">{{t "common.task.myTasks"}}</h2>
-	        <div id="myTasks" class="tasks-table"></div>
-	        
-	        <h2 class="header">{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h2>
-	        <div id="candidateTasks" class="tasks-table"></div>
-	        
-	        <div id="processes"></div>
-	    </div>
-	    <div class="column3">
-	        {{#shouldDisplayNotifications}}
-	        <h2 class="header">{{t "common.notification.notifications"}}</h2>
-	        <div id="notifications" style="margin-bottom: 15px;" ></div>
-	        {{/shouldDisplayNotifications}}
-	    </div>
-	</div>
+<div class="container">
+    <div class="page-header no-border">
+        <h1>Dashboard</h1>
+    </div>
 </div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-check-circle"></i></div>{{t "common.task.myTasks"}}</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="panel panel-collapse">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne" class="collapsed">My Tasks</a>
+                                    </h4>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="pull-right">
+                                        <div id="userBadge" style="display:none" class="badge"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne" aria-expanded="false" style="height: 0px;">
+                            <div class="panel-body">
+                                <div id="myTasks"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-gears"></i></div>{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="panel panel-collapse">
+                        <div class="panel-heading" role="tab" id="headingTwo">
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" class="collapsed">Group Tasks</a>
+                                    </h4>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="pull-right">
+                                        <div id="groupBadge" style="display:none" class="badge"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" aria-expanded="false" style="height: 0px;">
+                            <div class="panel-body">
+                                <div id="candidateTasks"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-globe"></i></div>Processes</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="panel panel-collapse">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree" class="collapsed">Processes</a>
+                                    </h4>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="pull-right">
+                                        <div id="processBadge" style="display:none" class="badge"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree" aria-expanded="false" style="height: 0px;">
+                            <div class="panel-body">
+                                <div id="processes"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-bell"></i></div>Notifications</h4>
+                </div>
+                <div class="panel-body">
+                    {{#shouldDisplayNotifications}}
+                    <div id="notifications"></div>
+                    {{/shouldDisplayNotifications}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="content" id="task-dashboard">
+
+    <div class="column5">
+        <h2 class="header">{{t "common.task.myTasks"}}</h2>
+        <div id="myTasks" class="tasks-table"></div>
+
+        <h2 class="header">{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h2>
+        <div id="candidateTasks" class="tasks-table"></div>
+
+        <div id="processes"></div>
+    </div>
+
+</div> -->

@@ -1,11 +1,10 @@
-<div class="column-layout">
-    <div class="column offset20">
-        <form class="form center shadow round bg-gradient" style="padding: 15px">
-			<div id ='processContent' class="bg-white border-gray round" style="padding: 15px"></div>
-			
-			<div id="actions" class="field field-submit">
-			    <input type="submit" name="startProcessButton" value='{{t "common.form.start"}}' class="button">
-			</div>
-        </form>
+<form class="vertical-form" role="form">
+    <div id="processContent"></div>
+
+
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-9">
+            <input type="submit" name="startProcessButton" value="{{t "common.form.start"}}"  class="btn btn-primary" disabled />
+        </div>
     </div>
-</div>
+</form>
