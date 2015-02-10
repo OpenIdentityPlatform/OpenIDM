@@ -226,51 +226,62 @@
   </note>
  </section>
 
- <section xml:id="basic-flow">
-  <title>Basic Data Flow Configuration</title>
+ <section xml:id="basic-sync">
+  <title>Configuring Basic Synchronization</title>
   <para>
-   Data flow for synchronization involves the following elements:
+   A basic synchronization configuration between two resources involves the
+   following steps:
   </para>
   <itemizedlist>
-  <listitem>
-   <para>
-    Connector configuration files (<filename>conf/provisioner-*.json</filename>),
-    with one file per external resource.
-   </para>
-  </listitem>
-  <listitem>
-   <para>
-    Synchronization mappings file (<filename>conf/sync.json</filename>), with
-    one file per OpenIDM instance.
-   </para>
-  </listitem>
-  <listitem>
-   <para>
-    A links table that OpenIDM maintains in its repository.
-   </para>
-  </listitem>
-  <listitem>
-   <para>
-    The scripts required to check objects and manipulate attributes.
-   </para>
-  </listitem>
+   <listitem>
+    <para>
+     Set up the connector configuration.
+    </para>
+    <para>
+     The connector configuration is defined in the file
+     <filename>conf/provisioner-*.json</filename>). One provisioner file exists
+     for each external resource to which you are connecting.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Configure a synchronization mapping.
+    </para>
+    <para>
+     Mappings are defined in the file <filename>conf/sync.json</filename>. There
+     is only one <filename>sync.json</filename> file per OpenIDM instance, but
+     multiple mappings can be defined in that file.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Configure any scripts that are required to check source and target objects,
+     and to manipulate attributes.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     In addition, OpenIDM stores a <literal>links</literal> table, in its
+     repository. The links table maintains a record of relationships established
+     between source and target objects.
+    </para>
+   </listitem>
   </itemizedlist>
 
   <section xml:id="connector-config-files">
-   <title>Connector Configuration Files</title>
-
+   <title>Setting up the Connector Configuration</title>
    <indexterm>
     <primary>Synchronization</primary>
     <secondary>Connectors</secondary>
    </indexterm>
-
    <para>
     Connector configuration files map external resource objects to OpenIDM
     objects, and are described in detail in the chapter on <link
     xlink:href="integrators-guide#chap-resource-conf"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
     External Resources</citetitle></link>. Connector configuration files are
-    named <filename>openidm/conf/provisioner.<replaceable>resource-name</replaceable>.json</filename>,
+    stored in the <literal>conf/</literal> directory of your project, and are
+    named <filename>provisioner.<replaceable>resource-name</replaceable>.json</filename>,
     where <replaceable>resource-name</replaceable> reflects the connector
     technology and the external resource, for example,
     <literal>openicf-xml</literal>.
@@ -321,8 +332,7 @@
    </section>
 
   <section xml:id="synchronization-mappings-file">
-   <title>Synchronization Mappings File</title>
-
+   <title>Configuring the Synchronization Mapping</title>
     <indexterm>
      <primary>Synchronization</primary>
      <secondary>Mappings</secondary>
@@ -330,9 +340,8 @@
     <indexterm>
      <primary>Mappings</primary>
     </indexterm>
-
     <para>
-     The synchronization mappings file (<filename>openidm/conf/sync.json</filename>)
+     The synchronization mappings file (<filename>conf/sync.json</filename>)
      represents the core configuration for OpenIDM synchronization.
     </para>
     <para>
@@ -345,22 +354,32 @@
      define two separate mappings.
     </para>
     <para>
-     You identify external resource sources and targets as
-     <literal>system/<replaceable>name</replaceable>/<replaceable
-     >object-type</replaceable></literal>, where <replaceable>name</replaceable>
-     is the name used in the connector configuration file, and
-     <replaceable>object-type</replaceable> is the object defined in the
-     connector configuration file list of object types. For objects in OpenIDM's
-     internal repository, you use
-     <literal>managed/<replaceable>object-type</replaceable></literal>, where
-     <replaceable>object-type</replaceable> is defined in
-     <filename>openidm/conf/managed.json</filename>. The name for the mapping
-     by convention is set to a string of the form
-     <literal><replaceable>source</replaceable>_<replaceable
-     >target</replaceable></literal>, as shown in the following example.
+     You can update mappings in the <filename>sync.json</filename> file while
+     the server is running, as long as you do not update a mapping that is
+     currently in use by a reconciliation process.
     </para>
 
-    <programlisting language="javascript" xml:id="basic-ldap-mapping">
+    <section xml:id="mapping-resources">
+     <title>Identifying Resources in a Mapping</title>
+     <para>
+      External resources are specified in a mapping as
+      <literal>system/<replaceable>name</replaceable>/<replaceable>object-type</replaceable></literal>,
+      where <replaceable>name</replaceable> is the name used in the connector
+      configuration file, and <replaceable>object-type</replaceable> is the
+      object defined in the connector configuration file list of object types.
+      Objects in OpenIDM's internal repository are specified in the mapping as
+      <literal>managed/<replaceable>object-type</replaceable></literal>, where
+      <replaceable>object-type</replaceable> is defined in the managed objects
+      configuration file (<filename>conf/managed.json</filename>).
+     </para>
+     <para>
+      External resources, and OpenIDM managed objects, can be the
+      <emphasis>source</emphasis> or the <emphasis>target</emphasis> in a
+      mapping. The mapping name, by convention, is set to a string of the form
+      <literal><replaceable>source</replaceable>_<replaceable>target</replaceable></literal>,
+      as shown in the following example.
+     </para>
+     <programlisting language="javascript" xml:id="basic-ldap-mapping">
 {
     "mappings": [
         {
@@ -400,70 +419,19 @@
             ]
         }
     ]
-}</programlisting>
-
-     <para>In this example, the source is the external resource,
-     <literal>MyLDAP</literal>, and the target is OpenIDM's repository,
-     specifically the managed user objects. The <literal>properties</literal>
-     reflect OpenIDM attribute names. For example, the mapping has the
-     attribute <literal>lastName</literal> defined in the
-     <literal>MyLDAP</literal> connector configuration file mapped to
-     <literal>sn</literal> in the OpenIDM managed user object. Notice
-     that the attribute names come from the connector configuration, rather
-     than the external resource itself.</para>
-
-     <indexterm>
-      <primary>Synchronization</primary>
-      <secondary>Creating attributes</secondary>
-     </indexterm>
+}    </programlisting>
      <para>
-      You can create attributes on the target as part of the mapping. In the
-      preceding example, a <literal>phoneExtension</literal> attribute with a
-      default value of <literal>0047</literal> is created on the target.
+      In this example, the source is the external resource, <literal>MyLDAP</literal>,
+      and the target is OpenIDM's repository, specifically the managed user
+      objects. The <literal>properties</literal> defined in the mapping reflect
+      OpenIDM attribute names. For example, the attribute <literal>lastName</literal>,
+      defined in the <literal>MyLDAP</literal> connector configuration file, is
+      mapped to the <literal>sn</literal> attribute in the OpenIDM managed user
+      object. Notice that the attribute names come from <emphasis>the connector
+      configuration</emphasis>, and not from the external resource itself.
      </para>
      <para>
-      You can also use the <literal>"default"</literal> property to specify a
-      value that should be assigned to the target property. When determining
-      the value of the target property, any associated conditions are evaluated
-      first, followed by the transform script, if present. The default value is
-      applied (for update and create actions) if the <literal>"source"</literal>
-      property and the <literal>"transform"</literal> script yield a null value.
-      The default value overrides the target value, if one exists.
-     </para>
-
-     <indexterm>
-      <primary>Synchronization</primary>
-      <secondary>Conditions</secondary>
-     </indexterm>
-     <para>You can also set up conditions under which OpenIDM maps attributes
-     as shown for the email attribute in the example. By default, OpenIDM
-     synchronizes all attributes. In the example, the mail attribute is set
-     only if the script for the condition returns <literal>true</literal>.
-     </para>
-
-     <indexterm>
-      <primary>Synchronization</primary>
-      <secondary>Transforming attributes</secondary>
-     </indexterm>
-     <para>OpenIDM also enables you to transform attributes. In the example,
-     the value of the <literal>displayName</literal> attribute is set using a
-     combination of the <literal>lastName</literal> and
-     <literal>firstName</literal> attribute values from the source. For
-     transformations, the <literal>source</literal> property is optional.
-     However, the source object is only available when you specify the
-     <literal>source</literal> property. Therefore, in order to use
-     <literal>source.lastName</literal> and <literal>source.firstName</literal>
-     to calculate the <literal>displayName</literal>, the example specifies
-     <literal>"source" : ""</literal>.</para>
-
-      <para>
-    You can update mappings in the synchronization configuration file
-    (<filename>sync.json</filename>) while the server is running, provided you
-    do not update a mapping that is currently in use by a reconciliation
-    process.
-   </para>
-
-     <para>To add a flow from the repository to <literal>MyLDAP</literal>,
+      To add a flow from the repository to <literal>MyLDAP</literal>,
      you would define a mapping with source <literal>managed/user</literal>
      and target <literal>system/MyLDAP/account</literal>, named for example
      <literal>managedUser_systemLdapAccounts</literal>.</para>
@@ -486,6 +454,79 @@
        <literal>/openidm/system</literal>.</para>
       </caption>
      </mediaobject>
+    </section>
+
+    <section xml:id="mapping-creating-attributes">
+     <title>Creating Attributes in a Mapping</title>
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Creating attributes</secondary>
+     </indexterm>
+     <para>
+      You can create attributes on the target as part of the mapping. In the
+      preceding example, a <literal>phoneExtension</literal> attribute with a
+      default value of <literal>0047</literal> is created on the target.
+     </para>
+     <para>
+      You can also use the <literal>"default"</literal> property to specify a
+      value that should be assigned to the target property. When determining
+      the value of the target property, any associated conditions are evaluated
+      first, followed by the transform script, if present. The default value is
+      applied (for update and create actions) if the <literal>"source"</literal>
+      property and the <literal>"transform"</literal> script yield a null value.
+      The default value overrides the target value, if one exists.
+     </para>
+    </section>
+
+    <section xml:id="mapping-transforming-attributes">
+     <title>Transforming Attributes in a Mapping</title>
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Transforming attributes</secondary>
+     </indexterm>
+     <para>
+      You can use a mapping configuration to define attribute transformations
+      that occur during sychronization. In the preceding sample mapping, the
+      value of the <literal>displayName</literal> attribute is set using a
+      combination of the <literal>lastName</literal> and
+      <literal>firstName</literal> attribute values from the source.
+     </para>
+     <para>
+      For transformations, the <literal>source</literal> property is optional.
+      However, the source object is only available when you specify the
+      <literal>source</literal> property. Therefore, in order to use
+      <literal>source.lastName</literal> and <literal>source.firstName</literal>
+      to calculate the <literal>displayName</literal>, the example specifies
+      <literal>"source" : ""</literal>.
+     </para>
+    </section>
+
+    <section xml:id="mapping-conditions">
+     <title>Using Conditions in a Mapping</title>
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Conditions</secondary>
+     </indexterm>
+     <para>
+      You can set up specific conditions under which OpenIDM maps attributes, as
+      shown for the <literal>email</literal> attribute in the sample mapping.
+     </para>
+     <programlisting language="javascript">
+{
+    "target": "mail",
+    "comment": "Set mail if non-empty.",
+    "source": "email",
+    "condition": {
+        "type": "text/javascript",
+        "source": "(object.email != null)"
+    }
+...  </programlisting>
+     <para>
+      By default, OpenIDM synchronizes all attributes. In this example, the
+      <literal>mail</literal> attribute on the target system is set, only if the
+      script for the condition returns <literal>true</literal>.
+     </para>
+    </section>
 
     <section xml:id="filtering-source-and-target">
      <title>Filtering Synchronization Objects By Using Scripts</title>
@@ -550,15 +591,16 @@
       </varlistentry>
      </variablelist>
 
-     <para>During synchronization, your scripts always have access to a
-     <literal>source</literal> object and a <literal>target</literal> object.
-     Examples already shown in this section use <literal>source.<replaceable
+     <para>
+      During synchronization, your scripts always have access to a
+      <literal>source</literal> object and a <literal>target</literal> object.
+      Examples already shown in this section use <literal>source.<replaceable
       >attributeName</replaceable></literal> to retrieve attributes from the
-     source objects. Your scripts can also write to target attributes using
-     <literal>target.<replaceable>attributeName</replaceable></literal>
-     syntax.</para>
-
-       <programlisting language="javascript">
+      source objects. Your scripts can also write to target attributes using
+      <literal>target.<replaceable>attributeName</replaceable></literal>
+     syntax, as shown in the following example.
+     </para>
+     <programlisting language="javascript">
 {
     "onUpdate": {
         "type": "text/javascript",
@@ -566,12 +608,14 @@
     }
 }</programlisting>
 
-     <para>See the <link xlink:href="integrators-guide#appendix-scripting"
-                         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
-     Reference</citetitle></link> appendix for more on scripting.</para>
+     <para>
+      See the <link xlink:href="integrators-guide#appendix-scripting"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
+      Reference</citetitle></link> appendix for more on scripting.
+     </para>
    </section>
 
-  <section xml:id="preventing-accidental-deleteion">
+  <section xml:id="preventing-accidental-deletion">
    <title>Preventing Accidental Deletion of a Target System</title>
    <para>
     If a source resource is empty, the default behavior is for a reconciliation
@@ -4382,7 +4426,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <secondary>Hooks for scripting</secondary>
   </indexterm>
 
-  <para><xref linkend="basic-flow"/> shows how to trigger scripts when objects
+  <para><xref linkend="basic-sync"/> shows how to trigger scripts when objects
   are created and updated. Other situations require you to trigger scripts
   in response to other synchronization actions. For example, you might not
   want OpenIDM to delete a managed user directly when an external account is
