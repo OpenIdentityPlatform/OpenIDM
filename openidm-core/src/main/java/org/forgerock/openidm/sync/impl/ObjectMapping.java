@@ -172,8 +172,10 @@ class ObjectMapping {
     /** an array of property-mapping objects */
     private List<PropertyMapping> properties = new ArrayList<PropertyMapping>();
 
-    /** an array of {@link Policy} objects */
-    private ArrayList<Policy> policies = new ArrayList<Policy>();
+    /**
+     * a map of {@link Policy} objects. 
+     */
+    private Map<String, List<Policy>> policies = new HashMap<String, List<Policy>>();
 
     /** a script to execute when a target object is to be created */
     private Script onCreateScript;
@@ -266,7 +268,15 @@ class ObjectMapping {
             properties.add(new PropertyMapping(jv));
         }
         for (JsonValue jv : config.get("policies").expect(List.class)) {
-            policies.add(new Policy(service, jv));
+            String situation = jv.get("situation").asString();
+            if (policies.containsKey(situation)) {
+                List<Policy> policy = policies.get(situation);
+                policy.add(new Policy(jv));
+                continue;
+            }
+            List<Policy> policyArrayList = new ArrayList<Policy>();
+            policies.put(situation, policyArrayList);
+            policyArrayList.add(new Policy(jv));
         }
         defaultMapping = Scripts.newInstance(config.get("defaultMapping").defaultTo(
                 json(object(field(SourceUnit.ATTR_TYPE, "text/javascript"),
@@ -1620,27 +1630,20 @@ class ObjectMapping {
         }
 
         /**
-         * Returns the current action.  Defaults to ReconAction.IGNORE if the action has not been set.
-         * 
-         * @return the current action.
-         */
-        protected ReconAction getAction() {
-            return (this.action == null ? ReconAction.IGNORE : this.action);
-        }
-
-        /**
          * Sets the action and active policy based on the current situation.
          *
-         * @throws SynchronizationException TODO.
+         * @throws SynchronizationException when cannot determine action from script
          */
         protected void determineAction() throws SynchronizationException {
             if (situation != null) {
                 // start with a reasonable default
                 action = situation.getDefaultAction();
-                for (Policy policy : policies) {
-                    if (situation == policy.getSituation()) {
+                List<Policy> situationPolicies = policies.get(situation.toString());
+                for (Policy policy : situationPolicies) {
+                    if (policy.getCondition().evaluate(json(field("object", getSourceObject())), getLinkQualifier())) {
                         activePolicy = policy;
-                        action = activePolicy.getAction(sourceObjectAccessor, targetObjectAccessor, this);
+                        action = activePolicy.getAction(sourceObjectAccessor, 
+                                                targetObjectAccessor, this, getLinkQualifier());
                         break;
                     }
                 }
@@ -1655,7 +1658,7 @@ class ObjectMapping {
          */
         @SuppressWarnings("fallthrough")
         protected void performAction() throws SynchronizationException {
-            switch (getAction()) {
+            switch (action) {
                 case CREATE:
                 case UPDATE:
                 case LINK:
@@ -1665,7 +1668,7 @@ class ObjectMapping {
                     try {
                         Context context = ObjectSetContext.get();
                         actionId = ObjectSetContext.get().getId();
-                        switch (getAction()) {
+                        switch (action) {
                             case CREATE:
                                 if (getSourceObject() == null) {
                                     throw new SynchronizationException("no source object to create target from");
@@ -1783,11 +1786,11 @@ class ObjectMapping {
                 case NOREPORT:
                     if (!ignorePostAction) {
                         if (null == activePolicy) {
-                            for (Policy policy : policies) {
-                                if (situation == policy.getSituation()) {
-                                    activePolicy = policy;
-                                    break;
-                                }
+                            List<Policy> situationPolicies = policies.get(situation.toString());
+                            for (Policy policy : situationPolicies) {
+                                // assigns the first policy found, as active policy
+                                activePolicy = policy;
+                                break;
                             }
                         }
                         postAction(isSourceToTarget());
@@ -1806,7 +1809,8 @@ class ObjectMapping {
          */
         protected void postAction(boolean sourceAction) throws SynchronizationException {
             if (null != activePolicy) {
-                activePolicy.evaluatePostAction(sourceObjectAccessor, targetObjectAccessor, action, sourceAction);
+                activePolicy.evaluatePostAction(
+                                sourceObjectAccessor, targetObjectAccessor, action, sourceAction, getLinkQualifier());
             }
         }
 
