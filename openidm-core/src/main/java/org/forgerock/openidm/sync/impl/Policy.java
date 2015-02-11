@@ -24,87 +24,85 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
-import java.util.HashMap;
-import java.util.Map;
-
-// SLF4J
-import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.servlet.HttpUtils;
 import org.forgerock.openidm.sync.ReconAction;
+import org.forgerock.openidm.sync.impl.Scripts.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// JSON Fluent library
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-
-// OpenIDM
-import org.forgerock.openidm.sync.impl.Scripts.Script;
-
 import javax.script.ScriptException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * TODO: Description.
- *
- * @author Paul C. Bryan
+ *  Policies to determine an action for a given {@link org.forgerock.openidm.sync.impl.Situation}.
  */
 class Policy {
 
-    /** TODO: Description. */
+    /**
+     * Set up logging for {@link org.forgerock.openidm.sync.impl.Policy}.
+     */
     private final static Logger LOGGER = LoggerFactory.getLogger(Policy.class);
 
-    /** TODO: Description. */
-    private final SynchronizationService service;
-
-    /** TODO: Description. */
+    /**
+     * Synchronization Situation {@link org.forgerock.openidm.sync.impl.Situation}.
+     */
     private final Situation situation;
 
-    /** TODO: Description. */
+    /**
+     * Reconciliation Action {@link org.forgerock.openidm.sync.ReconAction}. 
+     */
     private final ReconAction action;
 
-    /** TODO: Description. */
+    /**
+     * Script for action.
+     */
     private final Script script;
-
-    private final Map<String,Object> scriptScope;
-
-    /** TODO: Description. */
+    
+    /**
+     * Script for postAction.
+     */
     private Script postAction;
 
     /**
-     * A Constructor for the Policy class
-     *
-     * @param service the SynchronizationService
-     * @param config a {@link JsonValue} object representing the policy configuration.
-     * @throws JsonValueException
+     * Condition used to determine if policy should be enforced.
      */
-    public Policy(SynchronizationService service, JsonValue config) throws JsonValueException {
-        this.service = service;
+    private Condition condition;
+    
+    /**
+     * A Constructor for the Policy class.
+     *
+     * @param config a {@link JsonValue} object representing the policy configuration.
+     */
+    public Policy(JsonValue config) {
         situation = config.get("situation").required().asEnum(Situation.class);
         JsonValue action = config.get("action").required();
+        condition =  new Condition(config.get("condition"));
         if (action.isString()) {
             this.action = action.asEnum(ReconAction.class);
             this.script = null;
-            this.scriptScope = null;
         } else {
             this.action = null;
+            // Scripts.newInstance will copy the scope variables from action
             this.script = Scripts.newInstance(action);
-            if (action.isMap() && action.asMap().size() > 2) {
-                // If there is additional attributes then copy them
-                scriptScope = action.copy().asMap();
-                scriptScope.remove("type");
-                scriptScope.remove("source");
-                scriptScope.remove("file");
-            } else {
-                scriptScope = null;
-            }
         }
         JsonValue pAction = config.get("postAction");
-        if (pAction.isNull()) {
-            this.postAction = null;
-        } else {
+        if (!pAction.isNull()) {
             this.postAction = Scripts.newInstance(pAction);
         }
     }
 
+    /**
+     * Returns the condition for this policy.
+     *  
+     * @return a {@link org.forgerock.openidm.sync.impl.Condition} object representing 
+     * * a condition for this policy
+     */
+    public Condition getCondition() {
+        return condition;
+    }
+    
     /**
      * Returns the situation for this policy.
      * 
@@ -120,39 +118,27 @@ class Policy {
      * @param source a {@link LazyObjectAccessor} representing the source object
      * @param target a {@link LazyObjectAccessor} representing the target object
      * @param syncOperation the parent {@link ObjectMapping.SyncOperation} instance
+     * @param linkQualifier the linkQualifier for the policy
      * @return a {@link ReconAction} object representing the action for this policy
      * @throws SynchronizationException TODO.
      */
-    public ReconAction getAction(LazyObjectAccessor source, LazyObjectAccessor target, final ObjectMapping.SyncOperation syncOperation) throws SynchronizationException {
-        ReconAction result = null;
+    public ReconAction getAction(LazyObjectAccessor source, 
+                                 LazyObjectAccessor target, 
+                                 final ObjectMapping.SyncOperation syncOperation, 
+                                 String linkQualifier) throws SynchronizationException {
         if (action != null) { // static action specified
-            result = action;
-        } else if (script != null) { // action is dynamically determine
+            return action;
+        }
+        if (script != null) { // action is dynamically determine
             Map<String, Object> scope = new HashMap<String, Object>();
-            if (null != scriptScope) {
-                //Make a thread safe copy and put the variables into the scope
-                for (Map.Entry<String,Object> entry: Utils.deepCopy(scriptScope).entrySet()){
-                    if (scope.containsKey(entry.getKey())){
-                        continue;
-                    }
-                    scope.put(entry.getKey(),entry.getValue());
-                }
-            }
             Map<String, Object> recon = new HashMap<String, Object>();
-            scope.put("recon",recon);
-            JsonValue actionParam  = null;
-            if (syncOperation instanceof ObjectMapping.TargetSyncOperation) {
-                actionParam = ((ObjectMapping.TargetSyncOperation) syncOperation).toJsonValue();
-            } else if (syncOperation instanceof ObjectMapping.SourceSyncOperation) {
-                actionParam = ((ObjectMapping.SourceSyncOperation)syncOperation).toJsonValue();
-            }
-            if (null != actionParam){
-                //FIXME Decide if leading underscore should be used here or not
-                actionParam.put("_" + ActionRequest.FIELD_ACTION,"performAction");
-                recon.put("actionParam",actionParam.getObject());
-            }
+            scope.put("recon", recon);
+            JsonValue actionParam = syncOperation.toJsonValue();
+            actionParam.put(HttpUtils.PARAM_ACTION, "performAction");
+            recon.put("actionParam", actionParam.getObject());
 
             scope.put("sourceAction", (syncOperation instanceof ObjectMapping.SourceSyncOperation));
+            scope.put("linkQualifier", linkQualifier);
             if (source != null) {
                 scope.put("source", source.asMap());
             }
@@ -160,7 +146,7 @@ class Policy {
                 scope.put("target", target.asMap());
             }
             try {
-                result = ReconAction.valueOf(script.exec(scope).toString());
+                return ReconAction.valueOf(script.exec(scope).toString());
             } catch (NullPointerException npe) {
                 throw new SynchronizationException("action script returned null value");
             } catch (IllegalArgumentException iae) {
@@ -170,7 +156,7 @@ class Policy {
                 throw new SynchronizationException(se);
             }
         }
-        return result;
+        return ReconAction.IGNORE;
     }
 
     /**
@@ -179,12 +165,18 @@ class Policy {
      * @param source a {@link LazyObjectAccessor} representing the source object
      * @param target a {@link LazyObjectAccessor} representing the target object
      * @param action the {@link ReconAction} that was performed
+     * @param linkQualifier the linkQualifier               
      * @param sourceAction true if this is a source sync operation, false if it is a target sync operation
      * @throws SynchronizationException
      */
-    public void evaluatePostAction(LazyObjectAccessor source, LazyObjectAccessor target, ReconAction action, boolean sourceAction) throws SynchronizationException {
+    public void evaluatePostAction(LazyObjectAccessor source, 
+                                   LazyObjectAccessor target, 
+                                   ReconAction action, 
+                                   boolean sourceAction, 
+                                   String linkQualifier) throws SynchronizationException {
         if (postAction != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
+            scope.put("linkQualifier", linkQualifier);
             scope.put("sourceAction", sourceAction);
             scope.put("action", action.name());
             scope.put("situation", situation.name());
