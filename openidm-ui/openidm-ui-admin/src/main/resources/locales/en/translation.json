@@ -27,7 +27,7 @@
                 "changedPassword" : "Password has been changed",
                 "profileUpdateFailed" : "Problem during profile update",
                 "profileUpdateSuccessful" : "Profile has been updated",
-                "userNameUpdated" : "Username has been modified succesfully.",
+                "userNameUpdated" : "Username has been modified successfully.",
                 "afterRegistration" : "User has been registered successfully",
                 "siteIdentificationChanged" : "Site identification image has been changed",
                 "securityDataChanged" : "Security data has been changed",
@@ -632,7 +632,7 @@
                 "baseContext": "Enter the path to your base dn",
                 "baseContextNote": "Be sure to add base contexts which include both your users and your groups.",
                 "baseContextAdd":"Add Base Context",
-                "accountObjectClasses" : "Object Classe for users",
+                "accountObjectClasses" : "Object Class for users",
                 "addAccountObjectClasses" : "Add Object Class",
                 "addUsersTitle": "User Details",
                 "groupObjectClasses": "Object Classes for groups",
@@ -1009,7 +1009,7 @@
                 "tasks" : {
                     "TasksMenuView" : {
                         "noTasksAssigned" : "You do not have any tasks assigned to you right now.",
-                        "noTasksInGroupQueue" : "You do not have any tasks in your's group's queue now.",
+                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue now.",
                         "denyDefaultReason" : "Enter a reason for denying this request",
                         "acceptanceForm" : {
                             "for" : "For",
