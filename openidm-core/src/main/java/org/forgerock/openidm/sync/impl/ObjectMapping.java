@@ -1630,6 +1630,16 @@ class ObjectMapping {
         }
 
         /**
+         * Returns all possible policies for a given situation.
+         *  
+         * @param situation to get policies for
+         * @return List of policies for given situation
+         */
+        protected List<Policy> getPolicies(Situation situation) {
+           return (policies.get(situation.toString()) == null) ? new ArrayList<Policy>() : (policies.get(situation.toString()));
+        }
+        
+        /**
          * Sets the action and active policy based on the current situation.
          *
          * @throws SynchronizationException when cannot determine action from script
@@ -1638,7 +1648,7 @@ class ObjectMapping {
             if (situation != null) {
                 // start with a reasonable default
                 action = situation.getDefaultAction();
-                List<Policy> situationPolicies = policies.get(situation.toString());
+                List<Policy> situationPolicies = getPolicies(situation);
                 for (Policy policy : situationPolicies) {
                     if (policy.getCondition().evaluate(json(field("object", getSourceObject())), getLinkQualifier())) {
                         activePolicy = policy;
@@ -1786,7 +1796,7 @@ class ObjectMapping {
                 case NOREPORT:
                     if (!ignorePostAction) {
                         if (null == activePolicy) {
-                            List<Policy> situationPolicies = policies.get(situation.toString());
+                            List<Policy> situationPolicies = getPolicies(situation);
                             for (Policy policy : situationPolicies) {
                                 // assigns the first policy found, as active policy
                                 activePolicy = policy;
