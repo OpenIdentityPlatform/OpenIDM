@@ -27,7 +27,7 @@
                 "changedPassword" : "Password has been changed",
                 "profileUpdateFailed" : "Problem during profile update",
                 "profileUpdateSuccessful" : "Profile has been updated",
-                "userNameUpdated" : "Username has been modified succesfully.",
+                "userNameUpdated" : "Username has been modified successfully.",
                 "afterRegistration" : "User has been registered successfully",
                 "siteIdentificationChanged" : "Site identification image has been changed",
                 "userAlreadyExists" : "User already exists",
@@ -336,7 +336,7 @@
                 "tasks" : {
                     "TasksMenuView" : {
                         "noTasksAssigned" : "You do not have any tasks assigned to you right now.",
-                        "noTasksInGroupQueue" : "You do not have any tasks in your's group's queue now.",
+                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue now.",
                         "denyDefaultReason" : "Enter a reason for denying this request",
                         "acceptanceForm" : {
                             "for" : "For",
