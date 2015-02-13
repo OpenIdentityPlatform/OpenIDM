@@ -38,8 +38,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
         template: "templates/admin/ResourcesViewTemplate.html",
         events: {
             "click .connector-delete": "deleteConnections",
-            "click .managed-delete": "deleteManaged",
-            "click .resource-body" : "mappingDetail"
+            "click .managed-delete": "deleteManaged"
         },
         addMappingView: false,
         render: function(args, callback) {
@@ -119,7 +118,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
         },
 
         deleteConnections: function(event) {
-            var selectedItems = $(event.currentTarget).parents(".resource-body"),
+            var selectedItems = $(event.currentTarget).parents(".card"),
                 url,
                 tempConnector = _.clone(this.data.currentConnectors);
 
@@ -135,17 +134,17 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
                 ConfigDelegate.deleteEntity(url[0] +"/" +url[1]).then(function(){
                         ConnectorDelegate.deleteCurrentConnectorsCache();
-                        selectedItems.remove();
+                        selectedItems.parent().parent().remove();
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
                     },
                     function(){
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
                     });
-            } , this), "330px");
+            } , this));
         },
 
         deleteManaged: function(event) {
-            var selectedItems = $(event.currentTarget).parents(".resource-body"),
+            var selectedItems = $(event.currentTarget).parents(".card"),
                 promises = [],
                 tempManaged = _.clone(this.data.currentManagedObjects);
 
@@ -167,42 +166,13 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.currentManagedObjects}));
 
                 $.when.apply($, promises).then(function(){
-                        selectedItems.remove();
+                        selectedItems.parent().parent().remove();
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
                     },
                     function(){
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
                     });
-            },this), "360px");
-        },
-
-        mappingDetail: function(event){
-            var clickedEle = $(event.target),
-                index,
-                details;
-
-            if(!clickedEle.hasClass("resource-delete") && !clickedEle.hasClass("fa-times-circle-o")) {
-
-                if (!clickedEle.hasClass("resource-body")) {
-                    clickedEle = $(event.target).parents(".resource-body");
-                }
-
-                if(!clickedEle.hasClass("add-resource-body")) {
-                    event.preventDefault();
-
-                    if (clickedEle.attr("data-resource-type") === "managed") {
-                        index = $("#resourceManagedContainer .resource-body").index(clickedEle);
-                        details = this.data.currentManagedObjects[index];
-
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editManagedView", args: [details.name]});
-                    } else {
-                        index = $("#resourceConnectorContainer .resource-body").index(clickedEle);
-                        details = this.data.currentConnectors[index];
-
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editConnectorView", args: [details.cleanUrlName]});
-                    }
-                }
-            }
+            },this));
         }
     });
 
