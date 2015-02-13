@@ -45,7 +45,8 @@ require.config({
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
-        bootstrapjs: "libs/bootstrap.min",
+        bootstrap: "libs/bootstrap.min",
+        "bootstrap-dialog": "libs/bootstrap-dialog.min",
         placeholder: "libs/jquery.placeholder",
         moment: "libs/moment-2.8.1-min",
         contentflow: "libs/contentflow",
@@ -105,9 +106,11 @@ require.config({
         moment: {
             exports: "moment"
         },
-        bootstrapjs: {
-            deps: ["jquery"],
-            exports: "bootstrapjs"
+        bootstrap: {
+            deps: ["jquery"]
+        },
+        'bootstrap-dialog': {
+            deps: ["jquery", "underscore","backbone", "bootstrap"]
         },
         placeholder: {
             deps: ["jquery"]
@@ -133,7 +136,6 @@ require([
     "moment",
     "doTimeout",
     "handlebars",
-    "bootstrapjs",
     "placeholder",
     "i18next",
     "jsonEditor",
@@ -164,7 +166,6 @@ require([
     moment,
     doTimeout,
     handlebars,
-    bootstrapjs,
     placeholder,
     i18next,
     jsonEditor,
@@ -181,6 +182,3 @@ require([
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 
 });
-
-
-
