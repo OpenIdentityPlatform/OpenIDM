@@ -75,7 +75,7 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
             },
             {
                 "type" : "managedobject",
-                "iconClass" : "icon-managedobject",
+                "iconClass" : "icon-database",
                 "src": "img/icon-managedobject.png"
             }
 

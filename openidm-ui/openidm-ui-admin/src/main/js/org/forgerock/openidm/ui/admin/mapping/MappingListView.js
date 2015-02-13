@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             syncConfig.then(_.bind(function(sync) {
                 this.data.mappingConfig = sync.mappings;
                 this.data.docHelpUrl = constants.DOC_URL;
-                
+
                 this.cleanConfig = _.chain(sync.mappings)
                     .map(function (m) {
                         return _.clone(_.omit(m, "recon"));
@@ -77,8 +77,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                     results = arguments;
 
                     _.each(results, function (mappingInfo, index) {
-                        this.data.mappingConfig[index].targetIcon = mappingInfo.targetIcon.src;
-                        this.data.mappingConfig[index].sourceIcon = mappingInfo.sourceIcon.src;
+                        this.data.mappingConfig[index].targetIcon = mappingInfo.targetIcon.iconClass;
+                        this.data.mappingConfig[index].sourceIcon = mappingInfo.sourceIcon.iconClass;
 
                         this.data.mappingConfig[index].targetConnector = mappingInfo.targetConnector;
                         this.data.mappingConfig[index].sourceConnector = mappingInfo.sourceConnector;
@@ -178,10 +178,16 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                 if(sync.recon){
                     if(sync.recon.state === "CANCELED") {
                         txt = $.t("templates.mapping.lastSyncCanceled");
+                        el.toggleClass("text-muted", false);
+                        el.toggleClass("text-danger", true);
                     } else if(sync.recon.state === "ACTIVE") {
                         txt = $.t("templates.mapping.inProgress");
+                        el.toggleClass("text-muted", false);
+                        el.toggleClass("text-danger", true);
                     } else {
                         txt = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(sync.recon.ended,"MMMM dd, yyyy HH:mm");
+                        el.toggleClass("text-muted", true);
+                        el.toggleClass("text-danger", false);
                     }
                 }
 
