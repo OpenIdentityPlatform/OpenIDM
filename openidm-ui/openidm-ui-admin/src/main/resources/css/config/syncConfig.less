@@ -248,13 +248,62 @@
       }
     }
   }
-
 }
 
 #transformationScriptHolder,
 #conditionScriptHolder {
-  height: 285px;
+  height: 300px;
   width: 650px;
   overflow-y: scroll;
-  margin-bottom: 15px;
+}
+
+#Condition_Script {
+  &>input[type="submit"] {
+    margin: -24px -15px;
+  }
+
+  .script_output {
+    width: initial;
+    float: initial;
+  }
+
+  .conditionalUpdateType {
+    cursor: pointer;
+  }
+
+  .conditionalUpdateLabel {
+    font-weight: bold;
+    margin: 0 0 0 4px;
+    display: inline;
+    float: none;
+    font-size: inherit;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  .conditionalLinkQualifiers {
+    margin: 0 0 0 20px;
+    display: none;
+  }
+
+  .conditionalScript {
+    margin: 0 0 0 15px;
+    display: none;
+  }
+
+  .radioContainer {
+    margin-top: 10px;
+  }
+
+  #condition_script_output label {
+    padding: 0;
+  }
+
+  .notAvailable {
+    display: none;
+    color: #d97986;
+    span {
+      font-style: italic;
+    }
+  }
 }
