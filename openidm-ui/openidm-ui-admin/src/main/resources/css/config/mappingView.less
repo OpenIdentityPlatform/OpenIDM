@@ -1,3 +1,42 @@
+#mappingLinkQualifiers {
+  button {
+    vertical-align: top;
+    margin: 0 5px 10px 0;
+     line-height: 14px;
+  }
+
+  .addLinkQualifierContainer {
+    display: inline-block;
+  }
+  .addLinkQualifier {
+    margin-left: -5px;
+    border-radius: 0 5px 5px 0;
+  }
+
+  .newLinkQualifier {
+    border-radius: 5px 0 0 5px;
+  }
+
+  .notValid {
+    display: none;
+  }
+
+  .doNotDelete {
+    border: 1px solid #ccc;
+    color: #5d6871;
+    background: none;
+    cursor: default;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    &:hover {
+      box-shadow: none;
+      -moz-box-shadow: none;
+      -webkit-box-shadow: none;
+    }
+  }
+}
+
 #resourceMappingBody {
   width:960px;
   padding-top:20px;
@@ -15,7 +54,11 @@
 
 .mapping-body {
   height: 325px;
+}
 
+.attributesHeader {
+  border-top: 1px solid #ccc;
+  margin-top: 20px;
 }
 
 .mapping-resource-body {

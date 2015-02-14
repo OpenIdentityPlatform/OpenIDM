@@ -27,77 +27,75 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
             "click input[type=submit]": "formSubmit",
             "change :input": "validateMapping"
         },
-        
+
         formSubmit: function (event) {
             var property = $(":input[name=propertyList]",this.$el).val(),
                 mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties");
-            
+
             event.preventDefault();
-            
+
             if (property.length) {
                 this.$el.empty();
-                
+
                 mappingProperties.push({target: property});
 
                 browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
-                
+
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, property]});
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, mappingProperties.length]});
             }
         },
+
         validateMapping: function () {
             var propList = $("input[name='propertyList']", this.$el).val(),
                 validationMessage = $("#Property_List .validation-message", this.$el),
                 hasAvailableProps = this.data.availableTargetProps  && this.data.availableTargetProps.length,
                 hasPropListValue = propList && propList.length,
                 invalidProp = hasAvailableProps && hasPropListValue && !_.contains(this.data.availableTargetProps,propList),
-                mappingExists = _.contains(_.pluck(this.data.currentProperties,"target"),propList),
                 disableSave = function(message){
                     $("input[type=submit]", this.$el).prop("disabled", true);
                     validationMessage.text(message);
                 };
-            
+
             if (invalidProp) {
                 disableSave($.t("templates.mapping.validPropertyRequired"));
-                return false; 
-            } else if(mappingExists){
-                disableSave($.t("templates.mapping.mappingExists"));
-                return false; 
+                return false;
             } else {
                 $("input[type=submit]", this.$el).prop("disabled", false);
                 validationMessage.text("");
                 return true;
             }
-     
+
         },
+
         close: function () {
             if(this.currentDialog) {
                 this.currentDialog.dialog('destroy').remove();
             }
             $("#dialogs").hide();
         },
+
         getAvailableTargetProps: function(){
             var availableProps;
-            
+
             this.data.currentProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
-            
+
             browserStorageDelegate.set(this.data.mappingName + "_Properties", this.data.currentProperties);
-            
+
             availableProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").target.properties || [];
-            
-            return _.reject(availableProps, _.bind(function(p){
-                return _.contains(_.pluck(this.data.currentProperties,"target"), p);
-            },this));
+
+            return availableProps;
         },
+
         render: function(params, callback) {
             var _this = this,
                 settings;
 
             this.data.mappingName = params[0];
             this.property = "_new";
-            
+
             this.data.availableTargetProps = this.getAvailableTargetProps();
-            
+
             settings = {
                 "title": $.t("templates.mapping.propertyAdd.title"),
                 "template": this.template,
@@ -107,10 +105,10 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                     }
                 },this)
             };
-            
+
             this.currentDialog = $('<div id="propertyDialog"></div>');
             this.setElement(this.currentDialog);
-            
+
             this.currentDialog.dialog({
                 appendTo: $('#dialogs'),
                 title: settings.title,
@@ -126,20 +124,20 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 },this),
                 open: function(){
 
-                    uiUtils.renderTemplate(settings.template, $(this), 
-                                            _.extend(conf.globalData, _this.data), 
-                                            function () {
-                                                settings.postRender();
-                                                $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
-                                                _this.$el.parents(".ui-dialog,#dialogs").show();
-                                                if(callback){
-                                                    callback();
-                                                }
-                                            }, "append");
+                    uiUtils.renderTemplate(settings.template, $(this),
+                        _.extend(conf.globalData, _this.data),
+                        function () {
+                            settings.postRender();
+                            $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
+                            _this.$el.parents(".ui-dialog,#dialogs").show();
+                            if(callback){
+                                callback();
+                            }
+                        }, "append");
                 }
             });
         }
-    }); 
-    
+    });
+
     return new AddPropertyMappingDialog();
 });

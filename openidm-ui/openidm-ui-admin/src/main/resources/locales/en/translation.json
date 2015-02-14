@@ -82,10 +82,11 @@
                 "scheduleSaved" : "The schedule was successfully saved.",
                 "liveSyncSaved": "The LiveSync state has been saved.",
                 "correlationQuerySaved": "The correlation query has been saved.",
-                "reconQueryFilterSaveSuccess": "Reconcilation queries have been saved.",
+                "reconQueryFilterSaveSuccess": "Reconciliation queries have been saved.",
                 "triggeredBySituationSaved": "The Triggered by Situation scripts have been saved.",
                 "objectFiltersSaved": "The Object Filter scripts have been saved.",
-                "triggeredByReconSaved": "The Triggered by Reconciliation scripts have been saved."
+                "triggeredByReconSaved": "The Triggered by Reconciliation scripts have been saved.",
+                "linkQualifierSaveSuccess": "The Link Qualifiers have been saved."
             }
         },
         "AppConfiguration" : {
@@ -110,6 +111,9 @@
     },
     "templates" : {
         "util" : {
+            "saveChanges": {
+                "saveMsg": "The following changes will be saved"
+            },
             "filter": {
                 "options": {
                     "none": "No Filter",
@@ -291,13 +295,29 @@
             "expressionBuilder": "Expression Builder",
             "script": "Script",
             "warning": "Warning",
-            "specify": "You must specify a script with a unique Link Qualifier.",
-            "note": "Are you sure you want to save these changes and reconcile? It is recommended that you run a Reconciliation after modifying the association rules.",
+            "specify": "You must specify a script with a unique link qualifier.",
+            "note": "Are you sure you want to save these changes and reconcile? It is recommended that you run a reconciliation after modifying the association rules.",
             "dontRunReconcile": "Save and Don't Reconcile",
             "runReconcile": "Save and Reconcile",
             "queryFilters": "Query Filters",
             "linkQualifier": "Link Qualifier",
-            "legacy": "defaultLinkQualifier",
+            "empty": "none",
+            "save": "Save and Reconcile",
+            "resetMsg": "Are you sure you want to undo all pending changes?",
+            "resetTitle": "Reset Form",
+            "changesPending": "You have pending changes.",
+            "selectLQ": "Select a link qualifier",
+            "noLQ": "There are no link qualifiers defined to create a query from.",
+            "deleted": "Deleted",
+            "edited": "Edited",
+            "added": "Added",
+            "missingLQMsg": "This correlation query is referencing an undefined link qualifier.  You should remove this correlation query or create the link qualifier.",
+            "notAvailableMsg1": "The link qualifier, ",
+            "noLQdefined": "No link qualifiers defined",
+            "notAvailableMsg2": ", associated with this property is not available.  Add this link qualifier or update the condition.",
+            "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
+            "noCondition": "No Condition",
+            "undo": "Undo",
             "query": {
                 "correlationDescription": "List the fields which will be used to match existing items in your source to items in your target:",
                 "correlationAny": "Any of the below fields",
@@ -688,6 +708,9 @@
             }
         },
         "mapping": {
+            "attributes": "Attributes",
+            "linkQualifiers": "Link Qualifiers",
+            "uniqueLinkQualifiers": "The link qualifier must be unique.",
             "backToMapping" : "Back to Mappings",
             "mappings": "Mappings",
             "source": "Source",
