@@ -813,21 +813,22 @@ Server: Jetty(8.y.z-SNAPSHOT)
     <primary>Security</primary>
     <secondary>Encryption</secondary>
    </indexterm>
-
-   <para>By default, OpenIDM uses a symmetric encryption key with alias
-   <literal>openidm-sym-default</literal>. Change this default key before
-   deploying OpenIDM in production.</para>
-
    <para>
-    As noted in the section on the<link xlink:show="new"
+    By default, OpenIDM uses a symmetric encryption key with the alias
+    <literal>openidm-sym-default</literal>. Change this default key before you
+    deploy OpenIDM in production.
+   </para>
+   <para>
+    As noted in the section on the <link xlink:show="new"
     xlink:href="integrators-guide#cli-keytool"
     xlink:role="http://docbook.org/xlink/role/olink">
     <citetitle>keytool</citetitle></link> command, the default keystore
     password is <literal>changeit</literal>.
    </para>
-
    <step>
-    <para>Add the new key to the keystore.</para>
+    <para>
+     Add the new key to the keystore.
+    </para>
     <screen><userinput>$ cd /path/to/openidm/
 $ keytool \
  -genseckey \
@@ -851,10 +852,11 @@ Re-enter new password:</computeroutput></screen>
   </procedure>
 
   <procedure xml:id="security-replace-default-user-password">
-   <title>To Replace the Default User &amp; Password</title>
-
-   <para>After changing the default encryption key, change at least the default
-   user password.</para>
+   <title>To Replace the Default User Password</title>
+   <para>
+    After changing the default encryption key, change at least the default user
+    password.
+   </para>
    <step>
     <para>Use the <command>encrypt</command> command to obtain the encrypted 
     version of the new password.</para>
@@ -870,7 +872,7 @@ $ <userinput>cli.sh encrypt newpwd</userinput>
       "iv" : "TCoC/YrmiRmINw6jCPB5LQ==",
       "data" : "nCFvBIApIQ7C6k+UPzosaA==",
       "cipher" : "AES/CBC/PKCS5Padding",
-      "key" : "openidm-sym-default"
+      "key" : "new-sym-key"
     },
     "type" : "x-simple-encryption"
   }
@@ -881,10 +883,12 @@ $ <userinput>cli.sh encrypt newpwd</userinput>
    </step>
    <step>
     <para>
-     Replace the user object in the
+     Replace the password of the <literal>openidm</literal> user in the
      <filename>openidm/db/<replaceable>database</replaceable>/scripts/openidm.sql</filename>
-     script before setting up your JDBC repository for OpenIDM.
+     script before you set up your JDBC repository for OpenIDM.
     </para>
+    <screen>
+    </screen>
     <para>
      Alternatively, replace the user in the internal user table.
     </para>
