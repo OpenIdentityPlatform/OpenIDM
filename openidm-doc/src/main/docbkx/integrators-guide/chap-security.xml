@@ -805,7 +805,7 @@ Server: Jetty(8.y.z-SNAPSHOT)
   password.</para>
 
   <procedure xml:id="security-change-encryption-keys">
-   <title>To Change Default Encryption Keys</title>
+   <title>To Change the Default Encryption Key</title>
    <indexterm>
     <primary>Encryption</primary>
    </indexterm>
