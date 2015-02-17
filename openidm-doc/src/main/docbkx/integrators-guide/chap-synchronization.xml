@@ -4655,8 +4655,8 @@ externalAccount = openidm.read("system/ldap/account/uid=ddoe,ou=People,dc=exampl
     Each scheduled reconciliation and LiveSync task requires a schedule
     configuration file in <filename>openidm/conf</filename>. By convention,
     files are named
-    <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>
-    .json</filename>, where <replaceable>schedule-name</replaceable> is a
+    <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>.json</filename>,
+	  where <replaceable>schedule-name</replaceable> is a
     logical name for the scheduled synchronization operation, such as
     <literal>reconcile_systemXmlAccounts_managedUser</literal>.
    </para>
