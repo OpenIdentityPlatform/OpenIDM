@@ -800,9 +800,11 @@ Server: Jetty(8.y.z-SNAPSHOT)
    <primary>Passwords</primary>
   </indexterm>
 
-  <para>The default security settings are adequate for evaluation purposes. For 
-  production, change the default encryption key, and then replace the default user 
-  password.</para>
+  <para>
+   The default security settings are adequate for evaluation purposes. For
+   production, change at least the default encryption key, and replace the
+   default administrative user password.
+  </para>
 
   <procedure xml:id="security-change-encryption-keys">
    <title>To Change the Default Encryption Key</title>
@@ -851,49 +853,50 @@ Re-enter new password:</computeroutput></screen>
    </step>
   </procedure>
 
-  <procedure xml:id="security-replace-default-user-password">
-   <title>To Replace the Default User Password</title>
+  <section xml:id="security-replace-default-user-password">
+   <title>To Replace the Default Administrative User Password</title>
    <para>
-    After changing the default encryption key, change at least the default user
-    password.
+    After changing the default encryption key, change at least the password
+    of the default administrative user (<literal>openidm-admin</literal>).
    </para>
-   <step>
-    <para>Use the <command>encrypt</command> command to obtain the encrypted 
-    version of the new password.</para>
-    <screen>
-$ <userinput>cd /path/to/openidm/</userinput>
-$ <userinput>cli.sh encrypt newpwd</userinput>
-     <computeroutput>
-...
------BEGIN ENCRYPTED VALUE-----
-{
-  "$crypto" : {
-    "value" : {
-      "iv" : "TCoC/YrmiRmINw6jCPB5LQ==",
-      "data" : "nCFvBIApIQ7C6k+UPzosaA==",
-      "cipher" : "AES/CBC/PKCS5Padding",
-      "key" : "new-sym-key"
-    },
-    "type" : "x-simple-encryption"
-  }
-}
-------END ENCRYPTED VALUE------
-     </computeroutput>
-    </screen>
-   </step>
-   <step>
-    <para>
-     Replace the password of the <literal>openidm</literal> user in the
-     <filename>openidm/db/<replaceable>database</replaceable>/scripts/openidm.sql</filename>
-     script before you set up your JDBC repository for OpenIDM.
-    </para>
-    <screen>
-    </screen>
-    <para>
-     Alternatively, replace the user in the internal user table.
-    </para>
-   </step>
-  </procedure>
+   <para>
+    To change the password of the default administrative user, send a PUT
+    request to the user object. The following example changes the password of
+    the <literal>openidm-admin</literal> user to <literal>Passw0rd</literal>:
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PUT \
+ --data '{
+    "password": "Passw0rd",
+    "userName": "openidm-admin",
+    "roles": "openidm-admin,openidm-authorized",
+    "_id": "openidm-admin"
+ }' \
+ "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+<computeroutput>{
+  "roles": "openidm-admin,openidm-authorized",
+  "password": {
+    "$crypto": {
+      "value": {
+        "key": "new-sym-key",
+        "iv": "USfN9kARk4QjoyjGa/r8WA==",
+        "cipher": "AES/CBC/PKCS5Padding",
+        "data": "27tDQg49z8nWqvIOEh7VAg=="
+      },
+      "type": "x-simple-encryption"
+    }
+  },
+  "_id": "openidm-admin",
+  "userName": "openidm-admin",
+  "_rev": "2"
+}</computeroutput>
+   </screen>
+
+  </section>
  </section>
 
  <section xml:id="security-jetty">
@@ -1168,18 +1171,38 @@ password=<replaceable>password</replaceable></programlisting>
 
  <section xml:id="security-protect-repo">
   <title>Protect the OpenIDM Repository</title>
-
-  <!-- TODO: change if OrientDB is supported in production for 3.0 -->
-
-  <para>Use the JDBC or MSSQL repositories. OrientDB is not yet supported for
-  production use.</para>
-
-  <para>Use a strong password for the JDBC connection. Do not rely on default
-  passwords.</para>
-
-  <para>Use a case sensitive database, particularly if you work with systems
-  with different identifiers that match except for case. Otherwise correlation
-  queries can pick up identifiers that should not be considered the same.</para>
+  <para>
+   OpenIDM ${docTargetVersion} only supports the use of a JDBC repository in
+   production.
+  </para>
+  <para>
+   Use a strong password for the JDBC connection and change at least the
+   password of the database user (<literal>openidm</literal> by default). When
+   you change the database username and/or password, you must update the
+   repository configuration file (<filename>repo.jdbc.json</filename>) for your
+   repository type.
+  </para>
+  <para>
+   For example, the following excerpt of a MySQL repository configuration file
+   indicates the required change when the database user password has been
+   changed to <literal>myPassw0rd</literal>.
+  </para>
+  <programlisting language="javascript">{
+    "connection" : {
+        "dbType" : "MYSQL",
+        "jndiName" : "",
+        "driverClass" : "com.mysql.jdbc.Driver",
+        "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?allowMultiQueries=true&amp;characterEncoding=utf8",
+        "username" : "openidm",
+        "password" : "myPassw0rd",
+        ...
+    },
+} </programlisting>
+  <para>
+   Use a case sensitive database, particularly if you work with systems with
+   different identifiers that match except for case. Otherwise correlation
+   queries can pick up identifiers that should not be considered the same.
+  </para>
  </section>
 
  <section xml:id="security-adjust-log-levels">
