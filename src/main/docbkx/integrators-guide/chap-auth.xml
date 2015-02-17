@@ -347,370 +347,377 @@
 }  </programlisting>
    </section>
   </section>
- </section>
 
- <section xml:id="supported-auth-modules">
-  <title>Supported Authentication Modules</title>
-
-  <variablelist>
+  <section xml:id="supported-auth-modules">
+   <title>Supported Authentication Modules</title>
    <para>
-    OpenIDM supports a variety of modules, including those available from the
-    Common Authentication Framework (CAF). The CAF modules available to
-    OpenIDM include <literal>JWT_SESSION</literal>,
-    <literal>OPENAM_SESSION</literal>, and <literal>IWA</literal>. OpenIDM also
-    provides two additional authentication modules: <literal>DELEGATED</literal>
-    and <literal>CLIENT_CERT</literal>.
+    The authentication configuration is defined in
+    <filename>conf/authentication.json</filename>.
    </para>
 
-   <!-- Include OpenID Connect when a sample is available, or another statement
-   of support is made. -->
+   <variablelist>
+    <para>
+     OpenIDM supports a variety of authentication modules, including those
+     available from the Common Authentication Framework (CAF). The CAF modules available to
+     OpenIDM include <literal>JWT_SESSION</literal>,
+     <literal>OPENAM_SESSION</literal>, and <literal>IWA</literal>. OpenIDM also
+     provides two additional authentication modules: <literal>DELEGATED</literal>
+     and <literal>CLIENT_CERT</literal>.
+    </para>
+
+    <!-- Include OpenID Connect when a sample is available, or another statement
+    of support is made. -->
+
+    <para>
+     OpenIDM evaluates authentication modules in the order in which they are
+     placed in the <filename>authentication.json</filename> file.
+    </para>
+
+    <varlistentry>
+     <term>JWT_SESSION</term>
+     <listitem>
+      <para>
+       The JSON Web Token authentication module includes session information.
+       For details  on this common authentication module, see the following
+       Javadoc page: <link xlink:show="new"
+                           xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
+       <citetitle>Class JwtSessionModule</citetitle></link>.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <varlistentry>
+     <term>CLIENT_CERT</term>
+     <listitem>
+      <para>
+       The client certificate module accommodates users who authenticate with a
+       client certificate.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>DELEGATED</term>
+     <listitem>
+      <para>
+       The DELEGATED module validates client requests with the help of one of the
+       following entities:
+       <itemizedlist>
+        <listitem>
+         <para>
+          <literal>MANAGED_USER</literal>, a managed user object
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          <literal>INTERNAL_USER</literal>, an internal user object
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          <literal>PASSTHROUGH</literal>, an OpenICF connector.
+         </para>
+        </listitem>
+       </itemizedlist>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>OPENAM_SESSION</term>
+     <listitem>
+      <para>
+       The OPENAM_SESSION module allows you to protect a deployment of OpenIDM
+       with ForgeRock's <link xlink:show="new"
+                              xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
+       <citetitle>OpenAM Access Management</citetitle></link> product. For an
+       example of how you might use the OPENAM_SESSION module, see the
+       following: <link xlink:role="http://docbook.org/xlink/role/olink"
+                        xlink:show="new" xlink:href="install-guide#more-sample-openam">
+       <citetitle>Sample - Configuring Authentication Management With OpenAM.
+       </citetitle></link>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>IWA</term>
+     <listitem>
+      <para>
+       The IWA module supports Integrated Windows Authentication. In other words,
+       the IWA module supports the use of an LDAP connector for an Active
+       Directory server. For an example of how you can set that up with a
+       Kerberos server, see the following <link xlink:show="new"
+                                                xlink:href="integrators-guide#openidm-auth-kerberos"
+                                                xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Kerberos
+       Configuration Example</citetitle></link>.
+      </para>
+     </listitem>
+    </varlistentry>
+
+    <!--          Waiting for OpenID sample, per OPENIDM-2477
+    <varlistentry>
+     <term>OPENID_CONNECT</term>
+     <listitem>
+      <para>
+       The OPENID_CONNECT module supports the use of <link xlink:show="new"
+       xlink:href="http://openid.net/connect">OpenID Connect 1.0</link>, which
+       is an authentication layer built on OAuth 2.0.
+      </para>
+     </listitem>
+    </varlistentry>
+                      when sample is available, add a link here             -->
+   </variablelist>
+
+  </section>
+
+  <section xml:id="passthrough-auth">
+   <title>Using Delegated Authentication</title>
 
    <para>
-    OpenIDM evaluates authentication modules in the order in which they are
-    placed in the <filename>authentication.json</filename> file.
+    In addition to the internal and managed user authentication modules, OpenIDM
+    ${docTargetVersion} supports a delegated authentication mechanism.
+    With delegated authentication, the username and password included with the
+    REST request are validated against those stored in a remote system, such as
+    an LDAP server.
    </para>
 
-   <varlistentry>
-    <term>JWT_SESSION</term>
-    <listitem>
-     <para>
-      The JSON Web Token authentication module includes session information.
-      For details  on this common authentication module, see the following
-      Javadoc page: <link xlink:show="new"
-                          xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
-      <citetitle>Class JwtSessionModule</citetitle></link>.
-     </para>
-    </listitem>
-   </varlistentry>
+   <para>
+    The samples listed in the <link xlink:role="http://docbook.org/xlink/role/olink"
+                                    xlink:show="new" xlink:href="install-guide#chap-samples"><citetitle>OpenIDM
+    Installation Guide</citetitle></link> include multiple options for
+    authentication mechanisms.
+   </para>
 
-   <varlistentry>
-    <term>CLIENT_CERT</term>
-    <listitem>
-     <para>
-      The client certificate module accommodates users who authenticate with a
-      client certificate.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>DELEGATED</term>
-    <listitem>
-     <para>
-      The DELEGATED module validates client requests with the help of one of the
-      following entities:
-      <itemizedlist>
-       <listitem>
-        <para>
-         <literal>MANAGED_USER</literal>, a managed user object
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <literal>INTERNAL_USER</literal>, an internal user object
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <literal>PASSTHROUGH</literal>, an OpenICF connector.
-        </para>
-       </listitem>
-      </itemizedlist>
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>OPENAM_SESSION</term>
-    <listitem>
-     <para>
-      The OPENAM_SESSION module allows you to protect a deployment of OpenIDM
-      with ForgeRock's <link xlink:show="new"
-                             xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
-      <citetitle>OpenAM Access Management</citetitle></link> product. For an
-      example of how you might use the OPENAM_SESSION module, see the
-      following: <link xlink:role="http://docbook.org/xlink/role/olink"
-                       xlink:show="new" xlink:href="install-guide#more-sample-openam">
-      <citetitle>Sample - Configuring Authentication Management With OpenAM.
-      </citetitle></link>
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>IWA</term>
-    <listitem>
-     <para>
-      The IWA module supports Integrated Windows Authentication. In other words,
-      the IWA module supports the use of an LDAP connector for an Active
-      Directory server. For an example of how you can set that up with a
-      Kerberos server, see the following <link xlink:show="new"
-                                               xlink:href="integrators-guide#openidm-auth-kerberos"
-                                               xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Kerberos
-      Configuration Example</citetitle></link>.
-     </para>
-    </listitem>
-   </varlistentry>
+   <para>
+    You can add the delegated authentication module to the
+    <filename>conf/authentication.json</filename> file. For example, the
+    following excerpt illustrates one way to implement the
+    <literal>DELEGATED</literal> configuration object. For descriptive purposes,
+    you can substitute the <literal>PASSTHROUGH</literal> alias for
+    <literal>DELEGATED</literal>.
+   </para>
 
-   <!--          Waiting for OpenID sample, per OPENIDM-2477
-   <varlistentry>
-    <term>OPENID_CONNECT</term>
-    <listitem>
-     <para>
-      The OPENID_CONNECT module supports the use of <link xlink:show="new"
-      xlink:href="http://openid.net/connect">OpenID Connect 1.0</link>, which
-      is an authentication layer built on OAuth 2.0.
-     </para>
-    </listitem>
-   </varlistentry>
-                     when sample is available, add a link here             -->
-  </variablelist>
+   <programlisting language="javascript">
+ "authModules" : [
+    {
+       "name" : "DELEGATED",
+       "properties" : {
+          "augmentSecurityContext": {
+             "type" : "text/javascript",
+             "file" : "auth/populateAsManagedUser.js"
+          },
+          "queryOnResource" : "system/ldap/account",
+          "propertyMapping" : {
+             "authenticationId" : "uid",
+             "groupMembership" : "memberOf"
+          },
+          "groupRoleMapping" : {
+             "openidm-admin" : ["cn=admins"]
+          },
+          "managedUserLink" : "systemLdapAccounts_managedUser",
+          "defaultUserRoles" : [
+             "openidm-authorized"
+          ]
+       },
+       "enabled" : true
+    },
+    ...
+ ]
+   </programlisting>
 
- </section>
+   <para>
+    The properties shown from this excerpt are defined in
+    <xref linkend="roles-auth-prop" />
+   </para>
 
- <section xml:id="passthrough-auth">
-  <title>Using Delegated Authentication</title>
+   <para>
+    The content of the delegated authentication object varies. Samples
+    2/2b/2c/2d, 3, 5, and 6 include slightly different versions of the
+    <filename>conf/authentication.json</filename> file.
+   </para>
 
-  <para>
-   In addition to the internal and managed user authentication modules, OpenIDM
-   ${docTargetVersion} supports a delegated authentication mechanism.
-   With delegated authentication, the username and password included with the
-   REST request are validated against those stored in a remote system, such as
-   an LDAP server.
-  </para>
+   <variablelist>
+    <varlistentry>
+     <term>Samples 2, 2b, 2c, 2d (LDAP)</term>
+     <listitem>
+      <para>
+       Samples 2, 2b, 2c, and 2d relate to connections from an LDAP server.
+       Samples 5 and 5b  are quite similar, as they uses XML information to
+       masquerade as an LDAP server. The <filename>authentication.json</filename>
+       file is identical in each of these samples.
+      </para>
+      <para>
+       In the common <filename>authentication.json</filename> file, the
+       <literal>queryOnResource</literal> endpoint is
+       <literal>system/ldap/account</literal>. The
+       <literal>managedUserLink</literal> is
+       <literal>systemLdapAccounts_managedUser</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Sample 3 (Scripted SQL)</term>
+     <listitem>
+      <para>
+       Sample 3 relates to a connection to a scripted SQL database. As such, the
+       <literal>queryOnResource</literal> endpoint is
+       <literal>system/scriptedsql/account</literal>. The
+       <literal>managedUserLink</literal> is
+       <literal>systemHrdb_managedUser</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Sample 5, 5b (Synchronization of two resources)</term>
+     <listitem>
+      <para>
+       The XML files used in samples 5 and 5b simulate a connection between LDAP
+       servers. For that reason, the <filename>conf/authentication.json</filename>
+       file used in these samples are identical to that for sample 2/2b/2c/2d.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Sample 6 (LiveSync)</term>
+     <listitem>
+      <para>
+       The <literal>queryOnResource</literal> endpoint is
+       <literal>system/ad/account</literal>. The <literal>autheticationId</literal>
+       matches the AD attribute used for account names. The associated
+       <literal>managedUserLink</literal> is
+       <literal>systemAdAccounts_managedUser</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
 
-  <para>
-   The samples listed in the <link xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:show="new" xlink:href="install-guide#chap-samples"><citetitle>OpenIDM
-   Installation Guide</citetitle></link> include multiple options for
-   authentication mechanisms.
-  </para>
+  </section>
 
-  <para>
-   You can add the delegated authentication module to the
-   <filename>conf/authentication.json</filename> file. For example, the
-   following excerpt illustrates one way to implement the
-   <literal>DELEGATED</literal> configuration object. For descriptive purposes,
-   you can substitute the <literal>PASSTHROUGH</literal> alias for
-   <literal>DELEGATED</literal>.
-  </para>
+  <section xml:id="openidm-auth-kerberos">
+   <title>Kerberos Configuration Example</title>
 
-  <programlisting language="javascript">
-"authModules" : [
-   {
-      "name" : "DELEGATED",
-      "properties" : {
-         "augmentSecurityContext": {
-            "type" : "text/javascript",
-            "file" : "auth/populateAsManagedUser.js"
-         },
-         "queryOnResource" : "system/ldap/account",
-         "propertyMapping" : {
-            "authenticationId" : "uid",
-            "groupMembership" : "memberOf"
-         },
-         "groupRoleMapping" : {
-            "openidm-admin" : ["cn=admins"]
-         },
-         "managedUserLink" : "systemLdapAccounts_managedUser",
-         "defaultUserRoles" : [
-            "openidm-authorized"
-         ]
-      },
-      "enabled" : true
-   },
-   ...
-]
-  </programlisting>
+   <para>
+    This section assumes that you have an active Kerberos server acting as
+    a Key Distribution Center (KDC). If you're running Active Directory in your
+    deployment, that service includes a Kerberos KDC by default.
+   </para>
 
-  <para>
-   The properties shown from this excerpt are defined in
-   <xref linkend="roles-auth-prop" />
-  </para>
+   <para>
+    To take advantage of a Kerberos KDC, you need to do two things: first
+    include at least the <literal>IWA</literal> and possibly the
+    <literal>PASSTHROUGH</literal> modules in the
+    <filename>authentication.json</filename> file. Second, modify the
+    <filename>system.properties</filename> file to take advantage of the
+    noted modules.
+   </para>
 
-  <para>
-   The content of the delegated authentication object varies. Samples
-   2/2b/2c/2d, 3, 5, and 6 include slightly different versions of the
-   <filename>conf/authentication.json</filename> file.
-  </para>
+   <para>
+    For <literal>IWA</literal>, based on Integrated Windows Authentication,
+    this section assumes you have configured an LDAP connector for an Active
+    Directory server. To confirm, identify the following mapping source in the
+    <filename>sync.json</filename> configuration file:
+   </para>
 
-  <variablelist>
-   <varlistentry>
-    <term>Samples 2, 2b, 2c, 2d (LDAP)</term>
-    <listitem>
-     <para>
-      Samples 2, 2b, 2c, and 2d relate to connections from an LDAP server.
-      Samples 5 and 5b  are quite similar, as they uses XML information to
-      masquerade as an LDAP server. The <filename>authentication.json</filename>
-      file is identical in each of these samples.
-     </para>
-     <para>
-      In the common <filename>authentication.json</filename> file, the
-      <literal>queryOnResource</literal> endpoint is
-      <literal>system/ldap/account</literal>. The
-      <literal>managedUserLink</literal> is
-      <literal>systemLdapAccounts_managedUser</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Sample 3 (Scripted SQL)</term>
-    <listitem>
-     <para>
-      Sample 3 relates to a connection to a scripted SQL database. As such, the
-      <literal>queryOnResource</literal> endpoint is
-      <literal>system/scriptedsql/account</literal>. The
-      <literal>managedUserLink</literal> is
-      <literal>systemHrdb_managedUser</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Sample 5, 5b (Synchronization of two resources)</term>
-    <listitem>
-     <para>
-      The XML files used in samples 5 and 5b simulate a connection between LDAP
-      servers. For that reason, the <filename>conf/authentication.json</filename>
-      file used in these samples are identical to that for sample 2/2b/2c/2d.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Sample 6 (LiveSync)</term>
-    <listitem>
-     <para>
-      The <literal>queryOnResource</literal> endpoint is
-      <literal>system/ad/account</literal>. The <literal>autheticationId</literal>
-      matches the AD attribute used for account names. The associated
-      <literal>managedUserLink</literal> is
-      <literal>systemAdAccounts_managedUser</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+   <screen>system/ad/account</screen>
 
- </section>
+   <para>
+    You could then include the following code block in the
+    <filename>authentication.json</filename> file. Include appropriate
+    values for the <literal>kerberosRealm</literal> and
+    <literal>kerberosServerName</literal>. For a list of definitions, see the
+    following section: <link xlink:role="http://docbook.org/xlink/role/olink"
+                             xlink:href="integrators-guide#kerberos-definitions" xlink:show="new">
+    <citetitle>Kerberos Definitions</citetitle></link>.
+   </para>
 
- <section xml:id="openidm-auth-kerberos">
-  <title>Kerberos Configuration Example</title>
+   <programlisting language="javascript">"authModules" : [
+    ...
+    {
+    "name" : "IWA",
+    "properties": {
+    "servicePrincipal" : "",
+    "keytabFileName" : "security/name.HTTP.keytab",
+    "kerberosRealm" : "",
+    "kerberosServerName" : "",
+    "queryOnResource" : "system/ad/account",
+    "propertyMapping" : {
+    "authenticationId" : "sAMAccountName",
+    "groupMembership" : "memberOf"
+    },
+    "groupRoleMapping" : { "openidm-admin": [ ] },
+    "groupComparisonMethod": "ldap",
+    "defaultUserRoles" : [
+    "openidm-authorized"
+    ]
+    },
+    "enabled" : true
+    }
+   </programlisting>
 
-  <para>
-   This section assumes that you have an active Kerberos server acting as
-   a Key Distribution Center (KDC). If you're running Active Directory in your
-   deployment, that service includes a Kerberos KDC by default.
-  </para>
+   <para>
+    To grant different roles to users who are authenticated through the
+    <literal>IWA</literal> module, list them with their
+    <literal>groupRoleMapping</literal>.
+   </para>
 
-  <para>
-   To take advantage of a Kerberos KDC, you need to do two things: first
-   include at least the <literal>IWA</literal> and possibly the
-   <literal>PASSTHROUGH</literal> modules in the
-   <filename>authentication.json</filename> file. Second, modify the
-   <filename>system.properties</filename> file to take advantage of the
-   noted modules.
-  </para>
+   <para>
+    You could pair the <literal>IWA</literal> module with the
+    <literal>PASSTHROUGH</literal> module. When paired, a failure in the
+    <literal>IWA</literal> module allows users to revert to forms-based
+    authentication.
+   </para>
 
-  <para>
-   For <literal>IWA</literal>, based on Integrated Windows Authentication,
-   this section assumes you have configured an LDAP connector for an Active
-   Directory server. To confirm, identify the following mapping source in the
-   <filename>sync.json</filename> configuration file:
-  </para>
+   <para>
+    You could add the <literal>PASSTHROUGH</literal> module as follows, in the
+    <filename>authentication.json</filename> file:
+   </para>
 
-  <screen>system/ad/account</screen>
+   <programlisting language="javascript"> ...
+    {
+    "name" : "PASSTHROUGH",
+    "properties": {
+    "queryOnResource" : "system/AD/account",
+    "propertyMapping" : {
+    "authenticationId" : "sAMAccountName",
+    "groupMembership" : "memberOf" },
+    "groupRoleMapping" : { "openidm-admin": [ ] },
+    "groupComparisonMethod": "ldap",
+    "defaultUserRoles" : [
+    "openidm-authorized"
+    ]
+    },
+    "enabled" : true
+    }
+    ... </programlisting>
 
-  <para>
-   You could then include the following code block in the
-   <filename>authentication.json</filename> file. Include appropriate
-   values for the <literal>kerberosRealm</literal> and
-   <literal>kerberosServerName</literal>. For a list of definitions, see the
-   following section: <link xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:href="integrators-guide#kerberos-definitions" xlink:show="new">
-   <citetitle>Kerberos Definitions</citetitle></link>.
-  </para>
+   <para>
+    Once you have included at least the <literal>IWA</literal> module,
+    edit the <filename>system.properties</filename> file. Include the following
+    entry to point to a JAAS configuration file. Substitute if desired for
+    <filename>gssapi_jaas.conf</filename>
+   </para>
 
-  <programlisting language="javascript">"authModules" : [
-   ...
-   {
-   "name" : "IWA",
-   "properties": {
-   "servicePrincipal" : "",
-   "keytabFileName" : "security/name.HTTP.keytab",
-   "kerberosRealm" : "",
-   "kerberosServerName" : "",
-   "queryOnResource" : "system/ad/account",
-   "propertyMapping" : {
-   "authenticationId" : "sAMAccountName",
-   "groupMembership" : "memberOf"
-   },
-   "groupRoleMapping" : { "openidm-admin": [ ] },
-   "groupComparisonMethod": "ldap",
-   "defaultUserRoles" : [
-   "openidm-authorized"
-   ]
-   },
-   "enabled" : true
-   }
-  </programlisting>
+   <screen>
+    java.security.auth.login.config=/path/to/openidm/conf/gssapi_jaas.conf
+   </screen>
 
-  <para>
-   To grant different roles to users who are authenticated through the
-   <literal>IWA</literal> module, list them with their
-   <literal>groupRoleMapping</literal>.
-  </para>
+   <para>
+    In the <filename>gssapi_jaas.conf</filename> file, include the following
+    information related to the LDAP connector:
+   </para>
 
-  <para>
-   You could pair the <literal>IWA</literal> module with the
-   <literal>PASSTHROUGH</literal> module. When paired, a failure in the
-   <literal>IWA</literal> module allows users to revert to forms-based
-   authentication.
-  </para>
+   <programlisting language="javascript">
+    org.identityconnectors.ldap.LdapConnector {
+    com.sun.security.auth.module.Krb5LoginModule required client=TRUE
+    principal="bjensen@EXAMPLE.COM" useKeyTab=true keyTab="/path/to/bjensen.keytab";
+    };
+   </programlisting>
 
-  <para>
-   You could add the <literal>PASSTHROUGH</literal> module as follows, in the
-   <filename>authentication.json</filename> file:
-  </para>
+   <xinclude:include href="../shared/kerberos-definitions.xml" />
 
-  <programlisting language="javascript"> ...
-   {
-   "name" : "PASSTHROUGH",
-   "properties": {
-   "queryOnResource" : "system/AD/account",
-   "propertyMapping" : {
-   "authenticationId" : "sAMAccountName",
-   "groupMembership" : "memberOf" },
-   "groupRoleMapping" : { "openidm-admin": [ ] },
-   "groupComparisonMethod": "ldap",
-   "defaultUserRoles" : [
-   "openidm-authorized"
-   ]
-   },
-   "enabled" : true
-   }
-   ... </programlisting>
-
-  <para>
-   Once you have included at least the <literal>IWA</literal> module,
-   edit the <filename>system.properties</filename> file. Include the following
-   entry to point to a JAAS configuration file. Substitute if desired for
-   <filename>gssapi_jaas.conf</filename>
-  </para>
-
-  <screen>
-   java.security.auth.login.config=/path/to/openidm/conf/gssapi_jaas.conf
-  </screen>
-
-  <para>
-   In the <filename>gssapi_jaas.conf</filename> file, include the following
-   information related to the LDAP connector:
-  </para>
-
-  <programlisting language="javascript">
-   org.identityconnectors.ldap.LdapConnector {
-   com.sun.security.auth.module.Krb5LoginModule required client=TRUE
-   principal="bjensen@EXAMPLE.COM" useKeyTab=true keyTab="/path/to/bjensen.keytab";
-   };
-  </programlisting>
-
-  <xinclude:include href="../shared/kerberos-definitions.xml" />
+  </section>
 
  </section>
+
+
 
  <section xml:id="openidm-roles">
   <title>Roles and Authentication</title>
