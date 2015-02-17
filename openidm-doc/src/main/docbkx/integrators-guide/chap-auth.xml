@@ -41,236 +41,39 @@
 
  <para>
   OpenIDM provides a flexible authentication and authorization mechanism, based
-  on REST interface URLs and on roles which may be stored in the repository.
+  on REST interface URLs and on managed roles. This chapter describes how to
+  configure the supported authentication modules, and how roles are used to
+  support authentication, authorization, and access control.
  </para>
 
- <section xml:id="openidm-users">
-  <title>OpenIDM Users</title>
-  <indexterm>
-   <primary>Authentication</primary>
-   <secondary>Internal users</secondary>
-  </indexterm>
-  <indexterm>
-   <primary>Authentication</primary>
-   <secondary>Managed users</secondary>
-  </indexterm>
-
-  <para>
-   While OpenIDM authenticates internal and managed users with the
-   <literal>DELEGATED</literal> module, there are differences between these
-   two types of users.
-  </para>
-
-  <section xml:id="internal-users">
-   <title>Internal Users</title>
-   <para>
-    OpenIDM creates two internal users by default: <literal>anonymous</literal>
-    and <literal>openidm-admin</literal>. These accounts are separated from
-    other user accounts to protect them from any reconciliation or
-    synchronization processes.
-   </para>
-   <para>
-    OpenIDM stores internal users and their role membership in a table in the
-    repository. For the way internal users are mapped, see the discussion on
-    the <literal>explicitMapping</literal> property to
-    <literal>"internal/user</literal> described in <link xlink:show="new"
-    xlink:href="integrators-guide#explicit-mappings"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Explicit
-    Mappings</citetitle></link>.
-   </para>
-   <para>
-    For more information on storage mechanisms for managed users in OrientDB
-    and JDBC, see <link xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:show="new" xlink:href="integrators-guide#working-with-managed-users">
-    <citetitle>Working With Managed Users</citetitle></link>.
-   </para>
-   <variablelist>
-    <varlistentry>
-     <term>anonymous</term>
-     <listitem>
-      <para>
-       This user enables anonymous access to OpenIDM, for users who do not have
-       their own accounts. The anonymous user, configured by default with the
-       <literal>openidm-reg</literal> role, has limited rights within OpenIDM.
-       It can be used to allow self-registration. For more information on the
-       process, see <link xlink:role="http://docbook.org/xlink/role/olink"
-       xlink:show="new" xlink:href="integrators-guide#ui-self-registration">
-       <citetitle>Enabling Self-Registration</citetitle></link>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>openidm-admin</term>
-     <listitem>
-      <para>
-       This user serves as the top-level administrator. After installation, the
-       <literal>openidm-admin</literal> user has full access, and provides a
-       fallback mechanism in case other users are locked out. Do not use
-       <literal>openidm-admin</literal> for regular tasks. Under normal
-       circumstances, the <literal>openidm-admin</literal> account does not
-       represent a regular user, so any audit log records for this account do
-       not represent the actions of any real person.
-      </para>
-      <para>
-       OpenIDM encrypts the default administrative password,
-       <literal>openidm-admin</literal>. Change the password immediately after
-       installation. For instructions, see
-       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-       xlink:href="integrators-guide#security-replace-default-user-password">
-       <citetitle>To Replace the Default User and Password</citetitle></link>.
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  <section xml:id="repo-internal-user">
-   <title>Managing Internal Users Over REST</title>
-   <para>
-    To list the internal users over REST, query the <literal>repo</literal>
-    endpoint as follows:
-   </para>
-   <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET  \
- "https://localhost:8443/openidm/repo/internal/user?_queryId=query-all-ids"</userinput>
-<computeroutput>{
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 2,
-  "result": [
-    {
-      "_rev": "0",
-      "_id": "openidm-admin"
-    },
-    {
-      "_rev": "0",
-      "_id": "anonymous"
-    }
-  ]
-}</computeroutput></screen>
-   <para>
-    To query the details of an internal user, include the user's ID in the
-    request, for example:
-   </para>
-   <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET  \
- "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
-<computeroutput>{
-  "password": "openidm-admin",
-  "userName": "openidm-admin",
-  "roles": "openidm-admin,openidm-authorized",
-  "_rev": "1",
-  "_id": "openidm-admin"
-}</computeroutput></screen>
-   <para>
-    To change the username or password of the default administrative user,
-    send a PUT request to the user object. The following example changes the
-    password of the <literal>openidm-admin</literal> user to
-    <literal>Passw0rd</literal>:
-   </para>
-   <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "Content-Type: application/json" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request PUT \
- --data '{
-    "password": "Passw0rd",
-    "userName": "openidm-admin",
-    "roles": "openidm-admin,openidm-authorized",
-    "_id": "openidm-admin"
- }' \
- "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
-<computeroutput>{
-  "roles": "openidm-admin,openidm-authorized",
-  "password": {
-    "$crypto": {
-      "value": {
-        "key": "openidm-sym-default",
-        "iv": "USfN9kARk4QjoyjGa/r8WA==",
-        "cipher": "AES/CBC/PKCS5Padding",
-        "data": "27tDQg49z8nWqvIOEh7VAg=="
-      },
-      "type": "x-simple-encryption"
-    }
-  },
-  "_id": "openidm-admin",
-  "userName": "openidm-admin",
-  "_rev": "2"
-}</computeroutput>
-   </screen>
-  </section>
-
-  </section>
-  
-  <section xml:id="managed-users">
-   <title>Managed Users</title>
-  <indexterm>
-   <primary>Objects</primary>
-   <secondary>Managed objects</secondary>
-  </indexterm>
-   <para>
-    External users managed by OpenIDM are known as managed users.
-   </para>
-   <para>
-    The location of managed users depends on the type of repository. For
-    JDBC repositories, OpenIDM stores managed users in the managed objects
-    table, named <literal>managedobjects</literal>. OpenIDM may access an index
-    table <literal>managedobjectproperties</literal> as well.
-   </para>
-   <para>
-    For the OrientDB repository, managed objects are stored in the table
-    <literal>managed_user</literal>.
-   </para>
-   <para>
-    By default, the attribute names for managed user login and password are
-    <literal>userName</literal> and <literal>password</literal>, respectively.
-   </para>
-  </section>
- </section>
- 
  <section xml:id="openidm-authentication">
-  <title>Authentication</title>
-
+  <title>OpenIDM Authentication</title>
   <para>
    OpenIDM does not allow access to the REST interface without authentication.
-  </para>
-
-  <para>
-   User self-registration requires anonymous access. For that purpose, OpenIDM
-   includes an <literal>anonymous</literal> user, with the following password:
+   User self-registration requires anonymous access. For this purpose, OpenIDM
+   includes an <literal>anonymous</literal> user, with the password
    <literal>anonymous</literal>. For more information, see
-   <xref linkend="internal-users" />.
+   <xref linkend="internal-users" />. In production environments, only
+   applications are expected to access the REST interface.
   </para>
-
-  <para>
-   In production, only applications are expected to access the REST interface.
-  </para>
-
   <variablelist>
    <para>
-    OpenIDM supports an improved authentication mechanism on the REST
-    interface. Unlike basic authentication or form-based authentication, the
-    OpenIDM authentication mechanism is compatible with the AJAX framework. You
-    can configure authentication with standard or OpenIDM-specific header
-    fields, as follows:
+    OpenIDM supports HTTP basic authentication, but also supports an enhanced
+    authentication mechanism over the REST interface that is compatible with the
+    AJAX framework. You can use basic authentication headers, or the
+    OpenIDM-specific authentication headers, as follows:
    </para>
    <varlistentry>
-    <term>OpenIDM authentication with standard header fields</term>
+    <term>Authentication with HTTP basic authentication headers</term>
     <listitem>
-     <screen>$ curl --user userName:password</screen>
+     <screen>$ curl --user openidm-admin:openidm-admin</screen>
      <para>
-      This method uses standard basic authentication. However, it does not
-      prompt for missing credentials.
+      This method does not prompt for missing credentials.
      </para>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>OpenIDM authentication with OpenIDM header fields</term>
+    <term>Authentication with OpenIDM-specific headers</term>
     <listitem>
      <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -278,77 +81,272 @@
     </listitem>
    </varlistentry>
   </variablelist>
-
   <note>
    <para>
-    This document uses the OpenIDM authentication options for all REST calls.
-    Where no OpenIDM-specific options exist, the "long-form" option such as
-    <command>--data</command> is used. In contrast, the README files that
-    accompany OpenIDM generally use "short-form" options such as
-    <command>-X</command> (instead of <command>--request</command>) and
-    <command>-H</command> (instead of <command>--header</command>).
+    This document uses the OpenIDM authentication headers in all REST examples.
    </para>
   </note>
-  
-  <para>For more information about the OpenIDM authentication mechanism, see
+  <para>
+   For more information about the OpenIDM authentication mechanism, see
    <link xlink:href="integrators-guide#security-messages"
-   xlink:role="http://docbook.org/xlink/role/olink">
-   <citetitle>Use Message Level Security</citetitle></link>.</para>
+         xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Use Message Level Security</citetitle></link>.
+  </para>
+
+  <section xml:id="openidm-users">
+   <title>Authenticating OpenIDM Users</title>
+   <indexterm>
+    <primary>Authentication</primary>
+    <secondary>Internal users</secondary>
+   </indexterm>
+   <indexterm>
+    <primary>Authentication</primary>
+    <secondary>Managed users</secondary>
+   </indexterm>
+   <para>
+    OpenIDM stores two types of users in its repository - internal users and
+    managed users. The way in which both of these user types are authenticated
+    is defined in the file
+    <filename>openidm/conf/authentication.json</filename>.
+   </para>
+
+   <section xml:id="internal-users">
+    <title>Internal Users</title>
+    <para>
+     OpenIDM creates two internal users by default: <literal>anonymous</literal>
+     and <literal>openidm-admin</literal>. These internal user accounts are
+     separated from other user accounts to protect them from any reconciliation
+     or synchronization processes.
+    </para>
+    <para>
+     OpenIDM stores internal users and their role membership in a table in the
+     repository. The two default internal users have the following functions:
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term>anonymous</term>
+      <listitem>
+       <para>
+        This user enables anonymous access to OpenIDM, for users who do not have
+        their own accounts. The anonymous user has limited rights within
+        OpenIDM. By default, the anonymous user has the
+        <literal>openidm-reg</literal> role, and can be used to allow
+        self-registration. For more information about self-registration, see
+        <link xlink:role="http://docbook.org/xlink/role/olink"
+        xlink:show="new" xlink:href="integrators-guide#ui-self-registration">
+        <citetitle>Enabling Self-Registration</citetitle></link>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>openidm-admin</term>
+      <listitem>
+       <para>
+        This user serves as the top-level administrator. After installation, the
+        <literal>openidm-admin</literal> user has full access, and provides a
+        fallback mechanism in the event that other users are locked out of their
+        accounts. Do not use <literal>openidm-admin</literal> for regular tasks.
+        Under normal circumstances, the <literal>openidm-admin</literal> account
+        does not represent a regular user, so any audit log records for this
+        account do not represent the actions of any real person.
+       </para>
+       <para>
+        OpenIDM encrypts the default administrative password,
+        <literal>openidm-admin</literal>. Change the password immediately after
+        installation, as described in the following section.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+
+    <section xml:id="repo-internal-user">
+     <title>Managing Internal Users Over REST</title>
+     <para>
+      Like any other user in the repository, you can manage internal users over
+      the REST interface.
+     </para>
+     <para>
+      To list the internal users over REST, query the <literal>repo</literal>
+      endpoint as follows:
+     </para>
+     <screen><userinput>$ curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request GET  \
+   "https://localhost:8443/openidm/repo/internal/user?_queryId=query-all-ids"</userinput>
+  <computeroutput>{
+    "remainingPagedResults": -1,
+    "pagedResultsCookie": null,
+    "resultCount": 2,
+    "result": [
+      {
+        "_rev": "0",
+        "_id": "openidm-admin"
+      },
+      {
+        "_rev": "0",
+        "_id": "anonymous"
+      }
+    ]
+  }</computeroutput></screen>
+     <para>
+      To query the details of an internal user, include the user's ID in the
+      request, for example:
+     </para>
+     <screen><userinput>$ curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request GET  \
+   "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+  <computeroutput>{
+    "password": "openidm-admin",
+    "userName": "openidm-admin",
+    "roles": "openidm-admin,openidm-authorized",
+    "_rev": "1",
+    "_id": "openidm-admin"
+  }</computeroutput></screen>
+     <para>
+      To change the password of the default administrative user, send a PUT
+      request to the user object. The following example changes the password of
+      the <literal>openidm-admin</literal> user to <literal>Passw0rd</literal>:
+     </para>
+     <screen><userinput>$ curl \
+   --cacert self-signed.crt \
+   --header "Content-Type: application/json" \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request PUT \
+   --data '{
+      "password": "Passw0rd",
+      "userName": "openidm-admin",
+      "roles": "openidm-admin,openidm-authorized",
+      "_id": "openidm-admin"
+   }' \
+   "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+  <computeroutput>{
+    "roles": "openidm-admin,openidm-authorized",
+    "password": {
+      "$crypto": {
+        "value": {
+          "key": "openidm-sym-default",
+          "iv": "USfN9kARk4QjoyjGa/r8WA==",
+          "cipher": "AES/CBC/PKCS5Padding",
+          "data": "27tDQg49z8nWqvIOEh7VAg=="
+        },
+        "type": "x-simple-encryption"
+      }
+    },
+    "_id": "openidm-admin",
+    "userName": "openidm-admin",
+    "_rev": "2"
+  }</computeroutput>
+     </screen>
+    </section>
+   </section>
   
-  <para>
-   You can change the attributes used by OpenIDM to store user login and
-   password values. Attribute names are shown in a database query listed in
-   <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>.
-  </para>
+   <section xml:id="managed-users">
+    <title>Managed Users</title>
+    <indexterm>
+     <primary>Objects</primary>
+     <secondary>Managed objects</secondary>
+    </indexterm>
+    <para>
+     External users that are managed by OpenIDM are known as managed users.
+    </para>
+    <para>
+     The table in which managed users are stored depends on the type of
+     repository. For JDBC repositories, OpenIDM stores managed users in the
+     managed objects table, named <literal>managedobjects</literal>, and indexes
+     those objects in a table named <literal>managedobjectproperties</literal>.
+    </para>
+    <para>
+     For an OrientDB repository, managed objects are stored in the table
+     <literal>managed_user</literal>.
+    </para>
+    <para>
+     OpenIDM provides RESTful access to managed users, at the context path
+     <literal>/openidm/managed/user</literal>. For more information, see
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#managing-users-REST"><citetitle>Managing
+     Users Over REST</citetitle></link>.
+    </para>
+   </section>
 
-  <variablelist>
-   <para>Two queries are defined by default.</para>
-   <varlistentry>
-    <term><literal>credential-internaluser-query</literal></term>
-    <listitem>
-     <para>Uses the <literal>_openidm_id</literal> attribute for login</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><literal>credential-query</literal></term>
-    <listitem>
-     <para>Uses the <literal>userName</literal> attribute for login</para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
-
-  <para>
-   The <filename>openidm/conf/authentication.json</filename> file defines
-   the active query with the <literal>queryId</literal> property. In the
-   following example, <literal>credential-query</literal> is the
-   <literal>queryId</literal> identifier used in a <literal>queryRequest</literal>
-   to validate credentials.
-  </para>
-
-   <programlisting language="javascript">
-{
-    "queryId" : "credential-query",
-    "queryOnResource" : "managed/user",
-...
-}</programlisting>
-
- <para>
-  You can explicitly define the properties that constitute passwords or roles
-  with the <literal>propertyMapping</literal> object in the
-  <filename>conf/authentication.json</filename> file. The default property
-  mapping is shown here:
- </para>
- 
- <programlisting language="javascript">
+   <section xml:id="internal-managed-authentication">
+    <title>Authenticating Internal and Managed Users</title>
+    <para>
+     By default, the attribute names that are used to authenticate managed users
+     are <literal>username</literal> and <literal>password</literal>,
+     respectively. However, you can explicitly define the properties that
+     constitute usernames, passwords or roles with the
+     <literal>propertyMapping</literal> object in the
+     <filename>conf/authentication.json</filename> file. The following excerpt
+     of the <filename>authentication.json</filename> file shows the default
+     property mapping object:
+    </para>
+    <programlisting language="javascript">
  ...
     "propertyMapping" : {
         "authenticationId" : "username",
         "userCredential" : "password",
         "userRoles" : "roles"
     },
- ... 
- </programlisting>
-
+ ...
+    </programlisting>
+    <para>
+     If you change the attribute names that are used for authentication, you
+     must adjust the following authentication queries (defined in the repository
+     configuration file,
+     <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>).
+    </para>
+    <variablelist>
+     <para>Two queries are defined by default.</para>
+     <varlistentry>
+      <term><literal>credential-internaluser-query</literal></term>
+      <listitem>
+       <para>
+        This query uses the <literal>_openidm_id</literal> attribute for login,
+        for internal users. For example, the following
+        <literal>credential-internaluser-query</literal> is defined in the
+        default repository configuration file for a MySQL repository.
+       </para>
+       <programlisting>
+"credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
+       </programlisting>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>credential-query</literal></term>
+      <listitem>
+       <para>
+        This query uses the <literal>username</literal> attribute for login, for
+        managed users. For example, the following
+        <literal>credential-query</literal> is defined in the default repository
+        configuration file for a MySQL repository.
+       </para>
+       <programlisting>
+"credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username} and accountStatus = 'active'",
+       </programlisting>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+    <para>
+     The query that is used for a particular resource is specified by the
+     <literal>queryId</literal> property in the
+     <filename>authentication.json</filename> file. The following sample excerpt
+     of that file shows that the <literal>credential-query</literal> is used in
+     query request to validate managed user credentials.
+    </para>
+    <programlisting language="javascript">
+{
+    "queryId" : "credential-query",
+    "queryOnResource" : "managed/user",
+...
+}  </programlisting>
+   </section>
+  </section>
  </section>
 
  <section xml:id="supported-auth-modules">
@@ -623,7 +621,7 @@
    values for the <literal>kerberosRealm</literal> and
    <literal>kerberosServerName</literal>. For a list of definitions, see the
    following section: <link xlink:role="http://docbook.org/xlink/role/olink"
-                            xlink:href="integrators-guide#kerberos-definitions" xlink:show="new">
+   xlink:href="integrators-guide#kerberos-definitions" xlink:show="new">
    <citetitle>Kerberos Definitions</citetitle></link>.
   </para>
 
