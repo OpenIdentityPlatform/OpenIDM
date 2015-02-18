@@ -261,9 +261,10 @@
    </listitem>
    <listitem>
     <para>
-     In addition, OpenIDM stores a <literal>links</literal> table, in its
-     repository. The links table maintains a record of relationships established
-     between source and target objects.
+     In addition to these configuration elements, OpenIDM stores a
+     <literal>links</literal> table, in its repository. The links table
+     maintains a record of relationships established between source and target
+     objects.
     </para>
    </listitem>
   </itemizedlist>
@@ -348,15 +349,15 @@
      The <filename>sync.json</filename> file describes a set of mappings. Each
      mapping specifies how attributes from source objects correspond to
      attributes on target objects. The source and target indicate the direction
-     for the data flow, so you must define a separate mapping for each data
-     flow. For example, if you want data flows from an LDAP server to the
-     repository and also from the repository to the LDAP server, you must
-     define two separate mappings.
+     of the data flow, so you must define a separate mapping for each data flow.
+     For example, if you want data to flow from an LDAP server to the repository
+     and also from the repository to the LDAP server, you must define two
+     separate mappings.
     </para>
     <para>
      You can update mappings in the <filename>sync.json</filename> file while
      the server is running, as long as you do not update a mapping that is
-     currently in use by a reconciliation process.
+     currently being used by a reconciliation process.
     </para>
 
     <section xml:id="mapping-resources">
@@ -384,60 +385,67 @@
     "mappings": [
         {
             "name": "systemLdapAccounts_managedUser",
-            "source": "system/MyLDAP/account",
+            "source": "system/ldap/account",
             "target": "managed/user",
             "properties": [
                 {
-                    "target": "sn",
-                    "source": "lastName"
+                    "source": "lastName",
+                    "target": "sn"
                 },
                 {
-                    "target": "telephoneNumber",
-                    "source": "homePhone"
+                    "source": "telephoneNumber",
+                    "target": "telephoneNumber"
                 },
                 {
                     "target": "phoneExtension",
                     "default": "0047"
                 },
                 {
+                    "source": "email",
                     "target": "mail",
                     "comment": "Set mail if non-empty.",
-                    "source": "email",
                     "condition": {
                         "type": "text/javascript",
                         "source": "(object.email != null)"
                     }
                 },
                 {
-                    "target": "displayName",
                     "source": "",
+                    "target": "displayName",
                     "transform": {
                         "type": "text/javascript",
                         "source": "source.lastName +', ' + source.firstName;"
                     }
-                }
+                },
+               {
+                    "source" : "uid",
+                    "target" : "userName",
+                    "condition" : {
+                        "linkQualifier" : "user"
+                    }
+               },
             ]
         }
     ]
 }    </programlisting>
      <para>
-      In this example, the source is the external resource, <literal>MyLDAP</literal>,
-      and the target is OpenIDM's repository, specifically the managed user
-      objects. The <literal>properties</literal> defined in the mapping reflect
-      OpenIDM attribute names. For example, the attribute <literal>lastName</literal>,
-      defined in the <literal>MyLDAP</literal> connector configuration file, is
-      mapped to the <literal>sn</literal> attribute in the OpenIDM managed user
-      object. Notice that the attribute names come from <emphasis>the connector
-      configuration</emphasis>, and not from the external resource itself.
+      In this example, the source is the external resource
+      (<literal>ldap</literal>), and the target is OpenIDM's repository,
+      specifically the managed user objects. The <literal>properties</literal>
+      defined in the mapping reflect attribute names defined in the OpenIDM
+      configuration. For example, the target attribute
+      <literal>displayName</literal> is defined in the <literal>ldap</literal>
+      connector configuration file, rather than on the external resource itself.
      </para>
      <para>
-      To add a flow from the repository to <literal>MyLDAP</literal>,
-     you would define a mapping with source <literal>managed/user</literal>
-     and target <literal>system/MyLDAP/account</literal>, named for example
-     <literal>managedUser_systemLdapAccounts</literal>.</para>
-
-     <para>The following image shows the paths to objects in the OpenIDM
-     namespace.</para>
+      To add a flow from the repository to the <literal>ldap</literal> resource,
+      you would define a mapping with source <literal>managed/user</literal>
+      and target <literal>system/ldap/account</literal>. The mapping would be
+      named, for example, <literal>managedUser_systemLdapAccounts</literal>.
+     </para>
+     <para>
+      The following image shows the paths to objects in the OpenIDM namespace.
+     </para>
 
      <mediaobject xml:id="figure-service-tree"><?dbfo pgwide="1"?>
       <alt>OpenIDM namespace and object paths</alt>
@@ -486,11 +494,21 @@
      </indexterm>
      <para>
       You can use a mapping configuration to define attribute transformations
-      that occur during sychronization. In the preceding sample mapping, the
-      value of the <literal>displayName</literal> attribute is set using a
-      combination of the <literal>lastName</literal> and
+      that occur during synchronization. In the following excerpt of the sample
+      mapping, the value of the <literal>displayName</literal> attribute is set
+      using a combination of the <literal>lastName</literal> and
       <literal>firstName</literal> attribute values from the source.
      </para>
+     <programlisting language="javascript">
+{
+    "source": "",
+    "target": "displayName",
+    "transform": {
+        "type": "text/javascript",
+        "source": "source.lastName +', ' + source.firstName;"
+    }
+},
+     </programlisting>
      <para>
       For transformations, the <literal>source</literal> property is optional.
       However, the source object is only available when you specify the
@@ -501,6 +519,39 @@
      </para>
     </section>
 
+    <section xml:id="mapping-link-qualifiers">
+     <title>Using Link Qualifiers in a Mapping</title>
+     <para>
+      In certain situations, you might need to identify the
+      <emphasis>type</emphasis> of relationship, or link, that is created when
+      a source object is mapped to a target object. The ability to qualify
+      relationships between objects is useful only in a situation where you have
+      multiple target objects that map to a single source object. For example,
+      you might have one managed user, <literal>scarter</literal> who has two
+      distinct accounts in an LDAP directory, a regular user account
+      (<literal>scarter</literal>) and a test account
+      (<literal>scarter-test</literal>). Both of these LDAP accounts should be
+      linked to the single managed user object, <literal>scarter</literal>.
+     </para>
+     <para>
+      OpenIDM uses <emphasis>link qualifiers</emphasis> to indicate how the two
+      target objects are distinguished. A link qualifier relates to a specific
+      property in the target object. In this example, a link qualifier might
+      be defined on the <literal>dn</literal> property of the target object, to
+      indicate that it is the value of the target <literal>dn</literal> that
+      will determine the type of link that is created.
+     </para>
+     <para>
+      Link qualifiers are declared at the top of the mapping to which they
+      apply. They can then be referenced in the property mapping, in
+      transformation scripts, and in correlation queries. Each
+      <literal>linkQualifier</literal> within a specific mapping must be
+      unique. If no link qualifier is specified (in the case where there is
+      only one possible correlating target object) a default link qualifier,
+      with the value <literal>"default"</literal>, is used.
+     </para>
+    </section>
+
     <section xml:id="mapping-conditions">
      <title>Using Conditions in a Mapping</title>
      <indexterm>
@@ -508,10 +559,43 @@
       <secondary>Conditions</secondary>
      </indexterm>
      <para>
-      You can set up specific conditions under which OpenIDM maps attributes, as
-      shown for the <literal>email</literal> attribute in the sample mapping.
+      By default, OpenIDM synchronizes all attributes in a mapping. To
+      facilitate more complex relationships between source and target objects,
+      you can define specific conditions under which OpenIDM maps certain
+      attributes. OpenIDM supports two types of mapping conditions:
      </para>
-     <programlisting language="javascript">
+     <itemizedlist>
+      <listitem>
+       <para>
+        <emphasis>Scriptable conditions</emphasis>, in which an attribute is
+        mapped only if the defined script evaluates to <literal>true</literal>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <emphasis>Link qualifier conditions</emphasis>, used to distinguish the
+        properties that are to be set <emphasis>only</emphasis> for the
+        identified link qualifier. For more information, see
+        <xref linkend="mapping-link-qualifiers" />.
+       </para>
+      </listitem>
+     </itemizedlist>
+
+     <section xml:id="mapping-scriptable-conditions">
+      <title>Using Scriptable Conditions</title>
+      <para>
+       Scriptable conditions enable you to create mapping logic based on a
+       defined condition. If the condition script does not return
+       <literal>true</literal>, OpenIDM does not manipulate the target attribute
+       during a synchronization operation.
+      </para>
+      <para>
+       In the following excerpt of the sample mapping, the value of the target
+       <literal>mail</literal> attribute is set to the value of the source
+       <literal>email</literal> attribute, <emphasis>only if</emphasis> the
+       source attribute is not empty.
+      </para>
+      <programlisting language="javascript">
 {
     "target": "mail",
     "comment": "Set mail if non-empty.",
@@ -520,12 +604,86 @@
         "type": "text/javascript",
         "source": "(object.email != null)"
     }
-...  </programlisting>
-     <para>
-      By default, OpenIDM synchronizes all attributes. In this example, the
-      <literal>mail</literal> attribute on the target system is set, only if the
-      script for the condition returns <literal>true</literal>.
-     </para>
+...   </programlisting>
+      <para>
+       You can add comments to your mapping file to indicate how the attributes
+       are mapped. This example includes a <literal>"comment"</literal> property
+       but you can use any property whose name is meaningful to you, as long as
+       that property name is not used elsewhere in the server. OpenIDM simply
+       ignores unknown property names in JSON configuration files.
+      </para>
+     </section>
+
+     <section xml:id="link-qualifier-conditions">
+      <title>Using Link Qualifier Conditions</title>
+      <para>
+       In addition to these scriptable conditions, you can define specific
+       circumstances in which objects should be linked, by declaring a
+       <emphasis>link qualifier</emphasis>, based on individual attributes.
+      </para>
+      <para>
+       In the following excerpt of a sample mapping, two link qualifiers
+       (<literal>user</literal> and <literal>test</literal>) are declared for
+       the managed user to LDAP mapping.  This example assumes two accounts in
+       the LDAP directory, a real <literal>user</literal> account and a second,
+       <literal>test</literal> account. Both LDAP accounts should be mapped to
+       the same managed object.
+      </para>
+      <programlisting language="javascript">
+{
+    "mappings": [
+        {
+            "name": "managedUser_systemLdapAccounts",
+            "source": "managed/user",
+            "target": "system/MyLDAP/account",
+            "linkQualifiers" : [ "user", "test" ],
+...   </programlisting>
+      <para>
+       Link qualifier conditions can be used to specify when a target attribute
+       should be set. The following example sets a default value for the
+       <literal>description</literal> attribute on a target object, only if
+       the link qualifier to that target object is <literal>test</literal>.
+      </para>
+      <programlisting language="javascript">
+{
+    "source" : "",
+    "target" : "description",
+    "default": "This is a test account",
+    "condition" : {
+        "linkQualifier" : "test"
+    }
+},
+      </programlisting>
+      <para>
+       Link qualifiers can be used in conjunction with a transformation script,
+       to determine how to set or change a target attribute value. The following
+       excerpt of a sample mapping defines a transformation script that
+       generates the value of the <literal>dn</literal> attribute on the target
+       objects.
+      </para>
+      <para>
+       If the link qualifier is <literal>user</literal>, the value of the target
+       <literal>dn</literal> is set to
+       <literal>"uid=userName,ou=People,dc=example,dc=com"</literal>. Otherwise,
+       we assume that the link qualifier is <literal>test</literal>, and the
+       value of the target <literal>dn</literal> is set to
+       <literal>"uid=userName-test,ou=People,dc=example,dc=com"</literal>.
+      </para>
+      <programlisting language="javascript">{
+    "source": "",
+    "target": "dn",
+    "transform": {
+        "type": "text/javascript",
+        "source": "if (linkQualifier === 'user') { 'uid=' + source.userName + ',ou=People,dc=example,dc=com'; } else { 'uid=' + source.userName + '-test,ou=People,dc=example,dc=com'; }"
+    }
+      </programlisting>
+      <para>
+       A link qualifier can also be used in a correlation query, to determine
+       the correct link type for existing target objects. For more information
+       about using link qualifiers in correlation queries, see
+       <xref linkend="correlating-multiple-targets" />.
+      </para>
+     </section>
     </section>
 
     <section xml:id="filtering-source-and-target">
@@ -878,7 +1036,7 @@ $ <userinput>curl \
 }</programlisting>
 
    </section>
-</section>
+ </section>
 
  <section xml:id="recon-over-rest">
   <title>Managing Reconciliation Over REST</title>
@@ -4365,55 +4523,39 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   <section xml:id="correlating-multiple-targets">
    <title>Correlating Multiple Target Objects</title>
    <para>
-    OpenIDM supports mapping a single source object to more than one object in
-    a target system. For example, you might have one managed user,
-    <literal>scarter</literal> who has two distinct accounts in an Active
-    Directory forest, <literal>scarter.admin</literal> and
-    <literal>scarter.user</literal>. Both of these Active Directory accounts
-    should be linked to the single managed user object,
-    <literal>scarter</literal>.
-   </para>
-   <para>
     To correlate a single source entry with multiple target entries, you
     indicate how the source entry should be linked to the target entries, based
     on the distinguishing attribute of the target object. Effectively, a
     separate correlation query is created for each potential target object to
     which a single source object is mapped. These correlation queries are
-    distinguished by using a <literal>link qualifier</literal> for each distinct
-    link that will be created.
+    distinguished by using a <literal>link qualifier</literal> for each link
+    that will be created.
    </para>
    <para>
-    In the previous example, the correlation query might be constructed as
+    In the following example, the correlation query might be constructed as
     follows.
    </para>
    <programlisting>"correlationQuery" : [
     {
         "linkQualifier" : "user",
         "type" : "text/javascript",
-        "source" : "var map = {'_queryFilter': 'name eq \"' + source.userName + '.user\"'}; map;"
+        "source" : "var map = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; map;"
     },
     {
-        "linkQualifier" : "admin",
+        "linkQualifier" : "test",
         "type" : "text/javascript",
-        "source" : "var map = {'_queryFilter': 'name eq \"' + source.userName + '.admin\"'}; map;"
+        "source" : "var map = {'_queryFilter': 'uid eq \"' + source.userName + '-test\"'}; map;"
     }
 ]  </programlisting>
    <para>
     The link qualifier is assigned to the link, during correlation. In this
-    example, if the <literal>name</literal> of the target object matches the
+    example, if the <literal>uid</literal> of the target object matches the
+    <literal>userName</literal> of the source object, a link with the qualifier
+    <literal>user</literal> is created between the source and target object. If
+    the <literal>uid</literal> of the target object matches the
     <literal>userName</literal> of the source object, and is appended with
-    <literal>.user</literal>, a link with the qualifier <literal>user</literal>
-    is created between the source and target object. If
-    the <literal>name</literal> of the target object matches the
-    <literal>userName</literal> of the source object, and is appended with
-    <literal>.admin</literal>, a link with the qualifier
-    <literal>admin</literal> is created between the source and target object.
-   </para>
-   <para>
-    Each <literal>linkQualifier</literal> within a specific mapping must be
-    unique. If no link qualifier is specified (in the case where there is only
-    one possible correlating target object) a default link qualifier,
-    <literal>defaultLinkQualifier</literal>, is used.
+    <literal>-test</literal>, a link with the qualifier <literal>test</literal>
+    is created between the source and target object.
    </para>
   </section>
 

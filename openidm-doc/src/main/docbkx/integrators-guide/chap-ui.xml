@@ -323,12 +323,13 @@
     Your deployment might include multiple external systems that you need to
     connect, either to each other, or to the OpenIDM managed object repository.
     You can use the Admin UI to configure mappings between any two sets of
-    resources. In the Admin UI terminology, a connector represents an external
-    data store. The connectors supported for use with OpenIDM are described in
+    resources. In the Admin UI terminology, a <emphasis>connector</emphasis>
+    represents an external data store. The connectors that are supported for use
+    with OpenIDM are described in
     <link xlink:role="http://docbook.org/xlink/role/olink"
     xlink:show="new" xlink:href="integrators-guide#openicf-provisioner-conf">
-    <citetitle>Connectors Supported with OpenIDM</citetitle></link>. In
-    contrast, managed objects represents a data store internal to OpenIDM.
+    <citetitle>Connectors Supported with OpenIDM</citetitle></link>. Managed
+    objects represents the data repository that is internal to OpenIDM.
    </para>
 
    <para>
@@ -339,21 +340,42 @@
    </para>
 
    <para>
-    When you create a mapping between two resources, you identify the properties
-    that you want to control in the target. With this part of the Admin UI, you
-    configure how OpenIDM matches properties in the source resource to
-    properties in the target resource.
+    When a source object is mapped to a target object, during a reconciliation
+    operation, a <emphasis>link</emphasis> is created between the two objects.
+    In some cases, there might be multiple target objects that map to a single
+    source object. When there are multiple target objects, OpenIDM uses
+    <emphasis>link qualifiers</emphasis> to distinguish between the types of
+    relationships that are created from source to target. For more information,
+    see <link xlink:show="new"
+    xlink:href="integrators-guide#correlating-multiple-targets"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+    Multiple Target Objects</citetitle></link>.
    </para>
-
+   <para>
+    You can create and remove link qualifiers on this screen, and use them when
+    you define correlation queries, or in transformation scripts to set the
+    attribute values on target systems. The link qualifiers that you create here
+    are added to your mapping (<filename>conf/sync.json</filename>) file. For
+    more information about link qualifiers, see <link xlink:show="new"
+    xlink:href="integrators-guide#mapping-link-qualifiers"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Link
+    Qualifier Conditions</citetitle></link>.
+   </para>
+   <para>
+    When you create a mapping between two resources, you identify the properties
+    whose values you want to control in the target. The Attributes panel on this
+    screen enables you to configure how OpenIDM matches properties in the source
+    resource to properties in the target resource.
+   </para>
    <para>
     The following screenshot illustrates a property mapping between two
     resources. Every resource includes identifiers for each attribute. For
     example, different resources might use one of the following identifiers for
     usernames: un, uid, user, sAMAccountName, and account. For more information
-    on property mappings, see the following section on the
-    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-          xlink:href="integrators-guide#synchronization-mappings-file">
-     <citetitle>Synchronization Mappings File</citetitle></link>.
+    on property mappings, see <link xlink:show="new"
+    xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#synchronization-mappings-file"><citetitle>Configuring
+    the Synchronization Mapping</citetitle></link>.
    </para>
 
    <mediaobject>
@@ -364,12 +386,61 @@
    </mediaobject>
 
    <para>
-    The bold black line determines which properties are displayed for each
+    The bold grey line determines which properties are displayed for each
     object in the Data Association Management panel, under the Correlation menu.
-    A maximum of four properties can be displayed. To include a property in the
-    display, drag it above the bold line.
+    By default, four properties are displayed. To change the number of
+    properties that are displayed, edit the <emphasis>Number of representative
+    properties</emphasis>. To include a property in the display, drag it above
+    the bold line.
    </para>
-
+   <para>
+    The value of the target property might not be a simple direct mapping from
+    the value of the source property. To define how the value of the target
+    property should be calculated, double-click the property name. A window
+    similar to the following is displayed:
+   </para>
+   <mediaobject>
+    <alt>Admin UI - Property Mapping</alt>
+    <imageobject>
+     <imagedata fileref="images/admin-ui-map-properties.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+   <para>
+    This window enables you to manipulate the target attribute value in the
+    following ways:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Property List enables a direct mapping from the value of the selected
+      source attribute.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Transformation Script enables you to do something with the value of the
+      source attribute, to generate the value of the target attribute.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Conditional Update Script enables you to indicate that a source and target
+      attribute should be mapped <emphasis>only</emphasis> if a certain
+      condition is true.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Default values enables you to set a static value for the target attribute.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    For more information about setting and changing target attribute values, see
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#synchronization-mappings-file"><citetitle>Configuring
+    the Synchronization Mapping</citetitle></link>.
+   </para>
   </section>
 
   <section xml:id="admin-ui-sync">
@@ -397,10 +468,12 @@
      and to associate source and target objects manually.
     </para>
     <para>
-     To configure a correlation query for a mapping, use the Expression Builder,
-     type your JavaScript or Groovy script inline, or reference a file. For more
-     information about correlation, see the section on <link
-     xlink:href="integrators-guide#correlation" xlink:show="new"
+     Before you define a correlation query, you must specify at least one link
+     qualifier on the <emphasis>Properties</emphasis> panel (as described in the
+     previous section). To configure a correlation query for a mapping, use the
+     Expression Builder, type your JavaScript or Groovy script inline, or
+     reference a file. For more information about correlation, see the section
+     on <link xlink:href="integrators-guide#correlation" xlink:show="new"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
      Existing Target Objects</citetitle></link>. If there is more than one
      potential target object that should be linked to each source object, use
