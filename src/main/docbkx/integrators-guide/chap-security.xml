@@ -1149,21 +1149,23 @@ openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
  
  <section xml:id="security-remove-dev-tools">
   <title>Remove or Protect Development &amp; Debug Tools</title>
-
-  <para>Before deploying OpenIDM in production, remove or protect development
-  and debug tools, including the OSGi console exposed under
-  <literal>/system/console</literal>. Authentication for this console is not
-  integrated with authentication for OpenIDM.</para>
-
-  <para>To remove the OSGi console, remove the web console bundle,
-  <filename>org.apache.felix.webconsole-<replaceable>version</replaceable>.jar</filename>.</para>
-
-  <para>If you cannot remove the OSGi console, then protect it by overriding
-  the default <literal>admin:admin</literal> credentials. Create a file called
-  <filename>openidm/conf/org.apache.felix.webconsole.internal.servlet.OsgiManager.cfg</filename>
-  containing the user name and password to access the console in Java
-  properties file format.</para>
-
+  <para>
+   Before you deploy OpenIDM in production, remove or protect development and
+   debug tools, including the OSGi console that is exposed under
+   <literal>/system/console</literal>. Authentication for this console is not
+   integrated with authentication for OpenIDM.
+  </para>
+  <para>
+   To remove the OSGi console, remove the web console bundle,
+   <filename>org.apache.felix.webconsole-<replaceable>version</replaceable>.jar</filename>.
+  </para>
+  <para>
+   If you cannot remove the OSGi console, protect the console by overriding the
+   default <literal>admin:admin</literal> credentials. Create a file named
+   <filename>openidm/conf/org.apache.felix.webconsole.internal.servlet.OsgiManager.cfg</filename>
+   that contains the user name and password to access the console in Java
+   properties file format, for example:
+  </para>
   <programlisting language="ini">
 username=<replaceable>user-name</replaceable>
 password=<replaceable>password</replaceable></programlisting>
