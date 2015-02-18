@@ -548,7 +548,7 @@
       <literal>linkQualifier</literal> within a specific mapping must be
       unique. If no link qualifier is specified (in the case where there is
       only one possible correlating target object) a default link qualifier,
-      with the value <literal>"default"</literal>, is used.
+      with the value <literal>"defaultLinkQualifier"</literal>, is used.
      </para>
     </section>
 
