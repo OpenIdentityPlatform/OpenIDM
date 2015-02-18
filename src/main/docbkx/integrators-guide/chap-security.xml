@@ -1156,9 +1156,12 @@ openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
    integrated with authentication for OpenIDM.
   </para>
   <para>
-   To remove the OSGi console, remove the web console bundle,
-   <filename>org.apache.felix.webconsole-<replaceable>version</replaceable>.jar</filename>.
+   To remove the OSGi console, remove the web console bundle, and all of the
+   plugin bundles related to the web console, as follows:
   </para>
+  <screen>$ <userinput>cd /path/to/openidm/bundle</userinput>
+$ <userinput>rm org.apache.felix.webconsole*.jar</userinput>
+  </screen>
   <para>
    If you cannot remove the OSGi console, protect the console by overriding the
    default <literal>admin:admin</literal> credentials. Create a file named
