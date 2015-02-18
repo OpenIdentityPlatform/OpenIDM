@@ -605,6 +605,7 @@
         "source": "(object.email != null)"
     }
 ...   </programlisting>
+      <note>
       <para>
        You can add comments to your mapping file to indicate how the attributes
        are mapped. This example includes a <literal>"comment"</literal> property
@@ -612,6 +613,7 @@
        that property name is not used elsewhere in the server. OpenIDM simply
        ignores unknown property names in JSON configuration files.
       </para>
+      </note>
      </section>
 
      <section xml:id="link-qualifier-conditions">
