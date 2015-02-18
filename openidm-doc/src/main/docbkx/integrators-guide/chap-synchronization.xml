@@ -646,7 +646,6 @@
       </para>
       <programlisting language="javascript">
 {
-    "source" : "",
     "target" : "description",
     "default": "This is a test account",
     "condition" : {
