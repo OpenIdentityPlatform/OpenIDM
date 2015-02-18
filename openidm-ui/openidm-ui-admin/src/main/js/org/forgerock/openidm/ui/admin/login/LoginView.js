@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,22 +22,40 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
-define("config/routes/CommonIDMRoutesConfig", [
-], function() {
+/*global define, $, form2js, _, js2form, window */
 
-    var obj = {
-        "mandatoryPasswordChangeDialog" : {
-            base: "landingPage",
-            dialog: "org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog",
-            url: "change_password/",
-            role: "ui-admin"
-        },
-        "authenticationUnavailable" : {
-            view: "org/forgerock/openidm/ui/common/login/AuthenticationUnavailable",
-            url: "authenticationUnavailable/"
-        }
+/**
+ * @author huck.elliott
+ */
+define("org/forgerock/openidm/ui/admin/login/LoginView", [
+    "org/forgerock/commons/ui/common/LoginView",
+    "org/forgerock/openidm/ui/common/util/AMLoginUtils"
+], function(commonLoginView, amLoginUtils) {
+    
+    var LoginView = function () {},
+        obj;
+
+    LoginView.prototype = commonLoginView;
+    
+    obj = new LoginView();
+
+    obj.render = function (args, callback) {
+        var amCallback = amLoginUtils.init(this,true);
+        
+        commonLoginView.render.call(this, args, _.bind(function () {
+
+            if (callback) {
+                callback();
+            }
+            
+            if(amCallback) {
+                amCallback();
+            }
+
+        }, this));
     };
-
+    
     return obj;
 });
+
+

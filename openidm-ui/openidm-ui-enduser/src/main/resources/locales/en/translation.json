@@ -44,6 +44,10 @@
                 "unclaimedTask" : "Task has been unclaimed.",
                 "startedProcess" : "Process has been started",
                 "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__"
+            },
+            "AuthenticationMessages" : {
+                "authenticationUnavailable": "Authentication is unavailable",
+                "tryToLoginAgain": "Try to login again"
             }
         },
         "AppConfiguration" : {

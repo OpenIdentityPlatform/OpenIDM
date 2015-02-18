@@ -68,7 +68,9 @@
                 "objectFailedToLoad" : "Object type Failed To Load"
             },
             "AuthenticationMessages" : {
-                "saveSuccessful" : "Authentication configuration has been saved."
+                "saveSuccessful" : "Authentication configuration has been saved.",
+                "authenticationUnavailable": "Authentication is unavailable",
+                "tryToLoginAgain": "Try to login again"
             },
             "MappingMessages" : {
                 "mappingSaveSuccess": "Mapping successfully updated",
@@ -160,7 +162,8 @@
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset your password",
                 "siteIdentificationHeader": "Site Identification",
-                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
+                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here.",
+                "loginWithOpenAM": "Login with OpenAM"
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -366,8 +369,8 @@
             "authTitle": "Configure Authentication",
             "sessionFieldsetName": "Session Module",
             "sessionOnlyTitle": "Session Only",
-            "idleTimeTitle": "Token Idle Time (in minutes)",
-            "maxLifeTitle": "Max Token Life (in minutes)",
+            "idleTimeTitle": "Token Idle Time (in seconds)",
+            "maxLifeTitle": "Max Token Life (in seconds)",
             "type": "Type",
             "moduleEnabled": "Module Enabled",
             "queryOnResource": "Query on Resource",
@@ -410,10 +413,15 @@
             "truststorePassword": "Truststore Password",
             "truststoreFile": "Truststore File",
             "truststoreType": "Truststore Type",
-            "managedUserLink": "Managed User Link",
             "openamUserAttribute": "OpenAM User Attribute",
             "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
             "openamDeploymentUrl": "OpenAM Deployment Url",
+            "openamDeploymentUrlConfirmation" : "OpenAM Deployment Url is invalid. Would you like to continue?",
+            "openamLoginUrl": "OpenAM Login Url",
+            "openamLoginLinkText": "OpenAM Login Link Text",
+            "openamUseExclusively": "Require OpenAM Authentication",
+            "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
+            "openamUserDatastoreMappingName": "OpenAM User Datastore Mapping Name",
             "openIdConnectHeader": "OpenID Connect Header",
             "resolvers": "Resolvers",
             "resolver": "Resolver",
