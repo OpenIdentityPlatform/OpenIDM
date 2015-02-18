@@ -85,6 +85,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./sync/TestSyncView",
     "./sync/TestSyncGridView",
     "./sync/ScheduleView",
+
+    "./login/LoginView",
     
     "./settings/SettingsView"
 
