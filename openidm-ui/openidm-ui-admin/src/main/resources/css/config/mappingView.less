@@ -1,3 +1,179 @@
+#subNavHolder {display:none;}
+.addMapping {
+
+  .page-header {
+    margin-bottom: 10px;
+  }
+
+  .help{
+    margin-bottom: 10px;
+  }
+
+  #resourceMappingBody {
+    clear: both;
+
+
+    .card-body {
+      padding: 20px;
+      margin: 0;
+      color: #777;
+
+      .resource-info {
+        display: inline-block;
+        margin-left: 20px;
+        font-weight: bold;
+
+        .resource-given-name {
+          font-size: 16px;
+        }
+        .resource-type-name {
+
+        }
+      }
+    }
+
+    .circle{
+      height:80px;
+      width: 80px;
+      i {
+        font-size: 50px;
+      }
+    }
+
+
+    .mapping-create-body {
+      margin-top: 20px;
+
+      button {
+        width: 100%;
+      }
+    }
+
+    .mapping-swap-holder {
+      height: 90px;
+      margin-top:-10px;
+
+      button, p {
+        position: relative;
+        top: 50%;
+
+        .fa {
+          text-align: center;
+        }
+      }
+
+      p {
+        transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+      }
+
+      button {
+        top: 50%;
+        transform: translateY(-50%) rotate(-90deg);
+        -webkit-transform: translateY(-50%) rotate(-90deg);
+        -moz-transform: translateY(-50%) rotate(-90deg);
+        -ms-transform: translateY(-50%) rotate(-90deg);
+        -o-transform: translateY(-50%) rotate(-90deg);
+      }
+    }
+
+    .mapping-resource {
+      height: 190px;
+      border: 1px solid @card-container-border-color;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.14);
+      background-color: @card-container-background-color;
+      border-radius: 4px;
+      color: #444444;
+      &:hover {
+        border-color: @card-container-border-color-hover;
+        -webkit-transition: border-color 0.3s ease-in-out;
+        -o-transition: border-color 0.3s ease-in-out;
+        -moz-transition: border-color 0.3s ease-in-out;
+        -ms-transition: border-color 0.3s ease-in-out;
+        transition: border-color 0.3s ease-in-out;
+        text-decoration: none;
+      }
+
+      .mapping-resource-empty {
+        position: relative;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        transform: translateY(-50%);
+      }
+    }
+
+  }
+
+  .card-container {
+    height: 280px;
+  }
+  .card {
+    height: 278px;
+  }
+  .card-body {
+    margin: 20px 0;
+  }
+  .card .cardtype {
+    font-weight: bold;
+    margin-bottom: 0;
+  }
+  .card .objectType {
+    color: #999999;
+    text-align: center;
+  }
+  .section-header{
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+  }
+  .resourceConnectorHeader {
+    border: none;
+  }
+  .arrow-breaker {
+    border-bottom: 1px solid #ddd;
+    margin-top: 50px;
+
+    .arrow-box:after, .arrow-box:before {
+      bottom: 100%;
+      left: 50%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .arrow-box:before {
+      border-bottom-color: #ddd;
+      border-width: 31px;
+      margin-left: -31px;
+    }
+    .arrow-box:after {
+      border-bottom-color: #f7f7f7;
+      border-width: 30px;
+      margin-left: -30px;
+    }
+    .arrow-box {
+      position: relative;
+      top: 1px;
+      z-index: 2;
+
+      .fa-arrow-up {
+        position: absolute;
+        bottom: -20px;
+        z-index: 2;
+        left: 50%;
+        margin-left: -19px;
+        color: #5fa595;
+      }
+    }
+  }
+}
+
 .mapping {
   margin-bottom: 20px;
   position: relative;
@@ -422,7 +598,6 @@ h4.connector-role {
   height: 164px;
 }
 
-
 #mappingContent {
   background-color: @card-container-background-color;
   padding: 20px;
@@ -461,7 +636,30 @@ h4.connector-role {
                 color: @forgerock-green;
             }
         } 
-} 
+}
+
+@media (min-width: 993px) {
+  .addMapping #resourceMappingBody .mapping-swap-holder {
+    height: 140px;
+
+    .mapping-swap {
+      transform: rotate(0deg);
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+    }
+    p {
+      margin-top: 10px;
+    }
+  }
+
+  .addMapping #resourceMappingBody .mapping-create-body {
+    button {
+      width: auto;
+    }
+  }
+}
 
 @media (min-width: 768px) {
   .mapping .target {
