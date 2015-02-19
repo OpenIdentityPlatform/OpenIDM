@@ -5917,7 +5917,7 @@ $ ./ldapmodify \
        When you configure OpenAM for this sample, you do not need to install a
        Java EE agent. This sample uses the <literal>OPENAM_SESSION</literal>
        module to protect OpenIDM. That module is included in the
-       <literal>/path/to/openam/conf/authentication.json</literal> file.
+       <literal>conf/authentication.json</literal> file of the sample.
       </para>
      </note>
     </listitem>
