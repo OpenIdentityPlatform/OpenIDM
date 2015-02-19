@@ -29,8 +29,10 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(AbstractView, eventManager, constants, router, ConfigDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "bootstrap-dialog"
+
+], function(AbstractView, eventManager, constants, router, ConfigDelegate, BootstrapDialog) {
     var MapResourceView = AbstractView.extend({
         template: "templates/admin/MapResourceView.html",
         noBaseTemplate: true,
@@ -111,40 +113,14 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
         },
         submitNewMapping: function(event) {
             event.preventDefault();
-
-            var btns = [
-                {
-                    id:"mappingSaveCancel",
-                    text: $.t("common.form.cancel"),
-                    click: _.bind(function() {
-                        this.saveDialog.dialog("close");
-                    }, this)
-                },
-                {
-                    id:"mappingSaveOkay",
-                    text: $.t("common.form.ok"),
-                    click: _.bind(function() {
-                        this.saveMapping(_.bind(function(){
-                            this.saveDialog.dialog("close");
-                        },this));
-                    }, this)
-                }
-            ];
-
-            this.saveDialog = this.$el.find("#saveMappingDialog").dialog({
-                autoOpen: true,
+            BootstrapDialog.show({
                 title: $.t("templates.mapping.createMappingDialog"),
-                height: 245,
-                width: 350,
-                modal: true,
-                buttons: btns,
-                close: _.bind(function(){
-                    this.saveDialog.dialog("destroy");
-                }, this),
-                open: _.bind(function() {
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: this.$el.find("#saveMappingDialog").clone().attr("id","saveMappingDialogClone"),
+                onshown : _.bind(function (dialogRef) {
                     var mappingName = null,
                         nameCheck,
-                        tempName = this.createMappingName($("#mappingName")),
+                        tempName = this.createMappingName(dialogRef.$modalBody.find("#saveMappingDialogClone .mappingName")),
                         cleanName = tempName,
                         counter = 0,
                         availableLinks;
@@ -160,25 +136,39 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                         }
                     }
 
-                    $("#mappingName").val(mappingName);
+                    dialogRef.$modalBody.find("#saveMappingDialogClone .mappingName").val(mappingName);
 
                     availableLinks = this.findLinkedMapping();
 
-                    $("#mappingLinked .mapping-linked-option").remove();
+                    dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked .mapping-linked-option").remove();
 
                     if(availableLinks.length > 0) {
-                        $("#mappingLinked").prop("disabled", false);
+                        dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").prop("disabled", false);
 
                         _.each(availableLinks, function(link){
-                            $("#mappingLinked").append("<option class='mapping-linked-option' value='" +link.name +"'>" +link.name  +"</option>");
+                            dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").append("<option class='mapping-linked-option' value='" +link.name +"'>" +link.name  +"</option>");
                         }, this);
                     } else {
-                        $("#mappingLinked").prop("disabled", true);
+                        dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").prop("disabled", true);
                     }
-                }, this)
+                }, this),
+                buttons: [{
+                    label: $.t("common.form.cancel"),
+                    id:"mappingSaveCancel",
+                    action: function(dialogRef) {
+                        dialogRef.close();
+                    }
+                }, {
+                    label: $.t('common.form.ok'),
+                    id:"mappingSaveOkay",
+                    cssClass: "btn-primary",
+                    action: _.bind(function(dialogRef) {
+                        this.saveMapping(dialogRef, function(){ dialogRef.close();});
+                    }, this)
+                }]
             });
         },
-        saveMapping: function(callback) {
+        saveMapping: function(dialogRef, callback) {
             var completeMapping = {
                     "mappings": this.mappingList
                 },
@@ -187,7 +177,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
             tempMapping = {
                 "target" : this.targetDetails.saveName,
                 "source" : this.sourceDetails.saveName,
-                "name" : $("#mappingName").val(),
+                "name" : dialogRef.$modalBody.find("#saveMappingDialogClone .mappingName").val(),
                 "properties": [],
                 "policies" : [
                     {
@@ -245,8 +235,8 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                 ]
             };
 
-            if($("#mappingLinked").val() !== "none") {
-                tempMapping.links = $("#mappingLinked").val();
+            if (dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").val() !== "none") {
+                tempMapping.links = dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").val();
             }
 
             completeMapping.mappings.push(tempMapping);
@@ -368,8 +358,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
         },
         displayDetails: function(id, details) {
             if(details.resourceType === "connector") {
-                this.$el.find("#"+id +" .resource-small-icon").attr("src", details.iconSrc);
-                this.$el.find("#"+id +" .resource-small-icon").attr("alt", details.displayName);
+                this.$el.find("#"+id +" .resource-small-icon").addClass(details.iconClass);
                 this.$el.find("#"+id +" .resource-type-name").html(details.displayName);
                 this.$el.find("#"+id +" .resource-given-name").html(details.name);
                 this.$el.find("#"+id +" .edit-objecttype").show();
@@ -383,8 +372,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                 }, this);
 
             } else {
-                this.$el.find("#"+id +" .resource-small-icon").attr("src", details.iconSrc);
-                this.$el.find("#"+id +" .resource-small-icon").attr("alt", $.t("templates.connector.managedObjectType"));
+                this.$el.find("#"+id +" .resource-small-icon").addClass(details.iconClass);
                 this.$el.find("#"+id +" .resource-type-name").html($.t("templates.connector.managedObjectType"));
                 this.$el.find("#"+id +" .resource-given-name").html(details.name);
                 this.$el.find("#"+id +" .edit-objecttype").hide();
