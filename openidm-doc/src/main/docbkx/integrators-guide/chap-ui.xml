@@ -583,73 +583,74 @@
     <title>Reconciliation Options</title>
 
     <para>
-     Before activating reconciliation, you may choose to configure situational
-     policies, situational event scripts, and reconciliation scripts.
+     Before activating reconciliation, you can configure situational policies,
+     action scripts dependent on situational events, and reconciliation scripts.
     </para>
 
-    <para>
-     You may want to configure situational policies. By default, the policies
-     associated with mappings are set to "read-only". As such, OpenIDM does not
-     change anything on the target system, unless you make changes to
-     situational policies.
-    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       You can configure situational policies. For new mappings, the default
+       policy is "read-only". As such, OpenIDM does not change anything on the
+       target system.
+      </para>
+      <para>
+       With situational policies, you can define different actions as shown in
+       the screenshot below. For a full list of available
+       policies, see the following section:
+       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+             xlink:href="integrators-guide#handling-sync">
+        <citetitle> Synchronization Situations and Actions</citetitle></link>.
+      </para>
+      <para>
+       To access the following screen, select the Mapping of your choice and
+       select edit. In the sub-tabs that appear, select Reconciliation.
+      </para>
+      <mediaobject>
+       <alt>Admin UI Screen, User-Defined Situational Policies</alt>
+       <imageobject>
+        <imagedata fileref="images/admin-ui-situ-policy.png" format="PNG" />
+       </imageobject>
+      </mediaobject>
+     </listitem>
+     <listitem>
+      <para>
+       You can configure situational event scripts, which are really action
+       scripts. To that end, you can configure script
+       events (<literal>onCreate</literal>, <literal>onDelete</literal>,
+       <literal>onLink</literal>, <literal>onUnlink</literal>, and
+       <literal>onUpdate</literal>) to help you with
+       <link xlink:href="integrators-guide#constructing-attributes"
+             xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
+        <citetitle>Constructing and Manipulating Attributes</citetitle></link>.
+      </para>
+      <mediaobject>
+       <alt>Admin UI Screen, Situational Event Scripts</alt>
+       <imageobject>
+        <imagedata fileref="images/admin-ui-situ-event.png" format="PNG" />
+       </imageobject>
+      </mediaobject>
+     </listitem>
+     <listitem>
+      <para>
+       You can configure scripts that are triggered on reconciliation, as part of
+       the <link xlink:href="integrators-guide#advanced-dataflow"
+                 xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
+       <citetitle>Advanced Dataflow Configuration</citetitle></link>.
+      </para>
+      <mediaobject>
+       <alt>Admin UI Screen, Reconciliation Script</alt>
+       <imageobject>
+        <imagedata fileref="images/admin-ui-recon-script.png" format="PNG" />
+       </imageobject>
+      </mediaobject>
+     </listitem>
+    </itemizedlist>
 
     <para>
-     With situational policies, you can define actions relevant for situations
-     shown in the screenshot below. For a full list of available
-     policies, see the following section:
-     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:href="integrators-guide#handling-sync"><citetitle>Synchronization
-      Situations and Actions</citetitle></link>.
-    </para>
-
-    <para>
-     To access the following screen, select the Mapping of your choice and
-     select edit. In the sub-tabs that appear, select Reconciliation.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, User-Defined Situational Policies</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-situ-policy.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     You can configure situational event scripts. Each of the script events
-     shown <literal>onCreate</literal>, <literal>onDelete</literal>,
-     <literal>onLink</literal>, <literal>onUnlink</literal>, and
-     <literal>onUpdate</literal>, can help you with
-     <link xlink:href="integrators-guide#constructing-attributes"
-           xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
-      <citetitle>Constructing and Manipulating Attributes</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Situational Event Scripts</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-situ-event.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     You can configure scripts that are triggered on reconciliation, as part of
-     the <link xlink:href="integrators-guide#advanced-dataflow"
-     xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Advanced Dataflow Configuration</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Reconciliation Script</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-recon-script.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     You can choose to test the overall process with a single record
-     reconciliation. In other words, you need not test these policies and
-     scripts against the entire data set. For example, you can
+     You can test the overall process with the reconciliation of a single
+     record. In other words, you need not test these policies and scripts
+     against the entire data set. For example, you can
      <link xlink:href="integrators-guide#recon-by-id" xlink:show="new"
            xlink:role="http://docbook.org/xlink/role/olink">
       <citetitle>Restrict Reconciliation to a Specific ID</citetitle></link>.
