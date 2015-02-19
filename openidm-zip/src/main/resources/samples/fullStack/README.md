@@ -41,7 +41,7 @@ For simplicity in this demo, it is assumed that you are using a single, root-lev
 
 ### Authentication Configuration
 
-Configuring authentication is simple in most cases. Edit samples/openam/conf/authentication.json and update the "openamDeploymentUrl" property of the "OPENAM_SESSION" auth module. It should look something like this:
+Configuring authentication is simple in most cases. Edit samples/fullStack/conf/authentication.json and update the "openamDeploymentUrl" property of the "OPENAM_SESSION" auth module. It should look something like this:
 
         "authModules" : [
             {
