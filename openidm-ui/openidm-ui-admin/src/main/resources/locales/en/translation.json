@@ -689,6 +689,7 @@
             "target": "Target",
             "more" : "more...",
             "mappingListingTitle": "Mapping List",
+            "mappingDetailTitle": "Mapping Detail",
             "addToMapping" : "Add to Mapping",
             "newMapping" : "New Mapping",
             "syncNow": "Reconcile Now",

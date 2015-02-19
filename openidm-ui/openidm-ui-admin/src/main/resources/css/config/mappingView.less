@@ -11,6 +11,10 @@
 }
 #mappingConfigHolder {
   clear: both;
+  margin-top: -25px;
+}
+.popover-info {
+    width: 400px;
 }
 .mapping .panel {
   overflow: auto;
@@ -173,9 +177,10 @@ h4.connector-role {
   position: relative;
   margin-top: 10px;
   display: block;
+  color: #519387;
+  cursor: pointer;
 }
 .mapping .panel-footer .connector-info .sync-status:before {
-  content: '';
   display: inline-block;
   width: 0;
   height: 0;
@@ -304,6 +309,11 @@ h4.connector-role {
   float: left;
   width: 50%;
 }
+
+.mapping .panel-footer .help-link {
+  padding: 18px;
+}
+
 .mapping .panel-heading .mapping-action .btn-link,
 .mapping .panel-footer .mapping-action .btn-link {
   border-right: none;
@@ -412,6 +422,47 @@ h4.connector-role {
   height: 164px;
 }
 
+
+#mappingContent {
+  background-color: @card-container-background-color;
+  padding: 20px;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+#subNavHolderClone{
+        .container{
+            padding: 0px;
+            margin: 0px;
+            width: 100%;
+        }
+        
+        ul {
+            li{
+                margin-right: 0px;
+                
+                a{
+                    color: @forgerock-dark-grey;
+                    padding-left: 20px;
+                    padding-right: 20px;
+                    text-transform: capitalize;
+                    i{
+                        padding-right: 5px;
+                    }
+                }
+                
+                a:hover{
+                    color: @forgerock-green;
+                }
+            }
+            
+            li.active a{
+                color: @forgerock-green;
+            }
+        } 
+} 
+
 @media (min-width: 768px) {
   .mapping .target {
     height: 100px;
@@ -501,5 +552,23 @@ h4.connector-role {
   .mapping .panel-heading .mapping-action .btn-link,
   .mapping .panel-footer .mapping-action .btn-link {
     width: auto;
+  }
+}
+
+@media (max-width: 767px){
+  #subNavHolderClone{
+        ul {
+            li{
+                a{ 
+                    padding: 10px;
+                    i{
+                        padding-left: 10px;
+                    }
+                    span{
+                        font-size: 0px;
+                    }
+                }
+            }
+        } 
   }
 }
