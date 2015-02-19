@@ -79,11 +79,21 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             nav.reload();
         },
         moveSubmenu: function(){
-            var submenuClone = $("#submenu").clone(true);
+            var submenuClone = $("#subNavHolder").clone(true),
+            submenuList = submenuClone.find("ul");
 
-            $("#submenu").remove();
-            this.$el.find("#submenuClone").remove();
-            submenuClone.attr("id","submenuClone");
+            $("#subNavHolder").remove();
+            this.$el.find("#subNavHolderClone").remove();
+            submenuClone.attr({
+                "id":"subNavHolderClone",
+                "class": ""
+            });
+            submenuClone.find("#subNavBar").attr("class","");
+            submenuList.attr({
+                "class":"nav nav-tabs",
+                "role":"tablist"
+            });
+            submenuList.find("a").addClass("submenuNavButton");
             submenuClone.insertBefore("#mappingContent", this.$el).show();
         },
         setCurrentMapping: function(mappingObj){
@@ -181,8 +191,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                     connectorUtils.getMappingDetails(this.data.sourceType , this.data.targetType).then(_.bind(function (details) {
                         this.data.mapping.sourceConnector = details.sourceConnector;
                         this.data.mapping.targetConnector = details.targetConnector;
-                        this.data.mapping.targetIcon = details.targetIcon.src;
-                        this.data.mapping.sourceIcon = details.sourceIcon.src;
+                        this.data.mapping.targetIcon = details.targetIcon.iconClass;
+                        this.data.mapping.sourceIcon = details.sourceIcon.iconClass;
 
                         if (this.data.mapping.sourceConnector){
                             this.data.mapping.sourceConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mapping.sourceConnector.connectorRef.connectorName));
