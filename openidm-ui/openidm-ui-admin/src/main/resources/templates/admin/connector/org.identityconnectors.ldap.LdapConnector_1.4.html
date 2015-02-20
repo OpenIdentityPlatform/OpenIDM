@@ -128,37 +128,38 @@
         </h4>
     </div>
     <div id="baseContextsToSynchronize" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="ldapBaseContext" aria-expanded="true">
-    <div class="panel-body connector-array-component" id="baseContextsToSynchronizeWrapper">
-        <div>
-            <p>{{t "templates.connector.ldapConnector.baseContextToSyncNote"}}</p>
-            <button type="button" field_type="baseContextsToSynchronize" id="addBaseContextToSynchronizeButton" name="addBaseContextButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-plus"></i></button>
-        </div>
+        <div class="panel-body connector-array-component" id="baseContextsToSynchronizeWrapper">
+            <div>
+                <p>{{t "templates.connector.ldapConnector.baseContextToSyncNote"}}</p>
+                <button type="button" field_type="baseContextsToSynchronize" id="addBaseContextToSynchronizeButton" name="addBaseContextButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-plus"></i></button>
+            </div>
 
-        {{#if connectorDefaults.configurationProperties.baseContextsToSynchronize.length}}
-        {{#each_with_index connectorDefaults.configurationProperties.baseContextsToSynchronize}}
-        <div class="form-group has-feedback field">
-            <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
-            <div class="input-group col-sm-8">
-                <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
-                <div class="input-group-addon">
-                    <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+            {{#if connectorDefaults.configurationProperties.baseContextsToSynchronize.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.baseContextsToSynchronize}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
                 </div>
+                <div class="validation-message"></div>
             </div>
-            <div class="validation-message"></div>
-        </div>
-        {{/each_with_index}}
-        {{else}}
-        <div class="form-group has-feedback field">
-            <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
-            <div class="input-group col-sm-8">
-                <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
-                <div class="input-group-addon">
-                    <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
                 </div>
+                <div class="validation-message"></div>
             </div>
-            <div class="validation-message"></div>
+            {{/if}}
         </div>
-        {{/if}}
     </div>
 </div>
 
