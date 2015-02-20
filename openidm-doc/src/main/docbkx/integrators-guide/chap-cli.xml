@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-cli'
@@ -313,20 +313,20 @@ $ ./cli.sh configimport --user openidm-admin:openidm-admin --replaceAll /tmp/con
  
  <section xml:id="cli-configureconnector">
   <title>configureconnector</title>
-  
-  <para>The <command>configureconnector</command> subcommand generates a 
-  configuration for an OpenICF connector.</para>
-  
-  <para>Usage is as follows:</para>
-  
-  <screen>$ ./cli.sh configureconnector --user username:password <replaceable>connector-name</replaceable>
-  </screen>
-  
-  <para>Select the type of connector that you want to configure. The following 
-  example configures a new XML connector.
+  <para>
+   The <command>configureconnector</command> subcommand generates a
+   configuration for an OpenICF connector.
   </para>
-
-  <screen>$ <userinput>./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector</userinput>
+  <para>
+   Usage is as follows:
+  </para>
+  <screen>$ ./cli.sh configureconnector --user username:password --name <replaceable>connector-name</replaceable>
+  </screen>
+  <para>
+   Select the type of connector that you want to configure. The following
+   example configures a new XML connector.
+  </para>
+  <screen>$ <userinput>./cli.sh configureconnector --user openidm-admin:openidm-admin --name myXmlConnector</userinput>
  <computeroutput>Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 0. CSV File Connector version ${openicf.csvconnector.version}
@@ -341,14 +341,15 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 9. Exit
 Select [0..9]: 8
 Edit the configuration file and run the command again. The configuration was 
-saved to /openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput></screen>
-  
-  <para>The basic configuration is saved in a file named 
-  <filename>/openidm/temp/provisioner.openicf-<replaceable>connector-name</replaceable>.json</filename>.
-  Edit the <literal>configurationProperties</literal> parameter in this file to 
-  complete the connector configuration. For an XML connector, you can use the 
-  schema definitions in sample 1 for an example configuration.</para>
-  
+saved to /openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput>
+  </screen>
+  <para>
+   The basic configuration is saved in a file named
+   <filename>/openidm/temp/provisioner.openicf-<replaceable>connector-name</replaceable>.json</filename>.
+   Edit the <literal>configurationProperties</literal> parameter in this file to
+   complete the connector configuration. For an XML connector, you can use the
+   schema definitions in sample 1 for an example configuration.
+  </para>
   <programlisting language="javascript">
   "configurationProperties" : {
     "xmlFilePath" : "samples/sample1/data/resource-schema-1.xsd",
@@ -357,33 +358,38 @@ saved to /openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput><
     "xsdIcfFilePath" : "samples/sample1/data/xmlConnectorData.xml"
   },  
   </programlisting>
-  
-  <para>For more information about the connector configuration properties, see 
-  <link xlink:href="integrators-guide#openicf-provisioner-conf"
-xlink:role="http://docbook.org/xlink/role/olink"><citetitle
->Configuring Connectors</citetitle></link>.</para>
-
-  <para>When you have modified the file, run the 
-  <command>configureconnector</command> command again so that OpenIDM can pick 
-  up the new connector configuration.</para>
-  
-  <screen><userinput>$ ./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector</userinput>
+  <para>
+   For more information about the connector configuration properties, see
+   <link xlink:href="integrators-guide#openicf-provisioner-conf"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+    Connectors</citetitle></link>.
+  </para>
+  <para>
+   When you have modified the file, run the
+   <command>configureconnector</command> command again so that OpenIDM can pick
+   up the new connector configuration.
+  </para>
+  <screen><userinput>$ ./cli.sh configureconnector --user openidm-admin:openidm-admin --name myXmlConnector</userinput>
 <computeroutput>Executing ./cli.sh...
 Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 Configuration was found and read from: /path/to/openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput>
   </screen>
-
   <para>
    You can now copy the new
-   <filename>provisioner.openicf-myXmlConnector.json</filename> file
-   to the <filename>conf/</filename> subdirectory.
+   <filename>provisioner.openicf-myXmlConnector.json</filename> file to the
+   <filename>conf/</filename> subdirectory.
   </para>
-  
-  <para>You can also configure connectors over the REST interface. For more 
-  information, see <link xlink:href="integrators-guide#connector-wiz"
-xlink:role="http://docbook.org/xlink/role/olink"><citetitle
->Creating Default Connector Configurations</citetitle></link>.</para>
+  <para>
+   You can also configure connectors over the REST interface, or through the
+   Admin UI. For more information, see <link
+   xlink:href="integrators-guide#connector-wiz"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
+   Connector Configurations</citetitle></link> and <link
+   xlink:href="integrators-guide#ui-admin-connectors"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Administering
+   Connectors from the UI</citetitle></link>.
+  </para>
  </section> 
  
  <section xml:id="cli-encrypt">
