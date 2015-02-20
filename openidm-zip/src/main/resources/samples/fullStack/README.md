@@ -64,7 +64,7 @@ If you are using SSL (as in the above HTTPS example) then you will need to make 
 
 You must verify that the domain you will be using to access the OpenIDM UI is listed under "Configuration"->"System"->"Platform"->"Cookie Domains". For example, if you plan on accessing the UI like so:
 
-    https://idm.mydomain.com/openidmui
+    https://idm.example.com/openidmui
     
 Then you should ensure that ".example.com" is listed there. This is necessary for the OpenIDM UI to set the OpenAM SSO token cookie.
 
@@ -73,7 +73,7 @@ Then you should ensure that ".example.com" is listed there. This is necessary fo
 The provisioning portion of this sample is based primarily on sample2c. It includes a bi-directional mapping between OpenDJ (system/ldap/account) and managed/user. In this case, you need to update samples/fullStack/conf/provisioner-openicf.ldap.json:
 
     "configurationProperties" : {
-        "host" : "opendj.mydomain.com",
+        "host" : "opendj.example.com",
         "port" : 389,
         "ssl" : false,
         "principal" : "cn=Directory Manager",
