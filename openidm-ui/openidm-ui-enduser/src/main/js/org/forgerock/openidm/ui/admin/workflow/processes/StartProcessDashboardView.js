@@ -60,7 +60,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
                     }
 
                     if(processDefinitions.length === 0) {
-                        $("#processList").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noProcesses"));
+                        $("#processList").html("<h5 class='text-center'>" +$.t("openidm.ui.admin.tasks.StartProcessDashboardView.noProcesses") +"</h5>");
                     } else {
                         $("#processBadge").html(processDefinitions.length);
                         $("#processBadge").show();
