@@ -100,6 +100,7 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
                         this.$el.find("#linkedViewContent")[0],
                         {
                             theme: "bootstrap3",
+                            iconlib: "fontawesome4",
                             disable_edit_json: true,
                             disable_properties: true,
                             disable_array_delete: true,

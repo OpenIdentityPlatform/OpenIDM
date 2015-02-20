@@ -1,68 +1,79 @@
-<fieldset>
-    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body group-details group-list">
-        <ol>
-            <li>
-                <p>{{t "templates.connector.salesforce.callbackUrlMessage"}}</p>
-                <p><span class="important">{{callbackURL}}</span></p>
-            </li>
-            <li>
-                <p>{{t "templates.connector.salesforce.listHeader"}}</p>
-                <ul class="indented-list">
-                    <li>{{t "templates.connector.salesforce.listItemOne"}}</li>
-                    <li>{{t "templates.connector.salesforce.listItemTwo"}}</li>
-                    <li>{{t "templates.connector.salesforce.listItemThree"}}</li>
-                </ul>
-            </li>
-        </ol>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#connectorSpecificBase" aria-expanded="true" aria-controls="connectorSpecificBaseHeading" class="">{{t "templates.connector.baseTitle"}}</a>
+        </h4>
     </div>
-    <div class="group-body">
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="OAuthurl" class="light">{{t "templates.connector.salesforce.loginUrl"}}</label>
-                <div>
-                    {{#each urlTypes}}
-                        <label class="url-radio-label" for="{{id}}">{{name}}</label>
-                        <input {{#if selected}} checked {{/if}} {{#if readonly}} readonly {{/if}} name="urlRadio" class="url-radio" id="{{id}}" type="radio" value="{{value}}">
-                    {{/each}}
+    <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
+        <div class="panel-body">
+            <div>
+                <ol>
+                    <li>
+                        <p>{{t "templates.connector.salesforce.callbackUrlMessage"}}</p>
+                        <p><span class="important">{{callbackURL}}</span></p>
+                    </li>
+                    <li>
+                        <p>{{t "templates.connector.salesforce.listHeader"}}</p>
+                        <ul class="indented-list">
+                            <li>{{t "templates.connector.salesforce.listItemOne"}}</li>
+                            <li>{{t "templates.connector.salesforce.listItemTwo"}}</li>
+                            <li>{{t "templates.connector.salesforce.listItemThree"}}</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+            <div class="form-group">
+                {{#each urlTypes}}
+                <label class="url-radio-label" for="{{id}}">{{name}}</label>
+                <input {{#if selected}} checked {{/if}} {{#if readonly}} readonly {{/if}} name="urlRadio" class="url-radio" id="{{id}}" type="radio" value="{{value}}">
+                {{/each}}
+            </div>
 
-                    <input readonly id="OAuthurl" class="form-size-l" data-validator="required" type="text" name="configurationProperties.loginUrl"
+
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="OAuthurl">{{t "templates.connector.salesforce.loginUrl"}}</label>
+                <div class="col-sm-8">
+                    <input readonly id="OAuthurl" class="form-control" data-validator="required" type="text" name="configurationProperties.loginUrl"
                            data-validator-event="keyup blur change" {{#if connectorDefaults.configurationProperties.loginUrl}} value="{{connectorDefaults.configurationProperties.loginUrl}}" {{else}} value="https://login.salesforce.com/services/oauth2/token" {{/if}} required>
                     <span></span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message"></div>                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="clientId" class="light">{{t "templates.connector.salesforce.clientId"}}</label>
-                <textarea id="clientId" name="configurationProperties.clientId" data-validator-event="keyup blur" data-validator="required">{{connectorDefaults.configurationProperties.clientId}}</textarea>
-                <span></span>
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="secret" class="light">{{t "templates.connector.salesforce.clientSecret"}}</label>
-                {{#if connectorDefaults.configurationProperties.clientSecret}}
-                <input id="secret" data-validator-event="keyup blur" data-validator="changed" class="form-size-l" placeholder="**********" type="password" value="" name="configurationProperties.clientSecret">
-                {{else}}
-                <input id="secret" class="form-size-l" data-validator="required" type="password" value="" name="configurationProperties.clientSecret" data-validator-event="keyup blur" required>
-                {{/if}}
-                <span></span>
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="group-body group-details">
-            <a target="_blank" href="http://www.salesforce.com/us/developer/docs/api_rest/Content/quickstart_oauth.htm">{{t "templates.connector.salesforce.needHelpKey"}}</a>
-        </div>
-        <div class="group-body group-details">
-            <p><span class="important">{{t "templates.connector.salesforce.changeHeader"}}</span></p>
-            <p class="large-paragraph">
-                {{t "templates.connector.salesforce.changeDetails"}}
-            </p>
-        </div>
-    </div>
-    <input id="" type="hidden" name="configurationProperties.instanceUrl" value="{{connectorDefaults.configurationProperties.instanceUrl}}">
-</fieldset>
 
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="clientId">{{t "templates.connector.salesforce.clientId"}}</label>
+                <div class="col-sm-8">
+                    <textarea class="form-control" type="text" id="clientId" name="configurationProperties.clientId" data-validator-event="keyup blur" data-validator="required">{{connectorDefaults.configurationProperties.clientId}}</textarea>
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
+            </div>
+
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="clientSecret">{{t "templates.connector.salesforce.clientSecret"}}</label>
+                <div class="col-sm-8">
+                    {{#if connectorDefaults.configurationProperties.clientSecret}}
+                    <input id="clientSecret" data-validator-event="keyup blur" data-validator="changed" placeholder="**********" class="form-control" type="password" name="configurationProperties.clientSecret">
+                    {{else}}
+                    <input id="clientSecret" data-validator-event="keyup blur" data-validator="required" class="form-control" type="password" name="configurationProperties.clientSecret" required>
+                    {{/if}}
+
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
+            </div>
+
+            <div class="group-body group-details">
+                <a target="_blank" href="http://www.salesforce.com/us/developer/docs/api_rest/Content/quickstart_oauth.htm">{{t "templates.connector.salesforce.needHelpKey"}}</a>
+            </div>
+            <div class="group-body group-details">
+                <p><span class="important">{{t "templates.connector.salesforce.changeHeader"}}</span></p>
+                <p class="large-paragraph">
+                    {{t "templates.connector.salesforce.changeDetails"}}
+                </p>
+            </div>
+        </div>
+        <input id="" type="hidden" name="configurationProperties.instanceUrl" value="{{connectorDefaults.configurationProperties.instanceUrl}}">
+    </div>
+</div>
