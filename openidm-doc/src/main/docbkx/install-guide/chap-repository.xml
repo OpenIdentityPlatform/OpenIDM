@@ -418,7 +418,7 @@ Id   State          Name
       <para>
        Download the <literal>bnd</literal> Java archive file
        (<filename>biz.aQute.bnd.jar</filename>) that enables you to create OSGi
-       bundles. The file can be downloaded from <link
+       bundles. The file (Bundle Version 1.50.0) can be downloaded from <link
        xlink:href="http://dl.dropbox.com/u/2590603/bnd/biz.aQute.bnd.jar" />.
        For more information about <literal>bnd</literal>, see <link
        xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
@@ -642,7 +642,7 @@ Bundle-Version: &#36;{version}</screen>
    <para>
     Download the <literal>bnd</literal> Java archive file
     (<filename>biz.aQute.bnd.jar</filename>) that enables you to create
-    OSGi bundles. The file can be downloaded from
+    OSGi bundles. The file (Bundle Version 1.50.0) can be downloaded from
     <link xlink:show="new" xlink:href="http://dl.dropbox.com/u/2590603/bnd/biz.aQute.bnd.jar" />.
     For more information about <literal>bnd</literal>, see
     <link xlink:show="new" xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
