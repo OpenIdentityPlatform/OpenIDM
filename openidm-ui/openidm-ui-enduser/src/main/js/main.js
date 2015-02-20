@@ -180,5 +180,4 @@ require([
     window.Backbone = Backbone;
 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
-
 });

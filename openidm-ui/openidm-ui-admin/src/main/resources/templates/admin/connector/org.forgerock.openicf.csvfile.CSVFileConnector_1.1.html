@@ -1,38 +1,45 @@
-<fieldset>
-    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body">
-        <div class="group-field-block group-lead">
-            <div class="separate-message">
-                <label for="filePath" class="light">{{t "templates.connector.csvConnector.filePath"}}</label>
-                <input id="filePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.filePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.filePath}}" required>
-                <span></span>
-                <div class="validation-message"></div>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#connectorSpecificBase" aria-expanded="true" aria-controls="connectorSpecificBaseHeading" class="">{{t "templates.connector.baseTitle"}}</a>
+        </h4>
+    </div>
+    <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
+        <div class="panel-body">
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="csvFilePath">{{t "templates.connector.csvConnector.filePath"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="csvFilePath" name="configurationProperties.filePath" value="{{connectorDefaults.configurationProperties.filePath}}"  data-validator-event="keyup blur" data-validator="required" />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
             </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="uniqueAttribute" class="light">{{t "templates.connector.csvConnector.uniqueAttribute"}}</label>
-                <input id="uniqueAttribute" class="form-size-l" data-validator="required" type="text" name="configurationProperties.uniqueAttribute" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.uniqueAttribute}}" required>
-                <span></span>
-                <div class="validation-message"></div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="csvUniqueAttribute">{{t "templates.connector.csvConnector.uniqueAttribute"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="csvUniqueAttribute" name="configurationProperties.uniqueAttribute" value="{{connectorDefaults.configurationProperties.uniqueAttribute}}"  data-validator-event="keyup blur" data-validator="required" />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
             </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="nameAttribute" class="light">{{t "templates.connector.csvConnector.nameAttribute"}}</label>
-                <input id="nameAttribute" class="form-size-l" data-validator="required" type="text" name="configurationProperties.nameAttribute" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.nameAttribute}}" required>
-                <span></span>
-                <div class="validation-message"></div>
+
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="csvNameAttribute">{{t "templates.connector.csvConnector.nameAttribute"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="csvNameAttribute" name="configurationProperties.nameAttribute" value="{{connectorDefaults.configurationProperties.nameAttribute}}"  data-validator-event="keyup blur" data-validator="required" />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
             </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="passwordAttribute" class="light">{{t "templates.connector.csvConnector.passwordAttribute"}}</label>
-                <input id="passwordAttribute" class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordAttribute" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.passwordAttribute}}" required>
-                <span></span>
-                <div class="validation-message"></div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="csvPasswordAttribute">{{t "templates.connector.csvConnector.passwordAttribute"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="csvPasswordAttribute" name="configurationProperties.passwordAttribute" value="{{connectorDefaults.configurationProperties.passwordAttribute}}"  data-validator-event="keyup blur" data-validator="required" />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
             </div>
         </div>
     </div>
-</fieldset>
+</div>
 

@@ -164,8 +164,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         _.each(this.data.versionDisplay, function (group) {
                             group.versions = _.map(group.versions, function (v) {
                                 v.selected = v.connectorName === this.data.connectorTypeName &&
-                                             v.bundleVersion === data.connectorRef.bundleVersion &&
-                                             v.systemType === this.data.systemType;
+                                    v.bundleVersion === data.connectorRef.bundleVersion &&
+                                    v.systemType === this.data.systemType;
                                 return v;
                             }, this);
                         }, this);
