@@ -37,7 +37,9 @@ OpenIDM benefits from the strong access management that OpenAM provides - more a
 
 2. An OpenDJ installation which OpenAM has been configured to use as the user store. This OpenDJ server needs to be directly accessible to OpenIDM via a standard LDAP port. If you wish to enable livesync monitoring, be sure that OpenDJ has been installed with the Topology Option "This server will be part of a replication topology" enabled.
 
-For simplicity in this demo, it is assumed that you are using a single, root-level realm in OpenAM. It is possible to use mulitple realms, but that is a more complicated setup.
+3. Use FQDNs for the systems with OpenIDM, OpenAM, and OpenDJ. OpenAM SSO cookies require FQDNs.
+
+For simplicity in this demo, it is assumed that you are using a single, root-level realm in OpenAM. It is possible to use multiple realms, but that is a more complicated setup.
 
 ### Authentication Configuration
 
@@ -47,7 +49,7 @@ Configuring authentication is simple in most cases. Edit samples/fullStack/conf/
             {
                 "name" : "OPENAM_SESSION",
                 "properties" : {
-                    "openamDeploymentUrl" : "https://amserver.mydomain.com/openam",
+                    "openamDeploymentUrl" : "https://amserver.example.com:8443/openam",
                     "groupRoleMapping" : {
                         "openidm-admin" : [
                             "cn=idmAdmins,ou=Groups,dc=example,dc=com"
@@ -64,15 +66,15 @@ You must verify that the domain you will be using to access the OpenIDM UI is li
 
     https://idm.mydomain.com/openidmui
     
-Then you should ensure that ".mydomain.com" is listed there. This is necessary for the OpenIDM UI to set the OpenAM SSO token cookie.
+Then you should ensure that ".example.com" is listed there. This is necessary for the OpenIDM UI to set the OpenAM SSO token cookie.
 
 ### Provisioning Configuration
 
-The provisioning portion of this sample is based primarily on sample2c. It includes a bi-directional mapping between OpenDJ (system/ldap/account) and managed/user. In this case, you need to update samples/openam/conf/provisioner-openicf.ldap.json:
+The provisioning portion of this sample is based primarily on sample2c. It includes a bi-directional mapping between OpenDJ (system/ldap/account) and managed/user. In this case, you need to update samples/fullStack/conf/provisioner-openicf.ldap.json:
 
     "configurationProperties" : {
         "host" : "opendj.mydomain.com",
-        "port" : 1389,
+        "port" : 389,
         "ssl" : false,
         "principal" : "cn=Directory Manager",
         "credentials" : "password",
@@ -91,11 +93,11 @@ Once configured, run this command to import the users from OpenDJ into managed/u
 
     curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
 
-At this point you may also wish to enable scheduled reconcilation and livesync, to ensure that OpenDJ and managed/user stay in sync with each other over time. Edit samples/openam/conf/schedule-recon.json and schedule-livesync.json, setting the "enabled" value within each to true. This will ensure that any changes to the user store which do not originate from OpenIDM will still be visible to OpenIDM.
+At this point you may also wish to enable scheduled reconcilation and livesync, to ensure that OpenDJ and managed/user stay in sync with each other over time. Edit samples/fullStack/conf/schedule-recon.json and schedule-livesync.json, setting the "enabled" value within each to true. This will ensure that any changes to the user store which do not originate from OpenIDM will still be visible to OpenIDM.
 
 ### Logging In
 
-Once you have followed the above steps, you can access the OpenIDM UI as normal (https://domain:port/openidmui). The UI has been modified slightly for this sample; instead of the regular login process, we use a proxy service to communicate with OpenAM's REST-based Authentication service. This proxy service is implemented as a custom endpoint - read more details in the source at script/openamProxy.js. 
+Once you have followed the above steps, you can access the OpenIDM UI as normal (https://domain:port/openidmui). The UI has been modified slightly for this sample; instead of the regular login process, we use a proxy service to communicate with OpenAM's REST-based Authentication service. This proxy service is implemented as a custom endpoint - read more details in the source at bin//defaults/script/ui/openamProxy.js. 
 
 If everything is setup properly, when the OpenIDM UI loads you will see one of two things happen: 
 
