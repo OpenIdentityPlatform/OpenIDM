@@ -359,7 +359,7 @@
     more information about link qualifiers, see <link xlink:show="new"
     xlink:href="integrators-guide#mapping-link-qualifiers"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Link
-    Qualifier Conditions</citetitle></link>.
+    Qualifiers in a Mapping</citetitle></link>.
    </para>
    <para>
     When you create a mapping between two resources, you identify the properties
