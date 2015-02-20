@@ -78,7 +78,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         },
 
         noItemsMessage: function(item) {
-            return $.t("openidm.ui.apps.dashboard.NotificationsView.noNotifications");
+            return "<h5 class='text-center'>" + $.t("openidm.ui.apps.dashboard.NotificationsView.noNotifications") + "</h5>";
         },
 
         seeMoreItemsMessage: function(item) {

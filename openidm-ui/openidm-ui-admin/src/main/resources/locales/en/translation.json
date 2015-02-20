@@ -410,7 +410,7 @@
             "scriptedsql_ScriptedSQLConnector":"SQL Connector",
             "xml_XMLConnector":"XML Connector",
             "csvfile_CSVFileConnector":"CSV Connector",
-            "googleapps_GoogleAppsConnector" : "Google Connector",
+            "googleapps_GoogleAppsConnector" : "GoogleApps Connector",
             "salesforce_Salesforce":"Salesforce Connector",
             "databasetable_DatabaseTableConnector":"Database Connector",
             "ldap_LdapConnector":"LDAP Connector",
@@ -467,6 +467,7 @@
                 "deleteObject": "Delete Object",
                 "saveObject": "Save Object",
                 "objectTypeConfigs" : "Object Type Configs",
+                "objectTypeGenerator" : "Object Type Generator",
                 "changeConfiguration" : "<p>Are you sure you want to change your LDAP Object Type to a default or saved configuration?</p><p>Please note making this change will cause any unsaved or custom changes to be lost.</p>"
             },
             "errorMessages": {
@@ -579,6 +580,7 @@
                 "syncScriptFileName" : "Sync File Name",
                 "schemaScriptFileName" : "Schema File Name",
                 "driverClassName" : "Driver Class Name",
+                "addClasspath" : "Add Classpath",
                 "classpath" : "Classpath",
                 "autoCommit": "Auto Commit",
                 "scriptFiles": "Script Files"
@@ -598,7 +600,7 @@
                 "passwordColumn" : "Password Column",
                 "enableEmptyString" : "Enable Empty String",
                 "rethrowSQL" : "Rethrow All SQL Exceptions",
-                "natvieTimestamps" : "Native Timestamps",
+                "nativeTimestamps" : "Native Timestamps",
                 "allNative" : "All Native",
                 "validConnectionQuery" : "Valid Connection Query",
                 "changeLogColumn" : "Change Log Column",
@@ -627,7 +629,7 @@
                 "baseContext": "Enter the path to your base dn",
                 "baseContextNote": "Be sure to add base contexts which include both your users and your groups.",
                 "baseContextAdd":"Add Base Context",
-                "accountObjectClasses" : "Object Classe for users",
+                "accountObjectClasses" : "Object Classes for users",
                 "addAccountObjectClasses" : "Add Object Class",
                 "addUsersTitle": "User Details",
                 "groupObjectClasses": "Object Classes for groups",
@@ -1004,8 +1006,8 @@
             "admin" : {
                 "tasks" : {
                     "TasksMenuView" : {
-                        "noTasksAssigned" : "You do not have any tasks assigned to you right now.",
-                        "noTasksInGroupQueue" : "You do not have any tasks in your's group's queue now.",
+                        "noTasksAssigned" : "You do not have any tasks assigned to you.",
+                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue.",
                         "denyDefaultReason" : "Enter a reason for denying this request",
                         "acceptanceForm" : {
                             "for" : "For",
@@ -1026,7 +1028,7 @@
                     },
                     "StartProcessDashboardView" : {
                         "chooseProcess" : "Please choose a process to start",
-                        "noProcesses": "No processes",
+                        "noProcesses": "You do not have any processes in your queue.",
                         "noDataRequired": "No data required"
                     }
                 },

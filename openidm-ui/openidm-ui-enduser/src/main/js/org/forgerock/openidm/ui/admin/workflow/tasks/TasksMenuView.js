@@ -155,10 +155,9 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         errorHandler: function() {
             this.$el.html('');
             if(this.category === "assigned") {
-                this.$el.append('<b>' + $.t("openidm.ui.admin.tasks.TasksMenuView.noTasksAssigned") + '</b>');
+                this.$el.append('<h5 class="text-center">' + $.t("openidm.ui.admin.tasks.TasksMenuView.noTasksAssigned") + '</h5>');
             } else {
-                this.$el.prev().hide();
-                this.$el.hide();
+                this.$el.append('<h5 class="text-center">' + $.t("openidm.ui.admin.tasks.TasksMenuView.noTasksInGroupQueue") + '</h5>');
             }
         },
 
