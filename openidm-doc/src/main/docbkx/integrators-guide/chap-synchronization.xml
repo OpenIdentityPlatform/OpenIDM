@@ -55,10 +55,11 @@
    when OpenIDM discovers a change on an external resource.
   </para>
   <para>
-   For direct changes to OpenIDM, OpenIDM immediately pushes updates to all
-   external resources configured to receive the updates. A direct change can
-   originate not only as a write request through the REST interface, but also as
-   an update resulting from reconciliation with another resource.
+   For direct changes to managed objects, OpenIDM immediately synchronizes those
+   changes to all mappings configured to use those objects as their source.
+   A direct change can originate not only as a write request through the REST
+   interface, but also as an update resulting from reconciliation with another
+   resource.
   </para>
 
   <variablelist>
