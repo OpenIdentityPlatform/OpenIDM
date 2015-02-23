@@ -32,6 +32,10 @@ define("config/routes/CommonIDMRoutesConfig", [
             dialog: "org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog",
             url: "change_password/",
             role: "ui-admin"
+        },
+        "authenticationUnavailable" : {
+            view: "org/forgerock/openidm/ui/common/login/AuthenticationUnavailable",
+            url: "authenticationUnavailable/"
         }
     };
 

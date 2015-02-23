@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -58,7 +58,7 @@ for (Attribute attribute : attributes) {
 
 switch ( objectClass ) {
     case auditrecon:
-    sql.execute("INSERT INTO auditrecon (objectid,entrytype,rootactionid,activity,message,reconciling,reconid,situation,sourceobjectid,status,targetobjectid,ambiguoustargetobjectids,activitydate,actionid,exceptiondetail,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    sql.execute("INSERT INTO auditrecon (objectid,entrytype,rootactionid,activity,message,reconciling,reconid,situation,sourceobjectid,status,targetobjectid,ambiguoustargetobjectids,activitydate,actionid,exceptiondetail,linkqualifier,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             id, // objectid
             attributeMap.get("entrytype")?.getValue()?.get(0),
@@ -75,6 +75,7 @@ switch ( objectClass ) {
             attributeMap.get("activitydate")?.getValue()?.get(0),
             attributeMap.get("actionid")?.getValue()?.get(0),
             attributeMap.get("exceptiondetail")?.getValue()?.get(0),
+            attributeMap.get("linkqualifier")?.getValue()?.get(0),    
             attributeMap.get("mapping")?.getValue()?.get(0),
             attributeMap.get("messagedetail")?.getValue()?.get(0)
         ]);
@@ -118,7 +119,7 @@ switch ( objectClass ) {
 
     case auditsync:
 
-        sql.execute("INSERT INTO auditsync (objectid,rootactionid,sourceobjectid,targetobjectid,activitydate,activity,situation,status,message,actionid,exceptiondetail,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        sql.execute("INSERT INTO auditsync (objectid,rootactionid,sourceobjectid,targetobjectid,activitydate,activity,situation,status,message,actionid,exceptiondetail,linkqualifier,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 [
                         id,
                         attributeMap.get("rootactionid")?.getValue()?.get(0),
@@ -131,6 +132,7 @@ switch ( objectClass ) {
                         attributeMap.get("message")?.getValue()?.get(0),
                         attributeMap.get("actionid")?.getValue()?.get(0),
                         attributeMap.get("exceptiondetail")?.getValue()?.get(0),
+                        attributeMap.get("linkqualifier")?.getValue()?.get(0),
                         attributeMap.get("mapping")?.getValue()?.get(0),
                         attributeMap.get("messagedetail")?.getValue()?.get(0)
                 ]);

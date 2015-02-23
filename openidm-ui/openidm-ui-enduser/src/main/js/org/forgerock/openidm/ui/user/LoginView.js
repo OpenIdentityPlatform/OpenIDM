@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -30,8 +30,9 @@
 define("org/forgerock/openidm/ui/user/LoginView", [
     "org/forgerock/commons/ui/common/LoginView",
     "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(commonLoginView, siteIdentificationDelegate, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/openidm/ui/common/util/AMLoginUtils"
+], function(commonLoginView, siteIdentificationDelegate, conf, amLoginUtils) {
     
     var handleLoginChange = function() {
             var login = this.$el.find("input[name=login]").val();
@@ -59,6 +60,7 @@ define("org/forgerock/openidm/ui/user/LoginView", [
     obj = new LoginView();
 
     obj.render = function (args, callback) {
+        var amCallback = amLoginUtils.init(this);
 
         if (conf.globalData.securityQuestions || conf.globalData.selfRegistration || conf.globalData.siteIdentification) {
             obj.baseTemplate = "templates/common/MediumBaseTemplate.html";
@@ -67,9 +69,12 @@ define("org/forgerock/openidm/ui/user/LoginView", [
         commonLoginView.render.call(this, args, _.bind(function () {
 
             handleLoginChange.call(this);
-
             if (callback) {
                 callback();
+            }
+            
+            if(amCallback) {
+                amCallback();
             }
 
         }, this));

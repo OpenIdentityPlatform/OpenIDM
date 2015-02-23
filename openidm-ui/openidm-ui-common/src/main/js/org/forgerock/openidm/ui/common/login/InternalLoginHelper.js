@@ -27,14 +27,12 @@
 define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
     "AuthnDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/main/Router"
-            
-], function (authnDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, router) {
+    "org/forgerock/openidm/ui/common/util/AMLoginUtils"
+], function (authnDelegate, eventManager, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, amLoginUtils) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
@@ -61,7 +59,14 @@ define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
     obj.logout = function (successCallback, errorCallback) {
         delete conf.loggedUser;
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
+        
+        if(conf.globalData.openamAuthEnabled){
+            amLoginUtils.openamLogout(successCallback);
+            return false;
+        } 
+
         successCallback();
+        
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
@@ -80,7 +85,14 @@ define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
             }
             
             return user;
-        }, errorCallback);
+        }, function(e) {
+            if(e.responseJSON && e.responseJSON.detail && e.responseJSON.detail.failureReasons && e.responseJSON.detail.failureReasons.length){
+                if(_.where(e.responseJSON.detail.failureReasons,{ isAlive: false }).length){
+                    conf.globalData.authenticationUnavailable = true;
+                }
+            }
+            errorCallback();
+        });
 
     };
     return obj;

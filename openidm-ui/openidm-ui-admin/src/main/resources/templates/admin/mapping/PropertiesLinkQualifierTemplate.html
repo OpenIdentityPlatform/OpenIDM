@@ -1,0 +1,26 @@
+<div class="group-body">
+    <h3>{{t "templates.mapping.linkQualifiers"}}</h3>
+
+    <form>
+        {{#each linkQualifiers}}
+        <button type="button" class="removeLinkQualifier button icon-button {{#if ../doNotDelete}} doNotDelete{{/if}}">
+            <span class="linkQualifier">{{this}}</span>
+            <i class="fa fa-times fa-lg"></i>
+        </button>
+        {{/each}}
+
+        <span class="addLinkQualifierContainer">
+            <input class="newLinkQualifier" type="text" placeholder="{{t "templates.correlation.linkQualifier"}}"/>
+            <button type="button" class="addLinkQualifier button icon-button">
+                <i class="fa fa-plus fa-lg"></i>
+            </button>
+        </span>
+
+        <div class="float-left alert-box warning-message notValid">
+            <p class="alert-message">
+                <i class="fa alert-message-icon"></i><span class="message-type">{{t "templates.correlation.warning"}}!</span>
+                <span class="message">{{t "templates.mapping.uniqueLinkQualifiers"}}</span>
+            </p>
+        </div>
+    </form>
+</div>

@@ -71,6 +71,10 @@ define("config/messages/AdminMessages", [
             "startedProcess": {
                 msg: "config.messages.AdminMessages.startedProcess",
                 type: "info"
+            },
+            "authenticationUnavailable" : {
+                msg: "config.messages.AuthenticationMessages.authenticationUnavailable",
+                type: "error"
             }
     };
     

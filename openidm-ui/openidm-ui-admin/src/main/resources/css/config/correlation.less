@@ -1,6 +1,11 @@
-#correlationQueryWarning {
+#correlationQueryWarning{
   width: 510px;
   margin-top: 5px;
+}
+
+.correlationQueryChangesMsg, .correlationQueryAutoMsg {
+  width: 815px;
+  display: none;
 }
 
 #correlationQuerySubmit {
@@ -8,18 +13,67 @@
 }
 
 #correlationQueryView, #correlationQueryBuilderView {
+  .correlationQueryType{
+    margin-bottom: 5px;
+  }
+
+  .correlationFooter{
+    margin-top: 5px;
+  }
+
+  select {
+    height:30px;
+  }
   padding: 10px;
+
+  .disabled {
+    h3 {
+      background-color: #F2DEDE;
+
+      .linkQualifierLabel {
+        text-decoration: line-through;
+      }
+
+      i:hover {
+        background-color: #F2DEDE;
+        cursor: default;
+      }
+    }
+  }
 
   * {
     font-size: 13px;
   }
 
   .group-body {
-    padding: 10px 0 ;
+    padding: 5px 0 ;
   }
 
-  .saveCorrelationQuery {
+  .saveCorrelationQuery, .resetCorrelationQuery {
     float: right;
+  }
+
+  .undo {
+    font-style: italic;
+    cursor: pointer;
+  }
+
+  .undo:hover{
+    text-decoration: underline
+  }
+
+  #addNewCorrelationQuery.noLinkQualifiers {
+    cursor: default;
+    &:hover {
+      border-color: #999;
+      span {
+        color: #bbb;
+      }
+    }
+  }
+
+  .deleted, .linkQualifierError {
+    color: #a94442;
   }
 
   #addNewCorrelationQuery {
@@ -58,12 +112,14 @@
     position: relative;
 
     i {
-      height: 23px;
+      height: 22px;
       width: 28px;
       border-right: 1px solid #5a646d;
       position: absolute;
       padding-top: 6px;
       text-align: center;
+      cursor: pointer;
+      z-index: 1;
 
       &:hover {
         background-color: #80b7ab;
@@ -83,12 +139,20 @@
       background-color: #fff;
     }
 
-    .linkQualifierName {
+    .linkQualifierContainer {
       position: absolute;
       left: 70px;
       line-height: 13px;
       padding-top: 7px;
       font-weight: normal;
+    }
+    .status {
+      position: relative;
+      display: block;
+      line-height: 13px;
+      padding-top: 7px;
+      font-weight: normal;
+      text-align: center;
     }
   }
 

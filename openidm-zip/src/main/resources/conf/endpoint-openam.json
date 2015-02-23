@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/openam/*",
+    "type" : "text/javascript",
+    "file" : "ui/openamProxy.js"
+}

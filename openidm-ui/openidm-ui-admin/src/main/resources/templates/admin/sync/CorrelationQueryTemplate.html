@@ -5,18 +5,32 @@
 </select>
 
 <div class="group-body correlationQueries">
-    {{#each linkQualifiers}}
-    <div class="group">
+    {{#each correlationQueries}}
+    <div class="group row-{{linkQualifier}}{{#if deleted}} disabled{{/if}}">
         <h3>
             <i class="fa fa-pencil fa-2 edit"></i>
             <i class="fa fa-trash-o fa-2 trash"></i>
-            <span class="linkQualifierName">{{this}}</span>
+
+            <span class="linkQualifierContainer">{{t "templates.correlation.linkQualifier"}}:
+                <span class="linkQualifierLabel{{#if error}} linkQualifierError{{/if}}">{{linkQualifier}}</span>
+            </span>
+            <span class="status{{#if deleted}} deleted{{/if}}">
+                {{#if deleted}} ({{t "templates.correlation.deleted"}} <span class="undo">{{t "templates.correlation.undo"}}</span>){{/if}}
+                {{#if edited}} ({{t "templates.correlation.edited"}} <span class="undo">{{t "templates.correlation.undo"}}</span>){{/if}}
+                {{#if added}} ({{t "templates.correlation.added"}}){{/if}}
+            </span>
         </h3>
     </div>
     {{/each}}
-    <div class="group" id="addNewCorrelationQuery">
+    <div id="addNewCorrelationQuery" class="group{{#if noLinkQualifiers}} noLinkQualifiers{{/if}}">
         <h3>
+            {{#unless noLinkQualifiers}}
             <span>{{t "templates.correlation.addQuery"}}</span>
+            {{/unless}}
+
+            {{#if noLinkQualifiers}}
+            <span>{{t "templates.correlation.noLQ"}}</span>
+            {{/if}}
         </h3>
     </div>
 </div>
@@ -24,7 +38,16 @@
 <!--<div class="group-body correlationScript">-->
 <!--</div>-->
 
-<input type="submit" class="saveCorrelationQuery button" value="{{t "common.form.save"}}"/>
+<div class="correlationFooter">
+    <div class="float-left alert-box warning-message correlationQueryChangesMsg">
+        <p class="alert-message">
+            <i class="fa alert-message-icon"></i><span class="message-type">{{t "templates.correlation.warning"}}!</span>
+            <span class="message">{{t "templates.correlation.changesPending"}}</span>
+        </p>
+    </div>
 
+    <input type="submit" disabled class="saveCorrelationQuery button" value="{{t "common.form.save"}}"/>
+    <input type="submit" disabled class="resetCorrelationQuery button" value="{{t "common.form.reset"}}"/>
+</div>
 
 

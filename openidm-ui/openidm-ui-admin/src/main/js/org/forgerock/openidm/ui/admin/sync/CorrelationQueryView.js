@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -30,13 +30,15 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/sync/CorrelationQueryDialog",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
+    "org/forgerock/openidm/ui/admin/util/SaveChangesView"
 ], function(AdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,
             CorrelationQueryDialog,
-            BrowserStorageDelegate) {
+            BrowserStorageDelegate,
+            SaveChangesView) {
 
     var CorrelationQueryView = AdminAbstractView.extend({
         template: "templates/admin/sync/CorrelationQueryTemplate.html",
@@ -47,26 +49,73 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             "click .edit": "editLinkQualifier",
             "click .trash": "deleteLinkQualifier",
             "change .correlationQueryType": "changeCorrelationQueryType",
-            "click .saveCorrelationQuery": "saveQuery"
+            "click .saveCorrelationQuery": "saveQuery",
+            "click .resetCorrelationQuery": "resetQuery",
+            "click .undo": "undoChange"
         },
         data: {
+            noLinkQualifiers: false
+        },
+        model: {
+            changes: [],
+            addedLinkQualifiers: [],
             linkQualifiers:[]
         },
-        model: {},
 
         render: function(args) {
             this.model.sync = args.sync;
             this.model.mapping = args.mapping;
             this.model.mappingName = args.mappingName;
             this.model.startSync = args.startSync;
-            this.data.linkQualifiers = _.pluck(args.mapping.correlationQuery, "linkQualifier");
+            this.model.changes = args.changes || [];
+            this.model.linkQualifiers = args.mapping.linkQualifiers || ["default"];
+            this.model.addedLinkQualifiers = _.union(_.pluck(args.mapping.correlationQuery, "linkQualifier"), _.pluck(this.model.changes, "linkQualifier"));
 
             // Legacy Support
             if(_.has(this.model.mapping, "correlationQuery") && !_.isArray(this.model.mapping.correlationQuery)) {
-                args.mapping.correlationQuery.linkQualifier = $.t("templates.correlation.legacy");
-                this.model.mapping.correlationQuery = [args.mapping.correlationQuery];
-                this.data.linkQualifiers = _.pluck(this.model.mapping.correlationQuery, "linkQualifier");
+                args.mapping.correlationQuery.linkQualifier = "default";
+                args.mapping.correlationQuery = [args.mapping.correlationQuery];
             }
+
+            this.data.correlationQueries = _.clone(args.mapping.correlationQuery, true);
+
+            if (_.difference(this.model.linkQualifiers, this.model.addedLinkQualifiers).length === 0) {
+                this.data.noLinkQualifiers = true;
+            } else {
+                this.data.noLinkQualifiers = false;
+            }
+
+            // Add the pending changes to the array of correlation queries used for rendering purposes, saved data is not generated from the data object.
+            _.each(this.model.changes, _.bind(function(query) {
+                var linkQualifier = query.linkQualifier,
+                    correlationQuery = _.find(this.data.correlationQueries, {"linkQualifier": linkQualifier}),
+                    correlationQueryIndex = _.indexOf(this.data.correlationQueries, correlationQuery);
+
+                if (!_.isArray(this.data.correlationQueries)) {
+                    this.data.correlationQueries = [];
+                }
+
+                switch (query.changes) {
+                    case "add":
+                        this.data.correlationQueries.push(_.extend(query, {"added": true}));
+                        break;
+                    case "toAdd":
+                        this.data.correlationQueries.push(_.extend(query, {"toAdd": true}));
+                        break;
+                    case "edit":
+                        this.data.correlationQueries[correlationQueryIndex] = _.extend(correlationQuery, {"edited": true});
+                        break;
+                    case "delete":
+                        this.data.correlationQueries[correlationQueryIndex] = _.omit(_.extend(correlationQuery, {"deleted": true}), "edited");
+                        break;
+                }
+            }, this));
+
+            _.each(this.data.correlationQueries, function(query, key) {
+                if (this.model.linkQualifiers.indexOf(query.linkQualifier) === -1) {
+                    this.data.correlationQueries[key].error = true;
+                }
+            }, this);
 
             this.parentRender(function () {
                 if(_.has(this.model.mapping, "correlationQuery")) {
@@ -75,15 +124,63 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                     this.model.mapping.correlationQuery = [];
                     this.changeCorrelationQueryType();
                 }
+                this.checkButtons();
             });
         },
 
+        checkButtons: function() {
+            var showWarning = true;
+
+            if (this.$el.find(".correlationQueryType").val() === "queries") {
+                if (this.model.changes.length > 0) {
+                    this.$el.find(".correlationQueryChangesMsg").show();
+                    showWarning = false;
+                } else {
+                    this.$el.find(".correlationQueryChangesMsg").hide();
+                }
+
+            } else if (this.$el.find(".correlationQueryType").val() === "none") {
+                if (_.has(this.model.mapping, "correlationQuery")) {
+                    showWarning = false;
+                    this.$el.find(".correlationQueryChangesMsg").hide();
+                }
+            }
+
+            this.$el.find(".saveCorrelationQuery").prop('disabled', showWarning);
+            this.$el.find(".resetCorrelationQuery").prop('disabled', showWarning);
+        },
+
+        undoChange: function(e) {
+            var linkQualifier = $(e.target).closest("h3").find(".linkQualifierLabel").text(),
+                changesQuery = _.find(this.model.changes, {"linkQualifier": linkQualifier}),
+                changesIndex = _.indexOf(this.model.changes, changesQuery);
+
+            this.model.changes.splice(changesIndex, 1);
+
+            this.reload();
+        },
+
+        reload: function() {
+            this.render({
+                sync: this.model.sync,
+                mapping: this.model.mapping,
+                mappingName: this.model.mappingName,
+                startSync: this.model.startSync,
+                changes: this.model.changes
+            });
+
+            this.checkButtons();
+        },
+
         editLinkQualifier: function(e) {
-            var linkQualifier = $(e.target).parent().find(".linkQualifierName").text();
-            this.addEditNewCorrelationQuery(null, linkQualifier);
+            if (!$(e.target).parent().parent().hasClass("disabled")) {
+                var linkQualifier = $(e.target).closest("h3").find(".linkQualifierLabel").text();
+                this.addEditNewCorrelationQuery(null, linkQualifier);
+            }
         },
 
         changeCorrelationQueryType: function() {
+            this.checkButtons();
             if (this.$el.find(".correlationQueryType").val() === "queries") {
                 this.$el.find(".correlationQueries").show();
             } else {
@@ -92,51 +189,102 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
         },
 
         deleteLinkQualifier: function(e) {
-            var linkQualifier = $(e.target).parent().find(".linkQualifierName").text(),
-                correlationQuery = _.find(this.model.mapping.correlationQuery, {"linkQualifier": linkQualifier}),
-                correlationQueryIndex = _.indexOf(this.model.mapping.correlationQuery, correlationQuery);
+            if (!$(e.target).parent().parent().hasClass("disabled")) {
+                var linkQualifier = $(e.target).closest("h3").find(".linkQualifierLabel").text(),
+                    correlationQuery = _.find(this.model.mapping.correlationQuery, {"linkQualifier": linkQualifier}),
+                    correlationQueryIndex = _.indexOf(this.model.mapping.correlationQuery, correlationQuery),
+                    changesQuery = _.find(this.model.changes, {"linkQualifier": linkQualifier}),
+                    changesIndex = _.indexOf(this.model.changes, changesQuery);
 
-            this.model.mapping.correlationQuery.splice(correlationQueryIndex, 1);
+                if (correlationQueryIndex >= 0) {
+                    this.model.changes.push(_.extend(_.clone(this.model.mapping.correlationQuery[correlationQueryIndex], true), {"changes": "delete"}));
+                } else if (changesIndex >= 0) {
+                    this.model.changes.splice(changesIndex, 1);
+                }
 
-            this.render({
-                sync: this.model.sync,
-                mapping: this.model.mapping,
-                mappingName: this.model.mappingName,
-                startSync: this.model.startSync
-            });
+                this.reload();
+            }
         },
 
         addEditNewCorrelationQuery: function(e, linkQualifier) {
+            // There are no more linkQualifiers so we can't add a correlation Query
+            if (this.data.noLinkQualifiers && !linkQualifier) {
+                return false;
+            }
+
+            var correlationQuery = _.find(this.model.mapping.correlationQuery, {"linkQualifier": linkQualifier}),
+                added = _.find(this.model.changes, {"linkQualifier": linkQualifier}),
+                query = added || correlationQuery;
+
             CorrelationQueryDialog.render({
-                mapping: this.model.mapping,
+                query: _.clone(query, true),
+                mapping: _.clone(this.model.mapping, true),
                 mappingName: this.model.mappingName,
-                linkQualifiers: this.data.linkQualifiers,
+                linkQualifiers: this.model.linkQualifiers,
+                addedLinkQualifiers: this.model.addedLinkQualifiers,
                 linkQualifier: linkQualifier || null,
                 edit: _.isString(linkQualifier)
-            }, _.bind(function(data) {
-                var correlationQuery = _.find(this.model.mapping.correlationQuery, {"linkQualifier": data.linkQualifier}),
-                    correlationQueryIndex = _.indexOf(this.model.mapping.correlationQuery, correlationQuery);
 
-                if (correlationQueryIndex > -1) {
-                    this.model.mapping.correlationQuery[correlationQueryIndex] = data;
-                } else {
-                    this.model.mapping.correlationQuery.push(data);
+            }, _.bind(function(data) {
+                var added = _.find(this.model.changes, {"linkQualifier": data.linkQualifier}),
+                    addedIndex = _.indexOf(this.model.changes, added);
+
+
+                if (!added && _.isString(linkQualifier)) {
+                    this.model.changes.push(_.extend(data, {"changes": "edit"}));
+                } else if (!added) {
+                    this.model.changes.push(_.extend(data, {"changes": "add"}));
+                } else if (added && _.find(this.model.mapping.correlationQuery, {"linkQualifier": data.linkQualifier})) {
+                    this.model.changes[addedIndex] = _.extend(data, {"changes": "edit"});
+                } else if (added) {
+                    this.model.changes[addedIndex] = _.extend(data, {"changes": "add"});
                 }
 
-                this.render({
-                    sync: this.model.sync,
-                    mapping: this.model.mapping,
-                    mappingName: this.model.mappingName
-                });
+                this.reload();
             }, this));
         },
 
         save: function(callback) {
+            var edited,
+                editedIndex;
+
+            if (this.$el.find(".correlationQueryType").val() === "queries") {
+                _.each(this.model.changes, function (change) {
+                    switch (change.changes) {
+                        case "add":
+                            this.model.mapping.correlationQuery.push(_.omit(change, "deleted", "added", "edited", "changes"));
+                            break;
+
+                        case "edit":
+                            edited = _.find(this.model.mapping.correlationQuery, {"linkQualifier": change.linkQualifier});
+                            editedIndex = _.indexOf(this.model.mapping.correlationQuery, edited);
+
+                            this.model.mapping.correlationQuery[editedIndex] = _.omit(change, "deleted", "added", "edited", "changes");
+                            break;
+
+                        case "delete":
+                            edited = _.find(this.model.mapping.correlationQuery, {"linkQualifier": change.linkQualifier});
+                            editedIndex = _.indexOf(this.model.mapping.correlationQuery, edited);
+
+                            this.model.mapping.correlationQuery.splice(editedIndex, 1);
+                            break;
+                    }
+                }, this);
+
+            }
             _.each(this.model.sync.mappings, function(map, key) {
                 if ($(".correlationQueryType").val() === "queries" && map.name === this.model.mappingName) {
                     this.model.sync.mappings[key].correlationQuery = this.model.mapping.correlationQuery;
-                } else if (_.has(this.model.sync.mappings[key], "correlationQuery")) {
+                }
+                //Remove the correlation query property if it it set explicitly to "none" or all correlation queries were deleted.
+                if ( ($(".correlationQueryType").val() === "none" && map.name === this.model.mappingName && _.has(this.model.sync.mappings[key], "correlationQuery")) ||
+                    (map.name === this.model.mappingName && _.has(this.model.sync.mappings[key], "correlationQuery") &&this.model.sync.mappings[key].correlationQuery.length === 0 ) ){
                     delete this.model.sync.mappings[key].correlationQuery;
+                }
+
+
+                if (map.name === this.model.mappingName) {
+                    this.model.mapping = this.model.sync.mappings[key];
                 }
             }, this);
 
@@ -144,14 +292,49 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "correlationQuerySaveSuccess");
                 BrowserStorageDelegate.set("currentMapping", _.extend(this.model.mapping, this.model.recon));
 
+                this.model.changes = [];
+
+                this.reload();
+
                 if (callback) {
                     callback();
                 }
             }, this));
         },
 
-        saveQuery: function() {
+        resetQuery: function() {
             var btns = {};
+
+            btns[$.t("common.form.reset")] = _.bind(function() {
+                this.model.changes = [];
+                this.reload();
+                $("#jqConfirm").dialog("close");
+            }, this);
+
+            btns[$.t("common.form.cancel")] = function() {
+                $(this).dialog("close");
+            };
+
+            $("<div id='jqConfirm'>" + $.t("templates.correlation.resetMsg") + "</div>")
+                .dialog({
+                    title: $.t("templates.correlation.resetTitle"),
+                    modal: true,
+                    resizable: false,
+                    width: "350px",
+                    buttons: btns,
+                    close: function() {
+                        $('#jqConfirm').dialog('destroy').remove();
+                    }
+                });
+        },
+
+        saveQuery: function() {
+            var changes = [
+                    {"category": $.t("templates.correlation.added"), values:[]},
+                    {"category": $.t("templates.correlation.edited"), values:[]},
+                    {"category": $.t("templates.correlation.deleted"), values:[]}
+                ],
+                btns = {};
 
             btns[$.t("templates.correlation.runReconcile")] = _.bind(function() {
                 this.save(_.bind(function() {
@@ -169,16 +352,42 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                 $(this).dialog("close");
             };
 
-            $("<div id='jqConfirm'>" + $.t("templates.correlation.note") + "</div>")
+            _.each(this.model.changes, function(change){
+                switch(change.changes) {
+                    case "add":
+                        changes[0].values.push(change.linkQualifier);
+                        break;
+                    case "edit":
+                        changes[1].values.push(change.linkQualifier);
+                        break;
+                    case "delete":
+                        changes[2].values.push(change.linkQualifier);
+                        break;
+                }
+            });
+
+            _.each(changes, function(change) {
+                change.values = change.values.join(", ");
+            });
+
+            $("<div id='jqConfirm'></div>")
                 .dialog({
-                    title: "Save and Reconcile",
+                    title: $.t("templates.correlation.save"),
                     modal: true,
                     resizable: false,
                     width: "550px",
                     buttons: btns,
                     close: function() {
                         $('#jqConfirm').dialog('destroy').remove();
-                    }
+                    },
+                    open: _.bind(function() {
+                        // A table display of "changes" is not necessary if removing the correlation query
+                        if ($(".correlationQueryType").val() === "none") {
+                            changes = null;
+                        }
+
+                        SaveChangesView.render({"id": "jqConfirm", "msg": $.t("templates.correlation.note"), "changes": changes, "empty": $.t("templates.correlation.empty")});
+                    }, this)
                 });
         }
     });

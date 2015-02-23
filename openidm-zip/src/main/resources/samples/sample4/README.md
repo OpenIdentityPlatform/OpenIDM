@@ -39,9 +39,9 @@ CSV data for this sample is in the file samples/sample4/data/hr.csv.
 
     $ cd /path/to/openidm
     $ cat samples/sample4/data/hr.csv
-    "firstName", "uid", "lastName", "email", "employeeNumber", "password"
-    "Don", "DDOE", "Doe", "doe@example.org", "123456", "Z29vZA=="
-    "Stephen", "SCARTER", "Carter", "scarter@example.com", "654321", "Z29vZA=="
+    "firstName", "uid", "lastName", "email", "employeeNumber"
+    "Don", "DDOE", "Doe", "doe@example.org", "123456"
+    "Stephen", "SCARTER", "Carter", "scarter@example.com", "654321"
 
 XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xml
 
@@ -56,7 +56,6 @@ XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xm
        <ri:__ACCOUNT__>
           <icf:__UID__>bjensen</icf:__UID__>
           <icf:__NAME__>bjensen@example.com</icf:__NAME__>
-          <ri:password>TestPassw0rd#</ri:password>
           <ri:firstname>Barbara</ri:firstname>
           <ri:lastname>Jensen</ri:lastname>
           <ri:email>bjensen@example.com</ri:email>
@@ -67,7 +66,6 @@ XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xm
        <ri:__ACCOUNT__>
           <icf:__UID__>scarter</icf:__UID__>
           <icf:__NAME__>scarter@example.com</icf:__NAME__>
-          <ri:password>TestPassw0rd#</ri:password>
           <ri:firstname>Steven</ri:firstname>
           <ri:lastname>Carter</ri:lastname>
           <ri:email>scarter@example.com</ri:email>
@@ -110,7 +108,6 @@ See the data updated in the XML file:
           <ri:roles>openidm-admin,openidm-authorized</ri:roles>
           <icf:__NAME__>scarter@example.com</icf:__NAME__>
           <ri:email>scarter@example.com</ri:email>
-          <ri:password>Z29vZA==</ri:password>
           <ri:lastname>Carter</ri:lastname>
        </ri:__ACCOUNT__>
        <ri:__ACCOUNT__>
@@ -121,7 +118,6 @@ See the data updated in the XML file:
           <icf:__UID__>492f28f8-dc03-43e1-aaed-abd33f265ecb</icf:__UID__>
           <icf:__NAME__>doe@example.org</icf:__NAME__>
           <ri:email>doe@example.org</ri:email>
-          <ri:password>Z29vZA==</ri:password>
           <ri:lastname>Doe</ri:lastname>
        </ri:__ACCOUNT__>
     </icf:OpenICFContainer>

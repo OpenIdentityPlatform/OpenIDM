@@ -203,6 +203,7 @@ class Link {
             sourceId = jv.get("firstId").required().asString();
             targetId = jv.get("secondId").required().asString();
         }
+        linkQualifier = jv.get("linkQualifier").asString();
         sourceId = mapping.getLinkType().normalizeSourceId(sourceId);
         targetId = mapping.getLinkType().normalizeTargetId(targetId);
         initialized = true;

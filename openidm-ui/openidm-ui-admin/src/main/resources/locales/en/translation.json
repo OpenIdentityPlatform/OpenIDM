@@ -27,7 +27,7 @@
                 "changedPassword" : "Password has been changed",
                 "profileUpdateFailed" : "Problem during profile update",
                 "profileUpdateSuccessful" : "Profile has been updated",
-                "userNameUpdated" : "Username has been modified succesfully.",
+                "userNameUpdated" : "Username has been modified successfully.",
                 "afterRegistration" : "User has been registered successfully",
                 "siteIdentificationChanged" : "Site identification image has been changed",
                 "securityDataChanged" : "Security data has been changed",
@@ -68,7 +68,9 @@
                 "objectFailedToLoad" : "Object type Failed To Load"
             },
             "AuthenticationMessages" : {
-                "saveSuccessful" : "Authentication configuration has been saved."
+                "saveSuccessful" : "Authentication configuration has been saved.",
+                "authenticationUnavailable": "Authentication is unavailable",
+                "tryToLoginAgain": "Try to login again"
             },
             "MappingMessages" : {
                 "mappingSaveSuccess": "Mapping successfully updated",
@@ -82,10 +84,11 @@
                 "scheduleSaved" : "The schedule was successfully saved.",
                 "liveSyncSaved": "The LiveSync state has been saved.",
                 "correlationQuerySaved": "The correlation query has been saved.",
-                "reconQueryFilterSaveSuccess": "Reconcilation queries have been saved.",
+                "reconQueryFilterSaveSuccess": "Reconciliation queries have been saved.",
                 "triggeredBySituationSaved": "The Triggered by Situation scripts have been saved.",
                 "objectFiltersSaved": "The Object Filter scripts have been saved.",
-                "triggeredByReconSaved": "The Triggered by Reconciliation scripts have been saved."
+                "triggeredByReconSaved": "The Triggered by Reconciliation scripts have been saved.",
+                "linkQualifierSaveSuccess": "The Link Qualifiers have been saved."
             }
         },
         "AppConfiguration" : {
@@ -110,6 +113,9 @@
     },
     "templates" : {
         "util" : {
+            "saveChanges": {
+                "saveMsg": "The following changes will be saved"
+            },
             "filter": {
                 "options": {
                     "none": "No Filter",
@@ -156,7 +162,8 @@
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset your password",
                 "siteIdentificationHeader": "Site Identification",
-                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
+                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here.",
+                "loginWithOpenAM": "Login with OpenAM"
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -291,13 +298,29 @@
             "expressionBuilder": "Expression Builder",
             "script": "Script",
             "warning": "Warning",
-            "specify": "You must specify a script with a unique Link Qualifier.",
-            "note": "Are you sure you want to save these changes and reconcile? It is recommended that you run a Reconciliation after modifying the association rules.",
+            "specify": "You must specify a script with a unique link qualifier.",
+            "note": "Are you sure you want to save these changes and reconcile? It is recommended that you run a reconciliation after modifying the association rules.",
             "dontRunReconcile": "Save and Don't Reconcile",
             "runReconcile": "Save and Reconcile",
             "queryFilters": "Query Filters",
             "linkQualifier": "Link Qualifier",
-            "legacy": "defaultLinkQualifier",
+            "empty": "none",
+            "save": "Save and Reconcile",
+            "resetMsg": "Are you sure you want to undo all pending changes?",
+            "resetTitle": "Reset Form",
+            "changesPending": "You have pending changes.",
+            "selectLQ": "Select a link qualifier",
+            "noLQ": "There are no link qualifiers defined to create a query from.",
+            "deleted": "Deleted",
+            "edited": "Edited",
+            "added": "Added",
+            "missingLQMsg": "This correlation query is referencing an undefined link qualifier.  You should remove this correlation query or create the link qualifier.",
+            "notAvailableMsg1": "The link qualifier, ",
+            "noLQdefined": "No link qualifiers defined",
+            "notAvailableMsg2": ", associated with this property is not available.  Add this link qualifier or update the condition.",
+            "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
+            "noCondition": "No Condition",
+            "undo": "Undo",
             "query": {
                 "correlationDescription": "List the fields which will be used to match existing items in your source to items in your target:",
                 "correlationAny": "Any of the below fields",
@@ -346,8 +369,8 @@
             "authTitle": "Configure Authentication",
             "sessionFieldsetName": "Session Module",
             "sessionOnlyTitle": "Session Only",
-            "idleTimeTitle": "Token Idle Time (in minutes)",
-            "maxLifeTitle": "Max Token Life (in minutes)",
+            "idleTimeTitle": "Token Idle Time (in seconds)",
+            "maxLifeTitle": "Max Token Life (in seconds)",
             "type": "Type",
             "moduleEnabled": "Module Enabled",
             "queryOnResource": "Query on Resource",
@@ -355,6 +378,11 @@
             "defaultUserRole": "Default User Roles",
             "role": "Role",
             "propertyMapping": "Property Mappings",
+            "static" : {
+                "username" : "Static user name",
+                "password" : "Static user password",
+                "userRole" : "Static user role"
+            },
             "authId": "Authentication ID",
             "userCred": "User Credential",
             "userOrGroup": "User Roles or Group Membership",
@@ -385,10 +413,15 @@
             "truststorePassword": "Truststore Password",
             "truststoreFile": "Truststore File",
             "truststoreType": "Truststore Type",
-            "managedUserLink": "Managed User Link",
             "openamUserAttribute": "OpenAM User Attribute",
             "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
             "openamDeploymentUrl": "OpenAM Deployment Url",
+            "openamDeploymentUrlConfirmation" : "OpenAM Deployment Url is invalid. Would you like to continue?",
+            "openamLoginUrl": "OpenAM Login Url",
+            "openamLoginLinkText": "OpenAM Login Link Text",
+            "openamUseExclusively": "Require OpenAM Authentication",
+            "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
+            "openamUserDatastoreMappingName": "OpenAM User Datastore Mapping Name",
             "openIdConnectHeader": "OpenID Connect Header",
             "resolvers": "Resolvers",
             "resolver": "Resolver",
@@ -407,7 +440,7 @@
         "connector" : {
             "groovy_ScriptedConnector":"Groovy Connector",
             "groovy_ScriptedPoolableConnector":"Groovy Poolable Connector",
-            "scriptedsql_ScriptedSQLConnector":"SQL Connector",
+            "scriptedsql_ScriptedSQLConnector":"Scripted SQL Connector",
             "xml_XMLConnector":"XML Connector",
             "csvfile_CSVFileConnector":"CSV Connector",
             "googleapps_GoogleAppsConnector" : "GoogleApps Connector",
@@ -685,6 +718,9 @@
             }
         },
         "mapping": {
+            "attributes": "Attributes",
+            "linkQualifiers": "Link Qualifiers",
+            "uniqueLinkQualifiers": "The link qualifier must be unique.",
             "backToMapping" : "Back to Mappings",
             "mappings": "Mappings",
             "source": "Source",

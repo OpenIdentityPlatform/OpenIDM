@@ -34,10 +34,10 @@
 
  <para>
   OpenIDM provides a customizable, browser-based user interface, known as the
-  Data Management UI. To take full advantage of this interface, you can
-  configure OpenIDM <link xlink:show="new"
-                          xlink:href="integrators-guide#managed-objects"
-        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
+  Data Management UI. The Data Management UI provides a graphical view of the
+  OpenIDM <link xlink:show="new"
+  xlink:href="integrators-guide#managed-objects"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
   Objects</citetitle></link> under <literal>managed/user</literal>. Most of the
   <link xlink:show="new" xlink:href="install-guide#chap-samples"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
@@ -46,8 +46,8 @@
  </para>
 
  <para>
-  The Data Management UI interface enables administrative users to create,
-  modify, and delete user and other accounts. It provides role-based access to
+  The Data Management UI enables administrative users to create, modify, and
+  delete user and other accounts. It also provides role-based access to
   tasks based on BPMN2 workflows, and allows users to manage certain aspects of
   their own accounts, including configurable self-service registration. When
   OpenIDM starts, you can access the Data Management UI at
@@ -135,22 +135,14 @@
    <citetitle>Sample 2b - LDAP Two Way</citetitle></link>.
   </para>
 
-  <note>
-   <para>
-    While a connector is not a resource, it provides a connection to remote
-    resources such as LDAP data stores, XML files, and other databases.
-   </para>
-  </note>
-
   <para>
-   Connectors are used to communicate with remote resources, such as a
-   database, an identity store, or another organized data store.
-  </para>
-
-  <para>
-   Once you connect one or more data stores and managed objects, you can
-   create a mapping between two resources. You can then configure property
-   mapping between those resources, for later synchronization.
+   Connectors facilitate communication between OpenIDM and a remote resource,
+   such as a database, an identity store, or another organized data store. The
+   Admin UI uses the term <emphasis>connector</emphasis> to refer to the remote
+   resource to which you are connecting. When you have connected two resources,
+   you can create a mapping between the objects that are stored in those
+   resources. Mapping the individual object properties enables synchronization
+   between the resources.
   </para>
 
   <section xml:id="ui-admin-connectors">
@@ -161,10 +153,6 @@
     Select the option to create a new connector. Try some of the different
     connector types in the screen that appears. Observe as the Admin UI changes
     the configuration options to match the requirements of the connector type.
-   </para>
-
-   <para>
-    Every connector serves as a conduit to an external data store.
    </para>
 
    <mediaobject>
@@ -189,7 +177,7 @@
    </para>
 
    <para>
-    Once you fill in all required text boxes, the Admin UI allows you
+    When you have filled in all required text boxes, the Admin UI allows you
     to validate the connector configuration.
    </para>
 
@@ -332,36 +320,62 @@
    <title>Configuring a Resource Mapping from the UI</title>
 
    <para>
-    You may have multiple connectors and managed objects. You can configure a
-    mapping between any two of these resources. Connectors represent an external
-    data store, as specified in the following section:
+    Your deployment might include multiple external systems that you need to
+    connect, either to each other, or to the OpenIDM managed object repository.
+    You can use the Admin UI to configure mappings between any two sets of
+    resources. In the Admin UI terminology, a <emphasis>connector</emphasis>
+    represents an external data store. The connectors that are supported for use
+    with OpenIDM are described in
     <link xlink:role="http://docbook.org/xlink/role/olink"
     xlink:show="new" xlink:href="integrators-guide#openicf-provisioner-conf">
-    <citetitle>Connectors Supported with OpenIDM</citetitle></link>. In
-    contrast, managed objects represents a data store internal to OpenIDM.
+    <citetitle>Connectors Supported with OpenIDM</citetitle></link>. Managed
+    objects represents the data repository that is internal to OpenIDM.
    </para>
 
    <para>
-    Resource mapping requires a source and a target. Generally, each resource
-    includes properties such as username, address, surname, and title.
-    Resource mapping can go beyond user information to other types of data.
+    Resource mapping requires a source and a target. Generally, a resource
+    contains user accounts, which include properties such as username, address,
+    surname, and title. Resources can contain other types of data, however,
+    such as groups, or devices.
    </para>
 
    <para>
-    Once you create a mapping, you can identify properties that you wish to
-    control in the target. With this part of the Admin UI, you can configure
-    how OpenIDM uses matching properties in the source.
+    When a source object is mapped to a target object, during a reconciliation
+    operation, a <emphasis>link</emphasis> is created between the two objects.
+    In some cases, there might be multiple target objects that map to a single
+    source object. When there are multiple target objects, OpenIDM uses
+    <emphasis>link qualifiers</emphasis> to distinguish between the types of
+    relationships that are created from source to target. For more information,
+    see <link xlink:show="new"
+    xlink:href="integrators-guide#correlating-multiple-targets"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+    Multiple Target Objects</citetitle></link>.
    </para>
-
+   <para>
+    You can create and remove link qualifiers on this screen, and use them when
+    you define correlation queries, or in transformation scripts to set the
+    attribute values on target systems. The link qualifiers that you create here
+    are added to your mapping (<filename>conf/sync.json</filename>) file. For
+    more information about link qualifiers, see <link xlink:show="new"
+    xlink:href="integrators-guide#mapping-link-qualifiers"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Link
+    Qualifiers in a Mapping</citetitle></link>.
+   </para>
+   <para>
+    When you create a mapping between two resources, you identify the properties
+    whose values you want to control in the target. The Attributes panel on this
+    screen enables you to configure how OpenIDM matches properties in the source
+    resource to properties in the target resource.
+   </para>
    <para>
     The following screenshot illustrates a property mapping between two
     resources. Every resource includes identifiers for each attribute. For
-    example, different resources may use one of the following identifiers for
+    example, different resources might use one of the following identifiers for
     usernames: un, uid, user, sAMAccountName, and account. For more information
-    on property mappings, see the following section on the
-    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-          xlink:href="integrators-guide#synchronization-mappings-file">
-     <citetitle>Synchronization Mappings File</citetitle></link>.
+    on property mappings, see <link xlink:show="new"
+    xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#synchronization-mappings-file"><citetitle>Configuring
+    the Synchronization Mapping</citetitle></link>.
    </para>
 
    <mediaobject>
@@ -372,12 +386,61 @@
    </mediaobject>
 
    <para>
-    The bold black line is used solely by the UI to determine what data is
-    shown from these data stores. It does not affect reconciliation. In the
-    Admin UI, you can change the location of the line, or move a desired
-    property above or below the line.
+    The bold grey line determines which properties are displayed for each
+    object in the Data Association Management panel, under the Correlation menu.
+    By default, four properties are displayed. To change the number of
+    properties that are displayed, edit the <emphasis>Number of representative
+    properties</emphasis>. To include a property in the display, drag it above
+    the bold line.
    </para>
-
+   <para>
+    The value of the target property might not be a simple direct mapping from
+    the value of the source property. To define how the value of the target
+    property should be calculated, double-click the property name. A window
+    similar to the following is displayed:
+   </para>
+   <mediaobject>
+    <alt>Admin UI - Property Mapping</alt>
+    <imageobject>
+     <imagedata fileref="images/admin-ui-map-properties.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+   <para>
+    This window enables you to manipulate the target attribute value in the
+    following ways:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Property List enables a direct mapping from the value of the selected
+      source attribute.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Transformation Script enables you to do something with the value of the
+      source attribute, to generate the value of the target attribute.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Conditional Update Script enables you to indicate that a source and target
+      attribute should be mapped <emphasis>only</emphasis> if a certain
+      condition is true.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Default values enables you to set a static value for the target attribute.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    For more information about setting and changing target attribute values, see
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#synchronization-mappings-file"><citetitle>Configuring
+    the Synchronization Mapping</citetitle></link>.
+   </para>
   </section>
 
   <section xml:id="admin-ui-sync">
@@ -405,10 +468,12 @@
      and to associate source and target objects manually.
     </para>
     <para>
-     To configure a correlation query for a mapping, use the Expression Builder,
-     type your JavaScript or Groovy script inline, or reference a file. For more
-     information about correlation, see the section on <link
-     xlink:href="integrators-guide#correlation" xlink:show="new"
+     Before you define a correlation query, you must specify at least one link
+     qualifier on the <emphasis>Properties</emphasis> panel (as described in the
+     previous section). To configure a correlation query for a mapping, use the
+     Expression Builder, type your JavaScript or Groovy script inline, or
+     reference a file. For more information about correlation, see the section
+     on <link xlink:href="integrators-guide#correlation" xlink:show="new"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
      Existing Target Objects</citetitle></link>. If there is more than one
      potential target object that should be linked to each source object, use
@@ -518,73 +583,74 @@
     <title>Reconciliation Options</title>
 
     <para>
-     Before activating reconciliation, you may choose to configure situational
-     policies, situational event scripts, and reconciliation scripts.
+     Before activating reconciliation, you can configure situational policies,
+     action scripts dependent on situational events, and reconciliation scripts.
     </para>
 
-    <para>
-     You may want to configure situational policies. By default, the policies
-     associated with mappings are set to "read-only". As such, OpenIDM does not
-     change anything on the target system, unless you make changes to
-     situational policies.
-    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       You can configure situational policies. For new mappings, the default
+       policy is "read-only". As such, OpenIDM does not change anything on the
+       target system.
+      </para>
+      <para>
+       With situational policies, you can define different actions as shown in
+       the screenshot below. For a full list of available
+       policies, see the following section:
+       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+             xlink:href="integrators-guide#handling-sync">
+        <citetitle> Synchronization Situations and Actions</citetitle></link>.
+      </para>
+      <para>
+       To access the following screen, select the Mapping of your choice and
+       select edit. In the sub-tabs that appear, select Reconciliation.
+      </para>
+      <mediaobject>
+       <alt>Admin UI Screen, User-Defined Situational Policies</alt>
+       <imageobject>
+        <imagedata fileref="images/admin-ui-situ-policy.png" format="PNG" />
+       </imageobject>
+      </mediaobject>
+     </listitem>
+     <listitem>
+      <para>
+       You can configure situational event scripts, which are really action
+       scripts. To that end, you can configure script
+       events (<literal>onCreate</literal>, <literal>onDelete</literal>,
+       <literal>onLink</literal>, <literal>onUnlink</literal>, and
+       <literal>onUpdate</literal>) to help you with
+       <link xlink:href="integrators-guide#constructing-attributes"
+             xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
+        <citetitle>Constructing and Manipulating Attributes</citetitle></link>.
+      </para>
+      <mediaobject>
+       <alt>Admin UI Screen, Situational Event Scripts</alt>
+       <imageobject>
+        <imagedata fileref="images/admin-ui-situ-event.png" format="PNG" />
+       </imageobject>
+      </mediaobject>
+     </listitem>
+     <listitem>
+      <para>
+       You can configure scripts that are triggered on reconciliation, as part of
+       the <link xlink:href="integrators-guide#advanced-dataflow"
+                 xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
+       <citetitle>Advanced Dataflow Configuration</citetitle></link>.
+      </para>
+      <mediaobject>
+       <alt>Admin UI Screen, Reconciliation Script</alt>
+       <imageobject>
+        <imagedata fileref="images/admin-ui-recon-script.png" format="PNG" />
+       </imageobject>
+      </mediaobject>
+     </listitem>
+    </itemizedlist>
 
     <para>
-     With situational policies, you can define actions relevant for situations
-     shown in the screenshot below. For a full list of available
-     policies, see the following section:
-     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:href="integrators-guide#handling-sync"><citetitle>Synchronization
-      Situations and Actions</citetitle></link>.
-    </para>
-
-    <para>
-     To access the following screen, select the Mapping of your choice and
-     select edit. In the sub-tabs that appear, select Reconciliation.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, User-Defined Situational Policies</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-situ-policy.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     You can configure situational event scripts. Each of the script events
-     shown <literal>onCreate</literal>, <literal>onDelete</literal>,
-     <literal>onLink</literal>, <literal>onUnlink</literal>, and
-     <literal>onUpdate</literal>, can help you with
-     <link xlink:href="integrators-guide#constructing-attributes"
-           xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
-      <citetitle>Constructing and Manipulating Attributes</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Situational Event Scripts</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-situ-event.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     You can configure scripts that are triggered on reconciliation, as part of
-     the <link xlink:href="integrators-guide#advanced-dataflow"
-     xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Advanced Dataflow Configuration</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Reconciliation Script</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-recon-script.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     You can choose to test the overall process with a single record
-     reconciliation. In other words, you need not test these policies and
-     scripts against the entire data set. For example, you can
+     You can test the overall process with the reconciliation of a single
+     record. In other words, you need not test these policies and scripts
+     against the entire data set. For example, you can
      <link xlink:href="integrators-guide#recon-by-id" xlink:show="new"
            xlink:role="http://docbook.org/xlink/role/olink">
       <citetitle>Restrict Reconciliation to a Specific ID</citetitle></link>.

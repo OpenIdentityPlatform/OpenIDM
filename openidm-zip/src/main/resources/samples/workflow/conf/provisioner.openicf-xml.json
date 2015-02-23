@@ -105,7 +105,11 @@
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "__PASSWORD__", 
-                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING"
+                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+                    "flags" : [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
                 },
                 "roles" : {
                     "type" : "string",

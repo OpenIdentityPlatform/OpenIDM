@@ -27,7 +27,8 @@
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook
- http://docbook.org/xml/5.0/xsd/docbook.xsd'>
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Compatibility</title>
 
  <para>
@@ -81,8 +82,7 @@
      <para>
       As the functionality exists with <literal>queryFilter</literal>, the
       following pre-defined queries have been removed from the default
-      configuration: <literal>get-recons</literal>,
-      <literal>audit-last-recon-for-mapping</literal>,
+      configuration: <literal>audit-last-recon-for-mapping</literal>,
       <literal>audit-by-recon-id-situations-latest</literal>, and
       <literal>audit-by-recon-id-situations-latest-filtered</literal>.
      </para>
@@ -148,7 +148,22 @@
  <section xml:id="changing-functionality">
   <title>Functionality That Will Change in the Future</title>
   <para>
-   No major functionality is planned to change at this time.
+   The <link xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#active-directory-connector" xlink:show="new">
+   <citetitle>Active Directory (AD) .NET Connector</citetitle></link> will be
+   deprecated in a future OpenICF release, and, ultimately, support for its use
+   with OpenIDM will be discontinued.
+  </para>
+  <para>
+   For simple Active Directory (and Active Directory LDS) deployments, the
+   <link xlink:show="new" xlink:href="integrators-guide#ldap-connector"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Generic
+   LDAP Connector</citetitle></link> works better than the Active Directory
+   connector, in most circumstances. For more complex Active Directory
+   deployments, use the <link xlink:show="new"
+   xlink:href="integrators-guide#powershell-connector"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Powershell
+   Connector Toolkit</citetitle></link>.
   </para>
  </section>
 
