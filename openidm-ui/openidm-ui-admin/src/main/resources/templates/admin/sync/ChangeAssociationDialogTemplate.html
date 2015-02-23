@@ -3,8 +3,9 @@
         <label>
             {{t 'templates.mapping.analysis.linkQualifier'}}
             <select id="linkTypeSelect" {{#unless linkQualifiers.length}} disabled="true" {{/unless}}>
+            <option value=""></option>
             {{#each linkQualifiers}}
-            <option value="{{linkQualifier}}">{{linkQualifier}}</option>
+            <option value="{{this}}">{{this}}</option>
             {{/each}}
             </select>
         </label>
