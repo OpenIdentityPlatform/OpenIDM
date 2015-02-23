@@ -143,10 +143,12 @@ define("config/messages/AdminMessages", [
         "triggeredByReconSaveSuccess": {
             msg: "config.messages.SyncMessages.triggeredByReconSaved",
             type: "info"
+        },
+        "linkQualifierSaveSuccess": {
+            msg: "config.messages.SyncMessages.linkQualifierSaveSuccess",
+            type: "info"
         }
-
     };
 
     return obj;
 });
-

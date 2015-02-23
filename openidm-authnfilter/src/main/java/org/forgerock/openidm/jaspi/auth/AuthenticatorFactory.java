@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.auth;
@@ -30,10 +30,13 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.USER_CRE
 
 /**
  * A factory Function to build an Authenticator from an auth module config.
- *
- * @author brmiller
  */
 public class AuthenticatorFactory implements Function<JsonValue, Authenticator, NeverThrowsException> {
+
+    /** property for the username if using static authentication */
+    private static final String USERNAME_PROPERTY = "username";
+    /** property for the password if using static authentication */
+    private static final String PASSWORD_PROPERTY = "password";
 
     private final ConnectionFactory connectionFactory;
     private final CryptoService cryptoService;
@@ -58,6 +61,11 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator, 
                     jsonValue.get(QUERY_ID).required().asString(),
                     jsonValue.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).required().asString(),
                     jsonValue.get(PROPERTY_MAPPING).get(USER_CREDENTIAL).required().asString());
+        } else if (!jsonValue.get(USERNAME_PROPERTY).isNull()
+                && !jsonValue.get(PASSWORD_PROPERTY).isNull()) {
+            return new StaticAuthenticator(
+                    jsonValue.get(USERNAME_PROPERTY).required().asString(),
+                    jsonValue.get(PASSWORD_PROPERTY).required().asString());
         } else {
             return new PassthroughAuthenticator(connectionFactory,
                     jsonValue.get(QUERY_ON_RESOURCE).required().asString());

@@ -23,9 +23,15 @@
  */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.object;
+
+
 // Java SE
 import java.util.HashMap;
 import java.util.Map;
+
 
 // SLF4J
 import org.slf4j.Logger;
@@ -37,47 +43,57 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 
 import javax.script.ScriptException;
-import org.forgerock.openidm.sync.impl.Scripts.Script;
 
-// OpenIDM
+import org.forgerock.openidm.sync.impl.Scripts.Script;
+import org.forgerock.script.source.SourceUnit;
 
 /**
- * TODO: Description.
- *
- * @author Paul C. Bryan
+ * This class contains the necessary logic to map an attribute from the source object to an attribute
+ * on the target object.  It optionally contains a condition and transform scripts.. 
  */
 class PropertyMapping {
 
-    /** TODO: Description. */
+    /** Logger */
     private final static Logger LOGGER = LoggerFactory.getLogger(PropertyMapping.class);
 
-    /** TODO: Description. */
-    private final SynchronizationService service;
+    /** A condition script */
+    private final Condition condition;
 
-    /** TODO: Description. */
-    private final Script condition;
-
-    /** TODO: Description. */
+    /** A transform script */
+    private final Script transform;
+    
+    /** A {@link JsonPointer} for the target */
     private final JsonPointer targetPointer;
 
-    /** TODO: Description. */
+    /** A {@link JsonPointer} for the source */
     private final JsonPointer sourcePointer;
 
-    /** TODO: Description. */
-    private final Script transform;
-
-    /** TODO: Description. */
+    /** A default value */
     private final Object defaultValue;
+    
+    /**
+     * Constructor
+     *
+     * @param config a {@link JsonValue} representing the property mapping configuration.
+     * @throws JsonValueException if any errors are encountered when processing the configuration.
+     */
+    public PropertyMapping(JsonValue config) throws JsonValueException {
+        condition = new Condition(config.get("condition"));
+        targetPointer = config.get("target").required().asPointer();
+        sourcePointer = config.get("source").asPointer(); // optional
+        transform = Scripts.newInstance(config.get("transform"));
+        defaultValue = config.get("default").getObject();
+    }
 
     /**
-     * TODO: Description.
+     * Puts the value on the target object attribute.
      *
-     * @param targetObject TODO.
-     * @param pointer TODO.
-     * @param value TODO.
-     * @throws SynchronizationException TODO.
+     * @param targetObject the target object.
+     * @param pointer the target attribute.
+     * @param value the target attribute's value.
+     * @throws SynchronizationException if errors are encountered.
      */
-    private static void put(JsonValue targetObject, JsonPointer pointer, Object value) throws SynchronizationException {
+    protected static void put(JsonValue targetObject, JsonPointer pointer, Object value) throws SynchronizationException {
         String[] tokens = pointer.toArray();
         if (tokens.length == 0) {
             throw new SynchronizationException("cannot replace root object");
@@ -103,49 +119,20 @@ class PropertyMapping {
     }
 
     /**
-     * TODO: Description.
-     *
-     * @param service
-     * @param config TODO.
-     * @throws JsonValueException TODO.
-     */
-    public PropertyMapping(SynchronizationService service, JsonValue config) throws JsonValueException {
-        this.service = service;
-        condition = Scripts.newInstance(config.get("condition"));
-        targetPointer = config.get("target").required().asPointer();
-        sourcePointer = config.get("source").asPointer(); // optional
-        transform = Scripts.newInstance(config.get("transform"));
-        defaultValue = config.get("default").getObject();
-    }
-
-    /**
-     * TODO: Description.
+     * Applies this property mapping on the supplied source and target objects if no link qualifier has been 
+     * configured, or the supplied link qualifier matches the configure one.  This may execute condition and 
+     * transform scripts if any are configured.
      *
      * @param sourceObject Current specified source property/object to map from
      * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, 
      * null if not provided
      * @param targetObject Current specified target property/object to modify
-     * @throws SynchronizationException TODO.
+     * @param linkQualifier the link qualifier associated with the current sync
+     * @throws SynchronizationException if errors are encountered.
      */
-    public void apply(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject) throws SynchronizationException {
-        if (condition != null) { // optional property mapping condition
-            Map<String, Object> scope = new HashMap<String, Object>();
-            try {
-                scope.put("object", sourceObject.copy().asMap());
-                if (oldSource != null) {
-                    scope.put("oldSource", oldSource.asMap());
-                }
-                Object o = condition.exec(scope);
-                if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
-                    return; // property mapping is not applicable; do not apply
-                }
-            } catch (JsonValueException jve) {
-                LOGGER.warn("Unexpected JSON value exception", jve);
-                throw new SynchronizationException(jve);
-            } catch (ScriptException se) {
-                LOGGER.warn("Property mapping " + targetPointer + " condition script encountered exception", se);
-                throw new SynchronizationException(se);
-            }
+    public void apply(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, String linkQualifier) throws SynchronizationException {
+        if (!evaluateCondition(sourceObject, oldSource, targetObject, linkQualifier)) { // optional property mapping condition
+            return;
         }
         Object result = null;
         if (sourcePointer != null) { // optional source property
@@ -157,6 +144,7 @@ class PropertyMapping {
         if (transform != null) { // optional property mapping script
             Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("source", result);
+            scope.put("linkQualifier", linkQualifier);
             try {
                 result = transform.exec(scope); // script yields transformation result
             } catch (ScriptException se) {
@@ -168,5 +156,26 @@ class PropertyMapping {
             result = defaultValue; // remains null if default not specified
         }
         put(targetObject, targetPointer, result);
+    }
+    
+    /**
+     * Evaluates a property mapping condition.  Returns true if the condition passes, false otherwise.
+     * 
+     * @param sourceObject Current specified source property/object to map from
+     * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, 
+     * null if not provided
+     * @param targetObject Current specified target property/object to modify
+     * @param linkQualifier the link qualifier associated with the current sync
+     * @return true if the condition passes, false otherwise.
+     * @throws SynchronizationException if errors are encountered.
+     */
+    public boolean evaluateCondition(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, String linkQualifier) 
+            throws SynchronizationException {
+        JsonValue params = json(object(field("object", sourceObject),
+                field("linkQualifier", linkQualifier)));
+        if (oldSource != null) {
+            params.put("oldSource", oldSource);
+        }
+        return condition.evaluate(params, linkQualifier);
     }
 }

@@ -821,6 +821,24 @@ var results = openidm.query("system/ScriptedSQL/account", params)
   ]
 }</computeroutput>
      </screen>
+     <note>
+      <para>
+       Literal expressions (<literal>true</literal> and
+       <literal>false</literal>) can be used only in queries on managed objects.
+       Queries on system objects cannot use literal expressions. To replicate
+       the behaviour of a <literal>_queryFilter=true</literal> query on a system
+       resource, you can use the <literal>sw</literal> filter, with a value of
+       <literal>""</literal>. For example, the following query returns all user
+       accounts in an LDAP system:
+      </para>
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/system/ldap/account?_queryFilter=sn+sw+""'</userinput>
+      </screen>
+     </note>
     </listitem>
    </varlistentry>
 

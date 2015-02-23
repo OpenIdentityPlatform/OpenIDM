@@ -34,7 +34,7 @@
                     "target" : "userName"
                 },
                 {
-                    "source" : "password",
+                    "default" : "Passw0rd",
                     "target" : "password"
                 },
                 {

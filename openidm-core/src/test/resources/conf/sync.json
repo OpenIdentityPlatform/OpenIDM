@@ -32,8 +32,26 @@
                     "action" : "IGNORE"
                 },
                 {
+                    "condition" : {
+                        "linkQualifier": "user"
+                    },
                     "situation" : "ABSENT",
-                    "action" : "IGNORE"
+                    "action" : "IGNORE",
+                    "postAction" : {
+                        "type" : "text/javascript",
+                        "source" : "java.lang.System.out.println(\"Ignored user: \");"
+                    }
+                },
+                {
+                    "condition" : {
+                        "linkQualifier": "test"
+                    },
+                    "situation" : "ABSENT",
+                    "action" : "CREATE",
+                    "postAction" : {
+                        "type" : "text/javascript",
+                        "source" : "java.lang.System.out.println(\"Created user\");"
+                    }
                 },
                 {
                     "situation" : "AMBIGUOUS",
@@ -53,7 +71,10 @@
                 },
                 {
                     "situation" : "UNASSIGNED",
-                    "action" : "IGNORE"
+                    "action" : {
+                        "type" : "text/javascript",
+                        "source" : "java.lang.System.out.println(\"Action Script!\");"
+                    }
                 }
             ]
         }

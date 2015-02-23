@@ -86,10 +86,9 @@
   The default installation of OpenIDM is pre-configured to enable the cluster
   service. The <filename>conf/cluster.json</filename> file includes the
   <literal>"enabled" : true</literal> directive. All you need to do with
-  multiple instances of OpenIDM on the same subnet is modify each
-  <filename>boot.properties</filename> file. Pay attention to the
-  <literal>openidm.node.id</literal> and <literal>openidm.instance.type</literal>
-  properties in that file.
+  multiple instances of OpenIDM is modify each <filename>boot.properties</filename>
+  file. Pay attention to the <literal>openidm.node.id</literal> and
+  <literal>openidm.instance.type</literal> properties in that file.
  </para>
 
  <para>

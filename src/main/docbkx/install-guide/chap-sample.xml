@@ -765,7 +765,6 @@ access.csv activity.csv recon.csv
    <programlisting language="xml">&lt;ri:__ACCOUNT__&gt;
     &lt;icf:__UID__&gt;tmorris&lt;/icf:__UID__&gt;
     &lt;icf:__NAME__&gt;tmorris@example.com&lt;/icf:__NAME__&gt;
-    &lt;ri:password&gt;TestPassw0rd#&lt;/ri:password&gt;
     &lt;ri:firstname&gt;Toni&lt;/ri:firstname&gt;
     &lt;ri:lastname&gt;Morris&lt;/ri:lastname&gt;
     &lt;ri:email&gt;tmorris@example.com&lt;/ri:email&gt;

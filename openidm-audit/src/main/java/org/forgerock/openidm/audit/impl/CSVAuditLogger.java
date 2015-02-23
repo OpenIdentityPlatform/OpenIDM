@@ -85,8 +85,10 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     String recordDelim;
     int bufferSize;
     long maxFlushDelay;
-    WriteBufferFlushTimer flushTimer = new WriteBufferFlushTimer();
 
+    // The fileWriters are not static so neither is the flushTimer or its lock
+    private WriteBufferFlushTimer flushTimer;
+    private final Object flushTimerLock = new Object();
 
     final Map<String, BufferedWriter> fileWriters = new HashMap<String, BufferedWriter>();
 
@@ -111,7 +113,6 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             // trigger a flush.  maxFlushDelay will ensure that the buffer is flushed at least
             // once every <maxFlushDelay> seconds.
             maxFlushDelay = config.get(CONFIG_LOG_MAX_FLUSH_DELAY).defaultTo(0).asInteger();
-            flushTimer.setSleepSeconds(maxFlushDelay);
         } catch (Exception ex) {
             logger.error("ERROR - Configured CSV file location must be a directory and {} is invalid.", auditLogDir.getAbsolutePath(), ex);
             throw new InvalidException("Configured CSV file location must be a directory and '" + location
@@ -377,8 +378,12 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 writeEntry(fileWriter, type, auditFile, obj, fieldOrder);
 
                 if (maxFlushDelay > 0) {
-                    flushTimer.interrupt();
-                    flushTimer.start();
+                    synchronized(flushTimerLock) {
+                        if (flushTimer != null && flushTimer.isAlive()) {
+                            flushTimer.interrupt();
+                        }
+                        flushTimer = new WriteBufferFlushTimer(maxFlushDelay);
+                    }
                 } else {
                     fileWriter.flush();
                 }
@@ -504,21 +509,23 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     private class WriteBufferFlushTimer extends Thread {
         long sleepSeconds;
 
-        public void setSleepSeconds(long sleepSeconds) {
+        public WriteBufferFlushTimer(long sleepSeconds) {
             this.sleepSeconds = sleepSeconds;
+            start();
         }
 
         @Override
         public void run() {
             try {
                 sleep(sleepSeconds * 1000);
-
-                synchronized (fileWriters) {
-                    for (BufferedWriter writer : fileWriters.values()) {
-                        try {
-                            writer.flush();
-                        } catch (IOException e) {
-                            logger.debug("Failed to flush CSV audit write buffer", e);
+                synchronized (flushTimerLock) {
+                    synchronized (fileWriters) {
+                        for (BufferedWriter writer : fileWriters.values()) {
+                            try {
+                                writer.flush();
+                            } catch (IOException e) {
+                                logger.debug("Failed to flush CSV audit write buffer", e);
+                            }
                         }
                     }
                 }

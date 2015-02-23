@@ -21,14 +21,18 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
+ /*global source, linkQualifier, require */
  (function () {
 
     var syncConfig = openidm.read("config/sync"),
+        _ = require('lib/lodash'),
         i = 0,
         expression = "",
         sourceObject = source,
         valueForTargetField = function (mapping, field) {
             var j = 0, p,
+                conditionResult,
                 source = {},
                 returnValue;
 
@@ -36,7 +40,34 @@
                 p = mapping.properties[j];
                 if (p.target === field) {
 
-                    if (typeof(p.transform) === "object" && p.transform.type === "text/javascript" &&
+                    if (typeof p.condition === "object" && p.condition !== null) {
+
+                        // If this condition uses a linkQualifier to distinguish it, then make sure that the given qualifier
+                        // matches the qualifier used to execute this script. Otherwise, skip it.
+                        if (p.condition.linkQualifier !== undefined && 
+                            typeof linkQualifier !== undefined &&
+                            p.condition.linkQualifier !== linkQualifier) {
+                            return "";
+                        }
+
+                        // If this is a condition script (assuming based on the presence of a "type" property) then
+                        // evaluate that condition and decide whether or not to include it based on the result
+                        if (typeof p.condition.type !== "undefined") {
+                            if (openidm.action("script", "eval", _.extend(p.condition,
+                                    {
+                                        "globals": {
+                                            "object": sourceObject,
+                                            "linkQualifier": linkQualifier
+                                        }
+                                    })
+                                ) !== true) {
+
+                                return "";
+                            }
+                        }
+                    }
+
+                    if (typeof p.transform === "object" && p.transform.type === "text/javascript" &&
                             typeof (p.transform.source) === "string") {
 
                         if (typeof(p.source) !== "undefined" && p.source.length) {
@@ -51,7 +82,7 @@
                             returnValue = eval(p.transform.source); // references to "source" variable expected within this string
                         } catch (e) {
                             throw { 
-                                "openidmCode" : 500, 
+                                "code" : 500, 
                                 "message" : "Unable to evaluate transformation script for field " + field,
                                 "detail": {
                                     "message": "Unable to evaluate transformation script for field " + field

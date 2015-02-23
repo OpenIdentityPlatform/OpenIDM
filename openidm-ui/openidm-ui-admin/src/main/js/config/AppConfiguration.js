@@ -38,7 +38,7 @@ define("config/AppConfiguration", [
                 {
                     moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
                     configuration: {
-                        LoginView : "org/forgerock/commons/ui/common/LoginView",
+                        LoginView : "org/forgerock/openidm/ui/admin/login/LoginView",
                         LoginDialog : "org/forgerock/openidm/ui/admin/util/LoginDialog"
                     }
                 },
@@ -65,9 +65,9 @@ define("config/AppConfiguration", [
                 {
                     moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                     configuration: {
-                        remoteConfig: false,
-                        lang: "en"
-                    } 
+                        remoteConfig: true,
+                        delegate: "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
+                    }
                 },
                 {
                     moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",

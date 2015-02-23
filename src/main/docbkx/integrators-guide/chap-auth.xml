@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-auth'
@@ -41,236 +41,35 @@
 
  <para>
   OpenIDM provides a flexible authentication and authorization mechanism, based
-  on REST interface URLs and on roles which may be stored in the repository.
+  on REST interface URLs and on managed roles. This chapter describes how to
+  configure the supported authentication modules, and how roles are used to
+  support authentication, authorization, and access control.
  </para>
 
- <section xml:id="openidm-users">
-  <title>OpenIDM Users</title>
-  <indexterm>
-   <primary>Authentication</primary>
-   <secondary>Internal users</secondary>
-  </indexterm>
-  <indexterm>
-   <primary>Authentication</primary>
-   <secondary>Managed users</secondary>
-  </indexterm>
-
-  <para>
-   While OpenIDM authenticates internal and managed users with the
-   <literal>DELEGATED</literal> module, there are differences between these
-   two types of users.
-  </para>
-
-  <section xml:id="internal-users">
-   <title>Internal Users</title>
-   <para>
-    OpenIDM creates two internal users by default: <literal>anonymous</literal>
-    and <literal>openidm-admin</literal>. These accounts are separated from
-    other user accounts to protect them from any reconciliation or
-    synchronization processes.
-   </para>
-   <para>
-    OpenIDM stores internal users and their role membership in a table in the
-    repository. For the way internal users are mapped, see the discussion on
-    the <literal>explicitMapping</literal> property to
-    <literal>"internal/user</literal> described in <link xlink:show="new"
-    xlink:href="integrators-guide#explicit-mappings"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Explicit
-    Mappings</citetitle></link>.
-   </para>
-   <para>
-    For more information on storage mechanisms for managed users in OrientDB
-    and JDBC, see <link xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:show="new" xlink:href="integrators-guide#working-with-managed-users">
-    <citetitle>Working With Managed Users</citetitle></link>.
-   </para>
-   <variablelist>
-    <varlistentry>
-     <term>anonymous</term>
-     <listitem>
-      <para>
-       This user enables anonymous access to OpenIDM, for users who do not have
-       their own accounts. The anonymous user, configured by default with the
-       <literal>openidm-reg</literal> role, has limited rights within OpenIDM.
-       It can be used to allow self-registration. For more information on the
-       process, see <link xlink:role="http://docbook.org/xlink/role/olink"
-       xlink:show="new" xlink:href="integrators-guide#ui-self-registration">
-       <citetitle>Enabling Self-Registration</citetitle></link>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>openidm-admin</term>
-     <listitem>
-      <para>
-       This user serves as the top-level administrator. After installation, the
-       <literal>openidm-admin</literal> user has full access, and provides a
-       fallback mechanism in case other users are locked out. Do not use
-       <literal>openidm-admin</literal> for regular tasks. Under normal
-       circumstances, the <literal>openidm-admin</literal> account does not
-       represent a regular user, so any audit log records for this account do
-       not represent the actions of any real person.
-      </para>
-      <para>
-       OpenIDM encrypts the default administrative password,
-       <literal>openidm-admin</literal>. Change the password immediately after
-       installation. For instructions, see
-       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-       xlink:href="integrators-guide#security-replace-default-user-password">
-       <citetitle>To Replace the Default User and Password</citetitle></link>.
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-  <section xml:id="repo-internal-user">
-   <title>Managing Internal Users Over REST</title>
-   <para>
-    To list the internal users over REST, query the <literal>repo</literal>
-    endpoint as follows:
-   </para>
-   <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET  \
- "https://localhost:8443/openidm/repo/internal/user?_queryId=query-all-ids"</userinput>
-<computeroutput>{
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 2,
-  "result": [
-    {
-      "_rev": "0",
-      "_id": "openidm-admin"
-    },
-    {
-      "_rev": "0",
-      "_id": "anonymous"
-    }
-  ]
-}</computeroutput></screen>
-   <para>
-    To query the details of an internal user, include the user's ID in the
-    request, for example:
-   </para>
-   <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET  \
- "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
-<computeroutput>{
-  "password": "openidm-admin",
-  "userName": "openidm-admin",
-  "roles": "openidm-admin,openidm-authorized",
-  "_rev": "1",
-  "_id": "openidm-admin"
-}</computeroutput></screen>
-   <para>
-    To change the username or password of the default administrative user,
-    send a PUT request to the user object. The following example changes the
-    password of the <literal>openidm-admin</literal> user to
-    <literal>Passw0rd</literal>:
-   </para>
-   <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "Content-Type: application/json" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request PUT \
- --data '{
-    "password": "Passw0rd",
-    "userName": "openidm-admin",
-    "roles": "openidm-admin,openidm-authorized",
-    "_id": "openidm-admin"
- }' \
- "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
-<computeroutput>{
-  "roles": "openidm-admin,openidm-authorized",
-  "password": {
-    "$crypto": {
-      "value": {
-        "key": "openidm-sym-default",
-        "iv": "USfN9kARk4QjoyjGa/r8WA==",
-        "cipher": "AES/CBC/PKCS5Padding",
-        "data": "27tDQg49z8nWqvIOEh7VAg=="
-      },
-      "type": "x-simple-encryption"
-    }
-  },
-  "_id": "openidm-admin",
-  "userName": "openidm-admin",
-  "_rev": "2"
-}</computeroutput>
-   </screen>
-  </section>
-
-  </section>
-  
-  <section xml:id="managed-users">
-   <title>Managed Users</title>
-  <indexterm>
-   <primary>Objects</primary>
-   <secondary>Managed objects</secondary>
-  </indexterm>
-   <para>
-    External users managed by OpenIDM are known as managed users.
-   </para>
-   <para>
-    The location of managed users depends on the type of repository. For
-    JDBC repositories, OpenIDM stores managed users in the managed objects
-    table, named <literal>managedobjects</literal>. OpenIDM may access an index
-    table <literal>managedobjectproperties</literal> as well.
-   </para>
-   <para>
-    For the OrientDB repository, managed objects are stored in the table
-    <literal>managed_user</literal>.
-   </para>
-   <para>
-    By default, the attribute names for managed user login and password are
-    <literal>userName</literal> and <literal>password</literal>, respectively.
-   </para>
-  </section>
- </section>
- 
  <section xml:id="openidm-authentication">
-  <title>Authentication</title>
-
+  <title>OpenIDM Authentication</title>
   <para>
    OpenIDM does not allow access to the REST interface without authentication.
-  </para>
-
-  <para>
-   User self-registration requires anonymous access. For that purpose, OpenIDM
-   includes an <literal>anonymous</literal> user, with the following password:
+   User self-registration requires anonymous access. For this purpose, OpenIDM
+   includes an <literal>anonymous</literal> user, with the password
    <literal>anonymous</literal>. For more information, see
    <xref linkend="internal-users" />.
   </para>
-
-  <para>
-   In production, only applications are expected to access the REST interface.
-  </para>
-
   <variablelist>
    <para>
-    OpenIDM supports an improved authentication mechanism on the REST
-    interface. Unlike basic authentication or form-based authentication, the
-    OpenIDM authentication mechanism is compatible with the AJAX framework. You
-    can configure authentication with standard or OpenIDM-specific header
-    fields, as follows:
+    OpenIDM supports HTTP basic authentication, but also supports an enhanced
+    authentication mechanism over the REST interface that is compatible with the
+    AJAX framework. You can use basic authentication headers, or the
+    OpenIDM-specific authentication headers, as follows:
    </para>
    <varlistentry>
-    <term>OpenIDM authentication with standard header fields</term>
+    <term>Authentication with HTTP basic authentication headers</term>
     <listitem>
-     <screen>$ curl --user userName:password</screen>
-     <para>
-      This method uses standard basic authentication. However, it does not
-      prompt for missing credentials.
-     </para>
+     <screen>$ curl --user openidm-admin:openidm-admin</screen>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>OpenIDM authentication with OpenIDM header fields</term>
+    <term>Authentication with OpenIDM-specific headers</term>
     <listitem>
      <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -278,441 +77,875 @@
     </listitem>
    </varlistentry>
   </variablelist>
-
   <note>
    <para>
-    This document uses the OpenIDM authentication options for all REST calls.
-    Where no OpenIDM-specific options exist, the "long-form" option such as
-    <command>--data</command> is used. In contrast, the README files that
-    accompany OpenIDM generally use "short-form" options such as
-    <command>-X</command> (instead of <command>--request</command>) and
-    <command>-H</command> (instead of <command>--header</command>).
+    This document uses the OpenIDM authentication headers in all REST examples.
    </para>
   </note>
-  
-  <para>For more information about the OpenIDM authentication mechanism, see
+  <para>
+   For more information about the OpenIDM authentication mechanism, see
    <link xlink:href="integrators-guide#security-messages"
-   xlink:role="http://docbook.org/xlink/role/olink">
-   <citetitle>Use Message Level Security</citetitle></link>.</para>
+         xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Use Message Level Security</citetitle></link>.
+  </para>
+
+  <section xml:id="openidm-users">
+   <title>Authenticating OpenIDM Users</title>
+   <indexterm>
+    <primary>Authentication</primary>
+    <secondary>Internal users</secondary>
+   </indexterm>
+   <indexterm>
+    <primary>Authentication</primary>
+    <secondary>Managed users</secondary>
+   </indexterm>
+   <para>
+    OpenIDM stores two types of users in its repository - internal users and
+    managed users. The way in which both of these user types are authenticated
+    is defined in the file
+    <filename>openidm/conf/authentication.json</filename>.
+   </para>
+
+   <section xml:id="internal-users">
+    <title>Internal Users</title>
+    <para>
+     OpenIDM creates two internal users by default: <literal>anonymous</literal>
+     and <literal>openidm-admin</literal>. These internal user accounts are
+     separated from other user accounts to protect them from any reconciliation
+     or synchronization processes.
+    </para>
+    <para>
+     OpenIDM stores internal users and their role membership in a table in the
+     repository. The two default internal users have the following functions:
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term>anonymous</term>
+      <listitem>
+       <para>
+        This user enables anonymous access to OpenIDM, for users who do not have
+        their own accounts. The anonymous user has limited rights within
+        OpenIDM. By default, the anonymous user has the
+        <literal>openidm-reg</literal> role, and can be used to allow
+        self-registration. For more information about self-registration, see
+        <link xlink:role="http://docbook.org/xlink/role/olink"
+        xlink:show="new" xlink:href="integrators-guide#ui-self-registration">
+        <citetitle>Enabling Self-Registration</citetitle></link>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>openidm-admin</term>
+      <listitem>
+       <para>
+        This user serves as the top-level administrator. After installation, the
+        <literal>openidm-admin</literal> user has full access, and provides a
+        fallback mechanism in the event that other users are locked out of their
+        accounts. Do not use <literal>openidm-admin</literal> for regular tasks.
+        Under normal circumstances, the <literal>openidm-admin</literal> account
+        does not represent a regular user, so audit log records for this account
+        do not represent the actions of any real person.
+       </para>
+       <para>
+        The default password for the <literal>openidm-admin</literal> user (also
+        <literal>openidm-admin</literal>) is not encrypted, and is not secure.
+        In production environments, you must change this password to a more
+        secure one, as described in the following section. The new password will
+        be encrypted when it is changed.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+
+    <section xml:id="repo-internal-user">
+     <title>Managing Internal Users Over REST</title>
+     <para>
+      Like any other user in the repository, you can manage internal users over
+      the REST interface.
+     </para>
+     <para>
+      To list the internal users over REST, query the <literal>repo</literal>
+      endpoint as follows:
+     </para>
+     <screen><userinput>$ curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request GET  \
+   "https://localhost:8443/openidm/repo/internal/user?_queryId=query-all-ids"</userinput>
+  <computeroutput>{
+    "remainingPagedResults": -1,
+    "pagedResultsCookie": null,
+    "resultCount": 2,
+    "result": [
+      {
+        "_rev": "0",
+        "_id": "openidm-admin"
+      },
+      {
+        "_rev": "0",
+        "_id": "anonymous"
+      }
+    ]
+  }</computeroutput></screen>
+     <para>
+      To query the details of an internal user, include the user's ID in the
+      request, for example:
+     </para>
+     <screen><userinput>$ curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request GET  \
+   "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+  <computeroutput>{
+    "password": "openidm-admin",
+    "userName": "openidm-admin",
+    "roles": "openidm-admin,openidm-authorized",
+    "_rev": "1",
+    "_id": "openidm-admin"
+  }</computeroutput></screen>
+     <para>
+      To change the password of the default administrative user, send a PUT
+      request to the user object. The following example changes the password of
+      the <literal>openidm-admin</literal> user to <literal>Passw0rd</literal>:
+     </para>
+     <screen><userinput>$ curl \
+   --cacert self-signed.crt \
+   --header "Content-Type: application/json" \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request PUT \
+   --data '{
+      "password": "Passw0rd",
+      "userName": "openidm-admin",
+      "roles": "openidm-admin,openidm-authorized",
+      "_id": "openidm-admin"
+   }' \
+   "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+  <computeroutput>{
+    "roles": "openidm-admin,openidm-authorized",
+    "password": {
+      "$crypto": {
+        "value": {
+          "key": "openidm-sym-default",
+          "iv": "USfN9kARk4QjoyjGa/r8WA==",
+          "cipher": "AES/CBC/PKCS5Padding",
+          "data": "27tDQg49z8nWqvIOEh7VAg=="
+        },
+        "type": "x-simple-encryption"
+      }
+    },
+    "_id": "openidm-admin",
+    "userName": "openidm-admin",
+    "_rev": "2"
+  }</computeroutput>
+     </screen>
+    </section>
+   </section>
   
-  <para>
-   You can change the attributes used by OpenIDM to store user login and
-   password values. Attribute names are shown in a database query listed in
-   <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>.
-  </para>
+   <section xml:id="managed-users">
+    <title>Managed Users</title>
+    <indexterm>
+     <primary>Objects</primary>
+     <secondary>Managed objects</secondary>
+    </indexterm>
+    <para>
+     External users that are managed by OpenIDM are known as managed users.
+    </para>
+    <para>
+     The table in which managed users are stored depends on the type of
+     repository. For JDBC repositories, OpenIDM stores managed users in the
+     managed objects table, named <literal>managedobjects</literal>, and indexes
+     those objects in a table named <literal>managedobjectproperties</literal>.
+    </para>
+    <para>
+     For an OrientDB repository, managed objects are stored in the table
+     <literal>managed_user</literal>.
+    </para>
+    <para>
+     OpenIDM provides RESTful access to managed users, at the context path
+     <literal>/openidm/managed/user</literal>. For more information, see
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#managing-users-REST"><citetitle>Managing
+     Users Over REST</citetitle></link>.
+    </para>
+   </section>
 
-  <variablelist>
-   <para>Two queries are defined by default.</para>
-   <varlistentry>
-    <term><literal>credential-internaluser-query</literal></term>
-    <listitem>
-     <para>Uses the <literal>_openidm_id</literal> attribute for login</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><literal>credential-query</literal></term>
-    <listitem>
-     <para>Uses the <literal>userName</literal> attribute for login</para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
-
-  <para>
-   The <filename>openidm/conf/authentication.json</filename> file defines
-   the active query with the <literal>queryId</literal> property. In the
-   following example, <literal>credential-query</literal> is the
-   <literal>queryId</literal> identifier used in a <literal>queryRequest</literal>
-   to validate credentials.
-  </para>
-
-   <programlisting language="javascript">
-{
-    "queryId" : "credential-query",
-    "queryOnResource" : "managed/user",
-...
-}</programlisting>
-
- <para>
-  You can explicitly define the properties that constitute passwords or roles
-  with the <literal>propertyMapping</literal> object in the
-  <filename>conf/authentication.json</filename> file. The default property
-  mapping is shown here:
- </para>
- 
- <programlisting language="javascript">
+   <section xml:id="internal-managed-authentication">
+    <title>Authenticating Internal and Managed Users</title>
+    <para>
+     By default, the attribute names that are used to authenticate managed and
+     internal users are <literal>username</literal> and
+     <literal>password</literal>, respectively. However, you can explicitly
+     define the properties that constitute usernames, passwords or roles with
+     the <literal>propertyMapping</literal> object in the
+     <filename>conf/authentication.json</filename> file. The following excerpt
+     of the <filename>authentication.json</filename> file shows the default
+     property mapping object:
+    </para>
+    <programlisting language="javascript">
  ...
     "propertyMapping" : {
         "authenticationId" : "username",
         "userCredential" : "password",
         "userRoles" : "roles"
     },
- ... 
- </programlisting>
+ ...
+    </programlisting>
+    <para>
+     If you change the attribute names that are used for authentication, you
+     must adjust the following authentication queries (defined in the repository
+     configuration file,
+     <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>).
+    </para>
+    <variablelist>
+     <para>Two queries are defined by default.</para>
+     <varlistentry>
+      <term><literal>credential-internaluser-query</literal></term>
+      <listitem>
+       <para>
+        This query uses the <literal>username</literal> attribute for login,
+        for internal users. For example, the following
+        <literal>credential-internaluser-query</literal> is defined in the
+        default repository configuration file for a MySQL repository.
+       </para>
+       <informalexample><screen><?dbfo pgwide="1"?>
+"credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table}
+        WHERE objectid = ${username}",
+       </screen></informalexample>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>credential-query</literal></term>
+      <listitem>
+       <para>
+        This query uses the <literal>username</literal> attribute for login, for
+        managed users. For example, the following
+        <literal>credential-query</literal> is defined in the default repository
+        configuration file for a MySQL repository.
+       </para>
+       <informalexample><screen><?dbfo pgwide="1"?>
+"credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}
+        and accountStatus = 'active'",
+       </screen></informalexample>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+    <para>
+     The query that is used for a particular resource is specified by the
+     <literal>queryId</literal> property in the
+     <filename>authentication.json</filename> file. The following sample excerpt
+     of that file shows that the <literal>credential-query</literal> is used
+     when validating managed user credentials.
+    </para>
+    <programlisting language="javascript">
+{
+    "queryId" : "credential-query",
+    "queryOnResource" : "managed/user",
+...
+}  </programlisting>
+   </section>
+  </section>
 
- </section>
-
- <section xml:id="supported-auth-modules">
-  <title>Supported Authentication Modules</title>
-
-  <variablelist>
+  <section xml:id="supported-auth-modules">
+   <title>Supported Authentication and Session Modules</title>
    <para>
-    OpenIDM supports a variety of modules, including those available from the
-    Common Authentication Framework (CAF). The CAF modules available to
-    OpenIDM include <literal>JWT_SESSION</literal>,
-    <literal>OPENAM_SESSION</literal>, and <literal>IWA</literal>. OpenIDM also
-    provides two additional authentication modules: <literal>DELEGATED</literal>
-    and <literal>CLIENT_CERT</literal>.
+    The authentication configuration is defined in
+    <filename>conf/authentication.json</filename>. This file configures the
+    methods by which a user request is authenticated. It includes both session
+    and authentication module configuration.
    </para>
 
-   <!-- Include OpenID Connect when a sample is available, or another statement
-   of support is made. -->
+   <variablelist>
+    <para>
+     OpenIDM supports one module for managing authentication sessions.
+    </para>
+    <varlistentry>
+     <term>JWT_SESSION</term>
+     <listitem>
+      <para>
+       The JSON Web Token session module configuration specifies keystore
+       information, and details about the session lifespan. The default
+       <literal>JWT_SESSION</literal> configuration is as follows:
+      </para>
+      <programlisting language="javascript">
+    "name" : "JWT_SESSION",
+    "properties" : {
+        "keyAlias" : "openidm-localhost",
+        "privateKeyPassword" : "&amp;{openidm.keystore.password}",
+        "keystoreType" : "&amp;{openidm.keystore.type}",
+        "keystoreFile" : "&amp;{openidm.keystore.location}",
+        "keystorePassword" : "&amp;{openidm.keystore.password}",
+        "maxTokenLifeMinutes" : "120",
+        "tokenIdleTimeMinutes" : "30",
+        "sessionOnly" : true
+    }
+      </programlisting>
+      <para>
+       For more information about the <literal>JWT_SESSION</literal> module, see
+       the following Javadoc page: <link xlink:show="new"
+       xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
+       <citetitle>Class JwtSessionModule</citetitle></link>.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
 
-   <para>
-    OpenIDM evaluates authentication modules in the order in which they are
-    placed in the <filename>authentication.json</filename> file.
-   </para>
-
-   <varlistentry>
-    <term>JWT_SESSION</term>
-    <listitem>
-     <para>
-      The JSON Web Token authentication module includes session information.
-      For details  on this common authentication module, see the following
-      Javadoc page: <link xlink:show="new"
-                          xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
-      <citetitle>Class JwtSessionModule</citetitle></link>.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>CLIENT_CERT</term>
-    <listitem>
-     <para>
-      The client certificate module accommodates users who authenticate with a
-      client certificate.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>DELEGATED</term>
-    <listitem>
-     <para>
-      The DELEGATED module validates client requests with the help of one of the
-      following entities:
-      <itemizedlist>
-       <listitem>
-        <para>
-         <literal>MANAGED_USER</literal>, a managed user object
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <literal>INTERNAL_USER</literal>, an internal user object
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         <literal>PASSTHROUGH</literal>, an OpenICF connector.
-        </para>
-       </listitem>
-      </itemizedlist>
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>OPENAM_SESSION</term>
-    <listitem>
-     <para>
-      The OPENAM_SESSION module allows you to protect a deployment of OpenIDM
-      with ForgeRock's <link xlink:show="new"
-                             xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
-      <citetitle>OpenAM Access Management</citetitle></link> product. For an
-      example of how you might use the OPENAM_SESSION module, see the
-      following: <link xlink:role="http://docbook.org/xlink/role/olink"
-                       xlink:show="new" xlink:href="install-guide#more-sample-openam">
-      <citetitle>Sample - Configuring Authentication Management With OpenAM.
-      </citetitle></link>
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>IWA</term>
-    <listitem>
-     <para>
-      The IWA module supports Integrated Windows Authentication. In other words,
-      the IWA module supports the use of an LDAP connector for an Active
-      Directory server. For an example of how you can set that up with a
-      Kerberos server, see the following <link xlink:show="new"
-                                               xlink:href="integrators-guide#openidm-auth-kerberos"
-                                               xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Kerberos
-      Configuration Example</citetitle></link>.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <!--          Waiting for OpenID sample, per OPENIDM-2477
-   <varlistentry>
-    <term>OPENID_CONNECT</term>
-    <listitem>
-     <para>
-      The OPENID_CONNECT module supports the use of <link xlink:show="new"
-      xlink:href="http://openid.net/connect">OpenID Connect 1.0</link>, which
-      is an authentication layer built on OAuth 2.0.
-     </para>
-    </listitem>
-   </varlistentry>
-                     when sample is available, add a link here             -->
-  </variablelist>
-
- </section>
-
- <section xml:id="passthrough-auth">
-  <title>Using Delegated Authentication</title>
-
-  <para>
-   In addition to the internal and managed user authentication modules, OpenIDM
-   ${docTargetVersion} supports a delegated authentication mechanism.
-   With delegated authentication, the username and password included with the
-   REST request are validated against those stored in a remote system, such as
-   an LDAP server.
-  </para>
-
-  <para>
-   The samples listed in the <link xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:show="new" xlink:href="install-guide#chap-samples"><citetitle>OpenIDM
-   Installation Guide</citetitle></link> include multiple options for
-   authentication mechanisms.
-  </para>
-
-  <para>
-   You can add the delegated authentication module to the
-   <filename>conf/authentication.json</filename> file. For example, the
-   following excerpt illustrates one way to implement the
-   <literal>DELEGATED</literal> configuration object. For descriptive purposes,
-   you can substitute the <literal>PASSTHROUGH</literal> alias for
-   <literal>DELEGATED</literal>.
-  </para>
-
-  <programlisting language="javascript">
-"authModules" : [
-   {
-      "name" : "DELEGATED",
-      "properties" : {
-         "augmentSecurityContext": {
+   <variablelist>
+    <para>
+     In addition to the <literal>JWT_SESSION</literal> module, OpenIDM supports
+     a number of authentication modules. This section describes the supported
+     authentication modules.
+    </para>
+    <para>
+     OpenIDM evaluates authentication modules in the order in which they are
+     listed in the <filename>authentication.json</filename> file.
+    </para>
+    <!-- Include OpenID Connect when a sample is available, or another statement
+    of support is made. -->
+    <varlistentry>
+     <term>CLIENT_CERT</term>
+     <listitem>
+      <para>
+       The client certificate module accommodates users who authenticate with a
+       client certificate. By default, OpenIDM queries the truststore for the
+       certificate, but you can specify an alternative location by modifying the
+       <literal>"queryOnResource"</literal> property in the configuration.
+      </para>
+      <para>
+       A sample <literal>CLIENT_CERT</literal> authentication configuration
+       follows:
+      </para>
+      <programlisting>{
+    "name" : "CLIENT_CERT",
+    "enabled" : true,
+    "properties" : {
+        "queryOnResource" : "security/truststore",
+        "defaultUserRoles" : [ "openidm-cert" ],
+        "allowedAuthenticationIdPatterns" : [ ]
+    }
+},
+      </programlisting>
+      <para>
+       The <literal>"allowedAuthenticationIdPatterns"</literal> filter enables
+       you to specify an array of usernames or username patterns that will be
+       accepted for authentication. If this property is empty, any username can
+       authenticate.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>INTERNAL_USER</term>
+     <listitem>
+      <para>
+       <literal>INTERNAL_USER</literal> authentication queries the repository,
+       specifically the <literal>repo/internal/user</literal> objects, and
+       allows authentication if the credentials match. The default configuration
+       uses the <literal>username</literal> and <literal>password</literal> of
+       the managed user to authenticate, as shown in the following sample
+       configuration.
+      </para>
+      <programlisting language="javascript">{
+    "name" : "INTERNAL_USER",
+    "enabled" : true,
+    "properties" : {
+        "queryId" : "credential-internaluser-query",
+        "queryOnResource" : "repo/internal/user",
+        "propertyMapping" : {
+            "authenticationId" : "username",
+            "userCredential" : "password",
+            "userRoles" : "roles"
+        },
+        "defaultUserRoles" : [ ]
+    }
+},    </programlisting>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>STATIC_USER</term>
+     <listitem>
+      <para>
+       <literal>STATIC_USER</literal> authentication provides an anonymous
+       authentication mechanism that bypasses any database checks if the headers
+       in a request indicate that the user is <literal>anonymous</literal>. For
+       example, the following REST call uses <literal>STATIC_USER</literal>
+       authentication in the self-registration process:
+      </para>
+      <screen>$ curl \
+ --header "X-OpenIDM-Password: anonymous" \
+ --header "X-OpenIDM-Username: anonymous" \
+ --header "Content-Type: application/json" \
+ --data '{
+       "userName":"steve",
+       "givenName":"Steve",
+       "sn":"Carter",
+       "telephoneNumber":"0828290289",
+       "mail":"scarter@example.com",
+       "password":"Passw0rd"
+       }' \
+ --request POST \
+ "https://localhost:8443/openidm/managed/user/?_action=create"
+</screen>
+      <para>
+       Note that this is not the same as an anonymous request that is issued
+       without headers.
+      </para>
+      <para>
+       Authenticating with the <literal>STATIC_USER</literal> module avoids the
+       performance cost of reading the database for self-registration, certain
+       UI requests, and other actions that can be performed anonymously.
+       Authenticating the anonymous user with the <literal>STATIC_USER</literal>
+       module is identical to authenticating the anonymous user with the
+       <literal>INTERNAL_USER</literal> module, except that the database is not
+       accessed. So, <literal>STATIC_USER</literal> authentication provides an
+       authentication mechanism for the anonymous user that avoids the database
+       lookups incurred when using <literal>INTERNAL_USER</literal>.
+      </para>
+      <para>
+       A sample <literal>STATIC_USER</literal> authentication configuration
+       follows:
+      </para>
+      <programlisting>{
+    "name" : "STATIC_USER",
+    "enabled" : true,
+    "properties" : {
+        "propertyMapping" : "{}",
+        "queryOnResource" : "repo/internal/user",
+        "username" : "anonymous",
+        "password" : "anonymous",
+        "defaultUserRoles" : [
+            "openidm-reg"
+        ],
+        "augmentSecurityContext" : null
+    }
+}
+      </programlisting>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>MANAGED_USER</term>
+     <listitem>
+      <para>
+       <literal>MANAGED_USER</literal> authentication queries the repository,
+       specifically the <literal>managed/user</literal> objects, and allows
+       authentication if the credentials match. The default configuration uses
+       the <literal>username</literal> and <literal>password</literal> of the
+       managed user to authenticate, as shown in the following sample
+       configuration.
+      </para>
+      <programlisting language="javascript">{
+    "name" : "MANAGED_USER",
+    "enabled" : true,
+    "properties" : {
+        "queryId" : "credential-query",
+        "queryOnResource" : "managed/user",
+        "propertyMapping" : {
+            "authenticationId" : "username",
+            "userCredential" : "password",
+            "userRoles" : "roles"
+        },
+        "defaultUserRoles" : [ ]
+    }
+},    </programlisting>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>PASSTHROUGH</term>
+     <listitem>
+      <para>
+       <literal>PASSTHROUGH</literal> authentication queries an external system,
+       such as an LDAP server, and allows authentication if the provided
+       credentials match those in the external system. The following sample
+       configuration shows pass-through authentication using the user objects
+       in the system endpoint <literal>system/ldap/account</literal>. For more
+       information on pass-through authentication, see
+       <xref linkend="passthrough-auth" />.
+      </para>
+      <programlisting language="javascript">{
+    "name" : "PASSTHROUGH",
+    "enabled" : true,
+    "properties" : {
+        "augmentSecurityContext": {
             "type" : "text/javascript",
             "file" : "auth/populateAsManagedUser.js"
-         },
-         "queryOnResource" : "system/ldap/account",
-         "propertyMapping" : {
-            "authenticationId" : "uid",
-            "groupMembership" : "memberOf"
-         },
-         "groupRoleMapping" : {
-            "openidm-admin" : ["cn=admins"]
-         },
-         "managedUserLink" : "systemLdapAccounts_managedUser",
-         "defaultUserRoles" : [
+        },
+        "queryOnResource" : "system/ldap/account",
+        "propertyMapping" : {
+            "authenticationId" : "uid"
+        },
+        "managedUserLink" : "systemLdapAccounts_managedUser",
+        "defaultUserRoles" : [
             "openidm-authorized"
-         ]
-      },
-      "enabled" : true
-   },
-   ...
-]
-  </programlisting>
+        ]
+    }
+},    </programlisting>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>OPENAM_SESSION</term>
+     <listitem>
+      <para>
+       The <literal>OPENAM_SESSION</literal> module enables you to protect an
+       OpenIDM deployment with ForgeRock's <link xlink:show="new"
+       xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
+       <citetitle>OpenAM Access Management</citetitle></link> product. For an
+       example of how you might use the <literal>OPENAM_SESSION</literal>
+       module, see <link xlink:role="http://docbook.org/xlink/role/olink"
+       xlink:show="new" xlink:href="install-guide#more-sample-openam">
+       <citetitle>Sample - Configuring Authentication Management With OpenAM
+       </citetitle></link> in the <citetitle>Install Guide</citetitle>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>IWA</term>
+     <listitem>
+      <para>
+       The IWA module supports Integrated Windows Authentication. In other words,
+       the IWA module supports the use of an LDAP connector for an Active
+       Directory server. For an example of how you can set that up with a
+       Kerberos server, see the following <link xlink:show="new"
+       xlink:href="integrators-guide#openidm-auth-kerberos"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Kerberos
+       Configuration Example</citetitle></link>.
+      </para>
+     </listitem>
+    </varlistentry>
 
-  <para>
-   The properties shown from this excerpt are defined in
-   <xref linkend="roles-auth-prop" />
-  </para>
+    <!--          Waiting for OpenID sample, per OPENIDM-2477
+    <varlistentry>
+     <term>OPENID_CONNECT</term>
+     <listitem>
+      <para>
+       The OPENID_CONNECT module supports the use of <link xlink:show="new"
+       xlink:href="http://openid.net/connect">OpenID Connect 1.0</link>, which
+       is an authentication layer built on OAuth 2.0.
+      </para>
+     </listitem>
+    </varlistentry>
+                      when sample is available, add a link here             -->
+   </variablelist>
 
-  <para>
-   The content of the delegated authentication object varies. Samples
-   2/2b/2c/2d, 3, 5, and 6 include slightly different versions of the
-   <filename>conf/authentication.json</filename> file.
-  </para>
+  </section>
 
-  <variablelist>
-   <varlistentry>
-    <term>Samples 2, 2b, 2c, 2d (LDAP)</term>
-    <listitem>
-     <para>
-      Samples 2, 2b, 2c, and 2d relate to connections from an LDAP server.
-      Samples 5 and 5b  are quite similar, as they uses XML information to
-      masquerade as an LDAP server. The <filename>authentication.json</filename>
-      file is identical in each of these samples.
-     </para>
-     <para>
-      In the common <filename>authentication.json</filename> file, the
-      <literal>queryOnResource</literal> endpoint is
-      <literal>system/ldap/account</literal>. The
-      <literal>managedUserLink</literal> is
-      <literal>systemLdapAccounts_managedUser</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Sample 3 (Scripted SQL)</term>
-    <listitem>
-     <para>
-      Sample 3 relates to a connection to a scripted SQL database. As such, the
-      <literal>queryOnResource</literal> endpoint is
-      <literal>system/scriptedsql/account</literal>. The
-      <literal>managedUserLink</literal> is
-      <literal>systemHrdb_managedUser</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Sample 5, 5b (Synchronization of two resources)</term>
-    <listitem>
-     <para>
-      The XML files used in samples 5 and 5b simulate a connection between LDAP
-      servers. For that reason, the <filename>conf/authentication.json</filename>
-      file used in these samples are identical to that for sample 2/2b/2c/2d.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Sample 6 (LiveSync)</term>
-    <listitem>
-     <para>
-      The <literal>queryOnResource</literal> endpoint is
-      <literal>system/ad/account</literal>. The <literal>autheticationId</literal>
-      matches the AD attribute used for account names. The associated
-      <literal>managedUserLink</literal> is
-      <literal>systemAdAccounts_managedUser</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+  <section xml:id="passthrough-auth">
+   <title>Configuring Pass-Through Authentication</title>
+   <para>
+    OpenIDM ${docTargetVersion} supports a pass-through authentication
+    mechanism. With pass-through authentication, the credentials included with
+    the REST request are validated against those stored in a remote system, such
+    as an LDAP server.
+   </para>
+   <para>
+    The following excerpt of an <filename>authentication.json</filename> shows a
+    pass-through authentication configuration for an LDAP system.
+   </para>
+
+   <programlisting language="javascript">
+ "authModules" : [
+    {
+       "name" : "PASSTHROUGH",
+       "enabled" : true,
+       "properties" : {
+          "augmentSecurityContext": {
+             "type" : "text/javascript",
+             "file" : "auth/populateAsManagedUser.js"
+          },
+          "queryOnResource" : "system/ldap/account",
+          "propertyMapping" : {
+             "authenticationId" : "uid",
+             "groupMembership" : "memberOf"
+          },
+          "groupRoleMapping" : {
+             "openidm-admin" : ["cn=admins"]
+          },
+          "managedUserLink" : "systemLdapAccounts_managedUser",
+          "defaultUserRoles" : [
+             "openidm-authorized"
+          ]
+       },
+    },
+    ...
+ ]
+   </programlisting>
+
+   <para>
+    The configuration properties in this example are described in the following
+    section. Many of these properties apply to other authentication modules, not
+    just to pass-through authentication.
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term><literal>name</literal></term>
+     <listitem>
+      <para>The name of the authentication module, in this case
+       <literal>PASSTHROUGH</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>enabled</literal></term>
+     <listitem>
+      <para>
+       Whether the module should be taken into account during the authentication
+       process. Modules that are included in the authentication configuration
+       file, but set to <literal>"enabled" : false</literal>, are not used for
+       authentication.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>queryOnResource</literal></term>
+     <listitem>
+      <para>
+       The endpoint against which the user authenticates, such as
+       <literal>system/ldap/account</literal>,
+       <literal>system/scriptedsql/account</literal>,
+       <literal>system/ad/account</literal>,
+       <literal>managed/user</literal>, and
+       <literal>repo/internal/user</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>augmentSecurityContext</literal> (optional)</term>
+     <listitem>
+      <para>
+       This parameter points to a script, executed only after a successful
+       authentication request to provide additional information, based on the
+       security context.
+      </para>
+      <para>
+       For pass-through authentication, OpenIDM uses the
+       <filename>populateAsManagedUser.js</filename> script. This script uses
+       authentication details returned from the pass-through authentication
+       module. Those details can point to a linked managed user record.
+       If a linked record is found, the script adjusts the details of the
+       security context to match that managed user object. The adjusted security
+       context enables additional operations for the authenticated user, such as
+       the ability to access the default user interface.
+      </para>
+      <para>
+       The script must be either JavaScript
+       (<literal>"type":"text/javascript"</literal>) or Groovy
+       (<literal>"type":"groovy"</literal>), and can be provided inline
+       (<literal>"source":"script source"</literal>) or in a file
+       (<literal>"file":"filename"</literal>).
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>propertyMapping</literal> (optional)</term>
+     <listitem>
+      <para>
+       A list that enables you to map the following OpenIDM properties to fields
+       in the system resource used for the authentication.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>
+      <literal>authenticationId</literal>
+     </term>
+     <listitem>
+      <para>
+       Specifies the authentication property, such as <literal>"uid"</literal>,
+       <literal>"sAMAccountName"</literal>, and <literal>"username"</literal>
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>groupMembership</literal></term>
+     <listitem>
+      <para>
+       Specifies the name of the property in the remote system that contains
+       the list of groups of which the authenticated user is a member, such as
+       <literal>memberOf</literal>, or <literal>ldapGroups</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>groupRoleMapping</literal> (optional)</term>
+     <listitem>
+      <para>
+       Enables you to assign roles to users, based on their group membership in
+       the system resource. In this example, users who are members
+       of the <literal>"cn=admins"</literal> group in the LDAP directory
+       automatically acquire the <literal>"openidm-admin"</literal> role. Group
+       membership is determined, based on the
+       <literal>groupMembership</literal> property, described previously.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>managedUserLink</literal> (optional)</term>
+     <listitem>
+      <para>
+       Used by the script specified in <literal>"augmentSecurityContext"</literal>
+       to switch the context of an authenticated user from their original
+       security context to a context that is based on the related
+       <literal>managed/user</literal> account. The value is based on the
+       <literal>name</literal> of the mapping in the associated
+       <filename>sync.json</filename> file.
+      </para>
+      <para>
+       The value of this property is the <literal>"links"</literal> entry
+       (usually the mapping name defined in <literal>sync.json</literal>) that
+       was used to relate the remote system users with the managed users.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>defaultUserRoles</literal> (optional)</term>
+     <listitem>
+      <para>
+       Can be defined for any authentication module. OpenIDM assigns such roles
+       (or an empty set) to the security context of a user.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   <para>
+    The samples described in the
+    <link xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:show="new" xlink:href="install-guide#chap-samples"><citetitle>OpenIDM
+    Installation Guide</citetitle></link> include several examples of
+    pass-through authentication configuration. Samples 2, 2b, 2c, and 2d use an
+    external LDAP system for authentication. Sample 3 authenticates against a
+    SQL database. Sample 6 authenticates against an Active Directory server.
+    The <literal>scriptedrest2dj</literal> sample uses a scripted REST connector
+    to authenticate against an OpenDJ server.
+   </para>
+  </section>
+
+  <section xml:id="openidm-auth-kerberos">
+   <title>Kerberos Configuration Example</title>
+
+   <para>
+    This section assumes that you have an active Kerberos server acting as
+    a Key Distribution Center (KDC). If you're running Active Directory in your
+    deployment, that service includes a Kerberos KDC by default.
+   </para>
+
+   <para>
+    To take advantage of a Kerberos KDC, you need to do two things: first
+    include at least the <literal>IWA</literal> and possibly the
+    <literal>PASSTHROUGH</literal> modules in the
+    <filename>authentication.json</filename> file. Second, modify the
+    <filename>system.properties</filename> file to take advantage of the
+    noted modules.
+   </para>
+
+   <para>
+    For <literal>IWA</literal>, based on Integrated Windows Authentication,
+    this section assumes you have configured an LDAP connector for an Active
+    Directory server. To confirm, identify the following mapping source in the
+    <filename>sync.json</filename> configuration file:
+   </para>
+
+   <screen>system/ad/account</screen>
+
+   <para>
+    You could then include the following code block in the
+    <filename>authentication.json</filename> file. Include appropriate
+    values for the <literal>kerberosRealm</literal> and
+    <literal>kerberosServerName</literal>. For a list of definitions, see the
+    following section: <link xlink:role="http://docbook.org/xlink/role/olink"
+                             xlink:href="integrators-guide#kerberos-definitions" xlink:show="new">
+    <citetitle>Kerberos Definitions</citetitle></link>.
+   </para>
+
+   <programlisting language="javascript">"authModules" : [
+    ...
+    {
+    "name" : "IWA",
+    "properties": {
+    "servicePrincipal" : "",
+    "keytabFileName" : "security/name.HTTP.keytab",
+    "kerberosRealm" : "",
+    "kerberosServerName" : "",
+    "queryOnResource" : "system/ad/account",
+    "propertyMapping" : {
+    "authenticationId" : "sAMAccountName",
+    "groupMembership" : "memberOf"
+    },
+    "groupRoleMapping" : { "openidm-admin": [ ] },
+    "groupComparisonMethod": "ldap",
+    "defaultUserRoles" : [
+    "openidm-authorized"
+    ]
+    },
+    "enabled" : true
+    }
+   </programlisting>
+
+   <para>
+    To grant different roles to users who are authenticated through the
+    <literal>IWA</literal> module, list them with their
+    <literal>groupRoleMapping</literal>.
+   </para>
+
+   <para>
+    You could pair the <literal>IWA</literal> module with the
+    <literal>PASSTHROUGH</literal> module. When paired, a failure in the
+    <literal>IWA</literal> module allows users to revert to forms-based
+    authentication.
+   </para>
+
+   <para>
+    You could add the <literal>PASSTHROUGH</literal> module as follows, in the
+    <filename>authentication.json</filename> file:
+   </para>
+
+   <programlisting language="javascript"> ...
+    {
+    "name" : "PASSTHROUGH",
+    "properties": {
+    "queryOnResource" : "system/AD/account",
+    "propertyMapping" : {
+    "authenticationId" : "sAMAccountName",
+    "groupMembership" : "memberOf" },
+    "groupRoleMapping" : { "openidm-admin": [ ] },
+    "groupComparisonMethod": "ldap",
+    "defaultUserRoles" : [
+    "openidm-authorized"
+    ]
+    },
+    "enabled" : true
+    }
+    ... </programlisting>
+
+   <para>
+    Once you have included at least the <literal>IWA</literal> module,
+    edit the <filename>system.properties</filename> file. Include the following
+    entry to point to a JAAS configuration file. Substitute if desired for
+    <filename>gssapi_jaas.conf</filename>
+   </para>
+
+   <screen>
+    java.security.auth.login.config=/path/to/openidm/conf/gssapi_jaas.conf
+   </screen>
+
+   <para>
+    In the <filename>gssapi_jaas.conf</filename> file, include the following
+    information related to the LDAP connector:
+   </para>
+
+   <programlisting language="javascript">
+    org.identityconnectors.ldap.LdapConnector {
+    com.sun.security.auth.module.Krb5LoginModule required client=TRUE
+    principal="bjensen@EXAMPLE.COM" useKeyTab=true keyTab="/path/to/bjensen.keytab";
+    };
+   </programlisting>
+
+   <xinclude:include href="../shared/kerberos-definitions.xml" />
+
+  </section>
 
  </section>
 
- <section xml:id="openidm-auth-kerberos">
-  <title>Kerberos Configuration Example</title>
 
-  <para>
-   This section assumes that you have an active Kerberos server acting as
-   a Key Distribution Center (KDC). If you're running Active Directory in your
-   deployment, that service includes a Kerberos KDC by default.
-  </para>
-
-  <para>
-   To take advantage of a Kerberos KDC, you need to do two things: first
-   include at least the <literal>IWA</literal> and possibly the
-   <literal>PASSTHROUGH</literal> modules in the
-   <filename>authentication.json</filename> file. Second, modify the
-   <filename>system.properties</filename> file to take advantage of the
-   noted modules.
-  </para>
-
-  <para>
-   For <literal>IWA</literal>, based on Integrated Windows Authentication,
-   this section assumes you have configured an LDAP connector for an Active
-   Directory server. To confirm, identify the following mapping source in the
-   <filename>sync.json</filename> configuration file:
-  </para>
-
-  <screen>system/ad/account</screen>
-
-  <para>
-   You could then include the following code block in the
-   <filename>authentication.json</filename> file. Include appropriate
-   values for the <literal>kerberosRealm</literal> and
-   <literal>kerberosServerName</literal>. For a list of definitions, see the
-   following section: <link xlink:role="http://docbook.org/xlink/role/olink"
-                            xlink:href="integrators-guide#kerberos-definitions" xlink:show="new">
-   <citetitle>Kerberos Definitions</citetitle></link>.
-  </para>
-
-  <programlisting language="javascript">"authModules" : [
-   ...
-   {
-   "name" : "IWA",
-   "properties": {
-   "servicePrincipal" : "",
-   "keytabFileName" : "security/name.HTTP.keytab",
-   "kerberosRealm" : "",
-   "kerberosServerName" : "",
-   "queryOnResource" : "system/ad/account",
-   "propertyMapping" : {
-   "authenticationId" : "sAMAccountName",
-   "groupMembership" : "memberOf"
-   },
-   "groupRoleMapping" : { "openidm-admin": [ ] },
-   "groupComparisonMethod": "ldap",
-   "defaultUserRoles" : [
-   "openidm-authorized"
-   ]
-   },
-   "enabled" : true
-   }
-  </programlisting>
-
-  <para>
-   To grant different roles to users who are authenticated through the
-   <literal>IWA</literal> module, list them with their
-   <literal>groupRoleMapping</literal>.
-  </para>
-
-  <para>
-   You could pair the <literal>IWA</literal> module with the
-   <literal>PASSTHROUGH</literal> module. When paired, a failure in the
-   <literal>IWA</literal> module allows users to revert to forms-based
-   authentication.
-  </para>
-
-  <para>
-   You could add the <literal>PASSTHROUGH</literal> module as follows, in the
-   <filename>authentication.json</filename> file:
-  </para>
-
-  <programlisting language="javascript"> ...
-   {
-   "name" : "PASSTHROUGH",
-   "properties": {
-   "queryOnResource" : "system/AD/account",
-   "propertyMapping" : {
-   "authenticationId" : "sAMAccountName",
-   "groupMembership" : "memberOf" },
-   "groupRoleMapping" : { "openidm-admin": [ ] },
-   "groupComparisonMethod": "ldap",
-   "defaultUserRoles" : [
-   "openidm-authorized"
-   ]
-   },
-   "enabled" : true
-   }
-   ... </programlisting>
-
-  <para>
-   Once you have included at least the <literal>IWA</literal> module,
-   edit the <filename>system.properties</filename> file. Include the following
-   entry to point to a JAAS configuration file. Substitute if desired for
-   <filename>gssapi_jaas.conf</filename>
-  </para>
-
-  <screen>
-   java.security.auth.login.config=/path/to/openidm/conf/gssapi_jaas.conf
-  </screen>
-
-  <para>
-   In the <filename>gssapi_jaas.conf</filename> file, include the following
-   information related to the LDAP connector:
-  </para>
-
-  <programlisting language="javascript">
-   org.identityconnectors.ldap.LdapConnector {
-   com.sun.security.auth.module.Krb5LoginModule required client=TRUE
-   principal="bjensen@EXAMPLE.COM" useKeyTab=true keyTab="/path/to/bjensen.keytab";
-   };
-  </programlisting>
-
-  <xinclude:include href="../shared/kerberos-definitions.xml" />
-
- </section>
 
  <section xml:id="openidm-roles">
   <title>Roles and Authentication</title>
@@ -1095,150 +1328,6 @@ return isProcessOnUsersList(processDefinitionId);
     </listitem>
    </itemizedlist>
   </section>
-
-  <section xml:id="roles-auth-prop">
-   <title>Properties for Authentication and Roles</title>
-
-   <para>
-    The properties in this section define how users and groups may be associated
-    with roles and certain authentication mechanisms. Some of these properties
-    are included in the excerpt of the <filename>authentication.json</filename>
-    file shown in <xref linkend="passthrough-auth" />.
-   </para>
-
-   <para>
-    Different authentication modules may apply. In files such as
-    <filename>authentication.json</filename>, you may assign an authentication
-    module to the <literal>name</literal> property. Just be sure to include
-    <literal>enabled=true</literal> or <literal>enabled=false</literal> for
-    the configured module(s). For a list of available modules, see
-    <xref linkend="supported-auth-modules" />.
-   </para>
-
-   <variablelist>
-    <varlistentry>
-     <term><literal>queryOnResource</literal></term>
-     <listitem>
-      <para>
-       The system endpoint against which the user authenticates, such as
-       <literal>system/ldap/account</literal>,
-       <literal>system/scriptedsql/account</literal>,
-       <literal>system/ad/account</literal>,
-       <literal>managed/user</literal>, and
-       <literal>repo/internal/user</literal>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>augmentSecurityContext</literal> (optional)</term>
-     <listitem>
-      <para>
-       This parameter points to a script, executed only after a successful
-       authentication request to provide additional information, based on the
-       security context.
-      </para>
-      <para>
-       For delegated (pass-through authentication), OpenIDM uses the
-       <filename>populateAsManagedUser.js</filename> script. This script uses
-       authentication details returned from the pass-through authentication
-       module. Those details can point to a linked managed user record.
-       If a linked record is found, the script adjusts the details of the
-       security context to match that managed user object. The
-       adjusted security context enables additional operations for the
-       authenticated user, such as the ability to access the default user
-       interface.
-      </para>
-      <para>
-       The script must be either JavaScript
-       (<literal>"type":"text/javascript"</literal>) or Groovy
-       (<literal>"type":"groovy"</literal>), and can be provided inline
-       (<literal>"source":"script source"</literal>) or in a file
-       (<literal>"file":"filename"</literal>).
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>propertyMapping</literal> (optional)</term>
-     <listitem>
-      <para>
-       A list that enables you to map the following OpenIDM properties to fields
-       in the system resource used for the authentication.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>
-      <literal>authenticationId</literal>
-     </term>
-     <listitem>
-      <para>
-       Specifies the authentication property, such as <literal>"uid"</literal>,
-       <literal>"sAMAccountName"</literal>, and <literal>"username"</literal>
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>groupMembership</literal></term>
-     <listitem>
-      <para>
-       Specifies the name of the property in the remote system that contains
-       the list of groups of which the authenticated user is a member, such as
-       <literal>memberOf</literal>, or <literal>ldapGroups</literal>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>groupRoleMapping</literal> (optional)</term>
-     <listitem>
-      <para>
-       Enables you to assign roles to users, based on their group membership in
-       the system resource. In this example, users who are members
-       of the <literal>"cn=admins"</literal> group in the LDAP directory
-       automatically acquire the <literal>"openidm-admin"</literal> role. Group
-       membership is determined, based on the
-       <literal>groupMembership</literal> property, described previously.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>managedUserLink</literal> (optional)</term>
-     <listitem>
-      <para>
-       Used by the script specified in <literal>"augmentSecurityContext"</literal>
-       to switch the context of an authenticated user from their original
-       security context to a context that is based on the related
-       <literal>managed/user</literal> account. The value is based on the
-       <literal>name</literal> of the mapping in the associated
-       <filename>sync.json</filename> file.
-      </para>
-      <para>
-       The value of this property is the <literal>"links"</literal> entry
-       (usually the mapping name defined in <literal>sync.json</literal>) that
-       was used to relate the remote system users with the managed users.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>defaultUserRoles</literal> (optional)</term>
-     <listitem>
-      <para>
-       Can be defined for any authentication module. OpenIDM assigns such roles
-       (or an empty set) to the security context of a user.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>enabled</literal></term>
-     <listitem>
-      <para>
-       Specifies whether the given authentication module is enabled
-       (<literal>true</literal>) or disabled (<literal>false</literal>).
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-
-  </section>
   
   <section xml:id="authorization-extending">
    <title>Extending the Authorization Mechanism</title>
@@ -1280,10 +1369,9 @@ return isProcessOnUsersList(processDefinitionId);
    roles configured for clients, for managed / internal users, as well as for
    group memberships.
   </para>
-
   <para>
-   For information on the properties listed in this section, see <xref
-   linkend="roles-auth-prop" />.
+   The properties listed in this section are described in <xref
+   linkend="passthrough-auth" />.
   </para>
 
   <para>
@@ -1379,15 +1467,14 @@ return isProcessOnUsersList(processDefinitionId);
     <term>component</term>
     <listitem>
      <para>
-      Resources defined through properties defined in
-      <xref linkend="roles-auth-prop" />. The <literal>authorizationId</literal>
+      Resources defined through the configuration properties listed in
+      <xref linkend="passthrough-auth" />. The <literal>authorizationId</literal>
       component is set to the value references in the
       <literal>queryOnResource</literal> property.
      </para>
     </listitem>
    </varlistentry>
   </variablelist>
-
  </section>
  </section>
 

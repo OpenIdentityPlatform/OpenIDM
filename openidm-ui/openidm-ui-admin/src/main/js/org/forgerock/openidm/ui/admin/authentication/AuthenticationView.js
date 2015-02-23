@@ -31,8 +31,12 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptEditor",
-    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
-], function(AdminAbstractView, eventManager, constants, router, ConfigDelegate, ScriptEditor, ConnectorDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function(AdminAbstractView, eventManager, constants, router, ConfigDelegate, ScriptEditor, ConnectorDelegate, SiteConfigurationDelegate, conf, openamProxyDelegate, UIUtils) {
 
     var AuthenticationView = AdminAbstractView.extend({
         template: "templates/admin/authentication/AuthenticationTemplate.html",
@@ -54,6 +58,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             modules: {},
             defaultAuth: {},
             module_types: {
+                "STATIC_USER" : null,
                 "CLIENT_CERT": null,
                 "IWA": null,
                 "MANAGED_USER": null,
@@ -64,12 +69,23 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             },
             defaultUserRoles: [
                 "openidm-admin",
-                "openidm-authorize",
+                "openidm-authorized",
                 "openidm-cert",
                 "openidm-reg",
                 "openidm-task-manager"
             ],
-            resources: []
+            resources: [],
+            amUIProperties: [
+                "openamLoginUrl",  
+                "openamLoginLinkText", 
+                "openamUseExclusively"
+            ],
+            amTokenTime: "5",
+            defaultTokenTime: "7200",
+            defaultTokenIdleTime: "1800",
+            amTruststoreType : "&{openidm.truststore.type}",
+            amTruststoreFile : "&{openidm.truststore.location}",
+            amTruststorePassword : "&{openidm.truststore.password}"
         },
 
         render: function (args, callback) {
@@ -119,8 +135,8 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
 
                                     // The following code updates the enum values for the queryOnResource property
-                                    // Internal User Modules will only need access to the internal repo and can be excluded as that value is set in the template.
-                                    if (jsonTemplate.templateName !== "INTERNAL_USER" &&
+                                    // Internal/Anonymous User Modules will only need access to the internal repo and can be excluded as that value is set in the template.
+                                    if (jsonTemplate.templateName !== "INTERNAL_USER" && jsonTemplate.templateName !== "STATIC_USER" &&
                                         _.has(jsonTemplate.mainSchema, "properties") &&
                                         _.has(jsonTemplate.mainSchema.properties, "queryOnResource") &&
                                         _.has(jsonTemplate.mainSchema.properties.queryOnResource, "enum")) {
@@ -169,14 +185,30 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             this.$el.find(e.target).parentsUntil(".form").find(".advancedShowHide").toggleClass("fa-plus-square-o");
             this.$el.find(e.target).parentsUntil(".form").find(".ui-widget-content").first().toggle();
         },
+        
+        loadJWTTokenTimeSettings: function(){
+            var props = this.model.defaultAuth.serverAuthContext.sessionModule.properties,
+                convertToSeconds = function(mins){
+                    return mins * 60;
+                };
+                
+            if(props.maxTokenLifeMinutes){
+                props.maxTokenLifeSeconds = props.maxTokenLifeSeconds || convertToSeconds(props.maxTokenLifeMinutes);
+            }
+            
+            if(props.tokenIdleTimeMinutes){
+                props.tokenIdleTimeSeconds = props.tokenIdleTimeSeconds || convertToSeconds(props.tokenIdleTimeMinutes);
+            }
+            
+            this.$el.find("#maxTokenLifeSeconds").val(props.maxTokenLifeSeconds);
+            this.$el.find("#tokenIdleTimeSeconds").val(props.tokenIdleTimeSeconds);
+        },
 
         //  Gets the current authentication JSON file and creates UI modules for each one
         loadDefaults: function() {
             ConfigDelegate.readEntity("authentication").then(_.bind(function (auth) {
                 this.model.defaultAuth = auth;
-
-                this.$el.find("#maxTokenLifeMinutes").val(auth.serverAuthContext.sessionModule.properties.maxTokenLifeMinutes);
-                this.$el.find("#tokenIdleTimeMinutes").val(auth.serverAuthContext.sessionModule.properties.tokenIdleTimeMinutes);
+                this.loadJWTTokenTimeSettings();
                 this.$el.find("#sessionOnly").val(auth.serverAuthContext.sessionModule.properties.sessionOnly.toString());
 
                 _(auth.serverAuthContext.authModules).each(function (module) {
@@ -230,6 +262,12 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         }
                     }
 
+                    if(module.name === "OPENAM_SESSION"){
+                        //add amUIProperties
+                        module.properties = _.extend(module.properties,_.pick(conf.globalData,this.model.amUIProperties));
+                    }
+                    
+                    
                     _(module.properties).each(function(value, key) {
                         if (_(jsonEditorBasicFormat).has(key)) {
                             addProperty(jsonEditorBasicFormat, value, key);
@@ -404,19 +442,21 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 // The conditional display of roles or groupmembership doesn't load as expected from JsonEditor, custom code to show and hide is necessary
                 if (this.model.modules[tempKey]) {
                     userGroupEditorNode = this.model.modules[tempKey].basicEditor.getEditor("root.propertyMapping.userorgroup") || this.model.modules[tempKey].advancedEditor.getEditor("root.propertyMapping.userorgroup");
-                    userorgroup = userGroupEditorNode.value;
+                    if (typeof userGroupEditorNode !== "undefined" && userGroupEditorNode !== null) {
+                        userorgroup = userGroupEditorNode.value;
 
-                    if (_(userorgroup).isString() && userorgroup.length > 0) {
-                        userGroupEditorNode.switchEditor(1);
-                        this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.userRoles"));
+                        if (_(userorgroup).isString() && userorgroup.length > 0) {
+                            userGroupEditorNode.switchEditor(1);
+                            this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.userRoles"));
 
-                    } else if (_(userorgroup).isObject()) {
-                        userGroupEditorNode.switchEditor(2);
-                        this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.groupMembership"));
+                        } else if (_(userorgroup).isObject()) {
+                            userGroupEditorNode.switchEditor(2);
+                            this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.groupMembership"));
 
-                    } else {
-                        userGroupEditorNode.switchEditor(0);
-                        this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.selectOption"));
+                        } else {
+                            userGroupEditorNode.switchEditor(0);
+                            this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.selectOption"));
+                        }
                     }
                 }
             }
@@ -446,7 +486,9 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 advancedEditor,
                 authMod,
                 errors,
-                error = false;
+                error = false,
+                openamDeploymentUrl,
+                openamLoginUrl;
 
             if (toUpdate) {
                 basicEditor = this.model.modules[toUpdate].basicEditor.getValue();
@@ -454,7 +496,9 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 authMod = this.model.modules[toUpdate].name;
                 errors = this.model.modules[toUpdate].module.find(".ui-state-error:visible");
 
-                if(_.has(basicEditor, "queryOnResource")) {
+                if (authMod === "STATIC_USER" && _.has(basicEditor, "username")) {
+                    this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + basicEditor.username);
+                } else if(_.has(basicEditor, "queryOnResource")) {
                     this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + basicEditor.queryOnResource);
                 } else if(_.has(advancedEditor, "queryOnResource")) {
                     this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + advancedEditor.queryOnResource);
@@ -475,6 +519,20 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 }
 
                 $(this.model.modules[toUpdate].module).find(".form input[type='hidden']").parent().hide();
+                
+                if(authMod === "OPENAM_SESSION"){
+                    openamDeploymentUrl = $(this.model.modules[toUpdate].module).find(".form input[name*='openamDeploymentUrl']");
+                    openamLoginUrl = $(this.model.modules[toUpdate].module).find(".form input[name*='openamLoginUrl']");
+                    openamDeploymentUrl.focus(function(){
+                        openamDeploymentUrl.attr("beforeValue",openamDeploymentUrl.val());
+                    });
+                    //unbinding here so that this function does not get bound multiple times
+                    openamDeploymentUrl.unbind("blur").blur(_.bind(function(){
+                        this.model.modules[toUpdate].advancedEditor.getEditor('root.openamLoginUrl').setValue(
+                                openamLoginUrl.val().replace(openamDeploymentUrl.attr("beforeValue"),openamDeploymentUrl.val())
+                        );
+                    },this));
+                }
             }
 
             _(this.$el.find(".authModuleErrors")).each(function(module) {
@@ -494,14 +552,17 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
         },
 
         // Creates an Authentication JSON based off of the object the page was loaded with and any new or changed values
-        submitAuthModules: function() {
+        submitAuthModules: function(e) {
             var allGroups = this.$el.find(".group-body .group").not("#group-copy"),
                 authModules = [],
                 tempID = null,
                 tempEditor = null,
                 tempModule = {},
                 newAuth,
-                tempUserRoles;
+                tempUserRoles,
+                amUISettingsProm;
+            
+            $(e.target).prop("disabled",true);
 
             // Each Auth Module
             _(allGroups).each(function(group) {
@@ -514,6 +575,15 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     tempModule.enabled = tempEditor.enabled;
                     tempModule.properties = {};
                     tempModule.properties.propertyMapping = {};
+                    
+                    if(tempModule.name === "OPENAM_SESSION"){
+                        amUISettingsProm = this.handleOpenAMUISettings(tempEditor,tempID,authModules);
+                        //remove amUIProperties
+                        tempEditor = _.omit(tempEditor,this.model.amUIProperties);
+                        tempEditor.truststoreType = this.model.amTruststoreType;
+                        tempEditor.truststoreFile = this.model.amTruststoreFile;
+                        tempEditor.truststorePassword = this.model.amTruststorePassword;
+                    }
 
                     // Set root level properties that are not objects
                     _.chain(tempEditor)
@@ -545,16 +615,23 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         tempModule.properties.augmentSecurityContext = this.model.modules[tempID].scriptEditor.getScriptHook().script;
                     }
 
-                    if (tempEditor.propertyMapping.userorgroup.length > 0) {
-                        tempModule.properties.propertyMapping.userRoles = tempEditor.propertyMapping.userorgroup;
+                    // these are undefined for the STATIC_USER module which has no propertyMapping
+                    if (typeof tempEditor.propertyMapping !== "undefined"
+                            && tempEditor.propertyMapping !== null
+                            && typeof tempEditor.propertyMapping.userorgroup !== "undefined"
+                            && tempEditor.propertyMapping.userorgroup !== null) {
 
-                    } else if (!_.isUndefined(tempEditor.propertyMapping.userorgroup.grpMembership)) {
-                        tempModule.properties.propertyMapping.groupMembership = tempEditor.propertyMapping.userorgroup.grpMembership;
-                        tempModule.properties.groupRoleMapping = {};
+                        if (tempEditor.propertyMapping.userorgroup.length > 0) {
+                            tempModule.properties.propertyMapping.userRoles = tempEditor.propertyMapping.userorgroup;
 
-                        _(tempEditor.propertyMapping.userorgroup.groupRoleMapping).each(function (mapping) {
-                            tempModule.properties.groupRoleMapping[mapping.roleName] = mapping.groupMapping;
-                        });
+                        } else if (!_.isUndefined(tempEditor.propertyMapping.userorgroup.grpMembership)) {
+                            tempModule.properties.propertyMapping.groupMembership = tempEditor.propertyMapping.userorgroup.grpMembership;
+                            tempModule.properties.groupRoleMapping = {};
+
+                            _(tempEditor.propertyMapping.userorgroup.groupRoleMapping).each(function (mapping) {
+                                tempModule.properties.groupRoleMapping[mapping.roleName] = mapping.groupMapping;
+                            });
+                        }
                     }
 
                     if (_(this.model.modules[tempID].scriptEditor.getScriptHook().script).isObject()) {
@@ -563,17 +640,84 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     authModules.push(tempModule);
                 }
             }, this);
+            
+            if(!amUISettingsProm){
+                amUISettingsProm = true;
+            }
+            
+            amUISettingsProm.then(_.bind(function(){
+                newAuth = _(this.model.defaultAuth).clone();
+                newAuth.serverAuthContext.authModules = authModules;
 
-            newAuth = _(this.model.defaultAuth).clone();
-            newAuth.serverAuthContext.authModules = authModules;
-
-            // Set the session module properties and convert sessionOnly back to a boolean
-            _(newAuth.serverAuthContext.sessionModule.properties).extend(form2js("sessionModuleForm", ".", true));
-            newAuth.serverAuthContext.sessionModule.properties.sessionOnly = newAuth.serverAuthContext.sessionModule.properties.sessionOnly === "true";
-
-            ConfigDelegate.updateEntity("authentication", newAuth).then(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
-            });
+                // Set the session module properties and convert sessionOnly back to a boolean
+                _(newAuth.serverAuthContext.sessionModule.properties).extend(form2js("sessionModuleForm", ".", true));
+                newAuth.serverAuthContext.sessionModule.properties.maxTokenLifeMinutes = "";
+                newAuth.serverAuthContext.sessionModule.properties.tokenIdleTimeMinutes = "";
+                newAuth.serverAuthContext.sessionModule.properties.sessionOnly = newAuth.serverAuthContext.sessionModule.properties.sessionOnly === "true";
+                
+                ConfigDelegate.updateEntity("authentication", newAuth).then(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
+                    $(e.target).prop("disabled",false);
+                });
+            },this));
+        },
+        handleOpenAMUISettings: function(formVal,moduleId,authModules){
+            var prom = $.Deferred(),
+                amSettings = _.pick(formVal,this.model.amUIProperties,"enabled"),
+                maxTokenLifeSeconds = this.$el.find("#sessionModuleForm").find("#maxTokenLifeSeconds"),
+                tokenIdleTimeSeconds = this.$el.find("#sessionModuleForm").find("#tokenIdleTimeSeconds"),
+                confirmed = function(){
+                    SiteConfigurationDelegate.getConfiguration().then(function(uiConfig){
+                        ConfigDelegate.updateEntity("ui/configuration", { configuration: _.extend(uiConfig, amSettings) }).then(function(){
+                            prom.resolve();
+                        });
+                    });
+                },
+                resetTokenTimes = _.bind(function(){
+                    maxTokenLifeSeconds.val(this.model.defaultTokenTime);
+                    tokenIdleTimeSeconds.val(this.model.defaultTokenIdleTime);
+                },this);
+            
+            amSettings.openamAuthEnabled = amSettings.enabled;
+            delete amSettings.enabled;
+            
+            if(amSettings.openamAuthEnabled){
+                if(amSettings.openamUseExclusively){
+                    maxTokenLifeSeconds.val(this.model.amTokenTime);
+                    tokenIdleTimeSeconds.val(this.model.amTokenTime);
+                }
+                
+                if(!amSettings.openamUseExclusively && maxTokenLifeSeconds.val() === this.model.amTokenTime.toString() && tokenIdleTimeSeconds.val() === this.model.amTokenTime.toString()){
+                    //Just in case the user forgot to reset these settings
+                    //doing this so that the user will be able to login
+                    resetTokenTimes();
+                }
+                
+                //validate openamDeploymentUrl
+                openamProxyDelegate.serverinfo(formVal.openamDeploymentUrl).then(_.bind(function(info){
+                    if(info.cookieName){
+                        //set openamSSOTokenCookieName for this module
+                        authModules[parseInt(moduleId.replace("module_",""),10)].properties.openamSSOTokenCookieName = info.cookieName;
+                        confirmed();
+                    } else {
+                        this.$el.find("#submitAuth").prop("disabled",false);
+                        UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
+                    }
+                },this),
+                _.bind(function(){
+                    this.$el.find("#submitAuth").prop("disabled",false);
+                    UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
+                },this));
+            } else {
+                if(maxTokenLifeSeconds.val() === this.model.amTokenTime.toString() && tokenIdleTimeSeconds.val() === this.model.amTokenTime.toString()){
+                    //Just in case the user forgot to reset these settings
+                    //doing this so that the user will be able to login
+                    resetTokenTimes();
+                }
+                 confirmed();
+            }
+            
+            return prom;
         }
     });
 

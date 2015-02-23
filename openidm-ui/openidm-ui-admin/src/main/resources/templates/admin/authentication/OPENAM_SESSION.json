@@ -8,64 +8,141 @@
                 "title": "{{t "templates.auth.moduleEnabled"}}",
                 "type": "boolean",
                 "required": true,
-                "default": true
+                "default": false,
+                "propertyOrder": 1
             },
 
             "queryOnResource": {
-                "title": "{{t "templates.auth.queryOnResource"}}",
+                "title": "{{t "templates.auth.routeToOpenAMUserDataStore"}}",
                 "type": "string",
                 "enum": [],
-                "required": true
+                "required": true,
+                "propertyOrder": 2
             },
 
-            "queryId": {
-                "title": "{{t "templates.auth.queryId"}}",
-                "type": "string"
-            },
-
-            "defaultUserRoles": {
-                "title": "{{t "templates.auth.defaultUserRole"}}",
-                "type": "string"
+            "managedUserLink": {
+                "title": "{{t "templates.auth.openamUserDatastoreMappingName"}}",
+                "type": "string",
+                "propertyOrder": 3
             },
 
             "openamDeploymentUrl": {
                 "title": "{{t "templates.auth.openamDeploymentUrl"}}",
-                "type": "string"
+                "type": "string",
+                "propertyOrder": 4
+            },
+            "openamUseExclusively": {
+                "title": "{{t "templates.auth.openamUseExclusively"}}",
+                "type": "boolean",
+                "required": true,
+                "default": false,
+                "propertyOrder": 5
+            }
+        }
+    },
+
+    "advancedSchema": {
+        "title": "{{t "templates.auth.advancedProperties"}}",
+        "type": "object",
+        "properties": {
+            "augmentSecurityContext": {
+                "title": "{{t "templates.auth.augmentSecurityContext"}}",
+                "type": "object"
+            },
+            "customProperties": {
+                "title": "{{t "templates.auth.customProp"}}",
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "title": "{{t "templates.auth.property"}}",
+                    "headerTemplate": "{{jsonEditor "self.propertyName"}}",
+                    "properties": {
+                        "propertyName": {
+                            "title": "{{t "templates.auth.propertyName"}}",
+                            "type": "string"
+                        },
+                        "propertyType": {
+                            "title": "{{t "templates.auth.propertyType"}}",
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "title": "{{t "templates.auth.string"}}"
+                                }, {
+                                    "title": "{{t "templates.auth.simpleArray"}}",
+                                    "type": "array",
+                                    "format": "table",
+                                    "items": {
+                                        "type": "string",
+                                        "title": "{{t "templates.auth.value"}}"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+
+            "openamLoginUrl": {
+                "title": "{{t "templates.auth.openamLoginUrl"}}",
+                "type": "string",
+                "propertyOrder": 5,
+                "default": "/XUI/#login/"
+            },
+
+            "openamLoginLinkText": {
+                "title": "{{t "templates.auth.openamLoginLinkText"}}",
+                "type": "string",
+                "propertyOrder": 6
+            },
+
+            "defaultUserRoles": {
+                "title": "{{t "templates.auth.defaultUserRole"}}",
+                "type": "string",
+                "propertyOrder": 8,
+                "default": "openidm-authorized"
             },
 
             "openamSSOTokenCookieName": {
                 "title": "{{t "templates.auth.openamSSOTokenCookieName"}}",
-                "type": "string"
+                "type": "string",
+                "propertyOrder": 9,
+                "format": "hidden"
             },
 
             "openamUserAttribute": {
                 "title": "{{t "templates.auth.openamUserAttribute"}}",
-                "type": "string"
+                "type": "string",
+                "propertyOrder": 10,
+                "default": "uid"
             },
 
             "groupComparisonMethod": {
                 "title": "{{t "templates.auth.groupComparisonMethod"}}",
-                "type": "string"
-            },
-
-            "managedUserLink": {
-                "title": "{{t "templates.auth.managedUserLink"}}",
-                "type": "string"
+                "type": "string",
+                "propertyOrder": 11,
+                "format": "hidden",
+                "default": "ldap"
             },
 
             "truststoreType": {
                 "title": "{{t "templates.auth.truststoreType"}}",
-                "type": "string"
+                "type": "string",
+                "propertyOrder": 13,
+                "format": "hidden"
             },
 
             "truststoreFile": {
                 "title": "{{t "templates.auth.truststoreFile"}}",
-                "type": "string"
+                "type": "string",
+                "propertyOrder": 14,
+                "format": "hidden"
             },
 
             "truststorePassword": {
                 "title": "{{t "templates.auth.truststorePassword"}}",
-                "type": "string"
+                "type": "string",
+                "propertyOrder": 15,
+                "format": "hidden"
             },
 
             "propertyMapping": {
@@ -74,11 +151,13 @@
                 "properties": {
                     "authenticationId": {
                         "title": "{{t "templates.auth.authId"}}",
-                        "type": "string"
+                        "type": "string",
+                        "propertyOrder": 1
                     },
                     "userCredential": {
                         "title": "{{t "templates.auth.userCred"}}",
-                        "type": "string"
+                        "type": "string",
+                        "propertyOrder": 2
                     },
 
                     "userorgroup": {
@@ -95,9 +174,11 @@
                                 "title": "{{t "templates.auth.groupMembership"}}",
                                 "$ref": "#/definitions/GroupMembership"
                             }
-                        ]
+                        ],
+                        "propertyOrder": 3
                     }
-                }
+                },
+                "propertyOrder": 16
             }
         },
 
@@ -139,49 +220,6 @@
                                     }
                                 }
                             }
-                        }
-                    }
-                }
-            }
-        }
-    },
-
-    "advancedSchema": {
-        "title": "{{t "templates.auth.advancedProperties"}}",
-        "type": "object",
-        "properties": {
-            "augmentSecurityContext": {
-                "title": "{{t "templates.auth.augmentSecurityContext"}}",
-                "type": "object"
-            },
-            "customProperties": {
-                "title": "{{t "templates.auth.customProp"}}",
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "title": "{{t "templates.auth.property"}}",
-                    "headerTemplate": "{{jsonEditor "self.propertyName"}}",
-                    "properties": {
-                        "propertyName": {
-                            "title": "{{t "templates.auth.propertyName"}}",
-                            "type": "string"
-                        },
-                        "propertyType": {
-                            "title": "{{t "templates.auth.propertyType"}}",
-                            "oneOf": [
-                                {
-                                    "type": "string",
-                                    "title": "{{t "templates.auth.string"}}"
-                                }, {
-                                    "title": "{{t "templates.auth.simpleArray"}}",
-                                    "type": "array",
-                                    "format": "table",
-                                    "items": {
-                                        "type": "string",
-                                        "title": "{{t "templates.auth.value"}}"
-                                    }
-                                }
-                            ]
                         }
                     }
                 }

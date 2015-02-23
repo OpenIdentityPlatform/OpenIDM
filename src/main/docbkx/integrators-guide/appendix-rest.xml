@@ -313,22 +313,16 @@
 }</computeroutput></screen>
 
    <para>
-    To create an object with a client-assigned ID, use the
-    <literal>PUT</literal> operation, with either of the following headers:
-   </para>
-   <simplelist type="vert" columns="1">
-    <member><literal>If-None-Match: *</literal></member>
-    <member><literal>If-None-Match: "*"</literal></member>
-   </simplelist>
-   <para>
-    Specify the ID as part of the URL, for example:
+    To create an object with a client-assigned ID, use a <literal>PUT</literal>
+    request, with the <literal>If-None-Match</literal> header. Specify the ID as
+    part of the URL, for example:
    </para>
    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
- --header "If-None-Match: *"
+ --header "If-None-Match: *" \
  --request PUT \
  --data '{
     "userName":"james",
@@ -1106,6 +1100,7 @@ Content-Length: 89
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-None-Match: *" \
  --request PUT \
  --data '{
     "userName":"james",
@@ -1113,7 +1108,7 @@ Content-Length: 89
     "givenName":"James",
     "mail": "james@example.com",
     "telephoneNumber": "082082082",
-    "password":"password"
+    "password":"Passw0rd"
   }' \
 "https://localhost:8443/openidm/managed/user/james"</userinput></screen>
 
