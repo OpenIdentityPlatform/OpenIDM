@@ -257,6 +257,13 @@
        <programlisting>
 openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
        </programlisting>
+       <para>
+        For more information about the query function see <link
+        xlink:href="integrators-guide#function-query"
+        xlink:role="http://docbook.org/xlink/role/olink">
+        <citetitle>openidm.query</citetitle></link> in the <citetitle>Scripting
+        Reference</citetitle>.
+       </para>
       </listitem>
       <listitem>
        <para>
