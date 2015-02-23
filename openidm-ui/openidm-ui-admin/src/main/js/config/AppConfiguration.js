@@ -39,7 +39,7 @@ define("config/AppConfiguration", [
                     moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
                     configuration: {
                         LoginView : "org/forgerock/openidm/ui/admin/login/LoginView",
-                        LoginDialog : "org/forgerock/openidm/ui/admin/util/LoginDialog"
+                        LoginDialog: "org/forgerock/commons/ui/common/LoginDialog"
                     }
                 },
                 {
@@ -110,6 +110,23 @@ define("config/AppConfiguration", [
                 {
                     moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                     configuration: {
+                        userBar: [
+                            {
+                                "id": "settings",
+                                "href": "#settings/",
+                                "i18nKey": "common.form.settings"
+                            },
+                            {
+                                "id": "user_link",
+                                "href": "../openidmui",
+                                "i18nKey": "common.form.userView"
+                            },
+                            {
+                                "id": "logout_link",
+                                "href": "#logout/",
+                                "i18nKey": "common.form.logout"
+                            }
+                        ],
                         links: {
                             "admin" : {
                                 "role": "ui-admin",

@@ -34,6 +34,16 @@ define("org/forgerock/openidm/ui/admin/ManagedObjectNavigation", [
     var obj = {};
     
     obj.build = function(){
+
+        nav.addUserBarLink(
+            {
+                "id": "admin",
+                "href": "../admin",
+                "i18nKey": "openidm.admin.label"
+            }, 
+            'top'
+        );
+
         return configDelegate.readEntity("managed").then(function(managed){
             _.chain(managed.objects)
                 .reject(function(o){ return !o.schema || _.isEmpty(o.schema.properties) || o.name === "user";  })
