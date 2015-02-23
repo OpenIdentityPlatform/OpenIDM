@@ -71,20 +71,12 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                         obj = syncDelegate.translateToTarget(obj, this.mapping);
                     }
                     return mappingUtils.buildObjectRepresentation(obj, this.data.targetProps);
-                }, this),
-                correlationQueries = this.mapping.correlationQuery;
+                }, this);
 
             e.preventDefault();
 
-            if(!_.isArray(correlationQueries)){
-                correlationQueries = [correlationQueries];
-            }
-
-            correlationQueries = _.filter(correlationQueries, function(link){
-                return link.linkQualifier !== undefined;
-            });
-
             args = {
+                selectedLinkQualifier: selectedRow.linkQualifier,
                 sourceObj: sourceObj,
                 sourceObjRep : translateObj(_.pick(sourceObj, this.data.sourceProps), true),
                 targetObj: targetObj,
@@ -92,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                 targetProps: $.extend({},this.data.targetProps),
                 ambiguousTargetObjectIds: selectedRow.ambiguousTargetObjectIds,
                 recon: $.extend({},this.data.recon),
-                linkQualifiers : correlationQueries,
+                linkQualifiers : this.mapping.linkQualifiers,
                 reloadAnalysisGrid: _.bind(function(){
                     this.renderReconResults(this.$el.find("#situationSelection").val().split(","), null);
                 }, this)
@@ -240,6 +232,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                         }
                                     }
                                 },
+                                {"name":"linkQualifier", "label": $.t("templates.mapping.linkQualifier"), search: false, "sortable": false},
                                 {"name": "targetObjectDisplay", "jsonmap": "targetObject","label": $.t("templates.mapping.target"), "sortable": false,
                                     formatter : function (targetObject, opts, reconRecord) {
                                         if(reconRecord.sourceObject && _.contains(_this.data.newLinkIds, reconRecord.sourceObject._id)){

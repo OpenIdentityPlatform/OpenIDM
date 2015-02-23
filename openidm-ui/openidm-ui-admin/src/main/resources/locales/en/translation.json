@@ -720,6 +720,7 @@
             "linkQualifiers": "Link Qualifiers",
             "uniqueLinkQualifiers": "The link qualifier must be unique.",
             "backToMapping" : "Back to Mappings",
+            "linkQualifier" : "Link Qualifier",
             "mappings": "Mappings",
             "source": "Source",
             "target": "Target",
