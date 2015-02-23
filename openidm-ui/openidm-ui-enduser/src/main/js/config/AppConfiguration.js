@@ -101,6 +101,23 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                 configuration: {
+                    userBar: [
+                        {
+                            "id": "profile_link",
+                            "href": "#profile/",
+                            "i18nKey": "common.user.profile"
+                        },
+                        {
+                            "id": "security_link",
+                            "href": "#profile/change_security_data/",
+                            "i18nKey": "templates.user.UserProfileTemplate.changeSecurityData"
+                        },
+                        {
+                            "id": "logout_link",
+                            "href": "#logout/",
+                            "i18nKey": "common.form.logout"
+                        }
+                    ],
                     links: {
                         "admin" : {
                             "role": "ui-admin",

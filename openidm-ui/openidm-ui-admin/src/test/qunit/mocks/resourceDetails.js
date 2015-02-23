@@ -24,7 +24,6 @@
 
 /*global require, define*/
 define([
-    "text!templates/admin/AdminBaseTemplate.html",
     "text!templates/admin/managed/AddEditManagedTemplate.html",
     "text!templates/admin/ResourcesViewTemplate.html",
     "text!templates/admin/util/ScriptEditor.html",
@@ -34,7 +33,6 @@ define([
     /* an unfortunate need to duplicate the file names here, but I haven't
      yet found a way to fool requirejs into doing dynamic dependencies */
     var staticFiles = [
-            "templates/admin/AdminBaseTemplate.html",
             "templates/admin/managed/AddEditManagedTemplate.html",
             "templates/admin/ResourcesViewTemplate.html",
             "templates/admin/util/ScriptEditor.html",

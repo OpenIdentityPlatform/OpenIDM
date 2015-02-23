@@ -28,7 +28,6 @@ define("org/forgerock/openidm/ui/admin/util/AdminAbstractView", [
     "org/forgerock/commons/ui/common/main/AbstractView"
 ], function(AbstractView) {
     var AdminAbstractView = AbstractView.extend({
-        baseTemplate: "templates/admin/AdminBaseTemplate.html",
 
         sectionHideShow: function(event) {
             var clickedEle = event.target;

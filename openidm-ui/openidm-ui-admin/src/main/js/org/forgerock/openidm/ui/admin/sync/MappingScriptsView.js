@@ -41,7 +41,6 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
             BrowserStorageDelegate) {
     var MappingScriptsView = AdminAbstractView.extend({
         template: "templates/admin/sync/MappingScriptsTemplate.html",
-        baseTemplate: "templates/admin/AdminBaseTemplate.html",
 
         addScript: function() {
             var event = this.$el.find(".scriptEvents option:selected"),
