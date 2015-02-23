@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2015 ForgeRock AS
   !    
 -->
 <glossary xml:id='openidm-glossary'
@@ -77,13 +77,16 @@
 <glossentry>
  <glossterm>OSGi</glossterm>
  <glossdef>
-  <para>A module system and service platform for the Java programming language 
-  that implements a complete and dynamic component model. For a good 
-  introduction, see the <link xlink:show="new" 
-  xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site. OpenIDM 
-  services are designed to run in any OSGi container, but OpenIDM currently 
-  runs in <link xlink:show="new" 
-  xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link>.</para>
+  <para>
+   A module system and service platform for the Java programming language that
+   implements a complete and dynamic component model. For a good introduction,
+   see the <link xlink:show="new"
+   xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site. While
+   OpenIDM services are designed to run in any OSGi container, currently only
+   <link xlink:show="new"
+   xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link> is
+   supported.
+  </para>
  </glossdef>
 </glossentry>
 
