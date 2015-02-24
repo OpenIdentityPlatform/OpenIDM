@@ -47,50 +47,54 @@
 }
 
 #subNavHolder {
-    display: none;
+  display: none;
 }
 
 .back-bar {
-    padding: 15px 0;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
 }
 
 .clean-btn:hover {
   color: #000;
 }
 
-.schema-panel {
-    border-top: 1px solid #eee;
-    padding: 15px;
-    h3 {
-        margin-top: 0px;
-    }
+.inline-label {
+  padding-left: 15px;
 }
 
-.inline-label {
-    padding-left: 15px;
+.panel-collapse-group .panel {
+  margin-bottom:0px;
 }
 
 /*
     Managed Object Admin
 */
 
+.schema-panel {
+  border-top: 1px solid #eee;
+  padding-top: 5px;
+  h3 {
+    margin-top: 0px;
+  }
+}
+
 #managedPropertyWrapper {
-    input[type=text]{
-        width: 300px;
-    }
-    .managed-property {
-        border: 1px solid #efefef;
-        margin-top: 15px;
-        padding: 10px;
-    }
+  input[type=text]{
+    width: 300px;
+  }
+  .managed-property {
+    border: 1px solid #efefef;
+    margin-top: 15px;
+    padding: 10px;
+  }
 }
 .scripts-container {
+  margin-top: 15px;
+  .event-hook-body {
     margin-top: 15px;
-    .event-hook-body {
-        margin-top: 15px;
-    }
+  }
 }
 
 /*
@@ -102,8 +106,12 @@
   .dropdown-menu > li > a:hover,
   .dropdown-menu > li > a:focus,
   .dropdown-submenu:hover > a,
-  .dropdown-submenu:focus > a {
+  .dropdown-submenu:focus > a,
+  .dropdown-menu > li > span:hover,
+  .dropdown-menu > li > span:focus,
+  .dropdown-submenu:hover > span,
+  .dropdown-submenu:focus > span {
     color: #fff;
-    background-color: #519387;
+    background-color: @forgerock-green;
   }
 }
