@@ -61,6 +61,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.AuditConstants;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -154,6 +155,16 @@ class ObjectMapping {
 
     /** a script that determines if a target object is valid to be mapped */
     private Script validTarget;
+    
+    /**
+     * A boolean indicating is paging should be used for recon source queries.
+     */
+    private boolean reconSourceQueryPaging;
+    
+    /**
+     * A page size for recon source queries, if paging is used.
+     */
+    private int reconSourceQueryPageSize;
     
     /**
      * A Map of correlation queries where the keys are {@link String} instances representing link qualifiers and the 
@@ -295,6 +306,8 @@ class ObjectMapping {
         correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
         syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
         linkingEnabled = config.get("enableLinking").defaultTo(Boolean.TRUE).asBoolean();
+        reconSourceQueryPaging = config.get("reconSourceQueryPaging").defaultTo(false).asBoolean();
+        reconSourceQueryPageSize = config.get("reconSourceQueryPageSize").defaultTo(ReconFeeder.DEFAULT_FEED_SIZE).asInteger();
 
         LOGGER.debug("Instantiated {}", name);
     }
@@ -887,7 +900,9 @@ class ObjectMapping {
 
             // Get the relevant source (and optionally target) identifiers before we assess the situations
             reconContext.getStatistics().sourceQueryStart();
-            Iterator<ResultEntry> sourceIter = reconContext.querySourceIter();
+            
+            ReconQueryResult sourceQueryResult = reconContext.querySourceIter(reconSourceQueryPageSize, null);
+            Iterator<ResultEntry> sourceIter = sourceQueryResult.getIterator();
             reconContext.getStatistics().sourceQueryEnd();
             if (!sourceIter.hasNext()) {
                 if (!reconContext.getReconHandler().allowEmptySourceSet()) {
@@ -932,9 +947,24 @@ class ObjectMapping {
             reconContext.setStage(ReconStage.ACTIVE_RECONCILING_SOURCE);
 
             reconContext.getStatistics().sourcePhaseStart();
-            ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context,
-                    rootContext, allLinks, remainingTargetIds, sourceRecon);
-            sourcePhase.execute();
+            
+            boolean queryNextPage = false;
+
+            LOGGER.info("Perfoming source sync for recon {} on mapping {}", new Object[] {reconId, name});
+            do {
+                // Query next page of results if paging
+                if (queryNextPage) {
+                    LOGGER.debug("Querying next page of source ids");
+                    sourceQueryResult = reconContext.querySourceIter(reconSourceQueryPageSize, sourceQueryResult.getPagingCookie());
+                    sourceIter = sourceQueryResult.getIterator();
+                }
+                // Perform source recon phase on current set of source ids
+                ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context, rootContext, allLinks,
+                        remainingTargetIds, sourceRecon);
+                sourcePhase.execute();
+                queryNextPage = true;
+            } while (reconSourceQueryPaging && sourceQueryResult.getPagingCookie() != null); // If paging, loop through next pages
+            
             reconContext.getStatistics().sourcePhaseEnd();
             measureSource.end();
 

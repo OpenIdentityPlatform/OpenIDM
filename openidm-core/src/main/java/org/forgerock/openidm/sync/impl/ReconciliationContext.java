@@ -1,4 +1,4 @@
-/*
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
@@ -40,10 +40,7 @@ import org.forgerock.json.resource.ServerContext;
 
 
 /**
- * Represents the information and functionality for a
- * reconciliation run
- *
- * @author aegloff
+ * Represents the information and functionality for a reconciliation run
  */
 public class ReconciliationContext {
 
@@ -282,10 +279,10 @@ public class ReconciliationContext {
      * @return the source ids to reconcile in this recon scope
      * @throws SynchronizationException if getting the ids to reconcile failed
      */
-    Iterator<ResultEntry> querySourceIter() throws SynchronizationException {
-        ResultIterable result = getReconHandler().querySource();
+    ReconQueryResult querySourceIter(int pageSize, String pagingCookie) throws SynchronizationException {
+        ReconQueryResult result = getReconHandler().querySource(pageSize, pagingCookie);
         setSourceIds(result.getAllIds());
-        return result.iterator();
+        return result;
     }
     
     /**

@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.forgerock.json.fluent.JsonValue;
-
+import org.forgerock.json.resource.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,38 +40,62 @@ import static org.forgerock.json.fluent.JsonValue.object;
 /**
  * Represents a reconciliation of a set defined by query/queries,
  * typically a sub-set of source and/or target objects
- * @author aegloff
  */
 public class ReconTypeByQuery extends ReconTypeBase {
-    private static final Logger logger = LoggerFactory.getLogger(ReconTypeByQuery.class);
 
-    // Defaulting to run target phase
-    static final boolean DEFAULT_RUN_TARGET_PHASE = true;
-
+    /**
+     * A {@link JsonValue} representing a source query.
+     */
     JsonValue sourceQuery;
+
+    /**
+     * A {@link JsonValue} representing a target query. Only used if target phase is enabled
+     */
     JsonValue targetQuery;
 
+    /**
+     * A constructor.
+     * 
+     * @param reconContext a {@link RconciliationContext} object.
+     * @throws BadRequestException
+     */
     public ReconTypeByQuery(ReconciliationContext reconContext) {
         super(reconContext, DEFAULT_RUN_TARGET_PHASE);
 
-        sourceQuery = calcEffectiveQuery("sourceQuery",
-                reconContext.getObjectMapping().getSourceObjectSet());
-        targetQuery = calcEffectiveQuery("targetQuery",
-                reconContext.getObjectMapping().getTargetObjectSet());
+        sourceQuery = calcEffectiveQuery("sourceQuery", reconContext.getObjectMapping().getSourceObjectSet());
+        targetQuery = calcEffectiveQuery("targetQuery",  reconContext.getObjectMapping().getTargetObjectSet());
     }
 
-    public ResultIterable querySource() throws SynchronizationException {
-        return query(sourceQuery.get("resourceName").asString(), sourceQuery, reconContext, 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReconQueryResult querySource(int pageSize, String pagingCookie) throws SynchronizationException {
+        return query(sourceQuery.get("resourceName").asString(), 
+                sourceQuery, 
+                reconContext, 
                 ((Collection<String>) Collections.synchronizedList(new ArrayList<String>())), 
-                true, QuerySide.SOURCE);
+                true, 
+                QuerySide.SOURCE,
+                pageSize,
+                pagingCookie);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ResultIterable queryTarget() throws SynchronizationException {
         return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
                 Collections.synchronizedList(new ArrayList<String>()), 
-                reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), QuerySide.TARGET);                
+                reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), QuerySide.TARGET,
+                0, null).getResultIterable();                
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public JsonValue getReconParameters() {
         return json(object(
                 field("sourceQuery", sourceQuery.getObject()),

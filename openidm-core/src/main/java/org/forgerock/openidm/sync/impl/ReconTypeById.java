@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonValue;
-
 import org.forgerock.json.resource.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,25 +38,30 @@ import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
- * Represents a reconciliation by id(s)
- * @author aegloff
+ * Represents a reconciliation by id(s).
  */
 public class ReconTypeById extends ReconTypeBase {
-    private static final Logger logger = LoggerFactory.getLogger(ReconTypeByQuery.class);
 
-    // Defaulting to NOT run target phase
-    static final boolean DEFAULT_RUN_TARGET_PHASE = false;
-
+    /**
+     * A {@link List} of source IDs.
+     */
     List<String> sourceIds;
 
-    // Only used if target phase is enabled
-    JsonValue targetQuery;
+    /**
+     * A {@link JsonValue} representing a target query. Only used if target phase is enabled.
+     */
+    private JsonValue targetQuery;
 
+    /**
+     * A constructor.
+     * 
+     * @param reconContext a {@link ReconciliationContext} object.
+     * @throws BadRequestException
+     */
     public ReconTypeById(ReconciliationContext reconContext) throws BadRequestException {
         super(reconContext, DEFAULT_RUN_TARGET_PHASE);
 
-        targetQuery = calcEffectiveQuery("targetQuery",
-                reconContext.getObjectMapping().getTargetObjectSet());
+        targetQuery = calcEffectiveQuery("targetQuery", reconContext.getObjectMapping().getTargetObjectSet());
 
         JsonValue idsValue = reconContext.getReconParams().get("ids");
         if (idsValue.isNull()) {
@@ -71,16 +75,33 @@ public class ReconTypeById extends ReconTypeBase {
         sourceIds.add(rawIds);
     }
 
-    public ResultIterable querySource() {
-        return new ResultIterable(sourceIds, null);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ReconQueryResult querySource(int pageSize, String pagingCookie) {
+        return new ReconQueryResult(new ResultIterable(sourceIds, null));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ResultIterable queryTarget() throws SynchronizationException {
-        return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
+        return query(targetQuery.get("resourceName").asString(), 
+                targetQuery, 
+                reconContext,
                 Collections.synchronizedList(new ArrayList<String>()), 
-                reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), QuerySide.TARGET);
+                reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), 
+                QuerySide.TARGET,
+                0,
+                null).getResultIterable();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public JsonValue getReconParameters() {
         return json(object(
                 field("sourceIds", sourceIds),
