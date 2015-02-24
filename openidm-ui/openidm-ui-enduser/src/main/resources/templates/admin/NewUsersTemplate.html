@@ -1,16 +1,18 @@
-<div id="users" class="content-bg">
-    <div class="page-header">
-        <div class='btn-toolbar pull-right'>
-            <div class='btn-group'>
-                <a href="#users/add/"><button class="btn btn-primary" type="button">{{t "common.form.addUser"}}</button></a>
-                <a href="#"><button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button></a>
-                <a href="#"><button type="button"  class="btn btn-primary"  id="clearFiltersBtn" disabled>{{t 'common.form.clearFilters'}}</button></a>
+<div class="container">
+    <div id="users" class="content-bg">
+        <div class="page-header">
+            <div class='btn-toolbar pull-right'>
+                <div class='btn-group'>
+                    <a href="#users/add/"><button class="btn btn-primary" type="button">{{t "common.form.addUser"}}</button></a>
+                    <a href="#"><button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button></a>
+                    <a href="#"><button type="button"  class="btn btn-primary"  id="clearFiltersBtn" disabled>{{t 'common.form.clearFilters'}}</button></a>
+                </div>
             </div>
+            <h3>{{t "common.user.usersList"}}</h3>
         </div>
-        <h3>{{t "common.user.usersList"}}</h3>
-    </div>
 
-    <div class="col-md-offset-1">
-        <table id="usersTable"></table>
+        <div class="col-md-offset-1">
+            <table id="usersTable"></table>
+        </div>
     </div>
 </div>
