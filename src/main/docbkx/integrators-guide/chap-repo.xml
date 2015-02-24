@@ -586,19 +586,24 @@ openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
   <section xml:id="searches-with-generic-mappings">
    <title>Improving Search Performance for Generic Mappings</title>
    <para>
-    By default, all properties in a generic mapping are searchable.
-    Although there are no individual indexes in a generic mapping, you can
-    improve search performance by setting only those properties that you need to
-    search as <literal>"searchable"</literal>. Properties that are searchable
-    are created within the corresponding properties table. The properties table
-    exists only for searches or look-ups, and has a composite index, based on
-    the resource, then the property name.
+    All properties in a generic mapping are searchable by default. In other
+    words, the value of the <literal>"searchableDefault"</literal> property is
+    <literal>true</literal> unless you explicitly set it to false. Although
+    there are no individual indexes in a generic mapping, you can improve search
+    performance by setting only those properties that you need to search as
+    <literal>"searchable"</literal>. Properties that are searchable are created
+    within the corresponding properties table. The properties table exists only
+    for searches or look-ups, and has a composite index, based on the resource,
+    then the property name.
    </para>
    <para>
-    To restrict searches to specific properties, set the
-    <literal>"searchableDefault"</literal> to false for the mapping, and then
-    explicitly set <literal>"searchable"</literal> to true for each property
-    that should be searched. The following sample extract from
+    The sample JDBC repository configuration files
+    (<filename>db/<replaceable>database</replaceable>/conf/repo.jdbc.json</filename>)
+    restrict searches to specific properties by setting the
+    <literal>"searchableDefault"</literal> to <literal>false</literal> for
+    <literal>managed/user</literal> mappings. You must explicitly set
+    <literal>"searchable"</literal> to true for each property that should be
+    searched. The following sample extract from
     <filename>repo.jdbc.json</filename> indicates searches restricted to the
     <literal>"userName"</literal> property.
    </para>
