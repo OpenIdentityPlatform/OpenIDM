@@ -248,6 +248,7 @@
       }
     }
   }
+
 }
 
 #transformationScriptHolder,
@@ -306,4 +307,11 @@
       font-style: italic;
     }
   }
+}
+
+/*
+  The only way to reliable limit the column width
+*/
+td[aria-describedby="analysisGrid_linkQualifier"] {
+  width:150px;
 }

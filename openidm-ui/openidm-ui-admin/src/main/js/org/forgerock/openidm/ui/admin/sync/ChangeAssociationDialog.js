@@ -56,13 +56,13 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
             dialogData.searchCriteria = searchCriteria;
             searchDelegate.searchResults(MappingBaseView.currentMapping().target, this.data.targetProps, searchCriteria).then(_.bind(function (results) {
                 dialogData.results = _.chain(results)
-                                        .map(_.bind(function(result){
-                                            return {
-                                                _id: result._id,
-                                                objRep: mappingUtils.buildObjectRepresentation(result, this.data.targetProps)
-                                            };
-                                        },this))
-                                        .value();
+                    .map(_.bind(function(result){
+                        return {
+                            _id: result._id,
+                            objRep: mappingUtils.buildObjectRepresentation(result, this.data.targetProps)
+                        };
+                    },this))
+                    .value();
                 this.reloadData(dialogData);
             },this), _.bind(function () {
                 dialogData.results = [];
@@ -150,6 +150,8 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
                             this.$el,
                             _.extend({}, conf.globalData, this.data),
                             _.bind(function() {
+                                this.$el.find("#linkTypeSelect").val(args.selectedLinkQualifier);
+
                                 if(callback) {
                                     callback();
                                 }
@@ -163,4 +165,3 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
 
     return new ChangeAssociationDialog();
 });
-

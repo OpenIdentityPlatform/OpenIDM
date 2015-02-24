@@ -1733,6 +1733,145 @@ $ ./startup.sh</screen>
   </section>
  </section>
 
+ <section xml:id="ui-custom-template">
+  <title>Customizing a UI Template</title>
+
+  <para>
+   You may want to customize the information that you can include in the Web UI.
+   To do so copy appropriate files from the <filename>openidm/ui/default</filename>
+   directory to the <filename>openidm/ui/extension</filename> directory. The
+   process is similar to <xref linkend="ui-customizing" />.
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <para>
+     For the Admin UI, find HTML template files in the
+     <filename>admin/public/templates</filename> subdirectory.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     For the Data Management UI, find HTML template files in the
+     <filename>enduser/public/templates</filename> subdirectory.
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   In this section, you will see how to add another entry to the Data Management
+   UI Add User page.
+  </para>
+
+  <para>
+   Start OpenIDM in the Data Management UI by navigating to
+   <literal>https://localhost:8443/openidmui</literal>. Select Users and click
+   Add User.
+  </para>
+
+  <para>
+   If you want users to add more information, you can modify the template.
+   The template associated with the Create New Account page is
+   <filename>AdminUserRegistrationTemplate.html</filename>.
+  </para>
+
+  <para>
+   In the following steps, you will copy the template for the Create New Account
+   page to the appropriate subdirectory, and then edit that template.
+  </para>
+
+  <procedure>
+   <step>
+    <para>
+     Copy the template file for the Create New Account page to the appropriate
+     subdirectory.
+    </para>
+   </step>
+   <step>
+    <para>
+     Create the appropriate subdirectory:
+    </para>
+    <screen>$ <userinput>mkdir /path/to/openidm/ui/extension/templates/admin</userinput></screen>
+   </step>
+   <step>
+    <para>
+     Copy the template file to the new subdirectory:
+    </para>
+    <screen>$ <userinput>cd /path/to/openidm/ui/default/enduser/public/templates/admin</userinput>
+$ <userinput>cp AdminUserRegistrationTemplate.html \
+/path/to/openidm/ui/extension/templates/admin</userinput></screen>
+   </step>
+   <step>
+    <para>
+     Open the copied template file in a text editor:
+    </para>
+    <screen>$ <userinput>cd /path/to/openidm/ui/extension/templates/admin</userinput>
+$ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
+   </step>
+   <step>
+    <para>
+     Create a new <literal>group-field-block</literal> stanza in the desired
+     location. The following excerpt from a modified version of the file shows
+     a <literal>group-field-block</literal> named "Employee Title", placed after
+     the "common.user.familyName" (Last Name) entry:
+    </para>
+    <screen>&lt;div class="group-field-block"&gt;
+ &lt;label for="sn" class="light align-right"&gt;{{t "common.user.familyName"}}&lt;/label&gt;
+  &lt;div class="float-left separate-message"&gt;
+  &lt;div class="group-input-span"&gt;
+   &lt;input type="text" id="sn" name="sn" value="" data-validation-dependents="password" /&gt;
+   &lt;span class="error"&gt;x&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="validation-message"&gt;&lt;/div&gt;
+ &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="group-field-block"&gt;
+ &lt;label for="employeeTitle" class="light align-right"&gt;Employee Title&lt;/label&gt;
+ &lt;div class="float-left separate-message"&gt;
+  &lt;div class="group-input-span"&gt;
+   &lt;input type="text" id="title" name="title" value="" /&gt;
+  &lt;/div&gt;
+  &lt;div class="validation-message"&gt;&lt;/div&gt;
+ &lt;/div&gt;
+&lt;/div&gt;</screen>
+   </step>
+   <step>
+    <para>
+     Start OpenIDM.
+    </para>
+   </step>
+   <step>
+    <para>
+     Open a browser free of any cached information. Navigate to the Data
+     Management UI at <literal>https://localhost:8443/openidmui</literal>.
+     Select Users and then click Add User.
+    </para>
+   </step>
+   <step>
+    <para>
+     Observe the Create New Account screen with the Employee Title entry. You
+     can now use the Data Management View UI to add new users with employee
+     titles.
+    </para>
+
+    <mediaobject xml:id="custom-template">
+     <alt>A Custom Add User Template</alt>
+     <imageobject>
+      <imagedata fileref="images/custom-template.png" format="PNG" />
+     </imageobject>
+     <textobject>
+      <para>After you configure the Add User template, you can use the result.
+      </para>
+     </textobject>
+    </mediaobject>
+
+   </step>
+
+  </procedure>
+
+ </section>
+
  <section xml:id="ui-external-password-reset">
   <title>Using an External System for Password Reset</title>
   <para>
