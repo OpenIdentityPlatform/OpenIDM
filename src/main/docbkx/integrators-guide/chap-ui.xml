@@ -1783,12 +1783,6 @@ $ ./startup.sh</screen>
   <procedure>
    <step>
     <para>
-     Copy the template file for the Create New Account page to the appropriate
-     subdirectory.
-    </para>
-   </step>
-   <step>
-    <para>
      Create the appropriate subdirectory:
     </para>
     <screen>$ <userinput>mkdir /path/to/openidm/ui/extension/templates/admin</userinput></screen>
