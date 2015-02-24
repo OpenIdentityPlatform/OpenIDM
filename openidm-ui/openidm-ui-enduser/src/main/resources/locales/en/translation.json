@@ -60,7 +60,7 @@
                     "addMore" : "Add more apps",
                     "groups" : "Groups",
                     "tasksMenu" : "Tasks",
-                    "allTasks" : "Tasks that are in my group's queue",
+                    "allTasks" : "My group's Tasks",
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process"
                 }
@@ -131,7 +131,7 @@
                     "requestInitiator" : "Request initiated by"
                 },
                 "TasksDashboardTemplate" : {
-                    "tasksFromGroupsQueue" : "Tasks that are in my group's queue"
+                    "tasksFromGroupsQueue" : "My group's Tasks"
                 },
                 "ProcessUserTaskTableTemplate" : {
                     "requestCount" : "__count__  request",
@@ -342,8 +342,8 @@
             "admin" : {
                 "tasks" : {
                     "TasksMenuView" : {
-                        "noTasksAssigned" : "You do not have any tasks assigned to you right now.",
-                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue now.",
+                        "noTasksAssigned" : "You do not have any tasks assigned to you at this time.",
+                        "noTasksInGroupQueue" : "Your group has no tasks at this time.",
                         "denyDefaultReason" : "Enter a reason for denying this request",
                         "acceptanceForm" : {
                             "for" : "For",

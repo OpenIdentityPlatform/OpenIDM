@@ -190,7 +190,7 @@
   margin-top: -25px;
 }
 .popover-info {
-    width: 400px;
+  width: 400px;
 }
 .mapping .panel {
   overflow: auto;
@@ -600,42 +600,69 @@ h4.connector-role {
 
 #mappingContent {
   background-color: @card-container-background-color;
-  padding: 20px;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
 }
 
+#attributesHeading {
+  padding: 15px;
+}
+
 #subNavHolderClone{
-        .container{
-            padding: 0px;
-            margin: 0px;
-            width: 100%;
+  .container{
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+  }
+
+  ul {
+    li{
+      margin-right: 0px;
+
+      a{
+        color: @forgerock-dark-grey;
+        padding-left: 20px;
+        padding-right: 20px;
+        text-transform: capitalize;
+        i{
+          padding-right: 5px;
         }
-        
-        ul {
-            li{
-                margin-right: 0px;
-                
-                a{
-                    color: @forgerock-dark-grey;
-                    padding-left: 20px;
-                    padding-right: 20px;
-                    text-transform: capitalize;
-                    i{
-                        padding-right: 5px;
-                    }
-                }
-                
-                a:hover{
-                    color: @forgerock-green;
-                }
-            }
-            
-            li.active a{
-                color: @forgerock-green;
-            }
-        } 
+      }
+
+      a:hover{
+        color: @forgerock-green;
+      }
+    }
+
+    li.active a{
+      color: @forgerock-green;
+    }
+  }
+}
+
+/*
+  Properties styles
+*/
+
+.jqgrid-container {
+  margin-top: 20px;
+}
+
+.alert-warning .fa {
+  margin-right: 5px;
+}
+
+.removeLinkQualifier {
+  margin-top: 15px;
+}
+
+.linkqualifier-message {
+  margin-top:15px;
+}
+
+.notValid {
+  margin-top:15px;
 }
 
 @media (min-width: 993px) {
@@ -755,18 +782,18 @@ h4.connector-role {
 
 @media (max-width: 767px){
   #subNavHolderClone{
-        ul {
-            li{
-                a{ 
-                    padding: 10px;
-                    i{
-                        padding-left: 10px;
-                    }
-                    span{
-                        font-size: 0px;
-                    }
-                }
-            }
-        } 
+    ul {
+      li{
+        a{
+          padding: 10px;
+          i{
+            padding-left: 10px;
+          }
+          span{
+            font-size: 0px;
+          }
+        }
+      }
+    }
   }
 }
