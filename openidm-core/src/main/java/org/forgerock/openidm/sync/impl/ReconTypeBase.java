@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -32,7 +32,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
-
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -48,11 +47,18 @@ import static org.forgerock.openidm.util.RequestUtil.hasQueryId;
 
 /**
  * A base class for reconciliation type handling
- *
- * @author aegloff
  */
 public abstract class ReconTypeBase implements ReconTypeHandler {
+    
+    /**
+     * Logger.
+     */
     private static final Logger logger = LoggerFactory.getLogger(ReconTypeBase.class);
+
+    /**
+     *  Defaulting to NOT run target phase
+     */
+    static final boolean DEFAULT_RUN_TARGET_PHASE = false;
     
     /**
      * An indicator for which side of a reconciliation 
@@ -60,9 +66,21 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      */
     public enum QuerySide {SOURCE, TARGET};
 
+    /**
+     * A {@link ReconciliationContext} object.
+     */
     ReconciliationContext reconContext;
+    
+    /**
+     * A boolean indicating if target phase should be run.
+     */
     final boolean runTargetPhase;
+    
+    /**
+     * A boolean indicating if an empty source set is allowed.
+     */
     final boolean allowEmptySourceSet;
+    
     /**
      * If configured, sets if the defined source query returns full object data (true) or only ids (false)
      * If not set in configuration, it will try to auto-detect this based on query results.
@@ -77,6 +95,12 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      */
     final Boolean targetQueryFullEntry;
 
+    /**
+     * A constructor.
+     * 
+     * @param reconContext a {@link RconciliationContext} object.
+     * @param defaultRunTargetPhase a boolean indicating if target phase should be run.
+     */
     public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase) {
         this.reconContext = reconContext;
         this.allowEmptySourceSet = calcEffectiveConfig("allowEmptySourceSet").defaultTo(false).asBoolean();
@@ -90,10 +114,18 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean isRunTargetPhase() {
         return runTargetPhase;
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean allowEmptySourceSet() {
         return allowEmptySourceSet;
     }
@@ -182,15 +214,23 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * @param collectionToPopulate the collection to populate with results
      * @param caseSensitive whether the collection should be populated in case
      * sensitive fashion, or if false it populates as lower case only
-     * @return the collection of (unqualified) ids
+     * @param pageSize the page size if paging
+     * @param pagingCookie the cookie to use if paging, null if first page
+     * @param reconContext the {@link RconciliationContext} object associated with this recon
+     * @param querySide an indicator for which side of a reconciliation (source or target) a query is for
+     * @return a {@link ReconQueryResult} containing the collection of (unqualified) ids
      * @throws SynchronizationException if retrieving or processing the ids failed
      */
-    protected ResultIterable query(final String objectSet, final JsonValue query, final ReconciliationContext reconContext, 
-            final Collection<String> collectionToPopulate, final boolean caseSensitive, final QuerySide querySide) throws SynchronizationException {
+    protected ReconQueryResult query(final String objectSet, final JsonValue query, final ReconciliationContext reconContext, 
+            final Collection<String> collectionToPopulate, final boolean caseSensitive, final QuerySide querySide,
+            int pageSize, String pagingCookie) throws SynchronizationException {
         final Collection<String> ids = collectionToPopulate;
         final JsonValue objList = new JsonValue(new ArrayList());
+        final ReconQueryResult reconQueryResult = new ReconQueryResult();
         try {
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(objectSet, query.asMap());
+            request.setPageSize(pageSize);
+            request.setPagedResultsCookie(pagingCookie);
             reconContext.getService().getConnectionFactory().getConnection().query(
                     reconContext.getService().getRouter(), request,
                     new QueryResultHandler() {
@@ -225,7 +265,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
 
                         @Override
                         public void handleResult(QueryResult result) {
-                            //ignore
+                            reconQueryResult.setPagingCookie(result.getPagedResultsCookie());
                         }
                     });
         } catch (JsonValueException jve) {
@@ -235,8 +275,8 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         }
 
         reconContext.checkCanceled(); // Throws an exception if reconciliation was canceled
-
-        return new ResultIterable(ids, objList.size() > 0 ? objList : null);
+        reconQueryResult.setResultIterable(new ResultIterable(ids, objList.size() > 0 ? objList : null));
+        return reconQueryResult;
     }
     
     /**
@@ -292,15 +332,18 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
     /**
      * @inheritDoc
      */
-    public abstract ResultIterable querySource() throws SynchronizationException;
+    @Override
+    public abstract ReconQueryResult querySource(int pageSize, String pagingCookie) throws SynchronizationException;
 
     /**
      * @inheritDoc
      */
+    @Override
     public abstract ResultIterable queryTarget() throws SynchronizationException;
 
     /**
      * @inheritDoc
      */
+    @Override
     public abstract JsonValue getReconParameters();
 }
