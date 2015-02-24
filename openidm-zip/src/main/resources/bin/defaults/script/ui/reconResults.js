@@ -43,29 +43,29 @@
         queryFilter = '/reconId eq "'+reconId+'" AND /entryType eq "entry"',
         buildQueryFilter = function(props,searchString){
             var conditions = _.chain(props.split(","))
-                                .reject(function(p){ return !p; })
-                                .map(function(p){
-                                    return p + ' sw "' + encodeURIComponent(searchString) + '"';
-                                })
-                                .value();
-            
+                .reject(function(p){ return !p; })
+                .map(function(p){
+                    return p + ' sw "' + encodeURIComponent(searchString) + '"';
+                })
+                .value();
+
             return conditions.join(" or (") + new Array(conditions.length).join(")");
         },
         buildINClause = function (array, fieldName) {
             var inClause = ' AND (';
-                
+
             inClause += _.map(array,
-                                    function (val) {
-                                        return fieldName + ' eq "' + val + '"';
-                                    })
-                            .join(" OR ");
+                function (val) {
+                    return fieldName + ' eq "' + val + '"';
+                })
+                .join(" OR ");
 
             inClause += ')';
 
             return inClause;
         },
         recon = openidm.read("recon/" + reconId);
-    
+
     limit = parseInt(limit || 20);
     limit = (limit > 50) ? 50 : limit; // restrict limit to 50 records maximum
 
@@ -91,13 +91,13 @@
             if (sourceSearchResults.length) {
                 queryFilter += buildINClause(
 
-                                _(sourceSearchResults)
-                                 .pluck('_id')
-                                 .map(function (id) { return source + "/" + id; })
-                                 .value(),
+                    _(sourceSearchResults)
+                        .pluck('_id')
+                        .map(function (id) { return source + "/" + id; })
+                        .value(),
 
-                                '/sourceObjectId'
-                            );
+                    '/sourceObjectId'
+                );
             }
 
         }
@@ -111,19 +111,19 @@
             if (targetSearchResults.length) {
                 queryFilter += buildINClause(
 
-                                _(targetSearchResults)
-                                 .pluck('_id')
-                                 .map(function (id) { return target + "/" + id; })
-                                 .value(),
+                    _(targetSearchResults)
+                        .pluck('_id')
+                        .map(function (id) { return target + "/" + id; })
+                        .value(),
 
-                                '/targetObjectId'
-                            );
+                    '/targetObjectId'
+                );
             }
 
         }
 
         if (!sourceSearchResults.length && !targetSearchResults.length) {
-            // if they are searching for records but there are no results found for them, 
+            // if they are searching for records but there are no results found for them,
             // there is no point in querying the audit data; give up and return nothing.
 
             return [{
@@ -157,8 +157,8 @@
 
     for (i = 0; i<reconAudit.result.length; i++) {
         if (
-                reconAudit.result[i].targetObjectId != null && 
-                reconAudit.result[i].situation !== "FOUND_ALREADY_LINKED"
+            reconAudit.result[i].targetObjectId != null &&
+            reconAudit.result[i].situation !== "FOUND_ALREADY_LINKED"
             ) {
             targetIds.push('_id eq "' + reconAudit.result[i].targetObjectId.replace(target + "/", "") + '"');
         }
@@ -190,22 +190,22 @@
         if (reconAudit.result[i].targetObjectId !== null && reconAudit.result[i].targetObjectId !== undefined) {
             reconAudit.result[i].targetObject = targetDataMap[reconAudit.result[i].targetObjectId.replace(target + "/", "")];
         }
-        if (!!reconAudit.result[i].sourceObject && !!reconAudit.result[i].targetObject) {
-            if(openidm.query("repo/link", {'_queryFilter' : 'linkType eq "' + mapping + '" and firstId eq "' + reconAudit.result[i].sourceObject._id + '" and secondId eq "' + reconAudit.result[i].targetObject._id + '"'}).result.length > 0){
-                reconAudit.result[i].hasLink = true;
-            }
+
+        if(reconAudit.result[i].situation === "CONFIRMED") {
+            reconAudit.result[i].hasLink = true;
         }
+
         result.push(reconAudit.result[i]);
     }
 
     return [
-            {
+        {
             "limit": limit,
             "page": Math.ceil((offset+1)/limit),
             "rows": result,
             "id": "_id"
-            }
-        ];
+        }
+    ];
 }(
     request.additionalParameters.mapping,
     request.additionalParameters.source,
@@ -216,7 +216,7 @@
     request.additionalParameters.situations,
     request.additionalParameters.page,
     request.additionalParameters.rows,
-    request.additionalParameters.search === "true",
+        request.additionalParameters.search === "true",
     request.additionalParameters.sourceObjectDisplay,
     request.additionalParameters.targetObjectDisplay,
     request.additionalParameters.sidx,
