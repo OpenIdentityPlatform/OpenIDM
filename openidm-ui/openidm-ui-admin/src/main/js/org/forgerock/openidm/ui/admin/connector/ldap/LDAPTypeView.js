@@ -278,29 +278,32 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     updateBtnStatus();
                 },
                 buttons: [{
-                    label: $.t('common.form.save'),
-                    id: "sslSaveButton",
-                    action: function(dialogRef) {
-                        var saveBtn = dialogRef.$modalFooter.find("#sslSaveButton"),
-                            certField;
-
-                        if (!saveBtn.prop("disabled")) {
-                            certField = _this.$el.find("#certContainer").find('[name=certificate]');
-
-                            certField.text($('#certificateContainerClone').find('textarea').val());
-                            certField.val(certField.text()); // seems to be necessary for IE
-
-                            validatorsManager.validateAllFields(_this.$el);
+                        label: $.t('common.form.cancel'),
+                        action: function(dialogRef){
+                            dialogRef.close();
                         }
+                    },
+                    {
+                        label: $.t('common.form.save'),
+                        id: "sslSaveButton",
+                        cssClass: "btn-primary",
+                        action: function(dialogRef) {
+                            var saveBtn = dialogRef.$modalFooter.find("#sslSaveButton"),
+                                certField;
 
-                        dialogRef.close();
+                            if (!saveBtn.prop("disabled")) {
+                                certField = _this.$el.find("#certContainer").find('[name=certificate]');
+
+                                certField.text($('#certificateContainerClone').find('textarea').val());
+                                certField.val(certField.text()); // seems to be necessary for IE
+
+                                validatorsManager.validateAllFields(_this.$el);
+                            }
+
+                            dialogRef.close();
+                        }
                     }
-                }, {
-                    label: $.t('common.form.cancel'),
-                    action: function(dialogRef){
-                        dialogRef.close();
-                    }
-                }]
+                ]
             });
         },
 
