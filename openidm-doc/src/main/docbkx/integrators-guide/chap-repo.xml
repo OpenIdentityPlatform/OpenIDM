@@ -221,8 +221,11 @@
     <listitem>
      <para>
       Enables you to create pre-defined queries that can be referenced from the
-      configuration. The queries are divided between those for
-      <literal>"genericTables"</literal> and those for
+      configuration. For more information about pre-defined queries, see
+      <link xlink:href="integrators-guide#parameterized-queries"
+      xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>Parameterized Queries</citetitle></link>. The queries are
+      divided between those for <literal>"genericTables"</literal> and those for
       <literal>"explicitTables"</literal>.
      </para>
      <para>
