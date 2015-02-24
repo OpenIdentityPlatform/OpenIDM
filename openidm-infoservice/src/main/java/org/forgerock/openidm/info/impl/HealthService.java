@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -39,12 +39,29 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
+import org.forgerock.openidm.info.health.OsInfoResourceProvider;
+import org.forgerock.openidm.info.health.DatabaseInfoResourceProvider;
+import org.forgerock.openidm.info.health.MemoryInfoResourceProvider;
+import org.forgerock.openidm.info.health.ReconInfoResourceProvider;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
 import org.osgi.framework.Bundle;
@@ -65,9 +82,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A health service determining system state
- *
- * @author aegloff
+ * A health service determining system state.
  */
 @Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
         description = "OpenIDM Health Service", immediate = true)
@@ -82,8 +97,10 @@ import org.slf4j.LoggerFactory;
     *//* ) }) */
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service") })
-public class HealthService implements HealthInfo, ClusterEventListener, ServiceTrackerListener {
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/health/*")})
+public class HealthService
+        implements HealthInfo, ClusterEventListener, ServiceTrackerListener, RequestHandler {
 
     public static final String PID = "org.forgerock.openidm.health";
 
@@ -231,6 +248,8 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
             "org.forgerock.openidm.servletfilter.registrator"
     };
     /* @formatter:on */
+
+    private final Router router = new Router();
     
     @Activate
     protected void activate(final ComponentContext context) {
@@ -320,6 +339,11 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         context.getBundleContext().addServiceListener(svcListener);
         context.getBundleContext().addBundleListener(bundleListener);
         context.getBundleContext().addFrameworkListener(frameworkListener);
+
+        router.addRoute("os", new OsInfoResourceProvider());
+        router.addRoute("memory", new MemoryInfoResourceProvider());
+        router.addRoute("recon", new ReconInfoResourceProvider());
+        router.addRoute("jdbc", new DatabaseInfoResourceProvider());
 
         logger.info("OpenIDM Health Service component is activated.");
     }
@@ -695,6 +719,62 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
             break;
         }
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        router.handleAction(context, request, handler);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+        router.handleCreate(context, request, handler);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
+        router.handleDelete(context, request, handler);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        router.handlePatch(context, request, handler);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        router.handleQuery(context, request, handler);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+        router.handleRead(context, request, handler);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+        router.handleUpdate(context, request, handler);
     }
 
 }
