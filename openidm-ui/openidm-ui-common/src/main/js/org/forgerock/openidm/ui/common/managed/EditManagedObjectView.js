@@ -79,13 +79,13 @@ define("org/forgerock/openidm/ui/common/managed/EditManagedObjectView", [
             }
             
             JSONEditor.defaults.options = {
+                    theme: "bootstrap3",
+                    iconlib: "fontawesome4",
                     disable_edit_json: true,
                     disable_array_reorder: true,
                     disable_collapse: true,
                     disable_properties: true,
-                    show_errors: "never",
-                    template: 'handlebars',
-                    theme: 'jqueryui'
+                    show_errors: "never"
             };
             
             if(schema.order){

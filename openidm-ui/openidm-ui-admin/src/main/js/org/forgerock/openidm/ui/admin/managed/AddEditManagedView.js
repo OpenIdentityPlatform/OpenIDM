@@ -139,7 +139,6 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 disable_properties: true,
                 show_errors: 'always',
                 template: 'handlebars',
-                theme: 'jqueryui',
                 no_additional_properties: true,
                 additionalItems: false,
                 required_by_default: true
@@ -297,7 +296,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                             "type": "string"
                         },
                         "properties": {
-                            "title": "Properties",
+                            "title": "Schema Properties",
                             "$ref": "#/definitions/managedObject"
                         }
                     }

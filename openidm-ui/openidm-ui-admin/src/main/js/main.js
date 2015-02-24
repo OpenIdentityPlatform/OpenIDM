@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, window */
+/*global require, define, window, JSONEditor */
 
 require.config({
     paths: {
@@ -178,4 +178,7 @@ require([
     window.Backbone = Backbone;
 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+    
+    JSONEditor.defaults.options.theme = 'bootstrap3';
+    JSONEditor.defaults.options.iconlib = "fontawesome4";
 });
