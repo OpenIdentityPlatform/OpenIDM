@@ -475,7 +475,7 @@
             "addConnector" : "New Connector",
             "addManagedObject" : "New Managed Object",
             "addMapping" : "New Mapping",
-            "help" : "help",
+            "help" : "Help",
             "managedObjectType" : "Managed Object",
             "liveSync": {
                 "title": "LiveSync Options",

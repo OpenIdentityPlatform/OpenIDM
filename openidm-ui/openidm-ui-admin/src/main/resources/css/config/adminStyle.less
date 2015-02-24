@@ -115,3 +115,26 @@
     background-color: @forgerock-green;
   }
 }
+
+@media (max-width: 767px) {
+  .btn-toolbar {
+
+    .pull-right {
+      float: none !important;
+    }
+
+    .btn-group {
+      width: 100%;
+
+      button {
+        display: block;
+        margin-top: 10px;
+        width: 100%;
+      }
+    }
+
+    .btn-group:first-child button{
+      margin-top: 0;
+    }
+  }
+}
