@@ -328,7 +328,7 @@
     },
     "openidm" : {
         "admin": {
-            "label": "Admin"
+            "label": "Admin View"
         },
         "ui" : {
             "common" : {
