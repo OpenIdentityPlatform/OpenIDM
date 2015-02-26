@@ -75,7 +75,7 @@
         },
         "user" : {
             "LoginDialog" : {
-                "refreshOnLogin" : "Should refresh on login" 
+                "refreshOnLogin" : "Should refresh on login"
             },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
@@ -168,7 +168,7 @@
         }
     },
     "common" : {
-         "form" : {
+        "form" : {
             "true" : "True",
             "false" : "False",
             "update" : "Update",
@@ -239,8 +239,8 @@
                 "shouldBeLong" : "Should be long value",
                 "wrongDateFormat" : "Wrong format"
             }
-         },
-         "user" : {
+        },
+        "user" : {
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",
@@ -286,8 +286,8 @@
             "changePhoto" : "Change photo",
             "SKYPE" : "SKYPE",
             "googlePlus" : "Google+"
-         }, 
-         "task" : {
+        },
+        "task" : {
             "unassigned" : "Unassigned",
             "assignToMe" : "Assign to me",
             "claim" : "Claim",
@@ -303,8 +303,8 @@
             "myTasks" : "My tasks",
             "tasksList" : "Tasks list",
             "processes" : "Processes"
-         },
-         "application" : {
+        },
+        "application" : {
             "applicationName" : "Application Name",
             "requestedBy" : "Requested by",
             "yourFrequentlyUsedApplications" : "Your frequently used apps",
@@ -313,8 +313,8 @@
             "addMoreApplications" : "Add more apps",
             "allAvailableApps" : "All available apps",
             "dropApplicationsHere" : "drop apps here"
-         },
-         "notification" : {
+        },
+        "notification" : {
             "notifications" : "Notifications",
             "deleteThisMessage" : "Delete this message",
             "type" : "Notification type",
@@ -324,7 +324,7 @@
                 "warning" : "Warning",
                 "error" : "Error"
             }
-         }
+        }
     },
     "openidm" : {
         "admin": {
@@ -342,29 +342,29 @@
             "admin" : {
                 "tasks" : {
                     "TasksMenuView" : {
-                        "noTasksAssigned" : "You do not have any tasks assigned to you at this time.",
-                        "noTasksInGroupQueue" : "Your group has no tasks at this time.",
+                        "noTasksAssigned" : "You do not have any tasks in your queue.",
+                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue.",
                         "denyDefaultReason" : "Enter a reason for denying this request",
                         "acceptanceForm" : {
                             "for" : "For",
                             "application" : "Application",
                             "requested" : "Requested",
-                            "actions" : "Actions"                            
+                            "actions" : "Actions"
                         },
                         "headers" : {
                             "initiator" : "Initiator",
                             "key" : "Key",
                             "requested" : "Requested",
                             "inQueue" : "In queue",
-                            "actions" : "Actions"    
-                        }   
+                            "actions" : "Actions"
+                        }
                     },
                     "TasksWithMenuView" : {
                         "chooseTask" : "Choose a task"
                     },
                     "StartProcessDashboardView" : {
                         "chooseProcess" : "Please choose a process to start",
-                        "noProcesses": "No processes",
+                        "noProcesses": "You do not have any processes in your queue.",
                         "noDataRequired": "No data required"
                     }
                 },
@@ -378,7 +378,7 @@
                         "profileWillBeDeleted" : "%s account will be deleted."
                     },
                     "ChangeUserPasswordDialog" : {
-                        "securityDataChangeForWhom" : "Security data change for %s" 
+                        "securityDataChangeForWhom" : "Security data change for %s"
                     }
                 }
             },
@@ -388,7 +388,7 @@
                         "noNotifications" : "You have no notifications right now.",
                         "seeMoreNotifications" : "see more notifications"
                     }
-                }, 
+                },
                 "BaseApplicationsView" : {
                     "noApplicationsHere" : "Your have no apps here",
                     "noDefaultApplications" : "Your have no default apps",
