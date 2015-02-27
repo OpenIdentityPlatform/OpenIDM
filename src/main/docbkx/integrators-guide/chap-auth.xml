@@ -443,7 +443,7 @@
        specifically the <literal>repo/internal/user</literal> objects, and
        allows authentication if the credentials match. The default configuration
        uses the <literal>username</literal> and <literal>password</literal> of
-       the managed user to authenticate, as shown in the following sample
+       the internal user to authenticate, as shown in the following sample
        configuration.
       </para>
       <programlisting language="javascript">{
@@ -467,10 +467,11 @@
      <listitem>
       <para>
        <literal>STATIC_USER</literal> authentication provides an anonymous
-       authentication mechanism that bypasses any database checks if the headers
-       in a request indicate that the user is <literal>anonymous</literal>. For
-       example, the following REST call uses <literal>STATIC_USER</literal>
-       authentication in the self-registration process:
+       authentication mechanism that bypasses any database lookups if the
+       headers in a request indicate that the user is
+       <literal>anonymous</literal>. The following sample REST call uses
+       <literal>STATIC_USER</literal> authentication in the self-registration
+       process:
       </para>
       <screen>$ curl \
  --header "X-OpenIDM-Password: anonymous" \
