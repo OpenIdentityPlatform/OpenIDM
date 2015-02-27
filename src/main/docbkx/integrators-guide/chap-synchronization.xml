@@ -606,6 +606,11 @@
         "source": "(object.email != null)"
     }
 ...   </programlisting>
+      <para>
+       Only the source object is in the condition script's scope, so the
+       <literal>object.email</literal> in this example refers to the
+       <literal>email</literal> property of the source object.
+      </para>
       <note>
       <para>
        You can add comments to your mapping file to indicate how the attributes
