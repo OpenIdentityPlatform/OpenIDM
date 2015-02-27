@@ -846,6 +846,33 @@ $ ./create-openidm-rc.sh</userinput></screen>
     <screen>$ sudo /etc/init.d/openidm restart</screen>
    </step>
   </procedure>
+
+  <para>
+   If you have set up a deployment of OpenIDM in a custom directory, such as
+   <filename>/path/to/openidm/production</filename>, you can modify the
+   <filename>/etc/init.d/openidm</filename> script.
+  </para>
+  <para>
+   Open the <filename>openidm</filename> script in a text editor and navigate to
+   the <literal>START_CMD</literal> line.
+  </para>
+  <para>
+   At the end of the command, you should see the following line:
+  </para>
+  <screen>org.forgerock.commons.launcher.Main -c bin/launcher.json > logs/server.out 2>&amp;1 &amp;"
+  </screen>
+  <para>
+   Include the path to the production directory. In this case, you would add
+   <command>-p production</command> as shown.
+  </para>
+  <screen width="100">org.forgerock.commons.launcher.Main -c bin/launcher.json -p production > logs/server.out 2>&amp;1 &amp;</screen>
+  <para>
+   Save the <filename>openidm</filename> script file in the
+   <filename>/etc/init.d</filename> directory. The
+   <command>sudo /etc/init.d/openidm start</command> command should now start
+   OpenIDM with the files in your <filename>production</filename> subdirectory.
+  </para>
+
  </section>
 
 </chapter>
