@@ -1,5 +1,5 @@
-<div id="{{grid_id}}_container" class="content-bg">
-    <div class="page-header">
+<div id="{{grid_id}}_container" class="container">
+    <div class="page-header managedObjectsContainer">
         {{#if validObject}}
 	        <div class='btn-toolbar pull-right'>
 	            <div class='btn-group'>
@@ -16,7 +16,7 @@
         {{/if}}
     </div>
 
-    <div class="col-md-offset-1">
+    <div class="managedObjectsContainer">
         <table id="{{grid_id}}">
             <tr><td>{{t "templates.admin.ManagedObjectList.noData"}}</td></tr>
         </table>

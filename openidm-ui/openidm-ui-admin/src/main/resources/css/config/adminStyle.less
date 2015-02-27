@@ -68,6 +68,14 @@
   margin-bottom:0px;
 }
 
+.scripts-container .group-field-block .border-bottom:first-child {
+    border-bottom: 2px solid #ddd;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #eee;
+}
+
 /*
     Managed Object Admin
 */
@@ -92,8 +100,18 @@
 }
 .scripts-container {
   margin-top: 15px;
-  .event-hook-body {
+  .table {
     margin-top: 15px;
+    td,th {
+        border-top: none;
+        border-bottom: 1px solid #eee;
+    }
+    th {
+        border-bottom: 2px solid #ddd;
+    }
+  }
+  .lightenColor {
+    color: @navbar-toggle-color;
   }
 }
 
@@ -117,5 +135,10 @@
     .btn-group:first-child button{
       margin-top: 0;
     }
+  }
+    
+  .addScriptButton {
+      margin-top: 15px;
+      width: 100%;
   }
 }

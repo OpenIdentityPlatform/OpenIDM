@@ -113,6 +113,11 @@
     },
     "templates" : {
         "util" : {
+            "scriptList" : {
+                "event": "EVENT",
+                "hook": "HOOK",
+                "addScript": "Add Script"
+            },
             "saveChanges": {
                 "saveMsg": "The following changes will be saved"
             },
@@ -229,7 +234,9 @@
             "private" : "Private",
             "virtual" : "Virtual",
             "duplicateNameError" : "Duplicate name detected. Please provide a unique name.",
-            "managedSchema": "Schema"
+            "managedSchema": "Schema",
+            "addPropertyScript": "Add script for property events.",
+            "addManagedScript": "Add script for managed events."
         },
         "scriptEditor": {
             "scriptDelete" : "Are you sure you want to delete this script?",

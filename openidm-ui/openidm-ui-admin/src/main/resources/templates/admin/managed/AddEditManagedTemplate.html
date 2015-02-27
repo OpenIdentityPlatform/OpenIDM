@@ -34,32 +34,7 @@
                     <a data-toggle="collapse" href="#managedScripts" aria-expanded="true" aria-controls="managedScriptsHeading" class="">Managed Scripts</a>
                 </h4>
             </div>
-            <div id="managedScripts" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="managedScripts" aria-expanded="true">
-                <div class=" col-sm-8">
-                    <label class="control-label">Add script for managed events.</label>
-                </div>
-                <div class=" col-sm-5">
-                    <select class="select-button-form btn-block" id="managedScriptSelection">
-                        {{#each selectEvents}}
-                        <option value="{{this}}">{{this}}</option>
-                        {{/each}}
-                    </select>
-                </div>
-                <div class="panel-body">
-                    <div class="form-group has-feedback">
-                        <div class=" col-sm-3">
-                            <button type="button" id="addManagedScript" name="addManagedScript" class="btn btn-primary btn-block"><span>Add Script</span> <i class="fa fa-lg fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div id="mainHooksBody" class="scripts-container">
-                        <div class="group-field-block">
-                            {{#each addedEvents}}
-                            <div data-script-type="{{this}}" class="managed-event-hook"></div>
-                            {{/each}}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div id="managedScripts" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="managedScripts" aria-expanded="true"></div>
         </div>
 
 
@@ -74,7 +49,7 @@
                     <label>{{t "templates.managed.managedPropertyMessage"}}</label>
                 </div>
                 <div class="col-sm-3">
-                    <button type="button" id="addManagedProperties" name="addManagedProperties" class="btn btn-primary btn-block"><span>{{t "templates.managed.addProperty"}}</span> <i class="fa fa-lg fa-plus"></i></button>
+                    <button type="button" id="addManagedProperties" name="addManagedProperties" class="btn btn-primary btn-block"><i class="fa fa-lg fa-plus"></i> <span>{{t "templates.managed.addProperty"}}</span></button>
                 </div>
                 <div class="panel-body">
                     <div id="managedPropertyWrapper">
@@ -101,26 +76,7 @@
                                 </div>
                                 <div class="validation-message"></div>
                             </div>
-                            <div>
-                                <label class="control-label">Add script for property events.</label>
-                                <div>
-                                    <div class="col-sm-3">
-                                        <select class="form-size-m select-button-form btn-block">
-                                            {{#each propertiesEventList}}
-                                            <option value="{{this}}">{{this}}</option>
-                                            {{/each}}
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <button type="button" class="btn btn-primary add-property-script btn-block"><span>Add Script</span> <i class="fa fa-lg fa-plus"></i></button>
-                                    </div>
-                                    <div class="group-body col-lg-10 scripts-container">
-                                        <div class="group-field-block">
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="managedPropertyEvents"></div>
 
                         </div>
                         {{#if currentManagedObject.properties.length}}
@@ -148,30 +104,7 @@
                                 </div>
                                 <div class="validation-message"></div>
                             </div>
-                            <div>
-                                <label class="control-label">Add script for property events.</label>
-
-
-                                <div>
-                                    <div class="col-sm-3">
-                                        <select class="form-size-m select-button-form btn-block">
-                                            {{#each value.selectEvents}}
-                                            <option value="{{this}}">{{this}}</option>
-                                            {{/each}}
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <button type="button" class="btn btn-primary add-property-script btn-block"><span>Add Script</span> <i class="fa fa-lg fa-plus"></i></button>
-                                    </div>
-                                    <div class="group-body col-lg-10 scripts-container">
-                                        <div class="group-field-block">
-                                            {{#each value.addedEvents}}
-                                            <div data-script-type="{{this}}" class="managed-event-hook"></div>
-                                            {{/each}}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="managedPropertyEvents"></div>
                         </div>
                         {{/each_with_index}}
                         {{/if}}
