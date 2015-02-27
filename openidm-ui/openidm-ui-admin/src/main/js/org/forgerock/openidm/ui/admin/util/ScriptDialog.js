@@ -112,7 +112,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
 
-                        if (this.data.scriptData.source) {
+                        if (this.data.scriptData && this.data.scriptData.source) {
                             this.$el.find("#inlineHeading input[type='radio']").trigger("change");
                         }
                     }, _this), "replace");

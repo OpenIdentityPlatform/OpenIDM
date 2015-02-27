@@ -48,6 +48,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/ConnectorUtils",
     "./util/AbstractScriptEditor",
     "./util/ScriptEditor",
+    "./util/ScriptList",
     "./util/ScriptDialog",
     "./util/AutoCompleteUtils",
     "./util/Scheduler",
