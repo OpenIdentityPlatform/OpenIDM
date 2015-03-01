@@ -859,8 +859,7 @@ $ ./create-openidm-rc.sh</userinput></screen>
   <para>
    At the end of the command, you should see the following line:
   </para>
-  <screen>org.forgerock.commons.launcher.Main -c bin/launcher.json > logs/server.out 2>&amp;1 &amp;"
-  </screen>
+  <screen width="100">org.forgerock.commons.launcher.Main -c bin/launcher.json > logs/server.out 2>&amp;1 &amp;"</screen>
   <para>
    Include the path to the production directory. In this case, you would add
    <command>-p production</command> as shown.
