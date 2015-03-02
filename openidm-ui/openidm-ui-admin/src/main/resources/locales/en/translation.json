@@ -293,6 +293,8 @@
         },
         "correlation": {
             "correlation": "Correlation",
+            "type" : "Type",
+            "status" : "Status",
             "objectFilters": "Individual Record Validation",
             "reconQueries": "Reconciliation Query Filters",
             "sourceQuery": "Source Query",

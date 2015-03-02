@@ -31,14 +31,16 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/sync/CorrelationQueryDialog",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
-    "org/forgerock/openidm/ui/admin/util/SaveChangesView"
+    "org/forgerock/openidm/ui/admin/util/SaveChangesView",
+    "bootstrap-dialog"
 ], function(AdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,
             CorrelationQueryDialog,
             BrowserStorageDelegate,
-            SaveChangesView) {
+            SaveChangesView,
+            BootstrapDialog) {
 
     var CorrelationQueryView = AdminAbstractView.extend({
         template: "templates/admin/sync/CorrelationQueryTemplate.html",
@@ -151,7 +153,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
         },
 
         undoChange: function(e) {
-            var linkQualifier = $(e.target).closest("h3").find(".linkQualifierLabel").text(),
+            var linkQualifier = $(e.target).closest("tr").find(".linkQualifierLabel").text(),
                 changesQuery = _.find(this.model.changes, {"linkQualifier": linkQualifier}),
                 changesIndex = _.indexOf(this.model.changes, changesQuery);
 
@@ -174,7 +176,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
 
         editLinkQualifier: function(e) {
             if (!$(e.target).parent().parent().hasClass("disabled")) {
-                var linkQualifier = $(e.target).closest("h3").find(".linkQualifierLabel").text();
+                var linkQualifier = $(e.target).closest("tr").find(".linkQualifierLabel").text();
                 this.addEditNewCorrelationQuery(null, linkQualifier);
             }
         },
@@ -190,7 +192,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
 
         deleteLinkQualifier: function(e) {
             if (!$(e.target).parent().parent().hasClass("disabled")) {
-                var linkQualifier = $(e.target).closest("h3").find(".linkQualifierLabel").text(),
+                var linkQualifier = $(e.target).closest("tr").find(".linkQualifierLabel").text(),
                     correlationQuery = _.find(this.model.mapping.correlationQuery, {"linkQualifier": linkQualifier}),
                     correlationQueryIndex = _.indexOf(this.model.mapping.correlationQuery, correlationQuery),
                     changesQuery = _.find(this.model.changes, {"linkQualifier": linkQualifier}),
@@ -303,29 +305,32 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
         },
 
         resetQuery: function() {
-            var btns = {};
+            var _this = this;
 
-            btns[$.t("common.form.reset")] = _.bind(function() {
-                this.model.changes = [];
-                this.reload();
-                $("#jqConfirm").dialog("close");
-            }, this);
+            BootstrapDialog.show({
+                title: $.t("templates.correlation.resetTitle"),
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: $("<div id='dialogDetails'>" + $.t("templates.correlation.resetMsg") + "</div>"),
+                onshown : function (dialogRef) {
 
-            btns[$.t("common.form.cancel")] = function() {
-                $(this).dialog("close");
-            };
-
-            $("<div id='jqConfirm'>" + $.t("templates.correlation.resetMsg") + "</div>")
-                .dialog({
-                    title: $.t("templates.correlation.resetTitle"),
-                    modal: true,
-                    resizable: false,
-                    width: "350px",
-                    buttons: btns,
-                    close: function() {
-                        $('#jqConfirm').dialog('destroy').remove();
-                    }
-                });
+                },
+                buttons: [
+                    {
+                        label: $.t("common.form.cancel"),
+                        action: function(dialogRef) {
+                            dialogRef.close();
+                        }
+                    },
+                    {
+                        label: $.t("common.form.reset"),
+                        cssClass: "btn-primary",
+                        action: function(dialogRef){
+                            _this.model.changes = [];
+                            _this.reload();
+                            dialogRef.close();
+                        }
+                    }]
+            });
         },
 
         saveQuery: function() {
@@ -334,23 +339,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                     {"category": $.t("templates.correlation.edited"), values:[]},
                     {"category": $.t("templates.correlation.deleted"), values:[]}
                 ],
-                btns = {};
-
-            btns[$.t("templates.correlation.runReconcile")] = _.bind(function() {
-                this.save(_.bind(function() {
-                    this.model.startSync();
-                }, this));
-                $("#jqConfirm").dialog("close");
-            }, this);
-
-            btns[$.t("templates.correlation.dontRunReconcile")] = _.bind(function() {
-                this.save();
-                $("#jqConfirm").dialog("close");
-            }, this);
-
-            btns[$.t("common.form.cancel")] = function() {
-                $(this).dialog("close");
-            };
+                _this = this;
 
             _.each(this.model.changes, function(change){
                 switch(change.changes) {
@@ -370,25 +359,44 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                 change.values = change.values.join(", ");
             });
 
-            $("<div id='jqConfirm'></div>")
-                .dialog({
-                    title: $.t("templates.correlation.save"),
-                    modal: true,
-                    resizable: false,
-                    width: "550px",
-                    buttons: btns,
-                    close: function() {
-                        $('#jqConfirm').dialog('destroy').remove();
-                    },
-                    open: _.bind(function() {
-                        // A table display of "changes" is not necessary if removing the correlation query
-                        if ($(".correlationQueryType").val() === "none") {
-                            changes = null;
-                        }
 
-                        SaveChangesView.render({"id": "jqConfirm", "msg": $.t("templates.correlation.note"), "changes": changes, "empty": $.t("templates.correlation.empty")});
-                    }, this)
-                });
+            BootstrapDialog.show({
+                title: $.t("templates.correlation.save"),
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: $("<div id='dialogDetails'>" + $.t("templates.correlation.resetMsg") + "</div>"),
+                onshown : function (dialogRef) {
+                    if ($(".correlationQueryType").val() === "none") {
+                        changes = null;
+                    }
+
+                    SaveChangesView.render({"id": "dialogDetails", "msg": $.t("templates.correlation.note"), "changes": changes, "empty": $.t("templates.correlation.empty")});
+                },
+                buttons: [
+                    {
+                        label: $.t("common.form.cancel"),
+                        action: function(dialogRef){
+                            dialogRef.close();
+                        }
+                    },
+                    {
+                        label: $.t("templates.correlation.runReconcile"),
+                        cssClass: "btn-primary",
+                        action: function(dialogRef) {
+                            _this.save(_.bind(function() {
+                                _this.model.startSync();
+                                dialogRef.close();
+                            }, this));
+                        }
+                    },
+                    {
+                        label: $.t("templates.correlation.dontRunReconcile"),
+                        cssClass: "btn-primary",
+                        action: function(dialogRef){
+                            _this.save();
+                            dialogRef.close();
+                        }
+                    }]
+            });
         }
     });
 
