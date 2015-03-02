@@ -43,6 +43,11 @@ import static org.forgerock.json.fluent.JsonValue.object;
 public class ReconTypeById extends ReconTypeBase {
 
     /**
+     *  Defaulting to NOT run target phase
+     */
+    static final boolean DEFAULT_RUN_TARGET_PHASE = false;
+    
+    /**
      * A {@link List} of source IDs.
      */
     List<String> sourceIds;

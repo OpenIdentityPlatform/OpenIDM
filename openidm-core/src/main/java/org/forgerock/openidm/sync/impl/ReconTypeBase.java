@@ -54,11 +54,6 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * Logger.
      */
     private static final Logger logger = LoggerFactory.getLogger(ReconTypeBase.class);
-
-    /**
-     *  Defaulting to NOT run target phase
-     */
-    static final boolean DEFAULT_RUN_TARGET_PHASE = false;
     
     /**
      * An indicator for which side of a reconciliation 

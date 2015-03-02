@@ -44,6 +44,11 @@ import static org.forgerock.json.fluent.JsonValue.object;
 public class ReconTypeByQuery extends ReconTypeBase {
 
     /**
+     *  Defaulting to run target phase
+     */
+    static final boolean DEFAULT_RUN_TARGET_PHASE = true;
+    
+    /**
      * A {@link JsonValue} representing a source query.
      */
     JsonValue sourceQuery;
