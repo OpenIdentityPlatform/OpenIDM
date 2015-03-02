@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -99,6 +99,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
@@ -199,9 +200,6 @@ import org.slf4j.LoggerFactory;
  * {@link CollectionResourceProvider} interface with <a
  * href="http://openicf.forgerock.org">OpenICF</a>.
  * <p/>
- *
- * @author Laszlo Hordos
- * @author brmiller
  */
 @Component(name = OpenICFProvisionerService.PID,
         policy = ConfigurationPolicy.REQUIRE,
@@ -1508,7 +1506,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     activityLogger.log(context, RequestType.READ, "message", getSource(objectClass, uid.getUidValue()), resource.getContent(), resource.getContent(), Status.SUCCESS);
                     handler.handleResult(resource);
                 } else {
-                    handler.handleError(new NotFoundException(request.getResourceName()));
+                    final String matchedUri = context.containsContext(RouterContext.class)
+                            ? context.asContext(RouterContext.class).getMatchedUri()
+                            : "unknown path";
+                    handler.handleError(new NotFoundException("Object " + resourceId + " not found on " + matchedUri));
                 }
             } catch (ResourceException e) {
                 handler.handleError(e);
