@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-install'
@@ -390,10 +390,129 @@ Stopping OpenIDM (31391)</computeroutput></screen>
      </stepalternatives>
     </step>
    </procedure>
+
+   <procedure xml:id="install-windows-service">
+    <title>To Install OpenIDM as a Windows Service</title>
+    <para>
+     You can install OpenIDM to run as a Windows service, so that the server
+     starts and stops automatically when Windows starts and stops. You must be
+     logged in as an administrator to install OpenIDM as a Windows service.
+    </para>
+    <note>
+     <para>
+      On a 64-bit Windows server, you must have a 64-bit Java version installed
+      to start the service. If a 32-bit Java version is installed, you will be
+      able to install OpenIDM as a service, but starting the service will fail.
+     </para>
+     <para>
+      <emphasis>Before</emphasis> you launch the
+      <filename>install-service.bat</filename> file, which registers the
+      <literal>OpenIDM</literal> service within the Windows registry, make sure
+      that your <literal>JAVA_HOME</literal> environment variable points to a
+      valid 64-bit version of the JRE or JDK. If you have already installed the
+      service with the <literal>JAVA_HOME</literal> environment variable
+      pointing to a 32-bit JRE or JDK, delete the service first, then re-install
+      the service.
+     </para>
+    </note>
+    <step>
+     <para>
+      Unpack the OpenIDM .zip file, as described previously, and change to the
+      <filename><replaceable>install-location</replaceable>\bin</filename>
+      directory. For example:
+     </para>
+     <screen>C:\><userinput>cd openidm\bin</userinput>
+<computeroutput>C:\openidm\bin></computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Run the <filename>launcher.bat</filename> command, specifying the name as
+      which the service should run. For example:
+     </para>
+     <screen>C:\openidm\bin><userinput>launcher.bat  /install openidm</userinput>
+<computeroutput>...
+ForgeRock Launcher Java Service successfully installed as "openidm" service
+...
+C:\openidm\bin</computeroutput>     </screen>
+    </step>
+    <step>
+     <para>
+      Use the Windows Service manager to manage the OpenIDM service.
+     </para>
+     <mediaobject xml:id="figure-windows-service">
+      <alt>OpenIDM as a Windows Service</alt>
+      <imageobject>
+       <imagedata fileref="images/windows-service.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Change the user account for this service from the default
+      (<literal>local system</literal>) account to an account with
+      administrative privileges. The <literal>local system</literal> account has
+      limited permissions and an OpenIDM service that runs with this account
+      will encounter problems during synchronization.
+     </para>
+     <itemizedlist>
+      <para>
+      To change the user account:
+      </para>
+      <listitem>
+       <para>
+        Double click the <literal>openidm</literal> service in the Windows
+        Service manager.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Select the Log On tab.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Select This Account and browse for an Active Directory administrative
+        account.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Enter the password for the administrative account.
+       </para>
+       <mediaobject xml:id="figure-service-acct">
+       <alt>Changing the service user account</alt>
+       <imageobject>
+        <imagedata fileref="images/service-acct.png" format="PNG" />
+       </imageobject>
+      </mediaobject>
+      </listitem>
+      <listitem>
+       <para>
+        Click Apply to save the changes.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </step>
+    <step>
+     <para>
+      Use the Windows Service Manager to start, stop, or restart the service.
+     </para>
+    </step>
+    <step>
+     <para>
+      To uninstall the OpenIDM service stop the service, then run the following
+      command:
+     </para>
+     <screen>C:\install-location\openidm\bin><userinput>launcher.bat /uninstall openidm</userinput>
+<computeroutput>...
+ Service "openidm" removed successfully
+...</computeroutput></screen>
+    </step>
+   </procedure>
   </section>
 
   <section xml:id="first-steps-with-rest">
-    <title>To Get Started With the OpenIDM REST Interface</title>
+    <title>Getting Started With the OpenIDM REST Interface</title>
     <indexterm>
      <primary>Getting started</primary>
     </indexterm>
