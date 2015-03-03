@@ -302,7 +302,9 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                     this.renderReconResults(null, callback);
 
                     $(window).resize(function () {
-                        this.$el.find("#analysisGridContainer .recon-grid").setGridWidth(  this.$el.find("#analysisGridContainer").width());
+                        if(this.$el) {
+                            this.$el.find("#analysisGridContainer .recon-grid").setGridWidth(this.$el.find("#analysisGridContainer").width());
+                        }
                     });
 
                 } else {
