@@ -6018,10 +6018,11 @@ $ ./ldapmodify \
       The <literal>"openamDeploymentUrl"</literal> shown above assumes that you
       are using SSL. If you have a self-signed certificate, you will need to
       import that into the OpenIDM truststore file. For more information, see
-      the following section of the Integrator's Guide: <link xlink:show="new"
-      xlink:role="http://docbook.org/roles/xlink/role/olink"
-      xlink:href="integrators-guide#security-management-service"><citetitle>
-      Accessing the Security Management Service</citetitle></link>.
+      <link xlink:show="new"
+      xlink:href="integrators-guide#security-management-service"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Accessing the
+      Security Management Service</citetitle></link> in the
+      <citetitle>Integrator's Guide</citetitle>.
      </para>
 
     </section>
@@ -6096,14 +6097,13 @@ $ ./ldapmodify \
       ],</programlisting>
 
       <para>
-       Just remember, if you want to set up secure communications with OpenDJ,
-       you should configure OpenDJ with that in mind. If you have a self-signed
-       certificate for OpenDJ, you will also want to import that into the
-       OpenIDM truststore, as discussed in the following section of the
-       Integrator's Guide: <link xlink:show="new"
-       xlink:role="http://docbook.org/roles/xlink/role/olink"
-       xlink:href="integrators-guide#security-management-service"><citetitle>
-       Accessing the Security Management Service</citetitle></link>.
+       If you want to set up secure communications with OpenDJ, configure OpenDJ
+       with that in mind. If you have a self-signed certificate for OpenDJ,
+       import that into the OpenIDM truststore, as described in <link
+       xlink:show="new" xlink:href="integrators-guide#security-management-service"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Accessing the
+       Security Management Service</citetitle></link> in the
+       <citetitle>Integrator's Guide</citetitle>.
       </para>
 
     </section>
