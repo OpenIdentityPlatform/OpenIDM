@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-synchronization'
@@ -46,8 +46,10 @@
 
  <section xml:id="sync-object-mapping">
   <title>Object-Mapping Objects</title>
-  <para>An object-mapping object specifies the configuration for a mapping of
-  source objects to target objects.</para>
+  <para>
+   An object-mapping object specifies the configuration for a mapping of source
+   objects to target objects.
+  </para>
   
   <programlisting language="javascript"> {
   "name"            : <replaceable>string</replaceable>,
@@ -65,6 +67,11 @@
   "onUnlink"        : <replaceable>script object</replaceable>,
   "result"          : <replaceable>script object</replaceable>
 }</programlisting>
+
+  <para>
+   The <literal>onCreate</literal>, <literal>onUpdate</literal>,
+   <literal>onLink</literal>, and <literal>onUnlink</literal> scripts
+  </para>
 
   <variablelist xml:id="mapping-object-properties">
    <title>Mapping Object Properties</title>
@@ -133,14 +140,16 @@
     <term>correlationQuery</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script that yields a query object to query the target object
-      set when a source object has no linked target. The syntax for writing 
-      the query depends on the target system of the correlation. See the 
-      section on <link xlink:href="integrators-guide#correlation" 
-      xlink:role="http://docbook.org/xlink/role/olink"> 
-      <citetitle>Correlation Queries</citetitle></link> for examples of some 
-      common targets. The source object is provided in the 
-      <literal>"source"</literal> property in the script scope.</para>
+     <para>
+      A script that yields a query object to query the target object set when a
+      source object has no linked target. The syntax for writing the query
+      depends on the target system of the correlation. See the section on
+      <link xlink:href="integrators-guide#correlation"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+       Existing Target Objects</citetitle></link> for examples of some common
+      targets. The source object is provided in the <literal>"source"</literal>
+      property in the script scope.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -163,51 +172,110 @@
     <term>onCreate</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute when a target object is to be created,
-      after property mappings have been applied. In the root scope, the
-      source object is provided in the <literal>"source"</literal> property,
-      projected target object in the <literal>"target"</literal> property and
-      the link situation that led to the create operation in
-      <literal>"situation"</literal>. The <literal>_id</literal> property in
-      the target object can be modified, allowing the mapping to select an
-      identifier; if not set then the identifier is expected to be set by
-      the target object set. If the script throws an exception, then
-      target object creation is aborted.</para>
+     <para>
+      A script to execute when a target object is to be created, after property
+      mappings have been applied. In the root scope, the source object is
+      provided in the <literal>"source"</literal> property, the projected target
+      object in the <literal>"target"</literal> property, and the link situation
+      that led to the create operation in the <literal>"situation"</literal>
+      property. Properties on the target object can be modified by the script.
+      If a property value is not set by the script, OpenIDM falls back on the
+      default property mapping configuration. If the script throws an exception,
+      the target object creation is aborted.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>onUpdate</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute when a target object is to be updated,
-      after property mappings have been applied. In the root scope, the
-      source object is provided in the <literal>"source"</literal> property,
-      projected target object in the <literal>"target"</literal> property,
-      link situation that led to the update operation in
-      <literal>"situation"</literal>. If the script throws an exception,
-      then target object update is aborted.</para>
+     <para>
+      A script to execute when a target object is to be updated, after property
+      mappings have been applied. In the root scope, the source object is
+      provided in the <literal>"source"</literal> property, the projected target
+      object in the <literal>"target"</literal> property, and the link situation
+      that led to the update operation in the <literal>"situation"</literal>
+      property. Any changes that the script makes to the target object will be
+      persisted when the object is finally saved to the target resource. If the
+      script throws an exception, the target object update is aborted.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>onLink</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute when a source object is to be linked to a target object,
-      after property mappings have been applied. In the root scope, the
-      source object is provided in the <literal>"source"</literal> property,
-      projected target object in the <literal>"target"</literal> property. If the script throws an exception,
-      then target object linking is aborted.</para>
+     <para>
+      A script to execute when a source object is to be linked to a target
+      object, after property mappings have been applied. In the root scope, the
+      source object is provided in the <literal>"source"</literal> property, and
+      the projected target object in the <literal>"target"</literal> property.
+     </para>
+     <para>
+      Note that, although an <literal>onLink</literal> script has access to a
+      copy of the target object, changes made to that copy will not be saved to
+      the target system automatically. If you want to persist changes made to
+      target objects by an <literal>onLink</literal> script, you must explicitly
+      include a call to the action that should be taken on the target object
+      (for example <literal>openidm.create</literal>,
+      <literal>openidm.update</literal> or <literal>openidm.delete</literal>)
+      within the script.
+     </para>
+     <para>
+      In the following example, when an LDAP target object is linked, the
+      <literal>"description"</literal> attribute of that object is updated with
+      the value <literal>"Active Account"</literal>. A call to
+      <literal>openidm.update</literal> is made within the
+      <literal>onLink</literal> script, to set the value.
+     </para>
+     <informalexample>
+      <programlisting language="javascript">"onLink" : {
+    "type" : "text/javascript",
+    "source" : "target.description = 'Active Account';
+                openidm.update('system/ldap/account/' + target._id, null, target);"
+}     </programlisting>
+     </informalexample>
+     <para>
+      If the script throws an exception, target object linking is aborted.
+      </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>onUnlink</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute when a source and a target object are to be 
-     unlinked, after property mappings have been applied. In the root scope, 
-     the source object is provided in the <literal>"source"</literal> property,
-      projected target object in the <literal>"target"</literal> property. If 
-      the script throws an exception, then target object unlinking is aborted.
+     <para>
+      A script to execute when a source and a target object are to be unlinked,
+      after property mappings have been applied. In the root scope, the source
+      object is provided in the <literal>"source"</literal> property, and the
+      target object in the <literal>"target"</literal> property.
+     </para>
+     <para>
+      Note that, although an <literal>onUnlink</literal> script has access to a
+      copy of the target object, changes made to that copy will not be saved to
+      the target system automatically. If you want to persist changes made to
+      target objects by an <literal>onUnlink</literal> script, you must
+      explicitly include a call to the action that should be taken on the target
+      object (for example <literal>openidm.create</literal>,
+      <literal>openidm.update</literal> or <literal>openidm.delete</literal>)
+      within the script.
+     </para>
+     <para>
+      In the following example, when an LDAP target object is unlinked, the
+      <literal>"description"</literal> attribute of that object is updated with
+      the value <literal>"Inactive Account"</literal>. A call to
+      <literal>openidm.update</literal> is made within the
+      <literal>onUnlink</literal> script, to set the value.
+     </para>
+     <informalexample>
+      <programlisting language="javascript">"onUnlink" : {
+    "type" : "text/javascript",
+    "source" : "target.description = 'Inactive Account';
+                openidm.update('system/ldap/account/' + target._id, null, target);"
+}     </programlisting>
+     </informalexample>
+     <para>
+      If the script throws an exception, target object unlinking is aborted.
       </para>
     </listitem>
    </varlistentry>
