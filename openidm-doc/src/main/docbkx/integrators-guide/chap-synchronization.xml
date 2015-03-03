@@ -971,6 +971,12 @@ $ <userinput>curl \
     an object is about to be stored in the repository (onStore). Similar scripts
     are available for when a link is created (onLink) or removed (onUnlink).
    </para>
+   <para>
+    In the default synchronization mapping, changes are
+    <emphasis>always</emphasis> written to target objects, not to source
+    objects. However, you can explicitly include a call to an action that should
+    be taken on the source object within the script.
+   </para>
    <note>
     <para>
      The <literal>onUpdate</literal> script is <emphasis>always</emphasis>
@@ -1769,6 +1775,7 @@ $ <userinput>curl \
         },
     ...</programlisting>
   </section>
+
  </section>
 
  <section xml:id="recon-by-id">
