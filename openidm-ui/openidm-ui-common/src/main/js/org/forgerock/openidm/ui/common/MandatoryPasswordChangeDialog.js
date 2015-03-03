@@ -38,21 +38,21 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
         contentTemplate: "templates/admin/MandatoryPasswordChangeDialogTemplate.html",
         delegate: InternalUserDelegate,
         events: {
-            "click .dialogCloseCross img": "close",
+            "click .dialogCloseCross a": "close",
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
-            "click .dialogContainer": "stop",
+            "click .modal-content": "stop",
             "customValidate": "customValidate"
         },
 
         formSubmit: function(event) {
             event.preventDefault();
-            
+
             var patchDefinitionObject = [], element;
             if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
                 patchDefinitionObject.push({operation: "replace", field: "password", value: this.$el.find("input[name=password]").val()});
             }
-            
+
             this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                 delete conf.passwords;
@@ -66,7 +66,7 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
 
             }, this));
         },
-        
+
         render: function(args, callback) {
             var landingView = require(router.configuration.routes.landingPage.view);
 
@@ -92,10 +92,10 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
                     }
                 }, this));
             }, this));
-            
+
             this.$el.find("input[type=submit]").prop('disabled', true);
         },
-        
+
         customValidate: function () {
             if(validatorsManager.formValidated(this.$el.find("#passwordChange")) || validatorsManager.formValidated(this.$el.find("#securityDataChange"))) {
                 this.$el.find("input[type=submit]").prop('disabled', false);
@@ -103,10 +103,10 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
             else {
                 this.$el.find("input[type=submit]").prop('disabled', true);
             }
-            
+
         }
-    }); 
-    
+    });
+
     return new MandatoryPasswordChangeDialog();
 });
 
