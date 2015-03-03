@@ -82,7 +82,7 @@ define("org/forgerock/openidm/ui/admin/linkedView/LinkedView", [
             return cleanName;
         },
 
-        changeResource: function(target) {
+        changeResource: function(event) {
             event.preventDefault();
 
             this.loadEditor($(event.target).val());
