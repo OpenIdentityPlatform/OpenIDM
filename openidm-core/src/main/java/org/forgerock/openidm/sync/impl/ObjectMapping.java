@@ -950,7 +950,7 @@ class ObjectMapping {
             
             boolean queryNextPage = false;
 
-            LOGGER.info("Perfoming source sync for recon {} on mapping {}", new Object[] {reconId, name});
+            LOGGER.info("Performing source sync for recon {} on mapping {}", new Object[] {reconId, name});
             do {
                 // Query next page of results if paging
                 if (queryNextPage) {
