@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -87,8 +87,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A class containing common members and methods of a Security ResourceProvider implementation.
- * 
- * @author ckienle
  */
 public class SecurityResourceProvider {
     
@@ -462,7 +460,7 @@ public class SecurityResourceProvider {
             keyPairValue.put("value" , toPem(keyPair));
             JsonValue encrypted = getCryptoService().encrypt(keyPairValue, cryptoCipher, cryptoAlias);
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
-            keyMap.put("keyPair", encrypted);
+            keyMap.put("keyPair", encrypted.getObject());
             storeInRepo(KEYS_CONTAINER, alias, keyMap);
         } catch (Exception e) {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
