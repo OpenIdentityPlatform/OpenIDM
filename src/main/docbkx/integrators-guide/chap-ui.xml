@@ -1447,9 +1447,9 @@
    sample for an understanding of how the workflow integration works.
   </para>
   <para>
-   General access to workflow-related endpoints is based on the OpenIDM roles
-   defined in the <filename>conf/access.json</filename> file. The
-   <filename>conf/process-access.json</filename> file uses these roles to assess
+   General access to workflow-related endpoints is based on the access rules
+   defined in the <filename>script/access.js</filename> file. The configuration
+   defined in the <filename>conf/process-access.json</filename> file determines
    who can invoke workflows. By default all users with the role
    <literal>openidm-authorized</literal> or <literal>openidm-admin</literal> can
    invoke any available workflow. The default
