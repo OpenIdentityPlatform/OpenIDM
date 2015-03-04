@@ -37,8 +37,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
-    "org/forgerock/openidm/ui/admin/util/ReconDetailsView"
-], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView) {
+    "org/forgerock/openidm/ui/admin/util/ReconDetailsView",
+    "bootstrap-tabdrop"
+], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView, tabdrop) {
 
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
@@ -80,7 +81,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         },
         moveSubmenu: function(){
             var submenuClone = $("#subNavHolder").clone(true),
-            submenuList = submenuClone.find("ul");
+                submenuList = submenuClone.find("ul");
 
             $("#subNavHolder").remove();
             this.$el.find("#subNavHolderClone").remove();
@@ -95,6 +96,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             });
             submenuList.find("a").addClass("submenuNavButton");
             submenuClone.insertBefore("#mappingContent", this.$el).show();
+            this.$el.find(".nav-tabs").tabdrop();
         },
         setCurrentMapping: function(mappingObj){
             browserStorageDelegate.set('currentMapping',mappingObj);
@@ -140,10 +142,10 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         render: function(args, callback) {
             var syncConfig,
                 cleanName;
-            
+
             this.route = { url: window.location.hash.replace(/^#/, '') };
             this.data.docHelpUrl = constants.DOC_URL;
-                
+
             //because there are relatively slow queries being called which would slow down the interface if they were called each time
             //decide here whether we want to render all of this view or only the child
             //if this.data.mapping does not exist we know this view has not been loaded
