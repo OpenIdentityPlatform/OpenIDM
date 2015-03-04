@@ -1,8 +1,19 @@
-<h1>{{t "common.form.settings"}}</h1>
-<div id="settingsTabs" class=" box-shadow round">
-    <ul>
-        <li><a href="#authenticationContainer">{{t "config.AppConfiguration.Navigation.links.authentication"}}</a></li>
-    </ul>
+<div class="container">
+    <div class="page-header no-border">
+        <h1>{{t "common.form.settings"}}</h1>
+    </div>
+</div>
 
-    <div id="authenticationContainer"></div>
-</div>   
+<div id="settingsTabs" class="tab-menu">
+    <div class="container">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#authenticationContainer">{{t "config.AppConfiguration.Navigation.links.authentication"}}</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="container">
+    <div class="tab-content">
+        <div id="authenticationContainer" class="tab-pane active" role="tabpanel"></div>
+    </div>
+</div>
