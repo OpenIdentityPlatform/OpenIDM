@@ -44,6 +44,7 @@ require.config({
         handlebars: "libs/handlebars-1.3.0-min",
         bootstrap: "libs/bootstrap.min",
         "bootstrap-dialog": "libs/bootstrap-dialog.min",
+        "bootstrap-tabdrop": "libs/bootstrap-tabdrop-1.0",
         placeholder: "libs/jquery.placeholder",
         moment: "libs/moment-2.8.1-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
@@ -113,6 +114,9 @@ require.config({
         },
         'bootstrap-dialog': {
             deps: ["jquery", "underscore","backbone", "bootstrap"]
+        },
+        'bootstrap-tabdrop': {
+            deps: ["jquery", "bootstrap"]
         }
     }
 });

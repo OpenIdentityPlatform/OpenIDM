@@ -369,6 +369,8 @@
             "dialogTitle": "Situational Policy Configuration"
         },
         "auth": {
+            "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
+            "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules, in the order you specify.",
             "errorsmsg": "Please address the errors in the Authentication modules before proceeding to save.",
             "addNew": "Add New Authentication Module",
             "errors": "Errors",

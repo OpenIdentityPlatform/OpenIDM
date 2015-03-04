@@ -114,6 +114,13 @@
             <type>zip</type>
         </dependency>
 
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap-tabdrop</artifactId>
+            <version>1.0</version>
+            <type>js</type>
+        </dependency>
+
     </dependencies>
 
     <profiles>
