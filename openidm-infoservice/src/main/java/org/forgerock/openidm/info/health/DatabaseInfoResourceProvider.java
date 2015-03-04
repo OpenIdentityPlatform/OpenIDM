@@ -89,7 +89,7 @@ public class DatabaseInfoResourceProvider implements SingletonResourceProvider {
                         field("connectionWaitTimeAvg", mBeanServer.getAttribute(name, "ConnectionWaitTimeAvg")),
                         field("statementExecuteTimeAvg", mBeanServer.getAttribute(name, "StatementExecuteTimeAvg")),
                         field("statementPrepareTimeAvg", mBeanServer.getAttribute(name, "StatementPrepareTimeAvg")),
-                        field("totalLeasedConenctions", mBeanServer.getAttribute(name, "TotalLeased")),
+                        field("totalLeasedConnections", mBeanServer.getAttribute(name, "TotalLeased")),
                         field("totalFreeConnections", mBeanServer.getAttribute(name, "TotalFree")),
                         field("totalCreatedConnections", mBeanServer.getAttribute(name, "TotalCreatedConnections")),
                         field("cacheHits", mBeanServer.getAttribute(name, "CacheHits")),
