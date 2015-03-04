@@ -61,17 +61,21 @@
        programming language that implements a complete and dynamic component
        model. For a good introduction, see the <link xlink:show="new"
        xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site.
-       While OpenIDM services are designed to run in any OSGi container,
        OpenIDM currently runs in <link xlink:show="new"
        xlink:href="http://felix.apache.org/site/index.html">Apache
-       Felix</link>.</para>
+       Felix</link>, an implementation of
+       <link xlink:show="new"
+             xlink:href="http://www.osgi.org/Specifications/HomePage">
+        <citetitle>the OSGi Framework and Service Platform</citetitle></link>.
+        <!-- quoting the first line at felix.apache.org, 24 Feb 2015 -->
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
       <term>Servlet</term>
       <listitem>
        <para>
-        The optional Servlet layer provides RESTful HTTP access to the managed
+        The Servlet layer provides RESTful HTTP access to the managed
         objects and services. OpenIDM embeds the Jetty Servlet Container, which
         can be configured for either HTTP or HTTPS access.
        </para>
