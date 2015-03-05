@@ -48,7 +48,8 @@ define("org/forgerock/openidm/ui/admin/sync/ScheduleView", [
         noBaseTemplate: true,
         events: {
             "click .saveLiveSync": "saveLiveSync",
-            "click #addNew": "addReconciliation"
+            "click #addNew": "addReconciliation",
+            "click .deleteSchedule" : "reconDeleted"
         },
         mapping: null,
         allPatterns: {},

@@ -259,7 +259,9 @@
             "addScript": "Add Script"
         },
         "schedule": {
+            "liveSyncTitle" : "LiveSync",
             "schedule": "Scheduling",
+            "liveSyncDescription" : "LiveSync schedules synchronization.",
             "addReconciliationSchedule": "Add Reconciliation Schedule",
             "enableLiveSync": "Enable LiveSync for this mapping",
             "liveSyncEnabled": "LiveSync schedule is enabled.",
