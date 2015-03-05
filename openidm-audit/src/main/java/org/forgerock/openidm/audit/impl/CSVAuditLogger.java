@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -101,10 +102,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
             logger.info("Audit logging to: {}", auditLogDir.getAbsolutePath());
             auditLogDir.mkdirs();
             recordDelim = config.get(CONFIG_LOG_RECORD_DELIM).asString();
-            if (recordDelim == null) {
-                recordDelim = "";
+            if (StringUtils.isBlank(recordDelim)) {
+                recordDelim = ServerConstants.EOL;
             }
-            recordDelim += ServerConstants.EOL;
 
             // Maintain FileWriter's 1024 byte write buffer default unless config overrides it.
             bufferSize = config.get(CONFIG_LOG_BUFFER_SIZE).defaultTo(1024).asInteger();

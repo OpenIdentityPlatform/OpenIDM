@@ -18,8 +18,7 @@
     "logTo" : [
         {
             "logType" : "csv",
-            "location" : "audit",
-            "recordDelimiter" : ";"
+            "location" : "audit"
         },
         {
             "logType" : "repository",
