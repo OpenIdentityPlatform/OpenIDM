@@ -519,7 +519,6 @@
         {
             "logType" : "csv",
             "location" : "audit",
-            "recordDelimiter" : ";",
             "ignoreLoggingFailures" : true
         },
         {
@@ -700,12 +699,18 @@
           <filename>activity.csv</filename>, and <filename>recon.csv</filename>.
          </para>
          <para>
-          The <literal>"recordDelimiter"</literal> property enables you to
-          specify the separator between each record.
+          The <literal>"recordDelimiter"</literal> property allows you to
+          specify the character that represents a new line for the system that
+          hosts the CSV file.
+         </para>
+         <para>
+          If you set <literal>"recordDelimiter"</literal> to <literal>""</literal>,
+          the Java line separator property on the local OpenIDM system will be
+          used.
          </para>
         </listitem>
         <listitem>
-         <para>
+         <para>]
           <literal>repository</literal> - write to the OpenIDM repository.
          </para>
          <para>
@@ -939,7 +944,6 @@
         {
             "logType" : "csv",
             "location" : "audit",
-            "recordDelimiter" : ":",
             "bufferSize" : 1024,
             "maxFlushDelay" : 0
         }
