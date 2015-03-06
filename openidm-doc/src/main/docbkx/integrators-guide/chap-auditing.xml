@@ -710,7 +710,7 @@
          </para>
         </listitem>
         <listitem>
-         <para>]
+         <para>
           <literal>repository</literal> - write to the OpenIDM repository.
          </para>
          <para>
