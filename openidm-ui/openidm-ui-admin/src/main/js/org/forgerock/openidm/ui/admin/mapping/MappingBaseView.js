@@ -143,6 +143,10 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             var syncConfig,
                 cleanName;
 
+            if(args === "null"){
+                args = UIUtils.getCurrentHash().split("/").slice(1);
+            }
+            
             this.route = { url: window.location.hash.replace(/^#/, '') };
             this.data.docHelpUrl = constants.DOC_URL;
 

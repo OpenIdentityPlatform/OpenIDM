@@ -328,7 +328,7 @@
             "missingLQMsg": "This correlation query is referencing an undefined link qualifier.  You should remove this correlation query or create the link qualifier.",
             "notAvailableMsg1": "The link qualifier, ",
             "noLQdefined": "No link qualifiers defined",
-            "notAvailableMsg2": ", associated with this property is not available.  Add this link qualifier or update the condition.",
+            "notAvailableMsg2": " associated with this property is not available.  Add this link qualifier or update the condition.",
             "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
             "noCondition": "No Condition",
             "undo": "Undo",

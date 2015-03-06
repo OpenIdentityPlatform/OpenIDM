@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -76,6 +76,14 @@
     border-bottom: 1px solid #eee;
 }
 
+.ui-front {
+    z-index: 10000;
+}
+
+.validation-message {
+    color: @failure-color;
+}
+
 /*
     Managed Object Admin
 */
@@ -113,6 +121,17 @@
   .lightenColor {
     color: @navbar-toggle-color;
   }
+}
+
+.ui-autocomplete {
+    li.ui-state-focus {
+        color: #fff;
+        background: @base-theme-color;
+    }
+
+    li.ui-menu-item {
+        padding:5px;
+    }
 }
 
 @media (max-width: 767px) {
