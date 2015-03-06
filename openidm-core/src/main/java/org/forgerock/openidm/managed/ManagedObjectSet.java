@@ -532,7 +532,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                                 
                                 Resource response = update(context, request, resource.getId(), resource.getRevision(),
                                         decrypted, newValue);
-                                
+
+                                if (ContextUtil.isExternal(context)) {
+                                    response = cullPrivateProperties(response);
+                                }
+
                                 activityLogger.log(context, request.getRequestType(), "Patch " + operations.toString(), 
                                         managedId(resource.getId()).toString(), resource.getContent(), response.getContent(), 
                                         Status.SUCCESS);
@@ -690,8 +694,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
             ResultHandler<Resource> handler) {
         try {
-            handler.handleResult(
-                    patchResource(context, request, resourceId, request.getRevision(), request.getPatchOperations()));
+            Resource patched = patchResource(context, request, resourceId, request.getRevision(), request.getPatchOperations());
+
+            // only cull private properties if this is an external call
+            if (ContextUtil.isExternal(context)) {
+                patched = cullPrivateProperties(patched);
+            }
+
+            handler.handleResult(patched);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -837,6 +847,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 case patch:
                     final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
                     Resource resource = patchResource(context, request, resourceId, null, operations);
+                    if (ContextUtil.isExternal(context)) {
+                        resource = cullPrivateProperties(resource);
+                    }
                     handler.handleResult(resource.getContent());
                     break;
                 case triggerSyncCheck:
