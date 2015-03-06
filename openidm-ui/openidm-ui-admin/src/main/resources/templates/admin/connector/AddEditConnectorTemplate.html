@@ -115,6 +115,16 @@
                 </div>
             </div>
 
+            <div role="alert" id="connectorErrorMessage" class="alert alert-danger" style="display:none;">
+                <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.error" }}</strong>
+                <span class='message'></span>
+            </div>
+
+            <div role="alert" id="connectorChangesPending" class="alert alert-warning" style="display:none;">
+                <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.warning" }}</strong>
+                <span class='message'>{{t 'templates.connector.pendingObjectTypes'}}</span>
+            </div>
+
             <div class="panel panel-default panel-content panel-collapse-group">
                 <div class="panel panel-collapse">
                     <div class="panel-heading" role="tab" id="liveSyncScheduleHeading">
