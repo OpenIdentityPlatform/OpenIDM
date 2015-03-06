@@ -357,6 +357,9 @@
     and authentication module configuration.
    </para>
 
+   <!-- For those modules in the Admin UI, I want to set up tables for each
+   auth module in this section, in appendix-auth-modules.xml -->
+
    <variablelist>
     <para>
      OpenIDM supports one module for managing authentication sessions.
@@ -597,6 +600,14 @@
        <citetitle>Sample - Configuring Authentication Management With OpenAM
        </citetitle></link> in the <citetitle>Install Guide</citetitle>.
       </para>
+      <para>
+       For detailed options, see the
+       <link xlink:show="new" xlink:href="integrators-guide#openam-module-details"
+             xlink:role="http://docbook.org/xlink/role/olink">
+        <citetitle>OPENAM_SESSION Module Configuration Options</citetitle></link>
+       in the following Appendix: <citetitle>Configuration Details for
+       Authentication Modules</citetitle>.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -672,141 +683,13 @@
    </programlisting>
 
    <para>
-    The configuration properties in this example are described in the following
-    section. Many of these properties apply to other authentication modules, not
-    just to pass-through authentication.
+    For more information on authentication module properties, see the following
+    Appendix section on
+    <link xlink:show="new" xlink:href="integrators-guide#auth-module-prop"
+          xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>Authentication Module Properties</citetitle></link>.
    </para>
-   <variablelist>
-    <varlistentry>
-     <term><literal>name</literal></term>
-     <listitem>
-      <para>The name of the authentication module, in this case
-       <literal>PASSTHROUGH</literal>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>enabled</literal></term>
-     <listitem>
-      <para>
-       Whether the module should be taken into account during the authentication
-       process. Modules that are included in the authentication configuration
-       file, but set to <literal>"enabled" : false</literal>, are not used for
-       authentication.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>queryOnResource</literal></term>
-     <listitem>
-      <para>
-       The endpoint against which the user authenticates, such as
-       <literal>system/ldap/account</literal>,
-       <literal>system/scriptedsql/account</literal>,
-       <literal>system/ad/account</literal>,
-       <literal>managed/user</literal>, and
-       <literal>repo/internal/user</literal>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>augmentSecurityContext</literal> (optional)</term>
-     <listitem>
-      <para>
-       This parameter points to a script, executed only after a successful
-       authentication request to provide additional information, based on the
-       security context.
-      </para>
-      <para>
-       For pass-through authentication, OpenIDM uses the
-       <filename>populateAsManagedUser.js</filename> script. This script uses
-       authentication details returned from the pass-through authentication
-       module. Those details can point to a linked managed user record.
-       If a linked record is found, the script adjusts the details of the
-       security context to match that managed user object. The adjusted security
-       context enables additional operations for the authenticated user, such as
-       the ability to access the default user interface.
-      </para>
-      <para>
-       The script must be either JavaScript
-       (<literal>"type":"text/javascript"</literal>) or Groovy
-       (<literal>"type":"groovy"</literal>), and can be provided inline
-       (<literal>"source":"script source"</literal>) or in a file
-       (<literal>"file":"filename"</literal>).
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>propertyMapping</literal> (optional)</term>
-     <listitem>
-      <para>
-       A list that enables you to map the following OpenIDM properties to fields
-       in the system resource used for the authentication.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>
-      <literal>authenticationId</literal>
-     </term>
-     <listitem>
-      <para>
-       Specifies the authentication property, such as <literal>"uid"</literal>,
-       <literal>"sAMAccountName"</literal>, and <literal>"username"</literal>
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>groupMembership</literal></term>
-     <listitem>
-      <para>
-       Specifies the name of the property in the remote system that contains
-       the list of groups of which the authenticated user is a member, such as
-       <literal>memberOf</literal>, or <literal>ldapGroups</literal>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>groupRoleMapping</literal> (optional)</term>
-     <listitem>
-      <para>
-       Enables you to assign roles to users, based on their group membership in
-       the system resource. In this example, users who are members
-       of the <literal>"cn=admins"</literal> group in the LDAP directory
-       automatically acquire the <literal>"openidm-admin"</literal> role. Group
-       membership is determined, based on the
-       <literal>groupMembership</literal> property, described previously.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>managedUserLink</literal> (optional)</term>
-     <listitem>
-      <para>
-       Used by the script specified in <literal>"augmentSecurityContext"</literal>
-       to switch the context of an authenticated user from their original
-       security context to a context that is based on the related
-       <literal>managed/user</literal> account. The value is based on the
-       <literal>name</literal> of the mapping in the associated
-       <filename>sync.json</filename> file.
-      </para>
-      <para>
-       The value of this property is the <literal>"links"</literal> entry
-       (usually the mapping name defined in <literal>sync.json</literal>) that
-       was used to relate the remote system users with the managed users.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>defaultUserRoles</literal> (optional)</term>
-     <listitem>
-      <para>
-       Can be defined for any authentication module. OpenIDM assigns such roles
-       (or an empty set) to the security context of a user.
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
+
    <para>
     The samples described in the
     <link xlink:role="http://docbook.org/xlink/role/olink"
