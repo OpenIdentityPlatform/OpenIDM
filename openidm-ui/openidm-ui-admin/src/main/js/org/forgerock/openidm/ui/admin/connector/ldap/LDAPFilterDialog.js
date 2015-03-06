@@ -64,6 +64,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog", [
 
             this.currentDialog = new BootstrapDialog({
                 title:  $.t("templates.connector.ldapConnector.filterTitle", {type: params.type}),
+                size: BootstrapDialog.SIZE_WIDE,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.dialogContent,
                 onshown : _.bind(this.renderExpressionTree, this)
