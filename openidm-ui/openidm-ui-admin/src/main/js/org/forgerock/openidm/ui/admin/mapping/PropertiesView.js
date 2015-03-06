@@ -341,7 +341,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                 cmTemplate: {sortable:false},
                 onSelectRow: function(id){
                     if(id !== "blankRow"){
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, $('#' + id)[0].rowIndex]});
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, id]});
                     }
                 },
                 beforeSelectRow: function(rowid, e) {

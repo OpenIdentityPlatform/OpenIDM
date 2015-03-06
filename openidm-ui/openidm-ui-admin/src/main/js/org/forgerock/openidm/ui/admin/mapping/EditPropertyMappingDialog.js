@@ -18,14 +18,12 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
     "org/forgerock/commons/ui/common/main/SpinnerManager",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
-    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
-], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, inlineScriptEditor) {
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
+    "bootstrap-dialog",
+    "bootstrap-tabdrop"
+], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, inlineScriptEditor, BootstrapDialog, tabdrop) {
     var EditPropertyMappingDialog = AbstractView.extend({
         template: "templates/admin/mapping/PropertyMappingDialogEditTemplate.html",
-        data: {
-            width: 600,
-            height: 400
-        },
         el: "#dialogs",
         events: {
             "click input[type=submit]": "formSubmit",
@@ -68,9 +66,9 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                         }
                     });
 
-                    $("#exampleResult", this.$el).val(translatedProperty[1]);
+                    $("#exampleResult", this.currentDialog).val(translatedProperty[1]);
                 } else {
-                    $("#exampleResult", this.$el).val("");
+                    $("#exampleResult", this.currentDialog).val("");
                 }
                 this.validateMapping();
             }
@@ -102,61 +100,58 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                         }
                     });
 
-                    $("#conditionResult", this.$el).text(conditionAction);
+                    $("#conditionResult", this.currentDialog).text(conditionAction);
                 } else {
-                    $("#conditionResult", this.$el).text("");
+                    $("#conditionResult", this.currentDialog).text("");
                 }
                 this.validateMapping();
             }
         },
 
         conditionalUpdateType: function () {
-            var type = this.$el.find(".conditionalUpdateType:checked").val();
+            var type = this.currentDialog.find(".conditionalUpdateType:checked").val();
 
             if (type === "linkQualifier") {
-                this.$el.find(".conditionalLinkQualifiers").show();
-                this.$el.find(".conditionalScript").hide();
+                this.currentDialog.find(".conditionalLinkQualifiers").show();
+                this.currentDialog.find(".conditionalScript").hide();
             } else if (type === "script") {
-                this.$el.find(".conditionalLinkQualifiers").hide();
-                this.$el.find(".conditionalScript").show();
+                this.currentDialog.find(".conditionalLinkQualifiers").hide();
+                this.currentDialog.find(".conditionalScript").show();
             } else if (type === "none") {
-                this.$el.find(".conditionalLinkQualifiers").hide();
-                this.$el.find(".conditionalScript").hide();
+                this.currentDialog.find(".conditionalLinkQualifiers").hide();
+                this.currentDialog.find(".conditionalScript").hide();
             }
 
-            $("#propertyDialog").dialog("option","position","center");
-            this.currentDialog.dialog("option","position","center");
-            $( "#dialog" ).dialog( "option", "position", { my: "center", at: "center", of: window } );
         },
 
         changeLinkQualifier: function () {
-            this.$el.find(".notAvailable").hide();
+            this.currentDialog.find(".notAvailable").hide();
         },
 
         validateMapping: function () {
-            var source = $("input[name='source']", this.$el).val(),
+            var source = $("input[name='source']", this.currentDialog).val(),
                 hasAvailableSourceProps = this.data.availableSourceProps && this.data.availableSourceProps.length,
                 hasSourceValue = source && source.length,
                 invalidSourceProp = hasAvailableSourceProps && hasSourceValue && !_.contains(this.data.availableSourceProps,source),
-                proplistValidationMessage = $("#Property_List .validation-message", this.$el),
-                transformValidationMessage = $("#Transformation_Script .validation-message", this.$el),
-                conditionValidationMessage = $("#Condition_Script .validation-message", this.$el),
+                proplistValidationMessage = $("#Property_List .validation-message", this.currentDialog),
+                transformValidationMessage = $("#Transformation_Script .validation-message", this.currentDialog),
+                conditionValidationMessage = $("#Condition_Script .validation-message", this.currentDialog),
                 disableSave = function(el, message){
-                    $("input[type=submit]", this.$el).prop("disabled", true);
+                    $("#scriptDialogUpdate").prop("disabled", true);
                     el.text(message);
                 };
 
             if (invalidSourceProp) {
                 disableSave(proplistValidationMessage, $.t("templates.mapping.validPropertyRequired"));
                 return false;
-            } else if ($("#exampleResult", this.$el).val() === "ERROR WITH SCRIPT") {
+            } else if ($("#exampleResult", this.currentDialog).val() === "ERROR WITH SCRIPT") {
                 disableSave(transformValidationMessage, $.t("templates.mapping.invalidScript"));
                 return false;
-            } else if ($("#conditionResult", this.$el).text() === "ERROR WITH SCRIPT") {
+            } else if ($("#conditionResult", this.currentDialog).text() === "ERROR WITH SCRIPT") {
                 disableSave(conditionValidationMessage, $.t("templates.mapping.invalidConditionScript"));
                 return false;
             } else {
-                $("input[type=submit]", this.$el).prop("disabled", false);
+                $("#scriptDialogUpdate").prop("disabled", false);
                 transformValidationMessage.text("");
                 conditionValidationMessage.text("");
                 proplistValidationMessage.text("");
@@ -181,36 +176,42 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                     .properties
                     .push(propertyObj);
             }
+            
+            if (formContent.source) {
+                propertyObj.source = formContent.source;
+            } else {
+                delete propertyObj.source;
+            }
 
-            propertyObj.source = formContent.source || "";
-
-            if(this.transform_script_editor !== undefined) {
+            if (this.transform_script_editor !== undefined) {
                 propertyObj.transform = this.transform_script_editor.generateScript();
 
                 if(propertyObj.transform === null) {
                     delete propertyObj.transform;
+                } else if (!propertyObj.source) {
+                    propertyObj.source = "";
                 }
             } else {
                 delete propertyObj.transform;
             }
 
-            if (this.$el.find("input[name=conditionalUpdate]:checked").val() === "script" && this.conditional_script_editor !== undefined) {
+            if (this.currentDialog.find("input[name=conditionalUpdate]:checked").val() === "script" && this.conditional_script_editor !== undefined) {
                 propertyObj.condition = this.conditional_script_editor.generateScript();
 
                 if (propertyObj.condition === null) {
                     delete propertyObj.condition;
                 }
-            } else if (this.$el.find("#Condition_Script input[name=conditionalUpdate]:checked").val() === "linkQualifier" && this.$el.find(".linkQualifier").val().length > 0) {
+            } else if (this.currentDialog.find("#Condition_Script input[name=conditionalUpdate]:checked").val() === "linkQualifier" && this.currentDialog.find(".linkQualifier").val().length > 0) {
                 propertyObj.condition = {};
-                propertyObj.condition.linkQualifier = this.$el.find(".linkQualifier").val();
+                propertyObj.condition.linkQualifier = this.currentDialog.find(".linkQualifier").val();
 
             } else {
                 delete propertyObj.condition;
             }
 
             if (_.has(formContent, "default")) {
-                if($('#default_desc', this.$el).text().length > 0){
-                    propertyObj["default"] = $('#default_desc', this.$el).text();
+                if($('#default_desc', this.currentDialog).text().length > 0){
+                    propertyObj["default"] = $('#default_desc', this.currentDialog).text();
                 }
                 else{
                     propertyObj["default"] = formContent["default"];
@@ -226,9 +227,6 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
         },
 
         close: function () {
-            if(this.currentDialog) {
-                this.currentDialog.dialog('destroy').remove();
-            }
             $("#dialogs").hide();
         },
 
@@ -257,9 +255,6 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 "postRender": _.bind(this.loadData, this)
             };
 
-            this.currentDialog = $('<div id="propertyDialog"></div>');
-            this.setElement(this.currentDialog);
-
             syncConfig = syncDelegate.mappingDetails(this.data.mappingName);
 
             syncConfig.then(_.bind(function(details){
@@ -276,35 +271,47 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                     this.data.availableLinkQualifiers = [];
                     this.data.hasLinkQualifiers = false;
                 }
+                
+                this.currentDialog = $('<form id="propertyMappingDialogForm"></form>');
 
-                this.currentDialog.dialog({
-                    appendTo: $("#dialogs"),
+                $('#dialogs').append(this.currentDialog);
+                this.setElement(this.currentDialog);
+                
+                BootstrapDialog.show({
                     title: settings.title,
-                    position: ['center',25],
-                    modal: true,
-                    resizable: true,
-                    bgiframe: true,
-                    width:'850px',
-                    dialogClass: "overflow-visible",
-                    close: _.bind(function(){
-                        $("#dialogs").hide();
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
-                    }, this),
-                    open: function(){
-
-                        uiUtils.renderTemplate(settings.template, $(this),
-                            _.extend(conf.globalData, _this.data),
-                            function () {
-                                settings.postRender();
-
-                                _this.$el.parents(".ui-dialog,#dialogs").show();
-                                $(_this.$el).dialog( "option", "position", { my: "top center-110", at: "top center-110", of: $(window) } );
-
-                                if(callback){
-                                    callback();
-                                }
-                            }, "append");
-                    }
+                    type: BootstrapDialog.TYPE_DEFAULT,
+                    message: this.currentDialog,
+                    size: BootstrapDialog.SIZE_WIDE,
+                    onhide: function(dialogRef){
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
+                    },
+                    onshown : function (dialogRef) {
+                        uiUtils.renderTemplate(settings.template, _this.currentDialog,
+                                _.extend(conf.globalData, _this.data),
+                                function () {
+                                    settings.postRender();
+                                    _this.currentDialog.find(".nav-tabs").tabdrop();
+                                    if(callback){
+                                        callback();
+                                    }
+                                }, "replace");
+                    },
+                    buttons: [{
+                        label: $.t("common.form.cancel"),
+                        id:"scriptDialogCancel",
+                        action: function(dialogRef) {
+                            dialogRef.close();
+                        }
+                    },
+                    {
+                        label: $.t("common.form.update"),
+                        id:"scriptDialogUpdate",
+                        cssClass: 'btn-primary',
+                        action: _.bind(function(dialogRef) {
+                            this.formSubmit();
+                            dialogRef.close();
+                        },_this)
+                    }]
                 });
             }, this));
         },
@@ -320,7 +327,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 } else if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&
                     typeof (prop.transform.source) === "string") {
                     this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
-                            "element": this.$el.find("#transformationScriptHolder"),
+                            "element": this.currentDialog.find("#transformationScriptHolder"),
                             "eventName": "",
                             "noValidation": true,
                             "scriptData": prop.transform,
@@ -338,96 +345,80 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
 
                 if (_.has(prop, "condition")) {
                     if (_.has(prop.condition, "type")) {
-                        this.$el.find("#conditionalScript").prop("checked", true).change();
+                        this.currentDialog.find("#conditionalScript").prop("checked", true).change();
                     } else if (_.has(prop.condition, "linkQualifier")) {
                         if (this.data.availableLinkQualifiers.indexOf(prop.condition.linkQualifier) >= 0) {
-                            this.$el.find(".linkQualifier").val(prop.condition.linkQualifier);
+                            this.currentDialog.find(".linkQualifier").val(prop.condition.linkQualifier);
                         } else {
-                            this.$el.find(".notAvailable").show();
-                            this.$el.find(".notAvailable span").text(prop.condition.linkQualifier);
+                            this.currentDialog.find(".notAvailable").show();
+                            this.currentDialog.find(".notAvailable span").text(prop.condition.linkQualifier);
                         }
 
-                        this.$el.find("#conditionalLinkQualifier").prop("checked", true).change();
+                        this.currentDialog.find("#conditionalLinkQualifier").prop("checked", true).change();
                     }
                 }
             }
+            
+            _this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
+                "element": _this.currentDialog.find("#transformationScriptHolder"),
+                "eventName": "transform",
+                "noValidation": true,
+                "scriptData": _this.data.property.transform,
+                "disablePassedVariable": true,
+                "onBlur" : _this.showTransformSample,
+                "onChange" :  _this.showTransformSample,
+                "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
+            },
+            _this.showTransformSample);
 
-            $('#mappingDialogTabs', this.$el).css('width','830px').tabs({
-                active: selectedTab,
-                load: _.bind(function(e, ui){
-                    if(ui.tab[0].textContent === "Transformation Script") {
-                        this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
-                                "element": this.$el.find("#transformationScriptHolder"),
-                                "eventName": "",
-                                "noValidation": true,
-                                "scriptData": this.data.property.transform,
-                                "disablePassedVariable": true,
-                                "onBlur" : _.bind(this.showTransformSample, this),
-                                "onChange" :  _.bind(this.showTransformSample, this),
-                                "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
-                            },
-                            _.bind(this.showTransformSample, this));
-                    }
-                }, this),
-                activate: _.bind(function (e, ui) {
-                    if(ui.newTab[0].textContent === "Transformation Script") {
-                        this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
-                                "element": this.$el.find("#transformationScriptHolder"),
-                                "eventName": "",
-                                "noValidation": true,
-                                "scriptData": prop.transform,
-                                "disablePassedVariable": true,
-                                "onBlur" : _.bind(this.showTransformSample, this),
-                                "onChange" :  _.bind(this.showTransformSample, this),
-                                "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
-                            },
-                            _.bind(this.showTransformSample, this));
-
-                    } else if(ui.newTab[0].textContent === $.t("templates.mapping.propertyEdit.conditionalUpdateHeader")) {
-                        this.conditional_script_editor = inlineScriptEditor.generateScriptEditor({
-                                "element": this.$el.find("#conditionScriptHolder"),
-                                "eventName": "",
-                                "noValidation": true,
-                                "scriptData": prop.condition,
-                                "disablePassedVariable": true,
-                                "onBlur" : _.bind(this.showCondition, this),
-                                "onChange" :  _.bind(this.showCondition, this)
-                            },
-                            _.bind(this.showCondition, this));
-                    }
-
-                    $(':input:first', ui.newPanel).focus();
-                }, this)
+            _this.conditional_script_editor = inlineScriptEditor.generateScriptEditor({
+                "element": _this.currentDialog.find("#conditionScriptHolder"),
+                "eventName": "conditional",
+                "noValidation": true,
+                "scriptData": _this.data.property.condition,
+                "disablePassedVariable": true,
+                "onBlur" : _this.showCondition,
+                "onChange" :  _this.showCondition
+            },
+            _this.showCondition);
+            _this.conditionalUpdateType();
+            
+            $('#mappingDialogTabs a', this.currentDialog).click(function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+                $('#mappingDialogTabs .active :input:first', _this.currentDialog).focus();
             });
+            
+            $('#mappingDialogTabs a:first', this.currentDialog).tab('show');
 
-            $('#mappingDialogTabs [aria-expanded="true"] :input:first', this.$el).focus();
+            $('#mappingDialogTabs .active :input:first', this.currentDialog).focus();
 
             this.showTransformSample();
 
             this.data.availableSourceProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
 
             if(this.data.availableSourceProps){
-                autoCompleteUtils.selectionSetup($("input[name='source']:last", this.$el), _.sortBy(this.data.availableSourceProps,function(s){ return s; }));
+                autoCompleteUtils.selectionSetup($("input[name='source']:last", this.currentDialog), _.sortBy(this.data.availableSourceProps,function(s){ return s; }));
             }
 
-            $("input[name='source']", this.$el).on('change autocompleteclose', function (e, initialRender) {
+            $("input[name='source']", this.currentDialog).on('change autocompleteclose', function (e, initialRender) {
                 var val = $(this).val(),
                     isValid;
 
                 if (val) {
-                    $("#currentSourceDisplay", _this.$el).val(val);
+                    $("#currentSourceDisplay", _this.currentDialog).val(val);
                 } else {
-                    $("#currentSourceDisplay", _this.$el).val($.t("templates.mapping.completeSourceObject"));
+                    $("#currentSourceDisplay", _this.currentDialog).val($.t("templates.mapping.completeSourceObject"));
                 }
 
                 isValid = _this.validateMapping();
 
-                if(isValid && initialRender !== "true" && $('#propertyDialog').size() === 0){
+                if(isValid && initialRender !== "true" && $('#propertyMappingDialogForm').size() === 0){
                     _this.formSubmit();
                 }
             });
 
-            $("input[name='source']", this.$el).trigger('change', 'true');
+            $("input[name='source']", this.currentDialog).trigger('change', 'true');
 
             spinner.hideSpinner();
         }

@@ -1,45 +1,56 @@
 <form action="" class="form center no-margin" method="post" onsubmit="return false" id="propertyEditForm" autocomplete="off">
-    <fieldset>
-        <div id="mappingDialogTabs">
-            <ul>
-                <li><a href="#Property_List">{{t "templates.mapping.propertyEdit.propertyListHeader"}}</a></li>
-                <li><a href="#Transformation_Script">{{t "templates.mapping.propertyEdit.transformationHeader"}}</a></li>
-                <li class="conditionScript"><a href="#Condition_Script">{{t "templates.mapping.propertyEdit.conditionalUpdateHeader"}}</a></li>
-                <li><a href="#Default_Values">{{t "templates.mapping.propertyEdit.defaultValuesHeader"}}</a></li>
-            </ul>
-            <div id="Property_List">
-                <div class="field">
-                    <label>{{t "templates.mapping.propertyEdit.propertyListLabel"}}</label><br/><br/>
-                    <input autocomplete="off" name="source" value="{{property.source}}"/>
-                    <input type="submit" class="button" value="{{t "common.form.update"}}"/>
-
-                    <div class="validation-message"></div>
-
-                    <div id="arrayAssociationTabs" style="display:none">
-                        <ul>
-                            <li><a href="#arrayAssociations">{{t "templates.mapping.propertyEdit.valueMapping"}}</a></li>
-                            <li><a href="#valuePrecedence">{{t "templates.mapping.propertyEdit.valuePrecedence"}}</a></li>
-                        </ul>
-                        <div class="arrayAssociations" id="arrayAssociations">
-                            <label>{{t "templates.mapping.target"}}</label><label>{{t "templates.mapping.source"}}</label>
-                            <ul></ul>
-                        </div>
-                        <div id="valuePrecedence">
-                            <label>{{t "templates.mapping.propertyEdit.valuePrecedenceNote"}}</label>
-                            <ul></ul>
-                        </div>
+    <div id="mappingDialogTabs" role="tabpanel">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation"><a href="#Property_List">{{t "templates.mapping.propertyEdit.propertyListHeader"}}</a></li>
+            <li role="presentation"><a href="#Transformation_Script">{{t "templates.mapping.propertyEdit.transformationHeader"}}</a></li>
+            <li class="conditionScript" role="presentation"><a href="#Condition_Script">{{t "templates.mapping.propertyEdit.conditionalUpdateHeader"}}</a></li>
+            <li role="presentation"><a href="#Default_Values">{{t "templates.mapping.propertyEdit.defaultValuesHeader"}}</a></li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane" id="Property_List">
+                <div class="row">
+                    <div class="col-sm-11">
+                        <label>{{t "templates.mapping.propertyEdit.propertyListLabel"}}</label>
                     </div>
-                    <!-- <span class="error">x</span> -->
+                    <div class="col-sm-5">
+                        <input autocomplete="off" class="form-control" name="source" value="{{property.source}}"/>
+    
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="col-sm-11">
+                        <div id="arrayAssociationTabs" style="display:none">
+                            <ul>
+                                <li><a href="#arrayAssociations">{{t "templates.mapping.propertyEdit.valueMapping"}}</a></li>
+                                <li><a href="#valuePrecedence">{{t "templates.mapping.propertyEdit.valuePrecedence"}}</a></li>
+                            </ul>
+                            <div class="arrayAssociations" id="arrayAssociations">
+                                <label>{{t "templates.mapping.target"}}</label><label>{{t "templates.mapping.source"}}</label>
+                                <ul></ul>
+                            </div>
+                            <div id="valuePrecedence">
+                                <label>{{t "templates.mapping.propertyEdit.valuePrecedenceNote"}}</label>
+                                <ul></ul>
+                            </div>
+                        </div>
+                        <!-- <span class="error">x</span> -->
+                    </div>
+                     
+
+                     
                 </div>
             </div>
-            <div id="Transformation_Script">
-                <div class="field">
-                    <label>{{t "templates.mapping.propertyEdit.transformationSciptLabel"}}</label><br/><br/>
-
-                    <label style="display:inline" for="currentSourceDisplay">{{t "templates.mapping.propertyEdit.currentSourceValue"}}: </label>
-                    <input type="text" id="currentSourceDisplay" readonly value="{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}"><br>
-                    <div id="transformationScriptHolder"></div>
-                    <input type="submit" class="button float-right" value="{{t "common.form.update"}}"/>
+            <div role="tabpanel" class="tab-pane" id="Transformation_Script">
+                <div class="row">
+                    <div class="col-sm-11">
+                        <label>{{t "templates.mapping.propertyEdit.transformationSciptLabel"}}</label>
+                    </div>
+                       <div class="col-sm-5">
+                           <label for="currentSourceDisplay">{{t "templates.mapping.propertyEdit.currentSourceValue"}}: </label> 
+                           <span class="text-muted"><i>{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}</i></span>
+                       </div>
+                       <div class="col-sm-11">
+                           <div id="transformationScriptHolder"></div>
+                       </div>
 
 
                     <!--
@@ -50,8 +61,6 @@
                     <div class="validation-message script_output"></div>
                     -->
                 </div>
-
-                <div style="clear:both;"></div>
                 <!--
                 <br clear="both">
                 <p>
@@ -60,7 +69,7 @@
                 -->
             </div>
 
-            <div id="Condition_Script">
+            <div role="tabpanel" class="tab-pane" id="Condition_Script">
                 <p>{{t "templates.correlation.conditionScriptInfo"}}</p>
 
                 <div class="radioContainer">
@@ -72,22 +81,24 @@
                     <input type="radio" name="conditionalUpdate" id="conditionalLinkQualifier" value="linkQualifier" class="conditionalUpdateType"/>
                     <label for="conditionalLinkQualifier" class="conditionalUpdateLabel">{{t "templates.correlation.linkQualifier"}}</label>
                 </div>
-                <div class="conditionalLinkQualifiers">
+                <div class="conditionalLinkQualifiers row">
 
-                    <p class="notAvailable">{{t "templates.correlation.notAvailableMsg1"}}<span></span>{{t "templates.correlation.notAvailableMsg2"}}</p>
-                    <select name="linkQualifier" class="linkQualifier">
-                        {{#if hasLinkQualifiers}}
-                        <option value="" disabled selected>{{t "templates.correlation.selectLQ"}}</option>
-                        {{/if}}
-
-                        {{#unless hasLinkQualifiers}}
-                        <option value="" disabled selected>{{t "templates.correlation.noLQdefined"}}</option>
-                        {{/unless}}
-
-                        {{#each availableLinkQualifiers}}
-                        <option value="{{this}}">{{this}}</option>
-                        {{/each}}
-                    </select>
+                    <div class="notAvailable col-sm-12">{{t "templates.correlation.notAvailableMsg1"}}<span></span>{{t "templates.correlation.notAvailableMsg2"}}</div>
+                    <div class="col-sm-6">
+                        <select name="linkQualifier" class="linkQualifier form-control">
+                            {{#if hasLinkQualifiers}}
+                            <option value="" disabled selected>{{t "templates.correlation.selectLQ"}}</option>
+                            {{/if}}
+    
+                            {{#unless hasLinkQualifiers}}
+                            <option value="" disabled selected>{{t "templates.correlation.noLQdefined"}}</option>
+                            {{/unless}}
+    
+                            {{#each availableLinkQualifiers}}
+                            <option value="{{this}}">{{this}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="radioContainer">
@@ -109,17 +120,19 @@
                     <p>{{t "templates.mapping.propertyEdit.conditionScriptNote"}}</p> -->
                 </div>
 
-                <input type="submit" class="button float-right" value="{{t "common.form.update"}}"/>
             </div>
 
-            <div id="Default_Values">
-                <div class="field">
-                    <label>{{t "templates.mapping.propertyEdit.defaultValuesLabel"}}</label><br/><br/>
-                    <input autocomplete="off" name="default" style="width:300px;" value="{{property.default}}"/>
-                    <input type="submit" class="button" value="{{t "common.form.update"}}"/>
-                    <span class="ok" id="default_desc" style="display:none"></span>
+            <div role="tabpanel" class="tab-pane" id="Default_Values">
+                <div class="row">
+                    <div class="col-sm-11">
+                        <label>{{t "templates.mapping.propertyEdit.defaultValuesLabel"}}</label>
+                    </div>
+                    <div class="col-sm-5">
+                        <input autocomplete="off" name="default" class="form-control" value="{{property.default}}"/>
+                        <span class="ok" id="default_desc" style="display:none"></span>
+                    </div>
                 </div>
             </div>
         </div>
-    </fieldset>
+    </div>
 </form>

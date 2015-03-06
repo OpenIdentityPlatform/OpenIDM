@@ -155,10 +155,16 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
             //If either the file name or inline script are empty this function will return null
             generateScript: function() {
-                var currentSelection = this.$el.find("input[name=scriptType]:checked").val(),
+                var currentSelection,
                     scriptObject = {},
                     inputs,
                     emptyCheck = false;
+                
+                if(this.data.eventName) {
+                    currentSelection = this.$el.find("input[name=" + this.data.eventName + "_scriptType]:checked").val();
+                } else {
+                    currentSelection = this.$el.find("input[name=scriptType]:checked").val();
+                }
 
                 if(currentSelection === "none") {
                     return null;

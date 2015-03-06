@@ -12,7 +12,7 @@
         <div class="panel panel-default event-hook-piece file-code ">
             <div class="panel-heading" id="fileHeading">
                 <label class="event-hook-title inline radio">
-                    <input type="radio" class="radio inline" name="scriptType" value="file-code" {{#unless scriptData.source}} checked {{/unless}}/>
+                    <input type="radio" class="radio inline" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="file-code" {{#unless scriptData.source}} checked {{/unless}}/>
                     {{t "templates.scriptEditor.filePath"}}
                 </label>
             </div>
@@ -32,7 +32,7 @@
         <div class="panel panel-default event-hook-piece inline-code">
             <div class="panel-heading" id="inlineHeading">
                 <label class="event-hook-title inline radio">
-                    <input type="radio" name="scriptType" value="inline-code" class="radio inline collapsed" {{#if scriptData.source}} checked {{/if}}/>
+                    <input type="radio" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="inline-code" class="radio inline collapsed" {{#if scriptData.source}} checked {{/if}}/>
                     {{t "templates.scriptEditor.inline"}}
                 </label>
             </div>
