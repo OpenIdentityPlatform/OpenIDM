@@ -471,8 +471,8 @@
             "editTitle" : "Edit Connector",
             "addButtonTitle" : "Add",
             "updateButtonTitle" : "Update",
-            "addObjectTypeTitle": "Add ObjectType",
-            "editObjectTypeTitle": "Edit ObjectType",
+            "addObjectTypeTitle": "Add Object Type",
+            "editObjectTypeTitle": "Edit Object Type",
             "readSchema": "Read Schema",
             "validateConnector": "Validate Connector",
             "addConnectorTitle" : "Add Connector",
@@ -490,6 +490,7 @@
             "addMapping" : "New Mapping",
             "help" : "Help",
             "managedObjectType" : "Managed Object",
+            "pendingObjectTypes" : "You have pending Object Type changes. Please save the connector to persist these changes.",
             "liveSync": {
                 "title": "LiveSync Options",
                 "liveSyncFailure": "LiveSync Failure Options",
@@ -505,11 +506,11 @@
 
             },
             "objectTypes": {
-                "saveObjectType": "Save ObjectType and Close",
+                "saveObjectType": "Save Object Type and Close",
                 "discardEdits": "Discard Changes and Close",
-                "bulkDeleteMsg": "You can only perform bulk deletes, please select one objectType to make edits",
-                "deleteObjectTypes": "Delete Selected ObjectTypes",
-                "addNewObjecttype": "Add a new object type",
+                "bulkDeleteMsg": "You can only perform bulk deletes, please select one Object Type to make edits",
+                "deleteObjectTypes": "Delete Selected Object Types",
+                "addNewObjecttype": "Add a New Object Type",
                 "deleteObject": "Delete Object",
                 "saveObject": "Save Object",
                 "objectTypeConfigs" : "Object Type Configs",
@@ -919,6 +920,7 @@
             "reloadGrid" : "Reload Grid",
             "clearFilters" : "Clear Filters",
             "showAllItems" : "Show All Items",
+            "error" : "Error",
             "warning" : "Warning",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
