@@ -29,7 +29,8 @@
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
 <title>More OpenIDM Samples</title>
 
  <para>The current distribution of OpenIDM comes with a variety of samples
@@ -5799,6 +5800,7 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
   
  </section>
 
+ <!--
  <section xml:id="more-sample-openam">
   <title>Sample - Configuring Authentication Management With OpenAM</title>
    <indexterm>
@@ -5862,11 +5864,11 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
      </para>
      <screen>$ cd /path/to/opendj/bin
 $ ./ldapmodify \
---bindDN "cn=Directory Manager" \
---bindPassword password \
---hostname localhost \
---port 1389 \
---filename /path/to/openidm/samples/openam/data/Example.ldif
+-bindDN "cn=Directory Manager" \
+-bindPassword password \
+-hostname localhost \
+-port 1389 \
+-filename /path/to/openidm/samples/openam/data/Example.ldif
      </screen>
      <para>
       If you set up OpenDJ on a secure port with a self-signed certificate, you
@@ -6010,9 +6012,6 @@ $ ./ldapmodify \
       xlink:href="integrators-guide#openidm-roles" xlink:show="new">
       <citetitle>Roles and Authentication</citetitle></link>.
      </para>
-     <!-- The README suggests this is needed only for self-signed certs. I think
-     this may be required for regular certs too, or does our truststore include
-     the "standard list"? -->
 
      <para>
       The <literal>"openamDeploymentUrl"</literal> shown above assumes that you
@@ -6145,11 +6144,11 @@ $ ./ldapmodify \
     </para>
 
     <screen>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- --request POST \
+ -cacert self-signed.crt \
+ -header "X-OpenIDM-Username: openidm-admin" \
+ -header "X-OpenIDM-Password: openidm-admin" \
+ -header "Content-Type: application/json" \
+ -request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser&amp;waitForCompletion=true"</screen>
    <para>
     The reconciliation operation returns a reconciliation run ID, and the status
@@ -6246,7 +6245,7 @@ $ ./ldapmodify \
      </para>
     </listitem>
 
-   <!-- possible additional options; can incorporate with more detail
+   <!- possible additional options; can incorporate with more detail
     <listitem>
      <para>
       <literal>Set up workflows to request access to applications</literal>
@@ -6279,12 +6278,15 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
  being made to OpenIDM would be hidden from the user - the SSO token that they
  used to access the intranet would also be used by OpenIDM, and everything
  would just work seamlessly.
-    -->
+
    </itemizedlist>
 
   </section>
 
  </section>
+                       -->
+
+ <xinclude:include href="samples/full-stack-sample.xml" />
 
  <section xml:id='more-sample-audit'>
 
@@ -7475,7 +7477,9 @@ https://localhost:8443/admin/index.html#connectors/edit//&amp;code=aPrxJZTK7Rs03
       The relevant excerpts of the <filename>provisioner.salesforce-salesforce.json</filename>
       file are as follows:
      </para>
-     <programlisting width="pagewide">{
+
+<!-- <programlisting width="pagewide">{  -->
+     <programlisting language="javascript">{
     "name" : "salesforce",
     "enabled" : true,
     "connectorRef" : {
