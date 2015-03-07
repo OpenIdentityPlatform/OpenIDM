@@ -1,0 +1,77 @@
+{
+    "name" : "csv",
+    "connectorRef" : {
+        "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
+        "bundleVersion" : "1.1.0.2",
+        "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
+    },
+    "poolConfigOption" : {
+        "maxObjects" : 10,
+        "maxIdle" : 10,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "VALIDATE" : -1,
+        "TEST" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCHEMA" : -1,
+        "DELETE" : -1,
+        "UPDATE" : -1,
+        "SYNC" : -1,
+        "AUTHENTICATE" : -1,
+        "GET" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "SEARCH" : -1
+    },
+    "configurationProperties" : {
+        "filePath" : "&{launcher.project.location}/data/hr.csv",
+        "uniqueAttribute" : "uid",
+        "nameAttribute" : "uid"
+    },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
+    "objectTypes" : {
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "employeeNumber" : {
+                    "type" : "string",
+                    "nativeName" : "employeeNumber",
+                    "nativeType" : "string"
+                },
+                "mail" : {
+                    "type" : "string",
+                    "nativeName" : "email",
+                    "nativeType" : "string"
+                },
+                "uid" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "lastName" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "lastName",
+                    "nativeType" : "string"
+                },
+                "givenName" : {
+                    "type" : "string",
+                    "nativeName" : "firstName",
+                    "nativeType" : "string"
+                }
+            }
+        }
+    },
+    "operationOptions" : {
+    }
+}

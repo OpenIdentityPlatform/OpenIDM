@@ -1,0 +1,134 @@
+/** 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+Sample 7 - Scripting a SCIM-like Schema
+---------------------------------------
+
+This sample demonstrates using scripting to expose users according to a
+SCIM-like schema.
+
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample7
+
+Note that this sample does not work with the OpenIDM UI, due to the fact
+that the managed/user schema does not match the default.
+
+To try the sample, follow these steps.
+
+    1. Start OpenIDM with the configuration for sample 7.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/sample7
+
+    2. Run reconciliation to copy the user from the XML file under data/ to
+       the OpenIDM internal repository. The scripts configured within sync.json 
+       transform the user data to fit the SCIM-like schema.
+
+    $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+
+    3. Retrieve the user from the repository.
+
+    $ curl -k -u "openidm-admin:openidm-admin" -X GET "https://localhost:8443/openidm/managed/user/DDOE1?_prettyPrint=true"
+    {
+      "_id" : "DDOE1",
+      "_rev" : "1",
+      "schemas" : "['urn:scim:schemas:core:1.0']",
+      "ims" : [ {
+        "type" : "aim",
+        "value" : "jonyOnAim"
+      }, {
+        "type" : "skype",
+        "value" : "skyperHiasl"
+      } ],
+      "locale" : null,
+      "phoneNumbers" : [ {
+        "type" : "work",
+        "value" : "1234567"
+      }, {
+        "type" : "home",
+        "value" : "1234568"
+      } ],
+      "emails" : [ {
+        "type" : "work",
+        "value" : "hallo@example.com",
+        "primary" : true
+      }, {
+        "type" : "home",
+        "value" : "jdoe@forgerock.com"
+      } ],
+      "externalId" : "DDOE1",
+      "preferredLanguage" : "en_US",
+      "meta" : {
+        "lastModified" : "Fri Apr 18 2014 15:15:33 GMT-0700 (PDT)",
+        "created" : "Fri Apr 18 2014 15:15:33 GMT-0700 (PDT)"
+      },
+      "userType" : "permanent",
+      "photos" : [ {
+        "type" : "photo",
+        "value" : "https://photos.example.com/profilephoto/72930000000Ccne/F"
+      }, {
+        "type" : "thumbnail",
+        "value" : "https://photos.example.com/profilephoto/72930000000Ccne/T"
+      } ],
+      "title" : "Mr.Universe",
+      "timezone" : "America/Denver",
+      "profileUrl" : "https://login.example.com/DDOE1",
+      "nickName" : "Jonny",
+      "name" : {
+        "familyName" : "Doe",
+        "middleName" : "Hias",
+        "formatted" : "Dr. John H Doe III",
+        "givenName" : "John",
+        "honorificSuffix" : "III",
+        "honorificPrefix" : "Dr."
+      },
+      "userName" : "DDOE1",
+      "displayName" : "John Doe",
+      "addresses" : [ {
+        "streetAddress" : "100 Universal City Plaza",
+        "region" : "CA",
+        "formatted" : "100 Universal City Plaza\nHollywood, CA 91608 USA",
+        "postalCode" : "91608",
+        "primary" : "true",
+        "locality" : "Hollywood",
+        "type" : "work",
+        "country" : "USA"
+      }, {
+        "streetAddress" : "222 Universal City Plaza",
+        "region" : "CA",
+        "formatted" : "222 Universal City Plaza\nHollywood, CA 91622 USA",
+        "postalCode" : "91622",
+        "primary" : "false",
+        "locality" : "Hollywood",
+        "type" : "home",
+        "country" : "USA"
+      } ],
+      "groups" : [ {
+        "value" : "usemploys",
+        "display" : "US Employees"
+      }, {
+        "value" : "euemploys",
+        "display" : "EU Employees"
+      } ]
+    }

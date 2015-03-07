@@ -1,0 +1,21 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "0 0 */12 * * ?",
+    "persisted" : true,
+    "misfirePolicy" : "doNothing",
+    "invokeService" : "script",
+    "invokeContext" : {
+        "script" : {
+            "type" : "text/javascript",
+            "file" : "audit/autoPurgeAuditRecon.js",
+            "input" : {
+                "mappings" : [ "%" ],
+                "purgeType" : "purgeByNumOfReconsToKeep",
+                "numOfRecons" : 1,
+                "intervalUnit" : "minutes",
+                "intervalValue" : 1
+            }
+        }
+    }
+}

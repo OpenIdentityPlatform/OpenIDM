@@ -1,0 +1,224 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var query = {'_queryId' : 'for-userName', 'uid' : source.name};query;"
+            },
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "name",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "manager",
+                    "target" : "manager"
+                },
+                {
+                    "source" : "department",
+                    "target" : "department"
+                },
+                {
+                    "source" : "jobTitle",
+                    "target" : "jobTitle"
+                },
+                {
+                    "source" : "mobileTelephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "startDate",
+                    "target" : "startDate"
+                },
+                {
+                    "source" : "endDate",
+                    "target" : "endDate"
+                },
+                {
+                    "default" : "Welcome1",
+                    "target" : "password"
+                },
+                {
+                    "source" : "roles",
+                    "target" : "roles"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "target" : "provisionToXML",
+                    "default" : "1"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemXmlfileAccounts",
+            "source" : "managed/user",
+            "target" : "system/xmlfile/account",
+            "validSource" : {
+                "type" : "text/javascript",
+                "source" : "source.provisionToXML == '1'"
+            },
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "file" : "script/correlationQuery.js"
+            },
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "name"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "firstname"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "lastname"
+                },
+                {
+                    "source" : "manager",
+                    "target" : "manager",
+                    "default" : "No Manager"
+                },
+                {
+                    "source" : "department",
+                    "target" : "department",
+                    "default" : "Unassigned"
+                },
+                {
+                    "source" : "jobTitle",
+                    "target" : "jobTitle",
+                    "default" : "Unknown"
+                },
+                {
+                    "target" : "mobileTelephoneNumber",
+                    "source" : "telephoneNumber"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "startDate",
+                    "target" : "startDate",
+                    "default" : ""
+                },
+                {
+                    "source" : "endDate",
+                    "target" : "endDate",
+                    "default" : ""
+                },
+                {
+                    "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "object.password != null"
+                    },
+                    "target" : "password"
+                },
+                {
+                    "source" : "roles",
+                    "target" : "roles"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description",
+                    "default" : ""
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

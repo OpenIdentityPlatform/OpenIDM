@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//
+DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+<Configure class="org.eclipse.jetty.server.Server">
+
+    <!-- =========================================================== -->
+    <!-- Set connectors                                              -->
+    <!-- =========================================================== -->
+    <!-- One of each type!                                           -->
+    <!-- =========================================================== -->
+
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                <Set name="host"><Property name="jetty.host" /></Set>
+                <Set name="port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.http</Arg></Call></Set>
+                <Set name="maxIdleTime">300000</Set>
+                <Set name="Acceptors">2</Set>
+                <Set name="statsOn">false</Set>
+                <Set name="confidentialPort">
+                    <Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                        <Arg>openidm.port.https</Arg>
+                    </Call>
+                </Set>
+            </New>
+        </Arg>
+    </Call>
+
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ssl.SslSocketConnector">
+                <Arg>
+                    <New class="org.eclipse.jetty.http.ssl.SslContextFactory">
+                        <Set name="keyStore"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
+                        <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
+                        <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
+                        <Set name="trustStore"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
+                        <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
+                        <Set name="wantClientAuth">true</Set>
+                        <Set name="needClientAuth">false</Set>
+                        <Set name="certAlias"><Get class="org.forgerock.openidm.jetty.Param" name="certAlias"/></Set>
+                        <Set name="ExcludeProtocols">
+                            <Array type="java.lang.String">
+                                <Item>SSLv3</Item>
+                            </Array>
+                        </Set>
+                    </New>
+                </Arg>
+                <Set name="Port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.https</Arg></Call></Set>
+                <Set name="maxIdleTime">30000</Set>
+                <Set name="ExcludeCipherSuites">
+                    <Array type="java.lang.String">
+
+                        <!-- EXP-RC4-MD5  -->
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- EXP-EDH-RSA-DES-CBC-SHA or EXP-DHE-RSA-DES-CBC-SHA  -->
+                        <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+
+                        <!-- EXP-DES-CBC-SHA -->
+                        <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA</Item>
+
+                        <!-- DES-CBC-SHA -->
+                        <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_WITH_DES_CBC_SHA</Item>
+                        <Item>TLS_KRB5_WITH_DES_CBC_SHA</Item>
+
+                        <!--
+                        EDH-RSA-DES-CBC-SHA or DHE-RSA-DES-CBC-SHA is excluded above
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        -->
+
+                        <!-- RC4-MD5 -->
+                        <Item>SSL_RSA_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- RC4-SHA  -->
+                        <Item>SSL_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_anon_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_SHA</Item>
+
+                        <!--
+                        ECDHE-RSA-RC4-SHA is excluded above
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        -->
+
+                    </Array>
+                </Set>
+            </New>
+        </Arg>
+    </Call>
+
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ssl.SslSocketConnector" id="MutualAuthPort">
+                <Arg>
+                    <New class="org.eclipse.jetty.http.ssl.SslContextFactory">
+                        <Set name="keyStore"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
+                        <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
+                        <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
+                        <Set name="trustStore"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
+                        <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
+                        <Set name="wantClientAuth">true</Set>
+                        <Set name="needClientAuth">true</Set>
+                        <Set name="certAlias"><Get class="org.forgerock.openidm.jetty.Param" name="certAlias"/></Set>
+                        <Set name="ExcludeProtocols">
+                            <Array type="java.lang.String">
+                                <Item>SSLv3</Item>
+                            </Array>
+                        </Set>
+                    </New>
+                </Arg>
+
+                <Set name="Port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.mutualauth</Arg></Call></Set>
+                <Set name="maxIdleTime">30000</Set>
+                <Call class="org.forgerock.openidm.jetty.DisableOpenIDMAuth" name="add">
+                    <Arg>
+                        <Ref id="MutualAuthPort"/>
+                    </Arg>
+                </Call>
+                <Set name="ExcludeCipherSuites">
+                    <Array type="java.lang.String">
+
+                        <!-- EXP-RC4-MD5  -->
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- EXP-EDH-RSA-DES-CBC-SHA or EXP-DHE-RSA-DES-CBC-SHA  -->
+                        <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+
+                        <!-- EXP-DES-CBC-SHA -->
+                        <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA</Item>
+
+                        <!-- DES-CBC-SHA -->
+                        <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_WITH_DES_CBC_SHA</Item>
+                        <Item>TLS_KRB5_WITH_DES_CBC_SHA</Item>
+
+                        <!--
+                        EDH-RSA-DES-CBC-SHA or DHE-RSA-DES-CBC-SHA is excluded above
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        -->
+
+                        <!-- RC4-MD5 -->
+                        <Item>SSL_RSA_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- RC4-SHA  -->
+                        <Item>SSL_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_anon_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_SHA</Item>
+
+                        <!--
+                        ECDHE-RSA-RC4-SHA is excluded above
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        -->
+
+                    </Array>
+                </Set>
+            </New>
+        </Arg>
+    </Call>
+
+    <!-- Set the pax-web osgi port values -->
+    <Call class="java.lang.System" name="setProperty">
+        <Arg>org.osgi.service.http.port</Arg>
+        <Arg><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.http</Arg></Call></Arg>
+    </Call>
+    <Call class="java.lang.System" name="setProperty">
+        <Arg>org.osgi.service.http.port.secure</Arg>
+        <Arg><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.https</Arg></Call></Arg>
+    </Call>
+
+</Configure>
+

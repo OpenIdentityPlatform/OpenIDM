@@ -1,0 +1,975 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2014 ForgeRock AS
+  !
+-->
+<chapter xml:id='chap-repo'
+         xmlns='http://docbook.org/ns/docbook'
+         version='5.0' xml:lang='en'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>Managing the OpenIDM Repository</title>
+
+ <para>
+  OpenIDM stores managed objects, internal users, and configuration objects in
+  a repository. By default, OpenIDM uses OrientDB for its internal repository.
+  In production, you must replace OrientDB with a supported JDBC repository, as
+  described in <link xlink:href="install-guide#chap-repository"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a
+  Repository For Production</citetitle></link> in the <citetitle>Installation
+  Guide</citetitle>.
+ </para>
+ <para>
+  This chapter describes the JDBC repository configuration, the use of mappings
+  in the repository, and how to configure a connection to the repository over
+  SSL. It also describes how to interact with the OpenIDM repository over the
+  REST interface.
+ </para>
+
+ <section xml:id="jdbc-repo-config">
+  <title>Understanding the JDBC Repository Configuration File</title>
+  <para>
+   OpenIDM provides a specific configuration file for each supported JDBC
+   repository, as well as example configurations for other repositories. These
+   configuration files are located in
+   <filename>/path/to/openidm/db/<replaceable>database</replaceable></filename>
+   and are named <filename>repo.jdbc.json</filename>. Copy the configuration
+   file for your specific database type to
+   <filename>/path/to/openidm/conf/</filename>.
+  </para>
+  <para>
+   The repository configuration file includes the connection details for the
+   repository, a number of predefined queries, and a mapping between OpenIDM
+   resources and the tables in the repository.
+  </para>
+  <para>
+   An excerpt from an example repository configuration follows.
+  </para>
+  <programlisting language="javascript">
+{
+    "connection" : {
+        "dbType" : "MYSQL",
+        "jndiName" : "",
+        "driverClass" : "com.mysql.jdbc.Driver",
+        "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?characterEncoding=utf8",
+        "username" : "openidm",
+        "password" : "openidm",
+        "defaultCatalog" : "openidm",
+        "maxBatchSize" : 100,
+        "maxTxRetry" : 5,
+        "enableConnectionPool" : true,
+        "connectionTimeoutInMs" : 30000
+    },
+    "queries" : {...},
+    "resourceMapping" : {...}
+}
+  </programlisting>
+  <variablelist>
+   <varlistentry>
+    <term><literal>"dbType" : string, optional</literal></term>
+    <listitem>
+     <para>
+      The type of database. The database type might affect the queries used and
+      other optimizations. Supported database types include
+      <literal>MYSQL</literal>, <literal>SQLSERVER</literal>, and
+      <literal>ORACLE</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"driverClass"</literal>, <literal>"jndiName"</literal>, or
+    <literal>"jtaName"</literal></term>
+    <listitem>
+     <para>
+      Depending on the mechanism you use to acquire the data source, set
+      <emphasis>one</emphasis> of these properties.
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        <literal>"driverClass" : string</literal>
+       </para>
+       <para>
+        To use the JDBC driver manager to acquire a data source, set this
+        property, as well as <literal>"jdbcUrl"</literal>,
+        <literal>"username"</literal>, and <literal>"password"</literal>. The
+        driver class must be the fully qualified class name of the database
+        driver to use for your database.
+       </para>
+       <para>
+        Using the JDBC driver manager to acquire a data source is the most
+        likely option, and the only one supported "out of the box". The
+        remaining options in the sample repository configuration file assume
+        that you are using a JDBC driver manager.
+       </para>
+       <para>
+        Example: <literal>"driverClass" : "com.mysql.jdbc.Driver"</literal>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>"jndiName" : string</literal>
+       </para>
+       <para>
+        If you use JNDI to acquire the data source, set this property to the
+        JNDI name of the data source.
+       </para>
+       <para>
+        This option might be relevant if you want to run OpenIDM inside your own
+        web container.
+       </para>
+       <para>
+        Example: <literal>"jndiName" : "jdbc/my-datasource"</literal>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>"jtaName" : string</literal>
+       </para>
+       <para>
+        If you use an OSGi service to acquire the data source, set this property
+        to a stringified version of the OsgiName.
+       </para>
+       <para>
+        This option would only be relevant in a highly customized deployment,
+        for example, if you wanted to develop your own connection pool.
+       </para>
+       <para>
+        Example: <literal>"jtaName" : "osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)"</literal>
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"jdbcUrl"</literal></term>
+    <listitem>
+     <para>
+      The connection URL to the JDBC database. The URL should include all of the
+      parameters required by your database. For example, to specify the encoding
+      in MySQL use <literal>'characterEncoding=utf8'</literal>.
+     </para>
+     <para>
+      Example: <literal>"jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?characterEncoding=utf8"</literal>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"username"</literal></term>
+    <listitem>
+     <para>
+      The username with which to access the JDBC database.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"password"</literal></term>
+    <listitem>
+     <para>
+      The password with which to access the JDBC database. OpenIDM automatically
+      encrypts clear string passwords. To replace an existing encrypted value,
+      replace the whole <literal>crypto-object</literal> value, including the
+      brackets, with a string of the new password.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"defaultCatalog"</literal></term>
+    <listitem>
+     <para>
+      The database schema to use for OpenIDM. By default, no schema prefix
+      is used for queries.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"maxBatchSize"</literal></term>
+    <listitem>
+     <para>
+      The maximum number of SQL statements that will be batched together. This
+      parameter allows you to optimize the time taken to execute multiple
+      queries. Certain databases do not support batching, or limit how many
+      statements can be batched. A value of <literal>1</literal> disables
+      batching.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"queries"</literal></term>
+    <listitem>
+     <para>
+      Enables you to create pre-defined queries that can be referenced from the
+      configuration. For more information about pre-defined queries, see
+      <link xlink:href="integrators-guide#parameterized-queries"
+      xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>Parameterized Queries</citetitle></link>. The queries are
+      divided between those for <literal>"genericTables"</literal> and those for
+      <literal>"explicitTables"</literal>.
+     </para>
+     <para>
+      The following sample extract from the default MySQL configuration file
+      shows two credential queries, one for a generic mapping, and one for an
+      explicit mapping. Note that the lines have been broken here for legibility
+      only. In a real configuration file, the query would be all on one line.
+     </para>
+     <programlisting language="javascript">
+"queries" : {
+    "genericTables" : {
+        "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}
+          obj INNER JOIN ${_dbSchema}.${_propTable} prop ON
+          obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes
+          objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName'
+          AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+        ...
+    "explicitTables" : {
+        "credential-query" : "SELECT * FROM ${_dbSchema}.${_table}
+          WHERE objectid = ${username} and accountStatus = 'active'",
+        ...
+    }
+}    </programlisting>
+     <itemizedlist>
+      <para>
+       Options supported for query parameters include the following:
+      </para>
+      <listitem>
+       <para>
+        A default string parameter, for example:
+       </para>
+       <programlisting>
+openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
+       </programlisting>
+       <para>
+        For more information about the query function see <link
+        xlink:href="integrators-guide#function-query"
+        xlink:role="http://docbook.org/xlink/role/olink">
+        <citetitle>openidm.query</citetitle></link> in the <citetitle>Scripting
+        Reference</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        A list parameter (<literal>${list:propName}</literal>).
+       </para>
+       <para>
+        Use this parameter to specify a set of indeterminate size as part of
+        your query. For example:
+       </para>
+       <programlisting>
+WHERE targetObjectId IN (${list:filteredIds})
+       </programlisting>
+      </listitem>
+      <listitem>
+       <para>
+        An integer parameter (<literal>${int:propName}</literal>).
+       </para>
+       <para>
+        Use this parameter if you need query for non-string values in the
+        database. This is particularly useful with explicit tables.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"resourceMapping"</literal></term>
+    <listitem>
+     <para>
+      Defines the mapping between OpenIDM resource URIs (for example,
+      <literal>managed/user</literal>) and JDBC tables. The structure of the
+      resource mapping is as follows:
+     </para>
+     <programlisting language="javascript">
+"resourceMapping" : {
+    "default" : {
+        "mainTable" : "genericobjects",
+        "propertiesTable" : "genericobjectproperties",
+        "searchableDefault" : true
+    },
+    "genericMapping" : {...},
+    "explicitMapping" : {...}
+}    </programlisting>
+     <para>
+      The default mapping object represents a default generic table in which any
+      resource that does not have a more specific mapping is stored.
+     </para>
+     <para>
+      The generic and explicit mapping objects are described in the following
+      section.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="explicit-generic-mapping">
+  <title>Using Explicit or Generic Object Mapping With a JDBC Repository</title>
+  <itemizedlist>
+   <para>
+    For JDBC repositories, there are two ways of mapping OpenIDM objects to the
+    database tables.
+   </para>
+   <listitem>
+    <para>
+     <emphasis>Generic mapping</emphasis>, which allows arbitrary objects to be
+     stored without special configuration or administration.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <emphasis>Explicit mapping</emphasis>, which allows for optimized storage
+     and queries by explicitly mapping objects to tables and columns in the
+     database.
+    </para>
+   </listitem>
+  </itemizedlist>
+  <para>
+   These two mapping strategies are discussed in the following sections.
+  </para>
+
+  <section xml:id="generic-mappings">
+   <title>Using Generic Mappings</title>
+   <para>
+    Generic mapping speeds up development, and can make system maintenance
+    more flexible by providing a more stable database structure. However,
+    generic mapping can have a performance impact and does not take full
+    advantage of the database facilities (such as validation within the database
+    and flexible indexing). In addition, queries can be more difficult to set up.
+   </para>
+   <para>
+    In a generic table, the entire object content is stored in a single
+    large-character field named <literal>"fullobject"</literal> in the
+    <literal>"mainTable"</literal> for the object. To search on specific fields,
+    you can read them by referring to them in the corresponding
+    <literal>properties table</literal> for that object. The disadvantage of
+    generic objects is that, because every property you might like to filter by
+    is stored in a separate table, you must join to that table each time you need
+    to filter by anything.
+   </para>
+   <para>
+    The following diagram shows a pared down database structure for the default
+    generic table, and indicates the relationship between the main table and
+    the corresponding properties table for each object.
+   </para>
+   <mediaobject>
+    <alt>Generic tables entity relationship diagram</alt>
+    <imageobject>
+     <imagedata fileref="images/generic-tables-erd.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+   <para>
+    These separate tables can make the query syntax particularly complex. For
+    example, a simple query to return user entries based on a user name would
+    need to be implemented as follows:
+   </para>
+   <programlisting width="100">
+SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop
+    ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype
+    ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid}
+    AND objtype.objecttype = ${_resource}",
+   </programlisting>
+   <para>
+    The query can be broken down as follows:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>Select the full object from the main table</para>
+     <programlisting>
+SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj
+     </programlisting>
+    </listitem>
+    <listitem>
+     <para>
+      Join to the properties table and locate the object with the corresponding ID.
+     </para>
+     <programlisting>
+INNER JOIN ${_dbSchema}.${_propTable} prop  ON obj.id = prop.${_mainTable}_id
+     </programlisting>
+    </listitem>
+    <listitem>
+     <para>
+      Join to the object types table to restrict returned entries to objects of
+      a specific type. For example, you might want to restrict returned entries
+      to <literal>managed/user</literal> objects, or <literal>managed/role</literal>
+      objects.
+     </para>
+     <programlisting>
+INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id
+     </programlisting>
+    </listitem>
+    <listitem>
+     <para>
+      Filter records by the <literal>userName</literal> property, where the
+      userName is equal to the specified <literal>uid</literal> and the object
+      type is the specified type (in this case, managed/user objects).
+     </para>
+     <programlisting>
+WHERE prop.propkey='/userName'
+AND prop.propvalue = ${uid}
+AND objtype.objecttype = ${_resource}",
+     </programlisting>
+     <para>
+      The value of the <literal>uid</literal> field is provided as part of the
+      query call, for example:
+     </para>
+     <programlisting>
+openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
+     </programlisting>
+    </listitem>
+   </itemizedlist>
+   <para>
+    Tables for user definable objects use a generic mapping by default.
+   </para>
+   <para>
+    The following sample generic mapping object illustrates how
+    <literal>managed/</literal> objects are stored in a generic table.
+   </para>
+   <programlisting language="javascript">
+  "genericMapping" : {
+      "managed/*" : {
+          "mainTable" : "managedobjects",
+          "propertiesTable" : "managedobjectproperties",
+          "searchableDefault" : true,
+          "properties" : {
+              "/picture" : {
+                  "searchable" : false
+              }
+          }
+      }
+  },
+   </programlisting>
+   <variablelist>
+    <varlistentry>
+     <term><literal>"mainTable"</literal> (string, mandatory)</term>
+     <listitem>
+      <para>
+       Indicates the main table in which data is stored for this resource.
+      </para>
+      <para>
+       The complete object is stored in the <literal>fullobject</literal> column
+       of this table. The table includes an <literal>entityType</literal>
+       foreign key, that is used to distinguish the different objects stored
+       within the table. In addition, the revision of each stored object is
+       tracked, in the <literal>rev</literal> column of the table, enabling
+       multi version concurrency control (MVCC). For more information, see
+       <link xlink:show="new"
+             xlink:href="integrators-guide#managed-objects-programmatic"
+             xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Manipulating
+       Managed Objects Programmatically</citetitle></link> in the
+       <citetitle>Integrator's Guide</citetitle>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"propertiesTable"</literal> (string, mandatory)</term>
+     <listitem>
+      <para>
+       Indicates the properties table, used for searches.
+      </para>
+      <para>
+       The contents of the properties table is a defined subset of the
+       properties, copied from the character large object (CLOB) that is stored
+       in the <literal>fullobject</literal> column of the main table. The
+       properties are stored in a one-to-many style separate table. The set of
+       properties stored here is determined by the properties that are defined
+       as <literal>"searchable"</literal>.
+      </para>
+      <para>
+       The stored set of searchable properties makes these values available as
+       discrete rows that can be accessed with SQL queries, specifically, with
+       <literal>WHERE</literal> clauses. It is not otherwise possible to query
+       specific properties of the full object.
+      </para>
+      <itemizedlist>
+       <para>
+        The properties table includes the following columns:
+       </para>
+       <listitem>
+        <para>
+         <literal>${_mainTable}_id</literal> corresponds to the
+         <literal>id</literal> of the full object in the main table,
+         for example, <literal>manageobjects_id</literal>, or
+         <literal>genericobjects_id</literal>.
+        </para>
+       </listitem>
+       <listitem>
+         <para>
+          <literal>propkey</literal> is the name of the searchable property,
+          stored in JSON pointer format (for example <literal>/mail</literal>.
+          For more information about JSON pointer syntax, see
+          <link xlink:show="new"
+                xlink:href="http://tools.ietf.org/html/rfc6901">RFC 6901</link>.
+         </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>proptype</literal> is the data type of the property, for
+         example <literal>java.lang.String</literal>. The property type is
+         obtained from the Class associated with the value.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>propvalue</literal> is the value of property, extracted from
+         the full object that is stored in the main table.
+        </para>
+        <para>
+         Regardless of the property data type, this value is stored as a string,
+         so queries against it should treat it as such.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"searchableDefault"</literal> (boolean, optional)</term>
+     <listitem>
+      <para>
+       Specifies whether all properties of the resource should be searchable by
+       default. Properties that are searchable are stored and indexed. You can
+       override the default for individual properties in the
+       <literal>"properties"</literal> element of the mapping. The preceding
+       example indicates that all properties are searchable, with the exception
+       of the <literal>"picture"</literal> property.
+      </para>
+      <para>
+       For large, complex objects, having all properties searchable implies a
+       substantial performance impact. In such a case, a separate insert
+       statement is made in the properties table for each element in the object,
+       every time the object is updated. Also, because these are indexed fields,
+       the recreation of these properties incurs a cost in the maintenance of
+       the index. You should therefore enable <literal>"searchable"</literal>
+       only for those properties that must be used as part of a WHERE clause in
+       a query.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"properties"</literal></term>
+     <listitem>
+      <para>
+       Lists any individual properties for which the searchable default should
+       be overridden.
+      </para>
+      <para>
+       Note that if an object was originally created with a subset of
+       <literal>"searchable"</literal> properties, changing this subset (by
+       adding a new <literal>"searchable"</literal> property in the
+       configuration, for example) will not cause the existing values to be
+       updated in the properties table for that object. To add the new property
+       to the properties table for that object, you must update or recreate the
+       object.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="searches-with-generic-mappings">
+   <title>Improving Search Performance for Generic Mappings</title>
+   <para>
+    All properties in a generic mapping are searchable by default. In other
+    words, the value of the <literal>"searchableDefault"</literal> property is
+    <literal>true</literal> unless you explicitly set it to false. Although
+    there are no individual indexes in a generic mapping, you can improve search
+    performance by setting only those properties that you need to search as
+    <literal>"searchable"</literal>. Properties that are searchable are created
+    within the corresponding properties table. The properties table exists only
+    for searches or look-ups, and has a composite index, based on the resource,
+    then the property name.
+   </para>
+   <para>
+    The sample JDBC repository configuration files
+    (<filename>db/<replaceable>database</replaceable>/conf/repo.jdbc.json</filename>)
+    restrict searches to specific properties by setting the
+    <literal>"searchableDefault"</literal> to <literal>false</literal> for
+    <literal>managed/user</literal> mappings. You must explicitly set
+    <literal>"searchable"</literal> to true for each property that should be
+    searched. The following sample extract from
+    <filename>repo.jdbc.json</filename> indicates searches restricted to the
+    <literal>"userName"</literal> property.
+   </para>
+   <programlisting language="javascript">
+"genericMapping" : {
+    "managed/user" : {
+        "mainTable" : "manageduserobjects",
+        "propertiesTable" : "manageduserobjectproperties",
+        "searchableDefault" : false,
+        "properties" : {
+            "/userName" : {
+            "searchable" : true
+            }
+        }
+    }
+},
+   </programlisting>
+   <para>
+    With this configuration, OpenIDM creates entries in the properties table
+    only for <literal>"userName"</literal> properties of managed user objects.
+   </para>
+   <para>
+    If the global <literal>"searchableDefault"</literal> is set to false,
+    properties that do not have a searchable attribute explicitly set to true
+    are not written in the properties table.
+   </para>
+  </section>
+  <section xml:id="explicit-mappings">
+   <title>Using Explicit Mappings</title>
+   <para>
+    Explicit mapping is more difficult to set up and maintain, but can take
+    complete advantage of the native database facilities.
+   </para>
+   <para>
+    An explicit table offers better performance and simpler queries. There is
+    less work in the reading and writing of data, since the data is all in a
+    single row of a single table. In addition, it is easier to create different
+    types of indexes that apply to only specific fields in an explicit table.
+    The disadvantage of explicit tables is the additional work required in
+    creating the table in the schema. Also, because rows in a table are
+    inherently more simple, it is more difficult to deal with complex objects.
+    Any non-simple key:value pair in an object associated with an explicit table
+    is converted to a JSON string and stored in the cell in that format. This
+    makes the value difficult to use, from the perspective of a query attempting
+    to search within it.
+   </para>
+   <para>
+    Note that it is possible to have a generic mapping configuration for most
+    managed objects, <emphasis>and</emphasis> to have an explicit mapping that
+    overrides the default generic mapping in certain cases. The sample
+    configuration provided in
+    <filename>/path/to/openidm/db/mysql/conf/repo.jdbc-mysql-explicit-managed-user.json</filename>
+    has a generic mapping for managed objects, but an explicit mapping for
+    managed user objects.
+   </para>
+   <para>
+    OpenIDM uses explicit mapping for internal system tables, such as the tables
+    used for auditing.
+   </para>
+   <para>
+    Depending on the types of usage your system is supporting, you might find
+    that an explicit mapping performs better than a generic mapping. Operations
+    such as sorting and searching (such as those performed in the default UI)
+    tend to be faster with explicitly-mapped objects, for example.
+   </para>
+   <para>
+    The following sample explicit mapping object illustrates how
+    <literal>internal/user</literal> objects are stored in an explicit table.
+   </para>
+   <programlisting language="javascript">
+"explicitMapping" : {
+    "internal/user" : {
+        "table" : "internaluser",
+        "objectToColumn" : {
+            "_id" : "objectid",
+            "_rev" : "rev",
+            "password" : "pwd",
+            "roles" : "roles"
+        }
+    },
+    ...
+}
+   </programlisting>
+   <variablelist>
+    <varlistentry>
+     <term><literal>"&lt;resource-uri&gt;"</literal> (string, mandatory)</term>
+     <listitem>
+      <para>
+       Indicates the URI for the resources to which this mapping applies, for
+       example, <literal>"internal/user"</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"table"</literal> (string, mandatory)</term>
+     <listitem>
+      <para>
+       The name of the database table in which the object (in this case internal
+       users) is stored.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"objectToColumn"</literal> (string, mandatory)</term>
+     <listitem>
+      <para>
+       The way in which specific managed object properties are mapped to columns
+       in the table.
+      </para>
+      <para>
+       The mapping can be a simple one to one mapping, for example
+       <literal>"userName": "userName",</literal> or a more complex JSON map or
+       list. When a column is mapped to a JSON map or list, the syntax is as
+       shown in the following examples:
+      </para>
+      <programlisting>
+"messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
+      </programlisting>
+      <para>
+       or
+      </para>
+      <programlisting>
+"roles": { "column" : "roles", "type" : "JSON_LIST" }
+      </programlisting>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+ </section>
+
+ <section xml:id="jdbc-repos-ssl">
+  <title>Configuring SSL with a JDBC Repository</title>
+
+  <para>
+   To configure SSL with a JDBC repository, you need to import the CA
+   certificate file for the server into the OpenIDM truststore. That certificate
+   file could have a name like <filename>ca-cert.pem</filename>. If you have a
+   different genuine or self-signed certificate file, substitute accordingly.
+  </para>
+
+  <para>
+   To import the CA certificate file into the OpenIDM truststore, use the
+   <command>keytool</command> command native to the Java environment, typically
+   located in the <filename>/path/to/jre-version/bin</filename> directory. On
+   some UNIX-based systems, <command>/usr/bin/keytool</command> may link
+   to that command.
+  </para>
+
+  <procedure xml:id="import-cacert-jdbc">
+   <title>Preparing OpenIDM for SSL with a JDBC Repository</title>
+
+   <step>
+    <para>
+     Import the <filename>ca-cert.pem</filename> certificate into the OpenIDM
+     truststore file with the following command:
+    </para>
+
+    <screen>$ keytool \
+ -importcert \
+ -trustcacerts \
+ -file ca-cert.pem \
+ -alias "DB cert" \
+ -keystore /path/to/openidm/security/truststore
+    </screen>
+   </step>
+   <step>
+    <para>
+     Open the repository configuration file, <filename>repo.jdbc.json</filename>.
+    </para>
+    <para>
+     Look for the <literal>"jdbcUrl"</literal> properties. You should see a
+     <literal>jdbc</literal> URL. Add a
+     <literal><?linebreak?>?characterEncoding=utf8&amp;useSSL=true</literal> to
+     the end of that URL.
+    </para>
+    <para>
+     The <literal>"jdbcUrl"</literal> that you configure depends on your JDBC
+     repository. The following entries correspond to appropriate
+     <literal>"jdbcURL"</literal> properties for MySQL, MSSQL, PostgreSQL, and
+     Oracle DB, respectively.
+    </para>
+    <screen>
+"jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?characterEncoding=utf8&amp;useSSL=true"</screen>
+    <screen>
+"jdbcUrl" : "jdbc:sqlserver://localhost:1433;instanceName=default;
+     databaseName=openidm;applicationName=OpenIDM?characterEncoding=utf8&amp;useSSL=true"</screen>
+    <screen>
+"jdbcUrl" : "jdbc:postgresql://localhost:5432/openidm"</screen>
+    <screen>
+"jdbcUrl" : "jdbc:oracle:thin:@//localhost:1521/openidm?characterEncoding=utf8&amp;useSSL=true"</screen>
+   </step>
+   <step>
+    <para>
+     Open the <filename>/path/to/openidm/conf/config.properties</filename> file.
+     Find the <literal>org.osgi.framework.bootdelegation</literal> property.
+     Make sure that property includes a reference to the
+     <literal>javax.net.ssl</literal> option. If you started with the default
+     version of <filename>config.properties</filename> that line should now
+     read as follows:
+    </para>
+    <screen>
+org.osgi.framework.bootdelegation=sun.*,com.sun.*,apple.*,com.apple.*,javax.net.ssl
+    </screen>
+   </step>
+   <step>
+    <para>
+     Open the <filename>/path/to/openidm/conf/system.properties</filename> file.
+     Add the following line to that file. If appropriate, substitute the path to
+     your own truststore:
+     <screen># Set the truststore
+javax.net.ssl.trustStore=/path/to/openidm/security/truststore</screen>
+    </para>
+    <para>
+     Even if you are setting up this instance of OpenIDM as part of a cluster,
+     you still need to configure this initial truststore. After this instance
+     joins a cluster, the SSL keys in this particular truststore are replaced.
+     For more information on clustering, see <link xlink:show="new"
+     xlink:href="integrators-guide#chap-cluster"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+     OpenIDM to Work in a Cluster</citetitle></link>.
+    </para>
+   </step>
+   <step>
+    <stepalternatives>
+     <step>
+      <para>
+       If you are not using MySQL, you're done!
+      </para>
+     </step>
+     <step>
+      <para>
+       If you are including MySQL as a repository, you need to take the following
+       additional steps to add the client certificate and key to the OpenIDM
+       keystore:
+      </para>
+     </step>
+     <step>
+      <para>
+       Create the client certificate file, <filename>client.packet</filename>,
+       with the following command:
+      </para>
+      <screen>$ openssl \
+ pkcs12 \
+ -export \
+ -inkey client-key.pem \
+ -in client-cert.pem \
+ -out client.packet
+      </screen>
+      <para>
+       In this case, the <command>openssl</command> command imports a client key,
+       <filename>client-key.pem</filename>, with input data from the same file,
+       exporting output to a client certificate file named
+       <filename>client.packet</filename>, in PKCS12 format.
+      </para>
+     </step>
+     <step>
+      <para>
+       You can then add the client certificate to the OpenIDM keystore with the
+       following command:
+      </para>
+      <screen>$ keytool \
+ -importkeystore \
+ -srckeystore client.packet \
+ -srcstoretype pkcs12 \
+ -destkeystore /path/to/openidm/security/keystore.jceks \
+ -storetype JCEKS
+      </screen>
+     </step>
+    </stepalternatives>
+   </step>
+
+  </procedure>
+
+ </section>
+
+ <section xml:id="repo-over-rest">
+  <title>Interacting With the Repository Over REST</title>
+  <para>
+   The OpenIDM repository is accessible over the REST interface, at the
+   <literal>openidm/repo</literal> endpoint.
+  </para>
+  <para>
+   In general, you must ensure that external calls to the
+   <literal>openidm/repo</literal> endpoint are protected. Native queries and
+   free-form command actions on this endpoint are disallowed by default, as the endpoint
+   is vulnerable to injection attacks. For more information, see
+   <xref linkend="repo-commands"/>.
+  </para>
+
+  <section xml:id="repo-pwd-change">
+   <title>Changing the Repository Password</title>
+   <para>
+    In the case of an embedded OrientDB repository, the default username and
+    password are <literal>admin</literal> and <literal>admin</literal>. You can
+    change the default password, by sending the following POST request on the
+    <literal>repo</literal> endpoint:
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/repo?_action=updateDbCredentials&amp;user=admin&amp;password=newPassword"</userinput></screen>
+   <para>
+    You must restart OpenIDM for the change to take effect.
+   </para>
+  </section>
+
+  <section xml:id="repo-commands">
+   <title>Running Queries and Commands on the Repository</title>
+   <para>
+    Free-form commands and native queries on the repository are disallowed by
+    default and should remain so in production to reduce the risk of injection
+    attacks.
+   </para>
+   <para>
+    Common filter expressions, called with the <literal>_queryFilter</literal>
+    keyword, enable you to form arbitrary queries on the repository, using a
+    number of supported filter operations. For more information on these filter
+    operations, see <link
+    xlink:href="integrators-guide#constructing-queries"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
+    Queries</citetitle></link>. Parameterized or pre-defined queries and
+    commands (using the <literal>_queryId</literal> and
+    <literal>_commandId</literal> keywords) can be authorized on the repository
+    for external calls if necessary. For more information, see <link
+    xlink:href="integrators-guide#parameterized-queries"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Parameterized
+    Queries</citetitle></link>.
+   </para>
+   <para>
+    Running commands on the repository is supported primarily from scripts.
+    Certain scripts that interact with the repository are provided by default,
+    for example, the scripts that enable you to purge the repository of
+    reconciliation audit records.
+   </para>
+   <para>
+    You can define your own commands, and specify them in the repository
+    configuration file (either <filename>repo.orientdb.json</filename> or
+    <filename>repo.jdbc.json</filename>). In the following simple example, a
+    command is called to clear out UI notification entries from the repository,
+    for specific users.
+   </para>
+   <para>
+    The command is defined in the repository configuration file, as follows:
+   </para>
+   <programlisting language="javascript">"commands" : {
+"delete-notifications-by-id" : "DELETE FROM ui_notification WHERE receiverId = ${username}"
+...
+}, </programlisting>
+   <para>
+    The command can be called from a script, as follows:
+   </para>
+   <programlisting language="javascript">openidm.action("repo/ui/notification", "command", {},
+{ "commandId" : "delete-notifications-by-id", "userName" : "scarter"});
+</programlisting>
+   <para>
+    Exercise caution when allowing commands to be run on the repository over the
+    REST interface, as there is an attached risk to the underlying data.
+   </para>
+  </section>
+ </section>
+
+</chapter>

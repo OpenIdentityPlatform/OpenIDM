@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock.openidm</groupId>
+        <artifactId>openidm-project</artifactId>
+        <version>3.2.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>openidm-quartz-fragment</artifactId>
+    <name>OpenIDM Quartz Fragment</name>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-enhanced-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-cluster</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jta</artifactId>
+                    <groupId>javax.transaction</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Provided OSGi Dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Fragment-Host>org.apache.servicemix.bundles.quartz</Fragment-Host>
+                        <Export-Package>org.forgerock.openidm.quartz.impl;version="${project.version}"</Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

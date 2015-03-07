@@ -1,0 +1,335 @@
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+sciptedazure Sample - Groovy Connector to Azure AD Graph API
+-------------------
+
+This sample demonstrates how to use Groovy to connect to AD Graph API. This sample enables the basic create,
+read, update, and delete (CRUD) operations for groups and users. This sample requires a fresh install of OpenIDM.
+
+Setup Azure AD:
+
+Configure under the configurationProperties section of provisioner.openicf-scriptedazure.json these two properties:
+
+                               
+    "customConfiguration": "graphServiceUrl = 'https://graph.windows.net/__configureme__'; oauth2 { authority = 'https://login.windows.net/__configureme__'; redirectURI = '__configureme__'; resourceURI = 'https://graph.windows.net'}",
+    "customSensitiveConfiguration": "oauth2 { clientId = '__configureme__'; clientSecret = '__configureme__'; username = '__configureme__'; password = '__configureme__'}",
+    
+Example:
+
+    "customConfiguration": "graphServiceUrl = 'https://graph.windows.net/contoso.onmicrosoft.com_'; oauth2 { authority = 'https://login.windows.net/contoso.onmicrosoft.com'; redirectURI = 'https://localhost:8443/admin/index.html#azureCallback'; resourceURI = 'https://graph.windows.net'}",
+    "customSensitiveConfiguration": "oauth2 { clientId = 'b62c0f3f-f045-4e8e-a437-ab347420636e'; clientSecret = 'oiaRdRJm+rRzkjkccSOoRYFA0xwdV9sH+IZykBLhdtE='; username = 'admin@contoso.onmicrosoft.com'; password = 'Passw0rd'}",
+
+
+    Alternative option to use the Refresh Token. It requires some change in the CustomizerScript.groovy
+        Step#1 (Get Authorization code): Visit page https://login.windows.net/<__configureme__>/oauth2/authorize?api-version=1.0&response_type=code&client_id=<__configureme__>&redirect_uri=<__configureme__> 
+    
+        Step#2 (Get Access Token):
+    
+            curl --request POST \
+              --data-urlencode 'grant_type=authorization_code'\
+              --data-urlencode 'client_id=<__configureme__>'\
+              --data-urlencode 'client_secret=<__configureme__>'\
+              --data-urlencode 'resource=https://graph.windows.net'\
+              --data-urlencode 'code=<__configureme__>'\
+              'https://login.windows.net/<__configureme__>/oauth2/token' 
+
+
+OpenIDM Instructions:
+
+    1. Start OpenIDM with the configuration for sample scriptedazure.
+        $ /path/to/openidm/startup.sh -p samples/scriptedazure
+
+    2. Create a Group.
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request POST \
+          --data '{
+              "_id": "fake placeholder value",          
+              "mailEnabled": false,
+              "displayName": "Azure Test Group",
+              "mailNickname": "Test_Group",
+              "securityEnabled": "true",
+              "description": "Azure AD Test Group"
+           }' \
+          http://localhost:8080/openidm/system/scriptedazure/Group?_action=create
+
+        {
+           "mailEnabled":false,
+           "__NAME__":"b62c0f3f-f045-4e8e-a437-ab347420636e",
+           "mailNickname":"Test_Group",
+           "displayName":"Azure Test Group",
+           "mail":null,
+           "onPremisesSecurityIdentifier":null,
+           "lastDirSyncTime":null,
+           "dirSyncEnabled":null,
+           "description":"Azure AD Test Group",
+           "proxyAddresses":[
+        
+           ],
+           "securityEnabled":true,
+           "provisioningErrors":[
+        
+           ],
+           "_id":"b62c0f3f-f045-4e8e-a437-ab347420636e"
+        }
+
+    3. Create a User.
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request POST \
+          --data '{
+              "_id": "fake placeholder value",
+              "accountEnabled": true,
+              "displayName": "Alex Wu",
+              "mailNickname": "AlexW",
+              "passwordProfile": { "password" : "Test1234", "forceChangePasswordNextLogin": false },
+              "userPrincipalName": "Alex@contoso.onmicrosoft.com"
+          }' \
+          http://localhost:8080/openidm/system/scriptedazure/User?_action=create
+
+        {
+           "userType":"Member",
+           "assignedLicenses":[
+        
+           ],
+           "passwordPolicies":null,
+           "immutableId":null,
+           "surname":null,
+           "provisionedPlans":[
+        
+           ],
+           "state":null,
+           "accountEnabled":true,
+           "telephoneNumber":null,
+           "physicalDeliveryOfficeName":null,
+           "mail":null,
+           "__NAME__":"77d80814-55e0-4559-b956-985b744aa30f",
+           "proxyAddresses":[
+        
+           ],
+           "otherMails":[
+        
+           ],
+           "passwordProfile":null,
+           "assignedPlans":[
+        
+           ],
+           "facsimileTelephoneNumber":null,
+           "displayName":"Alex Wu",
+           "onPremisesSecurityIdentifier":null,
+           "userPrincipalName":"Alex@contoso.onmicrosoft.com",
+           "mobile":null,
+           "dirSyncEnabled":null,
+           "jobTitle":null,
+           "givenName":null,
+           "department":null,
+           "usageLocation":null,
+           "preferredLanguage":null,
+           "sipProxyAddress":null,
+           "country":null,
+           "mailNickname":"AlexW",
+           "postalCode":null,
+           "lastDirSyncTime":null,
+           "city":null,
+           "provisioningErrors":[
+        
+           ],
+           "streetAddress":null,
+           "_id":"77d80814-55e0-4559-b956-985b744aa30f"
+        }
+
+    4. Update user telephone number.
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request PUT \
+          --data '{
+              "telephoneNumber" : "555-1234"
+          }' \
+          http://localhost:8080/openidm/system/scriptedazure/User/77d80814-55e0-4559-b956-985b744aa30f
+
+        {
+           "userType":"Member",
+           "assignedLicenses":[
+        
+           ],
+           "passwordPolicies":null,
+           "immutableId":null,
+           "surname":null,
+           "provisionedPlans":[
+        
+           ],
+           "state":null,
+           "accountEnabled":true,
+           "telephoneNumber":"555-1234",
+           "physicalDeliveryOfficeName":null,
+           "mail":null,
+           "__NAME__":"77d80814-55e0-4559-b956-985b744aa30f",
+           "proxyAddresses":[
+        
+           ],
+           "otherMails":[
+        
+           ],
+           "passwordProfile":null,
+           "assignedPlans":[
+        
+           ],
+           "facsimileTelephoneNumber":null,
+           "displayName":"Alex Wu",
+           "onPremisesSecurityIdentifier":null,
+           "userPrincipalName":"Alex@contoso.onmicrosoft.com",
+           "mobile":null,
+           "dirSyncEnabled":null,
+           "jobTitle":null,
+           "givenName":null,
+           "department":null,
+           "usageLocation":null,
+           "preferredLanguage":null,
+           "sipProxyAddress":null,
+           "country":null,
+           "mailNickname":"AlexW",
+           "postalCode":null,
+           "lastDirSyncTime":null,
+           "city":null,
+           "provisioningErrors":[
+        
+           ],
+           "streetAddress":null,
+           "_id":"77d80814-55e0-4559-b956-985b744aa30f"
+        }
+
+    5. Read the user data.
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request GET \
+          http://localhost:8080/openidm/system/scriptedazure/User/77d80814-55e0-4559-b956-985b744aa30f
+
+        {
+           "userType":"Member",
+           "assignedLicenses":[
+        
+           ],
+           "passwordPolicies":null,
+           "immutableId":null,
+           "surname":null,
+           "provisionedPlans":[
+        
+           ],
+           "state":null,
+           "accountEnabled":true,
+           "telephoneNumber":"555-1234",
+           "physicalDeliveryOfficeName":null,
+           "mail":null,
+           "__NAME__":"77d80814-55e0-4559-b956-985b744aa30f",
+           "proxyAddresses":[
+        
+           ],
+           "otherMails":[
+        
+           ],
+           "passwordProfile":null,
+           "assignedPlans":[
+        
+           ],
+           "facsimileTelephoneNumber":null,
+           "displayName":"Alex Wu",
+           "onPremisesSecurityIdentifier":null,
+           "userPrincipalName":"Alex@contoso.onmicrosoft.com",
+           "mobile":null,
+           "dirSyncEnabled":null,
+           "jobTitle":null,
+           "givenName":null,
+           "department":null,
+           "usageLocation":null,
+           "preferredLanguage":null,
+           "sipProxyAddress":null,
+           "country":null,
+           "mailNickname":"AlexW",
+           "postalCode":null,
+           "lastDirSyncTime":null,
+           "city":null,
+           "provisioningErrors":[
+        
+           ],
+           "streetAddress":null,
+           "_id":"77d80814-55e0-4559-b956-985b744aa30f"
+        }
+
+    6. Read the group
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request GET \
+          http://localhost:8080/openidm/system/scriptedazure/Group/b62c0f3f-f045-4e8e-a437-ab347420636e
+
+        {
+           "mailEnabled":false,
+           "__NAME__":"b62c0f3f-f045-4e8e-a437-ab347420636e",
+           "mailNickname":"Test_Group",
+           "displayName":"Azure Test Group",
+           "mail":null,
+           "onPremisesSecurityIdentifier":null,
+           "lastDirSyncTime":null,
+           "dirSyncEnabled":null,
+           "description":"Azure AD Test Group",
+           "proxyAddresses":[
+        
+           ],
+           "securityEnabled":true,
+           "provisioningErrors":[
+        
+           ],
+           "_id":"b62c0f3f-f045-4e8e-a437-ab347420636e"
+        }
+
+    7. Delete the user.
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request DELETE \
+          http://localhost:8080/openidm/system/scriptedazure/User/77d80814-55e0-4559-b956-985b744aa30f
+
+        {
+          "_id": "77d80814-55e0-4559-b956-985b744aa30f"
+        }
+
+    8. Delete the group.
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request DELETE \
+          http://localhost:8080/openidm/system/scriptedazure/Group/b62c0f3f-f045-4e8e-a437-ab347420636e
+
+        {
+          "_id": "b62c0f3f-f045-4e8e-a437-ab347420636e"
+        }
+
+This shows the basic CRUD operations on users and groups using Groovy and the Azure AD Graph API. To read
+more documentation on the groovy connector and for help with customization please see
+http://openicf.forgerock.org/connectors/groovy-connector-1.4.1.0/doc/groovy-connector-1.4.1.0/index.html

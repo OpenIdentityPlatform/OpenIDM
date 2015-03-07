@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2015 ForgeRock AS
+  !
+-->
+ <!-- My intent: include details for all Admin UI auth modules in this
+ appendix, in separate sections. -->
+
+ <appendix xml:id='appendix-auth-modules'
+            version='5.0' xml:lang='en'
+            xmlns='http://docbook.org/ns/docbook'
+            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+            xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+            xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>Authentication Module Configuration Details</title>
+
+ <para>
+  This appendix includes configuration details for various authentication
+  modules described in
+  <link xlink:show="new" xlink:href="integrators-guide#supported-auth-modules"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Supported
+   Authentication and Session Modules</citetitle></link>.
+ </para>
+
+
+ <section xml:id="auth-module-prop">
+  <title>Authentication Module Properties</title>
+
+  <para>
+   Authentication modules, as configured in the
+   <filename>authentication.json</filename> file, include a number of properties.
+   Some of those properties are listed here:
+  </para>
+
+  <para>
+   The configuration properties in this example are described in the following
+   section. Many of these properties apply to other authentication modules, not
+   just to pass-through authentication.
+  </para>
+  <variablelist>
+   <varlistentry>
+    <term><literal>name</literal></term>
+    <listitem>
+     <para>The name of the authentication module, such as
+      <literal>PASSTHROUGH</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>enabled</literal></term>
+    <listitem>
+     <para>
+      Whether the module should be taken into account during the authentication
+      process. Modules that are included in the authentication configuration
+      file, but set to <literal>"enabled" : false</literal>, are not used for
+      authentication.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>queryOnResource</literal></term>
+    <listitem>
+     <para>
+      The endpoint against which the user authenticates, such as
+      <literal>system/ldap/account</literal>,
+      <literal>system/scriptedsql/account</literal>,
+      <literal>system/ad/account</literal>,
+      <literal>managed/user</literal>, and
+      <literal>repo/internal/user</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>augmentSecurityContext</literal> (optional)</term>
+    <listitem>
+     <para>
+      This parameter points to a script, executed only after a successful
+      authentication request to provide additional information, based on the
+      security context.
+     </para>
+     <para>
+      For pass-through authentication, OpenIDM uses the
+      <filename>populateAsManagedUser.js</filename> script. This script uses
+      authentication details returned from the pass-through authentication
+      module. Those details can point to a linked managed user record.
+      If a linked record is found, the script adjusts the details of the
+      security context to match that managed user object. The adjusted security
+      context enables additional operations for the authenticated user, such as
+      the ability to access the default user interface.
+     </para>
+     <para>
+      The script must be either JavaScript
+      (<literal>"type":"text/javascript"</literal>) or Groovy
+      (<literal>"type":"groovy"</literal>), and can be provided inline
+      (<literal>"source":"script source"</literal>) or in a file
+      (<literal>"file":"filename"</literal>).
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>propertyMapping</literal> (optional)</term>
+    <listitem>
+     <para>
+      A list that enables you to map the following OpenIDM properties to fields
+      in the system resource used for the authentication.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>
+     <literal>authenticationId</literal>
+    </term>
+    <listitem>
+     <para>
+      Specifies the authentication property, such as <literal>"uid"</literal>,
+      <literal>"sAMAccountName"</literal>, and <literal>"username"</literal>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>groupMembership</literal></term>
+    <listitem>
+     <para>
+      Specifies the name of the property in the remote system that contains
+      the list of groups of which the authenticated user is a member, such as
+      <literal>memberOf</literal>, or <literal>ldapGroups</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>groupRoleMapping</literal> (optional)</term>
+    <listitem>
+     <para>
+      Enables you to assign roles to users, based on their group membership in
+      the system resource. In this example, users who are members
+      of the <literal>"cn=admins"</literal> group in the LDAP directory
+      automatically acquire the <literal>"openidm-admin"</literal> role. Group
+      membership is determined, based on the
+      <literal>groupMembership</literal> property, described previously.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>managedUserLink</literal> (optional)</term>
+    <listitem>
+     <para>
+      Used by the script specified in <literal>"augmentSecurityContext"</literal>
+      to switch the context of an authenticated user from their original
+      security context to a context that is based on the related
+      <literal>managed/user</literal> account. The value is based on the
+      <literal>name</literal> of the mapping in the associated
+      <filename>sync.json</filename> file.
+     </para>
+     <para>
+      The value of this property is the <literal>"links"</literal> entry
+      (usually the mapping name defined in <literal>sync.json</literal>) that
+      was used to relate the remote system users with the managed users.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>defaultUserRoles</literal> (optional)</term>
+    <listitem>
+     <para>
+      Can be defined for any authentication module. OpenIDM assigns such roles
+      (or an empty set) to the security context of a user.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+ </section>
+
+
+ <section xml:id="openam-module-details">
+  <title>OPENAM_SESSION Module Configuration Options</title>
+
+  <para>
+   The <literal>OPENAM_SESSION</literal> module uses OpenAM authentication to
+   protect an OpenIDM deployment.
+  </para>
+
+  <para>
+   The options shown in the screen are subdivided into basic and advanced
+   properties. The options shown are based on defaults; the Admin UI may
+   display different properties if you make changes.
+  </para>
+
+  <mediaobject xml:id="openam-basic-prop">
+   <alt>New connected app data</alt>
+   <imageobject>
+    <imagedata fileref="images/openam-basic-prop.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
+  <para>
+   The following table describes the label that you see in the Admin UI, the
+   default value (if any), a brief description, and the associated configuration
+   file. If you need the property name, look at the configuration file.
+  </para>
+
+  <para>
+   The default values shown depict what you see if you add the
+   <literal>OPENAM_SESSION</literal> module to an existing deployment. If you
+   run OpenIDM with the
+   <link xlink:show="new" xlink:href="install-guide#full-stack-sample"
+         xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>The Full Stack Sample</citetitle></link>, the defaults will be
+   different.
+  </para>
+
+  <table pgwide="1" xml:id="table-openam-basic">
+   <title>OPENAM_SESSION Module Basic Properties</title>
+
+   <tgroup cols="4">
+    <colspec colnum="1" colwidth="2*" />
+    <colspec colnum="2" colwidth="3*"/>
+    <colspec colnum="3" colwidth="3*"/>
+    <colspec colnum="4" colwidth="3*"/>
+
+    <thead>
+     <row>
+      <entry>Admin UI Label</entry>
+      <entry>Default</entry>
+      <entry>Description</entry>
+      <entry>Configuration File</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>Module Enabled</entry>
+      <entry>false</entry>
+      <entry>Whether to enable the module</entry>
+      <entry>authentication.json</entry>
+     </row>
+     <row>
+      <entry>Route to OpenAM User Datastore</entry>
+      <entry>managed/user</entry>
+      <entry>External repository with OpenAM Data Store Information</entry>
+      <entry>authentication.json</entry>
+     </row>
+     <row>
+      <entry>OpenAM User Datastore Mapping Name</entry>
+      <entry>blank</entry>
+      <entry>Mapping from the OpenAM data store to the internal repository</entry>
+      <entry>authentication.json</entry>
+     </row>
+     <row>
+      <entry>OpenAM Deployment URL</entry>
+      <entry>blank</entry>
+      <entry>FQDN of the deployed instance of OpenAM</entry>
+      <entry>authentication.json</entry>
+     </row>
+     <row>
+      <entry>Require OpenAM Authentication</entry>
+      <entry>false</entry>
+      <entry>Whether to make the OpenIDM UI redirect users to OpenAM for
+       authentication</entry>
+      <entry>ui-configuration.json</entry>
+     </row>
+
+    </tbody>
+
+   </tgroup>
+
+  </table>
+
+  <table pgwide="1" xml:id="table-openam-advanced">
+  <title>OPENAM_SESSION Module Advanced Properties</title>
+
+  <tgroup cols="4">
+   <colspec colnum="1" colwidth="2*" />
+   <colspec colnum="2" colwidth="3*"/>
+   <colspec colnum="3" colwidth="3*"/>
+   <colspec colnum="4" colwidth="3*"/>
+
+   <thead>
+    <row>
+     <entry>Admin UI Label</entry>
+     <entry>Default</entry>
+     <entry>Description</entry>
+     <entry>Configuration File</entry>
+    </row>
+   </thead>
+   <tbody>
+    <row>
+     <entry>OpenAM Login URL</entry>
+     <entry>/XUI/#login/</entry>
+     <entry>FQDN of the login endpoint of the deployed instance of OpenAM</entry>
+     <entry>ui-configuration.json</entry>
+    </row>
+    <row>
+     <entry>OpenAM Login Link Text</entry>
+     <entry>blank</entry>
+     <entry>UI text that links to OpenAM</entry>
+     <entry>ui-configuration.json</entry>
+    </row>
+    <row>
+     <entry>Default User Roles</entry>
+     <entry>openidm-authorized</entry>
+     <entry>OpenIDM assigns such roles to the security context of a user</entry>
+     <entry>authentication.json</entry>
+    </row>
+    <row>
+     <entry>OpenAM User Attribute</entry>
+     <entry>uid</entry>
+     <entry>User identifier for the OpenAM data store</entry>
+     <entry>authentication.json</entry>
+    </row>
+    <row>
+     <entry>Authentication ID</entry>
+     <entry>blank</entry>
+     <entry>User identifier</entry>
+     <entry>authentication.json</entry>
+    </row>
+    <row>
+     <entry>User Credential</entry>
+     <entry>blank</entry>
+     <entry>Credential, sometimes a password</entry>
+     <entry>authentication.json</entry>
+    </row>
+    <row>
+     <entry>User Roles or Group Membership</entry>
+     <entry>Select an option</entry>
+     <entry>For an explanation, see
+     <xref linkend="auth-module-prop" />.</entry>
+     <entry>authentication.json</entry>
+    </row>
+    <row>
+     <entry>Group Membership (if selected)</entry>
+     <entry>blank</entry>
+     <entry>Group Membership</entry>
+     <entry>authentication.json</entry>
+    </row>
+    <row>
+     <entry>Role Name</entry>
+     <entry>openidm-admin</entry>
+     <entry>Default role for the user, normally a group role mapping</entry>
+     <entry>authentication.json</entry>
+    </row>
+    <row>
+     <entry>Group Mappings</entry>
+     <entry>blank</entry>
+     <entry>Mapping from a user to a LDAP entry</entry>
+     <entry>authentication.json</entry>
+    </row>
+   </tbody>
+  </tgroup>
+  </table>
+
+  <para>
+   In general, if you add a custom property, the Admin UI writes the changes to
+   the <filename>authentication.json</filename> or
+   <filename>ui-configuration.json</filename> files.
+  </para>
+
+ </section>
+
+</appendix>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+
+
+    <process id="manualMatch" name="Manual Linking Workflow">
+        <startEvent id="start" />
+        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
+        <scriptTask id="readUserData" scriptFormat="groovy">
+            <script>
+                sourceuser = openidm.read('managed/user/' + sourceId)
+                correlationQueryParams = [_queryFilter : 'userName eq "' + sourceuser.userName + '"']
+                results = openidm.query("system/business/account", correlationQueryParams)
+                
+                possibleTargets = ['__ignore' : 'Ignore']
+                for (user in results.result) {
+                    possibleTargets.put(user.uid, user.userName + ' (' + user.uid + ' - ' + user.familyName + ', ' + user.givenName + ')')
+                }
+                execution.setVariable("sourceuser", sourceuser)
+                execution.setVariable("possibleTargets", possibleTargets)
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="readUserData" targetRef="matchAccounts"/>
+        
+        <userTask id="matchAccounts" name="Manual Linking Task" activiti:assignee="systemadmin" activiti:formKey="manualMatch.xhtml"/>
+        <sequenceFlow sourceRef="matchAccounts" targetRef="linkAccount"/>
+        
+        <scriptTask id="linkAccount" scriptFormat="groovy">
+            <script>
+                if ("__ignore" != target) {
+                    params = new java.util.HashMap();
+                    params.put('reconId', reconId)
+                    params.put('mapping', mapping)
+                    params.put('action', 'link')
+                    params.put('sourceId', sourceId)
+                    params.put('targetId', target)
+                    openidm.action('sync', 'performAction', [:], params)
+                }
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="linkAccount" targetRef="end"/>
+        <endEvent id="end"/>
+    </process>
+</definitions>

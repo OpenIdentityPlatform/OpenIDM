@@ -1,0 +1,63 @@
+<div class="title-bar">
+    <h1>{{t "templates.mapping.newMapping"}}</h1>
+    <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+</div>
+<div id="resourceMappingBody">
+
+</div>
+<div class="arrow-breaker">
+    <div class="arrow_box">
+        <i class="fa fa-3x fa-arrow-up"></i>
+    </div>
+</div>
+
+<div id="resourceConnectorContainer" class="resource-container none-editable-resources">
+    <h4>{{t "templates.connector.connectorTitle"}}</h4>
+    {{#if currentConnectors}}
+    {{#each currentConnectors}}
+    <div data-resource-type="connector" data-connector-title="{{cleanEditName}}" class="resource-body resource-body-connector">
+        <div class="resource-type-body">
+            <div class="resource-info">
+                <img class="resource-large-icon {{iconClass}}" src="{{iconSrc}}" alt="{{displayName}}" />
+                <p class="resource-given-name">{{name}}</p>
+                <p class="resource-type-name">{{displayName}}</p>
+                <p class="resource-object-type">{{displayObjectType}}</p>
+            </div>
+        </div>
+        <hr />
+        <div class="resource-status-body">
+            <button type="button" class="button add-resource-button"><i class="fa fa-plus"></i>{{t "templates.mapping.addToMapping"}}</button>
+        </div>
+    </div>
+    {{/each}}
+    {{else}}
+    <div class="no-connectors-message">
+        <h3>{{t "templates.mapping.noConnectors"}}</h3>
+    </div>
+    {{/if}}
+</div>
+
+<div id="resourceManagedContainer" class="resource-container none-editable-resources">
+    <h4>{{t "templates.managed.managedTitle"}}</h4>
+    {{#if currentManagedObjects}}
+    {{#each currentManagedObjects}}
+    <div data-resource-type="managed" data-managed-title="{{name}}" class="resource-body">
+        <div class="resource-type-body managed-type">
+            <div class="resource-info">
+                <img class="resource-large-icon {{iconClass}}" src="{{iconSrc}}" alt="{{t "templates.connector.managedObjectType"}}" />
+                <p class="resource-given-name">{{name}}</p>
+                <p class="resource-type-name">{{t "templates.connector.managedObjectType"}}</p>
+            </div>
+        </div>
+        <hr />
+        <div class="resource-status-body">
+            <button type="button" class="button add-resource-button"><i class="fa fa-plus"></i>{{t "templates.mapping.addToMapping"}}</button>
+        </div>
+    </div>
+    {{/each}}
+    {{else}}
+    <div class="no-connectors-message">
+        <h3>{{t "templates.mapping.noConnectors"}}</h3>
+    </div>
+    {{/if}}
+</div>

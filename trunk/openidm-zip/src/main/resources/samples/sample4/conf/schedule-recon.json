@@ -1,0 +1,11 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "30 0/1 * * * ?",
+    "concurrentExecution" : false,
+    "invokeService" : "sync",
+    "invokeContext" : {
+        "action" : "reconcile",
+        "mapping" : "csv_xmlfile"
+    }
+}

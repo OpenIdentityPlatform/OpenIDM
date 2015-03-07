@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock.openidm</groupId>
+        <artifactId>openidm-project</artifactId>
+        <version>3.2.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>openidm-workflow-activiti</artifactId>
+    <name>OpenIDM Activiti BPMN 2.0 Integration</name>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <drools.version>5.1.1</drools.version>
+    </properties>
+    <repositories>
+        <repository>
+            <id>activiti-repository</id>
+            <name>Activiti Maven Repository</name>
+            <url>https://maven.alfresco.com/nexus/content/groups/public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <!-- mvn versions:display-dependency-updates -->
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-enhanced-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-router</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-groovy</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+            <version>5.15</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>activation</artifactId>
+                    <groupId>javax.activation</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>livetribe-jsr223</artifactId>
+                    <groupId>org.livetribe</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-osgi</artifactId>
+            <version>5.15</version>
+        </dependency>
+
+
+        <!-- This enhances the felix system bundle with the full javax.transaction 1.1 classes to remedy the split package issue that would occur otherwise. Must be installed before the use of the package, e.g. the transaction manager -->
+        <dependency>
+	    <groupId>org.glassfish</groupId>
+	    <artifactId>javax.transaction</artifactId>
+	    <version>3.1.1</version>
+        </dependency>
+
+        <!-- This registers a transaction service -->
+        <dependency>
+            <groupId>org.apache.servicemix.transaction</groupId>
+            <artifactId>org.apache.servicemix.transaction</artifactId>
+            <version>1.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-context</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>geronimo-jta_1.1_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>aopalliance</artifactId>
+                    <groupId>aopalliance</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.3.171</version>
+        </dependency>
+
+        <!-- REST Dependencies-->
+        <dependency>
+            <groupId>org.restlet.osgi</groupId>
+            <artifactId>org.restlet.ext.httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.osgi</groupId>
+            <artifactId>org.restlet.ext.jackson</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Provided OSGi Dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.enterprise</artifactId>
+        </dependency>
+
+        <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>remotejar</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-core-asl</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.restlet.osgi</groupId>
+                    <artifactId>org.restlet.ext.servlet</artifactId>
+                    <version>2.1.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.forgerock.commons</groupId>
+                    <artifactId>json-fluent</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.restlet.osgi</groupId>
+                    <artifactId>org.restlet.ext.httpclient</artifactId>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assemble/assemblyCfg.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-jar-with-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

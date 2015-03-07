@@ -1,0 +1,84 @@
+{
+    "serverAuthContext" : {
+        "sessionModule" : {
+            "name" : "JWT_SESSION",
+            "properties" : {
+                "keyAlias" : "openidm-localhost",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
+                "keystoreType" : "&{openidm.keystore.type}",
+                "keystoreFile" : "&{openidm.keystore.location}",
+                "keystorePassword" : "&{openidm.keystore.password}",
+                "maxTokenLifeMinutes" : "120",
+                "tokenIdleTimeMinutes" : "30",
+                "sessionOnly" : true
+            }
+        },
+        "authModules" : [
+            {
+                "name" : "STATIC_USER",
+                "properties" : {
+                    "queryOnResource" : "repo/internal/user",
+                    "username" : "anonymous",
+                    "password" : "anonymous",
+                    "defaultUserRoles" : [ "openidm-reg" ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "MANAGED_USER",
+                "properties" : {
+                    "queryId" : "credential-query",
+                    "queryOnResource" : "managed/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "INTERNAL_USER",
+                "properties" : {
+                    "queryId" : "credential-internaluser-query",
+                    "queryOnResource" : "repo/internal/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {   "name" : "CLIENT_CERT",
+                "properties" : {
+                    "queryOnResource" : "security/truststore",
+                    "defaultUserRoles" : [ "openidm-cert" ],
+                    "allowedAuthenticationIdPatterns" : [
+                    ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "PASSTHROUGH",
+                "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "file" : "auth/populateAsManagedUser.js"
+                    },
+                    "queryOnResource" : "system/scriptedrest/account",
+                    "propertyMapping" : {
+                        "authenticationId" : "uid"
+                    },
+                    "managedUserLink" : "systemScriptedRestAccount_managedUser",
+                    "defaultUserRoles" : [
+                        "openidm-authorized"
+                    ]
+                },
+                "enabled" : true
+            }
+        ]
+    }
+}

@@ -1,0 +1,33 @@
+<div class="selectPanel">
+    {{#if defaultConfigs}}
+    <div class="object-config-selector">
+        <label for="selectObjectConfig" class="light">{{t "templates.connector.objectTypes.objectTypeConfigs"}}</label>
+        <select data-type="{{defaultConfigs.0.type}}" id="selectObjectConfig" required>
+            {{#each defaultConfigs}}
+                <option value="{{fileName}}">{{displayName}}</option>
+            {{/each}}
+        </select>
+    </div>
+    {{/if}}
+    <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only json-editor-btn-edit" id="newObjectType"><span class="ui-button-text">{{t "templates.connector.objectTypes.addNewObjecttype"}}</span></button>
+    <select id="objectTypesList" name="objectTypesList" multiple></select>
+</div>
+
+<div class="objectTypeForm">
+    <div id="objectType"></div>
+
+    <div id="multiSelectOptions" style="display:none;">
+        <p>{{t "templates.connector.objectTypes.bulkDeleteMsg"}}</p>
+        <button id="deleteMultiple">{{t "templates.connector.objectTypes.deleteObjectTypes"}}</button>
+    </div>
+
+    <span id="objectTypeButtons">
+        <button class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only json-editor-btn-edit deleteObject'>
+            <span class='ui-button-text'>{{t "templates.connector.objectTypes.deleteObject"}}</span>
+        </button>
+
+        <button class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only json-editor-btn-edit saveObject'>
+            <span class='ui-button-text'>{{t "templates.connector.objectTypes.saveObject"}}</span>
+        </button>
+    </span>
+</div>

@@ -1,0 +1,82 @@
+{
+    "mappings" : [
+        {
+            "name" : "testMapping",
+            "source" : "managed/user",
+            "sourceCondition" : {
+                "equalsKey" : "foo",
+                "includesKey" : "1",
+                "json/pointer/key" : "foo"
+            },
+            "target" : "system/ldap/account",
+            "correlationQuery" : [
+                {
+                    "linkQualifier" : "user",
+                    "type" : "text/javascript",
+                    "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
+                },
+                {
+                    "linkQualifier" : "test",
+                    "type" : "text/javascript",
+                    "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '-test\"'}; qry"
+                }
+            ],
+            "properties" : [],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "condition" : {
+                        "linkQualifier": "user"
+                    },
+                    "situation" : "ABSENT",
+                    "action" : "IGNORE",
+                    "postAction" : {
+                        "type" : "text/javascript",
+                        "source" : "java.lang.System.out.println(\"Ignored user: \");"
+                    }
+                },
+                {
+                    "condition" : {
+                        "linkQualifier": "test"
+                    },
+                    "situation" : "ABSENT",
+                    "action" : "CREATE",
+                    "postAction" : {
+                        "type" : "text/javascript",
+                        "source" : "java.lang.System.out.println(\"Created user\");"
+                    }
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : {
+                        "type" : "text/javascript",
+                        "source" : "java.lang.System.out.println(\"Action Script!\");"
+                    }
+                }
+            ]
+        }
+    ]
+}

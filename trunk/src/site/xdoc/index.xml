@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2013 ForgeRock AS
+  !    
+-->
+<document
+ xmlns="http://maven.apache.org/XDOC/2.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+ <properties>
+  <title>About OpenIDM</title>
+  <author email="openidm-dev@forgerock.org">ForgeRock AS</author>
+ </properties>
+ <body>
+  <section name="About OpenIDM">
+   <p>OpenIDM is an open standards based identity management solution.
+    In addition to being open source, OpenIDM offers high flexibility in
+    business process handling and compliance. A flexible user interface
+    combined with a robust workflow engine make OpenIDM ready for any
+    identity management project.</p>
+    
+   <p>See the <a
+    href="https://wikis.forgerock.org/confluence/display/openidm/OpenIDM+Roadmap"
+    >OpenIDM Roadmap</a> for our plans to add standard, core, and cloud
+    features in upcoming deliveries.</p>
+  </section>
+  <section name="Welcome Users">
+   <p>The OpenIDM community shares an interest in improving and extending
+   OpenIDM software, and in adapting OpenIDM to best fit our needs.</p>
+   <p>You are welcome to join us. Here are some ways to get started.</p>
+   <ul>
+    <li>Join the <a
+    href="https://lists.forgerock.org/mailman/listinfo/openidm">OpenIDM
+    mailing list</a> to ask questions, make suggestions, and tell us what
+    you think of OpenIDM.</li>
+    <li><a
+    href="https://idp.forgerock.org/openam/UI/Login?service=register">Register
+    to join the community</a>.</li>
+    <li>Read and edit <a
+    href="https://wikis.forgerock.org/confluence/display/OPENIDM/Home"
+    >OpenIDM Wiki documentation</a>.</li>
+   </ul>
+   <p>Looking forward to hearing from you.</p>
+  </section>
+  <section name="Welcome Developers">
+   <p>If you are a developer interested in OpenIDM, there are plenty of
+   ways you can get actively involved in the community in addition to joining
+   as an OpenIDM user.</p>
+   <ul>
+    <li>Get the source. See instructions in <a
+    href="https://wikis.forgerock.org/confluence/display/openidm/How+to+use+OpenIDM+Subversion"
+    >How to Use OpenIDM Subversion</a>.</li>   
+    <li>Make sure you <a
+    href="https://idp.forgerock.org/openam/UI/Login?service=register">register
+    to join the community</a>, thus also registering to <a
+    href="https://bugster.forgerock.org/jira/browse/OPENIDM">report issues, and
+    describe requests for enhancements</a>, as well as to edit <a
+    href="https://wikis.forgerock.org/confluence/display/OPENIDM/Home"
+    >OpenIDM Wiki documentation</a>.</li>
+    <li>Participate and discuss your work on the <a
+    href="https://lists.forgerock.org/mailman/listinfo/openidm-dev">OpenIDM
+    developer mailing list</a> in addition to the <a
+    href="https://lists.forgerock.org/mailman/listinfo/openidm">OpenIDM
+    mailing list</a>.</li>
+   </ul>
+  </section>
+  <section name="Welcome Partners">
+   <p>Want to partner with other OpenIDM community members to bring solutions
+   based on OpenIDM to your customers?</p>
+   <ul>
+    <li>Come show off your expertise on the <a
+    href="https://lists.forgerock.org/mailman/listinfo/openidm">mailing
+    list</a>.</li>
+    <li>Post your success stories and white papers on the <a
+    href="https://wikis.forgerock.org/confluence/display/OPENIDM/Home"
+    >OpenIDM Wiki</a>.</li>
+   </ul>
+  </section>
+ </body>
+</document>
+

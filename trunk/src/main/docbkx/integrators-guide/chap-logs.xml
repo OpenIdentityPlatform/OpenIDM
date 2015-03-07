@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2014 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-logs'
+         xmlns='http://docbook.org/ns/docbook'
+         version='5.0' xml:lang='en'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>Configuring Server Logs</title>
+ <indexterm>
+  <primary>Server logs</primary>
+ </indexterm>
+
+ <para>
+  This chapter briefly describes server logging. For audit information, see the
+  chapter on <link xlink:href="integrators-guide#chap-auditing"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Audit
+  Logs</citetitle></link>.
+ </para>
+ <para>
+  To configure logging, edit the
+  <filename>openidm/conf/logging.properties</filename> file.
+ </para>
+
+ <section xml:id="log-messages">
+  <title>Log Message Files</title>
+
+  <para>
+   The default configuration writes log messages in simple format to
+   <filename>openidm/logs/openidm*.log</filename> files, rotating files when the
+   size reaches 5 MB, and retaining up to 5 files. Also by default, OpenIDM
+   writes all system and custom log messages to the files.
+  </para>
+ </section>
+
+ <section xml:id="log-levels">
+  <title>Logging Levels</title>
+  <para>
+   You can update the configuration to attach loggers to individual packages,
+   setting the log level to one of the following values.
+  </para>
+  <programlisting language="none">
+SEVERE (highest value)
+WARNING
+INFO
+CONFIG
+FINE
+FINER
+FINEST (lowest value)</programlisting>
+
+  <para>
+   If you use <literal>logger</literal> functions in your JavaScript scripts, you
+   can set the log level for the scripts as follows:
+  </para>
+
+  <literallayout class="monospaced"
+>org.forgerock.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
+
+  <para>
+   You can override the log level settings per script by using
+  </para>
+
+  <literallayout class="monospaced"
+>org.forgerock.script.javascript.JavaScript.<replaceable>script-name</replaceable>.level</literallayout>
+ </section>
+
+ <section xml:id="log-disabling">
+  <title>Disabling Logs</title>
+
+  <para>
+   You can also disable logs if desired. For example, before starting OpenIDM,
+   you can disable <literal>ConsoleHandler</literal> logging in the same
+   <filename>openidm/conf/logging.properties</filename> file.
+  </para>
+  <para>
+    Just set <literal>java.util.logging.ConsoleHandler.level = OFF</literal>,
+    and comment out other references to <literal>ConsoleHandler</literal>,
+    as shown in the following excerpt.</para>
+   <programlisting language="ini">
+   # ConsoleHandler: A simple handler for writing formatted records to System.err
+   #handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+   handlers=java.util.logging.FileHandler
+   ...
+   # --- ConsoleHandler ---
+   # Default: java.util.logging.ConsoleHandler.level = INFO
+   java.util.logging.ConsoleHandler.level = OFF
+   #java.util.logging.ConsoleHandler.formatter = ...
+   #java.util.logging.ConsoleHandler.filter=...</programlisting>
+ </section>
+
+</chapter>

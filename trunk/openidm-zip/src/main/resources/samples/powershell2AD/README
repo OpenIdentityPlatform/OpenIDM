@@ -1,0 +1,330 @@
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+Copyright (c) 2014 ForgeRock AS. All rights reserved.
+
+The contents of this file are subject to the terms
+of the Common Development and Distribution License
+(the License). You may not use this file except in
+compliance with the License.
+
+You can obtain a copy of the License at
+http://forgerock.org/license/CDDLv1.0.html
+See the License for the specific language governing
+permission and limitations under the License.
+
+When distributing Covered Code, include this CDDL
+Header Notice in each file and include the License file
+at http://forgerock.org/license/CDDLv1.0.html
+If applicable, add the following below the CDDL Header,
+with the fields enclosed by brackets [] replaced by
+your own identifying information:
+"Portions Copyrighted [year] [name of copyright owner]"
+
+
+PowerShell Connector - AD samples
+---------------------------------
+
+The tools/ folder contains a bunch of samples for the OpenICF PowerShell Connector.
+The samples use the MS Active Directory PowerShell module. See:
+http://technet.microsoft.com/en-us/library/hh852274.aspx
+
+These are the steps to follow to use the samples:
+
+1- Install the OpenICF .Net connector server on a machine running an Active Directory Domain Controller
+or a Workstation where the MS Active Directory PowerShell module is installed. See:
+http://openidm.forgerock.org/doc/integrators-guide/index.html#install-.net-connector
+The user used by the script is the same as the user running the .Net Connector server
+
+2- Install the PowerShell connector. See:
+http://openidm.forgerock.org/doc/integrators-guide/index.html#powershell-connector
+
+3- Copy all the .ps1 files to the machine where you installed the .Net connector server and the PowerShell connector.
+In the sample provisioner, files are copied to the folder C:/openidm/samples/powershell2AD/tools/
+
+4- Edit the ADSearch.ps1 (line 95) and ADSync.ps1 (line 113) files to define the base suffix of your AD DC. Change the following:
+$searchBase = 'CN=Users,DC=example,DC=com' to accommodate your environment.
+
+5- Copy the remote connector provisioner file to openidm/conf/ from openidm/samples/provisioners/provisioner.openicf.connectorinfoprovider.json 
+Adapt to your local configuration
+
+6- Edit the sample PowerShell connector provisioner file to suit your installation.
+The file is samples/provisioners/provisioner.openicf-adpowershell.json. You may need to change the file paths.
+For instance:
+"configurationProperties" : {
+        "AuthenticateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADAuthenticate.ps1",
+        "CreateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADCreate.ps1",
+
+may not reflect your Windows folder. The other settings should not be changed
+
+The Host, port, login and password do not need to be provided in these samples.
+login and password: The scripts execute under the same user as the .Net Connector Server
+host and port: By default the AD cmdlets will pick up the first available Domain Controller
+
+7- Copy the provisioner file to the openidm/conf/ folder.
+
+
+OpenIDM instructions:
+
+1- Test 
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request POST \
+	  http://localhost:8080/openidm/system/?_action=test
+
+Returns:
+
+[
+    {
+        "name": "adpowershell",
+        "enabled": true,
+        "config": "config/provisioner.openicf/adpowershell",
+        "objectTypes": [
+            "__ALL__",
+	    "group",
+            "account"
+        ],
+        "connectorRef": {
+            "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
+            "bundleName": "MsPowerShell.Connector",
+            "bundleVersion": "1.4.1.0"
+        },
+        "ok": true
+    }
+]
+
+2 - Authenticate a user (username can be either ObjectGUID, UPN, sAMAccountname or CN)
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request POST \
+          http://localhost:8080/openidm/system/adpowershell/account?_action=authenticate&username=TestUser&password=Passw0rd
+
+Returns the user ObjectGUID if success
+{
+    "_id": "ee683bcf-9853-4efa-ad70-16a50f9d8c34"
+}
+
+3- Use Query Filter
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          http://localhost:8080/openidm/system/adpowershell/account?_queryFilter=cn+eq+"Guest"
+
+Returns the default Guest user:
+
+{
+    "result": [
+        {
+            "logonCount": 0,
+            "countryCode": 0,
+            "manager": null,
+            "streetAddress": null,
+            "badPwdCount": 0,
+            "pwdLastSet": "0",
+            "postalCode": null,
+            "cn": "Guest",
+            "sAMAccountName": "Guest",
+            "modifyTimeStamp": "12/09/2012 00:20:28",
+            "cannotChangePassword": true,
+            "description": [
+                "Built-in account for guest access to the computer/domain"
+            ],
+            "memberOf": [
+                "CN=Guests,CN=Builtin,DC=example,DC=com"
+            ],
+            "employeeNumber": null,
+            "name": "Guest",
+            "division": null,
+            "homePhone": null,
+            "createTimeStamp": "12/09/2012 00:20:28",
+            "userAccountControl": 66082,
+            "homeDrive": null,
+            "passwordNotRequired": true,
+            "distinguishedName": "CN=Guest,CN=Users,DC=example,DC=com",
+            "department": null,
+            "userPrincipalName": null,
+            "whenCreated": "12/09/2012 00:20:28",
+            "lastLogon": "0",
+            "company": null,
+            "displayName": null,
+            "initials": null,
+            "allowReversiblePasswordEncryption": false,
+            "homeDirectory": null,
+            "__NAME__": "CN=Guest,CN=Users,DC=example,DC=com",
+            "passwordNeverExpires": true,
+            "employeeID": null,
+            "badPasswordTime": "0",
+            "whenChanged": "12/09/2012 00:20:28",
+            "accountExpirationDate": null,
+            "accountExpires": "9223372036854775807",
+            "codePage": 0,
+            "sAMAccountType": 805306368,
+            "givenName": null,
+            "title": null,
+            "_id": "7242c41d-0e39-4791-9410-d123959c06bb"
+        }
+    ],
+    "resultCount": 1,
+    "pagedResultsCookie": null,
+    "remainingPagedResults": -1
+}
+
+2- Search ALL users
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+	  http://localhost:8080/openidm/system/adpowershell/account?_queryId=query-all-ids
+
+3- Read a specific user (pick up an _id from the Search ALL)
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+	  http://localhost:8080/openidm/system/adpowershell/account/eb9e36db-451e-43a7-97ce-f9d8c628eca0
+
+Returns for instance:
+
+{
+    "uSNCreated": "479423",
+    "userAccountControl": 544,
+    "description": [
+        "Updated by Bob"
+    ],
+    "uSNChanged": "1311154",
+    "modifyTimeStamp": "18/11/2014 15:45:31",
+    "streetAddress": null,
+    "homePhone": null,
+    "memberOf": [],
+    "postalCode": null,
+    "name": "Bob Fleming",
+    "scriptPath": null,
+    "badPasswordTime": "130596768837529400",
+    "title": null,
+    "employeeID": null,
+    "userPrincipalName": "bob@example.com",
+    "telephoneNumber": "0052-611-091",
+    "whenChanged": "18/11/2014 15:45:31",
+    "smartcardLogonRequired": false,
+    "initials": null,
+    "badPwdCount": "0",
+    "trustedForDelegation": false,
+    "employeeNumber": null,
+    "passwordNotRequired": true,
+    "lockoutTime": "0",
+    "whenCreated": "21/03/2013 15:58:14",
+    "displayName": null,
+    "allowReversiblePasswordEncryption": false,
+    "mail": "Bob.Fleming@example.com",
+    "homeDrive": null,
+    "manager": null,
+    "givenName": "Bob",
+    "passwordNeverExpires": false,
+    "accountExpirationDate": null,
+    "objectGUID": "eb9e36db-451e-43a7-97ce-f9d8c628eca0",
+    "createTimeStamp": "21/03/2013 15:58:14",
+    "division": null,
+    "distinguishedName": "CN=Bob Fleming,CN=Users,DC=example,DC=com",
+    "lastLogon": "130596768978397647",
+    "cn": "Bob Fleming",
+    "sn": "Fleming",
+    "cannotChangePassword": false,
+    "homeDirectory": null,
+    "department": null,
+    "pwdLastSet": "130596776194502322",
+    "company": null,
+    "lastLogonTimestamp": "130595128752246642",
+    "logonCount": "54",
+    "sAMAccountName": "bob",
+    "_id": "eb9e36db-451e-43a7-97ce-f9d8c628eca0"
+}
+
+4 - Create a user 
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request POST \
+          --data '{ 
+		"distinguishedName": "CN=OpenIDM Sample,CN=Users,DC=example,DC=com",
+		"sn": "Sample",
+		"cn": "OpenIDM",
+		"sAMAccountName": "sample",
+		"userPrincipalName": "sample@example.com",
+		"passwordNeverExpires": true,
+		"__ENABLE__": true,
+		"__PASSWORD__": "Passw0rd",
+		"telephoneNumber": "0052-611-091"
+		}' \
+       	http://localhost:8080/openidm/system/adpowershell/account?_action=create 
+
+returns:
+
+{
+    "_id": "76ea8c7a-fbe7-4926-8442-f99e9900e34c",
+    "accountExpirationDate": null,
+    "allowReversiblePasswordEncryption": false,
+    "badPasswordTime": "0",
+    "badPwdCount": "0",
+    "cannotChangePassword": false,
+    "cn": "OpenIDM",
+    "company": null,
+    "createTimeStamp": "18/11/2014 15:54:47",
+    "department": null,
+    "description": null,
+    "displayName": null,
+    "distinguishedName": "CN=OpenIDM,CN=Users,DC=example,DC=com",
+    "division": null,
+    "employeeID": null,
+    "employeeNumber": null,
+    "givenName": null,
+    "homeDirectory": null,
+    "homeDrive": null,
+    "homePhone": null,
+    "initials": null,
+    "lastLogon": "0",
+    "logonCount": "0",
+    "manager": null,
+    "memberOf": [],
+    "modifyTimeStamp": "18/11/2014 15:54:47",
+    "name": "OpenIDM",
+    "objectGUID": "76ea8c7a-fbe7-4926-8442-f99e9900e34c",
+    "passwordNeverExpires": true,
+    "passwordNotRequired": false,
+    "postalCode": null,
+    "pwdLastSet": "130607960876320218",
+    "sAMAccountName": "sample",
+    "scriptPath": null,
+    "smartcardLogonRequired": false,
+    "sn": "Sample",
+    "streetAddress": null,
+    "telephoneNumber": "0052-611-091",
+    "title": null,
+    "trustedForDelegation": false,
+    "uSNChanged": "1311167",
+    "uSNCreated": "1311163",
+    "userAccountControl": 66048,
+    "userPrincipalName": "sample@example.com",
+    "whenChanged": "18/11/2014 15:54:47",
+    "whenCreated": "18/11/2014 15:54:47"
+}
+
+
+5 - Delete the created user
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request DELETE \
+          http://localhost:8080/openidm/system/adpowershell/account/76ea8c7a-fbe7-4926-8442-f99e9900e34c
+
+returns:
+
+{
+    "_id": "76ea8c7a-fbe7-4926-8442-f99e9900e34c"
+}
+

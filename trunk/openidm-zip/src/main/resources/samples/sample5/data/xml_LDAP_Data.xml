@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+                      xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension samples/sample5/data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+   <ri:__ACCOUNT__>
+     <icf:__UID__>1</icf:__UID__>
+       <icf:__NAME__>DDOE1</icf:__NAME__>
+      <icf:__PASSWORD__>TestPassw0rd2</icf:__PASSWORD__>
+      <ri:firstname>Darth</ri:firstname>
+      <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+      <ri:email>mail1@example.com</ri:email>
+      <ri:lastname>Doe</ri:lastname>
+    </ri:__ACCOUNT__>   
+</icf:OpenICFContainer>

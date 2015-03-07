@@ -1,0 +1,435 @@
+{
+    "user":"admin",
+    "password":"admin",
+    "rootPassword" : "7A5DEAB30884B4C8026A047F13D4A67BDEDC7CA227AA8F4D477727EABE5541B4",
+    "queries":{
+        "get-by-field-value":"select * FROM ${_resource} WHERE ${field} = :value",
+        "get-users-of-role":"select userName FROM ${_resource} WHERE roles CONTAINS( :role )",
+        "query-all-ids":"select _openidm_id from ${_resource}",
+        "query-all":"select * from ${_resource}",
+        "links-for-firstId":"SELECT * FROM ${_resource} WHERE linkType = :linkType AND firstId = :firstId",
+        "links-for-secondId":"SELECT * FROM ${_resource} WHERE linkType = :linkType AND secondId = :secondId",
+        "links-for-linkType":"SELECT * FROM ${_resource} WHERE linkType = :linkType",
+        "credential-query":"SELECT * FROM ${_resource} WHERE userName = :username",
+        "credential-internaluser-query":"SELECT * FROM internal_user WHERE _openidm_id = :username",
+        "for-userName":"SELECT * FROM ${_resource} WHERE userName = :uid",
+        "get-notifications-for-user":"select * FROM ${_resource} WHERE receiverId = :userId order by createDate desc",
+        "scan-tasks":"SELECT * FROM ${_resource} WHERE ${dotnotation:property} < :condition.before AND ${taskState.completed} is NULL",
+        "query-cluster-instances":"SELECT * FROM cluster_states WHERE timestamp <= :timestamp AND (state = '1' OR state = '2')",
+        "audit-by-mapping":"select * FROM audit_recon WHERE mapping = ${mappingName}",
+        "audit-by-recon-id":"select * FROM audit_recon WHERE reconId = ${reconId}",
+        "audit-by-recon-id-type":"select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
+        "audit-by-recon-id-situation":"select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
+        "audit-by-activity-parent-action":"select * FROM audit_activity WHERE parentActionId = ${parentActionId}",
+        "audit-last-recon-for-all-mappings":"SELECT max(messageDetail.started) AS last_started,  max(messageDetail.ended) AS last_ended, mapping from audit_recon where entryType='summary' group by mapping"
+    },
+    "dbStructure":{
+        "orientdbClass":{
+            "internal_user":{
+            },
+            "managed_organization":{
+            },
+            "managed_role":{
+            },
+            "managed_user":{
+            },
+            "managed_group":{
+            },
+            "managed_system":{
+            },
+            "managed_account":{
+            },
+            "ui_notification":{
+            },
+            "link":{
+                "index":[
+                    {
+                        "propertyName":"linkType",
+                        "propertyType":"string",
+                        "indexType":"notunique"
+                    },
+                    {
+                        "propertyNames" : [ "linkType", "firstId" ],
+                        "propertyType":"string",
+                        "indexType":"notunique"
+                    },
+                    {
+                        "propertyNames" : [ "linkType", "secondId" ],
+                        "propertyType":"string",
+                        "indexType":"notunique"
+                    },
+                    {
+                        "propertyName":"reconId",
+                        "propertyType":"string",
+                        "indexType":"notunique"
+                    }
+                ]
+            },
+            "synchronisation_pooledSyncStage":{
+                "index":[
+                    {
+                        "propertyName":"sourceId",
+                        "propertyType":"string",
+                        "indexType":"unique"
+                    },
+                    {
+                        "propertyName":"targetId",
+                        "propertyType":"string",
+                        "indexType":"unique"
+                    },
+                    {
+                        "propertyName":"reconId",
+                        "propertyType":"string",
+                        "indexType":"notunique"
+                    }
+                ]
+            },
+            "config":{
+            },
+            "scheduler":{
+            },
+            "cluster_states":{
+            },
+            "scheduler_triggers":{
+            },
+            "scheduler_jobs":{
+            },
+            "scheduler_calendars":{
+            },
+            "scheduler_jobGroups":{
+            },
+            "scheduler_triggerGroups":{
+            },
+            "audit_recon":{
+                "index":[
+                    {
+                        "propertyName":"reconId",
+                        "propertyType":"string",
+                        "indexType":"notunique"
+                    }
+                ]
+            },
+            "audit_activity":{
+
+            }
+        }
+    },
+    "globalConfiguration" : {
+        "environment.dumpCfgAtStartup" : "false",
+        "environment.concurrent" : "true",
+        "memory.optimizeThreshold" : "0.7",
+        "jvm.gc.delayForOptimize" : "600",
+        "storage.diskCache.bufferSize" : "2048",
+        "storage.compressionMethod" : "snappy",
+        "storage.useWAL" : "true",
+        "storage.wal.cacheSize" : "3000",
+        "storage.wal.maxSegmentSize" : "51200",
+        "storage.wal.maxSize" : "153600",
+        "storage.wal.commitTimeout" : "1000",
+        "storage.wal.fuzzyCheckpointInterval" : "36000",
+        "storage.wal.checkpointIntervalTimeout" : "300",
+        "storage.wal.path" : null,
+        "storage.diskCache.pageSize" : "64",
+        "storage.record.growFactor" : "1.2",
+        "storage.record.overflowGrowFactor" : "1.2",
+        "storage.diskCache.writeQueueLength" : "15000",
+        "storage.diskPageCache.lockTimeOut" : "1000",
+        "storage.lowestFreeListBound" : "16",
+        "storage.cluster.useNodeIdAsClusterPosition" : "false",
+        "storage.keepOpen" : "false",
+        "storage.lockTimeout" : "5000",
+        "storage.record.lockTimeout" : "5000",
+        "storage.useTombstones" : "false",
+        "cache.level1.enabled" : "true",
+        "cache.level1.size" : "1000",
+        "cache.level2.enabled" : "true",
+        "cache.level2.size" : "1000",
+        "cache.level2.impl" : "com.orientechnologies.orient.core.cache.ODefaultCache",
+        "cache.level2.strategy" : "1",
+        "object.saveOnlyDirty" : "false",
+        "db.pool.min" : "5",
+        "db.pool.max" : "20",
+        "db.mvcc" : "true",
+        "db.mvcc.throwfast" : "false",
+        "db.validation" : "true",
+        "db.use.distributedVersion" : "false",
+        "nonTX.recordUpdate.synch" : "false",
+        "nonTX.clusters.sync.immediately" : "manindex",
+        "tx.useLog" : "true",
+        "tx.log.fileType" : "classic",
+        "tx.log.synch" : "false",
+        "tx.commit.synch" : "true",
+        "blueprints.graph.txMode" : "0",
+        "hashTable.slitBucketsBuffer.length" : "1500",
+        "index.auto.rebuildAfterNotSoftClose" : "true",
+        "index.auto.lazyUpdates" : "10000",
+        "index.manual.lazyUpdates" : "1",
+        "mvrbtree.timeout" : "5000",
+        "mvrbtree.nodePageSize" : "256",
+        "mvrbtree.loadFactor" : "0.7",
+        "mvrbtree.optimizeThreshold" : "10000",
+        "mvrbtree.entryPoints" : "64",
+        "mvrbtree.optimizeEntryPointsFactor" : "1.0",
+        "mvrbtree.entryKeysInMemory" : "false",
+        "mvrbtree.entryValuesInMemory" : "false",
+        "mvrbtree.ridBinaryThreshold" : "8",
+        "mvrbtree.ridNodePageSize" : "64",
+        "mvrbtree.ridNodeSaveMemory" : "false",
+        "lazyset.workOnStream" : "true",
+        "file.lock" : "true",
+        "file.defrag.strategy" : "0",
+        "file.defrag.holeMaxDistance" : "32768",
+        "file.mmap.useOldManager" : "false",
+        "file.mmap.autoFlush.timer" : "30",
+        "file.mmap.autoFlush.unusedTime" : "30",
+        "file.mmap.lockMemory" : "true",
+        "file.mmap.strategy" : "0",
+        "file.mmap.blockSize" : "1048576",
+        "file.mmap.bufferSize" : "8192",
+        "file.mmap.maxMemory" : "2082504704",
+        "file.mmap.overlapStrategy" : "2",
+        "file.mmap.forceDelay" : "10",
+        "file.mmap.forceRetry" : "50",
+        "jna.disable.system.library" : "true",
+        "file.cluster.useLHPEPS" : "false",
+        "file.cluster.useMemoryLHCluster" : "false",
+        "network.socketBufferSize" : "32768",
+        "network.lockTimeout" : "15000",
+        "network.socketTimeout" : "10000",
+        "network.retry" : "5",
+        "network.retryDelay" : "500",
+        "network.binary.loadBalancing.enabled" : "false",
+        "network.binary.loadBalancing.timeout" : "2000",
+        "network.binary.maxLength" : "32736",
+        "network.binary.readResponse.maxTimes" : "20",
+        "network.binary.debug" : "false",
+        "network.http.maxLength" : "1000000",
+        "network.http.charset" : "utf-8",
+        "network.http.sessionExpireTimeout" : "300",
+        "profiler.enabled" : "false",
+        /*"profiler.config" : "<seconds-for-snapshot>,<archive-snapshot-size>,<summary-size>",*/
+        "profiler.autoDump.interval" : "0",
+        "profiler.autoDump.reset" : "true",
+        "log.console.level" : "info",
+        "log.file.level" : "fine",
+        "command.timeout" : "0",
+        "client.channel.minPool" : "1",
+        "client.channel.maxPool" : "5",
+        "client.connectionPool.waitTimeout" : "5000",
+        "client.channel.dbReleaseWaitTimeout" : "10000",
+        "server.channel.cleanDelay" : "5000",
+        "server.cache.staticFile" : "false",
+        "server.cache.2q.increaseOnDemand" : "true",
+        "server.cache.2q.increaseStep" : "0.1",
+        "server.log.dumpClientExceptionLevel" : "FINE",
+        "server.log.dumpClientExceptionFullStackTrace" : "true"
+    },
+    "embeddedServer":{
+        "enabled":true,
+        "location":"memory",
+        "handlers":[
+            {
+                "clazz":"com.orientechnologies.orient.server.handler.OJMXPlugin",
+                "parameters":[
+                    {
+                        "name":"enabled",
+                        "value":"false"
+                    },
+                    {
+                        "name":"profilerManaged",
+                        "value":"true"
+                    }
+                ]
+            },
+            {
+                "clazz":"com.orientechnologies.orient.server.plugin.mail.OMailPlugin",
+                "parameters":[
+                    {
+                        "name":"enabled",
+                        "value":"true"
+                    },
+                    {
+                        "name":"profile.default.mail.smtp.host",
+                        "value":"localhost"
+                    },
+                    {
+                        "name":"profile.default.mail.smtp.port",
+                        "value":"25"
+                    },
+                    {
+                        "name":"profile.default.mail.smtp.auth",
+                        "value":"true"
+                    },
+                    {
+                        "name":"profile.default.mail.smtp.starttls.enable",
+                        "value":"true"
+                    },
+                    {
+                        "name":"profile.default.mail.smtp.user",
+                        "value":""
+                    },
+                    {
+                        "name":"profile.default.mail.smtp.password",
+                        "value":""
+                    },
+                    {
+                        "name":"profile.default.mail.date.format",
+                        "value":"yyyy-MM-dd HH:mm:ss"
+                    }
+                ]
+            },
+            {
+                "clazz":"com.orientechnologies.orient.server.handler.OAutomaticBackup",
+                "parameters":[
+                    {
+                        "name":"enabled",
+                        "value":"false"
+                    },
+                    {
+                        "name":"delay",
+                        "value":"4h"
+                    },
+                    {
+                        "name":"target.directory",
+                        "value":"backup"
+                    },
+                    {
+                        "name":"target.fileName",
+                        "value":"${DBNAME}-${DATE:yyyyMMddHHmmss}.json"
+                    },
+                    {
+                        "name":"db.include",
+                        "value":"openidm"
+                    },
+                    {
+                        "name":"db.exclude",
+                        "value":""
+                    }
+                ]
+            },
+            {
+                "clazz":"com.orientechnologies.orient.server.handler.OServerSideScriptInterpreter",
+                "parameters":[
+                    {
+                        "name":"enabled",
+                        "value":"false"
+                    }
+                ]
+            }
+        ],
+        "hooks":null,
+        "network":{
+            "protocols":[
+                {
+                    "name":"binary",
+                    "implementation":"com.orientechnologies.orient.server.network.protocol.binary.ONetworkProtocolBinary"
+                }
+                /*,
+                {
+                    "name":"http",
+                    "implementation":"com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb"
+                }
+                */
+            ],
+            "listeners":[
+                /*
+                {
+                    "ipAddress":"127.0.0.1",
+                    "portRange":"2424-2430",
+                    "protocol":"binary",
+                    "parameters":null,
+                    "commands":null
+                },
+                {
+                    "ipAddress":"127.0.0.1",
+                    "portRange":"2480-2490",
+                    "protocol":"http",
+                    "parameters":[
+                        {
+                            "name":"network.http.charset",
+                            "value":"utf-8"
+                        }
+                    ],
+                    "commands":[
+                        {
+                            "pattern":"GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg",
+                            "implementation":"com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent",
+                            "stateful":false,
+                            "parameters":[
+                                {
+                                    "name":"http.cache:*.htm *.html",
+                                    "value":"Cache-Control: no-cache, no-store, max-age=0, must-revalidate\\r\\nPragma: no-cache"
+                                },
+                                {
+                                    "name":"http.cache:default",
+                                    "value":"Cache-Control: max-age=120"
+                                }
+                            ]
+                        }
+                    ]
+                }
+                */
+            ]
+        },
+        "storages":[
+            {
+                "name":"temp",
+                "path":"memory:temp",
+                "userName":"admin",
+                "userPassword":"admin",
+                "loadOnStartup":false
+            }
+        ],
+        "users":[
+            {
+                "name":"root",
+                "password":"7A5DEAB30884B4C8026A047F13D4A67BDEDC7CA227AA8F4D477727EABE5541B4",
+                "resources":"*"
+            }/*,
+            {
+                "name":"guest",
+                "password":"guest",
+                "resources":"connect,server.listDatabases,server.dblist"
+            }*/
+        ],
+        "security":null,
+        "properties":[
+            {
+                "name":"db.pool.min",
+                "value":"5"
+            },
+            {
+                "name":"db.pool.max",
+                "value":"20"
+            },
+            {
+                "name":"cache.level1.enabled",
+                "value":"false"
+            },
+            {
+                "name":"cache.level1.size",
+                "value":"1000"
+            },
+            {
+                "name":"cache.level2.enabled",
+                "value":"true"
+            },
+            {
+                "name":"cache.level2.size",
+                "value":"1000"
+            },
+            {
+                "name":"profiler.enabled",
+                "value":"true"
+            },
+            {
+                "name":"log.console.level",
+                "value":"info"
+            },
+            {
+                "name":"server.channel.cleanDelay",
+                "value":"5000"
+            }
+        ]
+    }
+}

@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock.openidm</groupId>
+        <artifactId>openidm-project</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>openidm-integration-test</artifactId>
+    <name>OpenIDM automated integration tests</name>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.7</version>
+            <scope>test</scope>
+        </dependency>
+        <!--dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>2.25.0</version>
+            <exclude>
+            httpclient 412
+        </dependency-->
+
+
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>org.forgerock.json.resource</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>launcher</artifactId>
+            <version>1.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- OSGi R4 frameworks -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <excludes>**</excludes>
+                    </excludes>
+                    <skipIfEmpty>true</skipIfEmpty>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.12.4</version>
+                <executions>
+                    <execution>
+                        <id>integration-test-default</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <reportNameSuffix>default</reportNameSuffix>
+                            <groups>common,default</groups>
+                            <skipITs>false</skipITs>
+                            <systemPropertyVariables>
+                                <launcher.install.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.install.location>
+                                <launcher.project.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.project.location>
+                                <launcher.working.location>
+                                    ${project.build.directory}/storage/default
+                                </launcher.working.location>
+                            </systemPropertyVariables>
+                            <summaryFile>target/failsafe-reports/failsafe-summary-default.xml</summaryFile>
+                            <!--debugForkedProcess>true</debugForkedProcess-->
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>integration-test-sample1</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <reportNameSuffix>sample1</reportNameSuffix>
+                            <groups>common,sample1</groups>
+                            <skipITs>false</skipITs>
+                            <systemPropertyVariables>
+                                <launcher.install.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.install.location>
+                                <launcher.project.location>
+                                    ${project.build.directory}/openidm/samples/sample1
+                                </launcher.project.location>
+                                <launcher.working.location>
+                                    ${project.build.directory}/storage/sample1
+                                </launcher.working.location>
+                            </systemPropertyVariables>
+                            <summaryFile>target/failsafe-reports/failsafe-summary-sample1.xml</summaryFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>integration-test-sample2</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <reportNameSuffix>sample2</reportNameSuffix>
+                            <groups>common,sample2</groups>
+                            <skipITs>false</skipITs>
+                            <systemPropertyVariables>
+                                <launcher.install.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.install.location>
+                                <launcher.project.location>
+                                    ${project.build.directory}/openidm/samples/sample2
+                                </launcher.project.location>
+                                <launcher.working.location>
+                                    ${project.build.directory}/storage/sample2
+                                </launcher.working.location>
+                            </systemPropertyVariables>
+                            <summaryFile>target/failsafe-reports/failsafe-summary-sample2.xml</summaryFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <summaryFiles>
+                                <summaryFile>target/failsafe-reports/failsafe-summary-default.xml</summaryFile>
+                                <!--summaryFile>target/failsafe-reports/failsafe-summary-sample1.xml</summaryFile>
+                                <summaryFile>target/failsafe-reports/failsafe-summary-sample2.xml</summaryFile-->
+                            </summaryFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <systemPropertyVariables>
+                        <org.osgi.framework.system.packages.extra>
+                            sun.misc,org.forgerock.util;version="1.0.0",org.forgerock.json.fluent;version="1.1.0",org.forgerock.json.resource;version="1.2.3"
+                        </org.osgi.framework.system.packages.extra>
+                    </systemPropertyVariables>
+                    <workingDirectory>${project.build.directory}/openidm</workingDirectory>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.forgerock.openidm</groupId>
+                                    <artifactId>openidm-zip</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>
+                                openidm/bin/**,
+                                openidm/bundle/**,
+                                openidm/conf/**,
+                                openidm/connectors/**,
+                                openidm/samples/**,
+                                openidm/script/**,
+                                openidm/security/**,
+                                openidm/workflow/**
+                            </includes>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-mysql</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>5.1.24</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/openidm/bundle
+                            </outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+			
+        </plugins>
+    </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.12.3</version>
+                <reportSets>
+                    <reportSet>
+                        <id>integration-tests</id>
+                        <reports>
+                            <report>failsafe-report-only</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+</project>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+
+
+    <process id="osgiProcess" name="Osgi process">
+
+        <startEvent id="start" />
+        <sequenceFlow sourceRef="start" targetRef="scripttask1"/>
+        <scriptTask id="scripttask1" scriptFormat="groovy">
+            <script>
+                params = [_queryId:'query-all-ids']
+                out:println "script task using resolver: " + openidm.query('workflow/processdefinition', params)
+                execution.setVariable('params', params)
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="scripttask1" targetRef="serviceTask"/>
+        <serviceTask id="serviceTask" activiti:expression="${openidm.query('workflow/processdefinition', params)}"
+                 activiti:resultVariableName="idmresult"/>
+        <sequenceFlow sourceRef="serviceTask" targetRef="scripttask2"/>
+        
+        <scriptTask id="scripttask2" scriptFormat="groovy">
+            <script>
+                out:println "script task using expression resolver: " + idmresult
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="scripttask2" targetRef="end"/>
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>

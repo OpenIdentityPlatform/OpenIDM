@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-distributed_task'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+    <title>Distributed Task</title>
+
+    <para>The purpose of the distributed task mechanism is to allow for scaling and fail-over capabilities. </para>
+    <para/>
+    <para>The implementation utilizes the existing shared infrastructure of the cluster nodes in the form of the shared repository (e.g. database) rather than adding another shared mechanism to install and administer. This mechanism is suitable for medium frequency/coarse grained jobs. If a need arises for fine grained/very frequent task distribution, utilizing an existing mechanism such as the http front-end is a possibility.</para>
+    <para/>
+    <sect1>
+        <title>Approach Basics</title>
+        <para/>
+        <para>The data store (repository) is used to add new tasks that any node can pick up (poll based model) and claim. Upon claiming a task, the node "leases" the task for a specified amount of time (e.g. 5 minutes). As it processes the task it renews the lease, i.e. regularly asks again for the lease to expire in 5 minutes. If the node for any reason stops processing (e.g. crashed) the lease expires, and another node is free to claim the task. The node can store a result in the task. This mechanism operates similar to a map/reduce mechanism.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>High Availability / HA</title>
+        <para/>
+        <para>The lease mechanism provides for automatic fail-over if a task does not make any progress anymore.</para>
+        <para/>
+        <para>There is no leader and hence no single point of failure or need to re-elect leaders.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Scaling</title>
+        <para/>
+        <para>A node can split out a task (such as a recon batch) into many pieces (such as 1000 records to recon each), and create individual tasks that can be claimed and processed by many nodes in parallel. By grouping the tasks a subsequent "join" task can be triggered that can process the completion of the whole batch.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Task Handlers</title>
+        <para/>
+        <para>Nodes in the cluster upon start/up configuration should register all task handlers they are willing to handle. Nodes will only pick up work for task types it has handlers for, this is primarily intended to remove start-up race conditions, but can also be used to disable certain kinds of tasks (e.g. reconciliation) on a given node.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Implementation Notes</title>
+        <para/>
+        <para>Each node has a scheduled activity that periodically checks for new work, and scans the tasks for abandoned tasks.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Concurrency/Locking Notes</title>
+        <para/>
+        <para>The underlying store must provide for some way to allow a node to uniquely claim a task, e.g. optimistic concurrency to check that the "claim" update succeeded rather than conflicted with another node already claiming the task.</para>
+        <para/>
+        <para>There is no guaranteed ordering amongst the distributed tasks; they can happen in any order and concurrently.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Disallowing Concurrent Execution and Serialized Executions in the Cluster</title>
+        <para/>
+        <para>When there is a requirement that a given functionality is only executed by one node at any given time in the cluster, this mechanism can be used as well. If the nodes know of a unique name/id for the functionality (e.g. "check-database-consistency", they can assign that id as the taskId and ask the submit to ignore if the tasks entry already exists in the DB. This way even if multiple nodes ask to submit the same task, only one task will be stored and hence picked up. </para>
+        <para/>
+        <para>Queing serialized execution of tasks is currently not supported, i.e. note that the task is only executed once. Multiple submits are not queued for serialized execution, duplicate submits are discarded/ignored. We could add a submitSerialExecution() capability going forward if required (which would queue the tasks and only serially process each in the cluster).</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>QoS / Transactionality</title>
+        <para/>
+        <para>The task is processed on an at-least-once approach; i.e. until the task handler says it completed the task successfully, or it says there is something wrong in the task and it should not be re-tried - triggering an error handler.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Sub-tasks and Grouping</title>
+        <para/>
+        <para>A group name (in the context of task type)  provides for a way to define a "join" on the group - a task that gets triggered when the whole group finished (either successfully or not). </para>
+        <para/>
+        <para>A group task's unique identifier consists of the task type (e.g. "reconcile-set-of-records"), a group name ("reconcile-system-x"), task number in group(10), group total tasks (100). The group task generation/submission should be done in a fashion that re-doing the generation results in the same identifier.</para>
+        <para/>
+        <para>When the total number of task that will be submitted for a group is unknown whilst generating the tasks, only the last record submitted for group has both the task number in group and group total tasks, which must be the same (100/100). This is necessary for the system to detect when the whole group has finished. Previous tasks only have the task number in group set. The generation of tasks within a group should be idempotent, i.e. it should be able to re-do the task generation in a fashion that duplicates are ignored because the taskid is the same again.</para>
+        <para/>
+        <para>A task can submit sub-tasks through the handler provided context. This implies that the spawning task is the parent of these sub-tasks. This allows for an enclosing task to a) ensure only one enclosing task of the same type (controlled through task id) runs at the same time in the cluster, and b) there is a place to handle a "join" (group finished handler) of the overall task, after all the sub-tasks are finished.</para>
+        <para/>
+        <para>Only when the sub-tasks all finished will the parent task's "group finished handler" be triggered. For example, if only one reconciliation for a given system should run at any given time, and it is broken into sub-tasks a Handler for Single task "[recon-parent][recon-system-x] will submit 100 sub-tasks as follows:</para>
+        <itemizedlist>
+            <listitem>
+                <para>Submit single task with task type [recon-parent], task name  "recon-system-x". </para>
+            </listitem>
+            <listitem>
+                <para>Node 1 picks up "[recon-parent][recon-system-x]", submits 100x grouped tasks with task type "recon-record-set", group name "recon-system-x", record numbers 1-100 / 100</para>
+            </listitem>
+            <listitem>
+                <para>All nodes start picking up and processing "[recon-record-set][recon-system-x][&lt;batch number&gt;/100]" tasks</para>
+            </listitem>
+            <listitem>
+                <para>When all "[recon-record-set][recon-system-x][&lt;batch number&gt;/100]" tasks finished, a task gets inserted to trigger the group finished handler for "recon-batch".</para>
+            </listitem>
+            <listitem>
+                <para>A node picks up and handles the group finished handler 'task' for "recon-record-set"</para>
+            </listitem>
+            <listitem>
+                <para>Upon completion of the "[recon-record-set][recon-system-x][group-finished-task]" group finished handler, a task gets inserted to trigger the group finished handler on the parent task, "[recon-parent][recon-system-x][group-finished-task]"</para>
+            </listitem>
+            <listitem>
+                <para>A node picks up and handles the group finished handler task for "[recon-parent][recon-system-x][group-finished-task]" </para>
+            </listitem>
+        </itemizedlist>
+    </sect1>
+    <sect1>
+        <title>Scheduling </title>
+        
+        <para>Rather than having the scheduler be cluster aware, every node will have its own local scheduler - configured with a homogenous schedule. Where there are tasks that should be triggered only once cluster-wide this can be achieved by inserting a task with a taskId that is the same for all nodes, and for example encodes the configured trigger time. The submit should be configured to ignore if the task already exists. Hence, examples of some variations upon a scheduler triggering:</para>
+        <itemizedlist>
+            <listitem>
+                <para>Execute something immediately on each node: no need to use the distributed task</para>
+            </listitem>
+            <listitem>
+                <para>Execute something once for this timer, on only one node: insert a distributed task with taskId "check-database-&lt;configured trigger date/time&gt;'</para>
+            </listitem>
+            <listitem>
+                <para>Execute something at most once in parallel, even if different timers trigger: insert a distributed task with taskid "active-sync-systemx"</para>
+            </listitem>
+            <listitem>
+                <para>Note that this would result in a subsequent configured active sync schedule of same type to be ignored if the existing still is in progress</para>
+            </listitem>
+            <listitem>
+                <para>Execute a group of tasks at most once in parallel, even if different configured timers trigger: insert a distributed task to spawn sub-tasks within a group, i.e.</para>
+            </listitem>
+            <listitem>
+                <para>Insert a distributed taks with taskid "recon-systemx" (group "recon-parent"), which spawns sub-tasks with taskids "recon-systemx-&lt;batch number&gt;" (group "recon-batch")</para>
+            </listitem>
+            <listitem>
+                <para>Note that this would result in a subsequent configured active sync schedule of same type to be ignored if the existing still is in progress</para>
+            </listitem>
+            <listitem>
+                <para>Queueing and Serializing executions not yet supported, i.e. can't queue group y to only start when group x finished.</para>
+            </listitem>
+        </itemizedlist>
+    </sect1>
+    <sect1>
+        <title>API</title>
+        
+        <programlisting language="java">
+package org.forgerock.openidm.distributedtask;
+
+
+/**
+ * Distribute tasks across the cluster nodes for both scaling and HA/fail-over
+ */
+
+public interface DistributedTask {
+
+    /**
+     * @param failGroupFast if true a single task failure within the group
+     * aborts further processing of the group and eventually triggers the
+     * group handler
+     * @param taskData the data associated with the task. Content must be
+     * either 1. String, 2. JSON based object model and/or 3. Serializable
+     * @return Task ID
+     */
+
+    String submit(TaskIdentifier taskId, int priority, Object taskData);
+
+    /**
+     * Register the implementation for a given task type
+     * Will get invoked when a node claims a task and hands it to this handler.
+     * The handler is responsible for executing the task, maintaining the
+     * lease as it is processing, and for returning results if any
+     */
+
+    void registerTaskHandler(String taskType, TaskHandler taskHandler);
+
+    /**
+     * Handle if a group is finished processing, either successfully
+     * (all tasks) or not.
+     */
+
+    void registerGroupFinishedHandler(String taskType, TaskHandler taskHandler);
+
+    /**
+     * Optional handler to customize how failed tasks are treated. Default
+     * is to log, remove individual task and trigger group complete handling
+     * if appropriate.
+     */
+
+    void registerInvalidTaskHandler(TaskHandler taskHandler);
+
+}
+
+
+public interface TaskIdentifier {
+
+    String getStringifiedTaskId();
+
+}
+
+
+
+public class SingleTaskId implements TaskIdentifier {
+
+    public SingleTaskId(String taskType, String taskName) {...};
+
+}
+
+
+public class GroupedTaskId implements TaskIdentifier {
+
+    public GroupedTaskId(String taskType, String groupName,
+        boolean failGroupFast, int taskNumber, int totalGroupTasks) {...};
+
+}
+
+
+public abstract class TaskHandler {
+
+    /**
+     * @param leaseSeconds sets the initial number of seconds the task
+     * handler should own the task, it should be
+     * plenty of time to either process the task, or to renew the lease;
+     * but at the same time be reasonably short to achieve the desired
+     * fail-over times when a handler/node has a problem and stops
+     * processing/renewing the lease.
+     */
+
+    public void setInitialLeaseTime(int leaseSeconds) {
+
+    }
+
+    /**
+     * @param taskData The data for the task to process. For a regular task
+     * this data is what was submitted, for group finished tasks this
+     * contains the success/failure and results of all the tasks that ran in
+     * the group.
+     * @return optional result, which can be used in the group complete
+     * handler
+     */
+
+    Object process(TaskIdentifier taskId, int priority, Object taskData,
+        LeaseManager leaseManager) throws InvalidTaskException,
+        RetryLaterException, LeaseExpiredException;
+
+}
+
+
+public interface LeaseManager {
+
+    /**
+     * Renew the lease (the time allotted for the task handler to process the
+     * next step and before someone else should assume that this taskHandler
+     * has an issue and another node should take over. The lease time should
+     * be selected so that during normal operation it is plenty of time for
+     * the taskHandler to renew the lease for continous processing.
+     * An example would be a lease of 5 minutes, and the taskHandler expects
+     * to renew the lease every ~30 seconds.
+     * To allow for frequent lease updates without unnecessary performance
+     * overhead, the lease manager may batch/time writes to the persistence
+     * store, but it must first check continued ownership of the task with
+     * sufficient time.
+     * @param leaseSeconds how many seconds from current time the lease
+     * should expire
+     * @throws LeaseExpiredException if the lease renewal did not succeed.
+     * The task handler is required to abort the task processing as it now
+     * does not own the task anymore.
+     */
+
+    boolean renewLease(int leaseSeconds) throws LeaseExpiredException {}
+
+}</programlisting>
+    </sect1>
+
+</chapter>

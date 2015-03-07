@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+                      xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+   <ri:__ACCOUNT__>
+      <icf:__UID__>1</icf:__UID__>
+      <icf:__NAME__>DDOE1</icf:__NAME__>
+      <icf:__PASSWORD__>TestPassw0rd</icf:__PASSWORD__>
+      <ri:firstname>John</ri:firstname>
+      <ri:lastname>Doe</ri:lastname>
+      <middlename>Hias</middlename>
+      <honorificPrefix>Dr.</honorificPrefix>
+      <honorificSuffix>III</honorificSuffix>
+      <nickName>Jonny</nickName>
+      <email>hallo@example.com</email>
+      <email>jdoe@forgerock.com</email>
+      <address>work|100 Universal City Plaza|Hollywood|CA|91608|USA|true</address>
+      <address>home|222 Universal City Plaza|Hollywood|CA|91622|USA|false</address>
+      <phoneNumber>1234567</phoneNumber>
+      <phoneNumber>1234568</phoneNumber>
+      <im>aim:jonyOnAim</im>
+      <im>skype:skyperHiasl</im>
+      <photo>https://photos.example.com/profilephoto/72930000000Ccne/F</photo>
+      <photo>https://photos.example.com/profilephoto/72930000000Ccne/T</photo>
+      <employee-type>permanent</employee-type>
+      <title>Mr.Universe</title>
+      <preferredLanguage>en_US</preferredLanguage>
+      <local>en_US</local>
+      <timezone>America/Denver</timezone>
+      <group>usemploys|US Employees</group>
+      <group>euemploys|EU Employees</group>
+    </ri:__ACCOUNT__>
+</icf:OpenICFContainer>

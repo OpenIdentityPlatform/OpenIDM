@@ -1,0 +1,169 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var query = {'_queryId' : 'for-userName', 'uid' :  source.name};query;"
+            },
+            "properties" : [
+                {
+                    "target" : "schemas",
+                    "default" : "['urn:scim:schemas:core:1.0']"
+                },
+                {
+                    "target" : "_id",
+                    "source" : "name"
+                },
+                {
+                    "target" : "externalId",
+                    "source" : "name"
+                },
+                {
+                    "target" : "userName",
+                    "source" : "name"
+                },
+                {
+                    "target" : "name",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getName(source)"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "displayName",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getDisplayName(source.firstName, source.lastName, source.name)"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "nickName",
+                    "source" : "nickName"
+                },
+                {
+                    "target" : "profileUrl",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getProfileUrl(source)"
+                    },
+                    "source" : "name"
+                },
+                {
+                    "target" : "emails",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getEmails(source)"
+                    },
+                    "source" : "emails"
+                },
+                {
+                    "target" : "addresses",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getAddresses(source)"
+                    },
+                    "source" : "addresses"
+                },
+                {
+                    "target" : "phoneNumbers",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getPhoneNumbers(source)"
+                    },
+                    "source" : "phoneNumbers"
+                },
+                {
+                    "target" : "ims",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getIMs(source)"
+                    },
+                    "source" : "ims"
+                },
+                {
+                    "target" : "photos",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getPhotos(source)"
+                    },
+                    "source" : "photos"
+                },
+                {
+                    "target" : "userType",
+                    "source" : "employee-type"
+                },
+                {
+                    "target" : "title",
+                    "source" : "title"
+                },
+                {
+                    "target" : "preferredLanguage",
+                    "source" : "preferredLanguage"
+                },
+                {
+                    "target" : "locale",
+                    "source" : "locale"
+                },
+                {
+                    "target" : "timezone",
+                    "source" : "timezone"
+                },
+                {
+                    "target" : "groups",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "require('scim').getGroups(source)"
+                    },
+                    "source" : "groups"
+                }
+            ],
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target.meta = require('scim').getMetaData()"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "target.meta = require('scim').getMetaData(target.meta)"
+            },
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

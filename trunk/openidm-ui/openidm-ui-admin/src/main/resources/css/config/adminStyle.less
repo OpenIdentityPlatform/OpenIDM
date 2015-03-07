@@ -1,0 +1,289 @@
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+/*
+  Base Page Styles
+*/
+
+.button-bar {
+  border-bottom: 1px solid #bbb;
+  padding: 10px 0px 10px 0px;
+  height:35px;
+  clear:both;
+}
+
+.subtitle-bar {
+  height: 20px;
+  clear: both;
+  padding-top: 15px;
+}
+
+.subtitle-divider {
+  margin-top:25px;
+  border-top:1px solid #ddd;
+}
+
+.subtitle-bar a {
+  float:right;
+  text-decoration: none;
+}
+
+.subtitle-bar h4 {
+  float:left;
+}
+
+.title-bar {
+  height:45px;
+  border-bottom:1px solid #bbb;
+}
+
+.title-bar.no-bottom-border {
+  border-bottom:none;
+}
+
+.title-bar h1 {
+  float:left;
+  font-size:24px;
+}
+
+.title-bar a {
+  float:right;
+  text-decoration: none;
+  margin-top:25px;
+}
+
+.title-bar .fa-arrow-left {
+  float:none;
+  margin-left:15px;
+}
+
+.button-bar .fa {
+  margin-right:10px;
+}
+
+.button-bar .left-end {
+  margin-left:0px;
+}
+
+.button-bar .right-end {
+  margin-left:0px;
+}
+
+.help-body {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.help-body h3{
+  margin-top:10px;
+  color:#5fa595;
+}
+
+.help-body p {
+  padding-bottom:0px;
+}
+
+/*
+  Our version of FontAwesome is older and missing this
+*/
+.fa-icon() {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome; // shortening font declaration
+  font-size: inherit; // can't have font-size inherit on line above, so need to override
+  text-rendering: auto; // optimizelegibility throws things off #1094
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa {
+  background-image:none;
+}
+
+.menu .fa {
+  margin-right: 5px;
+}
+
+#footer {
+  height:60px;
+  margin-top:-60px;
+  color:@light-font-color;
+  background-color: #5d6871;
+}
+
+.menubar {
+  margin-bottom:0px;
+}
+
+.menubar .menu {
+  background-image:none;
+}
+
+body {
+  background-image:none;
+}
+
+button:disabled
+{
+  cursor:default;
+}
+
+#content {
+  padding-bottom:75px;
+}
+
+.overflow-visible {
+  overflow: visible;
+}
+
+.script_output {
+  width:550px;
+  height:20px;
+  float:left;
+}
+
+input[type=text].small-text-input {
+  width:20px;
+  margin-right:15px;
+}
+
+.bold-message {
+  font-weight:bold;
+}
+
+/**
+  Alert Box Display
+*/
+
+.alert-box {
+  width: 962px;
+  height:25px;
+  margin-bottom:5px;
+  border:black solid 2px;
+  padding: 3px 0px 0px 0px;
+
+  .alert-message {
+    width:920px;
+    padding: 2px 0px 0px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    float:left;
+  }
+
+  .fa {
+    margin-right:10px;
+  }
+
+  .message-type {
+    font-weight:bold;
+    margin-right:10px;
+  }
+
+  .close-button {
+    float: right;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 14px;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    filter: alpha(opacity=20);
+    opacity: .2;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding:0px;
+    margin-right: 5px;
+  }
+
+  .close-button:hover {
+    filter: alpha(opacity=50);
+    opacity: .5;
+  }
+
+}
+
+.alert-box.error-message {
+  background-color:#f2dede;
+  color:#a94442;
+  border-color:#ebccd1;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-cogs;
+    }
+  }
+}
+
+.alert-box.warning-message {
+  background-color:#fcf8e3;
+  color:#8a6d3b;
+  border-color:#faebcc;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-warning;
+    }
+  }
+}
+
+.alert-box.success-message {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-check-square;
+    }
+  }
+}
+
+.alert-box.info-message {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-comment-o;
+    }
+  }
+}
+
+.filter-form .node {
+  padding-left: 10px;
+  input {
+    vertical-align: bottom;
+    &.name {
+      width: 100px;
+    }
+  }
+}

@@ -1,0 +1,464 @@
+In the usecase folder there are a set of files which together tell a user story based on some common examples.
+These files are copied and organized in an appropriate folder structure,
+each usecase folder contains the files that are needed for that certain use case sample.
+
+All the samples assume a certain initial setup of managed users in OpenIDM.
+The users are organized the following way:
+- there are 20 ordinary users: user.0 ... user.19 where 
+
+    - user.0 .. user.4 belong to Human Resources having user.0 as Manager,
+       user.0 .. user.3 employees and user.4 contractor
+
+    - user.5 .. user.9 belong to Production Planning having user.5 as Manager,
+       user.5 .. user.8 employees and user.9 contractor
+
+    - user.10 .. user.14 belong to Sales & Distribution having user.10 as Manager,
+       user.10 .. user.13 employees and user.14 contractor
+
+    - user.15 .. user.19 belong to Treasury & Payments having user.15 as Manager,
+       user.15 .. user.18 employees and user.19 contractor
+
+Furthermore we have the following special users:
+- hradmin: user representing the human interaction of the HR department
+- systemadmin: user representing the human interaction of the populated systems (“Business” and “Project”)
+- superadmin: user representing the manager of the managers
+
+The samples use OrientDB as a backend by default. There are other repository configuration files
+provided in the samples/usecase/db folder. If you want to use one of the alternative repositories
+remove the repo.orientdb.json file from the conf folder of the usecase you want to test (e.g. samples/usecase/usecase1/conf)
+and then copy the appropriate repo.jdbc.json to the same folder.
+For more information on how to configure an alternative OpenIDM repository, see http://openidm.forgerock.org/doc/install-guide/#chap-repository
+
+List of use cases
+
+Usecase1 - Initial reconciliation
+    In this step we import the users from OpenDJ to OpenIDM using reconciliation.
+
+    To prepare to run the sample, download OpenDJ directory server from
+    http://forgerock.org/opendj.html. Install OpenDJ using QuickSetup:
+
+        * Use "password" as the password for cn=Directory Manager.
+        * Import samples/usecase/data/hr_data.ldif during installation.
+
+    1. Start OpenIDM with the configuration for usecase1.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/usecase/usecase1
+
+    2. Run reconciliation.
+
+    $ curl -k -u openidm-admin:openidm-admin -H "Content-Type: application/json" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
+
+    3. Query the managed users created by reconciliation
+
+    $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+    
+    There should be 23 users created. The default password of the imported users is "Passw0rd".
+
+Usecase 2 - New user onboarding
+    In this step we simulate an HR employee starting the onboarding process for an employee
+    and approval step of the manager.
+
+    If we want to use email notifications as part of the process make the following changes:
+    - External email service of OpenIDM has to be configured using the following file:
+        samples/usecase/usecase2/conf/external.email.json
+        Update the smtp settings in this file before starting the workflow.
+    - Change the notification email properties in the workflow definition file.
+      To do so:
+      - Copy the workflow bar file (samples/usecase/usecase2/workflow/newUserCreate.bar)
+        to a temporary location.
+      - Unzip the temporary workflow bar file and edit the extracted workflow
+        definition (newUserCreate.bpmn20.xml).
+
+        Original:
+        emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com', 
+                    subject : 'Use Case Test Notification', type : 'text/plain', 
+                    body : 'The requested user ' + userName + ' was successfully created']
+
+        Change the from and to fields to contain valid email addresses.
+
+      - When you have completed the edit, zip up the workflow definition file,
+        along with the two xhtml templates required for the sample, using a
+        command similar to the following:
+
+        $ zip newUserCreate.bar newUserCreate.bpmn20.xml nUCDecideApprovalForm.xhtml nUCStartForm.xhtml
+
+      - Copy the resulting bar file to the workflow directory, overwriting
+        the existing bar file:
+
+        $ cp /tmp/newUserCreate.bar  /path/to/openidm/samples/usecase/usecase2/workflow
+
+    
+    1. Start OpenIDM with the configuration for usecase2.
+
+        $ cd /path/to/openidm
+        $ ./startup.sh -p samples/usecase/usecase2
+
+    2. Log in to the UI as user.1 (this user belongs to HR department, default password is 'Passw0rd')
+
+    3. Select the User Onboarding Process by clicking on it.
+
+    4. Fill the fields of the form presented by the UI. The fields marked with x are mandatory.
+        - Department field:
+            By selecting one of the four departments we define which department the new user
+            will belong to. Based on this the workflow will select the possible candidate assignees
+            for the manager approval user task: it will be either superadmin (as manager of everyone)
+            or the manager of the selected department (see description above).
+            example: if HR is selected the manager candidates will be user.0 and superadmin.
+        - User Type field:
+            if the User Type field is Employee then the user will have access to an account called "Business".
+                This is represented on the managed user in OpenIDM repository by having the following attribute on
+                the managed user:
+                    accounts : [ "Business"]
+            if the User Type is Contractor then the new user won't have any accounts associated to it in
+                managed user representation in OpenIDM.
+
+        - Send Email Notification field:
+            If 'No' is selected for this field then no email notifications will be sent.
+            Notifications will be added to the OpenIDM repository which will appear on UI.
+
+    5. Start the workflow by clicking on Start button.
+
+    6. Log out and log in as the manager of the department selected in the initial start form
+        example: if HR was selected then log in as user.0
+
+    7. Click on the Onboarding approval task appearing on UI as task in the group queue
+        and assign the user task to user.0 (select 'Assign it to me'). The task appears now in 'My tasks'.
+
+    8. Click on the Task and then on the 'Details' button.
+        - Start Date field:
+            filling this field results in the user being created and adding the startDate property
+            to the user. Furthermore, the user status will be 'inactive'.
+            The field is optional, it will be used by TaskScanner to trigger sunrise workflow.
+        - End Date field:
+            filling this field results in the user being created and adding the startDate property
+            to the user.
+            The field is optional, it will be used by TaskScanner to trigger sunset workflow.
+        - Manager field:
+            Selecting yes will add 'title' field to the new managed user with the value 'manager'.
+        - Decision field:
+            Selecting 'Reject' terminates the workflow and sends a notification to the start user
+            of the workflow.
+       Complete the task by clicking on 'Complete' button.
+
+    9. If 'Accept' was selected then the user is created as a managed user in OpenIDM.
+        The password of the new user is "Passw0rd".
+        Two OpenIDM notifications are created about this event: one for the start user and one for the
+        new user. Those are visible on the UI after login with the appropriate user.
+
+        If email notification was selected then one email is sent to the user configured at the
+        beginning of the use case sample.
+    
+    10. Sunrise workflow
+        If the sunrise date of the new user was set then the user was created with inactive account status.
+        To trigger sunrise activate the sunrise task scanner (it's inactive by default):
+            samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json
+            Change: "enabled" : false
+            to "enabled" : true
+        The scan will run every minute and checks for users having sunrise date before
+        current date plus one day.
+        Once the scan is triggered it picks the new user, starts the sunrise workflow on it:
+            - changes the account status to active
+            - adds an OpenIDM notification to the new user (visible when logging in to OpenIDM UI).
+
+    11. Sunset workflow
+        If the sunset date of the new user was set then sunset workflow can be triggered
+        To trigger sunset activate the sunset task scanner (it's inactive by default):
+            samples/usecase/usecase2/conf/schedule-taskscan_sunset.json
+            Change: "enabled" : false
+            to "enabled" : true
+        The scan will run every minute and checks for users having sunset date before
+        current date plus one day.
+        Once the scan is triggered it picks the new user, starts the sunset workflow on it:
+            - a user task is assigned to the manager of the user (e.g. in our sample the assignee is user.0)
+            - Log in to OpenIDM UI with user.0 and select the task in 'My tasks'
+            - Decision field:
+                - Accept termination: the user's account status will be set to inactive and hradmin
+                    receives an OpenIDM notification about it.
+                - Modify date: the sunset date of the user will be changed and the manager
+                    of the user receives an OpenIDM notification about it (user.0 in our sample).
+
+Usecase 3 - User access request
+    In this step we simulate a user starting an access request and having 2-level approval for it.
+
+    If we want to use email notifications as part of the process make the following changes:
+    - External email service of OpenIDM has to be configured using the following file:
+        samples/usecase/usecase3/conf/external.email.json
+        Update the smtp settings in this file before starting the workflow.
+    - Change the notification email properties in the workflow definition file:
+        samples/usecase/usecase3/workflow/accessRequest.bpmn20.xml
+
+        Original:
+        emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com', 
+                    subject : 'Use Case Test Notification', type : 'text/plain', body : 'The access request was accepted']
+        Change the from and to fields to contain valid email addresses.
+        Note that there are 2 occurences of the emailParams, change both.
+    
+    1. Start OpenIDM with the configuration for usecase3.
+
+        $ cd /path/to/openidm
+        $ ./startup.sh -p samples/usecase/usecase3
+
+    2. Log in to the UI as user.1 (this user belongs to HR department, default password is 'Passw0rd')
+
+    3. Select the Access Request Process by clicking on it and start the workflow.
+
+    4. A new task appears in 'My tasks', click on it and select 'Details'.
+        - Access to Business system field: the value is reflecting the current value in OpenIDM database
+        - Access to Project system field: the value is reflecting the current value in OpenIDM database
+        - Send Email Notification field:
+            If 'No' is selected for this field then no email notifications will be sent.
+            Notifications will be added to the OpenIDM repository which will appear on UI.
+        - Request field: Cancel terminates the process and does not change anything.
+            Accept starts a user task assigned to the manager of the user (user.0 in this sample).
+
+        Click on Complete after selecting the values.
+
+    5. Log out and log in as the manager of the start user (user.0 in this sample)
+
+    6. Click on the User Access Request Approval task appearing on UI as task in the group queue
+        and assign the user task to user.0 (select 'Assign it to me'). The task appears now in 'My tasks'.
+
+    7. Click on the task and then on the 'Details' button.
+        The two fields showing the required access rights are modifiable by the manager. 
+        Complete the task by clicking on 'Complete' button after selecting the Decision.
+        The decision can be
+        - Reject: the start user (in our sample user.1) receives a notification about the denial. An OpenIDM 
+            notification is created about this event which is visible on the UI after log in with the appropriate user.
+            If email notification was selected then one email will be sent to the user configured at the
+            beginning of the use case sample.
+        - Accept:
+            Accept starts a user task assigned to systemadmin.
+
+    8. If the manager accepted log out and log in as systemadmin (default password is "Passw0rd").
+
+    9. Click on the User Access Request Approval task appearing on UI in 'My tasks' and then on the 'Details' button.
+        The two fields showing the required access rights are modifiable by the systemadmin. 
+        Complete the task by clicking on 'Complete' button after selecting the Decision.
+        The request can be
+        - Reject: the start user (in our sample user.1) receives a notification about the denial. An OpenIDM 
+            notification is created about this event which is visible on the UI after log in with the appropriate user.
+            If email notification was selected then one email will be sent to the user configured at the
+            beginning of the use case sample.
+        - Accept: user.1 is updated in managed users table of OpenIDM reflecting the requested changes.
+            An OpenIDM notification is created about this event which is visible on the UI after login with the appropriate user.
+            If email notification was selected then one email will be sent to the user configured at the
+            beginning of the use case sample.
+
+    In this sample there is an escalation step attached to the manager approval task. If the manager does not complete
+    the user task within 10 minutes then a new user task is created and assigned to superadmin. It has the same user interface
+    as the one assigned to the manager of the user and has the same functionalities. If the superadmin 
+    completes this task then the execution is passed to the administrator approval (systemadmin).
+
+Usecase 4 - Orphan account detection and manual linking task started from reconciliation
+    In this use case we show two different asynchronous tasks started from reconciliation:
+    detecting orphan accounts on the target objects set and handling ambiguous results of correlation phase.
+
+    1. Before starting the test we need to rename the following file:
+    rename samples/usecase/usecase4/conf/syncManagedBusiness.json to samples/usecase/usecase4/conf/sync.json
+
+    In that file we have a mapping defined: recon_managedUser_systemBusiness.
+    This mapping has managed users as source and a csv file as target object set. The target object set 
+    is defined in samples/usecase/usecase4/data/business.csv file.
+    In that file we have all the users of the initial reconciliation (usecase1) which are employees
+    and therefore have "Business" in the 'accounts' attribute (see usecase2 User Type).
+    Since this mapping has a 'validSource' field defined only those managed users will be taken into
+    account which are employees.
+
+    There are some extra users in that csv file:
+    - user.50 is defined only in the csv file so when running the reconciliation this user will be 
+        detected as an orphan account (orphan account workflow is triggered when the situation is
+        "UNQUALIFIED" or "UNASSIGNED").
+
+    - user.33: the 'userName' attribute of this user is 'user.3', same as for user.3.
+        When running the correlation query during reconciliation there will be two candidate users
+        to be linked with user.3 from managed users (correlation query is based on userName attribute).   
+    
+    2. Start OpenIDM with the configuration for usecase4.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/usecase/usecase4
+
+    3. Run reconciliation.
+
+    $ curl -k -u openidm-admin:openidm-admin -H "Content-Type: application/json" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=recon_managedUser_systemBusiness"
+
+    Two asynchronous workflows are started: an orphanAccountReport for user.50 and a
+    manualMatch for user.3 of managed users.
+
+    4. Log in to the UI as systemadmin (default password is 'Passw0rd').
+
+    5. Click on the 'Details' button of the 'Manual Linking' task.
+        The 'Possible targets' field is modifiable by systemadmin and it is required.
+        The decision can be
+        - Ignore: no action will be taken (no link will be created) and the workflow terminates.
+        - user.3 (user.3 - Atrc, Aaron) or user.3 (user.33 - Atrc, Aaron): these are the two candidate
+            users found in the target object set by executing the correlation query. These values 
+            are queried in the workflow and the possible values of that field are determined
+            at runtime. Here we can choose the user we need.
+            After choosing one of the users the workflow will link user.3 of managed user to the selected user 
+            of the target object set.
+
+    6. Click on the 'Details' button of the 'Orphan Account' task.
+        'Link to' and 'Decision' fields are modifiable by systemadmin.
+        Complete the task by clicking on 'Complete' button after selecting the Decision.
+        The decision can be
+        - Delete: the user will be deleted from the target object set and the workflow terminates.
+        - Link: when choosing this option valid managed user id needs to be entered to link the orphan account to.
+            Pick any user id from managed users where the managed user is not linked to any users in the csv file yet:
+            if this use case is started after the initial reconciliation then pick e.g. user.5.
+            If users are created e.g. by using sample2 that user can be used here as well.
+
+Usecase5 - Certification workflows
+    In this use case we have two scheduled tasks starting certification workflows.
+    
+    One of them fetches all the managed users and starts a certification workflow
+    for every user. This workflow shows the roles assigned to the managed users.
+    The other scheduled task fetches all the managed roles and starts a certification
+    workflow for every role. This workflow shows the assignments of the managed
+    roles.
+
+    There are four roles defined for this sample based on the departments.
+    Each user has a dynamic role by default: the role corresponding to the
+    department to which the user belongs.
+
+    1. Start OpenIDM with the configuration for usecase5.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/usecase/usecase5
+
+    2. Add the following four roles to OpenIDM by running these curl commands:
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Human Resources department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=cisco_vpn,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Human Resources"}' \
+        "http://localhost:8080/openidm/managed/role/human-resources"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Production Planning department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com","CN=radius_dialin,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Production Planning"}' \
+        "http://localhost:8080/openidm/managed/role/production-planning"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Sales and Distribution department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Sales and Distribution"}' \
+        "http://localhost:8080/openidm/managed/role/sales-distribution"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Treasury and Payments department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=intranet,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Treasury and Payments"}' \
+        "http://localhost:8080/openidm/managed/role/treasury-payments"
+
+    3. The scheduled user certification can be triggered by enabling the scheduled task in the 
+        samples/usecase/usecase5/conf/schedule-certification.json file.
+
+    4. Log in to the UI as user.0 (default password is 'Passw0rd').
+
+    5. Click on the Role Status Check process task under 'Tasks that are in my
+       group's queue'. A scheduled task has been started for each managed user.
+       With the default schedule, a new task will be started for each managed
+       user every minute. Choose one of the users, for example, user.1, and
+       select 'Assign to me' under the Actions column. The task now appears
+       under 'My tasks'.
+
+    6. Click on the 'Details' button of the 'Role Status Check' task.
+        On the UI a list of available roles defined in OpenIDM is visible:
+        - The values of the first column show if the role is currently assigned to the managed user.
+        - The values of the second column show if the role will be assigned to the managed user once the certification process is completed.
+            If the role is dynamic  (assigned to the user based on the department the user belongs to)
+            then the value is readonly.
+
+    7. Complete the task by clicking on 'Complete' button after selecting the appropriate roles
+        by choosing one of the following options:
+        - Change: the user will be updated based on the values of the second column.
+        - Certify: the user will not be updated.
+        - Escalate: the manager can't decide so the certification task will be assigned to superadmin.
+            In this case log out and log in as superadmin. The user task assigned to superadmin has the same
+            elements as the one described here (apart of the 'Escalate' option).
+
+    8. The scheduled role certification can be triggered by enabling the scheduled
+       task in the samples/usecase/usecase5/conf/schedule-certificationEntitlements.json
+       file.
+
+    9. Log in to the UI as systemadmin (default password is 'Passw0rd').
+
+    10. Click on the 'Details' button of one of the Entitlements Status Check tasks.
+        The name, id and description of the role is shown on the UI.
+        Below that the assignment and the attribute belonging to the role are shown as a table.
+        Here the 'Value' field is editable: after clicking on the text new lines can be added and deleted
+        by pushing 'Enter' while typing. Note that this attribute in OpenIDM is multivalued, so
+        the separation of the values in this list is done based on the new lines of this UI field.
+
+    11. Once the 'Value' field contains the required values click on 'Complete' 
+        after choosing one of the following options:
+        - Certify: the role will not be updated
+        - Update: the role will be updated by using the new 'Value'
+
+Usecase6 - Password change reminder
+    In this use case we use TaskScanner to trigger a password change reminder workflow.
+    Every managed user created in OpenIDM has a dedicated attribute to store the date of the last password change event (lastPasswordSet).
+    This value is updated by an onStore script defined in managed.json which
+    sets the date of this attribute if a new password is stored for the user. The TaskScanner
+    scans that attribute and starts a workflow if the password was changed more than an hour ago.
+
+    The workflow is started by passwordchange.js javascript. There are two options to run this workflow:
+    - By default it sends the default OpenIDM notifications to the user (visible on the UI).
+
+    - It can send email notification to the user if configured. 
+        - External email service of OpenIDM has to be configured using the following file:
+            samples/usecase/usecase6/conf/external.email.json
+            Update the smtp settings in this file before starting the workflow.
+            Note that if you want to use this option you have to make sure that the 'mail' attribute of the
+            managed user(s) used for this test case are valid email addresses.
+
+        To enable email notifications change the following parameter of passwordchange.js:
+        change "emailEnabled" : "false", 
+        to "emailEnabled" : "true",
+
+    The workflow does the following:
+    - sends a notification to the user 
+    - five minutes later sends an other notification to the user (if password was not changed yet)
+    - two minutes later changes the user's 'accountStatus' to 'inactive' and sends notification to the user (if password was not changed yet)
+
+    1. Start OpenIDM with the configuration for usecase6.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/usecase/usecase6
+
+    2. Activate the password change task scanner (it's inactive by default):
+            samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json
+            Change: "enabled" : false
+            to "enabled" : true
+
+    3. Log in to the UI as one of the sample users, e.g. user.0 (default password is 'Passw0rd').
+        Once the task scanner was triggered a notification is visible for the user on the OpenIDM UI.
+
+    4. To test the workflow the user can change the password either on the UI or using the following REST call:
+        curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/managed/user/user.0?_action=patch" -H "Content-Type: application/json"  --data '[{"operation":"replace", "field":"/password", "value":"newPassw0rd"}]'

@@ -1,0 +1,34 @@
+<div class="schedule-input-body">
+    <div id="syncWidget">
+        <div class="group-body">
+            <div id="schedules"></div>
+            <div id="addNew">
+                <h3>
+                    <span>{{t "templates.schedule.addReconciliationSchedule"}}</span>
+                </h3>
+            </div>
+
+            <div class="liveSyncContainer">
+                <span class="managedLiveSyncEnabled systemObjectMessage fieldHidden"><i class="fa fa-check-circle-o "></i> {{t "templates.schedule.liveSyncEnabled"}}</span>
+                <span class="managedLiveSyncDisabled noLiveSyncMessage fieldHidden"><i class="fa fa-times-circle-o "></i> {{t "templates.schedule.liveSyncDisabled"}}</span>
+
+                <div class="group-field-block-inline no-validation-block fieldHidden">
+                    <label class="light">
+                        <input type="checkbox" value="false" class="liveSyncEnabled"/>
+                        {{t "templates.schedule.enableLiveSync"}}
+                    </label>
+                </div>
+
+                <div class="group-field-block">
+                    <p class="managedSourceMessage fieldHidden">{{t "templates.schedule.managedObjects"}}</p>
+                    <p class="systemObjectMessage fieldHidden">
+                        {{t "templates.schedule.systemObjects1"}} <span class="liveSyncSeconds">0</span> {{t "templates.schedule.systemObjects2"}}
+                    </p>
+                    <p class="noLiveSyncMessage fieldHidden">{{t "templates.schedule.noLiveSync"}}</p>
+                </div>
+
+                <input type="button" class="float-right button saveLiveSync" value="{{t 'common.form.save'}}" />
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+<div id="mappingConfigHolder">
+    <div class="back-header">
+        <a href="#mapping/"><span class="header-link-text"><i class="fa fa-lg fa-angle-double-left"></i> Back to Mappings</span></a>
+    </div>
+    <div class="mapping-config-body">
+        <div class="mapping-config-header">
+            {{mapping.name}}
+        </div>
+        <div class="mapping-body">
+            <a href="{{mapping.sourceConnector.url}}"><img class="mapping-icon left-icon" src="{{mapping.sourceIcon}}" alt="{{mapping.sourceConnector.displayName}}" /></a>
+            <div class="mapping-source">
+                <p class="mapping-header">{{t "templates.mapping.source"}}</p>
+                <p class="mapping-title">{{mapping.source}}</p>
+                <p>{{sourceType}}</p>
+            </div>
+            <div class="mapping-arrow">
+                <div class="arrow-box">
+                    <i class="fa fa-arrow-right"></i>
+                </div>
+            </div>
+            <a href="{{mapping.targetConnector.url}}"><img class="mapping-icon left-icon" src="{{mapping.targetIcon}}" alt="{{mapping.targetConnector.displayName}}" /></a>
+            <div class="mapping-target">
+                <p class="mapping-header">{{t "templates.mapping.target"}}</p>
+                <p class="mapping-title">{{mapping.target}}</p>
+                <p>{{targetType}}</p>
+            </div>
+        </div>
+        <div>
+            <div id="stoppingSync">
+                <h3>{{t "templates.mapping.stoppingSync"}} {{t "templates.mapping.pleaseStandBy"}}...</h3>
+            </div>
+        </div>
+        <div class="mapping-bottom-bar">
+            <div id="syncStatus" class="sync-status">
+                <i class="fa fa-caret-right"></i>
+                <span id="syncLabel">{{syncLabel}}</span>
+                <span id="syncMessage">{{syncStatus}}</span>
+            </div>
+            <div class="float-right">
+                <button id="syncNowButton" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
+                <span class="fa fa-clock-o"></span>
+                {{t "templates.mapping.syncNow"}}
+                </button>
+                <button id="stopSyncButton" type="button" title="{{t "templates.mapping.stopSync"}}" class="button" style="display:none;">
+                <span class="fa fa-clock-o"></span>
+                Cancel
+                </button>
+                <a class="mapping-help" href="{{docHelpUrl}}integrators-guide/index.html#sync-types" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+            </div>
+        </div>
+        <div id="syncStatusDetails" style="display:none;"></div>
+    </div>
+</div>
+
+<div id="mappingContent"></div>

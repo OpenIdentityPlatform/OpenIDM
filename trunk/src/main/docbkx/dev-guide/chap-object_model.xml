@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-object_model'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+    <title>Object model</title>
+    <para>Artifacts handled by OpenIDM are Java object representations of the JavaScript object model as defined by JSON. This supports interoperability and potential integration with a vast number of applications, services and programming languages. As OpenIDM is a Java-based product, these representations are instances of classes: Map, List, String, Number, Boolean and null (known in this documentation by the initialism: MLSNBN). OpenIDM can serialize/deserialize these structures to/from JSON as required.</para>
+    <para/>
+    <para>OpenIDM exposes a set of triggers and functions that system administrators can define in JavaScript (with the ability to expand into other scripting and programming languages in the future), which can natively read and modify these JSON-based object model structures.</para>
+    <para/>
+</chapter>
+

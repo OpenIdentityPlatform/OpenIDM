@@ -1,0 +1,31 @@
+<h1>{{t "common.user.siteImage"}}</h1>
+<p>{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
+
+<form id="siteImageChange" action="" class="form" method="post" onsubmit="return false">
+
+    <fieldset>
+   
+        <input type="hidden" name="oldSiteImage" /> 
+               
+        <div class="ContentFlow" id="siteImageFlow">
+            <div class="loadIndicator"><div class="indicator"></div></div>
+            <div class="flow">{{siteImages siteImages}}</div>
+            <div class="scrollbar"><div class="slider"></div></div>
+        </div>   
+
+        <input type="hidden" name="siteImage" data-validator="siteImage" data-validation-status="disabled" /> 
+
+        <input type="hidden" name="oldPassPhrase" />
+        <div class="group-field-block center"  id="securityPassword">
+            <label for="passPhrase" class="light align-right">{{t "common.user.sitePhrase"}}</label>
+            <div class="float-left separate-message">
+                <div class="group-input-span">
+                    <input type="text" id="passPhrase" name="passPhrase"  required autofocus >
+                    <span class="error">x</span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        
+    </fieldset>
+</form>

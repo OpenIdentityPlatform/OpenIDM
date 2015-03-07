@@ -1,0 +1,159 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemAdAccounts_managedUser",
+            "source" : "system/ad/account",
+            "target" : "managed/user",
+            "properties" : [
+                {
+                    "source" : "cn",
+                    "target" : "cn"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "sAMAccountName",
+                    "target" : "userName"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var map = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; map;"
+            },
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.cn || (source.givenName + ' ' + source.sn)"
+                    },
+                    "target" : "cn"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "default": "Created in OpenIDM",
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber",
+                    "condition": {
+                        "type": "text/javascript",
+                        "source": "object.telephoneNumber !== undefined && object.telephoneNumber !== null && object.telephoneNumber !== ''"
+                    }
+                }
+            ],
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target.dn = 'uid=' + source.userName + ',ou=People,dc=example,dc=com';"
+            },
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

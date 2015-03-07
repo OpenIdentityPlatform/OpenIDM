@@ -1,0 +1,215 @@
+{
+    "name": "scriptedrest",
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector",
+        "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+        "bundleVersion": "[1.4.0.0,2.0.0.0)"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "configurationProperties": {
+        "serviceAddress": "http://localhost:8090",
+        "proxyAddress": null,
+        "username": "idm",
+        "password": "password",
+        "defaultAuthMethod": "BASIC_PREEMPTIVE",
+        "defaultRequestHeaders": [null],
+        "defaultContentType": "application/json",
+        "scriptExtensions": ["groovy"],
+        "sourceEncoding": "UTF-8",
+        "authenticateScriptFileName": "AuthenticateScript.groovy",
+        "customizerScriptFileName": "CustomizerScript.groovy",
+        "createScriptFileName": "CreateScript.groovy",
+        "deleteScriptFileName": "DeleteScript.groovy",
+        "resolveUsernameScriptFileName": "ResolveUsernameScript.groovy",
+        "schemaScriptFileName": "SchemaScript.groovy",
+        "scriptOnResourceScriptFileName": "ScriptOnResourceScript.groovy",
+        "searchScriptFileName": "SearchScript.groovy",
+        "syncScriptFileName": "SyncScript.groovy",
+        "testScriptFileName": "TestScript.groovy",
+        "updateScriptFileName": "UpdateScript.groovy",
+        "scriptBaseClass": null,
+        "recompileGroovySource": false,
+        "minimumRecompilationInterval": 100,
+        "debug": false,
+        "verbose": false,
+        "warningLevel": 1,
+        "tolerance": 10,
+        "disabledGlobalASTTransformations": null,
+        "targetDirectory": null,
+        "classpath": ["&{launcher.project.location}/tools"]
+    },
+    "objectTypes": {
+        "group": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__GROUP__",
+            "type": "object",
+            "nativeType": "__GROUP__",
+            "properties": {
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "members",
+                    "nativeType": "object"
+                },
+                "lastModified": {
+                    "type": "string",
+                    "nativeName": "lastModified",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "displayName": {
+                    "type": "string",
+                    "nativeName": "displayName",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "cn": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string",
+                    "flags": ["NOT_UPDATEABLE"]
+                },
+                "created": {
+                    "type": "string",
+                    "nativeName": "created",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                }
+            }
+        },
+        "account": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__ACCOUNT__",
+            "type": "object",
+            "nativeType": "__ACCOUNT__",
+            "properties": {
+                "created": {
+                    "type": "string",
+                    "nativeName": "created",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "managerId": {
+                    "type": "string",
+                    "nativeName": "managerId",
+                    "nativeType": "string"
+                },
+                "displayName": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "displayName",
+                    "nativeType": "string"
+                },
+                "managerDisplayName": {
+                    "type": "string",
+                    "nativeName": "managerDisplayName",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "givenName": {
+                    "type": "string",
+                    "nativeName": "givenName",
+                    "nativeType": "string"
+                },
+                "familyName": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "familyName",
+                    "nativeType": "string"
+                },
+                "uid": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string",
+                    "flags": ["NOT_UPDATEABLE"]
+                },
+                "userName": {
+                    "type": "string",
+                    "nativeName": "userName",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "groups",
+                    "nativeType": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "nativeName": "password",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_UPDATEABLE",
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "emailAddress": {
+                    "type": "string",
+                    "nativeName": "emailAddress",
+                    "nativeType": "string"
+                },
+                "telephoneNumber": {
+                    "type": "string",
+                    "nativeName": "telephoneNumber",
+                    "nativeType": "string"
+                }
+            }
+        }
+    }
+}

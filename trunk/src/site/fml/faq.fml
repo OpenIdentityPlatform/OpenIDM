@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<faqs
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://maven.apache.org/FML/1.0"
+ xsi:schemaLocation="http://maven.apache.org/FML/1.0 http://maven.apache.org/xsd/fml-1.0.xsd"
+ id="OpenIDM FAQ">
+ <part id="General">
+  <faq id="what">
+   <question>What is OpenIDM?</question>
+   <answer>
+    <p>OpenIDM is an open standards based identity management solution.
+    In addition to being open source, OpenIDM offers high flexibility in
+    business process handling and compliance. A flexible user interface
+    combined with a robust workflow engine make OpenIDM ready for any
+    identity management project.</p>
+   </answer>
+  </faq>
+  <faq id="roadmap">
+   <question>What's the OpenIDM roadmap? Is OpenIDM actively developed?</question>
+   <answer>
+    <p>Find the <a
+    href="https://wikis.forgerock.org/confluence/display/openidm/OpenIDM+Roadmap"
+    >OpenIDM roadmap</a> on the Wiki. Development continues, with releases
+    planned quarterly.</p>
+   </answer>
+  </faq>
+  <faq id="develop">
+   <question>I want to contribute a patch (a feature, a test, a plug-in)
+   to OpenIDM. How do I get involved?</question>
+   <answer>
+    <p>Come discuss your work on the <a
+    href="https://lists.forgerock.org/mailman/listinfo/openidm-dev">dev mailing
+    list</a>. <a
+    href="https://idp.forgerock.org/openam/UI/Login?service=register">Join
+    the community</a>, too.</p>
+   </answer>
+  </faq>
+  <faq id="test">
+   <question>I want to help test OpenIDM. How do I get started?</question>
+   <answer>
+    <p>As for development, come to discuss the testing you plan to do on the <a
+    href="https://lists.forgerock.org/mailman/listinfo/openidm-dev">dev mailing
+    list</a>. <a
+    href="https://idp.forgerock.org/openam/UI/Login?service=register">Joining
+    the community</a> gives you access to log issues in the <a
+    href="https://bugster.forgerock.org/jira/browse/OPENIDM">bug database</a>,
+    contribute to the <a
+    href="https://wikis.forgerock.org/confluence/display/openidm">Wiki
+    documentation</a>, and get more involved in the project.</p>
+   </answer>
+  </faq>
+ </part>
+</faqs>

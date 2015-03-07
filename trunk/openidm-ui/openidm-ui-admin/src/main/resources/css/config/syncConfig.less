@@ -1,0 +1,317 @@
+.sync-input-body {
+  fieldset {
+    border: 1px #ddd solid;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 5px;
+    background-color: white;
+
+    &:not(:first-child) {
+      margin-top: 15px;
+    }
+  }
+
+  legend {
+    height: 25px;
+    padding: 5px 5px 0px 5px;
+    background-color: #80b7ab;
+    border: 2px solid #5fa595;
+    cursor: pointer;
+    margin-left: 10px;
+    color: white;
+
+    &:hover {
+      background-color: lighten(#80b7ab, @button-hover-lightness);
+    }
+
+    span {
+      margin-right: 10px;
+      width: 190px;
+      display: inline-block;
+      text-overflow: ellipsis;
+    }
+  }
+
+  form {
+    &.form {
+      fieldset {
+        .group-lead {
+          padding-top: 0px;
+          margin-top: 15px;
+        }
+        .group-note-lead {
+          padding-top: 0px;
+          margin-top: 10px;
+        }
+      }
+      .group-field-block {
+        margin-top: 0px;
+
+        label {
+          display: block;
+          width: 200px;
+          text-align: left;
+          padding-bottom: 0px;
+          font-size: 13px;
+        }
+
+        select, input {
+          padding: 0 5px;
+          height: 24px;
+          font-size: 13px;
+        }
+
+        select {
+          width: 262px;
+        }
+
+        .note {
+          font-size: 14px;
+          font-weight: bold;
+        }
+      }
+
+      .no-validation-block {
+        margin-bottom: 10px;
+      }
+
+      .field {
+        margin-bottom: 0px;
+      }
+
+      .group-field-buttons button {
+        margin-bottom: 5px;
+      }
+
+      .group-actions-block {
+        margin-top: 15px;
+      }
+    }
+  }
+  input[type="text"]:disabled,
+  select:disabled {
+    color: #bbb;
+    opacity: .8;
+  }
+
+  .group-field-block {
+    .add-btn {
+      margin-left: 0px;
+
+      span {
+        display: inline-block;
+        width: 140px;
+      }
+    }
+  }
+
+  .filter {
+    font-style: italic;
+    color: #888;
+  }
+
+  .form-size-s {
+    width: 250px;
+  }
+
+  .outside-element .form-size-m {
+    width: 620px;
+  }
+
+  .inline .inline-right {
+    margin-right: 10px;
+  }
+
+  .group-body {
+    color: #5a646d;
+    margin: 10px;
+    background-color: #fff;
+
+    .group > h3 {
+      i {
+        &:hover {
+        }
+      }
+    }
+
+    .group {
+      & > h3 {
+        height: 28px;
+        margin: -1px 0 0;
+        padding: 0;
+        border-radius: 0;
+        border: none;
+        border-top: 1px solid #5a646d;
+        border-bottom: 1px solid #5a646d;
+        background: none;
+        background-color: #fff;
+        color: #5a646d;
+      }
+    }
+  }
+}
+
+#policyPattern {
+  padding: 10px;
+
+  .color {
+    float: left;
+    margin: 4px 10px 0 0;
+  }
+
+  .info {
+    color: #a3a3a3;
+    cursor: pointer;
+    margin: 0 0 0 5px;
+  }
+
+  .info:hover {
+    color: #5a646d;
+  }
+
+  .success-display {
+    color: #70a796;
+  }
+  .failure-display {
+    color: #ca3127;
+  }
+  .warning-display {
+    color:#e6bf24;
+  }
+
+  .policyInformation {
+    display: inline-block;
+    margin: 0 0 10px;
+    width: 100%;
+
+    #patternDescription {
+      margin: 0 0 10px 10px;
+      display: inline-block;
+      font-style: italic;
+    }
+    a {
+      float: right;
+      text-decoration: none;
+    }
+  }
+  &>p {
+    margin: 5px 0 0;
+    font-size: 13px;
+    padding: 0;
+  }
+
+  label {
+    width: initial;
+    font-size: 13px;
+  }
+
+  #sessionModuleForm {
+    border: 1px #ddd solid;
+    background-color: white;
+    padding: 5px;
+    margin: 0 0 10px;
+
+    label {
+      display: block;
+      padding: 3px 0 7px 0;
+      width: 140px;
+    }
+
+    select {
+      padding: 0 5px;
+      height:24px;
+      font-size: 13px;
+      width:180px;
+    }
+
+    .situationRow {
+      display: inline-block;
+      width: 50%;
+      position: relative;
+    }
+  }
+
+  .group-body {
+    color: #5a646d;
+    margin: 10px;
+    background-color: #fff;
+  }
+
+  #situationCopy {
+    display: none !important;
+  }
+  .situationRow {
+    .situation{}
+    .action{
+      select {
+        font-family: "FontAwesome";
+      }
+    }
+  }
+
+}
+
+#transformationScriptHolder,
+#conditionScriptHolder {
+  height: 300px;
+  width: 650px;
+  overflow-y: scroll;
+}
+
+#Condition_Script {
+  &>input[type="submit"] {
+    margin: -24px -15px;
+  }
+
+  .script_output {
+    width: initial;
+    float: initial;
+  }
+
+  .conditionalUpdateType {
+    cursor: pointer;
+  }
+
+  .conditionalUpdateLabel {
+    font-weight: bold;
+    margin: 0 0 0 4px;
+    display: inline;
+    float: none;
+    font-size: inherit;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  .conditionalLinkQualifiers {
+    margin: 0 0 0 20px;
+    display: none;
+  }
+
+  .conditionalScript {
+    margin: 0 0 0 15px;
+    display: none;
+  }
+
+  .radioContainer {
+    margin-top: 10px;
+  }
+
+  #condition_script_output label {
+    padding: 0;
+  }
+
+  .notAvailable {
+    display: none;
+    color: #d97986;
+    span {
+      font-style: italic;
+    }
+  }
+}
+
+/*
+  The only way to reliable limit the column width
+*/
+td[aria-describedby="analysisGrid_linkQualifier"] {
+  width:150px;
+}

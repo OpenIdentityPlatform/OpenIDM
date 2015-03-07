@@ -1,0 +1,335 @@
+<fieldset>
+    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body">
+        <div class="group-field-block group-lead">
+            <div class="separate-message">
+                <label for="serviceAddress" class="light">{{t "templates.connector.scriptedCrest.serviceAddress"}}</label>
+                <input id="serviceAddress" class="form-size-l" data-validator="required" type="text" name="configurationProperties.serviceAddress" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.serviceAddress}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="proxyAddress" class="light">{{t "templates.connector.scriptedCrest.proxyAddress"}}</label>
+                <input id="proxyAddress" class="form-size-l" type="text" name="configurationProperties.proxyAddress" value="{{connectorDefaults.configurationProperties.proxyAddress}}">
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="username" class="light">{{t "templates.connector.scriptedCrest.username"}}</label>
+                <input id="username" class="form-size-l" type="text" name="configurationProperties.username" value="{{connectorDefaults.configurationProperties.username}}">
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="password" class="light">{{t "templates.connector.scriptedCrest.password"}}</label>
+                <input id="password" class="form-size-l" type="password" name="configurationProperties.password" {{#if connectorDefaults.configurationProperties.password}} placeholder="*****" {{/if}} value="">
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="defaultAuthMethod" class="light">{{t "templates.connector.scriptedCrest.defaultAuthMethod"}}</label>
+                <input id="defaultAuthMethod" class="form-size-l" type="text" name="configurationProperties.defaultAuthMethod" value="{{connectorDefaults.configurationProperties.defaultAuthMethod}}">
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="defaultContentType" class="light">{{t "templates.connector.scriptedCrest.defaultContentType"}}</label>
+                <input id="defaultContentType" class="form-size-l" data-validator="required" type="text" name="configurationProperties.defaultContentType" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.defaultContentType}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="sourceEncoding" class="light">{{t "templates.connector.scriptedCrest.sourceEncoding"}}</label>
+                <input id="sourceEncoding" class="form-size-l" type="text" name="configurationProperties.sourceEncoding" value="{{connectorDefaults.configurationProperties.sourceEncoding}}">
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="minimumRecompilationInterval" class="light">{{t "templates.connector.scriptedCrest.minimumRecompilationInterval"}}</label>
+                <input id="minimumRecompilationInterval" class="form-size-s" data-validator="required" type="text" name="configurationProperties.minimumRecompilationInterval" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.minimumRecompilationInterval}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="warningLevel" class="light">{{t "templates.connector.scriptedCrest.warningLevel"}}</label>
+                <input id="warningLevel" class="form-size-s" type="text" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.warningLevel}}">
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="tolerance" class="light">{{t "templates.connector.scriptedCrest.tolerance"}}</label>
+                <input id="tolerance" class="form-size-s" type="text" name="configurationProperties.tolerance" value="{{connectorDefaults.configurationProperties.tolerance}}">
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="targetDirectory" class="light">{{t "templates.connector.scriptedCrest.targetDirectory"}}</label>
+                <input id="targetDirectory" class="form-size-l" type="text" name="configurationProperties.targetDirectory" value="{{connectorDefaults.configurationProperties.targetDirectory}}">
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <label for="recompileGroovySource" class="light">{{t "templates.connector.scriptedCrest.recompileGroovySource"}}</label>
+            <select id="recompileGroovySource" class="form-size-s" name="configurationProperties.recompileGroovySource" required>
+                {{#staticSelect connectorDefaults.configurationProperties.recompileGroovySource}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+                {{/staticSelect}}
+            </select>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <label for="debug" class="light">{{t "templates.connector.scriptedCrest.debug"}}</label>
+            <select id="debug" class="form-size-s" name="configurationProperties.debug" required>
+                {{#staticSelect connectorDefaults.configurationProperties.debug}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+                {{/staticSelect}}
+            </select>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <label for="verbose" class="light">{{t "templates.connector.scriptedCrest.verbose"}}</label>
+            <select id="verbose" class="form-size-s" name="configurationProperties.verbose" required>
+                {{#staticSelect connectorDefaults.configurationProperties.verbose}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+                {{/staticSelect}}
+            </select>
+        </div>
+    </div>
+</fieldset>
+<fieldset>
+    <legend><span>{{t "templates.connector.scriptedCrest.defaultHeadersTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div id="groupDefaultRequestHeadersWrapper" class="connector-array-component">
+        <div class="group-field-block group-lead">
+            <button type="button" field_type="groupDefaultRequestHeaders" class="button add-btn"><span>{{t "templates.connector.scriptedCrest.addDefaultRequestHeaders"}}</span><i class="fa fa-lg fa-plus"></i></button>
+        </div>
+        {{#if connectorDefaults.configurationProperties.defaultRequestHeaders.length}}
+        {{#each_with_index connectorDefaults.configurationProperties.defaultRequestHeaders}}
+        <div class="group-field-block no-validation-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.defaultRequestHeaders"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupDefaultRequestHeaders" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" autocomplete="off" type="text" name="configurationProperties.defaultRequestHeaders[]" placeholder="group" value="{{value}}"/>
+                </div>
+            </div>
+        </div>
+        {{/each_with_index}}
+        {{else}}
+        <div class="group-field-block no-validation-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.defaultRequestHeaders"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupDefaultRequestHeaders" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" autocomplete="off" type="text" name="configurationProperties.defaultRequestHeaders[]" value=""/>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</fieldset>
+<fieldset>
+    <legend><span>{{t "templates.connector.scriptedCrest.scriptExtensionsTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div id="groupScriptExtensionsWrapper" class="connector-array-component">
+        <div class="group-field-block group-lead">
+            <button type="button" field_type="groupScriptExtensions" class="button add-btn"><span>{{t "templates.connector.scriptedCrest.addScriptExtensions"}}</span><i class="fa fa-lg fa-plus"></i></button>
+        </div>
+        {{#if connectorDefaults.configurationProperties.defaultRequestHeaders.length}}
+        {{#each_with_index connectorDefaults.configurationProperties.defaultRequestHeaders}}
+        <div class="group-field-block no-validation-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.scriptExtensions"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupScriptExtensions" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" placeholder="group" value="{{value}}"/>
+                </div>
+            </div>
+        </div>
+        {{/each_with_index}}
+        {{else}}
+        <div class="group-field-block no-validation-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.scriptExtensions"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupScriptExtensions" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input class="form-size-m" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" value=""/>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</fieldset>
+<fieldset>
+    <legend><span class="large-legend">{{t "templates.connector.scriptedCrest.disabledGlobalASTTransformationsTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div id="groupDisabledGlobalASTTransformationsWrapper" class="connector-array-component">
+        <div class="group-field-block group-lead">
+            <button type="button" field_type="groupDisabledGlobalASTTransformations" class="button add-btn"><span>{{t "templates.connector.scriptedCrest.addDisabledGlobalASTTransformations"}}</span><i class="fa fa-lg fa-plus"></i></button>
+        </div>
+        {{#if connectorDefaults.configurationProperties.disabledGlobalASTTransformations.length}}
+        {{#each_with_index connectorDefaults.configurationProperties.disabledGlobalASTTransformations}}
+        <div class="group-field-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.disabledGlobalASTTransformations"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupDisabledGlobalASTTransformations" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="configurationProperties.disabledGlobalASTTransformations[]" placeholder="group" value="{{value}}"/>
+                    <span></span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        {{/each_with_index}}
+        {{else}}
+        <div class="group-field-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.disabledGlobalASTTransformations"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupDisabledGlobalASTTransformations" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="configurationProperties.disabledGlobalASTTransformations[]" value=""/>
+                    <span></span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</fieldset>
+<fieldset>
+    <legend><span>{{t "templates.connector.scriptedCrest.classpathTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div id="groupClasspathWrapper" class="connector-array-component">
+        <div class="group-field-block group-lead">
+            <button type="button" field_type="groupClasspath" class="button add-btn"><span>{{t "templates.connector.scriptedCrest.addClasspath"}}</span><i class="fa fa-lg fa-plus"></i></button>
+        </div>
+        {{#if connectorDefaults.configurationProperties.classpath.length}}
+        {{#each_with_index connectorDefaults.configurationProperties.classpath}}
+        <div class="group-field-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.classpath"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupClasspath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="group" value="{{value}}"/>
+                    <span></span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        {{/each_with_index}}
+        {{else}}
+        <div class="group-field-block field">
+            <div class="separate-message outside-element">
+                <label class="light">{{t "templates.connector.scriptedCrest.classpath"}}</label>
+                <div class="inline">
+                    <button type="button" field_type="groupClasspath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="configurationProperties.classpath[]" value=""/>
+                    <span></span>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</fieldset>
+<fieldset>
+    <legend><span>{{t "templates.connector.groovyPoolableConnector.scriptTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body">
+        <div class="group-field-block no-validation-block group-lead">
+            <div class="separate-message">
+                <label for="scriptBaseClass" class="light">{{t "templates.connector.groovyPoolableConnector.scriptBaseClass"}}</label>
+                <input id="scriptBaseClass" class="form-size-l" type="text" name="configurationProperties.scriptBaseClass" value="{{connectorDefaults.configurationProperties.scriptBaseClass}}" required>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="authenticateScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.authenticateScriptFileName"}}</label>
+                <input id="authenticateScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.authenticateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="deleteScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.deleteScriptFileName"}}</label>
+                <input id="deleteScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.deleteScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="schemaScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.schemaScriptFileName"}}</label>
+                <input id="schemaScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.schemaScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block no-validation-block">
+            <div class="separate-message">
+                <label for="customizerScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.customizerScriptFileName"}}</label>
+                <input id="customizerScriptFileName" class="form-size-l" type="text" name="configurationProperties.customizerScriptFileName" value="{{connectorDefaults.configurationProperties.customizerScriptFileName}}">
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="resolveUsernameScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.resolveUsernameScriptFileName"}}</label>
+                <input id="resolveUsernameScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.resolveUsernameScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.resolveUsernameScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="testScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.testScriptFileName"}}</label>
+                <input id="testScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="updateScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.updateScriptFileName"}}</label>
+                <input id="updateScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.updateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="searchScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.searchScriptFileName"}}</label>
+                <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.searchScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="scriptOnResourceFileName" class="light">{{t "templates.connector.groovyPoolableConnector.scriptOnResourceFileName"}}</label>
+                <input id="scriptOnResourceFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.scriptOnResourceScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.scriptOnResourceScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="createScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.createScriptFileName"}}</label>
+                <input id="createScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.createScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="syncScriptFileName" class="light">{{t "templates.connector.groovyPoolableConnector.syncScriptFileName"}}</label>
+                <input id="syncScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.syncScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+
