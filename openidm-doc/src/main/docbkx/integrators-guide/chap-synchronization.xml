@@ -676,6 +676,7 @@
        value of the target <literal>dn</literal> is set to
        <literal>"uid=userName-test,ou=People,dc=example,dc=com"</literal>.
       </para>
+      <informalexample><?dbfo pgwide="1"?>
       <programlisting language="javascript">{
     "source": "",
     "target": "dn",
@@ -683,7 +684,7 @@
         "type": "text/javascript",
         "source": "if (linkQualifier === 'user') { 'uid=' + source.userName + ',ou=People,dc=example,dc=com'; } else { 'uid=' + source.userName + '-test,ou=People,dc=example,dc=com'; }"
     }
-      </programlisting>
+      </programlisting></informalexample>
       <para>
        A link qualifier can also be used in a correlation query, to determine
        the correct link type for existing target objects. For more information
@@ -1774,6 +1775,53 @@ $ <userinput>curl \
             "_queryFilter" : "uid sw \"\""
         },
     ...</programlisting>
+  </section>
+
+  <section xml:id="recon-paging">
+   <title>Configuring Reconciliation Paging</title>
+   <indexterm>
+    <primary>Reconciliation</primary>
+    <secondary>Paging</secondary>
+   </indexterm>
+   <para>
+    <xref linkend="recon-query-optimization" /> describes how to improve
+    reconciliation performance by loading all entries into memory to avoid
+    making individual requests to the external system for every ID. However,
+    this optimization depends on the entire result set fitting into the
+    available memory on the system for which it is enabled. For particularly
+    large data sets (for example, data sets of hundreds of millions of users),
+    having the entire data set in memory might not be feasible.
+   </para>
+   <para>
+    To alleviate this constraint, OpenIDM supports a paged reconciliation
+    mechanism that enables reconciliation of extremely large data sets to be
+    broken down into chunks. Reconciliation paging enables you to specify the
+    number of entries that should be reconciled in each chunk or page.
+   </para>
+   <para>
+    Reconciliation paging is disabled by default, and can be enabled per mapping
+    (in the <filename>sync.json</filename> file). To configure reconciliation
+    paging, set the <literal>"reconSourceQueryPaging"</literal> property to
+    <literal>true</literal> and set the
+    <literal>"reconSourceQueryPageSize"</literal> in the synchronization
+    mapping, for example:
+   </para>
+   <programlisting language="javascript">{
+    "mappings" : [
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+			"reconSourceQueryPaging" : true,
+			"reconSourceQueryPageSize" : 100,
+...
+   </programlisting>
+   <para>
+    The value of <literal>"reconSourceQueryPageSize"</literal> must be a
+    positive integer, and specifies the number of entries that will be processed
+    in each page. If reconciliation paging is enabled, but no page size is set,
+    a default page size of <literal>1000</literal> is used.
+   </para>
   </section>
 
  </section>
@@ -3497,17 +3545,17 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     results of the correlation query.
    </para>
 
-   <table pgwide="1" rules="none">
+   <table pgwide="1" rules="none"><?dbfo font-size="6pt" ?>
     <title>Resolving Source Reconciliation Situations</title>
     <tgroup cols="8">
-     <colspec colnum="1" colname="c1" colwidth="1*" />
-     <colspec colnum="2" colname="c2" colwidth="1*" />
-     <colspec colnum="3" colname="c3" colwidth="1*" />
-     <colspec colnum="4" colname="c4" colwidth="1*" />
-     <colspec colnum="5" colname="c5" colwidth="1*" />
-     <colspec colnum="6" colname="c6" colwidth="1*" />
-     <colspec colnum="7" colname="c7" colwidth="1*" />
-     <colspec colnum="8" colname="c8" colwidth="2*" />
+     <colspec colnum="1" colname="c1" />
+     <colspec colnum="2" colname="c2" />
+     <colspec colnum="3" colname="c3" />
+     <colspec colnum="4" colname="c4" />
+     <colspec colnum="5" colname="c5" />
+     <colspec colnum="6" colname="c6" />
+     <colspec colnum="7" colname="c7" />
+     <colspec colnum="8" colname="c8" colwidth="4*" />
      <thead>
       <row>
        <entry namest="c1" nameend="c2" align="left">Source Qualifies?</entry>
@@ -3603,7 +3651,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        <entry>X</entry>
        <entry>&#160;</entry>
        <entry>&#160;</entry>
-       <entry>X<footnote><para>A link does exist from the target object but it
+       <entry>X<footnote><para>A link exists from the target object but it is
         not for this specific source object.</para></footnote></entry>
        <entry>&#160;</entry>
        <entry>X</entry>
@@ -3672,15 +3720,15 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <table pgwide="1" rules="none">
     <title>Resolving Target Reconciliation Situations</title>
     <tgroup cols="9">
-     <colspec colnum="1" colname="c1" colwidth="1*" />
-     <colspec colnum="2" colname="c2" colwidth="1*" />
-     <colspec colnum="3" colname="c3" colwidth="1*" />
-     <colspec colnum="4" colname="c4" colwidth="1*" />
-     <colspec colnum="5" colname="c5" colwidth="1*" />
-     <colspec colnum="6" colname="c6" colwidth="1*" />
-     <colspec colnum="7" colname="c7" colwidth="1*" />
-     <colspec colnum="8" colname="c8" colwidth="1*" />
-     <colspec colnum="9" colname="c9" colwidth="2*" />
+     <colspec colnum="1" colname="c1" />
+     <colspec colnum="2" colname="c2" />
+     <colspec colnum="3" colname="c3" />
+     <colspec colnum="4" colname="c4" />
+     <colspec colnum="5" colname="c5" />
+     <colspec colnum="6" colname="c6" />
+     <colspec colnum="7" colname="c7" />
+     <colspec colnum="8" colname="c8" />
+     <colspec colnum="9" colname="c9" colwidth="4*" />
      <thead>
       <row>
        <entry namest="c1" nameend="c2" align="left">Target Qualifies?</entry>
@@ -3777,14 +3825,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <table pgwide="1" rules="none">
     <title>Resolving Implicit Sync and LiveSync Delete Situations</title>
     <tgroup cols="8">
-     <colspec colnum="1" colname="c1" colwidth="1*" />
-     <colspec colnum="2" colname="c2" colwidth="1*" />
-     <colspec colnum="3" colname="c3" colwidth="1*" />
-     <colspec colnum="4" colname="c4" colwidth="1*" />
-     <colspec colnum="5" colname="c5" colwidth="1*" />
-     <colspec colnum="6" colname="c6" colwidth="1*" />
-     <colspec colnum="7" colname="c7" colwidth="1*" />
-     <colspec colnum="8" colname="c8" colwidth="2*" />
+     <colspec colnum="1" colname="c1" />
+     <colspec colnum="2" colname="c2" />
+     <colspec colnum="3" colname="c3" />
+     <colspec colnum="4" colname="c4" />
+     <colspec colnum="5" colname="c5" />
+     <colspec colnum="6" colname="c6" />
+     <colspec colnum="7" colname="c7" />
+     <colspec colnum="8" colname="c8" colwidth="4*" />
      <thead>
       <row>
        <entry namest="c1" nameend="c2" align="left">Source Qualifies?</entry>
@@ -3792,7 +3840,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        <entry namest="c5" nameend="c7" align="left">Target Objects Found
         <footnote>
          <para>
-          If no link exists for the source object, then OpenIDM executes a
+          If no link exists for the source object, OpenIDM executes a
           correlation query. If no previous object is available, OpenIDM cannot
           correlate.
          </para>
