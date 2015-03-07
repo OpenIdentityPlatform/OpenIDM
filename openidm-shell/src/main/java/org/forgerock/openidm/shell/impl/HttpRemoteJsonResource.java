@@ -352,7 +352,7 @@ public class HttpRemoteJsonResource implements Connection {
                 response = clientResource.get();
                 break;
             case ACTION:
-                //clientResource.getRequest().setEntity(representation);
+                clientResource.setQueryValue("_action", ((ActionRequest) request).getAction());
                 response = clientResource.post(representation);
                 break;
             default:
