@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 ForgeRock AS. All rights reserved.
+ * Copyright 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -36,19 +36,25 @@ import static org.forgerock.json.resource.QueryFilter.*;
 /**
  * Tests basic QueryFilter-to-SQL-Where-Clause creation using a basic SQL syntax.
  */
-public class SQLQueryFilterVisitorTest {
+public class StringSQLQueryFilterVisitorTest {
 
     /* a visitor to generate base value assertions */
-    private SQLQueryFilterVisitor<Void> visitor = new SQLQueryFilterVisitor<Void>() {
+    private StringSQLQueryFilterVisitor<Void> visitor = new StringSQLQueryFilterVisitor<Void>() {
         @Override
-        public String visitValueAssertion(Void parameters, String operand, JsonPointer field, Object valueAssertion) {
+        public StringSQLRenderer visitValueAssertion(Void parameters, String operand, JsonPointer field, Object valueAssertion) {
             String quote = valueAssertion instanceof String ? "'" : "";
-            return field.leaf() + " " +  operand + " " + quote + String.valueOf(valueAssertion) + quote;
+            return new StringSQLRenderer(field.leaf())
+                    .append(" ")
+                    .append(operand)
+                    .append(" ")
+                    .append(quote)
+                    .append(String.valueOf(valueAssertion))
+                    .append(quote);
         }
 
         @Override
-        public String visitPresentFilter(Void parameters, JsonPointer field) {
-            return field.leaf() + " IS NOT NULL";
+        public StringSQLRenderer visitPresentFilter(Void parameters, JsonPointer field) {
+            return new StringSQLRenderer(field.leaf()).append(" IS NOT NULL");
         }
     };
 
@@ -93,7 +99,7 @@ public class SQLQueryFilterVisitorTest {
 
     @Test(dataProvider = "sqlData")
     public void testToString(QueryFilter filter, String whereClause) {
-        assertThat(filter.accept(visitor, null)).isEqualTo(whereClause);
+        assertThat(filter.accept(visitor, null).toSQL()).isEqualTo(whereClause);
     }
 
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012-2014 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -37,10 +37,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
-import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.StringSQLRenderer;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.Iterables;
 import org.forgerock.util.promise.Function;
@@ -51,64 +51,73 @@ import org.forgerock.util.promise.NeverThrowsException;
  */
 public class PostgreSQLTableHandler extends GenericTableHandler {
 
-    private static final QueryFilterVisitor<String, Map<String, Object>> JSON_EXTRACT_PATH_QUERY_FILTER_VISITOR =
-            new GenericSQLQueryFilterVisitor() {
-                // value number for each value placeholder
-                int objectNumber = 0;
+    private class JsonExtractPathQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, Object>> {
+        // value number for each value placeholder
+        int objectNumber = 0;
 
-                /**
-                 * Convenience method to generate the json_extract_path_text fragment:
-                 *
-                 * <pre><blockquote>
-                 *  json_extract_path_text(obj.fullobject, ${p1}, ${p2}, {$p3} ...)
-                 * </blockquote></pre>
-                 *
-                 * where ${pn} are placeholders for the JsonPointer path elements.
-                 */
-                private String jsonExtractPathOnField(JsonPointer field, final Map<String, Object> objects) {
-                    return "json_extract_path_text(obj.fullobject, "
-                        + StringUtils.join(
-                                Iterables.from(Arrays.asList(field.toArray()))
-                                .map(new Function<String, String, NeverThrowsException>() {
-                                    @Override
-                                    public String apply(String jsonPath) throws NeverThrowsException {
-                                        ++objectNumber;
-                                        String placeholder = "p" + objectNumber;
-                                        objects.put(placeholder, jsonPath);
-                                        return "${" + placeholder + "}";
-                                    }
-                                }), ", ")
-                        + ")";
-                }
+        /**
+         * Convenience method to generate the json_extract_path_text fragment:
+         *
+         * <pre><blockquote>
+         *  json_extract_path_text(obj.fullobject, ${p1}, ${p2}, {$p3} ...)
+         * </blockquote></pre>
+         *
+         * where ${pn} are placeholders for the JsonPointer path elements.
+         */
+        private StringSQLRenderer jsonExtractPathOnField(JsonPointer field, final Map<String, Object> objects) {
+            return new StringSQLRenderer("json_extract_path_text(obj.fullobject, ")
+                    .append(StringUtils.join(
+                            Iterables.from(Arrays.asList(field.toArray()))
+                                    .map(new Function<String, String, NeverThrowsException>() {
+                                         @Override
+                                         public String apply(String jsonPath) throws NeverThrowsException {
+                                            ++objectNumber;
+                                            String placeholder = "p" + objectNumber;
+                                            objects.put(placeholder, jsonPath);
+                                            return "${" + placeholder + "}";
+                                        }
+                                    }),
+                            ", "))
+                    .append(")");
+        }
 
-                @Override
-                public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
-                    ++objectNumber;
-                    String value = "v"+objectNumber;
-                    objects.put(value, valueAssertion);
-                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                        return "(obj.objectid " + operand + " ${" + value + "})";
-                    } else {
-                        // cast to numeric for numeric types
-                        String cast = (valueAssertion instanceof Integer || valueAssertion instanceof Long
-                                || valueAssertion instanceof Float || valueAssertion instanceof Double)
-                            ? "::numeric"
-                            : "";
+        @Override
+        public StringSQLRenderer visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
+            ++objectNumber;
+            String value = "v"+objectNumber;
+            objects.put(value, valueAssertion);
+            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                return new StringSQLRenderer("(obj.objectid " + operand + " ${" + value + "})");
+            } else {
+                // cast to numeric for numeric types
+                String cast = (valueAssertion instanceof Integer || valueAssertion instanceof Long
+                        || valueAssertion instanceof Float || valueAssertion instanceof Double)
+                    ? "::numeric"
+                    : "";
 
-                        return "(" + jsonExtractPathOnField(field, objects) + cast + " " + operand + " (${" + value + "})" + cast + ")";
-                    }
-                }
+                return new StringSQLRenderer("(")
+                        .append(jsonExtractPathOnField(field, objects).toSQL())
+                        .append(cast)
+                        .append(" ")
+                        .append(operand)
+                        .append(" (${")
+                        .append(value)
+                        .append("})")
+                        .append(cast)
+                        .append(")");
+            }
+        }
 
-                @Override
-                public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
-                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                        // NOT NULL enforced by the schema
-                        return "(obj.objectid IS NOT NULL)";
-                    } else {
-                        return "(" + jsonExtractPathOnField(field, objects) + " IS NOT NULL)";
-                    }
-                }
-            };
+        @Override
+        public StringSQLRenderer visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
+            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                // NOT NULL enforced by the schema
+                return new StringSQLRenderer("(obj.objectid IS NOT NULL)");
+            } else {
+                return new StringSQLRenderer("(" + jsonExtractPathOnField(field, objects).toSQL() + " IS NOT NULL)");
+            }
+        }
+    }
 
     /**
      * Construct a table handler for Postgres using Postgres-specific json-handling
@@ -117,7 +126,7 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
      */
     public PostgreSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, JSON_EXTRACT_PATH_QUERY_FILTER_VISITOR, sqlExceptionHandler);
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
@@ -135,13 +144,14 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
     }
     
     @Override
-    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final String offsetParam = (String) params.get(PAGED_RESULTS_OFFSET);
         final String pageSizeParam = (String) params.get(PAGE_SIZE);
         String pageClause = " LIMIT " + pageSizeParam + " OFFSET " + offsetParam;
         
+        // JsonValue-cheat to avoid an unchecked cast
+        final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
         // Check for sort keys and build up order-by syntax
-        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
         if (sortKeys != null && sortKeys.size() > 0) {
             List<String> keys = new ArrayList<String>();
             for (int i = 0; i < sortKeys.size(); i++) {
@@ -152,8 +162,12 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
             }
             pageClause = " ORDER BY " + StringUtils.join(keys, ", ") + pageClause;
         }
-        
-        return "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE "
-                + filter.accept(queryFilterVisitor, replacementTokens) + pageClause;
+
+        replacementTokens.put("otype", params.get("_resource"));
+        return "SELECT fullobject::text"
+                + " FROM ${_dbSchema}.${_mainTable} obj"
+                + " INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id AND objtype.objecttype = ${otype}"
+                + " WHERE "
+                + filter.accept(new JsonExtractPathQueryFilterVisitor(), replacementTokens).toSQL() + pageClause;
     }
 }

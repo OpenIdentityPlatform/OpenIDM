@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 ForgeRock AS. All rights reserved.
+ * Copyright 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,22 +25,15 @@ package org.forgerock.openidm.repo.util;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
-import org.forgerock.util.Iterables;
-import org.forgerock.util.promise.Function;
-import org.forgerock.util.promise.NeverThrowsException;
 
 /**
- * An abstract {@link QueryFilterVisitor} to produce SQL.  Includes patterns for the standard
+ * An abstract {@link QueryFilterVisitor} to produce SQL via an {@link SQLRenderer}.
+ * Includes implementation patterns for the standard
  *
  * <ul>
- *     <li>AND</li>
- *     <li>OR</li>
- *     <li>NOT</li>
  *     <li>&gt;=</li>
  *     <li>&gt;</li>
  *     <li>=</li>
@@ -51,18 +44,25 @@ import org.forgerock.util.promise.NeverThrowsException;
  * <ul>
  *     <li>contains : field LIKE '%value%'</li>
  *     <li>startsWith : field LIKE 'value%'</li>
- *     <li>literal true : 1 = 1</li>
- *     <li>literal false : 1 &lt;&gt; 1</li>
  * </ul>
  * <p>
  * This implementation does not support extended-match.
  * <p>
- * The implementer is responsible for implementing {@link #visitValueAssertion(Object, String, org.forgerock.json.fluent.JsonPointer, Object)}
- * which handles the value assertions - x operand y for the standard operands.  The implementer is also responsible for
- * implementing {@link #visitPresentFilter(Object, org.forgerock.json.fluent.JsonPointer)} as "field present" can vary
- * by database implementation (though typically "field IS NOT NULL" is chosen).
+ * The implementer is responsible for implementing
+ * <ul>
+ *     <li>{@link #visitValueAssertion(Object, String, org.forgerock.json.fluent.JsonPointer, Object)} which
+ *     handles the value assertions - x operand y for the standard operands</li>
+ *     <li>{@link #visitPresentFilter(Object, org.forgerock.json.fluent.JsonPointer)} as "field present" can
+ *     vary by database implementation (though typically "field IS NOT NULL" is chosen)</li>
+ *     <li>@{link #visitBooleanLiteralFilter(Object, boolean)} to express a boolean true or false in whatever
+ *     SQL dialect is being used</li>
+ *     <li>@{link #visitNotFilter(Object, QueryFilter)} to negate the QueryFilter parameter</li>
+ *     <li>@{link #visitAndFilter(Object, List&lt;QueryFilter&gt;, Object)} to dictate how the composite
+ *     function AND behaves</li>
+ *     <li>@{link #visitOrFilter(Object, List&lt;QueryFilter&gt;, Object)} to dictate how the composite
+ *     function OR behaves</li>
  */
-public abstract class SQLQueryFilterVisitor<P> implements QueryFilterVisitor<String, P> {
+public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer, P> implements QueryFilterVisitor<R, P> {
 
     /**
      * A templating method that will generate the actual value assertion.
@@ -88,83 +88,71 @@ public abstract class SQLQueryFilterVisitor<P> implements QueryFilterVisitor<Str
      * @param valueAssertion the value in the assertion
      * @return a query expression or clause
      */
-    public abstract String visitValueAssertion(P parameters, String operand, JsonPointer field, Object valueAssertion);
+    public abstract R visitValueAssertion(P parameters, String operand, JsonPointer field, Object valueAssertion);
 
-    private String visitCompositeFilter(final P parameters, List<QueryFilter> subFilters, String operand) {
-        StringBuilder sb = new StringBuilder("(");
-        sb.append(StringUtils.join(
-                Iterables.from(subFilters)
-                        .map(new Function<QueryFilter, String, NeverThrowsException>() {
-                            @Override
-                            public String apply(QueryFilter filter) {
-                                return filter.accept(SQLQueryFilterVisitor.this, parameters);
-                            }
-                        }),
-                new StringBuilder(" ").append(operand).append(" ").toString()));
-        sb.append(")");
-        return sb.toString();
-    }
+    /*
+     * {@inheritDoc}
+     */
+    public abstract R visitPresentFilter(P parameters, JsonPointer field);
+
+    /*
+     * {@inheritDoc}
+     */
+    public abstract R visitBooleanLiteralFilter(P parameters, boolean value);
+
+    /*
+     * {@inheritDoc}
+     */
+    public abstract R visitNotFilter(P parameters, QueryFilter subFilter);
+
+    /*
+     * {@inheritDoc}
+     */
+    public abstract R visitAndFilter(final P parameters, List<QueryFilter> subFilters);
+
+    /*
+     * {@inheritDoc}
+     */
+    public abstract R visitOrFilter(final P parameters, List<QueryFilter> subFilters);
 
     @Override
-    public String visitAndFilter(final P parameters, List<QueryFilter> subFilters) {
-        return visitCompositeFilter(parameters, subFilters, "AND");
-    }
-
-    @Override
-    public String visitBooleanLiteralFilter(P parameters, boolean value) {
-        return value ? "1 = 1" : "1 <> 1";
-    }
-
-    @Override
-    public String visitContainsFilter(P parameters, JsonPointer field, Object valueAssertion) {
+    public R visitContainsFilter(P parameters, JsonPointer field, Object valueAssertion) {
         return visitValueAssertion(parameters, "LIKE", field, "%" + valueAssertion + "%");
     }
 
     @Override
-    public String visitEqualsFilter(P parameters, JsonPointer field, Object valueAssertion) {
+    public R visitEqualsFilter(P parameters, JsonPointer field, Object valueAssertion) {
         return visitValueAssertion(parameters, "=", field, valueAssertion);
     }
 
     @Override
-    public String visitExtendedMatchFilter(P parameters, JsonPointer field, String operator, Object valueAssertion) {
+    public R visitExtendedMatchFilter(P parameters, JsonPointer field, String operator, Object valueAssertion) {
         throw new UnsupportedOperationException("Extended match filter not supported on this endpoint");
     }
 
     @Override
-    public String visitGreaterThanFilter(P parameters, JsonPointer field, Object valueAssertion) {
+    public R visitGreaterThanFilter(P parameters, JsonPointer field, Object valueAssertion) {
         return visitValueAssertion(parameters, ">", field, valueAssertion);
     }
 
     @Override
-    public String visitGreaterThanOrEqualToFilter(P parameters, JsonPointer field, Object valueAssertion) {
+    public R visitGreaterThanOrEqualToFilter(P parameters, JsonPointer field, Object valueAssertion) {
         return visitValueAssertion(parameters, ">=", field, valueAssertion);
     }
 
     @Override
-    public String visitLessThanFilter(P parameters, JsonPointer field, Object valueAssertion) {
+    public R visitLessThanFilter(P parameters, JsonPointer field, Object valueAssertion) {
         return visitValueAssertion(parameters, "<", field, valueAssertion);
     }
 
     @Override
-    public String visitLessThanOrEqualToFilter(P parameters, JsonPointer field, Object valueAssertion) {
+    public R visitLessThanOrEqualToFilter(P parameters, JsonPointer field, Object valueAssertion) {
         return visitValueAssertion(parameters, "<=", field, valueAssertion);
     }
 
-    @Override
-    public String visitNotFilter(P parameters, QueryFilter subFilter) {
-        return "NOT " + subFilter.accept(this, parameters);
-    }
 
     @Override
-    public String visitOrFilter(final P parameters, List<QueryFilter> subFilters) {
-        return visitCompositeFilter(parameters, subFilters, "OR");
-    }
-
-    @Override
-    public abstract String visitPresentFilter(P parameters, JsonPointer field);
-
-    @Override
-    public String visitStartsWithFilter(P parameters, JsonPointer field, Object valueAssertion) {
+    public R visitStartsWithFilter(P parameters, JsonPointer field, Object valueAssertion) {
         return visitValueAssertion(parameters, "LIKE", field, valueAssertion + "%");
     }
 }
