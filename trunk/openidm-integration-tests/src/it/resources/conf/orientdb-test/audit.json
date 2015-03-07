@@ -1,0 +1,8 @@
+{
+    "logTo" : [ {
+        "logType" : "csv",
+        "location" : "./target/audit/csv/"
+    }, {
+        "logType" : "repository"
+    } ]
+}

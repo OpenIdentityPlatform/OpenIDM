@@ -1,0 +1,10 @@
+# Download sqljdbc_4.0.2206.100_enu.tar.gz from http://www.microsoft.com/en-us/download/details.aspx?id=11774 
+# Go to http://www.aqute.biz/Bnd/Download and download biz.aQute.bnd.jar from http://dl.dropbox.com/u/2590603/bnd/biz.aQute.bnd.jar
+# Run java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd sqljdbc4.jar
+# As a result of this step you should get a new file: sqljdbc4.bar rename it whatever you want but .jar extension: sqljdbc4-osgi.jar
+
+version=4.0.2206.100
+Export-Package: *;version=${version}
+Bundle-Name: Microsoft JDBC Driver 4.0 for SQL Server
+Bundle-SymbolicName: com.microsoft.sqlserver.jdbc
+Bundle-Version: ${version}

@@ -1,0 +1,93 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var query = {'_queryId' : 'for-userName', 'uid' : source.name};query;"
+            },
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "name",
+                    "target" : "userName"
+                },
+                {
+                    "default" : "Passw0rd",
+                    "target" : "password"
+                },
+                {
+                    "source" : "mobileTelephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "roles",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.split(',')"
+                    },
+                    "target" : "roles"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : {
+                        "workflowName" : "managedUserApproval",
+                        "type" : "text/javascript",
+                        "file" : "workflow/triggerWorkflowFromSync.js"
+                    }
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

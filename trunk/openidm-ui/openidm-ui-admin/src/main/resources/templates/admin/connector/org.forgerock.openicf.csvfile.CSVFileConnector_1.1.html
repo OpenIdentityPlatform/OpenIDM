@@ -1,0 +1,38 @@
+<fieldset>
+    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body">
+        <div class="group-field-block group-lead">
+            <div class="separate-message">
+                <label for="filePath" class="light">{{t "templates.connector.csvConnector.filePath"}}</label>
+                <input id="filePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.filePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.filePath}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="uniqueAttribute" class="light">{{t "templates.connector.csvConnector.uniqueAttribute"}}</label>
+                <input id="uniqueAttribute" class="form-size-l" data-validator="required" type="text" name="configurationProperties.uniqueAttribute" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.uniqueAttribute}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="nameAttribute" class="light">{{t "templates.connector.csvConnector.nameAttribute"}}</label>
+                <input id="nameAttribute" class="form-size-l" data-validator="required" type="text" name="configurationProperties.nameAttribute" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.nameAttribute}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="passwordAttribute" class="light">{{t "templates.connector.csvConnector.passwordAttribute"}}</label>
+                <input id="passwordAttribute" class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordAttribute" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.passwordAttribute}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+

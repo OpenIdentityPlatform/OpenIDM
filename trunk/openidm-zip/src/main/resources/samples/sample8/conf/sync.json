@@ -1,0 +1,116 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var query = {'_queryId' : 'for-userName', 'uid' :  source.name};query;"
+            },
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "logger.warn('Case onCreate: the source object contains: = {} ', source); source;"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "logger.warn('Case onUpdate: the source object contains: = {} ', source); source;"
+            },
+            "result" : {
+                "type" : "text/javascript",
+                "source" : "logger.warn('Case result: the source object contains: = {} ', source); source;"
+            },
+            "properties" : [
+                {
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "logger.warn('Case no Source: the source object contains: = {} ', source); source;"
+                    },
+                    "target" : "sourceTest1Nosource"
+                },
+                {
+                    "source" : "",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "logger.warn('Case emptySource: the source object contains: = {} ', source); source;"
+                    },
+                    "target" : "sourceTestEmptySource"
+                },
+                {
+                    "source" : "description",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "logger.warn('Case sourceDescription: the source object contains: = {} ', source); source"
+                    },
+                    "target" : "sourceTestDescription"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "name",
+                    "target" : "userName"
+                },
+                {
+                    "default" : "Passw0rd",
+                    "target" : "password"
+                },
+                {
+                    "source" : "name",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "roles",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.split(',')"
+                    },
+                    "target" : "roles"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

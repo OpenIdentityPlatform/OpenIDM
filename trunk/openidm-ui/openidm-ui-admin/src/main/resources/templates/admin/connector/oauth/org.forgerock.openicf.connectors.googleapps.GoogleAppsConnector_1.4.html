@@ -1,0 +1,55 @@
+<fieldset>
+    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body group-details group-list">
+        <p>
+            <a target="_blank" href="https://developers.google.com/admin-sdk/directory/v1/get-start/getting-started">{{t "templates.connector.google.gettingStarted"}}</a>
+        </p>
+        <ol>
+            <li>
+                <p>{{t "templates.connector.google.callbackUrlMessage"}}</p>
+                <p><span class="important">{{callbackURL}}</span></p>
+            </li>
+            <li>
+                <p>{{t "templates.connector.google.listHeader"}}</p>
+                <ul class="indented-list">
+                    <li>{{t "templates.connector.google.listItemOne"}}</li>
+                    <li>{{t "templates.connector.google.listItemTwo"}}</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+    <div class="group-body">
+        <div class="group-field-block group-lead">
+            <div class="separate-message">
+                <label for="clientId" class="light">{{t "templates.connector.oAuthGeneral.clientId"}}</label>
+                <textarea id="clientId" name="configurationProperties.clientId" data-validator-event="keyup blur" data-validator="required">{{connectorDefaults.configurationProperties.clientId}}</textarea>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="secret" class="light">{{t "templates.connector.oAuthGeneral.clientSecret"}}</label>
+                {{#if connectorDefaults.configurationProperties.clientSecret}}
+                <input id="secret" data-validator-event="keyup blur" data-validator="changed" placeholder="**********" class="form-size-l" type="password" name="configurationProperties.clientSecret">
+                {{else}}
+                <input id="secret" data-validator-event="keyup blur" data-validator="required" class="form-size-l" type="password" name="configurationProperties.clientSecret" required>
+                {{/if}}
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-body group-details">
+            <a target="_blank" href="https://developers.google.com/console/help/new/#generatingdevkeys">{{t "templates.connector.google.needHelp"}}</a>
+        </div>
+        <div class="group-body group-details">
+            <p><span class="important">{{t "templates.connector.google.changeHeader"}}</span></p>
+            <p class="large-paragraph">
+                {{t "templates.connector.google.changeDetails"}}
+            </p>
+        </div>
+    </div>
+    <input id="OAuthurl" type="hidden" value="https://accounts.google.com/o/oauth2/auth">
+    <input id="OAuthTokenUrl" type="hidden" value="https://accounts.google.com/o/oauth2/token">
+    <input id="clientDomain" type="hidden" name="configurationProperties.domain" value={{connectorDefaults.configurationProperties.domain}}>
+</fieldset>

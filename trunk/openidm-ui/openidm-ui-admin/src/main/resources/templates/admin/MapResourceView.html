@@ -1,0 +1,71 @@
+<div class="mapping-body">
+    <div id="mappingSource" class="mapping-resource-body pull-left">
+        <div class="mapping-resource">
+            <div class="mapping-resource-empty">
+                <div class="mapping-resource-empty-details">
+                    <i class="fa fa-question-circle fa-3x"></i>
+                    <div>{{t "templates.mapping.selectSourceResource"}}</div>
+                </div>
+            </div>
+            <div style="display:none;" class="mapping-resource-details">
+                <i class="fa fa-times select-resource"></i>
+                <div class="resource-info">
+                    <img class="resource-small-icon" src="{{iconSrc}}" alt="{{displayName}}" />
+                    <p class="resource-given-name"></p>
+                    <p class="resource-type-name"></p>
+                </div>
+                <hr />
+                <div class="resource-status-body">
+                    <p class="resource-object-type">
+                    <p class="object-type-name">{{t "templates.mapping.noObjectType"}}</p>
+                    <select style="display:none;" class="resource-object-type-select"></select>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mapping-swap-holder pull-left">
+        <button type="button" class="mapping-swap button"><i class="fa fa-lg fa-exchange"></i></button>
+        <p>Swap</p>
+    </div>
+
+    <div id="mappingTarget" class="mapping-resource-body pull-left">
+        <div class="mapping-resource">
+            <div class="mapping-resource-empty">
+                <div class="mapping-resource-empty-details">
+                    <i class="fa fa-question-circle fa-3x"></i>
+                    <div>{{t "templates.mapping.selectTargetResource"}}</div>
+                </div>
+            </div>
+            <div style="display:none;" class="mapping-resource-details">
+                <i class="fa fa-times select-resource"></i>
+                <div class="resource-info">
+                    <img class="resource-small-icon" src="{{iconSrc}}" alt="{{displayName}}" />
+                    <p class="resource-given-name"></p>
+                    <p class="resource-type-name"></p>
+                </div>
+                <hr />
+                <div class="resource-status-body">
+                    <p class="resource-object-type">
+                    <p class="object-type-name">{{t "templates.mapping.noObjectType"}}</p>
+                    <select style="display:none;" class="resource-object-type-select"></select>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mapping-create-body">
+        <button id="createMapping" disabled="true" type="button" class="add-mapping button">{{t "templates.mapping.createMapping"}}</button>
+    </div>
+</div>
+
+<div style="display:none;" id="saveMappingDialog">
+    <p>{{t "templates.mapping.saveMappingMessage"}}</p>
+    <label>{{t "templates.mapping.mappingName"}}</label>
+    <input id="mappingName" type="text" name="mappingName" value="" required autofocus>
+    <label>{{t "templates.mapping.linkedMapping"}}</label>
+    <select disabled="true" id="mappingLinked" name="mappingLinked" >
+        <option value="none">{{t "templates.mapping.noLinkedMapping"}}</option>
+    </select>
+</div>

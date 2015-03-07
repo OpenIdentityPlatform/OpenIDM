@@ -1,0 +1,74 @@
+<h1>{{t "templates.user.ChangeSecurityDataDialogTemplate.securityDataChange"}}</h1>
+
+<form id="passwordChange" action="" class="form clearfix" method="post" onsubmit="return false" autocomplete="off">
+    <fieldset class="fieldset">
+        <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.enterNewPasswordToChange"}}</p>
+        <div class="float-left">
+
+            <div class="group-field-block">
+                <label for="password" class="align-right">{{t "common.user.password"}}</label>
+                <input type="hidden" name="oldPassword" />
+                <div class="group-input-span">
+                    <input type="password" name="password" value="" data-validation-dependents="passwordConfirm" data-validation-force-server="true" id="password" required autofocus/>
+                    <span class="error">x</span>
+                </div>
+            </div>
+
+
+            <div class="group-field-block">
+                <label for="passwordConfirm" class="align-right">{{t "common.user.confirmPassword"}}</label>
+                <div class="group-input-span">
+                    <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup change" id="passwordConfirm" required />
+                    <span class="error">x</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="group-field-errors validationRules float-left" data-for-validator="password passwordConfirm">
+            <div class="field-rule">
+                <span class="error">x</span><span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
+            </div>
+        </div>
+
+    </fieldset>
+</form>            
+{{#equals userComponent "managed/user"}}   
+{{#securityQuestions}}
+
+<form id="securityDataChange" action="" class="form clearfix" method="post" onsubmit="return false">
+    <fieldset  class="fieldset">
+        <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.selectQuestionAndAnserIfYouWant"}}</p>
+
+        <div class="float-left">
+
+            <div class="group-field-block ">
+                <label for="securityQuestion" class="align-right">{{t "common.user.securityQuestion"}}</label>
+                <div class="group-input-span">
+                    <input type="hidden" name="oldSecurityQuestion" />
+                    <select id="securityQuestion" name="securityQuestion"></select>  
+                </div>
+            </div>
+
+            <div class="group-field-block">
+                <label for="securityAnswer" class="align-right">{{t "common.user.securityAnswer"}}</label>
+                <div class="float-left separate-message">
+                    <div class="group-input-span">
+                        <input type="text" name="securityAnswer" />
+                        <span class="error">x</span>
+                    </div>
+                    <div class="validation-message"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="group-field-errors float-left">
+            <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}</p>
+        </div>
+
+    </fieldset>
+</form>
+
+{{/securityQuestions}}
+{{/equals}}

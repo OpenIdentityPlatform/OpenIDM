@@ -1,0 +1,137 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemHRAccounts_managedUser",
+            "source" : "system/HR/account",
+            "target" : "managed/user",
+            "properties" : [
+                {
+                    "source" : "cn",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "departmentNumber",
+                    "target" : "department"
+                },
+                {
+                    "source" : "employeeNumber",
+                    "target" : "employeeNumber"
+                },
+                {
+                    "source" : "employeeType",
+                    "target" : "userType"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "l",
+                    "target" : "city"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "mobile",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "postalCode",
+                    "target" : "postalCode"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "st",
+                    "target" : "stateProvince"
+                },
+                {
+                    "source" : "street",
+                    "target" : "address1"
+                },
+                {
+                    "source" : "title",
+                    "target" : "title"
+                },
+                {
+                    "source" : "title",
+                    "target" : "roles",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/defineRoles.js"
+                    }
+                },
+                {
+                    "source" : "uid",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "uid",
+                    "target" : "_id"
+                },
+                {
+                    "default" : "Passw0rd",
+                    "target" : "password"
+                },
+                {
+                    "default" : "active",
+                    "target" : "accountStatus"
+                },
+                {
+                    "source" : "manager",
+                    "target" : "manager",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/transformHRManager.js"
+                    }
+                },
+                {
+                    "source" : "",
+                    "target" : "accounts",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/transformHRAccounts.js"
+                    }
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

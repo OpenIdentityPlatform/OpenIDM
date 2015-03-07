@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+    <process id="certificationEntitlements" name="Entitlement Certification process">
+        <startEvent id="start" activiti:initiator="startUserId" />
+        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
+
+        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy">
+            <script><![CDATA[ 
+                role = openidm.read('managed/role/' + roleId);
+                assignments = role.assignments;
+                uidata = [rolename:role.name, roleid:role._id, roledescription:role.properties.description];
+                uiassignments = [];
+                assignments.each { key, value ->
+                    uiassignments.push([assignmentname:key, attributes:value.attributes]);
+                }
+                uidata.assignments = uiassignments;
+                execution.setVariable('uidata', uidata);
+                ]]>
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="readUserData" targetRef="approval"/>
+        
+        <userTask id="approval" name="Entitlement Status Check" activiti:assignee="systemadmin" activiti:formKey="certificationEntitlementsForm.xhtml"/>
+        <sequenceFlow sourceRef="approval" targetRef="decisionMadeGateway"/>
+        
+        <exclusiveGateway id="decisionMadeGateway" name="Decision Made" default="endProcess"/>
+        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="patchManagedRole">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='update'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="patchManagedRole" scriptFormat="groovy">
+            <script><![CDATA[
+                role = openidm.read('managed/role/' + roleId);
+                role.assignments.each{ key, value ->
+                    for (attribute in value.attributes) {
+                        newValue = execution.getVariable(key + attribute.name + 'Assignments');
+                        org.json.JSONArray jsonObj = new org.json.JSONArray(newValue)
+                        list = [];
+                        for(int i = 0; i < jsonObj.length(); i++){
+                            list.push(jsonObj.getString(i));
+                        }
+                        attribute.value = list;
+                    }
+                }
+                openidm.update('managed/role/' + roleId, null, role);
+                ]]>
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="patchManagedRole" targetRef="end"/>
+        
+        <sequenceFlow id ="endProcess" sourceRef="decisionMadeGateway" targetRef="end"/>
+
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>

@@ -1,0 +1,146 @@
+#objectTypesForm button,
+#objectTypesForm .ui-buttonset {
+  width: auto;
+  margin: 0 !important;
+  font-size: 12px;
+  float: right;
+}
+
+#objectTypesForm button,
+.ui-dialog-buttonset button {
+  margin-left:10px !important;
+  .linear-gradient(top, @color-active, darken(@color-active, 10%)) !important;
+  border: 1px solid darken(@color-active, 10%);
+}
+
+#objectTypesForm button:hover,
+.ui-dialog-buttonset button:hover {
+  .linear-gradient(top, lighten(@color-active, @button-hover-lightness), @color-active) !important;
+  border: 1px solid darken(@color-active, 10%);
+}
+
+/*
+  We need these importants to override disable issues with the object type dialog
+*/
+button.ui-button:disabled
+{
+  background: #808080 !important;
+  background-image:none !important;
+  border: 1px solid #808080;
+  cursor: default;
+  box-shadow: 0 0 0 0 #888888;
+  -moz-box-shadow: 0 0 0 0 #888888;
+  -webkit-box-shadow: 0 0 0 0 #888888;
+}
+
+
+#objectTypesForm {
+  margin:0;
+  padding:0;
+}
+
+#objectTypesForm .selectPanel {
+  height: 100%;
+  width: 240px;
+  margin: 15px;
+  display: inline-block;
+  float: left;
+}
+
+#objectTypesForm .selectPanel #newObjectType{
+  margin-bottom: 15px;
+  width: 100%;
+}
+#objectTypesForm .selectPanel #objectTypesList {
+  height: 100%;
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+#objectTypesForm .objectTypeForm {
+  display: inline-block;
+  float: right;
+  margin: 7px 15px 15px 0;
+  position: absolute;
+}
+
+#objectTypesForm .objectTypeForm label {
+  display: inline-block !important;
+  width: 140px;
+}
+
+#objectTypesForm .objectTypeForm input {
+  display: inline;
+}
+
+#objectTypesForm .objectTypeForm select {
+  height:29px;
+}
+
+#objectTypesForm .objectTypeForm h3 > span {
+  display: inline-block;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#objectTypesForm .content {
+  padding: 0;
+}
+
+#objectTypesForm .content > div {
+  margin: 0 !important;
+}
+
+#objectTypesForm .tabs > div span {
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+  padding: 0 5px;
+  white-space: nowrap;
+}
+
+#objectTypesForm .form-control > select {
+  width:252px;
+}
+
+#objectTypesForm .ui-widget-content {
+  background-color: rgba(128, 183, 171, .03);
+  background-image: none;
+}
+
+.objectTypeEditor {
+  top: 20px;
+  left: 20px;
+  position: fixed;
+}
+
+.object-config-selector {
+  margin-bottom:10px;
+}
+
+#selectObjectConfig {
+  border: 1px solid #dbdbdb;
+  border-top-color: #b7b7b7;
+  border-left-color: #b7b7b7;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  font-size: 15px;
+  color: #5a646d;
+  padding: 5px 10px;
+  background-color: #ffffff;
+  width: 240px;
+  box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, 0.1) inset;
+  -moz-box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, 0.1) inset;
+  -webkit-box-shadow: 1px 1px 1px 0 rgba(0, 0, 0, 0.1) inset;
+  -webkit-transition: background 0.3s 0.25s ease-in-out;
+  -moz-transition: background 0.3s 0.25s ease-in-out;
+  -ms-transition: background 0.3s 0.25s ease-in-out;
+  -o-transition: background 0.3s 0.25s ease-in-out;
+  transition: background 0.3s 0.25s ease-in-out;
+}

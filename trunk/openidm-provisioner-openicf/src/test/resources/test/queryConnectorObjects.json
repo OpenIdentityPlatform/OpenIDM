@@ -1,0 +1,230 @@
+[
+    {
+        "query" : {
+            "ContainsAllValues" : {
+                "field" : "address"
+            }
+        }, "params" : {
+            "address" : [
+                "1938 Sulivan Ln Metropolis",
+                "633 Stag Trail Rd N Caldwell NJ"
+            ]
+        }
+    },
+    {
+    "query": {
+        "AND": [
+            { "Equals": {
+                    "field" : "lastname",
+                    "values" : [
+                        "Doe"
+                    ]
+                }
+            },
+            {
+                "Equals": {
+                    "field" : "firstname"
+                }
+            }
+        ]
+        }, "params" : {
+            "firstname" : [
+                "Mari"
+            ]
+        }
+    },
+        {
+        "query" : {
+            "ContainsAllValues" : {
+                "field" : "email"
+            }
+        },
+        "params" : {
+            "email" : [
+                "vader@forgerock.com",
+                "secret@forgerock.com"
+            ]
+        }
+    },
+    {
+        "query" : {
+            "EndsWith" : {
+                "field" : "__DESCRIPTION__"
+            }
+        },
+        "params" : {
+            "__DESCRIPTION__" : [
+                "Description"
+            ]
+        }
+    },
+    {
+        "query" : {
+            "Equals" : {
+                "field" : "last-logoff"
+            }
+        },
+        "params" : {
+            "last-logoff" : [
+                987654321
+            ]
+        }
+    },
+    {
+        "query" : {
+            "GreaterThan" : {
+                "field" : "years-employed"
+            }
+        },
+        "params" : {
+            "years-employed" : [
+                5
+            ]
+        }
+    },
+    {
+        "query" : {
+            "GreaterThanOrEqual" : {
+                "field" : "age"
+            }
+        },
+        "params" : {
+            "age" : [
+                21
+            ]
+        }
+    },
+    {
+        "query" : {
+            "LessThan" : {
+                "field" : "avg-wage"
+            }
+        },
+        "params" : {
+            "avg-wage" : [
+                1000000
+            ]
+        }
+    },
+    {
+        "query" : {
+            "LessThanOrEqual" : {
+                "field" : "office-square-feet"
+            }
+        },
+        "params" : {
+            "office-square-feet" : [
+                200
+            ]
+        }
+    },
+    {
+        "query" : {
+            "StartsWith" : {
+                "field" : "name"
+            }
+        },
+        "params" : {
+            "name" : [
+                "MD"
+            ]
+        }
+    },
+    {
+        "query" : {
+            "AND" : [
+                {
+                    "Equals" : {
+                        "field" : "firstname"
+                    }
+                },
+                {
+                    "Equals" : {
+                        "field" : "lastname"
+                    }
+                }
+            ]
+        },
+        "params" : {
+            "firstname" : [
+                "Darth"
+            ],
+            "lastname" : [
+                "Vader"
+            ]
+        }
+    },
+    {
+        "query" : {
+            "NAND" : [
+                {
+                    "Equals" : {
+                        "field" : "firstname"
+                    }
+                },
+                {
+                    "Equals" : {
+                        "field" : "lastname"
+                    }
+                }
+            ]
+        },
+        "params" : {
+            "firstname" : [
+                "Darth"
+            ],
+            "lastname" : [
+                "Vader"
+            ]
+        }
+    },
+    {
+        "query" : {
+            "OR" : [
+                {
+                    "LessThanOrEqual" : {
+                        "field" : "office-square-feet"
+                    }
+                },
+                {
+                    "GreaterThan" : {
+                        "field" : "yearly-wage"
+                    }
+                }
+            ]
+        },
+        "params" : {
+            "office-square-feet" : [
+                200
+            ],
+            "yearly-wage" : [
+                980000000
+            ]
+        }
+    },
+    {
+        "query" : {
+            "NOR" : [
+                {
+                    "LessThanOrEqual" : {
+                        "field" : "office-square-feet"
+                    }
+                },
+                {
+                    "GreaterThan" : {
+                        "field" : "yearly-wage"
+                    }
+                }
+            ]
+        },
+        "params" : {
+            "office-square-feet" : [
+                200
+            ],
+            "yearly-wage" : [
+                980000000
+            ]
+        }
+    }
+
+]

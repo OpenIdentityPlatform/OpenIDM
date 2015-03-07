@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+
+
+    <process id="orphanAccountReport" name="Orphan Account Handling Workflow">
+        <startEvent id="start" />
+        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
+        <scriptTask id="readUserData" scriptFormat="groovy" activiti:autoStoreVariables="true">
+            <script>
+                user = openidm.read('system/business/account/'+ targetId)
+                userName = user.userName
+                givenName = user.givenName
+                familyName = user.familyName
+                email = user.email 
+                department = user.department
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="readUserData" targetRef="systemadminDecision"/>
+        
+        <userTask id="systemadminDecision" name="Orphan Account Task" activiti:assignee="systemadmin">
+            <extensionElements>
+                <activiti:formProperty id="userName"
+                                       name="Username"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="givenName"
+                                       name="First Name"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="familyName"
+                                       name="Last Name"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="email"
+                                       name="Email"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="linkTo"
+                                       variable="linkTo"
+                                       name="Link to"
+                                       type="string" />
+                <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+                    <activiti:value id="delete" name="Delete"></activiti:value>
+                    <activiti:value id="link" name="Link"></activiti:value>
+                </activiti:formProperty>
+            </extensionElements>
+        </userTask>
+        <sequenceFlow sourceRef="systemadminDecision" targetRef="decisionGateway"/>
+        
+        <exclusiveGateway id="decisionGateway" name="Decision"></exclusiveGateway>
+        
+        <sequenceFlow sourceRef="decisionGateway" targetRef="deleteAccount">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='delete'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="deleteAccount" scriptFormat="groovy">
+            <script>
+                params = new java.util.HashMap();
+                params.put('reconId', reconId)
+                params.put('mapping', mapping)
+                params.put('action', 'delete')
+                params.put('target', 'true')
+                targetId = execution.getVariables().get("targetId")
+                if (targetId!=null){
+                    params.put('targetId', targetId)
+                }
+                openidm.action('sync', 'performAction', [:], params)
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="deleteAccount" targetRef="end"/>
+
+        <sequenceFlow sourceRef="decisionGateway" targetRef="linkAccount">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='link'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="linkAccount" scriptFormat="groovy">
+            <script>
+                params = new java.util.HashMap();
+                params.put('reconId', reconId)
+                params.put('mapping', mapping)
+                params.put('action', 'link')
+                params.put('sourceId', linkTo)
+                params.put('targetId', targetId)
+                openidm.action('sync', 'performAction', [:], params)
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="linkAccount" targetRef="end"/>
+        <endEvent id="end"/>
+    </process>
+</definitions>

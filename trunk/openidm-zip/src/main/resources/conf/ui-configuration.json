@@ -1,0 +1,35 @@
+{
+    "configuration" : {
+        "selfRegistration" : false,
+        "securityQuestions" : false,
+        "siteIdentification" : false,
+        "lang" : "en",
+        "passwordResetLink": "",
+        "roles" : {
+            "openidm-admin" : "Administrator",
+            "openidm-authorized" : "User",
+            "openidm-tasks-manager" : "Tasks Manager"
+        },
+        "siteImages" : [
+            "images/passphrase/mail.png",
+            "images/passphrase/user.png",
+            "images/passphrase/report.png",
+            "images/passphrase/twitter.png"
+        ],
+        "notificationTypes" : {
+            "info" : {
+                "name" : "common.notification.types.info",
+                "iconPath" : "images/notifications/info.png"
+            },
+            "warning" : {
+                "name" : "common.notification.types.warning",
+                "iconPath" : "images/notifications/warning.png"
+            },
+            "error" : {
+                "name" : "common.notification.types.error",
+                "iconPath" : "images/notifications/error.png"
+            }
+        },
+        "defaultNotificationType" : "info"
+    }
+}

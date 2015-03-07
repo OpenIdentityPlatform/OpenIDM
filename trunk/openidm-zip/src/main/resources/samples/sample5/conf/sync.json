@@ -1,0 +1,191 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+            "result" : {
+                "type" : "text/javascript",
+                "file" : "script/reconStats.js"
+            },
+            "properties" : [
+                {
+                    "source" : "uid",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "email",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source[0];"
+                    },
+                    "target" : "mail"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                }
+            ],
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target._id = source.name;"
+            }
+        },
+        {
+            "name" : "managedUser_systemAdAccounts",
+            "source" : "managed/user",
+            "target" : "system/ad/account",
+            "taskThreads" : 0,
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var map = {'_queryFilter': 'name eq \"' + source.userName + '\"'}; map;"
+            },
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "name"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "lastname"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "firstname"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "default" : "initial_Passw0rd",
+                    "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source && openidm.decrypt(source);"
+                    },
+                    "target" : "userPassword"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "taskThreads" : 0,
+            "links" : "systemLdapAccounts_managedUser",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var map = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; map;"
+            },
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "lastname"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "firstname"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
+                    "target" : "userPassword",
+                    "condition": {
+                        "type": "text/javascript",
+                        "source": "!!object.password"
+                    }
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "EXCEPTION"
+                }
+            ]
+        },
+        {
+            "name" : "systemAdAccount_managedUser",
+            "source" : "system/ad/account",
+            "target" : "managed/user",
+            "links" : "managedUser_systemAdAccounts",
+            "policies" : [
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                }
+            ],
+            "properties" : [
+                {
+                    "source" : "name",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                }
+            ]
+        }
+    ]
+}

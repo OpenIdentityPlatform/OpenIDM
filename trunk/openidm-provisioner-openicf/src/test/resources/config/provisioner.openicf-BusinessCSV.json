@@ -1,0 +1,116 @@
+{
+    "name" : "business",
+    "connectorRef" : {
+        "bundleName" : "org.forgerock.openicf.connectors.csvfile-connector",
+        "bundleVersion" : "1.1.0.2",
+        "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
+        "connectorHostRef" : "testServer"
+    },
+    "poolConfigOption" : {
+        "maxObjects" : 10,
+        "maxIdle" : 10,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "VALIDATE" : -1,
+        "TEST" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCHEMA" : -1,
+        "DELETE" : -1,
+        "UPDATE" : -1,
+        "SYNC" : -1,
+        "AUTHENTICATE" : -1,
+        "GET" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "SEARCH" : -1
+    },
+    "configurationProperties" : {
+        "filePath" : "&{launcher.working.location}data/business.csv",
+        "uniqueAttribute" : "uid",
+        "nameAttribute" : "uid"
+    },
+    "objectTypes" : {
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "address" : {
+                    "type" : "string",
+                    "nativeName" : "address",
+                    "nativeType" : "string"
+                },
+                "city" : {
+                    "type" : "string",
+                    "nativeName" : "city",
+                    "nativeType" : "string"
+                },
+                "department" : {
+                    "type" : "string",
+                    "nativeName" : "department",
+                    "nativeType" : "string"
+                },
+                "email" : {
+                    "type" : "string",
+                    "nativeName" : "email",
+                    "nativeType" : "string"
+                },
+                "employeeNumber" : {
+                    "type" : "string",
+                    "nativeName" : "employeeNumber",
+                    "nativeType" : "string"
+                },
+                "familyName" : {
+                    "type" : "string",
+                    "nativeName" : "familyName",
+                    "nativeType" : "string"
+                },
+                "givenName" : {
+                    "type" : "string",
+                    "nativeName" : "givenName",
+                    "nativeType" : "string"
+                },
+                "phoneNumber" : {
+                    "type" : "string",
+                    "nativeName" : "phoneNumber",
+                    "nativeType" : "string"
+                },
+                "postalCode" : {
+                    "type" : "string",
+                    "nativeName" : "postalCode",
+                    "nativeType" : "string"
+                },
+                "stateProvince" : {
+                    "type" : "string",
+                    "nativeName" : "stateProvince",
+                    "nativeType" : "string"
+                },
+                "title" : {
+                    "type" : "string",
+                    "nativeName" : "title",
+                    "nativeType" : "string"
+                },
+                "uid" : {
+                    "type" : "string",
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "userName" : {
+                    "type" : "string",
+                    "nativeName" : "userName",
+                    "nativeType" : "string"
+                },
+                "userType" : {
+                    "type" : "string",
+                    "nativeName" : "userType",
+                    "nativeType" : "string"
+                }
+            }
+        }
+    },
+    "operationOptions" : { }
+}

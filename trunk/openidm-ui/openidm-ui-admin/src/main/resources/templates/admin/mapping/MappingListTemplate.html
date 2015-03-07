@@ -1,0 +1,49 @@
+<div class="title-bar">
+    <h1>{{t "templates.mapping.mappingListingTitle"}}</h1>
+    <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+</div>
+<div class="button-bar">
+    <a href="#mapping/add/"><button type="button" class="icon-button button pull-right" id="addMapping"><span>{{t "templates.connector.addMapping"}}</span><i class="fa fa-lg fa-plus"></i></button></a>
+</div>
+
+{{#if mappingConfig.length}}
+<div id="mappingConfigHolder" class="mapping-listing">
+    {{#each mappingConfig}}
+    <div class="mapping-config-body" mapping="{{name}}">
+        <div class="mapping-config-header">
+            {{name}}
+        </div>
+        <div class="mapping-body">
+            <img class="mapping-icon left-icon" src="{{sourceIcon}}" alt="{{sourceConnector.displayName}}" />
+            <div class="mapping-source">
+                <p class="mapping-header">{{t "templates.mapping.source"}}</p>
+                <p class="mapping-title">{{source}}</p>
+                <p>{{sourceType}}</p>
+            </div>
+            <div class="mapping-arrow">
+                <div class="arrow-box">
+                    <i class="fa fa-arrow-right"></i>
+                </div>
+            </div>
+            <img class="mapping-icon left-icon" src="{{targetIcon}}" alt="{{targetConnector.displayName}}" />
+            <div class="mapping-target">
+                <p class="mapping-header">{{t "templates.mapping.target"}}</p>
+                <p class="mapping-title">{{target}}</p>
+                <p>{{targetType}}</p>
+            </div>
+        </div>
+        <div class="mapping-bottom-bar">
+            <div class="sync-status">
+                <span class="sync-label">{{t "templates.mapping.syncStatus"}}:</span>
+                <span id="{{name}}_syncStatus"></span>
+            </div>
+            <div class="float-right">
+                <button type="button"  name="" class="button icon-button delete-button"><span>{{t "common.form.delete"}}</span><i class="fa fa-lg fa-times-circle-o"></i></button>
+                <button type="button"  name="" class="button icon-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>
+{{/if}}
+<div id="noMappingsDefined" {{#if mappingConfig}}style="display:none;"{{/if}}>{{t "templates.mapping.noMappingsDefined"}}</div>

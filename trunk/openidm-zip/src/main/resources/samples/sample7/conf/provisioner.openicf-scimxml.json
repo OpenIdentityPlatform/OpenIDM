@@ -1,0 +1,182 @@
+{
+    "name" : "xmlfile",
+    "connectorRef" : {
+        "bundleName"    : "org.forgerock.openicf.connectors.xml-connector",
+        "bundleVersion" : "1.1.0.2",
+        "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
+    },
+    "producerBufferSize" : 100,
+    "connectorPoolingSupported" : true,
+    "poolConfigOption" : {
+        "maxObjects" : 1,
+        "maxIdle" : 1,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "TEST" : -1,
+        "AUTHENTICATE" : -1,
+        "SEARCH" : -1,
+        "VALIDATE" : -1,
+        "GET" : -1,
+        "UPDATE" : -1,
+        "DELETE" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "SYNC" : -1,
+        "SCHEMA" : -1
+    },
+    "configurationProperties" : {
+        "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
+        "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "&{launcher.project.location}/data/xmlConnectorData.xml"
+    },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
+    "objectTypes" : {
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "__UID__" : {
+                    "type" : "string",
+                    "nativeName" : "__UID__"
+                },
+                "name" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "firstName" : {
+                    "type" : "string",
+                    "nativeName" : "firstname",
+                    "nativeType" : "string"
+                },
+                "lastName" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "lastname",
+                    "nativeType" : "string"
+                },
+                "middleName" : {
+                    "type" : "string",
+                    "nativeName" : "middlename",
+                    "nativeType" : "string"
+                },
+                "honorificPrefix" : {
+                    "type" : "string",
+                    "nativeName" : "honorificPrefix",
+                    "nativeType" : "string"
+                },
+                "honorificSuffix" : {
+                    "type" : "string",
+                    "nativeName" : "honorificSuffix",
+                    "nativeType" : "string"
+                },
+                "nickName" : {
+                    "type" : "string",
+                    "nativeName" : "nickName",
+                    "nativeType" : "string"
+                },
+                "emails" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "email",
+                    "nativeType" : "string"
+                },
+                "addresses" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "address",
+                    "nativeType" : "string"
+                },
+                "phoneNumbers" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "phoneNumber",
+                    "nativeType" : "string"
+                },
+                "ims" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "im",
+                    "nativeType" : "string"
+                },
+                "photos" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "photo",
+                    "nativeType" : "string"
+                },
+                "employee-type" : {
+                    "type" : "string",
+                    "nativeName" : "employee-type",
+                    "nativeType" : "string"
+                },
+                "title" : {
+                    "type" : "string",
+                    "nativeName" : "title",
+                    "nativeType" : "string"
+                },
+                "preferredLanguage" : {
+                    "type" : "string",
+                    "nativeName" : "preferredLanguage",
+                    "nativeType" : "string"
+                },
+                "locale" : {
+                    "type" : "string",
+                    "nativeName" : "locale",
+                    "nativeType" : "string"
+                },
+                "timezone" : {
+                    "type" : "string",
+                    "nativeName" : "timezone",
+                    "nativeType" : "string"
+                },
+                "groups" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "group",
+                    "nativeType" : "string"
+                },
+                "password" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "__PASSWORD__",
+                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+                    "flags" : [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                }
+            }
+        }
+    },
+    "operationOptions" : {
+    }
+}

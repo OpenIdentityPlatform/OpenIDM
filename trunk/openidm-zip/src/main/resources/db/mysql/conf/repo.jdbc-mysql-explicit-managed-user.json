@@ -1,0 +1,255 @@
+{
+    "connection" : {
+        "dbType" : "MYSQL",
+        "jndiName" : "",
+        "driverClass" : "com.mysql.jdbc.Driver",
+        "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?characterEncoding=utf8",
+        "username" : "openidm",
+        "password" : "openidm",
+        "defaultCatalog" : "openidm",
+        "maxBatchSize" : 100,
+        "maxTxRetry" : 5,
+        "enableConnectionPool" : true,
+        "connectionTimeoutInMs" : 30000
+    },
+    "queries" : {
+        "genericTables" : {
+            "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "find-by-id" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
+            "get-by-field-value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey=CONCAT('/', ${field}) AND prop.propvalue = ${value} AND objtype.objecttype = ${_resource}",
+            "get-users-of-direct-role" : "select obj.fullobject from ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id  INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id where objtype.objecttype = ${_resource} AND prop.propKey LIKE '/roles/%' AND prop.propValue = ${role}",
+            "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propkey=${taskState.completed} AND complete.propvalue is NULL )",
+            
+            "query-cluster-failed-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))",
+            "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id WHERE (prop.propkey = '/type' AND prop.propvalue = 'state')",
+            "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})",
+            
+            "get-managed-users" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} orderby on obj.id = orderby.managedobjects_id and orderby.propkey = CONCAT('/',${orderBy}) ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN orderby.propvalue END asc, CASE WHEN ${orderByDir} = 'desc' THEN orderby.propvalue END desc  LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
+            "get-managed-users-filtered" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} orderby on obj.id = orderby.managedobjects_id and orderby.propkey = CONCAT('/',${orderBy}) INNER JOIN ${_dbSchema}.${_propTable} userName on obj.id = userName.${_mainTable}_id and userName.propkey = '/userName' INNER JOIN ${_dbSchema}.${_propTable} givenName on obj.id = givenName.${_mainTable}_id and givenName.propkey = '/givenName' INNER JOIN ${_dbSchema}.${_propTable} sn on obj.id = sn.${_mainTable}_id and sn.propkey = '/sn' INNER JOIN ${_dbSchema}.${_propTable} mail on obj.id = mail.${_mainTable}_id and mail.propkey = '/mail' INNER JOIN ${_dbSchema}.${_propTable} accountStatus on obj.id = accountStatus.${_mainTable}_id and accountStatus.propkey = '/accountStatus' WHERE userName.propvalue LIKE concat(${userName},'%') AND mail.propvalue LIKE concat(${mail},'%') AND givenName.propvalue LIKE concat(${givenName},'%') AND sn.propvalue LIKE concat(${sn},'%') AND accountStatus.propvalue LIKE concat(${accountStatus},'%') ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN orderby.propvalue END asc, CASE WHEN ${orderByDir} = 'desc' THEN orderby.propvalue END desc  LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
+            "get-managed-users-count" : "SELECT concat('{ \"total\":',COUNT(*),'}') as fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource}",
+            "get-managed-users-filtered-count" : "SELECT concat('{ \"total\":',COUNT(*),'}') as fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} userName on obj.id = userName.${_mainTable}_id and userName.propkey = '/userName' INNER JOIN ${_dbSchema}.${_propTable} givenName on obj.id = givenName.${_mainTable}_id and givenName.propkey = '/givenName' INNER JOIN ${_dbSchema}.${_propTable} sn on obj.id = sn.${_mainTable}_id and sn.propkey = '/sn' INNER JOIN ${_dbSchema}.${_propTable} mail on obj.id = mail.${_mainTable}_id and mail.propkey = '/mail' INNER JOIN ${_dbSchema}.${_propTable} accountStatus on obj.id = accountStatus.${_mainTable}_id and accountStatus.propkey = '/accountStatus' WHERE userName.propvalue LIKE concat(${userName},'%') AND mail.propvalue LIKE concat(${mail},'%') AND givenName.propvalue LIKE concat(${givenName},'%') AND sn.propvalue LIKE concat(${sn},'%') AND accountStatus.propvalue LIKE concat(${accountStatus},'%')"
+        },
+        "explicitTables" : {
+            "get-users-of-direct-role" : "select objectid from ${_dbSchema}.${_table} where find_in_set(${role},replace(substring(roles,2,(length(roles) - 2)),'\"',''))",
+            "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
+            "for-internalcredentials" : "select * FROM ${_dbSchema}.${_table} WHERE objectid = ${uid}",
+            "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
+            "for-userName" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${uid}",
+            
+            "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${username} and accountStatus = 'active'",
+            "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
+            
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
+
+            "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
+            
+            "audit-by-mapping" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE mapping = ${mappingName}",
+            "audit-by-recon-id" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId}",
+            "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND entryType = ${entryType}",
+            "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND situation = ${situation}",
+            "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentactionid = ${parentActionId}",
+            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
+            
+            "get-managed-users" : "call ${_dbSchema}.getAllFromTable('${_dbSchema}','${_table}',${orderBy},${orderByDir},${int:_pageSize},${int:_pagedResultsOffset},'userName,givenName,sn,mail,accountStatus')",
+            "get-managed-users-filtered" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%') ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END asc, CASE WHEN ${orderByDir} = 'desc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END desc LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
+            "get-managed-users-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table}",
+            "get-managed-users-filtered-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%')"
+        }
+    },
+    "commands" : {
+        "genericTables" : { },
+        "explicitTables" : {
+            "purge-by-recon-expired" : "DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN (SELECT reconId FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp} AND entryType = 'summary') AS x ON x.reconId = r.reconId",
+            "purge-by-recon-number-of" : "set @num := 0, @mapping := ''; DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN ( SELECT reconId, mapping, activitydate, @num := if(@mapping = mapping, @num + 1, 1) AS row_number, @mapping := mapping as m FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY mapping, activitydate desc ) AS x ON r.reconId = x.reconId WHERE x.row_number > ${numberOf}"
+        }
+    },
+    "resourceMapping" : {
+        "default" : {
+            "mainTable" : "genericobjects",
+            "propertiesTable" : "genericobjectproperties",
+            "searchableDefault" : true
+        },
+        "genericMapping" : {
+            "managed/*" : {
+                "mainTable" : "managedobjects",
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : true
+            },
+            "scheduler" : {
+                "mainTable" : "schedulerobjects",
+                "propertiesTable" : "schedulerobjectproperties",
+                "searchableDefault" : true
+            },
+            "cluster" : {
+                "mainTable" : "clusterobjects",
+                "propertiesTable" : "clusterobjectproperties",
+                "searchableDefault" : true
+            }
+        },
+        "explicitMapping" : { 
+            "managed/user": {
+                "table" : "managed_user",
+                "objectToColumn": {
+                    "_id": "objectid",
+                    "_rev" : "rev",
+                    "userName": "userName",
+                    "password": "password",
+                    "accountStatus":"accountStatus",
+                    "roles": { "column" : "roles", "type" : "JSON_LIST" },
+                    "lastPasswordSet":"lastPasswordSet",
+                    "postalCode":"postalCode",
+                    "stateProvince":"stateProvince",
+                    "passwordAttempts":"passwordAttempts",
+                    "lastPasswordAttempt":"lastPasswordAttempt",
+                    "postalAddress":"postalAddress",
+                    "address2":"address2",
+                    "country":"country",
+                    "city":"city",
+                    "givenName":"givenName",
+                    "sn":"sn",
+                    "telephoneNumber":"telephoneNumber",
+                    "mail":"mail",
+                    "siteImage":"siteImage",
+                    "passPhrase":"passPhrase",
+                    "securityAnswer":"securityAnswer",
+                    "securityQuestion":"securityQuestion",
+                    "securityAnswerAttempts":"securityAnswerAttempts",
+                    "lastSecurityAnswerAttempt":"lastSecurityAnswerAttempt",
+                    "total":"total"
+                }
+            },
+            "link" : {
+                "table" : "links",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "linkType" : "linktype",
+                    "firstId" : "firstid",
+                    "secondId" : "secondid",
+                    "linkQualifier" : "linkqualifier"
+                }
+            },
+            "ui/notification" : {
+                "table" : "uinotification",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "requester" : "requester",
+                    "requesterId" : "requesterId",
+                    "receiverId" : "receiverId",
+                    "createDate" : "createDate",
+                    "notificationType" : "notificationType",
+                    "notificationSubtype" : "notificationSubtype",
+                    "message" : "message"
+                }
+            },
+            "internal/user" : {
+                "table" : "internaluser",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "password" : "pwd",
+                    "roles" : "roles"
+                }
+            },
+            "audit/activity" : {
+                "table" : "auditactivity",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "activityId" : "activityid",
+                    "timestamp" : "activitydate",
+                    "action" : "activity",
+                    "message" : "message",
+                    "objectId" : "subjectid",
+                    "rev" : "subjectrev",
+                    "rootActionId" : "rootactionid",
+                    "parentActionId" : "parentactionid",
+                    "requester" : "requester",
+                    "approver" : "approver",
+                    "before" : "subjectbefore",
+                    "after" : "subjectafter",
+                    "status" : "status",
+                    "changedFields" : "changedfields",
+                    "passwordChanged" : "passwordchanged"
+                }
+            },
+            "audit/recon" : {
+                "table" : "auditrecon",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "entryType" : "entrytype",
+                    "rootActionId" : "rootactionid",
+                    "action" : "activity",
+                    "message" : "message",
+                    "linkQualifier": "linkqualifier",
+                    "reconciling" : "reconciling",
+                    "reconId" : "reconid",
+                    "reconAction" : "reconaction",
+                    "situation" : "situation",
+                    "sourceObjectId" : "sourceobjectid",
+                    "status" : "status",
+                    "targetObjectId" : "targetobjectid",
+                    "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
+                    "timestamp" : "activitydate",
+                    "actionId" : "actionid",
+                    "exception" : "exceptiondetail",
+                    "mapping" : "mapping",
+                    "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
+                }
+            },
+            "audit/sync" : {
+                "table" : "auditsync",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "status" : "status",
+                    "situation" : "situation",
+                    "action" : "activity",
+                    "actionId" : "actionid",
+                    "rootActionId" : "rootactionid",
+                    "sourceObjectId" : "sourceobjectid",
+                    "targetObjectId" : "targetobjectid",
+                    "linkQualifier": "linkqualifier",
+                    "timestamp" : "activitydate",
+                    "mapping" : "mapping",
+                    "exception" : "exceptiondetail",
+                    "message" : "message",
+                    "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
+                }
+            },
+            "audit/access" : {
+                "table" : "auditaccess",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "action" : "activity",
+                    "ip" : "ip",
+                    "principal" : "principal",
+                    "roles" : "roles",
+                    "status" : "status",
+                    "timestamp" : "activitydate"
+                }
+            },
+            "security" : {
+                "table" : "security",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "storeString" : "storestring"
+                }
+            },
+            "security/keys" : {
+                "table" : "securitykeys",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "keyPair" : "keypair"
+                }
+            }
+        }
+    }
+}

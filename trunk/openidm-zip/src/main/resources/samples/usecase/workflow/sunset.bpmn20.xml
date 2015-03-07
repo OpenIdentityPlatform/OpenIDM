@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+    <process id="sunset" name="Contract termination process">
+        <startEvent id="start" activiti:initiator="startUserId" />
+            
+        <sequenceFlow sourceRef="start" targetRef="fetchData"/>
+
+        <scriptTask id="fetchData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
+            <script><![CDATA[ 
+                user = openidm.read(userId)
+                userName = user.userName
+                givenName = user.givenName
+                familyName = user.sn
+                department = user.department
+                endDate = user.sunset.date
+                employeeNumber = user.employeeNumber
+                manager = user.manager.managerId
+          ]]>
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="fetchData" targetRef="decideApprovalTask"/>
+        
+        <userTask id="decideApprovalTask" name="Contract Termination" activiti:assignee="${manager}">
+            <extensionElements>
+                <activiti:formProperty id="userName"
+                                       name="Username"
+                                       required="true"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="givenName"
+                                       name="First Name"
+                                       required="true"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="familyName"
+                                       name="Last Name"
+                                       required="true"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="department"
+                                       name="Department"
+                                       required="true"
+                                       writable="false"
+                                       type="string"/>
+                <activiti:formProperty id="endDate"
+                                       name="End Date"
+                                       type="string" 
+                                       datePattern="yyyy-MM-dd"/>
+                <activiti:formProperty id="employeeNumber"
+                                       name="Employee number"
+                                       required="true"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+              <activiti:value id="accept" name="Accept termination"></activiti:value>
+              <activiti:value id="modify" name="Modify date"></activiti:value>
+            </activiti:formProperty>
+            </extensionElements>
+        </userTask>
+        <sequenceFlow sourceRef="decideApprovalTask" targetRef="decisionMadeGateway"></sequenceFlow>
+        
+        <exclusiveGateway id="decisionMadeGateway" name="Decision Made"></exclusiveGateway>
+
+        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="deactivateManagedUser">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='accept'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="deactivateManagedUser" scriptFormat="groovy">
+            <script>
+                params = [[operation:'replace', field:'accountStatus', value :'inactive'],
+                [operation:'add', field:'sunset/dateProcessed', value:endDate],
+                [operation:'remove', field:'sunset/date']]
+                
+                openidm.patch(userId, null, params)
+                
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="deactivateManagedUser" targetRef="sendAcceptNotification"/>
+        
+        <scriptTask id="sendAcceptNotification" scriptFormat="groovy">
+            <script>
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
+                requestDate = formatUTC.format(new Date());
+                
+                def newRequesterNotification = [
+                "receiverId": "hradmin",
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "The requested user " + userName + " was successfully inactivated"
+                ];
+                
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
+        
+        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="modifyDate">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='modify'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="modifyDate" scriptFormat="groovy">
+            <script>
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC")); 
+                
+                java.text.SimpleDateFormat formatUTCDate = new java.text.SimpleDateFormat("yyyy-MM-dd");     
+                formatUTCDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+                
+                if (endDate != "") {
+                    endDateISO = formatUTC.format(formatUTCDate.parse(endDate))
+                    sunsetMap = [date:endDateISO.toString()]
+                    params = [[operation: 'replace', field:'sunset',value:sunsetMap]]
+                    openidm.patch(userId, null, params)
+                }
+                
+                requestDate = formatUTC.format(new Date());
+                
+                def newRequesterNotification = [
+                "receiverId": user.manager.managerId,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "warning",
+                "notificationSubtype" : "",
+                "message" : "Contract of " + user.userName + " was extended"
+                ];
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
+                
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="modifyDate" targetRef="end"/>
+        
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>

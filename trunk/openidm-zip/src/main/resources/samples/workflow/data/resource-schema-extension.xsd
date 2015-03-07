@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+    xmlns:tns="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension" xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd" >
+    <xsd:import namespace="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd" schemaLocation="resource-schema-1.xsd"/>
+    <xsd:element name="__ACCOUNT__">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="icf:__UID__" minOccurs="0"/>
+                <xsd:element ref="icf:__NAME__"/>
+                <xsd:element name="firstname" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="lastname" type="xsd:string" />
+                <xsd:element name="manager" type="xsd:string" />
+                <xsd:element name="department" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="jobTitle" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="mobileTelephoneNumber" type="xsd:string" minOccurs="0" />
+                <xsd:element name="email" type="xsd:string" />
+                <xsd:element name="startDate" type="xsd:string" minOccurs="0"/> <!--YYYY-MM-DD-->
+                <xsd:element name="endDate" type="xsd:string" minOccurs="0"/> <!--YYYY-MM-DD-->
+                <xsd:element name="__PASSWORD__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                __PASSWORD__ attribute
+            </xsd:documentation>
+            <xsd:appinfo>
+                <tns:javaclass>org.identityconnectors.common.security.GuardedString</tns:javaclass>
+            </xsd:appinfo>
+        </xsd:annotation>
+    </xsd:element>
+                <xsd:element name="roles" type="xsd:string" minOccurs="0"/>
+                <xsd:element ref="icf:__DESCRIPTION__" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

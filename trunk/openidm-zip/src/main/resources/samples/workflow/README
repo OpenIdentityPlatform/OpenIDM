@@ -1,0 +1,23 @@
+Workflow Sample
+===============
+
+This sample demonstrates a typical use case of a workflow for provisioning.  After starting this sample, the first
+step is to load users from the XML file into your managed/user store, like so:
+
+curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+
+This will create two users: user1 and manager1.  Both have the same password, "Welcome1".
+
+This sample also adds two new business roles to the configuration : "manager" and "employee".  User1 is an employee and manager1 is 
+a manager.
+
+Employees have access to initiate a "Contract Onboarding" process.  This is a request to add a contractor to the system, with an 
+option to include them in the xml file.  Once the form is completed, the request is sent for manager approval.  Any user with the 
+"manager" role can claim this task.  Manager1 is our only manager, so login with that user and claim the task.  You may then
+either approve or deny the request.  If approved, the user will be created in the managed/user store.  If it was requested that
+the user be provisioned into the XML file, then that will also be done.  You can now login as the new user and see the notification
+display informing the user of the dates they have been granted.  Also, user1 will be notified of the result of the manager's decision.
+
+
+This workflow uses embedded templates to build a more sophisticated input form.  This is how the form is being validated with the
+server-side policy rules.

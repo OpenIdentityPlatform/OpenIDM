@@ -1,0 +1,3125 @@
+{
+    "name": "salesforce",
+    "enabled": false,
+    "connectorRef": {
+        "connectorName": "org.forgerock.openidm.salesforce.Salesforce",
+        "bundleName": "org.forgerock.openidm.salesforce",
+        "displayName": "Salesforce Connector",
+        "systemType": "provisioner.salesforce",
+        "bundleVersion": "2.0.29.1-RC3-SNAPSHOT"
+    },
+    "objectTypes": {
+        "Group": {
+            "id": "Group",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "Name": {
+                    "type": "string",
+                    "nativeName": "Name",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "DeveloperName": {
+                    "type": "string",
+                    "nativeName": "DeveloperName",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "RelatedId": {
+                    "type": "reference",
+                    "nativeName": "RelatedId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "Type": {
+                    "type": "picklist",
+                    "nativeName": "Type",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "Email": {
+                    "type": "email",
+                    "nativeName": "Email",
+                    "nativeType": "email",
+                    "required": false
+                },
+                "OwnerId": {
+                    "type": "reference",
+                    "nativeName": "OwnerId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "DoesSendEmailToMembers": {
+                    "type": "boolean",
+                    "nativeName": "DoesSendEmailToMembers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "DoesIncludeBosses": {
+                    "type": "boolean",
+                    "nativeName": "DoesIncludeBosses",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "CreatedDate": {
+                    "type": "datetime",
+                    "nativeName": "CreatedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedById": {
+                    "type": "reference",
+                    "nativeName": "CreatedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastModifiedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastModifiedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastModifiedById": {
+                    "type": "reference",
+                    "nativeName": "LastModifiedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                }
+            }
+        },
+        "GroupMember": {
+            "id": "GroupMember",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "GroupId": {
+                    "type": "reference",
+                    "nativeName": "GroupId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "UserOrGroupId": {
+                    "type": "reference",
+                    "nativeName": "UserOrGroupId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                }
+            }
+        },
+        "Organization": {
+            "id": "Organization",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "Name": {
+                    "type": "string",
+                    "nativeName": "Name",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "Division": {
+                    "type": "string",
+                    "nativeName": "Division",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Street": {
+                    "type": "textarea",
+                    "nativeName": "Street",
+                    "nativeType": "textarea",
+                    "required": false
+                },
+                "City": {
+                    "type": "string",
+                    "nativeName": "City",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "State": {
+                    "type": "string",
+                    "nativeName": "State",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "PostalCode": {
+                    "type": "string",
+                    "nativeName": "PostalCode",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Country": {
+                    "type": "string",
+                    "nativeName": "Country",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Latitude": {
+                    "type": "double",
+                    "nativeName": "Latitude",
+                    "nativeType": "double",
+                    "required": false
+                },
+                "Longitude": {
+                    "type": "double",
+                    "nativeName": "Longitude",
+                    "nativeType": "double",
+                    "required": false
+                },
+                "Phone": {
+                    "type": "phone",
+                    "nativeName": "Phone",
+                    "nativeType": "phone",
+                    "required": false
+                },
+                "Fax": {
+                    "type": "phone",
+                    "nativeName": "Fax",
+                    "nativeType": "phone",
+                    "required": false
+                },
+                "PrimaryContact": {
+                    "type": "string",
+                    "nativeName": "PrimaryContact",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "DefaultLocaleSidKey": {
+                    "type": "picklist",
+                    "nativeName": "DefaultLocaleSidKey",
+                    "nativeType": "picklist",
+                    "required": true
+                },
+                "LanguageLocaleKey": {
+                    "type": "picklist",
+                    "nativeName": "LanguageLocaleKey",
+                    "nativeType": "picklist",
+                    "required": true
+                },
+                "ReceivesInfoEmails": {
+                    "type": "boolean",
+                    "nativeName": "ReceivesInfoEmails",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "ReceivesAdminInfoEmails": {
+                    "type": "boolean",
+                    "nativeName": "ReceivesAdminInfoEmails",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PreferencesRequireOpportunityProducts": {
+                    "type": "boolean",
+                    "nativeName": "PreferencesRequireOpportunityProducts",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "FiscalYearStartMonth": {
+                    "type": "int",
+                    "nativeName": "FiscalYearStartMonth",
+                    "nativeType": "int",
+                    "required": false
+                },
+                "UsesStartDateAsFiscalYearName": {
+                    "type": "boolean",
+                    "nativeName": "UsesStartDateAsFiscalYearName",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "DefaultAccountAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultAccountAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultContactAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultContactAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultOpportunityAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultOpportunityAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultLeadAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultLeadAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultCaseAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultCaseAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultCalendarAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultCalendarAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultPricebookAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultPricebookAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultCampaignAccess": {
+                    "type": "picklist",
+                    "nativeName": "DefaultCampaignAccess",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "ComplianceBccEmail": {
+                    "type": "email",
+                    "nativeName": "ComplianceBccEmail",
+                    "nativeType": "email",
+                    "required": false
+                },
+                "UiSkin": {
+                    "type": "picklist",
+                    "nativeName": "UiSkin",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "TrialExpirationDate": {
+                    "type": "datetime",
+                    "nativeName": "TrialExpirationDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "OrganizationType": {
+                    "type": "picklist",
+                    "nativeName": "OrganizationType",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "WebToCaseDefaultOrigin": {
+                    "type": "string",
+                    "nativeName": "WebToCaseDefaultOrigin",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "CreatedDate": {
+                    "type": "datetime",
+                    "nativeName": "CreatedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedById": {
+                    "type": "reference",
+                    "nativeName": "CreatedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastModifiedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastModifiedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastModifiedById": {
+                    "type": "reference",
+                    "nativeName": "LastModifiedById",
+                    "nativeType": "reference",
+                    "required": false
+                }
+            }
+        },
+        "PermissionSet": {
+            "id": "PermissionSet",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "Name": {
+                    "type": "string",
+                    "nativeName": "Name",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "Label": {
+                    "type": "string",
+                    "nativeName": "Label",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "UserLicenseId": {
+                    "type": "reference",
+                    "nativeName": "UserLicenseId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "ProfileId": {
+                    "type": "reference",
+                    "nativeName": "ProfileId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "IsOwnedByProfile": {
+                    "type": "boolean",
+                    "nativeName": "IsOwnedByProfile",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEmailSingle": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailSingle",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEmailMass": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailMass",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditTask": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditTask",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditEvent": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditEvent",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsExportReport": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsExportReport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsImportPersonal": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsImportPersonal",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDataExport": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDataExport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageUsers": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditPublicTemplates": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditPublicTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsModifyAllData": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsModifyAllData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCases": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCases",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsMassInlineEdit": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsMassInlineEdit",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageSolutions": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageSolutions",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCustomizeApplication": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCustomizeApplication",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditReadonlyFields": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditReadonlyFields",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsRunReports": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsRunReports",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewSetup": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewSetup",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTransferAnyEntity": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTransferAnyEntity",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsNewReportBuilder": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsNewReportBuilder",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsActivateContract": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsActivateContract",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsImportLeads": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsImportLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageLeads": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTransferAnyLead": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTransferAnyLead",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewAllData": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewAllData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditPublicDocuments": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditPublicDocuments",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewEncryptedData": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewEncryptedData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditBrandTemplates": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditBrandTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditHtmlTemplates": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditHtmlTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterInternalUser": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterInternalUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDeleteActivatedContract": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDeleteActivatedContract",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterInviteExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterInviteExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsSendSitRequests": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsSendSitRequests",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsApiUserOnly": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsApiUserOnly",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageRemoteAccess": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageRemoteAccess",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCanUseNewDashboardBuilder": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCanUseNewDashboardBuilder",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCategories": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsConvertLeads": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsConvertLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsPasswordNeverExpires": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsPasswordNeverExpires",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsUseTeamReassignWizards": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsUseTeamReassignWizards",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsInstallPackaging": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsInstallPackaging",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsPublishPackaging": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsPublishPackaging",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterOwnGroups": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterOwnGroups",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditOppLineItemUnitPrice": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditOppLineItemUnitPrice",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCreatePackaging": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCreatePackaging",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsBulkApiHardDelete": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsBulkApiHardDelete",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsInboundMigrationToolsUser": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsInboundMigrationToolsUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsSolutionImport": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsSolutionImport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCallCenters": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCallCenters",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsOutboundMigrationToolsUser": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsOutboundMigrationToolsUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewContent": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewContent",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageEmailClientConfig": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageEmailClientConfig",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEnableNotifications": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEnableNotifications",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageDataIntegrations": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageDataIntegrations",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDistributeFromPersWksp": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDistributeFromPersWksp",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewDataCategories": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewDataCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageDataCategories": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageDataCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsAuthorApex": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsAuthorApex",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageMobile": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageMobile",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsApiEnabled": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsApiEnabled",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCustomReportTypes": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCustomReportTypes",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditCaseComments": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditCaseComments",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTransferAnyCase": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTransferAnyCase",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsContentAdministrator": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsContentAdministrator",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCreateWorkspaces": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCreateWorkspaces",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageContentPermissions": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageContentPermissions",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageContentProperties": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageContentProperties",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageContentTypes": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageContentTypes",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsScheduleJob": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsScheduleJob",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageAnalyticSnapshots": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageAnalyticSnapshots",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsScheduleReports": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsScheduleReports",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageBusinessHourHolidays": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageBusinessHourHolidays",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCustomSidebarOnAllPages": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCustomSidebarOnAllPages",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewMyTeamsDashboards": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewMyTeamsDashboards",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsModerateChatter": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsModerateChatter",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsResetPasswords": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsResetPasswords",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsFlowUFLRequired": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsFlowUFLRequired",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCanInsertFeedSystemFields": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCanInsertFeedSystemFields",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEmailTemplateManagement": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailTemplateManagement",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEmailAdministration": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailAdministration",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageChatterMessages": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageChatterMessages",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsAllowEmailIC": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsAllowEmailIC",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterFileLink": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterFileLink",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsForceTwoFactor": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsForceTwoFactor",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewCaseInteraction": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewCaseInteraction",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageAuthProviders": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageAuthProviders",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewAllUsers": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewAllUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsConnectOrgToEnvironmentHub": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsConnectOrgToEnvironmentHub",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTwoFactorApi": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTwoFactorApi",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDeleteTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDeleteTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCreateTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCreateTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsAssignTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsAssignTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsIdentityEnabled": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsIdentityEnabled",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsIdentityConnect": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsIdentityConnect",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "Description": {
+                    "type": "string",
+                    "nativeName": "Description",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "CreatedDate": {
+                    "type": "datetime",
+                    "nativeName": "CreatedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedById": {
+                    "type": "reference",
+                    "nativeName": "CreatedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastModifiedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastModifiedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastModifiedById": {
+                    "type": "reference",
+                    "nativeName": "LastModifiedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "NamespacePrefix": {
+                    "type": "string",
+                    "nativeName": "NamespacePrefix",
+                    "nativeType": "string",
+                    "required": false
+                }
+            }
+        },
+        "PermissionSetAssignment": {
+            "id": "PermissionSetAssignment",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "PermissionSetId": {
+                    "type": "reference",
+                    "nativeName": "PermissionSetId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "AssigneeId": {
+                    "type": "reference",
+                    "nativeName": "AssigneeId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                }
+            }
+        },
+        "PermissionSetLicense": {
+            "id": "PermissionSetLicense",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "IsDeleted": {
+                    "type": "boolean",
+                    "nativeName": "IsDeleted",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "DeveloperName": {
+                    "type": "string",
+                    "nativeName": "DeveloperName",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Language": {
+                    "type": "picklist",
+                    "nativeName": "Language",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "MasterLabel": {
+                    "type": "string",
+                    "nativeName": "MasterLabel",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "CreatedDate": {
+                    "type": "datetime",
+                    "nativeName": "CreatedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedById": {
+                    "type": "reference",
+                    "nativeName": "CreatedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastModifiedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastModifiedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastModifiedById": {
+                    "type": "reference",
+                    "nativeName": "LastModifiedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "PermissionSetLicenseKey": {
+                    "type": "string",
+                    "nativeName": "PermissionSetLicenseKey",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "TotalLicenses": {
+                    "type": "int",
+                    "nativeName": "TotalLicenses",
+                    "nativeType": "int",
+                    "required": false
+                },
+                "Status": {
+                    "type": "picklist",
+                    "nativeName": "Status",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "ExpirationDate": {
+                    "type": "date",
+                    "nativeName": "ExpirationDate",
+                    "nativeType": "date",
+                    "required": false
+                },
+                "MaximumPermissionsEmailSingle": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEmailSingle",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEmailMass": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEmailMass",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditTask": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditTask",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditEvent": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditEvent",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsExportReport": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsExportReport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsImportPersonal": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsImportPersonal",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsDataExport": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsDataExport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageUsers": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditPublicTemplates": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditPublicTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsModifyAllData": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsModifyAllData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageCases": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageCases",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsMassInlineEdit": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsMassInlineEdit",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageSolutions": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageSolutions",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsCustomizeApplication": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsCustomizeApplication",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditReadonlyFields": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditReadonlyFields",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsRunReports": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsRunReports",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewSetup": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewSetup",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsTransferAnyEntity": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsTransferAnyEntity",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsNewReportBuilder": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsNewReportBuilder",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsActivateContract": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsActivateContract",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsImportLeads": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsImportLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageLeads": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsTransferAnyLead": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsTransferAnyLead",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewAllData": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewAllData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditPublicDocuments": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditPublicDocuments",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewEncryptedData": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewEncryptedData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditBrandTemplates": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditBrandTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditHtmlTemplates": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditHtmlTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsChatterInternalUser": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsChatterInternalUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsDeleteActivatedContract": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsDeleteActivatedContract",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsChatterInviteExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsChatterInviteExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsSendSitRequests": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsSendSitRequests",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsApiUserOnly": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsApiUserOnly",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageRemoteAccess": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageRemoteAccess",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsCanUseNewDashboardBuilder": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsCanUseNewDashboardBuilder",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageCategories": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsConvertLeads": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsConvertLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsPasswordNeverExpires": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsPasswordNeverExpires",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsUseTeamReassignWizards": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsUseTeamReassignWizards",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsInstallPackaging": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsInstallPackaging",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsPublishPackaging": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsPublishPackaging",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsChatterOwnGroups": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsChatterOwnGroups",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditOppLineItemUnitPrice": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditOppLineItemUnitPrice",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsCreatePackaging": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsCreatePackaging",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsBulkApiHardDelete": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsBulkApiHardDelete",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsInboundMigrationToolsUser": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsInboundMigrationToolsUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsSolutionImport": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsSolutionImport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageCallCenters": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageCallCenters",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsOutboundMigrationToolsUser": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsOutboundMigrationToolsUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewContent": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewContent",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageEmailClientConfig": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageEmailClientConfig",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEnableNotifications": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEnableNotifications",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageDataIntegrations": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageDataIntegrations",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsDistributeFromPersWksp": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsDistributeFromPersWksp",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewDataCategories": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewDataCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageDataCategories": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageDataCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsAuthorApex": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsAuthorApex",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageMobile": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageMobile",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsApiEnabled": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsApiEnabled",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageCustomReportTypes": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageCustomReportTypes",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditCaseComments": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditCaseComments",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsTransferAnyCase": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsTransferAnyCase",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsContentAdministrator": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsContentAdministrator",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsCreateWorkspaces": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsCreateWorkspaces",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageContentPermissions": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageContentPermissions",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageContentProperties": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageContentProperties",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageContentTypes": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageContentTypes",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsScheduleJob": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsScheduleJob",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageAnalyticSnapshots": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageAnalyticSnapshots",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsScheduleReports": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsScheduleReports",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageBusinessHourHolidays": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageBusinessHourHolidays",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsCustomSidebarOnAllPages": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsCustomSidebarOnAllPages",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewMyTeamsDashboards": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewMyTeamsDashboards",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsModerateChatter": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsModerateChatter",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsResetPasswords": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsResetPasswords",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsFlowUFLRequired": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsFlowUFLRequired",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsCanInsertFeedSystemFields": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsCanInsertFeedSystemFields",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEmailTemplateManagement": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEmailTemplateManagement",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEmailAdministration": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEmailAdministration",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageChatterMessages": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageChatterMessages",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsAllowEmailIC": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsAllowEmailIC",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsChatterFileLink": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsChatterFileLink",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsForceTwoFactor": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsForceTwoFactor",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewCaseInteraction": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewCaseInteraction",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsManageAuthProviders": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsManageAuthProviders",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsViewAllUsers": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsViewAllUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsConnectOrgToEnvironmentHub": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsConnectOrgToEnvironmentHub",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsTwoFactorApi": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsTwoFactorApi",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsDeleteTopics": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsDeleteTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsEditTopics": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsEditTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsCreateTopics": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsCreateTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsAssignTopics": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsAssignTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsIdentityEnabled": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsIdentityEnabled",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "MaximumPermissionsIdentityConnect": {
+                    "type": "boolean",
+                    "nativeName": "MaximumPermissionsIdentityConnect",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UsedLicenses": {
+                    "type": "int",
+                    "nativeName": "UsedLicenses",
+                    "nativeType": "int",
+                    "required": false
+                }
+            }
+        },
+        "PermissionSetLicenseAssign": {
+            "id": "PermissionSetLicenseAssign",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "IsDeleted": {
+                    "type": "boolean",
+                    "nativeName": "IsDeleted",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "CreatedDate": {
+                    "type": "datetime",
+                    "nativeName": "CreatedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedById": {
+                    "type": "reference",
+                    "nativeName": "CreatedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastModifiedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastModifiedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastModifiedById": {
+                    "type": "reference",
+                    "nativeName": "LastModifiedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "PermissionSetLicenseId": {
+                    "type": "reference",
+                    "nativeName": "PermissionSetLicenseId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "AssigneeId": {
+                    "type": "reference",
+                    "nativeName": "AssigneeId",
+                    "nativeType": "reference",
+                    "required": false
+                }
+            }
+        },
+        "Profile": {
+            "id": "Profile",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "Name": {
+                    "type": "string",
+                    "nativeName": "Name",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "PermissionsEmailSingle": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailSingle",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEmailMass": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailMass",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditTask": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditTask",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditEvent": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditEvent",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsExportReport": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsExportReport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsImportPersonal": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsImportPersonal",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDataExport": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDataExport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageUsers": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditPublicTemplates": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditPublicTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsModifyAllData": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsModifyAllData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCases": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCases",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsMassInlineEdit": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsMassInlineEdit",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageSolutions": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageSolutions",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCustomizeApplication": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCustomizeApplication",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditReadonlyFields": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditReadonlyFields",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsRunReports": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsRunReports",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewSetup": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewSetup",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTransferAnyEntity": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTransferAnyEntity",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsNewReportBuilder": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsNewReportBuilder",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsActivateContract": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsActivateContract",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsImportLeads": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsImportLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageLeads": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTransferAnyLead": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTransferAnyLead",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewAllData": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewAllData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditPublicDocuments": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditPublicDocuments",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewEncryptedData": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewEncryptedData",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditBrandTemplates": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditBrandTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditHtmlTemplates": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditHtmlTemplates",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterInternalUser": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterInternalUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDeleteActivatedContract": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDeleteActivatedContract",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterInviteExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterInviteExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsSendSitRequests": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsSendSitRequests",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsApiUserOnly": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsApiUserOnly",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageRemoteAccess": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageRemoteAccess",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCanUseNewDashboardBuilder": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCanUseNewDashboardBuilder",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCategories": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsConvertLeads": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsConvertLeads",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsPasswordNeverExpires": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsPasswordNeverExpires",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsUseTeamReassignWizards": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsUseTeamReassignWizards",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsInstallMultiforce": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsInstallMultiforce",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsPublishMultiforce": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsPublishMultiforce",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterOwnGroups": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterOwnGroups",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditOppLineItemUnitPrice": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditOppLineItemUnitPrice",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCreateMultiforce": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCreateMultiforce",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsBulkApiHardDelete": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsBulkApiHardDelete",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsInboundMigrationToolsUser": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsInboundMigrationToolsUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsSolutionImport": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsSolutionImport",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCallCenters": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCallCenters",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsOutboundMigrationToolsUser": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsOutboundMigrationToolsUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewContent": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewContent",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageEmailClientConfig": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageEmailClientConfig",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEnableNotifications": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEnableNotifications",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageDataIntegrations": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageDataIntegrations",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDistributeFromPersWksp": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDistributeFromPersWksp",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewDataCategories": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewDataCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageDataCategories": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageDataCategories",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsAuthorApex": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsAuthorApex",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageMobile": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageMobile",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsApiEnabled": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsApiEnabled",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageCustomReportTypes": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageCustomReportTypes",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditCaseComments": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditCaseComments",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTransferAnyCase": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTransferAnyCase",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsContentAdministrator": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsContentAdministrator",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCreateWorkspaces": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCreateWorkspaces",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageContentPermissions": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageContentPermissions",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageContentProperties": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageContentProperties",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageContentTypes": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageContentTypes",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsScheduleJob": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsScheduleJob",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageAnalyticSnapshots": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageAnalyticSnapshots",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsScheduleReports": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsScheduleReports",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageBusinessHourHolidays": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageBusinessHourHolidays",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCustomSidebarOnAllPages": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCustomSidebarOnAllPages",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewMyTeamsDashboards": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewMyTeamsDashboards",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsModerateChatter": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsModerateChatter",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsResetPasswords": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsResetPasswords",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsFlowUFLRequired": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsFlowUFLRequired",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCanInsertFeedSystemFields": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCanInsertFeedSystemFields",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEmailTemplateManagement": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailTemplateManagement",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEmailAdministration": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEmailAdministration",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageChatterMessages": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageChatterMessages",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsAllowEmailIC": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsAllowEmailIC",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsChatterFileLink": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsChatterFileLink",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsForceTwoFactor": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsForceTwoFactor",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewCaseInteraction": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewCaseInteraction",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsManageAuthProviders": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsManageAuthProviders",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsViewAllUsers": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsViewAllUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsConnectOrgToEnvironmentHub": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsConnectOrgToEnvironmentHub",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsTwoFactorApi": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsTwoFactorApi",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsDeleteTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsDeleteTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsEditTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsEditTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsCreateTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsCreateTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsAssignTopics": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsAssignTopics",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsIdentityEnabled": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsIdentityEnabled",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "PermissionsIdentityConnect": {
+                    "type": "boolean",
+                    "nativeName": "PermissionsIdentityConnect",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserLicenseId": {
+                    "type": "reference",
+                    "nativeName": "UserLicenseId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "UserType": {
+                    "type": "picklist",
+                    "nativeName": "UserType",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "CreatedDate": {
+                    "type": "datetime",
+                    "nativeName": "CreatedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedById": {
+                    "type": "reference",
+                    "nativeName": "CreatedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastModifiedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastModifiedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastModifiedById": {
+                    "type": "reference",
+                    "nativeName": "LastModifiedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "Description": {
+                    "type": "string",
+                    "nativeName": "Description",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "LastViewedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastViewedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastReferencedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastReferencedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                }
+            }
+        },
+        "User": {
+            "id": "User",
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "id",
+                    "nativeName": "Id",
+                    "nativeType": "id",
+                    "required": false
+                },
+                "Username": {
+                    "type": "string",
+                    "nativeName": "Username",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "LastName": {
+                    "type": "string",
+                    "nativeName": "LastName",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "FirstName": {
+                    "type": "string",
+                    "nativeName": "FirstName",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Name": {
+                    "type": "string",
+                    "nativeName": "Name",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "CompanyName": {
+                    "type": "string",
+                    "nativeName": "CompanyName",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Division": {
+                    "type": "string",
+                    "nativeName": "Division",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Department": {
+                    "type": "string",
+                    "nativeName": "Department",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Title": {
+                    "type": "string",
+                    "nativeName": "Title",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Street": {
+                    "type": "textarea",
+                    "nativeName": "Street",
+                    "nativeType": "textarea",
+                    "required": false
+                },
+                "City": {
+                    "type": "string",
+                    "nativeName": "City",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "State": {
+                    "type": "string",
+                    "nativeName": "State",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "PostalCode": {
+                    "type": "string",
+                    "nativeName": "PostalCode",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Country": {
+                    "type": "string",
+                    "nativeName": "Country",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Latitude": {
+                    "type": "double",
+                    "nativeName": "Latitude",
+                    "nativeType": "double",
+                    "required": false
+                },
+                "Longitude": {
+                    "type": "double",
+                    "nativeName": "Longitude",
+                    "nativeType": "double",
+                    "required": false
+                },
+                "Email": {
+                    "type": "email",
+                    "nativeName": "Email",
+                    "nativeType": "email",
+                    "required": true
+                },
+                "EmailPreferencesAutoBcc": {
+                    "type": "boolean",
+                    "nativeName": "EmailPreferencesAutoBcc",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "EmailPreferencesAutoBccStayInTouch": {
+                    "type": "boolean",
+                    "nativeName": "EmailPreferencesAutoBccStayInTouch",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "EmailPreferencesStayInTouchReminder": {
+                    "type": "boolean",
+                    "nativeName": "EmailPreferencesStayInTouchReminder",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "SenderEmail": {
+                    "type": "email",
+                    "nativeName": "SenderEmail",
+                    "nativeType": "email",
+                    "required": false
+                },
+                "SenderName": {
+                    "type": "string",
+                    "nativeName": "SenderName",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Signature": {
+                    "type": "string",
+                    "nativeName": "Signature",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "StayInTouchSubject": {
+                    "type": "string",
+                    "nativeName": "StayInTouchSubject",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "StayInTouchSignature": {
+                    "type": "string",
+                    "nativeName": "StayInTouchSignature",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "StayInTouchNote": {
+                    "type": "string",
+                    "nativeName": "StayInTouchNote",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "Phone": {
+                    "type": "phone",
+                    "nativeName": "Phone",
+                    "nativeType": "phone",
+                    "required": false
+                },
+                "Fax": {
+                    "type": "phone",
+                    "nativeName": "Fax",
+                    "nativeType": "phone",
+                    "required": false
+                },
+                "MobilePhone": {
+                    "type": "phone",
+                    "nativeName": "MobilePhone",
+                    "nativeType": "phone",
+                    "required": false
+                },
+                "Alias": {
+                    "type": "string",
+                    "nativeName": "Alias",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "CommunityNickname": {
+                    "type": "string",
+                    "nativeName": "CommunityNickname",
+                    "nativeType": "string",
+                    "required": true
+                },
+                "IsActive": {
+                    "type": "boolean",
+                    "nativeName": "IsActive",
+                    "nativeType": "boolean",
+                    "required": true
+                },
+                "TimeZoneSidKey": {
+                    "type": "picklist",
+                    "nativeName": "TimeZoneSidKey",
+                    "nativeType": "picklist",
+                    "required": true
+                },
+                "UserRoleId": {
+                    "type": "reference",
+                    "nativeName": "UserRoleId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LocaleSidKey": {
+                    "type": "picklist",
+                    "nativeName": "LocaleSidKey",
+                    "nativeType": "picklist",
+                    "required": true
+                },
+                "ReceivesInfoEmails": {
+                    "type": "boolean",
+                    "nativeName": "ReceivesInfoEmails",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "ReceivesAdminInfoEmails": {
+                    "type": "boolean",
+                    "nativeName": "ReceivesAdminInfoEmails",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "EmailEncodingKey": {
+                    "type": "picklist",
+                    "nativeName": "EmailEncodingKey",
+                    "nativeType": "picklist",
+                    "required": true
+                },
+                "ProfileId": {
+                    "type": "reference",
+                    "nativeName": "ProfileId",
+                    "nativeType": "reference",
+                    "required": true
+                },
+                "UserType": {
+                    "type": "picklist",
+                    "nativeName": "UserType",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "LanguageLocaleKey": {
+                    "type": "picklist",
+                    "nativeName": "LanguageLocaleKey",
+                    "nativeType": "picklist",
+                    "required": true
+                },
+                "EmployeeNumber": {
+                    "type": "string",
+                    "nativeName": "EmployeeNumber",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "DelegatedApproverId": {
+                    "type": "reference",
+                    "nativeName": "DelegatedApproverId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "ManagerId": {
+                    "type": "reference",
+                    "nativeName": "ManagerId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastLoginDate": {
+                    "type": "datetime",
+                    "nativeName": "LastLoginDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastPasswordChangeDate": {
+                    "type": "datetime",
+                    "nativeName": "LastPasswordChangeDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedDate": {
+                    "type": "datetime",
+                    "nativeName": "CreatedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "CreatedById": {
+                    "type": "reference",
+                    "nativeName": "CreatedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "LastModifiedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastModifiedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastModifiedById": {
+                    "type": "reference",
+                    "nativeName": "LastModifiedById",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "SystemModstamp": {
+                    "type": "datetime",
+                    "nativeName": "SystemModstamp",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "OfflineTrialExpirationDate": {
+                    "type": "datetime",
+                    "nativeName": "OfflineTrialExpirationDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "OfflinePdaTrialExpirationDate": {
+                    "type": "datetime",
+                    "nativeName": "OfflinePdaTrialExpirationDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "UserPermissionsMarketingUser": {
+                    "type": "boolean",
+                    "nativeName": "UserPermissionsMarketingUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPermissionsOfflineUser": {
+                    "type": "boolean",
+                    "nativeName": "UserPermissionsOfflineUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPermissionsAvantgoUser": {
+                    "type": "boolean",
+                    "nativeName": "UserPermissionsAvantgoUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPermissionsCallCenterAutoLogin": {
+                    "type": "boolean",
+                    "nativeName": "UserPermissionsCallCenterAutoLogin",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPermissionsMobileUser": {
+                    "type": "boolean",
+                    "nativeName": "UserPermissionsMobileUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPermissionsSFContentUser": {
+                    "type": "boolean",
+                    "nativeName": "UserPermissionsSFContentUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPermissionsChatterAnswersUser": {
+                    "type": "boolean",
+                    "nativeName": "UserPermissionsChatterAnswersUser",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "ForecastEnabled": {
+                    "type": "boolean",
+                    "nativeName": "ForecastEnabled",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesActivityRemindersPopup": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesActivityRemindersPopup",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesEventRemindersCheckboxDefault": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesEventRemindersCheckboxDefault",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesTaskRemindersCheckboxDefault": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesTaskRemindersCheckboxDefault",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesReminderSoundOff": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesReminderSoundOff",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableAllFeedsEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableAllFeedsEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableFollowersEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableFollowersEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableProfilePostEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableProfilePostEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableChangeCommentEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableChangeCommentEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableLaterCommentEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableLaterCommentEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisProfPostCommentEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisProfPostCommentEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesApexPagesDeveloperMode": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesApexPagesDeveloperMode",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesHideCSNGetChatterMobileTask": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesHideCSNGetChatterMobileTask",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableMentionsPostEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableMentionsPostEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisMentionsCommentEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisMentionsCommentEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesHideCSNDesktopTask": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesHideCSNDesktopTask",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesHideChatterOnboardingSplash": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesHideChatterOnboardingSplash",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesHideSecondChatterOnboardingSplash": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesHideSecondChatterOnboardingSplash",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisCommentAfterLikeEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisCommentAfterLikeEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableLikeEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableLikeEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableMessageEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableMessageEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesOptOutOfTouch": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesOptOutOfTouch",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableBookmarkEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableBookmarkEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableSharePostEmail": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableSharePostEmail",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesEnableAutoSubForFeeds": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesEnableAutoSubForFeeds",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesDisableFileShareNotificationsForApi": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesDisableFileShareNotificationsForApi",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowTitleToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowTitleToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowManagerToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowManagerToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowEmailToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowEmailToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowWorkPhoneToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowWorkPhoneToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowMobilePhoneToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowMobilePhoneToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowFaxToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowFaxToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowStreetAddressToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowStreetAddressToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowCityToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowCityToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowStateToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowStateToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowPostalCodeToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowPostalCodeToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowCountryToExternalUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowCountryToExternalUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowProfilePicToGuestUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowProfilePicToGuestUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowTitleToGuestUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowTitleToGuestUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowCityToGuestUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowCityToGuestUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowStateToGuestUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowStateToGuestUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowPostalCodeToGuestUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowPostalCodeToGuestUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesShowCountryToGuestUsers": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesShowCountryToGuestUsers",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "UserPreferencesHideS1BrowserUI": {
+                    "type": "boolean",
+                    "nativeName": "UserPreferencesHideS1BrowserUI",
+                    "nativeType": "boolean",
+                    "required": false
+                },
+                "ContactId": {
+                    "type": "reference",
+                    "nativeName": "ContactId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "AccountId": {
+                    "type": "reference",
+                    "nativeName": "AccountId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "CallCenterId": {
+                    "type": "reference",
+                    "nativeName": "CallCenterId",
+                    "nativeType": "reference",
+                    "required": false
+                },
+                "Extension": {
+                    "type": "phone",
+                    "nativeName": "Extension",
+                    "nativeType": "phone",
+                    "required": false
+                },
+                "FederationIdentifier": {
+                    "type": "string",
+                    "nativeName": "FederationIdentifier",
+                    "nativeType": "string",
+                    "required": false
+                },
+                "AboutMe": {
+                    "type": "textarea",
+                    "nativeName": "AboutMe",
+                    "nativeType": "textarea",
+                    "required": false
+                },
+                "FullPhotoUrl": {
+                    "type": "url",
+                    "nativeName": "FullPhotoUrl",
+                    "nativeType": "url",
+                    "required": false
+                },
+                "SmallPhotoUrl": {
+                    "type": "url",
+                    "nativeName": "SmallPhotoUrl",
+                    "nativeType": "url",
+                    "required": false
+                },
+                "DigestFrequency": {
+                    "type": "picklist",
+                    "nativeName": "DigestFrequency",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "DefaultGroupNotificationFrequency": {
+                    "type": "picklist",
+                    "nativeName": "DefaultGroupNotificationFrequency",
+                    "nativeType": "picklist",
+                    "required": false
+                },
+                "LastViewedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastViewedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "LastReferencedDate": {
+                    "type": "datetime",
+                    "nativeName": "LastReferencedDate",
+                    "nativeType": "datetime",
+                    "required": false
+                },
+                "PSA__c": {
+                    "type": "textarea",
+                    "nativeName": "PSA__c",
+                    "nativeType": "textarea",
+                    "required": false
+                }
+            }
+        }
+    },
+    "configurationProperties": {
+        "connectTimeout": 120000,
+        "loginUrl": null,
+        "idleCheckInterval": 10000,
+        "refreshToken": null,
+        "clientSecret": null,
+        "clientId": null,
+        "instanceUrl": null,
+        "version": 29
+    }
+}

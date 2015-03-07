@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! trunk/opendj3/legal-notices/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<document
+ xmlns="http://maven.apache.org/XDOC/2.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+ <properties>
+  <title>OpenIDM News</title>
+  <author email="openidm-dev@forgerock.org">ForgeRock AS</author>
+ </properties>
+ <body>
+  <section name="New Releases">
+   <p>March 30, 2012. OpenIDM 2.0.3 is now available. This is the latest update
+   on the 2.0.x branch. You can download OpenIDM 2.0.3 from the
+   <a href="http://www.forgerock.org/openidm.html">download page</a>.
+   Also read the <a
+   href="http://docs.forgerock.org/en/openidm/2.0.3/release-notes/index.html"
+   >release notes</a>.</p>
+
+   <p>February 9, 2012. OpenIDM 2.0.2 has been released as the latest supported
+   version on the 2.0.x branch. Get it now from the
+   <a href="http://www.forgerock.org/openidm.html">download page</a>.
+   See the <a
+   href="http://docs.forgerock.org/en/openidm/2.0.2/release-notes/OpenIDM-Release-Notes.html"
+   >release notes</a> for more information.</p>
+
+   <p>January 15, 2012. OpenIDM 2.0.1 is out. You can download it at
+   <a href="http://www.forgerock.org/openidm.html">ForgeRock.org/openidm.html</a>.
+   See the <a href="https://bugster.forgerock.org/jira/secure/ReleaseNote.jspa?projectId=10020&amp;version=10180"
+   >release notes</a> for details.</p>
+
+   <p>December 24, 2011. OpenIDM 2.0.0 is now available. Get it from the
+   <a href="http://www.forgerock.org/openidm.html">download page</a>. See the
+   list of fixes in the
+   <a href="https://bugster.forgerock.org/jira/secure/ReleaseNote.jspa?projectId=10020&amp;version=10137"
+   >release notes</a>.</p>
+
+   <p>May 31, 2011.  The OpenIDM team has announced OpenIDM 2.0 
+   Milestone 1, the revolutionary step towards the next generation, 
+   lightweight, scalable, highly modular and developer friendly 
+   Identity Management solution.  OpenIDM 2.0 Milestone 1 includes 
+   full capability to perform synchronization, reconciliation and 
+   basic account administration as well as exposing a RESTful web 
+   API to the core services of OpenIDM. Visit the 
+   <a href="http://www.forgerock.org/openidm.html">download page</a> 
+   to get started.
+  </p>
+  </section>
+ </body>
+</document>
+

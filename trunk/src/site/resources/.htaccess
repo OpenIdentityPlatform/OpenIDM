@@ -1,0 +1,29 @@
+# OPENIDM-2865 Redirect away from obsolete in-progress documentation
+# sending obsolete formats to the Bootstrap-styled HTML.
+
+### OpenIDM docs ###
+
+# EPUB
+RedirectMatch 301 ^/doc/OpenIDM-Integrators-Guide.epub    http://openidm.forgerock.org/doc/bootstrap/integrators-guide/
+RedirectMatch 301 ^/doc/OpenIDM-Install-Guide.epub        http://openidm.forgerock.org/doc/bootstrap/install-guide/
+RedirectMatch 301 ^/doc/OpenIDM-Release-Notes.epub        http://openidm.forgerock.org/doc/bootstrap/release-notes/
+
+# Single page HTML
+RedirectMatch 301 ^/doc/integrators-guide/(.*)            http://openidm.forgerock.org/doc/bootstrap/integrators-guide/$1
+RedirectMatch 301 ^/doc/install-guide/(.*)                http://openidm.forgerock.org/doc/bootstrap/install-guide/$1
+RedirectMatch 301 ^/doc/release-notes/(.*)                http://openidm.forgerock.org/doc/bootstrap/release-notes/$1
+
+# Chunked HTML
+RedirectMatch 301 ^/doc/integrators-guide/index/(.*)      http://openidm.forgerock.org/doc/bootstrap/integrators-guide/
+RedirectMatch 301 ^/doc/install-guide/index/(.*)          http://openidm.forgerock.org/doc/bootstrap/install-guide/
+RedirectMatch 301 ^/doc/release-notes/index/(.*)          http://openidm.forgerock.org/doc/bootstrap/release-notes/
+
+# RTF
+RedirectMatch 301 ^/doc/OpenIDM-Integrators-Guide.rtf     http://openidm.forgerock.org/doc/bootstrap/integrators-guide/
+RedirectMatch 301 ^/doc/OpenIDM-Install-Guide.rtf         http://openidm.forgerock.org/doc/bootstrap/install-guide/
+RedirectMatch 301 ^/doc/OpenIDM-Release-Notes.rtf         http://openidm.forgerock.org/doc/bootstrap/release-notes/
+
+# Webhelp
+RedirectMatch 301 ^/doc/webhelp/integrators-guide/(.*)    http://openidm.forgerock.org/doc/bootstrap/integrators-guide/
+RedirectMatch 301 ^/doc/webhelp/install-guide/(.*)        http://openidm.forgerock.org/doc/bootstrap/install-guide/
+RedirectMatch 301 ^/doc/webhelp/release-notes/(.*)        http://openidm.forgerock.org/doc/bootstrap/release-notes/

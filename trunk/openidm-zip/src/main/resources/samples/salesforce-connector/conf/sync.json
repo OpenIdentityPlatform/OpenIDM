@@ -1,0 +1,160 @@
+{
+    "_id" : "sync",
+    "mappings" : [
+        {
+            "name" : "sourceSalesforceUser_managedUser",
+            "target" : "managed/user",
+            "source" : "system/salesforce/User",
+            "policies" : [
+                {
+                    "action" : "CREATE",
+                    "situation" : "ABSENT"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "ALL_GONE"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "AMBIGUOUS"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "CONFIRMED"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "FOUND"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "FOUND_ALREADY_LINKED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "LINK_ONLY"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "MISSING"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "SOURCE_IGNORED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "SOURCE_MISSING"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "TARGET_IGNORED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "UNASSIGNED"
+                },
+                {
+                    "action" : "DELETE",
+                    "situation" : "UNQUALIFIED"
+                }
+            ],
+            "properties" : [
+                {
+                    "source" : "FirstName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "LastName",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "Email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "Username",
+                    "target" : "userName"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_sourceSalesforceUser",
+            "source" : "managed/user",
+            "target" : "system/salesforce/User",
+            "links" : "sourceSalesforceUser_managedUser",
+            "properties" : [
+                {
+                    "source" : "givenName",
+                    "target" : "FirstName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "LastName"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "Username"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "Email"
+                }
+            ],
+            "policies" : [
+                {
+                    "action" : "ASYNC",
+                    "situation" : "ABSENT"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "ALL_GONE"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "AMBIGUOUS"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "CONFIRMED"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "FOUND"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "FOUND_ALREADY_LINKED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "LINK_ONLY"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "MISSING"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "SOURCE_IGNORED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "SOURCE_MISSING"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "TARGET_IGNORED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "UNASSIGNED"
+                },
+                {
+                    "action" : "ASYNC",
+                    "situation" : "UNQUALIFIED"
+                }
+            ]
+        }
+    ]
+}

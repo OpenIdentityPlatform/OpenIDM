@@ -1,0 +1,36 @@
+<form id="authenticationForm" class="form clearfix" autocomplete="off">
+    <div class="policyInformation">
+        <label>{{t "templates.situationalPolicies.currentPolicy"}}</label>
+        <select id="policyPatterns"></select>
+        <span id="patternDescription"></span>
+        <a href="{{docHelpUrl}}integrators-guide/index.html#sync-situations" target="_blank">help <i class="fa fa-question-circle"></i></a>
+    </div>
+
+
+    <div id="sessionModuleForm">
+        <div class="group-body">
+            <div id="situationCopy" class="situationRow group-field-block">
+                <i class="fa color fa-circle"></i>
+                <label class="light situation">{{t "templates.situationalPolicies.situation"}}</label>
+                <select class="action">
+                    <option value="CREATE">Create</option>
+                    <option value="UPDATE">Update</option>
+                    <option value="DELETE">Delete</option>
+                    <option value="LINK">Link</option>
+                    <option value="UNLINK">Unlink</option>
+                    <option value="EXCEPTION">Exception</option>
+                    <option value="IGNORE">Ignore</option>
+                    <option value="REPORT">Report</option>
+                    <option value="NOREPORT">No Report</option>
+                    <option value="ASYNC">Async</option>
+                </select>
+                <i data-title="" class="fa fa-info-circle info"></i>
+            </div>
+        </div>
+    </div>
+</form>
+
+<input type="button" class="float-right button savePolicy" value="{{t 'common.form.save'}}" />
+<p>{{{star}}} {{t "templates.situationalPolicies.starDef"}}</p>
+<p>{{{hollowStar}}} {{t "templates.situationalPolicies.hollowStarDef"}}</p>
+

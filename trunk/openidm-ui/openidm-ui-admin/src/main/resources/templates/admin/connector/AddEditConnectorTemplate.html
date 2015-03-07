@@ -1,0 +1,112 @@
+<div class="title-bar">
+    <h1>{{addEditTitle}}</h1>
+    <a href="{{docHelpUrl}}integrators-guide/index.html#openidm-openicf" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+</div>
+
+<div class="resource-input-body">
+    <form id="connectorForm" class="form clearfix" autocomplete="off">
+
+        <fieldset>
+            <legend><span>{{t "common.form.generalDetails"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+            <div class="group-body">
+
+                <div class="group-field-block group-lead">
+                    <div class="separate-message">
+                        <label for="connectorName" class="light">{{t "templates.connector.connectorName"}}</label>
+                        <input id="connectorName" class="form-size-l" type="text" name="name" value="{{connectorName}}" {{#if editState}} disabled="true" {{else}}data-validator="required" data-validator-event="keyup blur" required autofocus {{/if}}>
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                </div>
+
+                <div class="group-field-block no-validation-block">
+                    <label for="connectorEnabled" class="light">{{t "templates.connector.connectorEnabled"}}</label>
+                    <select data-validator="required" data-validator-event="changed" id="connectorEnabled" class="form-size-s" name="enabled">
+                        {{#staticSelect enabled}}
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
+                        {{/staticSelect}}
+                    </select>
+                </div>
+
+                <div class="group-field-block no-validation-block">
+                    <label for="connectorType" class="light">{{t "templates.connector.connectorType"}}</label>
+                    <select id="connectorType" class="form-size-m" name="connectorType">
+                        {{#each versionDisplay}}
+                        <optgroup label="{{groupName}}">
+                            {{#each versions}}
+                            <option connectorTypeName="{{connectorName}}" bundleVersion="{{bundleVersion}}" systemType="{{systemType}}" {{#if selected}} selected{{/if}}>{{displayName}} - {{bundleVersion}}</option>
+                            {{/each}}
+                        </optgroup>
+                        {{/each}}
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="connector-details-body" id="connectorDetails">
+        </div>
+
+
+        <fieldset id="liveSync">
+            <legend><span>{{t "templates.connector.liveSync.title"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+
+            <div class="group-body">
+                <div class="group-field-block no-validation-block">
+                    <label class="light">{{t "templates.connector.liveSync.liveSyncFailure"}}</label>
+                    <select class="form-size-m retryOptions">
+                        <option value="0">{{t "templates.connector.liveSync.doNotReattempt"}}</option>
+                        <option value="-1">{{t "templates.connector.liveSync.retryIndefinitely"}}</option>
+                        <option value="*" selected>{{t "templates.connector.liveSync.specificAmount"}}</option>
+                    </select>
+                </div>
+
+                <div class="group-field-block retryBlock no-validation-block">
+                    <label for="syncFailureHandler.maxRetries" class="light">{{t "templates.connector.liveSync.retryAttempts"}}</label>
+                    <input type="text" name="syncFailureHandler.maxRetries" value="5" class="form-size-s maxRetries"/>
+                </div>
+
+                <div class="group-field-block postActionBlock no-validation-block">
+                    <label for="syncFailureHandler.postRetryAction" class="light">{{t "templates.connector.liveSync.action"}}</label>
+                    <select name="syncFailureHandler.postRetryAction" class="form-size-m postRetryAction">
+                        <option value="logged-ignore">logged-ignore</option>
+                        <option value="dead-letter-queue">dead-letter-queue</option>
+                        <option value="script">script</option>
+                    </select>
+
+                    <div class="script fieldHidden"></div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div style="display:none;" id="connectorErrorMessage" class="float-left alert-box warning-message">
+            <p class="alert-message">
+                <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
+                <span class="message"></span>
+            </p>
+        </div>
+        <div class="float-right form-button-bar">
+            <input type="submit" id="validateConnector" name="validateConnector" value="{{t 'templates.connector.validateConnector'}}" class="button">
+            <input type="button" id="addEditObjectType" name="addEditObjectType" value="{{addEditObjectTypeTitle}}" class="button" disabled="true">
+            <input type="button" id="addEditConnector" name="addEditButton" value="{{addEditSubmitTitle}}" class="button" disabled="true">
+            <a href="#resources/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="button"></a>
+        </div>
+        <div style="clear:both;"></div>
+
+        <fieldset id="liveSync">
+            <legend><span>{{t "templates.connector.liveSync.schedules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+
+            <p class="nameFieldMessage">{{t "templates.connector.liveSync.noName"}}</p>
+            <p class="objectTypeFieldMessage">{{t "templates.connector.liveSync.noObjects"}}</p>
+
+            <div class="group-body">
+                <div class="group-field-block no-validation-block">
+                    <label class="light">{{t "templates.connector.liveSync.addLiveSync"}}</label>
+                    <select class="form-size-m sources"></select>
+                    <button type="button" class="addLiveSync button add-btn"><span>{{t "templates.scheduler.addSchedule"}}</span><i class="fa fa-lg fa-plus"></i></button>
+                </div>
+                <div id="schedules" class="no-validation-block"></div>
+            </div>
+        </fieldset>
+    </form>
+</div>

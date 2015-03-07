@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-best-practices'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>OpenIDM Project Best Practices</title>
+ <indexterm>
+  <primary>Best practices</primary>
+ </indexterm>
+
+ <para>This chapter lists points to check when implementing an identity
+ management solution with OpenIDM.</para>
+
+ <section xml:id="immplementation-phase">
+  <title>Implementation Phases</title>
+
+  <para>Any identity management project should follow a set of well defined
+  phases, where each phase defines discrete deliverables. The phases take
+  the project from initiation to finally going live with a tested
+  solution.</para>
+
+  <section>
+   <title>Initiation</title>
+   <para>The project's initiation phase involves identifying and gathering
+   project background, requirements, and goals at a high level. The deliverable
+   for this phase is a statement of work or a mission statement.</para>
+  </section>
+
+  <section>
+   <title>Definition</title>
+   <para>In the definition phase, you gather more detailed information on
+   existing systems, determine how to integrate, describe account schemas,
+   procedures, and other information relevant to the OpenIDM deployment.
+   The deliverable for this phase is one or more documents that define
+   detailed requirements for the project, and that cover project definition,
+   the business case, use cases to solve, and functional specifications.</para>
+
+   <variablelist>
+    <para>The definition phase should capture at least the following.</para>
+    <varlistentry>
+     <term>User Administration and Management</term>
+     <listitem>
+      <para>Procedures for managing users and accounts, who manages users,
+      what processes look like for joiners, movers and leavers, and what is
+      required of OpenIDM to manage users</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Password Management and Password Synchronization</term>
+     <listitem>
+      <para>Procedures for managing account passwords, password policies,
+      who manages passwords, and what is required of OpenIDM to manage
+      passwords</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Security Policy</term>
+     <listitem>
+      <para>What security policies defines for users, accounts, passwords, and
+      access control</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Target Systems</term>
+     <listitem>
+      <para>Target systems and resources with which OpenIDM must integrate.
+      Information such as schema, attribute mappings and attribute
+      transformation flow, credentials and other integration specific
+      information.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Entitlement Management</term>
+     <listitem>
+      <para>Procedures to manage user access to resources, individual
+      entitlements, grouping provisioning activities into encapsulated
+      concepts such as roles and groups</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Synchronization and Data Flow</term>
+     <listitem>
+      <para>Detailed outlines showing how identity information flows from
+      authoritative sources to target systems, attribute transformations
+      required</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Interfaces</term>
+     <listitem>
+      <para>How to secure the REST, user and file-based interfaces, and to
+      secure the communication protocols involved</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Auditing and Reporting</term>
+     <listitem>
+      <para>Procedures for auditing and reporting, including who takes
+      responsibility for auditing and reporting, and what information is
+      aggregated and reported. Characteristics of reporting engines provided,
+      or definition of the reporting engine to be integrated.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Technical Requirements</term>
+     <listitem>
+      <para>Other technical requirements for the solution such as how to
+      maintain the solution in terms of monitoring, patch management,
+      availability, backup, restore and recovery process. This includes any
+      other components leveraged such as a ConnectorServer and plug-ins for
+      password synchronization on Active Directory, or OpenDJ.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section>
+   <title>Design</title>
+   <para>This phase focuses on solution design including on OpenIDM and other
+   components. The deliverables for this phase are the architecture and design
+   documents, and also success criteria with detailed descriptions and test
+   cases to verify when project goals have been met.</para>
+  </section>
+
+  <section>
+   <title>Build</title>
+   <para>This phase builds and tests the solution prior to moving the solution
+   into production.</para>
+  </section>
+
+  <section>
+   <title>Production</title>
+   <para>This phase deploys the solution into production until an
+   application steady state is reached and maintenance routines and procedures
+   can be applied.</para>
+  </section>
+ </section>
+</chapter>

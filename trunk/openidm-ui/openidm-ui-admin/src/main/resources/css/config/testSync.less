@@ -1,0 +1,34 @@
+#testSyncView, #testSyncDialog {
+    table {
+        width: 100%;
+        margin-top: 25px;
+        border: 1px solid #ddd;
+    }
+    td {
+        padding: 0px 0px 4px 10px;
+        vertical-align:middle;
+    }
+    td.changed {
+        span {
+            color: @color-active;
+            margin-right: 5px;
+        }
+        input {
+            border-color: @color-active;
+        }
+    }
+    .leftBorder {
+        border-left: 1px solid #ddd;
+    }
+    #changedPropertyMessage {
+        color: @color-active;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    #refreshSourceRecord, #removeSourceRecord{
+        cursor: pointer;
+    }
+    .button {
+        margin-bottom: 10px;
+    }
+}

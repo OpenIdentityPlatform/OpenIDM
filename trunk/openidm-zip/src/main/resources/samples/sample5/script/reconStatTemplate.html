@@ -1,0 +1,126 @@
+<h2>Global Statistics</h2>
+
+{{#global}}
+<b>Mapping Name:</b>&nbsp;{{mappingName}}<br>
+<b>Recon Id:</b>&nbsp;{{reconId}}<br>
+<b>Start Time:</b>&nbsp;{{startTime}}<br>
+<b>End Time:</b>&nbsp;{{endTime}}<br>
+{{/global}}
+
+<h2>Source System Statistics</h2>
+
+{{#source}}
+<b>System Name:</b>&nbsp;{{name}}<br>
+<b>Start Time:</b>&nbsp;{{startTime}}<br>
+<b>End Time:</b>&nbsp;{{endTime}}<br>
+<b>Duration:</b>&nbsp;{{durationMinutes}} minutes<br>
+<b>Entries:</b>&nbsp;{{entries}} read<br>
+<b>Entry List Query duration:</b>&nbsp;{{entryListDurationSeconds}} seconds<br>
+<h4> SITUATIONS </h4>
+<ul>
+    <li>CONFIRMED: {{CONFIRMED.count}}</li>
+    <li>MISSING: {{MISSING.count}}</li>
+    <li>FOUND: {{FOUND.count}}</li>
+    <li>ABSENT: {{ABSENT.count}}</li>
+    <li>UNQUALIFIED: {{UNQUALIFIED.count}}</li>
+    <li>UNASSIGNED: {{UNASSIGNED.count}}</li>
+</ul>
+<br>
+<b>Invalid entries:</b> {{NOTVALID.count}}
+<br><br>
+{{/source}}
+
+<h2>Target System Statistics</h2>
+
+{{#target}}
+<b>System Name:</b>&nbsp;{{name}}<br>
+<b>Start Time:</b>&nbsp;{{startTime}}<br>
+<b>End Time:</b>&nbsp;{{endTime}}<br>
+<b>Duration:</b>&nbsp;{{durationMinutes}} minutes<br>
+<b>Entries:</b>&nbsp;{{entries}} read<br>
+<b>Entry List Query duration:</b>&nbsp;{{entryListDurationSeconds}} seconds<br>
+<h4> SITUATIONS </h4>
+<ul>
+    <li>CONFIRMED: {{CONFIRMED.count}}</li>
+    <li>MISSING: {{MISSING.count}}</li>
+    <li>FOUND: {{FOUND.count}}</li>
+    <li>ABSENT: {{ABSENT.count}}</li>
+    <li>UNQUALIFIED: {{UNQUALIFIED.count}}</li>
+    <li>UNASSIGNED: {{UNASSIGNED.count}}</li>
+</ul>
+<br>
+<b>Invalid entries:</b> {{NOTVALID.count}}
+<br><br>
+{{/target}}
+
+<hr>
+
+<h2>Detailed Source Statistics</h2>
+
+{{#source}}
+
+    {{#if CONFIRMED.ids.length}}
+    <b><u>Confirmed ids:</u></b><br>
+        {{#each CONFIRMED.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+    {{#if MISSING.ids.length}}
+    <b><u>Missing ids:</u></b><br>
+        {{#each MISSING.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+    {{#if FOUND.ids.length}}
+    <b><u>Found ids:</u></b><br>
+        {{#each FOUND.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+    {{#if ABSENT.ids.length}}
+    <b><u>Absent ids:</u></b><br>
+        {{#each ABSENT.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+    {{#if UNQUALIFIED.ids.length}}
+    <b><u>Unqualified ids:</u></b><br>
+        {{#each UNQUALIFIED.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+    {{#if UNASSIGNED.ids.length}}
+    <b><u>Unassigned ids:</u></b><br>
+        {{#each UNASSIGNED.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+{{/source}}
+
+<hr>
+
+<h2>Detailed Target Statistics</h2>
+
+{{#target}}
+
+    {{#if CONFIRMED.ids.length}}
+    <b><u>Confirmed ids:</u></b><br>
+        {{#each CONFIRMED.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+    {{#if UNQUALIFIED.ids.length}}
+    <b><u>Unqualified ids:</u></b><br>
+        {{#each UNQUALIFIED.ids}}
+            {{this}}<br>
+        {{/each}}
+    {{/if}}
+
+{{/target}}

@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2014 ForgeRock AS
+  !
+-->
+<chapter xml:id='chap-external-rest'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'>
+ <title>Accessing External REST Services</title>
+ <indexterm>
+  <primary>External REST</primary>
+ </indexterm>
+
+ <para>
+  You can access remote REST services by using the
+  <literal>openidm/external/rest</literal> endpoint, or by specifying the
+  <literal>external/rest</literal> resource in your scripts. Note that this
+  service is not intended as a full connector to synchronize or reconcile
+  identity data, but as a way to make dynamic HTTP calls as part of the OpenIDM
+  logic. For more declarative and encapsulated interaction with remote REST
+  services, and for synchronization or reconciliation operations, you should
+  rather use the scripted REST connector.
+ </para>
+ <para>
+  An external REST call via a script might look something like the following:
+ </para>
+ <programlisting>openidm.action("external/rest", "call", params);</programlisting>
+ <para>
+  The <literal>"call"</literal> parameter specifies the action name to be used
+  for this invocation, and is the standard method signature for the
+  <literal>openidm.action</literal> method in OpenIDM ${docTargetVersion}.
+ </para>
+ <para>
+  An external REST call over REST might look something like the following:
+ </para>
+
+ <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+  "url": "http://www.december.com/html/demo/hello.html",
+  "method": "GET",
+  "detectResultFormat": false,
+  "headers": { "custom-header": "custom-header-value" }
+  }' \
+ "https://localhost:8443/openidm/external/rest?_action=call"</userinput>
+<computeroutput>{
+  "body": "&lt;!DOCTYPE html PUBLIC \"-//IETF//DTD HTML 2.0//EN\"&gt;\r\n
+           &lt;html>\r\n
+           &lt;head>\r\n
+           &lt;title>\r\n   Hello World Demonstration Document\r\n  &lt;/title>\r\n
+           &lt;/head>\r\n
+           &lt;body>\r\n
+           &lt;h1>\r\n   Hello, World!\r\n  &lt;/h1>
+           …
+           &lt;/html>\r\n",
+  "headers": {
+    "Server": "Apache",
+    "ETag": "\"299-4175ff09d1140\"",
+    "Date": "Mon, 28 Jul 2014 08:21:25 GMT",
+    "Content-Length": "665",
+    "Last-Modified": "Thu, 29 Jun 2006 17:05:33 GMT",
+    "Keep-Alive": "timeout=15, max=100",
+    "Content-Type": "text/html",
+    "Connection": "Keep-Alive",
+    "Accept-Ranges": "bytes"
+  }
+}</computeroutput></screen>
+
+ <para>
+  Note that attributes in the POST body <emphasis>do not</emphasis> have
+  underscore prefixes. This is different to the OpenIDM 2.1 implementation, in
+  which underscores were required.
+ </para>
+
+ <para>
+  HTTP 2xx responses are represented as regular, successful responses to the
+  invocation. All other responses, including redirections, are returned as
+  exceptions, with the HTTP status code in the exception
+  <literal>"code"</literal>, and the response body in the exception
+  <literal>"detail"</literal>, within the "content" element.
+ </para>
+
+ <section xml:id="invocation-parameters">
+  <title>Invocation Parameters</title>
+  <para>
+   The following parameters are passed in the resource API parameters map. These
+   parameters can override the static configuration (if present) on a
+   per-invocation basis.
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     <literal>url</literal>. The target URL to invoke, in string format.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>method</literal>. The HTTP action to invoke, in string format.
+    </para>
+    <para>
+     Possible actions include <literal>"POST"</literal>, <literal>"GET"</literal>,
+     <literal>"PUT"</literal>, <literal>"DELETE"</literal>,
+     <literal>"HEAD"</literal> and <literal>"OPTIONS"</literal>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>authenticate</literal>. The authentication type, and the details
+     with which to authenticate.
+    </para>
+    <para>
+     OpenIDM ${docTargetVersion} supports the following authentication types:
+    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <literal>basic</literal> authentication, with a username and password,
+       for example:
+      </para>
+      <programlisting>"authenticate" : {"type": "basic", "user" : "john", "password" : "Passw0rd"}</programlisting>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>bearer</literal> authentication,  which takes an OAuth
+       <literal>token</literal>, instead of a username and password, for
+       example:
+      </para>
+      <programlisting>"authenticate" : {"type": "bearer", "token" : "ya29.iQDWKpn8AHy09p....."}</programlisting>
+     </listitem>
+    </itemizedlist>
+    <para>
+     If no <literal>authenticate</literal> parameter is specified, no
+     authentication is used.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>headers</literal>. The HTTP headers to set, in a map format from
+     string (<replaceable>header-name</replaceable>) to string
+     (<replaceable>header-value</replaceable>). For example,
+     <literal>Accept-Language: en-US</literal>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>content-type</literal>. The media type of the data that is sent,
+     for example <literal>Content-Type: application/json</literal> or
+     <literal>Content-Type: application/xml</literal>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>body</literal>. The body/resource representation to send (for PUT
+     and POST operations), in string format.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>detectResultFormat</literal>. Specifies whether JSON or non-JSON
+     results are expected. Boolean, defaults to <literal>true</literal>.
+    </para>
+    <para>
+     For all responses other than 2xx, the result is returned as an exception,
+     with the HTTP code in the exception <literal>"code"</literal>. Any details
+     are returned in the exception <literal>"detail"</literal> under the
+     <literal>"content"</literal> element. For example:
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+     "url":"http://december.com/non_existing_page",
+     "method":"GET",
+     "content-type":"application/xml"
+   }' \
+ "https://localhost:8443/openidm/external/rest?_action=call"</userinput>
+<computeroutput>{
+    "detail": {
+        "content": "&lt;html>&lt;head>&lt;title>December Communications, Inc. Missing Page&lt;/title> (...) &lt;/html>\n"
+    },
+    "message": "Error while processing GET request: Not Found",
+    "reason": "Not Found",
+    "code": 404
+}</computeroutput></screen>
+    <para>
+     For more information about non-JSON results, see
+     <xref linkend="non-json-responses" />.
+    </para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="non-json-responses">
+  <title>Support for Non-JSON Responses</title>
+  <para>
+   The external REST service supports any arbitrary payload (currently in
+   stringified format). The <literal>"detectResultFormat"</literal> parameter
+   specifies whether the server should attempt to detect the response format
+   and, if the format is known, parse that format.
+  </para>
+  <para>
+   Currently, the only known response format is JSON. So, if the service that is
+   requested returns results in JSON format, and
+   <literal>"detectResultFormat"</literal> is set to <literal>true</literal>
+   (the default), the response from the call to external/rest will be the
+   identical JSON data that was returned from the remote system. This enables
+   JSON clients to interact with the external REST service with minimal changes
+   to account for in the response.
+  </para>
+  <para>
+   If the service returns results in JSON format and
+   <literal>"detectResultFormat"</literal> is set to <literal>false</literal>,
+   results are represented as a stringified entry.
+  </para>
+  <para>
+   If <literal>"detectResultFormat"</literal> is set to <literal>true</literal>
+   and the mime type is not recognized (currently any type other than JSON) the
+   result is the same as if <literal>"detectResultFormat"</literal> were set to
+   <literal>false</literal>. Set <literal>"detectResultFormat"</literal> to
+   <literal>false</literal> if the remote system returns non-JSON data, or if
+   you require details in addition to the literal JSON response body (for
+   example, if you need to access a specific response header, such as a cookie).
+  </para>
+  <para>
+   The representation as parsed JSON differs from the stringified format as
+   follows:
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     The parsed JSON representation returns the message payload directly in the
+     body, with no wrapper. Currently, for parsed JSON responses, additional
+     meta-data is not returned in the body. For example:
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+     "url": "http://localhost:8080/openidm/info/ping",
+     "method": "GET",
+     "detectResultFormat": true,
+     "headers": { "X-OpenIDM-Username": "anonymous", "X-OpenIDM-Password": "anonymous" }
+   }' \
+ "https://localhost:8443/openidm/external/rest?_action=call"</userinput>
+<computeroutput>{
+  "shortDesc": "OpenIDM ready",
+  "state": "ACTIVE_READY"
+}</computeroutput></screen>
+   </listitem>
+   <listitem>
+    <para>
+     The stringified format includes a wrapper that represents other meta-data,
+     such as returned headers. For example:
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+     "url": "http://localhost:8080/openidm/info/ping",
+     "method": "GET",
+     "detectResultFormat": false,
+     "headers": { "X-OpenIDM-Username": "anonymous", "X-OpenIDM-Password": "anonymous" }
+   }' \
+ "https://localhost:8443/openidm/external/rest?_action=call"</userinput>
+<computeroutput>{
+  "body": "{\"state\":\"ACTIVE_READY\",\"shortDesc\":\"OpenIDM ready\"}",
+  "headers": {
+    "Cache-Control": "no-cache",
+    "Server": "Jetty(8.y.z-SNAPSHOT)",
+    "Content-Type": "application/json;charset=UTF-8",
+    "Set-Cookie": "session-jwt=eyAiYWxn...-cQ.3QT4zT4ZZTj8LH8Oo_zx3w;Path=/",
+    "Expires": "Thu, 01 Jan 1970 00:00:00 GMT",
+    "Content-Length": "52",
+    "Vary": "Accept-Encoding, User-Agent"
+  }
+}</computeroutput></screen>
+    <para>
+     A sample non-JSON response would be similar:
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+     "url":"http://december.com",
+     "method":"GET",
+     "content-type":"application/xml",
+     "detectResultFormat":false
+   }' \
+ "https://localhost:8443/openidm/external/rest?_action=call"</userinput>
+<computeroutput>{
+  "body": "&lt;!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"
+          \"http://www.w3.org/TR/html4/loose.dtd\"> \n
+          &lt;html>&lt;head>&lt;title>December Communications, Inc.
+          december.com&lt;/title>\n
+          &lt;meta http-equiv=\"Content-Type\" content=\"text/html;
+          charset=iso-8859-1\">
+          ..."
+  "headers": {
+  "Server": "Apache",
+  "ETag": "\"4c3c-4f06c64da3980\"",
+  "Date": "Mon, 28 Jul 2014 19:16:33 GMT",
+  "Content-Length": "19516",
+  "Last-Modified": "Mon, 20 Jan 2014 20:04:06 GMT",
+  "Keep-Alive": "timeout=15, max=100",
+  "Content-Type": "text/html",
+  "Connection": "Keep-Alive",
+  "Accept-Ranges": "bytes"
+  }
+}</computeroutput></screen>
+   </listitem>
+  </itemizedlist>
+
+ </section>
+
+</chapter>

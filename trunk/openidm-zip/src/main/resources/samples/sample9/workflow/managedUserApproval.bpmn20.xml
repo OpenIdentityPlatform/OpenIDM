@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+
+    <process id="managedUserApproval" name="Managed User Approval Workflow">
+        <startEvent id="start"/>
+        <sequenceFlow sourceRef="start" targetRef="evaluateRequest"/>
+        
+        <userTask id="evaluateRequest" name="Evaluate request" activiti:assignee="openidm-admin">
+            <extensionElements> 
+                <activiti:formProperty id="requesterName" name="Requester's name" expression="${sourceId}" writable="false"/>
+                <activiti:formProperty id="requestApproved"  name="Do you approve the request?" required="true" type="enum">
+                    <activiti:value id="true" name="Yes"/>
+                    <activiti:value id="false" name="No"/>
+                </activiti:formProperty>
+            </extensionElements>
+        </userTask>
+        
+        <sequenceFlow sourceRef="evaluateRequest" targetRef="callOpenidmSync"/>
+        <scriptTask id="callOpenidmSync" scriptFormat="groovy">
+            <script>
+                <![CDATA[
+                if (requestApproved == 'true') {
+                    params = new java.util.HashMap();
+                    params.put('reconId', reconId)
+                    params.put('mapping', mapping)
+                    params.put('situation', situation)
+                    params.put('action', action)
+                    params.put('sourceId', sourceId)
+                    targetId = execution.getVariables().get("targetId")
+                    if (targetId!=null){
+                        params.put('targetId', targetId)
+                    }
+                    openidm.action('sync', 'performAction', [:], params)
+                }
+                ]]>
+            </script>
+        </scriptTask>
+        
+        
+        <sequenceFlow sourceRef="callOpenidmSync" targetRef="end"/>
+        
+        <endEvent id="end"/>
+
+    </process>
+</definitions>

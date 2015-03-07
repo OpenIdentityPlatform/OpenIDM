@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+    <process id="sunrise" name="Sunrise process">
+        <startEvent id="start" activiti:initiator="startUserId" />
+            
+        <sequenceFlow sourceRef="start" targetRef="activateManagedUser"/>
+
+        <scriptTask id="activateManagedUser" scriptFormat="groovy">
+            <script>
+                user = openidm.read(userId)
+                
+                params = [[operation:'replace', field:'accountStatus', value :'active'],
+                [operation:'add', field:'sunrise/dateProcessed', value:user.sunrise.date],
+                [operation:'remove', field:'sunrise/date']]
+                
+                openidm.patch(userId, null, params)
+                
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
+                requestDate = formatUTC.format(new Date());
+                
+                def notification = [
+                "receiverId": userId.split('/')[-1],
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "Your account was successfully activated."
+                ];
+                
+                openidm.create("repo/ui/notification/", null, notification)
+                
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="activateManagedUser" targetRef="end"/>
+        
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>

@@ -1,0 +1,325 @@
+{
+    "type" : "text/javascript",
+    "file" : "policy.js",
+    "additionalFiles" : [ ],
+    "resources" : [
+        {
+            "resource" : "managed/user/*",
+            "properties" : [
+                {
+                    "name" : "_id",
+                    "policies" : [
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : [
+                                    "/"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "userName",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "unique"
+                        },
+                        {
+                            "policyId" : "no-internal-user-conflict"
+                        },
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : [
+                                    "/"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "password",
+                    "policies" : [
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "at-least-X-capitals",
+                            "params" : {
+                                "numCaps" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "at-least-X-numbers",
+                            "params" : {
+                                "numNums" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 8
+                            }
+                        },
+                        {
+                            "policyId" : "cannot-contain-others",
+                            "params" : {
+                                "disallowedFields" : "userName,givenName,sn"
+                            }
+                        },
+                        {
+                            "policyId" : "re-auth-required",
+                            "params" : {
+                                "exceptRoles" : [
+                                    "system",
+                                    "openidm-admin",
+                                    "openidm-reg",
+                                    "openidm-cert"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "mail",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-email-address-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "givenName",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-name-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "sn",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-name-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "telephoneNumber",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-phone-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "employeeNumber",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        }
+                    ]
+                },
+                {
+                    "name" : "displayName",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        }
+                    ]
+                },
+                {
+                    "name" : "startDate",
+                    "policies" : [
+                        {
+                            "policyId" : "valid-date"
+                        }
+                    ]
+                },
+                {
+                    "name" : "endDate",
+                    "policies" : [
+                        {
+                            "policyId" : "valid-date"
+                        }
+                    ]
+                },
+                {
+                    "name" : "securityQuestion",
+                    "policies" : [
+                        {
+                            "policyId" : "required-if-configured",
+                            "params" : {
+                                "configBase" : "ui/configuration",
+                                "baseKey" : "configuration.securityQuestions",
+                                "exceptRoles" : [
+                                    "system",
+                                    "openidm-admin"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "securityAnswer",
+                    "policies" : [
+                        {
+                            "policyId" : "required-if-configured",
+                            "params" : {
+                                "configBase" : "ui/configuration",
+                                "baseKey" : "configuration.securityQuestions",
+                                "exceptRoles" : [
+                                    "system",
+                                    "openidm-admin"
+                                ]
+                            }
+                        },
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 16
+                            }
+                        },
+                        {
+                            "policyId" : "re-auth-required",
+                            "params" : {
+                                "exceptRoles" : [
+                                    "system",
+                                    "openidm-admin",
+                                    "openidm-reg"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "securityAnswerAttempts",
+                    "policies" : [
+                        {
+                            "policyId" : "max-attempts-triggers-lock-cooldown",
+                            "params" : {
+                                "max" : 3,
+                                "numMinutes" : 15,
+                                "dateTimeField" : "lastSecurityAnswerAttempt"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "lastSecurityAnswerAttempt",
+                    "policies" : [
+                        {
+                            "policyId" : "valid-date"
+                        }
+                    ]
+                },
+                {
+                    "name" : "passPhrase",
+                    "policies" : [
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 4
+                            }
+                        },
+                        {
+                            "policyId" : "required-if-configured",
+                            "params" : {
+                                "configBase" : "ui/configuration",
+                                "baseKey" : "configuration.siteIdentification",
+                                "exceptRoles" : [
+                                    "system",
+                                    "openidm-admin"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "resource" : "repo/internal/user/*",
+            "properties" : [
+                {
+                    "name" : "_id",
+                    "policies" : [
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : [
+                                    "/"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "password",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "at-least-X-capitals",
+                            "params" : {
+                                "numCaps" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "at-least-X-numbers",
+                            "params" : {
+                                "numNums" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 8
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

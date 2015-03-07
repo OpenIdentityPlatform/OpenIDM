@@ -1,0 +1,585 @@
+{
+    "name" : "ActiveDirectory",
+    "connectorRef" : {
+        "connectorHostRef" : "dotnet",
+        "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
+        "bundleName" : "ActiveDirectory.Connector",
+        "bundleVersion" : "[1.4.0.0,2.0.0.0)"
+    },
+    "poolConfigOption" : {
+        "maxObjects" : 10,
+        "maxIdle" : 10,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "SYNC" : -1,
+        "TEST" : -1,
+        "SEARCH" : -1,
+        "RESOLVEUSERNAME" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "VALIDATE" : -1,
+        "DELETE" : -1,
+        "UPDATE" : -1,
+        "AUTHENTICATE" : -1,
+        "CREATE" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "GET" : -1,
+        "SCHEMA" : -1
+    },
+    "configurationProperties" : {
+        "DirectoryAdminName" : "EXAMPLE\\Administrator",
+        "DirectoryAdminPassword" : "password",
+        "ObjectClass" : "User",
+        "Container" : "dc=example,dc=com",
+        "CreateHomeDirectory" : true,
+        "LDAPHostName" : "127.0.0.1",
+        "SearchChildDomains" : false,
+        "DomainName" : "example",
+        "SyncGlobalCatalogServer" : null,
+        "SyncDomainController" : null,
+        "SearchContext" : ""
+    },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
+    "objectTypes" : {
+        "Group" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "Group",
+            "type" : "object",
+            "nativeType" : "Group",
+            "properties" : {
+                "member" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "member",
+                    "nativeType" : "string"
+                },
+                "description" : {
+                    "type" : "string",
+                    "nativeName" : "description",
+                    "nativeType" : "string"
+                },
+                "groupType" : {
+                    "type" : "integer",
+                    "nativeName" : "groupType",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "mail" : {
+                    "type" : "string",
+                    "nativeName" : "mail",
+                    "nativeType" : "string"
+                },
+                "samAccountName" : {
+                    "type" : "string",
+                    "nativeName" : "samAccountName",
+                    "nativeType" : "string"
+                },
+                "managedby" : {
+                    "type" : "string",
+                    "nativeName" : "managedby",
+                    "nativeType" : "string"
+                },
+                "displayName" : {
+                    "type" : "string",
+                    "nativeName" : "displayName",
+                    "nativeType" : "string"
+                },
+                "__NAME__" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "cn" : {
+                    "type" : "string",
+                    "nativeName" : "cn",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_UPDATEABLE"
+                    ]
+                }
+            }
+        },
+        "organizationalUnit" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "organizationalUnit",
+            "type" : "object",
+            "nativeType" : "organizationalUnit",
+            "properties" : {
+                "description" : {
+                    "type" : "string",
+                    "nativeName" : "description",
+                    "nativeType" : "string"
+                },
+                "displayName" : {
+                    "type" : "string",
+                    "nativeName" : "displayName",
+                    "nativeType" : "string"
+                },
+                "__NAME__" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "managedby" : {
+                    "type" : "string",
+                    "nativeName" : "managedby",
+                    "nativeType" : "string"
+                },
+                "ou" : {
+                    "type" : "string",
+                    "nativeName" : "ou",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_UPDATEABLE"
+                    ]
+                }
+            }
+        },
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "PasswordNeverExpires" : {
+                    "type" : "boolean",
+                    "nativeName" : "PasswordNeverExpires",
+                    "nativeType" : "boolean"
+                },
+                "mail" : {
+                    "type" : "string",
+                    "nativeName" : "mail",
+                    "nativeType" : "string"
+                },
+                "__ENABLE__" : {
+                    "type" : "boolean",
+                    "nativeName" : "__ENABLE__",
+                    "nativeType" : "boolean"
+                },
+                "sAMAccountName" : {
+                    "type" : "string",
+                    "nativeName" : "sAMAccountName",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "middleName" : {
+                    "type" : "string",
+                    "nativeName" : "middleName",
+                    "nativeType" : "string"
+                },
+                "__SHORT_NAME__" : {
+                    "type" : "string",
+                    "nativeName" : "__SHORT_NAME__",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "company" : {
+                    "type" : "string",
+                    "nativeName" : "company",
+                    "nativeType" : "string"
+                },
+                "description" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "description",
+                    "nativeType" : "string"
+                },
+                "uSNChanged" : {
+                    "type" : "string",
+                    "nativeName" : "uSNChanged",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "division" : {
+                    "type" : "string",
+                    "nativeName" : "division",
+                    "nativeType" : "string"
+                },
+                "displayName" : {
+                    "type" : "string",
+                    "nativeName" : "displayName",
+                    "nativeType" : "string"
+                },
+                "__NAME__" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "otherHomePhone" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "otherHomePhone",
+                    "nativeType" : "string"
+                },
+                "facsimileTelephoneNumber" : {
+                    "type" : "string",
+                    "nativeName" : "facsimileTelephoneNumber",
+                    "nativeType" : "string"
+                },
+                "homePhone" : {
+                    "type" : "string",
+                    "nativeName" : "homePhone",
+                    "nativeType" : "string"
+                },
+                "__CURRENT_PASSWORD__" : {
+                    "type" : "string",
+                    "nativeName" : "__CURRENT_PASSWORD__",
+                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING"
+                },
+                "l" : {
+                    "type" : "string",
+                    "nativeName" : "l",
+                    "nativeType" : "string"
+                },
+                "homeDirectory" : {
+                    "type" : "string",
+                    "nativeName" : "homeDirectory",
+                    "nativeType" : "string"
+                },
+                "postalCode" : {
+                    "type" : "string",
+                    "nativeName" : "postalCode",
+                    "nativeType" : "string"
+                },
+                "st" : {
+                    "type" : "string",
+                    "nativeName" : "st",
+                    "nativeType" : "string"
+                },
+                "manager" : {
+                    "type" : "string",
+                    "nativeName" : "manager",
+                    "nativeType" : "string"
+                },
+                "__GROUPS__" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "__GROUPS__",
+                    "nativeType" : "string"
+                },
+                "__PASSWORD__" : {
+                    "type" : "string",
+                    "nativeName" : "__PASSWORD__",
+                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+                    "flags" : [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "department" : {
+                    "type" : "string",
+                    "nativeName" : "department",
+                    "nativeType" : "string"
+                },
+                "initials" : {
+                    "type" : "string",
+                    "nativeName" : "initials",
+                    "nativeType" : "string"
+                },
+                "sn" : {
+                    "type" : "string",
+                    "nativeName" : "sn",
+                    "nativeType" : "string"
+                },
+                "distinguishedName" : {
+                    "type" : "string",
+                    "nativeName" : "distinguishedName",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "__PASSWORD_EXPIRED__" : {
+                    "type" : "boolean",
+                    "nativeName" : "__PASSWORD_EXPIRED__",
+                    "nativeType" : "boolean"
+                },
+                "__LOCK_OUT__" : {
+                    "type" : "boolean",
+                    "nativeName" : "__LOCK_OUT__",
+                    "nativeType" : "boolean"
+                },
+                "streetAddress" : {
+                    "type" : "string",
+                    "nativeName" : "streetAddress",
+                    "nativeType" : "string"
+                },
+                "mobile" : {
+                    "type" : "string",
+                    "nativeName" : "mobile",
+                    "nativeType" : "string"
+                },
+                "givenName" : {
+                    "type" : "string",
+                    "nativeName" : "givenName",
+                    "nativeType" : "string"
+                },
+                "employeeID" : {
+                    "type" : "string",
+                    "nativeName" : "employeeID",
+                    "nativeType" : "string"
+                },
+                "co" : {
+                    "type" : "string",
+                    "nativeName" : "co",
+                    "nativeType" : "string"
+                },
+                "telephoneNumber" : {
+                    "type" : "string",
+                    "nativeName" : "telephoneNumber",
+                    "nativeType" : "string"
+                },
+                "title" : {
+                    "type" : "string",
+                    "nativeName" : "title",
+                    "nativeType" : "string"
+                }
+            }
+        }
+    },
+    "operationOptions" : {
+        "SYNC" : {
+            "objectFeatures" : {
+                "account" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                }
+            }
+        },
+        "SEARCH" : {
+            "objectFeatures" : {
+                "Group" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "organizationalUnit" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "account" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                }
+            }
+        },
+        "DELETE" : {
+            "objectFeatures" : {
+                "Group" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "organizationalUnit" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "account" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                }
+            }
+        },
+        "UPDATE" : {
+            "objectFeatures" : {
+                "Group" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "organizationalUnit" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "account" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                }
+            }
+        },
+        "AUTHENTICATE" : {
+            "objectFeatures" : {
+                "account" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                }
+            }
+        },
+        "CREATE" : {
+            "objectFeatures" : {
+                "Group" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "organizationalUnit" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "account" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                }
+            }
+        },
+        "GET" : {
+            "objectFeatures" : {
+                "Group" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "organizationalUnit" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                },
+                "account" : {
+                    "denied" : false,
+                    "onDeny" : "DO_NOTHING",
+                    "operationOptionInfo" : {
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "id" : "FIX_ME",
+                        "type" : "object",
+                        "properties" : {
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

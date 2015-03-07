@@ -1,0 +1,770 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012-2014 ForgeRock AS
+  !    
+-->
+<appendix xml:id='appendix-file-layout'
+ version='5.0' xml:lang='en'
+ xmlns='http://docbook.org/ns/docbook'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>File Layout</title>
+ <indexterm><primary>File layout</primary></indexterm>
+ <indexterm>
+  <primary>Configuration</primary>
+  <secondary>Files</secondary>
+ </indexterm>
+
+ <variablelist>
+  <para>
+   When you unpack and start OpenIDM ${docTargetVersion}, you create the
+   following files and directories. Note that the precise paths will depend on
+   the install, project, and working directories that you have selected during
+   startup. For more information, see <link
+   xlink:href="integrators-guide#startup-configuration"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Specifying the
+   OpenIDM Startup Configuration</citetitle></link>.
+  </para>
+  
+  <varlistentry>
+   <term>
+    <filename>openidm/audit/</filename>
+   </term>
+   <listitem>
+    <para>
+     OpenIDM audit log directory default location, created at run time, as
+     configured in <filename>openidm/conf/audit.json</filename>
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/audit/access.csv</filename></term>
+    <listitem>
+     <para>Default OpenIDM access audit log</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/audit/activity.csv</filename></term>
+    <listitem><para>Default OpenIDM activity audit log</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/audit/recon.csv</filename></term>
+    <listitem>
+     <para>Default OpenIDM reconciliation audit log</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/audit/sync.csv</filename></term>
+    <listitem>
+     <para>Default OpenIDM synchronization audit log</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/</filename></term>
+    <listitem><para>OpenIDM core libraries and scripts</para></listitem>
+  </varlistentry>  
+  <varlistentry>
+    <term><filename>openidm/bin/create-openidm-logrotate.sh</filename></term>
+    <listitem><para>Script to create an <filename>openidmlog</filename> log 
+    rotation scheduler for inclusion under 
+    <filename>/etc/logrotate.d/</filename></para></listitem>
+  </varlistentry>  
+  <varlistentry>
+    <term><filename>openidm/bin/create-openidm-rc.sh</filename></term>
+    <listitem><para>Script to create an <filename>openidm</filename> resource 
+    definition file for inclusion under <filename>/etc/init.d/</filename></para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script</filename></term>
+    <listitem>
+     <para>
+      Default scripts required to run specific services. In general, you should
+      not modify these scripts. Instead, add customized scripts to the
+      <filename>openidm/script</filename> folder.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/audit/*.js</filename></term>
+    <listitem>
+     <para>Scripts related to the audit logging service.</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/auth/*.js</filename></term>
+    <listitem>
+     <para>Scripts related to the authentication mechanism, described in the
+      <link xlink:href="integrators-guide#openidm-authentication"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Authentication
+      chapter</citetitle></link>.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/compensate.js</filename></term>
+    <listitem><para>Script that provides the compensation functionality to
+     assure or roll back reconciliation operations. For more information, see
+     <link xlink:href="integrators-guide#sync-types-automatic"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>How Automatic
+     Sync Works With onSync</citetitle></link>.
+    </para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/info/crypto.js</filename></term>
+    <listitem>
+     <para>
+      A wrapper script for the <literal>openidm.encrypt</literal> function.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/info/login.js</filename></term>
+    <listitem><para>Provides information about the current OpenIDM session.
+    </para></listitem>
+  </varlistentry>  
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/info/ping.js</filename></term>
+    <listitem><para>Provides basic information about the health of an OpenIDM 
+    system</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/lib/*</filename></term>
+    <listitem>
+     <para>
+      Internal libraries required by certain OpenIDM javascripts.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/linkedView.js</filename></term>
+    <listitem>
+     <para>
+      A script that returns all the records linked to a specific resource, used
+      in reconciliation.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/policy.js</filename></term>
+    <listitem><para>Defines each policy and specifies how policy validation is 
+    performed</para></listitem>
+  </varlistentry>  
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/policyFilter.js</filename></term>
+    <listitem><para>Enforces policy validation</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/roles/*.js</filename></term>
+    <listitem>
+     <para>
+      Scripts to provide the default roles functionality. For more information,
+      see <link xlink:href="integrators-guide#configuring-custom-roles"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+      Custom Roles</citetitle></link>.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/router-authz.js</filename></term>
+    <listitem><para>Provides the functions that enforce access rules</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/ui/*</filename></term>
+    <listitem><para>Scripts required by the UI</para></listitem>
+  </varlistentry>  
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/workflow/*</filename></term>
+    <listitem><para>Default workflow scripts</para></listitem>
+  </varlistentry>  
+  <varlistentry>
+    <term><filename>openidm/bin/felix.jar</filename></term>
+    <term><filename>openidm/bin/openidm.jar</filename></term>
+    <term><filename>openidm/bin/org.apache.felix.gogo.runtime-0.10.0.jar</filename></term>
+    <term><filename>openidm/bin/org.apache.felix.gogo.shell-0.10.0.jar</filename></term>
+    <listitem><para>Files relating to the Apache Felix OSGi framework</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/launcher.bat</filename></term>
+    <term><filename>openidm/bin/launcher.jar</filename></term>
+    <term><filename>openidm/bin/launcher.json</filename></term>
+    <listitem><para>Files relating to the startup configuration</para></listitem>
+  </varlistentry>    
+  <varlistentry>
+    <term><filename>openidm/bin/LICENSE.TXT</filename></term>
+    <term><filename>openidm/bin/NOTICE.TXT</filename></term>
+    <listitem><para>Files relating to the Apache Software License</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/install-service.bat</filename></term>
+    <term><filename>openidm/bin/MonitorService.bat</filename></term>
+    <term><filename>openidm/bin/prunmgr.exe</filename></term>     
+    <term><filename>openidm/bin/amd64/prunsrv.exe</filename></term>
+    <term><filename>openidm/bin/i386/prunsrv.exe</filename></term>
+    <term><filename>openidm/bin/ia64/prunsrv.exe</filename></term>
+    <listitem><para>Files required by the user interface to monitor and 
+    configure installed services</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/startup/</filename></term>
+    <term><filename>openidm/bin/startup/OS X - Run OpenIDM In Background.command</filename></term>
+    <term><filename>openidm/bin/startup/OS X - Run OpenIDM In Terminal Window.command</filename></term>
+    <term><filename>openidm/bin/startup/OS X - Stop OpenIDM.command</filename></term>
+    <listitem><para>Clickable commands for Mac OS X</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/workflow/</filename></term>
+    <listitem><para>Files related to the Activiti workflow engine</para></listitem>
+  </varlistentry>      
+  <varlistentry>
+    <term><filename>openidm/bundle/</filename></term>
+    <listitem><para>OSGi bundles and modules required by OpenIDM. Upgrade can 
+    install new and upgraded bundles here.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/cli.bat</filename></term>
+    <term><filename>openidm/cli.sh</filename></term>
+    <listitem><para>Management commands for operations such as validating 
+    configuration files</para></listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/</filename></term>
+   <listitem>
+    <para>OpenIDM configuration files, including .properties files and JSON
+    files. You can also access JSON views through the REST interface.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/audit.json</filename></term>
+   <listitem>
+    <para>Audit event publisher configuration file</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/authentication.json</filename></term>
+   <listitem>
+    <para>Authentication configuration file for access to the REST API</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/boot/boot.properties</filename></term>
+   <listitem>
+    <para>OpenIDM bootstrap properties</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/cluster.json</filename></term>
+   <listitem>
+    <para>Configuration file to enable use of this OpenIDM instance in a
+     cluster</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/config.properties</filename></term>
+   <listitem>
+    <para>Felix and OSGi bundle configuration properties</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/endpoint-*.json</filename></term>
+   <listitem>
+    <para>Endpoint configuration files required by the UI for the default 
+    workflows</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/info-*.json</filename></term>
+   <listitem>
+    <para>
+     Configuration files for the info service, described in <link
+     xlink:href="integrators-guide#info-service"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Obtaining
+     Information About an OpenIDM Instance</citetitle></link>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/jetty.xml</filename></term>
+   <listitem>
+    <para>Jetty configuration controlling access to the REST interface</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/logging.properties</filename></term>
+   <listitem>
+    <para>OpenIDM log configuration properties</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/managed.json</filename></term>
+   <listitem>
+    <para>Managed object configuration file</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/policy.json</filename></term>
+   <listitem>
+    <para>Default policy configuration</para>
+   </listitem>
+  </varlistentry>  
+  <varlistentry>
+   <term><filename>openidm/conf/process-access.json</filename></term>
+   <listitem>
+    <para>Workflow access configuration</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/repo.orientdb.json</filename></term>
+   <listitem>
+    <para>OrientDB internal repository configuration file</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/router.json</filename></term>
+   <listitem>
+    <para>Router service configuration file</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/scheduler.json</filename></term>
+   <listitem>
+    <para>Scheduler service configuration</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/script.json</filename></term>
+   <listitem>
+    <para>Script configuration file with default script directories.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/servletfilter-*.json</filename></term>
+   <listitem>
+    <para>Sample servlet filter configuration, described in <link
+    xlink:href="integrators-guide#registering-servlet-filters"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Registering
+    Additional Servlet Filters</citetitle></link>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/system.properties</filename></term>
+   <listitem>
+    <para>System configuration properties used when starting OpenIDM
+    services</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/ui-configuration.json</filename></term>   
+   <listitem>
+    <para>Main configuration file for the browser-based user interface</para>
+   </listitem>
+  </varlistentry>  
+  <varlistentry>
+   <term><filename>openidm/conf/ui-countries.json</filename></term>   
+   <listitem>
+    <para>Configurable list of countries available when registering users in 
+    the user interface</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/ui-secquestions.json</filename></term>   
+   <listitem>
+    <para>Configurable list of security questions available when registering 
+    users in the user interface</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/ui-themeconfig.json</filename></term>
+   <listitem>
+    <para>Customizable UI theme configuration file</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/ui.context-enduser.json</filename></term>
+   <listitem>
+    <para>Configuration file that specifies the context root of the UI,
+    <literal>/openidmui</literal> by default</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/workflow.json</filename></term>   
+   <listitem>
+    <para>Configuration of the Activiti workflow engine</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/connectors/</filename></term>
+   <listitem>
+    <para>OpenICF connector libraries. OSGi enabled connector libraries can
+    also be stored in <filename>openidm/bundle/</filename>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/</filename></term>
+   <listitem>
+    <para>
+     Internal repository files, including OrientDB files and sample repository
+     configurations for JDBC-based repositories.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/db2</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language script for
+     DB2 database.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/h2</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language script for
+     H2 database, supported for Activiti engine.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/mssql</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration, data definition language script, and
+     <literal>bnd</literal> file (for creating OSGi bundle) for configuring an
+     MS SQL repository. For more information, see <link
+     xlink:href="install-guide#repository-mssql"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With MS SQL</citetitle></link> in the <citetitle>Installation
+     Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/mysql</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language scripts for
+     configuring a MySQL repository. For more information, see <link
+     xlink:href="install-guide#repository-mysql"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With MySQL</citetitle></link> in the <citetitle>Installation
+     Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/oracle</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language script for
+     configuring an OracleDB repository. For more information, see <link
+     xlink:href="install-guide#repository-oracledb"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With Oracle Database</citetitle></link> in the
+     <citetitle>Installation Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/postgresql</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration, data definition language script, and
+     schema optimization scripts for configuring a PostgreSQL repository. For
+     more information, see <link
+     xlink:href="install-guide#repository-postgresql"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With PostgreSQL</citetitle></link> in the <citetitle>Installation
+     Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/util</filename></term>
+   <listitem>
+    <para>
+     Files required for support of OrientDB Studio.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/felix-cache/</filename></term>
+   <listitem>
+    <para>Bundle cache directory created when the Felix framework is 
+    started</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/lib</filename></term>
+   <listitem>
+    <para>
+     Location in which third-party libraries (required, for example, by custom
+     connectors) should be placed.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/logs/</filename></term>
+   <listitem>
+    <para>OpenIDM service log directory</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/logs/openidm0.log.*</filename></term>
+   <listitem>
+    <para>OpenIDM service log files as configured in
+    <filename>openidm/conf/logging.properties</filename></para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/</filename></term>
+   <listitem>
+    <para>OpenIDM sample configurations</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/audit-sample/</filename></term>
+   <listitem>
+    <para>
+     Sample demonstrates configuring a MySQL database to receive the audit logs
+     for access, activity, and recon.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/customendpoint/</filename></term>
+   <listitem>
+    <para>Sample custom endpoint configuration. For more information, see 
+    <link xlink:href="integrators-guide#adding-custom-endpoints"
+xlink:role="http://docbook.org/xlink/role/olink"><citetitle
+>Adding Custom Endpoints</citetitle></link>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/infoservice/</filename></term>
+   <listitem>
+    <para>Sample that shows how to use the configurable information service. 
+    For more information, see <link xlink:href="integrators-guide#info-service"
+xlink:role="http://docbook.org/xlink/role/olink"><citetitle
+>Obtaining Information About an OpenIDM Instance</citetitle></link>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/misc/</filename></term>
+   <listitem>
+    <para>Sample configuration files</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/provisioners/</filename></term>
+   <listitem>
+    <para>Sample connector configuration files</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample1/</filename></term>
+   <listitem>
+    <para>XML file connector sample</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample2/</filename></term>
+   <listitem>
+    <para>One-way reconciliation sample using OpenDJ and LDAP connector</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample2b/</filename></term>
+   <listitem>
+    <para>Bi-directional reconciliation sample using OpenDJ and LDAP
+     connector</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample2c/</filename></term>
+   <listitem>
+    <para>Sample using LDAP connector to synchronize LDAP group membership</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample2d/</filename></term>
+   <listitem>
+    <para>>Sample using LDAP connector to synchronize LDAP groups</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample3/</filename></term>
+   <listitem>
+    <para>Scripted SQL connector sample for MySQL</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample4/</filename></term>
+   <listitem>
+    <para>Sample demonstrating synchronization between two external resources
+    (CSV and XML) without using the OpenIDM internal repository</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample5/</filename></term>
+   <listitem>
+    <para>LDAP to OpenIDM to Active Directory attribute flow sample using XML
+    resources rather than actual directories</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample5b/</filename></term>
+   <listitem>
+    <para>Similar to sample 5 but also configures a compensation script that
+     attempts to ensure either all the synchronization or none of the
+     synchronization is performed</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample6/</filename></term>
+   <listitem>
+    <para>LiveSync and reconciliation sample for use with two LDAP servers,
+    using Active Directory and OpenDJ</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample7/</filename></term>
+   <listitem>
+    <para>Sample exposing identities with a SCIM-line schema</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample8/</filename></term>
+   <listitem>
+    <para>Sample demonstrating logging in scripts</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/sample9/</filename></term>
+   <listitem>
+    <para>Sample demonstrating how to perform an asynchronous action from a
+     reconciliation</para>
+   </listitem>
+  </varlistentry>  
+  <varlistentry>
+   <term><filename>openidm/samples/schedules/</filename></term>
+   <listitem>
+    <para>Sample schedule configuration files</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/security/</filename></term>
+   <listitem>
+    <para>Sample keystore, truststore, and certificates</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/syncfailure/</filename></term>
+   <listitem>
+    <para>
+     Sample showing the sync failure handler for liveSync
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/taskscanner/</filename></term>
+   <listitem>
+    <para>Sample sunset scanning task. For more information, see <link 
+    xlink:href="integrators-guide#task-scanner"
+xlink:role="http://docbook.org/xlink/role/olink"><citetitle
+>Scanning Data to Trigger Tasks</citetitle></link>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/workflow/</filename></term>
+   <listitem>
+    <para>Typical use case of a workflow for provisioning</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/usecase/*</filename></term>
+   <listitem>
+    <para>Several workflow samples to demonstrate common use cases</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/script/</filename></term>
+   <listitem>
+    <para>
+     OpenIDM location for script files referenced in the configuration
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/script/access.js</filename></term>
+   <listitem>
+    <para>Default authorization policy script</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/security/</filename></term>
+   <listitem>
+    <para>OpenIDM security configuration, keystore, and truststore</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/shutdown.sh</filename></term>
+   <listitem>
+    <para>Script to shutdown OpenIDM services based on the process
+    identifier</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/startup.bat</filename></term>
+   <listitem>
+    <para>Script to start OpenIDM services on Windows</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/startup.sh</filename></term>
+   <listitem>
+    <para>Script to start OpenIDM services on UNIX</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/ui/default/*</filename></term>
+   <listitem>
+    <para>Default OpenIDM graphical UI files</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/ui/extension/*</filename></term>
+   <listitem>
+    <para>Location for any UI customizations</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/workflow/</filename></term>
+   <listitem>
+    <para>OpenIDM location for BPMN 2.0 workflows and .bar files</para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</appendix>

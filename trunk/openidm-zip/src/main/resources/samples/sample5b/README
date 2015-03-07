@@ -1,0 +1,147 @@
+/** 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+Sample 5b - "All-or-Nothing" Synchronization of Two Resources
+-------------------------------------------------------------
+
+This sample demonstrates flowing data between external resources just as
+in the regular sample 5 on which it is based. It simulates two directory 
+resources using XML files. It extends sample 5 in that it configures a
+compensation script that attempts to ensure either all the synchronization
+or none of the synchronization is performed after making a change to a
+managed user.
+
+Whenever a change is made to a managed/user resource, OpenIDM implicitly
+attempts to synchronize external resources according to the object mapping
+in sync.json where managed/user is the source.  Typically, if the 
+synchronization fails--owing to a policy validation for the target, 
+missing required properties for the target, or simply that the target
+is unavailable--the synchronization stops, leaving the managed/user
+resource, and any targets that were synchronized before the failure,
+updated.  The target that failed, and any targets specified
+in mappings subsequent to the one that failed are not updated.
+This situation would usually result in a set of systems that are out of
+sync. The only way to re-synchronize them would be a reconciliation operation.
+Reconciliations can be expensive with large data sets.
+
+OpenIDM 3.0 enhances synchronization to multiple targets by providing
+synchronization details to an "onSync" script, after successfully synchronizing
+all targets or failing one target.  This script hook can be used to "revert"
+the partial change to managed/user and the corresponding external resources
+per the object mappings.
+
+Sample 5b includes a script that demonstrates compensating for a synchronization
+failure.
+
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample5b
+
+To try the sample, follow these steps.
+
+  Steps 1 and 2 are optional, and only necessary if you'd like to receive emailed
+  recon summaries.
+
+    1. Copy the samples/misc/external.email.json file into samples/sample5b/conf
+    $ cd /path/to/openidm
+    $ cp samples/misc/external.email.json samples/sample5b/conf
+
+    Edit this file to have your email server SMTP details.
+    See http://openidm.forgerock.org/doc/integrators-guide/index.html#chap-mail
+    for more information.
+
+    2. Edit samples/sample5b/script/reconStats.js and change these values to your
+    own email addresses:
+
+    var params = {
+        //UPDATE THESE VALUES
+        from : "openidm@example.com",
+        to : "idmadmin1@example.com",
+        cc : "idmadmin2@example.com,idmadmin3@example.com",
+        subject : "Recon stats for " + global.mappingName,
+        type : "text/html"
+    }
+
+    3. Start OpenIDM with the configuration for sample 5b.
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/sample5b
+    When you start OpenIDM, it creates data in the new external resource file
+    that represents an AD directory, samples/sample5b/data/xml_AD_Data.xml.
+    The new file is empty until you run reconciliation.
+
+    4. Run reconciliation.
+    $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
+    {"_id":"b149f0e3-4bb9-4790-9266-fab2e5c80ec6","state":"ACTIVE"}
+    
+    5. Check 
+    $ cat /path/to/openidm/samples/sample5b/data/xml_AD_Data.xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+                          xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension samples/sample5b/data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd samples/sample5b/data/resource-schema-1.xsd">
+       <ri:__ACCOUNT__>
+          <ri:firstname>Darth</ri:firstname>
+          <icf:__DESCRIPTION__/>
+          <icf:__GROUPS__/>
+          <icf:__UID__>68077c05-32ae-4438-b250-d23be784ea07</icf:__UID__>
+          <icf:__NAME__>DDOE1</icf:__NAME__>
+          <ri:email>mail1@example.com</ri:email>
+          <icf:__PASSWORD__>initial_Passw0rd</icf:__PASSWORD__>
+          <icf:__ENABLE__/>
+          <ri:lastname>Doe</ri:lastname>
+       </ri:__ACCOUNT__>
+    </icf:OpenICFContainer>
+
+    6. Create a new user in the source external resource file,
+       samples/sample5b/data/xml_LDAP_Data.xml, and run reconciliation again
+       to see the result show up in samples/sample5b/data/xml_AD_Data.xml.
+
+    7. Login to the UI at https://localhost:8443/openidmui. You can use
+       openidm-admin/openidm-admin for admin access or DDOE1/TestPassw0rd2 for
+       non-admin access. Updates to DDOE1 will be synced backed to both XML files.
+
+    8. Now make the LDAP xml file unavailable by renaming it so it is unreadable.
+       You may need to have root or sudo access to do this:
+       $ mv /path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml /path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml.bak
+
+    9. Perform an update to the DDOE1 user.  It will be updated in managed/user,
+       the synchronization to AD will be successful, but the synchronization to
+       LDAP should fail.  The compensate.js script will be invoked and will
+       attempt to revert the change by performing another update to DDOE1 in
+       managed/user, which will, in turn, perform the sync to AD and LDAP.
+       On the second time through, the sync will again fail to LDAP, which will
+       trigger the compensate.js again.  The script this time will recognize
+       that the change was originally called from compensation and will abort.
+       The original sync error on the first update will be thrown from the
+       script and the UI should display an error.
+
+       Note that if you are making these updates from the UI, the UI screen does
+       not refresh after the failure.  It will still show the "pending update"
+       that has not taken effect.  Go back to the Users tab and start over and
+       you will see the old managed/user data has been restored.  View the
+       xml_AD_Data.xml file and you will see that DDOE1 has also been reverted
+       to its condition prior to update.
+
+   10. If you have configured the recon email summary in steps 1 and 2, you
+       should have received an email that lists the details for the reconciliation.

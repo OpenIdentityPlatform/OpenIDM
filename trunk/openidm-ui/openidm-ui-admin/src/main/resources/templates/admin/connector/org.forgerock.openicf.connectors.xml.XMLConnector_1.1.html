@@ -1,0 +1,39 @@
+<fieldset>
+    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body">
+        <div class="group-field-block group-lead">
+            <div class="separate-message">
+                <label for="xsdicfFilePath" class="light">{{t "templates.connector.xmlConnector.xsdicfFilePath"}}</label>
+                <input id="xsdicfFilePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.xsdIcfFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xsdIcfFilePath}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="xsdFilePath" class="light">{{t "templates.connector.xmlConnector.xsdFilePath"}}</label>
+                <input id="xsdFilePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.xsdFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xsdFilePath}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="xmlFilePath" class="light">{{t "templates.connector.xmlConnector.xmlFilePath"}}</label>
+                <input id="xmlFilePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.xmlFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xmlFilePath}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <label for="createIfNotExists" class="light">{{t "templates.connector.xmlConnector.createIfNotExists"}}</label>
+            <select if="createIfNotExists" class="form-size-s" name="configurationProperties.createFileIfNotExists" required>
+            {{#staticSelect connectorDefaults.configurationProperties.createFileIfNotExists}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
+            </select>
+        </div>
+    </div>
+</fieldset>
+

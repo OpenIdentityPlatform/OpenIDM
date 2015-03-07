@@ -1,0 +1,41 @@
+{
+    "dbUrl" : "plocal:./target/testdb/openidm",
+    "user" : "admin",
+    "poolMinSize" : 5,
+    "poolMaxSize" : 20,
+    "queries" : {
+        "query-all-ids" : "select _openidm_id from ${unquoted:_resource}",
+        "query-all" : "select ${unquoted:fields} from ${unquoted:_resource}",
+        "query-by-native-ids" : "select ${unquoted:fields} from ${unquoted:native-ids}",
+        "query-by-ids-experiment" : "select ${unquoted:fields} from ${unquoted:_resource} where _openidm_id = ${id1} or _openidm_id = ${id2}",
+        "query-without-token" : "select * from managed_user where lastname like 'Eglo%' and test = 'inlinequery'",
+        "query-with-where-token" : "select * from managed_user where lastname like 'Eglo%' and test = ${querytype}",
+        "query-with-from-token" : "select * from ${unquoted:_resource} where lastname like '${unquoted:lastname}%' and test = ${querytype}"
+    },
+    "dbStructure" : {
+        "orientdbClass" : {
+            "managed_user" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                } ]
+            },
+            "links_account_mapping" : {
+                "index" : [ {
+                    "propertyName" : "sourceId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "targetId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "reconId",
+                    "propertyType" : "string",
+                    "indexType" : "notunique"
+                } ]
+            }
+        }
+    }
+}

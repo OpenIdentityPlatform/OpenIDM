@@ -1,0 +1,89 @@
+{
+    "mappings" : [
+        {
+            "name" : "sourceGoogle__ACCOUNT___managedUser",
+            "source" : "system/google/__ACCOUNT__",
+            "target" : "managed/user",
+            "validSource" : {
+                "type" : "text/javascript",
+                "source" : "source != null ? !source.isAdmin : false;"
+            },
+            "properties" : [
+                {
+                    "target" : "givenName",
+                    "source" : "givenName"
+                },
+                {
+                    "target" : "sn",
+                    "source" : "familyName"
+                },
+                {
+                    "target" : "userName",
+                    "source" : "__NAME__"
+                },
+                {
+                    "target" : "mail",
+                    "source" : "emails",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.length ? source[0].address : null"
+                    }
+                }
+            ],
+            "policies" : [
+                {
+                    "action" : "CREATE",
+                    "situation" : "ABSENT"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "ALL_GONE"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "AMBIGUOUS"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "CONFIRMED"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "FOUND"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "FOUND_ALREADY_LINKED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "LINK_ONLY"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "MISSING"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "SOURCE_IGNORED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "SOURCE_MISSING"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "TARGET_IGNORED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "UNASSIGNED"
+                },
+                {
+                    "action" : "DELETE",
+                    "situation" : "UNQUALIFIED"
+                }
+            ]
+        }
+    ]
+}

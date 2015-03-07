@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-repository'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+    <title>Repository</title>
+    <para>The repository provides a common abstraction for a pluggable persistence layer. Plugged in repositories could be NoSQL, relational databases, ldap etc.</para>
+    <para/>
+    <para>The API operates with (JSON-based) object model parameters/results, with the same RESTful principles as the other internal APIs.</para>
+    <para/>
+    <para>Aside from get, put, patch, delete it also provides for queries for sets of objects.</para>
+    <para/>
+    <sect1>
+        <title>Query</title>
+        <para>Repository Query</para>
+        <para/>
+        <para>Implementation Phases</para>
+        <orderedlist>
+            <listitem>
+                <para>In a first phase native queries are supported</para>
+            </listitem>
+            <listitem>
+                <para>In a second phase a common query expression independent of the underlying technology is planned.</para>
+            </listitem>
+        </orderedlist>
+        <para/>
+        <para>Assumptions</para>
+        <orderedlist>
+            <listitem>
+                <para>We will provide for native queries as a baseline. This way even when we add a common query language doesn't have to cover every possibility</para>
+            </listitem>
+            <listitem>
+                <para>A common expression/language to define queries, independent of the underlying data store is desirable in the long run</para>
+            </listitem>
+            <listitem>
+                <para>The client API provides for both the ability to execute pre-defined, parameterized queries, and the ability to supply the query as a parameter as well.</para>
+            </listitem>
+        </orderedlist>
+    
+        <para/>
+        <para>Query Configuration</para>
+        <para/>
+        <para>Queries can be configured either on the OrientDB service, i.e. the queries section of the file </para>
+        <para>conf/org.forgerock.repo.orientdb.json</para>
+        <para/>
+        <para>Or they can be declared in the context of the calling module if it passes the expression to the repository as part of the query.</para>
+        <para/>
+        <para>Query Types</para>
+        <para>The default is to express the query in the native language of the underlying store.</para>
+        <para/>
+        <para>An optional querytype can be added going foward to explicitly declare the query type, e.g.</para>
+        <para/>
+        <para>- Native query languages(s) - Languages/expressions directly understood by the underlying persistence store</para>
+        <para>- Common query languages(s) - NOTE: format TBD (*)  </para>
+        <para>examples:</para>
+        <para/>
+        <para>QueryType NATIVE</para>
+        <para>QueryType COMMON_JSON_PATH (*)</para>
+        <para>QueryType COMMON_SQL (*)</para>
+        <para/>
+        <para>Common Query Formats</para>
+        <para/>
+        <para>To be decided</para>
+        <para>  </para>
+        <para>Query Tokens</para>
+        <para/>
+        <para>Queries can contain tokens of the format ${token-name}, which will get replaced from parameters passed to the query.</para>
+        <para/>
+        <para>Queries can be of type String or List.</para>
+        <para/>
+        <para>At token of type List typically will be converted into a repository specific string representation to insert into the query, e.g. for an orientdb "query of "select ${_fields} from managed/user" a List of fields with firstname, lastname, email will be expanded to "select firstname,lastname,email from managed/user"</para>
+        <para/>
+        <para>Query API</para>
+        <para/>
+        <para>Object query(String id, Map params)</para>
+        <para/>
+        <para>id: </para>
+        <para>identifies the resource set to query against, such as a relative uri for all "user" objects </para>
+        <para/>
+        <para>params: </para>
+        <para>set of parameters that can be substituted as tokens into the query. Reserved property keys are defined in QueryConstants. </para>
+        <orderedlist>
+            <listitem>
+                <para>The reserved property _queryId (QueryConstants.QUERY_ID) can specify a pre-configured parameterized query to execute</para>
+            </listitem>
+            <listitem>
+                <para>The reserved properties _queryExpressions ((QueryConstants.QUERY_EXPRESSION) (and optional _query-type) allow to pass add-hoc queries rather than specifying a query by id</para>
+            </listitem>
+            <listitem>
+                <para>The optional reserved properties _page-from (*), _page-size (*), _page-direction (*) can be used to page through the results either forwards or backwards. For the first page, the _page-from property can be empty; in the result meta-data the query will return two tokens for subsequent use in the _page-from parameter - a token representing the first record to page backwards, and a token representing the last record to page forward </para>
+            </listitem>
+        </orderedlist>
+    
+        <para/>
+        <para>The system also populates the OrientDB document class name in the property "_resource" (QueryConstants.RESOURCE_NAME), which can be resulved as a query token, e.g.</para>
+        <para>select * from ${_resource}</para>
+        <para/>
+        <para>return value:</para>
+        <para/>
+        <para>a Map&lt;String, Object&gt; JSON based object model</para>
+        <para/>
+        <para>The actual result set "records" are in the "result" map entry (QueryConstants.QUERY_RESULT) and of format List&lt;Map&lt;String, Object&gt;&gt;. Each list entry is a (potentially parts of) an object matching the query. If not all fields of an object were selected, only the selected parts of the object will be present.</para>
+        <para/>
+        <para>Additional meta-data is available at the top level of the returned map, e.g. QueryConstants.STATISTICS_QUERY_TIME (time to execute the query in ms) or  QueryConstants.STATISTICS_CONVERSION_TIME (time to convert the results to the object model in ms)</para>
+        <para/>
+        <para>The metadata in the future can contain more information about the query, such as paging token for the first and last result to page backwards/forwards.</para>
+        <para/>
+        <para>The paging mechanism does not guarantee isolation or consistency across the consecutive paging calls, i.e. changing the underlying data in between/during paging calls(s) will show up in the results.  </para>
+        <para/>
+        <para>Query Definition</para>
+        <para/>
+        <para>The query definition happens based on structure of the stored object, e.g.</para>
+        <orderedlist>
+            <listitem>
+                <para>The mapping object which links arbitrary objects (managed and/or system objects)</para>
+            </listitem>
+            <listitem>
+                <para>The managed object structure and its associated schema</para>
+            </listitem>
+            <listitem>
+                <para>Intermediate objects constructed for recon and sync purposes</para>
+            </listitem>
+            <listitem>
+                <para>Objects constructed for reporting purposes</para>
+            </listitem>
+        </orderedlist>
+        <para>The query can contain tokens (e.g. ${firstname}) that will get substituted at runtime by the value supplied in the params map argument</para>
+        <para/>
+        <para>For example, assuming a managed object "managed/user"</para>
+        <example>
+            <programlisting language="javascript">
+{
+    "_id" : "999",
+    "_rev" : "0",
+    "firstname" : "John",
+    "lastname" : "Doe",
+    "address":
+    {
+         "street":"Some ln",
+         "city":"Somewhere",
+         "zip":"99999"
+    }
+}</programlisting>
+        </example>
+        <para/>
+        <para>Example associated queries</para>
+        <example>
+            <programlisting language="javascript">
+queries: {
+    "my-query" : "select firstname, lastname from user where address.city = '${city}'"
+}</programlisting>
+        </example>
+        <para/>
+        <para>The call to Managed Object API can look something equivalent to the following (e.g. from the REST API, or from recon code)</para>
+        <para/>
+        <programlisting language="java">
+Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
+params.put(QueryConstants.QUERY_ID, "my-query");
+params.put("city", "Some");
+
+Map&lt;String, Object&gt; result = query("managed/user", params);
+
+List&lt;Map&lt;String, Object&gt;&gt; records = (List&lt;Map&lt;String, Object&gt;&gt;) result.get(QueryConstants.QUERY_RESULT);
+for (Map&lt;String, Object&gt; entry : records.entrySet()) {
+    entry.get("firstname");
+    entry.get("lastname");
+    entry.get("_id");
+    entry.get("_rev");
+}
+Long queryTimeMs = (String) result.get(QueryConstants.STATISTICS_QUERY_TIME);
+Long conversionTimeMs = result.get(QueryConstants.STATISTICS_CONVERSION_TIME);
+
+// Not yet supported
+// result.get(QueryConstants.PAGING_TOKEN_FIRST);
+// result.get(QueryConstants.PAGING_TOKEN_LAST);
+        </programlisting>
+        <para/>
+        <para>It may pass this query directly to the repository service, "as is". The specific repository service implementation, e.g. the repo-orientdb would have read in the query definitions. If necessary it can translate a common query format into something it natively understands, or - as in this example - use the native query directly. </para>
+        <para/>
+        <para>Performance Considerations</para>
+        <para/>
+        <para>Care needs to be taken to create appropriate indexes on queried fields.</para>
+        <para/>
+        <para>When creating queries with tokens, note that OrientDB can only make prepared statements with tokens in the "where" clause. Hence if tokens are used elsewhere, the repository will create queries on demand with the replaced tokens.</para>
+        <para/>
+        <para>Comments</para>
+        <para/>
+        <para>TODO: make sure the API aligns with the query API specified on the managed object</para>
+        <orderedlist>
+            <listitem>
+                <para>Might need to provide less rigid pre-defined queries, e.g. being able to search a user given any number of combinations of fields</para>
+            </listitem>
+            <listitem>
+                <para>The common query technology choice is a concern. </para>
+            </listitem>
+            <listitem>
+                <para>JSONPath (or JSONQuery) is not a standard and not well known. Although technically it fits nicely into the architecture, this may not appeal that much to folks that might be DB developers/admins.</para>
+            </listitem>
+            <listitem>
+                <para>SQL is more familiar to many, but we may have to invent a query syntax that allows querying embedded documents. It also is not terribly JSON related.</para>
+            </listitem>
+            <listitem>
+                <para>XPath is another technology that is pretty well known, but obviously is typically thought of as XML related - although JXPath provides queries on arbitrary java objects for example.</para>
+            </listitem>
+            <listitem>
+                <para>The common query flexiblity/effort is a concern: Depending on the extent of what needs to be expressable this could become a considerable effort for every persistence option, including concerns about lowest common denominator and other incompatibilities.</para>
+            </listitem>
+            <listitem>
+                <para>Rather than simple token substitution from a single dimension map we could support notations to traverse objects, akin to the JSP expression language (EL). We could also then include whole resource "objects" as a paramter map entry, e.g. "${systemobject.firstname}". This could remove the need for a javascript mapping to extract parameters for simple cases.</para>
+            </listitem>
+        </orderedlist>
+        <para/>
+    </sect1>
+
+
+</chapter>
+

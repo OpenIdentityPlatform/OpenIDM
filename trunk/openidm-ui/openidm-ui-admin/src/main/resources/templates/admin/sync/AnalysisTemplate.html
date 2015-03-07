@@ -1,0 +1,37 @@
+<div class="content-bg" style="border: none">
+    <div class="formContainer" id="reconContainer">
+
+        {{#if reconAvailable}}
+            <div id="newLinksWarning" class="changesPending alert-box warning-message" style="display:none;">
+                <div class="alert-message">
+                    <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
+                    <span class="message">
+                        <span id="newLinksWarningText"></span>
+                        <button id="doSyncButton" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
+                            <span class="fa fa-clock-o"></span>
+                            {{t "templates.mapping.syncNow"}}
+                        </button> {{t "templates.mapping.analysis.forResultsToTakeEffect"}}
+                    </span>
+                </div>
+            </div>
+            {{t "templates.mapping.analysis.view"}}:
+            <select id="situationSelection">
+                <option value="{{allSituations}}">{{t "templates.mapping.analysis.allSituations"}}</option>
+                {{#each situationList}}
+                    <option value="{{key}}">{{key}} ({{value}})</option>
+                {{/each}}
+            </select>
+            <button id="changeAssociation" class="button actionButton" disabled>{{t "templates.mapping.analysis.changeAssociation"}}</button>
+            {{#unless hideSingleRecordReconButton}}<button id="singleRecordSync" class="button actionButton" disabled>{{t "templates.mapping.analysis.reconcileSelectedRecord"}}</button>{{/unless}}
+            <div id="analysisGridContainer">
+                <table class="recon-grid" id="analysisGrid"></table>
+                <div class="recon-pager" id="analysisGridGridPager"></div> 
+            </div>
+        {{else}}
+            <button id="doSyncButton" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
+                <span class="fa fa-clock-o"></span>
+                {{t "templates.mapping.syncNow"}}
+            </button> {{t "templates.mapping.analysis.clickToAnalyze"}}
+        {{/if}}
+    </div>
+</div>

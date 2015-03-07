@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<orient-server>
+    <handlers>
+        <handler class="com.orientechnologies.orient.server.handler.OJMXPlugin">
+            <parameters>
+                <parameter name="enabled" value="false"/>
+                <parameter name="profilerManaged" value="true"/>
+            </parameters>
+        </handler>
+        <handler class="com.orientechnologies.orient.server.plugin.mail.OMailPlugin">
+            <parameters>
+                <parameter name="enabled" value="true"/>
+                <parameter name="profile.default.mail.smtp.host" value="localhost"/>
+                <parameter name="profile.default.mail.smtp.port" value="25"/>
+                <parameter name="profile.default.mail.smtp.auth" value="true"/>
+                <parameter name="profile.default.mail.smtp.starttls.enable" value="true"/>
+                <parameter name="profile.default.mail.smtp.user" value=""/>
+                <parameter name="profile.default.mail.smtp.password" value=""/>
+                <parameter name="profile.default.mail.date.format" value="yyyy-MM-dd HH:mm:ss"/>
+            </parameters>
+        </handler>
+        <handler class="com.orientechnologies.orient.server.handler.OAutomaticBackup">
+            <parameters>
+                <parameter name="enabled" value="false"/>
+                <parameter name="delay" value="4h"/>
+                <parameter name="target.directory" value="backup"/>
+                <parameter name="target.fileName" value="${DBNAME}-${DATE:yyyyMMddHHmmss}.json"/>
+                <parameter name="db.include" value=""/>
+                <parameter name="db.exclude" value=""/>
+            </parameters>
+        </handler>
+        <handler class="com.orientechnologies.orient.server.handler.OServerSideScriptInterpreter">
+            <parameters>
+                <parameter name="enabled" value="false"/>
+            </parameters>
+        </handler>
+    </handlers>
+    <network>
+        <protocols>
+            <protocol name="binary" implementation="com.orientechnologies.orient.server.network.protocol.binary.ONetworkProtocolBinary"/>
+            <protocol name="http" implementation="com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb"/>
+        </protocols>
+        <listeners>
+            <listener ip-address="127.0.0.1" port-range="2424-2430" protocol="binary"/>
+            <listener ip-address="127.0.0.1" port-range="2480-2490" protocol="http">
+                <commands>
+                    <command stateful="false" pattern="GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg" implementation="com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent">
+                        <parameters>
+                            <entry name="http.cache:*.htm *.html" value="Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache"/>
+                            <entry name="http.cache:default" value="Cache-Control: max-age=120"/>
+                        </parameters>
+                    </command>
+                </commands>
+                <parameters>
+                    <parameter name="network.http.charset" value="utf-8"/>
+                </parameters>
+            </listener>
+        </listeners>
+    </network>
+    <storages>
+        <storage name="temp" path="memory:temp" userName="admin" userPassword="admin" loaded-at-startup="true"/>
+    </storages>
+    <users>
+        <user name="root" password="7A5DEAB30884B4C8026A047F13D4A67BDEDC7CA227AA8F4D477727EABE5541B4" resources="*"/>
+        <user name="guest" password="guest" resources="connect,server.listDatabases,server.dblist"/>
+    </users>
+    <properties>
+        <entry name="db.pool.min" value="1"/>
+        <entry name="db.pool.max" value="20"/>
+        <entry name="cache.level1.enabled" value="false"/>
+        <entry name="cache.level1.size" value="1000"/>
+        <entry name="cache.level2.enabled" value="true"/>
+        <entry name="cache.level2.size" value="1000"/>
+        <entry name="profiler.enabled" value="true"/>
+        <entry name="log.console.level" value="info"/>
+    </properties>
+</orient-server>

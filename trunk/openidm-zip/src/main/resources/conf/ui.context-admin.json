@@ -1,0 +1,8 @@
+{
+    "enabled" : true,
+    "urlContextRoot" : "/admin",
+    "bundle" : {
+        "name" : "org.forgerock.openidm.ui-admin",
+        "resourceDir" : "/public"
+    }
+}

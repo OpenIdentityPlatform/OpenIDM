@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+    xmlns:tns="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension" xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd" >
+    <xsd:import namespace="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd" schemaLocation="resource-schema-1.xsd"/>
+    <xsd:element name="__ACCOUNT__">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="icf:__UID__" minOccurs="0"/>
+                <xsd:element ref="icf:__NAME__"/>
+                <xsd:element name="firstname" type="xsd:string" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="lastname" type="xsd:string" >
+                </xsd:element>
+                <xsd:element name="email" type="xsd:string" maxOccurs="unbounded" minOccurs="0">
+                </xsd:element>
+                <!--xsd:element name="address" type="xsd:string" maxOccurs="unbounded" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="employee-number" type="xsd:string" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="employee-type" type="xsd:string" minOccurs="0">
+                </xsd:element-->
+                <xsd:element ref="icf:__PASSWORD__"/>
+                <!--xsd:element name="secret-pin" type="xsd:string" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>org.identityconnectors.common.security.GuardedString</icf:javaclass>
+                            <icf:flag>NOT_READABLE</icf:flag>
+                            <icf:flag>NOT_RETURNED_BY_DEFAULT</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="password-secret-answer" type="xsd:base64Binary" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>org.identityconnectors.common.security.GuardedByteArray</icf:javaclass>
+                            <icf:flag>NOT_RETURNED_BY_DEFAULT</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="is-deleted" type="xsd:boolean" default="false" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:flag>NOT_CREATABLE</icf:flag>
+                            <icf:flag>NOT_UPDATABLE</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="jpegPhoto" type="xsd:base64Binary" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:flag>NOT_RETURNED_BY_DEFAULT</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element ref="icf:__LAST_LOGIN_DATE__" minOccurs="0"/>
+                <xsd:element name="last-logoff" type="xsd:integer" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.math.BigInteger</icf:javaclass>
+                            <icf:flag>NOT_CREATABLE</icf:flag>
+                            <icf:flag>NOT_UPDATABLE</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="account-created-timestamp" type="xsd:long" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:flag>NOT_UPDATABLE</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element-->
+                <!--xsd:element name="ms-employed" type="xsd:long" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Long</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element-->
+                <!--xsd:element name="lastname-first-letter" type="xsd:string" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Character</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="gender" type="xsd:string" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Character</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="hourly-wage" type="xsd:double" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="overtime-commission" type="xsd:double" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Double</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="avg-wage" type="xsd:float" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:flag>NOT_CREATABLE</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="office-square-feet" type="xsd:float" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Float</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="age" type="xsd:int" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="years-employed" type="xsd:int" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Integer</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="has-sixth-sense" type="xsd:boolean" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="permanent-employee" type="xsd:boolean" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Boolean</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="yearly-wage" type="xsd:integer" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.math.BigInteger</icf:javaclass>
+                            <icf:flag>NOT_READABLE</icf:flag>
+                            <icf:flag>NOT_RETURNED_BY_DEFAULT</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="max-storage" type="xsd:decimal" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.math.BigDecimal</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="userCertificate" type="xsd:base64Binary" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:flag>NOT_RETURN_BY_DEFAULT</icf:flag>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element-->
+                <xsd:element ref="icf:__DESCRIPTION__"  minOccurs="0"/>
+                <!--xsd:element ref="icf:__DISABLE_DATE__"  minOccurs="0"/>
+                <xsd:element ref="icf:__ENABLE_DATE__"  minOccurs="0"/-->
+                <xsd:element ref="icf:__ENABLE__"  minOccurs="0"/>
+                <xsd:element ref="icf:__GROUPS__"  minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="__GROUP__">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <xsd:sequence>
+                        <icf:operation>CREATE</icf:operation>
+                        <icf:operation>SEARCH</icf:operation>
+                        <icf:operation>UPDATE</icf:operation>
+                    </xsd:sequence>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:sequence>
+                <xsd:element ref="icf:__NAME__"/>
+                <xsd:element ref="icf:__DESCRIPTION__"/>
+                <xsd:element ref="icf:__SHORT_NAME__"/>
+                <xsd:element ref="icf:OpenICFContainer"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="OrganizationUnit">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <xsd:sequence>
+                        <icf:operation>CREATE</icf:operation>
+                        <icf:operation>SEARCH</icf:operation>
+                        <icf:operation>UPDATE</icf:operation>
+                    </xsd:sequence>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:sequence>
+                <xsd:element ref="icf:__NAME__"/>
+                <xsd:element ref="icf:__DESCRIPTION__"/>
+                <xsd:element ref="icf:__SHORT_NAME__"/>
+                <xsd:element ref="icf:OpenICFContainer"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

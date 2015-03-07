@@ -1,0 +1,72 @@
+{
+    "serverAuthContext" : {
+        "sessionModule" : {
+            "name" : "JWT_SESSION",
+            "properties" : {
+                "keyAlias" : "openidm-localhost",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
+                "keystoreType" : "&{openidm.keystore.type}",
+                "keystoreFile" : "&{openidm.keystore.location}",
+                "keystorePassword" : "&{openidm.keystore.password}",
+                "maxTokenLifeMinutes" : "1",
+                "tokenIdleTimeMinutes" : "1",
+                "sessionOnly" : true
+            }
+        },
+        "authModules" : [
+            {
+                "name" : "STATIC_USER",
+                "properties" : {
+                    "queryOnResource" : "repo/internal/user",
+                    "username" : "anonymous",
+                    "password" : "anonymous",
+                    "defaultUserRoles" : [ "openidm-reg" ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "OPENAM_SESSION",
+                "properties" : {
+                    "openamDeploymentUrl" : "",
+                    "groupRoleMapping" : {
+                        "openidm-admin" : [ ]
+                    },
+                    "openamSSOTokenCookieName" : "iPlanetDirectoryPro",
+                    "openamUserAttribute" : "uid",
+                    "queryOnResource" : "system/ldap/account",
+                    "propertyMapping" : {
+                        "authenticationId" : "uid",
+                        "groupMembership" : "ldapGroups"
+                    },
+                    "defaultUserRoles" : [
+                        "openidm-authorized"
+                    ],
+                    "groupComparisonMethod" : "ldap",
+                    "managedUserLink" : "systemLdapAccounts_managedUser",
+                    "augmentSecurityContext" : {
+                        "type" : "text/javascript",
+                        "file" : "auth/populateAsManagedUser.js"
+                    },
+                    "truststoreType" : "&{openidm.truststore.type}",
+                    "truststoreFile" : "&{openidm.truststore.location}",
+                    "truststorePassword" : "&{openidm.truststore.password}"
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "INTERNAL_USER",
+                "properties" : {
+                    "queryId" : "credential-internaluser-query",
+                    "queryOnResource" : "repo/internal/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            }
+        ]
+    }
+}

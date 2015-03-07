@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/jqgrid",
+    "type" : "text/javascript",
+    "file" : "ui/jqgridQueryWrapper.js"
+}

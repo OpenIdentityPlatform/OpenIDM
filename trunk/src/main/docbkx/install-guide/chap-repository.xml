@@ -1,0 +1,929 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012-2014 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-repository'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>Installing a Repository For Production</title>
+  <indexterm>
+   <primary>Repository database</primary>
+   <secondary>Production ready</secondary>
+  </indexterm>
+
+ <para>
+  By default, OpenIDM uses OrientDB for its internal repository so that you do
+  not have to install a database in order to evaluate OpenIDM. Before using
+  OpenIDM in production, however, you must replace OrientDB with a supported
+  JDBC repository.
+ </para>
+ 
+ <para>
+  OpenIDM ${docTargetVersion} supports the use of <link
+  xlink:href="http://dev.mysql.com/downloads/mysql/"
+  xlink:show="new">MySQL</link>, MS SQL, PostgreSQL, and Oracle Database as
+  internal repositories. For details of the supported versions, see <link
+  xlink:href="release-notes#chap-before-you-install"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You Install
+  OpenIDM Software</citetitle></link> in the
+  <citetitle>Release Notes</citetitle>.
+ </para>
+
+ <para>
+  For information about the general JDBC repository configuration, and how to
+  map OpenIDM objects to JDBC database tables, see <link
+  xlink:href="integrators-guide#chap-repo"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing the
+  OpenIDM Repository</citetitle></link> in the <citetitle>Integrator's
+  Guide</citetitle>.
+ </para>
+
+ <section xml:id="repository-mysql">
+  <title>To Set Up OpenIDM With MySQL</title>
+
+  <procedure>
+   <para>
+    After you have installed MySQL on the local host and <emphasis>before
+    starting OpenIDM for the first time</emphasis>, set up OpenIDM to use the
+    new repository, as described in the following sections.
+   </para>
+   <para>
+    This procedure assumes that a password has already been set for the MySQL
+    root user.
+   </para>
+   <step>
+    <para>
+     Download <link xlink:show="new"
+     xlink:href="http://dev.mysql.com/downloads/connector/j/5.1.html">MySQL
+     Connector/J</link>, version 5.1 or later from the MySQL website. Unpack the
+     delivery, and copy the .jar into the <filename>openidm/bundle</filename>
+     directory.
+    </para>
+    <screen>
+$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/
+    </screen>
+   </step>
+   <step>
+    <para>
+     Make sure that OpenIDM is stopped.
+    </para>
+    <screen>$ cd /path/to/openidm/
+$ ./shutdown.sh
+OpenIDM is not running, not stopping.
+    </screen>
+   </step>
+   <step>
+    <para>
+     Remove <filename>openidm/conf/repo.orientdb.json</filename>.
+    </para>
+   <screen>$ cd /path/to/openidm/conf/
+$ rm repo.orientdb.json</screen>
+  </step>
+  <step>
+   <para>
+    Copy <filename>openidm/db/mysql/conf/repo.jdbc.json</filename> to the
+    <filename>openidm/conf</filename> directory.
+   </para>
+   <screen>$ cd /path/to/openidm
+$ cp db/mysql/conf/repo.jdbc.json conf/</screen>
+  </step>
+  <step>
+   <indexterm>
+    <primary>Repository database</primary>
+    <secondary>Table names</secondary>
+   </indexterm>
+   <para>
+    Import the data definition language script for OpenIDM into MySQL.
+   </para>
+   <screen><userinput>$ cd /path/to/mysql
+$ ./bin/mysql -u root -p &lt; /path/to/openidm/db/mysql/scripts/openidm.sql</userinput>
+<computeroutput>Enter password:
+$ </computeroutput></screen>
+   <para>This step creates an <literal>openidm</literal> database for use
+   as the internal repository, and a user <literal>openidm</literal> with 
+   password <literal>openidm</literal> who has all the required privileges to 
+   update the database.</para>
+   <screen><userinput>$ ./bin/mysql -u root -p</userinput>
+<computeroutput>Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 18
+Server version: 5.5.19 MySQL Community Server (GPL)
+...
+mysql&gt; </computeroutput><userinput>use openidm;</userinput>
+<computeroutput>Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql&gt; </computeroutput><userinput>show tables;</userinput>
+<computeroutput>
++---------------------------+
+| Tables_in_openidm         |
++---------------------------+
+| auditaccess               |
+| auditactivity             |
+| auditrecon                |
+| clusterobjectproperties   |
+| clusterobjects            |
+| configobjectproperties    |
+| configobjects             |
+| genericobjectproperties   |
+| genericobjects            |
+| internaluser              |
+| links                     |
+| managedobjectproperties   |
+| managedobjects            |
+| objecttypes               |
+| schedulerobjectproperties |
+| schedulerobjects          |
+| security                  |
+| securitykeys              |
+| uinotification            |
++---------------------------+
+19 rows in set (0.00 sec)</computeroutput></screen>
+   <para>The table names are similar to those used with OrientDB.</para>
+  </step>
+  <step>
+   <para>
+    Update <filename>openidm/conf/repo.jdbc.json</filename> as necessary, to
+    reflect your MySQL deployment.
+   </para>
+   <programlisting language="javascript">"connection" : {
+    "dbType" : "MYSQL",
+    "jndiName" : "",
+    "driverClass" : "com.mysql.jdbc.Driver",
+    "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm",
+    "username" : "openidm",
+    "password" : "openidm",
+    "defaultCatalog" : "openidm",
+    "maxBatchSize" : 100,
+    "maxTxRetry" : 5,
+    "enableConnectionPool" : true,
+    "connectionTimeoutInMs" : 30000
+},</programlisting>
+  </step>
+ </procedure>
+
+    <para>
+     When you have set up MySQL for use as the OpenIDM internal repository,
+     start OpenIDM to check that the setup has been successful. After startup,
+     you should see that <literal>repo.jdbc</literal> is
+     <literal>active</literal>, whereas <literal>repo.orientdb</literal> is
+     <literal>unsatisfied</literal>.
+    </para>
+
+    <screen><userinput>
+$ cd /path/to/openidm
+$ ./startup.sh</userinput>
+<computeroutput>Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG:
+-Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties</computeroutput>
+<userinput>-&gt; scr list</userinput>
+<computeroutput>
+Id   State          Name
+[  19] [active       ] org.forgerock.openidm.config.starter
+[  23] [active       ] org.forgerock.openidm.taskscanner
+[   8] [active       ] org.forgerock.openidm.external.rest
+[  12] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  15] [active       ] org.forgerock.openidm.ui.simple
+[   1] [active       ] org.forgerock.openidm.router
+[  22] [active       ] org.forgerock.openidm.scheduler
+[  14] [active       ] org.forgerock.openidm.restlet
+[   7] [unsatisfied  ] org.forgerock.openidm.external.email
+[  18] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+[   6] [active       ] org.forgerock.openidm.sync
+[   3] [active       ] org.forgerock.openidm.script
+[   5] [active       ] org.forgerock.openidm.recon
+[   2] [active       ] org.forgerock.openidm.scope
+[  10] [active       ] org.forgerock.openidm.http.contextregistrator
+[  20] [active       ] org.forgerock.openidm.config
+[   0] [active       ] org.forgerock.openidm.audit
+[  21] [active       ] org.forgerock.openidm.schedule
+[  17] [active       ] org.forgerock.openidm.repo.jdbc
+[  16] [active       ] org.forgerock.openidm.workflow
+[  13] [active       ] org.forgerock.openidm.provisioner.openicf
+[   4] [active       ] org.forgerock.openidm.managed
+[   9] [active       ] org.forgerock.openidm.authentication
+[  11] [active       ] org.forgerock.openidm.provisioner</computeroutput></screen>
+ </section>
+
+ <section xml:id="repository-mssql">
+  <title>To Set Up OpenIDM With MS SQL</title>
+
+  <procedure>
+   <para>
+    These instructions are specific to MS SQL Server 2008 running on
+    a local Windows 2008 Server R2 system. Adapt the instructions for your
+    environment.
+   </para>
+
+   <itemizedlist>
+    <para>
+     When you install Microsoft SQL Server, note that OpenIDM has the following
+     specific configuration requirements:
+    </para>
+    <listitem>
+     <para>
+      During the Feature Selection installation step, make sure that at least
+      SQL Server Replication, Full Text Search, and Management Tools - Basic are
+      selected.
+     </para>
+     <para>
+      These instructions require SQL Management Studio so make sure that you
+      include Management Tools in the installation.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      OpenIDM requires SQL Server authentication. During the MS SQL Server
+      installation, make sure that you select SQL Server authentication (mixed
+      mode) and not just Windows authentication.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      TCP/IP must be enabled and configured for the correct IP address and port.
+      To configure TCP/IP, follow these steps:
+     </para>
+     <orderedlist>
+      <listitem>
+       <para>
+        Click Start > All Programs > MS SQL Server 2008 R2 > Configuration Tools
+        > SQL Server Configuration Manager.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Expand the SQL Server Network Configuration item and select "Protocols
+        for MSSQLSERVER".
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Double click TCP/IP and select Enabled > Yes.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Select the IP Addresses tab and set the addresses and ports on which the
+        server will listen.
+       </para>
+       <para>
+        For this sample procedure, scroll down to IPAll and set TCP Dynamic
+        Ports to 1433 (the default port for MS SQL).
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Click Apply, then OK.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Restart MS SQL Server for the configuration changes to take effect. To
+        restart the server, select SQL Server Services in the left pane, double
+        click SQL Server (MSSQLSERVER) and click Restart.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        If you have a firewall enabled, ensure that the port you configured in
+        the previous step is open for OpenIDM to access MS SQL.
+       </para>
+      </listitem>
+     </orderedlist>
+    </listitem>
+   </itemizedlist>
+
+   <para>
+    After you have installed MS SQL on the local host, install OpenIDM, if you
+    have not already done so, but <emphasis>do not start</emphasis> the OpenIDM
+    instance. Import the data definition and set up OpenIDM to use the new
+    repository, as described in the following steps.
+   </para>
+
+   <step>
+    <para>
+     Use SQL Management Studio to import the data definition language script for
+     OpenIDM into MS SQL.
+    </para>
+    <substeps>
+     <step>
+      <para>
+       Click Start > All Programs > Microsoft SQL Server 2008 > SQL Server
+       Management Studio.
+      </para>
+     </step>
+     <step>
+      <para>
+       On the Connect to Server panel, under Server Type, select Database
+       Engine. From the Authentication drop down list, select Windows
+       Authentication. If needed,  log in as the current user (for
+       example, Administrator).
+      </para>
+     </step>
+     <step>
+      <para>
+       Select File > Open > File and navigate to the OpenIDM data definition
+       language script
+       (<filename>path\to\openidm\db\mssql\scripts\openidm.sql</filename>).
+       Click Open to open the file.
+      </para>
+     </step>
+     <step>
+      <para>
+       Click Execute to run the script.
+      </para>
+     </step>
+    </substeps>
+   </step>
+   <step>
+    <para>
+     This step creates an <literal>openidm</literal> database for use as the
+     internal repository, and a user <literal>openidm</literal> with password
+     <literal>Passw0rd</literal> who has all the required privileges to update
+     the database. You might need to refresh the view in SQL Server Management
+     Studio to see the <literal>openidm</literal> database in the Object
+     Explorer.
+    </para>
+    <para>
+     Expand Databases > openidm > Tables. You should see the OpenIDM tables in
+     the openidm database, as shown in the following example:
+    </para>
+    <mediaobject>
+     <alt>Default tables in the openidm MS SQL database</alt>
+     <imageobject>
+      <imagedata fileref="images/sql-tables-2008.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+    <para>
+     The table names are similar to those used with OrientDB.
+    </para>
+   </step>
+   <step>
+    <para>
+     OpenIDM requires an MS SQL driver that must be created from two separate
+     JAR files. Create the driver as follows.
+    </para>
+    <substeps>
+     <step>
+      <para>
+       Download the JDBC Driver 4.0 for SQL Server
+       (<filename>sqljdbc_4.0.2206.100_enu.exe</filename>) from <link
+       xlink:href="http://www.microsoft.com/en-us/download/details.aspx?id=11774">
+       Microsoft's download site</link>. The precise URL may vary, depending on
+       your location.
+      </para>
+      <para>
+       Run the downloaded executable file; it should extract multiple files,
+       include Java archive files, to a dedicated folder.
+      </para>
+      <para>
+       Extract the executable Java archive file
+       (<filename>sqljdbc4.jar</filename>) from the dedicated folder, using
+       7-zip or an equivalent file management application.
+      </para>
+      <para>
+       Copy the Java archive file to
+       <filename>openidm\db\mssql\scripts</filename>.
+      </para>
+     </step>
+     <step>
+      <para>
+       Download the <literal>bnd</literal> Java archive file
+       (<filename>biz.aQute.bnd.jar</filename>) that enables you to create OSGi
+       bundles. The file (Bundle Version 1.50.0) can be downloaded from <link
+       xlink:href="http://central.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar" />.
+       For more information about <literal>bnd</literal>, see <link
+       xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
+      </para>
+      <para>
+       Copy the file to <filename>openidm\db\mssql\scripts</filename>.
+      </para>
+     </step>
+     <step>
+      <para>
+       Your <filename>openidm\db\mssql\scripts</filename> directory should now
+       contain the following files:
+      </para>
+       <screen>
+       biz.aQute.bnd.jar  openidm.sql  sqljdbc4.bnd  sqljdbc4.jar
+       </screen>
+     </step>
+     <step>
+      <para>
+       Bundle the two JAR files together with the following command:
+      </para>
+      <screen>
+C:\> cd \path\to\openidm\db\mssql\scripts
+./> java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd sqljdbc4.jar
+      </screen>
+      <para>
+       This step creates a single <literal>.bar</literal> file, named
+       <filename>sqljdbc4.bar</filename>.
+      </para>
+     </step>
+     <step>
+      <para>
+       Rename the <filename>sqljdbc4.bar</filename> file to
+       <filename>sqljdbc4-osgi.jar</filename> and copy it to the
+       <filename>openidm\bundle</filename> directory.
+      </para>
+      <screen>
+./> ren sqljdbc4.bar sqljdbc4-osgi.jar
+./> copy sqljdbc4-osgi.jar \path\to\openidm\bundle
+      </screen>
+     </step>
+    </substeps>
+   </step>
+   <step>
+    <para>
+     Remove the default OrientDB repository configuration file
+     (<filename>openidm\conf\repo.orientdb.json</filename>) from the
+     configuration directory.
+    </para>
+    <screen>
+C:\> cd \path\to\openidm\conf\
+.\> del repo.orientdb.json
+    </screen>
+   </step>
+   <step>
+    <para>
+     Copy the repository configuration file for MS SQL
+     (<filename>openidm\db\mssql\conf\repo.jdbc.json</filename>) to the
+     configuration directory.
+    </para>
+    <screen>
+C:\> cd \path\to\openidm
+.\> cp db\mssql\conf\repo.jdbc.json conf\
+    </screen>
+   </step>
+   <step>
+    <para>
+     Update <filename>openidm\conf\repo.jdbc.json</filename> as necessary, to
+     reflect your MS SQL deployment.
+    </para>
+    <programlisting language="javascript">{
+    "connection" : {
+        "dbType" : "SQLSERVER",
+        "jndiName" : "",
+        "driverClass" : "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+        "jdbcUrl" : "jdbc:sqlserver://localhost:1433;instanceName=default;
+                     databaseName=openidm;applicationName=OpenIDM",
+        "username" : "openidm",
+        "password" : "Passw0rd",
+        "defaultCatalog" : "openidm",
+        "maxBatchSize" : 100,
+        "maxTxRetry" : 5,
+        "enableConnectionPool" : true,
+        "connectionTimeoutInMs" : 30000
+    },
+...</programlisting>
+    <para>
+     Specifically, check that the port matches what you have configured in MS
+     SQL.
+    </para>
+   </step>
+  </procedure>
+
+  <para>
+   When you have completed the preceding steps, start OpenIDM to check that the
+   setup has been successful. After startup, you should see that
+   <literal>repo.jdbc</literal> is <literal>active</literal>, whereas
+   <literal>repo.orientdb</literal> is <literal>unsatisfied</literal>.
+  </para>
+
+  <screen><userinput>
+C:> cd \path\to\openidm
+./> startup.bat</userinput>
+   <computeroutput>
+"Using OPENIDM_HOME:   \path\to\openidm"
+"Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
+"Using LOGGING_CONFIG:
+-Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
+Using boot properties at \path\to\openidm\conf\boot\boot.properties
+-&gt; scr list
+Id   State          Name
+...
+[ 18] [unsatisfied ] org.forgerock.openidm.repo.orientdb
+...
+[ 17] [active      ] org.forgerock.openidm.repo.jdbc
+...
+   </computeroutput></screen>
+ </section>
+
+ <section xml:id="repository-oracledb">
+ <title>To Set Up OpenIDM With Oracle Database</title>
+
+  <para>
+   When implementing an Oracle database for OpenIDM, confer with an Oracle DBA
+   when creating the database schema, tables, and users. This section assumes
+   that you have configured an Oracle Database with
+   <link xlink:show="new"
+   xlink:href="http://docs.oracle.com/cd/B28359_01/network.111/b28317/tnsnames.htm">
+    <citetitle>Local Naming Parameters (tnsnames.ora)</citetitle> </link> and a
+   service user for use by OpenIDM.
+  </para>
+
+ <procedure>
+
+  <para>
+   Import the OpenIDM schema using the data definition language script
+   (<filename>/path/to/openidm/db/oracle/scripts/openidm.sql</filename>), as the
+   appropriate schema owner user.
+  </para>
+
+  <para>
+   If you have created OpenIDM tables correctly, you should be able to
+   query the <literal>internaluser</literal> table. The query should return two
+   records (<literal>openidm-admin</literal> and <literal>anonymous</literal>).
+   The output here has been formatted for legibility.
+  </para>
+
+      <screen>SQL&gt; select * from internaluser;
+
+OBJECTID     openidm-admin
+-----------------------------------------------------------------------------
+REV          0
+-----------------------------------------------------------------------------
+PWD          openidm-admin
+-----------------------------------------------------------------------------
+ROLES        openidm-admin,openidm-authorized
+-----------------------------------------------------------------------------
+
+OBJECTID     anonymous
+-----------------------------------------------------------------------------
+REV          0
+-----------------------------------------------------------------------------
+PWD          anonymous
+-----------------------------------------------------------------------------
+ROLES        openidm-reg
+-----------------------------------------------------------------------------</screen>
+
+  <para>
+   Before you start OpenIDM, create an Oracle DB driver from two separate jar
+   files and set up the OpenIDM repository configuration for Oracle DB, as
+   follows:
+  </para>
+
+  <step>
+   <para>Download the Oracle JDBC driver for your Oracle DB version
+    from <link xlink:show="new"
+    xlink:href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"
+    >Oracle Technology Network</link> and place it in the
+    <filename>openidm/db/oracle/scripts</filename> directory.</para>
+   <screen>$ ls /path/to/openidm/db/oracle/scripts
+ojdbc6_g.jar    openidm.sql
+   </screen>
+  </step>
+  <step>
+   <para>
+    Create a bind file and edit it to match the version information for your
+    JDBC driver.
+   </para>
+   <para>
+    You can use the sample bind file located in
+    <filename>openidm/db/mssql/scripts</filename>. Copy the bind file
+    to the same location as the JDBC driver.
+   </para>
+    <screen>$ cd /path/to/openidm/db
+$ cp mssql/scripts/sqljdbc4.bnd oracle/scripts
+$ ls oracle/scripts
+ojdbc6_g.jar    openidm.sql    sqljdbc4.bnd</screen>
+   <para>
+    The JDBC driver version information for your driver is located
+    in the <literal>Specification-Version</literal> property in the
+    MANIFEST file of the driver.</para>
+    <screen>$ cd /path/to/openidm/db/oracle/scripts
+$ unzip -q -c ojdbc6_g.jar META-INF/MANIFEST.MF
+...
+Specification-Vendor: Sun Microsystems Inc.
+Specification-Title: JDBC
+Specification-Version: 4.0
+...</screen>
+   <para>
+    Edit the bind file to match the JDBC driver version.
+   </para>
+   <screen>$ more sqljdbc4.bnd
+...
+version=4.0
+Export-Package: *;version=&#36;{version}
+Bundle-Name: Oracle JDBC Driver 4.0 for SQL Server
+Bundle-SymbolicName: Oracle JDBC Driver 4.0 for SQL Server
+Bundle-Version: &#36;{version}</screen>
+  </step>
+  <step>
+   <para>
+    Download the <literal>bnd</literal> Java archive file
+    (<filename>biz.aQute.bnd.jar</filename>) that enables you to create
+    OSGi bundles. The file (Bundle Version 1.50.0) can be downloaded from
+    <link xlink:show="new" xlink:href="http://central.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar" />.
+    For more information about <literal>bnd</literal>, see
+    <link xlink:show="new" xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
+   </para>
+   <para>
+    Place the <literal>bnd</literal> Java archive file in the same
+    directory as the JDBC driver, and the bind file.
+   </para>
+   <screen><userinput>$ ls /path/to/openidm/db/oracle/scripts</userinput>
+biz.aQute.bnd.jar    ojdbc6_g.jar    openidm.sql    sqljdbc4.bnd</screen>
+  </step>
+  <step>
+   <para>
+    Change to the directory in which the script files are located and run the
+    following command to create the OSGi bundle.
+   </para>
+   <screen>$ cd /path/to/openidm/db/oracle/scripts
+$ java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd ojdbc6_g.jar
+Dec 10, 2013 9:53:28 AM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+ojdbc6_g 984 0</screen>
+   <para>
+    A new <literal>.bar</literal> file has now been created.
+   </para>
+   <screen><userinput>$ ls</userinput>
+biz.aQute.bnd.jar  ojdbc6_g.bar  ojdbc6_g.jar  openidm.sql  sqljdbc4.bnd</screen>
+  </step>
+  <step>
+   <para>Move the <literal>.bar</literal> file to the
+   <literal>openidm/bundle</literal> directory and rename it with a
+   <literal>.jar</literal> extension. The actual name of the file is
+   unimportant.</para>
+   <screen>$ mv ojdbc6_g.bar /path/to/openidm/bundle/ojdbc6_g-osgi.jar</screen>
+  </step>
+  <step>
+   <para>
+    Remove the default OrientDB configuration file
+   (<filename>openidm/conf/repo.orientdb.json</filename>) from the
+   configuration directory.
+   </para>
+   <screen>$ rm /path/to/openidm/conf/repo.orientdb.json</screen>
+  </step>
+  <step>
+   <para>Copy the OracleDB configuration file
+   (<filename>openidm/db/oracle/conf/repo.jdbc.json</filename>) to the
+   configuration directory.
+   </para>
+   <screen>$ cd /path/to/openidm
+$ cp db/oracle/conf/repo.jdbc.json conf/</screen>
+  </step>
+  <step>
+   <para>
+    Update <filename>openidm/conf/repo.jdbc.json</filename> as necessary,
+    to reflect your OracleDB deployment. Specifically, edit the
+    <literal>jdbcUrl</literal>,
+    <literal>username</literal>, and <literal>password</literal> properties. For
+    example:</para>
+   <programlisting language="javascript">"connection" : {
+        "dbType" : "ORACLE",
+        "jndiName" : "",
+        "driverClass" : "oracle.jdbc.OracleDriver",
+        "jdbcUrl" : "jdbc:oracle:thin:@//localhost:1521/openidm",
+        "username" : "openidm",
+        "password" : "password",
+        "defaultCatalog" : "openidm",
+        "maxBatchSize" : 100,
+        "maxTxRetry" : 5,
+        "connectionTimeoutInMs" : 30000
+    },</programlisting>
+  </step>
+ </procedure>
+
+  <itemizedlist>
+   <para>
+    The following parameters relate to the Oracle database:
+   </para>
+   <listitem>
+    <para>
+     The <literal>"dbType"</literal> is <literal>"ORACLE"</literal>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The <literal>"driverClass"</literal> is
+     <literal>"oracle.jdbc.OracleDriver"</literal>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The <literal>"jdbcUrl"</literal> corresponds to the URL of the Oracle DB
+     listener, including the service name, based on your configured Local Naming
+     Parameters (tnsnames.ora). It should be whatever is appropriate for your
+     environment. Replace "openidm" with the service name from your TNS
+     description.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The <literal>"username"</literal> and <literal>"password"</literal>
+     corresponds to the credentials of the service user that connects from
+     OpenIDM.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The <literal>"defaultCatalog"</literal> is used to generate queries
+     appropriate to your OpenIDM schema in Oracle. It should match the user who
+     "owns" the tables. If your schema owner was <literal>"openidm"</literal>,
+     then the <literal>"defaultCatalog"</literal> should also be
+     <literal>"openidm"</literal>. This will cause OpenIDM to generate queries
+     such as <literal>"SELECT objectid FROM openidm.internaluser"</literal>.
+    </para>
+   </listitem>
+  </itemizedlist>
+
+    <para>
+     When you have set up OracleDB for use as the OpenIDM internal
+     repository, start OpenIDM to check that the setup has been successful. On
+     startup, a number of INFO messages are output, as the predefined queries
+     are processed.
+    </para>
+    <para>
+     After startup, you should see that <literal>repo.jdbc</literal> is
+     <literal>active</literal>, whereas <literal>repo.orientdb</literal> is
+     <literal>unsatisfied</literal>.
+    </para>
+
+    <screen><userinput>$ cd /path/to/openidm
+$ ./startup.sh        </userinput>
+<computeroutput>Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG:
+-Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+....</computeroutput>
+<userinput>-&gt; scr list</userinput>
+<computeroutput>   Id   State          Name
+...
+[   2] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+...
+[   3] [active       ] org.forgerock.openidm.repo.jdbc
+...</computeroutput></screen>
+  </section>
+
+ <section xml:id="repository-postgresql">
+  <title>To Set Up OpenIDM With PostgreSQL</title>
+  <note>
+   <para>
+    The use of PostgreSQL as a repository is supported for Java 1.7 only.
+   </para>
+  </note>
+  <para>
+   This procedure assumes that PostgreSQL (version 9.3 or later) is installed
+   and running on the local host.
+  </para>
+  <para>
+   <emphasis>Before starting OpenIDM for the first time</emphasis>, set up
+   OpenIDM to use a PostgreSQL repository, as described in the following
+   procedure.
+  </para>
+  <procedure>
+   <step>
+    <para>
+     OpenIDM includes a script
+     (<filename>path/to/openidm/db/postgresql/scripts/createuser.pgsql</filename>)
+     that sets up an <literal>openidm</literal> database and user, with a
+     default password of <literal>openidm</literal>. The script also grants the
+     appropriate permissions.
+    </para>
+    <para>
+     Edit this script if you want to change the password of the
+     <literal>openidm</literal> user, for example:
+    </para>
+    <screen><userinput>$ more /path/to/openidm/db/postgresql/scripts/createuser.pgsql</userinput>
+<computeroutput>create user openidm with password 'mypassword';
+create database openidm encoding 'utf8' owner openidm;
+grant all privileges on database openidm to openidm;</computeroutput></screen>
+   </step>
+   <step>
+    <para>
+     Execute the <literal>createuser.pgsql</literal> script as follows:
+    </para>
+    <screen><userinput>$ psql &lt; /path/to/openidm/db/postgresql/scripts/createuser.pgsql</userinput>
+<computeroutput>CREATE ROLE
+CREATE DATABASE
+GRANT</computeroutput></screen>
+   </step>
+   <step>
+    <para>
+     Execute the <literal>openidm.pgsql</literal> script as the new
+     <literal>openidm</literal> user that you created in the first step.
+    </para>
+    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/postgresql/scripts/openidm.pgsql</userinput>
+<computeroutput>
+CREATE SCHEMA
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+...
+START TRANSACTION
+INSERT 0 1
+INSERT 0 1
+COMMIT
+CREATE INDEX
+CREATE INDEX</computeroutput></screen>
+    <para>
+     Your database has now been initialized.
+    </para>
+   </step>
+   <step>
+    <para>
+     Remove the OrientDB repository configuration file from the OpenIDM
+     configuration directory (<filename>conf/repo.orientdb.json</filename>).
+    </para>
+    <screen><userinput>$ rm /path/to/openidm/conf/repo.orientdb.json</userinput></screen>
+   </step>
+   <step>
+    <para>
+     Copy the PostgreSQL repository configuration file
+     (<filename>openidm/db/postgres/conf/repo.jdbc.json</filename>) to the
+     configuration directory.
+    </para>
+    <screen><userinput>$ cd /path/to/openidm
+$ cp db/postgres/conf/repo.jdbc.json conf/</userinput></screen>
+   </step>
+   <step>
+    <para>
+     If you changed the password in step 1 of this procedure, edit the
+     <filename>repo.jdbc.json</filename> file to set the value for the
+     <literal>"password"</literal> field to whatever password you set for the
+     <literal>openidm</literal> user. For example:
+    </para>
+    <screen><userinput>$ more conf/repo.jdbc.json</userinput>
+<computeroutput>{
+    "connection" : {
+        "dbType" : "POSTGRESQL",
+        "jndiName" : "",
+        "driverClass" : "org.postgresql.Driver",
+        "jdbcUrl" : "jdbc:postgresql://localhost:5432/openidm",
+        "username" : "openidm",
+        "password" : "mypassword",
+...}</computeroutput></screen>
+   </step>
+   <step>
+    <para>
+     PostgreSQL is now set up for use as the OpenIDM internal repository.
+    </para>
+    <para>
+     Start OpenIDM to check that the setup has been successful. After startup,
+     you should see that <literal>repo.jdbc</literal> is
+     <literal>active</literal>, whereas <literal>repo.orientdb</literal> is
+     <literal>unsatisfied</literal>.
+    </para>
+    <screen><computeroutput>-> OpenIDM ready</computeroutput>
+<userinput>scr list</userinput>
+<computeroutput>Id   State          Name
+...
+[   4] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+...
+[   3] [active       ] org.forgerock.openidm.repo.jdbc
+...
+-></computeroutput></screen>
+   </step>
+   <step>
+    <para>
+     If you are using the default project configuration, run the
+     <literal>default_schema_optimization.pgsql</literal> script to create the
+     required indexes. The file includes extensive comments on the indexes
+     that are being created.
+    </para>
+    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/postgresql/scripts/default_schema_optimization.pgsql</userinput>
+<computeroutput>CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX</computeroutput></screen>
+   </step>
+  </procedure>
+ </section>
+
+</chapter>

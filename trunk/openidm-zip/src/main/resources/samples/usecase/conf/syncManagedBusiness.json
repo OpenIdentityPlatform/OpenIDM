@@ -1,0 +1,229 @@
+{
+    "mappings" : [
+        {
+            "name" : "managedUser_systemBusiness",
+            "source" : "managed/user",
+            "target" : "system/business/account",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "file" : "script/correlationQuery.js"
+            },
+            "enableSync" : false,
+            "validSource" : {
+                "type" : "text/javascript",
+                "file" : "script/isSourceValidBusiness.js"
+            },
+            "properties" : [
+                {
+                    "source" : "address1",
+                    "target" : "address"
+                },
+                {
+                    "source" : "city",
+                    "target" : "city"
+                },
+                {
+                    "source" : "department",
+                    "target" : "department"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "employeeNumber",
+                    "target" : "employeeNumber"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "phoneNumber"
+                },
+                {
+                    "source" : "postalCode",
+                    "target" : "postalCode"
+                },
+                {
+                    "source" : "stateProvince",
+                    "target" : "stateProvince"
+                },
+                {
+                    "source" : "title",
+                    "target" : "title"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "userType",
+                    "target" : "userType"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "uid"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "recon_managedUser_systemBusiness",
+            "source" : "managed/user",
+            "target" : "system/business/account",
+            "links" : "managedUser_systemBusiness",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "file" : "script/correlationQuery.js"
+            },
+            "enableSync" : false,
+            "validSource" : {
+                "type" : "text/javascript",
+                "file" : "script/isSourceValidBusiness.js"
+            },
+            "properties" : [
+                {
+                    "source" : "address1",
+                    "target" : "address"
+                },
+                {
+                    "source" : "city",
+                    "target" : "city"
+                },
+                {
+                    "source" : "department",
+                    "target" : "department"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "employeeNumber",
+                    "target" : "employeeNumber"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "phoneNumber"
+                },
+                {
+                    "source" : "postalCode",
+                    "target" : "postalCode"
+                },
+                {
+                    "source" : "stateProvince",
+                    "target" : "stateProvince"
+                },
+                {
+                    "source" : "title",
+                    "target" : "title"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "userType",
+                    "target" : "userType"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "uid"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : {
+                        "workflowName" : "manualMatch",
+                        "type" : "text/javascript",
+                        "file" : "workflow/triggerWorkflowFromSync.js"
+                    }
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : {
+                        "workflowName" : "orphanAccountReport",
+                        "type" : "text/javascript",
+                        "file" : "workflow/triggerWorkflowFromSync.js"
+                    }
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : {
+                        "workflowName" : "orphanAccountReport",
+                        "type" : "text/javascript",
+                        "file" : "workflow/triggerWorkflowFromSync.js"
+                    }
+                }
+            ]
+        }
+    ]
+}
