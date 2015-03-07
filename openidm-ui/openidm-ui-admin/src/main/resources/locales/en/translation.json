@@ -1105,9 +1105,9 @@
                     }
                 },
                 "BaseApplicationsView" : {
-                    "noApplicationsHere" : "Your have no applications here.",
-                    "noDefaultApplications" : "Your have no default applications.",
-                    "noFrequentlyUsedApplications" : "Your have no frequently used applications."
+                    "noApplicationsHere" : "You have no applications here.",
+                    "noDefaultApplications" : "You have no default applications.",
+                    "noFrequentlyUsedApplications" : "You have no frequently used applications."
                 },
                 "UsersApplicationsView" : {
                     "noApplications" : "You have no applications."
