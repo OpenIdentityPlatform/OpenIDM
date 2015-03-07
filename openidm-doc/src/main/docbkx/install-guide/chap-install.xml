@@ -827,9 +827,6 @@ C:\openidm\bin</computeroutput>     </screen>
 
   </section>
 
- <!-- For OPENIDM-3.1, we have two UI endpoints, admin and openidmui. I think
- this may change in future releases. -->
-
   <section xml:id="openidm-uis">
    <title>OpenIDM User Interfaces</title>
 
@@ -862,7 +859,7 @@ C:\openidm\bin</computeroutput>     </screen>
     configure managed object data that conforms to the core schema of OpenIDM,
     including default policies set up in the <filename>policy.json</filename>
     configuration file. For more information, see the following chapter:
-    <link xlink:show="new" xlink:role="http:/docbook.org/xlink/role/olink"
+    <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
     xlink:href="integrators-guide#chap-policies"><citetitle>Using Policies to
     Validate Data</citetitle></link>.
    </para>
