@@ -453,6 +453,9 @@ public class TableQueries {
         replacements.put("_mainTable", mainTableName);
         replacements.put("_propTable", propTableName);
         replacements.put("_dbSchema", dbSchemaName);
+
+        logger.debug("Tokenized statement: {} with replacements: {}, replacementTokens: {}", rawQuery, replacements, replacementTokens);
+
         TokenHandler tokenHandler = new TokenHandler();
         // Replace the table name tokens.
         String tempQueryString = tokenHandler.replaceSomeTokens(rawQuery, replacements);
