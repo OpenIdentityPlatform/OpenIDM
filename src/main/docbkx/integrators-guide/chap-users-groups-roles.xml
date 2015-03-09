@@ -285,8 +285,7 @@
      adding <literal>managed/role/<replaceable>role ID</replaceable></literal>
      to the user's <literal>"roles"</literal> attribute. The following example
      adds the <literal>ldap</literal> role, created previously, to user
-     <literal>bjensen</literal>, whose <literal>_id</literal> is
-     <literal>2e78fd22-a7cb-4585-9570-5f649e8abd25</literal>.
+     <literal>bjensen</literal>.
     </para>
     <screen><userinput>$ curl \
  --cacert self-signed.crt \
@@ -303,7 +302,7 @@
 
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/2e78fd22-a7cb-4585-9570-5f649e8abd25"
+ "https://localhost:8443/openidm/managed/user/bjensen"
     </userinput>
 <computeroutput>{
   "displayName": "Barbara Jensen",
@@ -352,7 +351,7 @@
   "_rev": "2",
   "lastPasswordSet": "",
   "postalCode": "",
-  "_id": "2e78fd22-a7cb-4585-9570-5f649e8abd25",
+  "_id": "bjensen",
   "description": "Created for OpenIDM",
   "accountStatus": "active",
   "telephoneNumber": "1-360-229-7105"
@@ -377,9 +376,7 @@
     <para>
      The following query returns all members of the <literal>"newrole"</literal>
      role created previously. Currently that role has only one member,
-     <literal>bjensen</literal>, whose ID is
-     <literal>2e78fd22-a7cb-4585-9570-5f649e8abd25</literal>. The query returns
-     the complete user object.
+     <literal>bjensen</literal>. The query returns the complete user object.
     </para>
 
     <screen><userinput>$ curl \
@@ -401,7 +398,7 @@
             {
               "name": "ldapGroups",
 ...
-      "_id": "2e78fd22-a7cb-4585-9570-5f649e8abd25",
+      "_id": "bjensen",
       "_rev": "2",
       "description": "Created for OpenIDM",
       "accountStatus": "active"
@@ -437,7 +434,7 @@
         ]
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/2e78fd22-a7cb-4585-9570-5f649e8abd25"</screen>
+ "https://localhost:8443/openidm/managed/user/bjensen"</screen>
     <para>
      In the role definition, you can specify what should happen when an
      assignment of that role is removed. For more information, see
@@ -1027,13 +1024,21 @@
     <para>
      The <literal>ldap-role</literal> includes one assignment, named
      <literal>ldap</literal>. Add a mapping for the assignment, by adding the
-     following lines to your <literal>sync.json</literal> file:
+     <literal>"assignmentsToMap"</literal> property to your mapping
+     (<literal>sync.json</literal>) file. For example:
     </para>
     <programlisting language="javascript">
     "mappings":[
-        "assignmentsToMap":[
-            "ldap"
-        ],
+        {
+            "name" : "managedUser_systemAdAccounts",
+            "source" : "managed/user",
+            "target" : "system/ad/account",
+            "assignmentsToMap": [
+                "ldap"
+            ],
+        ...
+        },
+...
     ]</programlisting>
      <para>
       By default, OpenIDM addresses any change in role assignments with the
@@ -1045,8 +1050,7 @@
     </step>
     <step>
      <para>
-      Assign the role to user <literal>bjensen</literal>, whose ID is
-      <literal>2e78fd22-a7cb-4585-9570-5f649e8abd25</literal>.
+      Assign the role to user <literal>bjensen</literal>.
      </para>
      <screen><userinput>$ curl \
  --cacert self-signed.crt \
@@ -1065,7 +1069,7 @@
         ]
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/2e78fd22-a7cb-4585-9570-5f649e8abd25"</userinput>
+ "https://localhost:8443/openidm/managed/user/bjensen"</userinput>
      <computeroutput>{
     "mail": "bjensen@example.com",
     "sn": "Jensen",
@@ -1078,7 +1082,7 @@
     "_rev": "2",
     "lastPasswordSet": "",
     "postalCode": "",
-    "_id": "2e78fd22-a7cb-4585-9570-5f649e8abd25",
+    "_id": "bjensen",
     "accountStatus": "active",
     "description": "Created for OpenIDM",
     "roles": [
@@ -1103,7 +1107,7 @@
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user/2e78fd22-a7cb-4585-9570-5f649e8abd25"</userinput>
+ "https://localhost:8443/openidm/managed/user/bjensen"</userinput>
       <computeroutput>...
 {
   "effectiveAssignments": {
