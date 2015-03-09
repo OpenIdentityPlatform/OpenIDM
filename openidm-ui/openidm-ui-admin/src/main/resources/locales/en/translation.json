@@ -280,6 +280,10 @@
             "schedules": "Schedules",
             "situationalScripts":"Situational Event Scripts",
             "reconciliationScript":"Reconciliation Script",
+            "policiesDesc": "Define actions for various synchronization issues.",
+            "situationalEventScriptsDesc": "Action scripts. Add a script for each event.",
+            "reconScriptDesc": "Add a script triggered on reconciliation.",
+            "singleRecordReconDesc": "Test the process on a single record.",
             "testSync": {
                 "title": "Single Record Reconciliation",
                 "sourceProperties": "Source Properties",
@@ -366,8 +370,8 @@
             "currentPolicy": "Current Policy",
             "policies": "Policies",
             "situation": "Situation",
-            "starDef": "Indicates an action that is the default for a situation",
-            "hollowStarDef": "Indicates a valid action for a given situation",
+            "starDef": "Default",
+            "hollowStarDef": "Valid action",
             "dialogTitle": "Situational Policy Configuration"
         },
         "auth": {

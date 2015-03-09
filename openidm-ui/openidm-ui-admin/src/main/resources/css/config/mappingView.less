@@ -592,6 +592,56 @@ h4.connector-role {
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
   margin-bottom:20px;
+
+  #policyPattern {
+    .warning-display {
+      color: #e6bf24;
+    }
+
+    .success-display {
+      color: #70a796;
+    }
+
+    .failure-display {
+      color: #ca3127;
+    }
+
+    .panel-footer {
+      border-top: 1px solid #ddd !important
+    }
+
+    .form-policy-editor {
+
+      padding: 10px 0;
+
+      label {
+        font-weight: 500;
+        padding: 7px 0 0;
+      }
+
+      #situationCopy {
+        display: none;
+      }
+
+      .btn-policy-info {
+        padding-left: 5px;
+        color: #777;
+
+        i:hover {
+          color: #519387;
+        }
+      }
+
+      .situationRow {
+        margin-bottom: 15px;
+        .form-control {
+          width: 80%;
+          display: inline-block;
+        }
+        min-height: 38px;
+      }
+    }
+  }
 }
 
 #attributesHeading {
