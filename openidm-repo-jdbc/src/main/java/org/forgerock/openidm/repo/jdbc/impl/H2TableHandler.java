@@ -70,6 +70,7 @@ public class H2TableHandler extends GenericTableHandler {
             public String toSQL() {
                 return "SELECT " + getColumns().toSQL()
                         + getFromClause().toSQL()
+                        + getJoinClause().toSQL()
                         + getWhereClause().toSQL()
                         + getOrderByClause().toSQL()
                         + " LIMIT " + pageSizeParam

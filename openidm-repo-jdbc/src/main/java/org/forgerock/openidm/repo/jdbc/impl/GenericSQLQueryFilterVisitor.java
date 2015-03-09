@@ -195,9 +195,10 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
             String key = "k" + objectNumber;
             String propTable = "prop"+objectNumber;
             objects.put(key, field.toString());
-            builder.join("${_dbSchema}.${_propTable}", propTable)
-                    .on(where(propTable + ".${_mainTable}_id = obj.id"));
-            return where(propTable + ".propkey = ${" + key + "}");
+            builder.leftJoin("${_dbSchema}.${_propTable}", propTable)
+                    .on(where(propTable + ".${_mainTable}_id = obj.id")
+                            .and(propTable + ".propkey = ${" + key + "}"));
+            return where(propTable + ".propvalue IS NOT NULL");
         }
     }
 

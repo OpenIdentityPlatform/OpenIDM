@@ -45,6 +45,7 @@ import org.forgerock.util.promise.NeverThrowsException;
  *     public String toSQL() {
  *         return "SELECT " + getColumns().toSQL()
  *                 + getFromClause().toSQL()
+ *                 + getJoinClause().toSQL()
  *                 + getWhereClause().toSQL()
  *                 + getOrderByClause().toSQL()
  *                 + " LIMIT " + pageSizeParam
@@ -88,28 +89,81 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     }
 
     /**
-     * Models an inner join.
+     * Models the type of table join.
      */
-    class Join {
+    private enum JoinType implements SQLRenderer<String> {
+        INNER {
+            @Override
+            public String toSQL() { return "INNER JOIN"; }
+        },
+        LEFT_OUTER {
+            @Override
+            public String toSQL() { return "LEFT OUTER JOIN"; }
+        },
+        RIGHT_OUTER {
+            @Override
+            public String toSQL() { return "RIGHT OUTER JOIN"; }
+        }
+    }
+
+    /**
+     * Models/renders a table join.
+     */
+    class Join implements SQLRenderer<String> {
+        final JoinType type;
         final Table table;
         final Clause onClause;
         final SQLBuilder builder;
 
-        Join(SQLBuilder builder, String table, String alias) {
+        /**
+         * Construct the first pass of a join with the type, table, and alias.
+         *
+         * @param builder the calling SQLBuilder
+         * @param type the type of join
+         * @param table the table name
+         * @param alias the table alias
+         */
+        Join(SQLBuilder builder, JoinType type, String table, String alias) {
             this.builder = builder;
+            this.type = type;
             this.table = new Table(table, alias);
             this.onClause = null;
         }
 
-        Join(SQLBuilder builder, Table table, Clause clause) {
+        /**
+         * Construct the second pass of a join with the type, table clause, and on clause.
+         *
+         * @param builder the calling SQLBuilder
+         * @param type the type of join
+         * @param table the table object
+         * @param clause the on clause
+         */
+        Join(SQLBuilder builder, JoinType type, Table table, Clause clause) {
             this.builder = builder;
+            this.type = type;
             this.table = table;
             this.onClause = clause;
         }
 
+        /**
+         * Complete this join on the on-clause.
+         *
+         * @param clause the on clause
+         * @return the calling SQLBuilder with this completed join added
+         */
         SQLBuilder on(Clause clause) {
-            builder.addJoin(new Join(builder, table, clause));
+            builder.addJoin(new Join(builder, type, table, clause));
             return builder;
+        }
+
+        @Override
+        public String toSQL() {
+            return new StringBuilder(type.toSQL())
+                    .append(" ")
+                    .append(table.toSQL())
+                    .append(" ON ")
+                    .append(onClause.toSQL())
+                    .toString();
         }
     }
 
@@ -132,7 +186,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
 
     private final List<SQLRenderer<String>> columns = new ArrayList<SQLRenderer<String>>();
     private final List<SQLRenderer<String>> tables = new ArrayList<SQLRenderer<String>>();
-    private final List<Join> joins = new ArrayList<Join>();
+    private final List<SQLRenderer<String>> joins = new ArrayList<SQLRenderer<String>>();
     // the where clause is not final because it is not set at build time
     private SQLRenderer<String> whereClause = null;
     private final List<SQLRenderer<String>> orderBys = new ArrayList<SQLRenderer<String>>();
@@ -171,7 +225,49 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     }
 
     /**
-     * Create a table join.
+     * Create a left [outer] table join.
+     *
+     * @param table the table to join
+     * @return the Join
+     */
+    Join leftJoin(String table) {
+        return leftJoin(table, null);
+    }
+
+    /**
+     * Create an aliased left [outer] table join.
+     *
+     * @param table the table to join
+     * @param alias the table's alias
+     * @return the Join
+     */
+    Join leftJoin(String table, String alias) {
+        return join(JoinType.LEFT_OUTER, table, alias);
+    }
+
+    /**
+     * Create a right [outer] table join.
+     *
+     * @param table the table to join
+     * @return the Join
+     */
+    Join rightJoin(String table) {
+        return rightJoin(table, null);
+    }
+
+    /**
+     * Create an aliased right [outer] table join.
+     *
+     * @param table the table to join
+     * @param alias the table's alias
+     * @return the Join
+     */
+    Join rightJoin(String table, String alias) {
+        return join(JoinType.RIGHT_OUTER, table, alias);
+    }
+
+    /**
+     * Create an inner table join.
      *
      * @param table the table to join
      * @return the Join
@@ -188,7 +284,19 @@ abstract class SQLBuilder implements SQLRenderer<String> {
      * @return the Join
      */
     Join join(String table, String alias) {
-        return new Join(this, table, alias);
+        return join(JoinType.INNER, table, alias);
+    }
+
+    /**
+     * Create a join given the type, table, and alias.
+     *
+     * @param type the join type
+     * @param table the table to join
+     * @param alias the alias for the table to join
+     * @return
+     */
+    private Join join(JoinType type, String table, String alias) {
+        return new Join(this, type, table, alias);
     }
 
     private SQLBuilder addJoin(Join join) {
@@ -223,8 +331,8 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     private static final Function<SQLRenderer<String>, String, NeverThrowsException> TO_SQL =
             new Function<SQLRenderer<String>, String, NeverThrowsException>() {
                 @Override
-                public String apply(SQLRenderer<String> where) throws NeverThrowsException {
-                    return where.toSQL();
+                public String apply(SQLRenderer<String> renderer) throws NeverThrowsException {
+                    return renderer.toSQL();
                 }
             };
 
@@ -250,20 +358,35 @@ abstract class SQLBuilder implements SQLRenderer<String> {
      * @return a renderer for the from clause
      */
     SQLRenderer<String> getFromClause() {
-        final int tableSize =  tables.size() + joins.size();
-        if (tableSize == 0) {
+        if (tables.isEmpty()) {
             throw new InternalErrorException("SQL query contains no tables in FROM clause");
-        }
-        final List<SQLRenderer<String>> allTables = new ArrayList<SQLRenderer<String>>(tableSize);
-        allTables.addAll(tables);
-        for (final Join join : joins) {
-            allTables.add(join.table);
         }
 
         return new SQLRenderer<String>() {
             @Override
             public String toSQL() {
-                return " FROM " + StringUtils.join(Iterables.from(allTables).map(TO_SQL), ", ");
+                return " FROM " + StringUtils.join(Iterables.from(tables).map(TO_SQL), ", ");
+            }
+        };
+    }
+
+    private static final SQLRenderer<String> NO_STRING =
+            new SQLRenderer<String>() {
+                @Override
+                public String toSQL() {
+                    return "";
+                }
+            };
+
+    SQLRenderer<String> getJoinClause() {
+        if (joins.isEmpty()) {
+            return NO_STRING;
+        }
+
+        return new SQLRenderer<String>() {
+            @Override
+            public String toSQL() {
+                return " " + StringUtils.join(Iterables.from(joins).map(TO_SQL), " ");
             }
         };
     }
@@ -274,17 +397,10 @@ abstract class SQLBuilder implements SQLRenderer<String> {
      * @return a renderer for the where clause
      */
     SQLRenderer<String> getWhereClause() {
-        final int whereSize = joins.size() + 1;
-        final List<SQLRenderer<String>> allWhere = new ArrayList<SQLRenderer<String>>(whereSize);
-        for (Join join : joins) {
-            allWhere.add(join.onClause);
-        }
-        allWhere.add(whereClause);
-
         return new SQLRenderer<String>() {
             @Override
             public String toSQL() {
-                return " WHERE " + StringUtils.join(Iterables.from(allWhere).map(TO_SQL), " AND ");
+                return " WHERE " + whereClause.toSQL();
             }
         };
     }
@@ -295,12 +411,14 @@ abstract class SQLBuilder implements SQLRenderer<String> {
      * @return a renderer for the order-by clause
      */
     SQLRenderer<String> getOrderByClause() {
+        if (orderBys.isEmpty()) {
+            return NO_STRING;
+        }
+
         return new SQLRenderer<String>() {
             @Override
             public String toSQL() {
-                return orderBys.isEmpty()
-                        ? ""
-                        : " ORDER BY " + StringUtils.join(Iterables.from(orderBys).map(TO_SQL), ", ");
+                return " ORDER BY " + StringUtils.join(Iterables.from(orderBys).map(TO_SQL), ", ");
             }
         };
     }
