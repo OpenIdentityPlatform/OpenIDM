@@ -41,7 +41,6 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -492,7 +491,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         if (!request.getContent().required().isList()) {
             throw new BadRequestException(
-                    "The request could nto be processed because the provided content is not a JSON array");
+                    "The request could not be processed because the provided content is not a JSON array");
         }
 
         // Build query request from action parameters looking for query parameters
@@ -504,7 +503,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         connectionFactory.getConnection().query(context, queryRequest,
                 new QueryResultHandler() {
-                    ArrayList<Resource> resources = new ArrayList<Resource>();
+                    final List<Resource> resources = new ArrayList<Resource>();
             
                     @Override
                     public void handleError(final ResourceException error) {
@@ -525,22 +524,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                         } else if (resources.size() == 1) {
                             try {
                                 Resource resource = resources.get(0);
-                                
-                                Resource decrypted = decrypt(resource);
-                                JsonValue newValue = decrypted.getContent().copy();
-                                JsonValuePatch.apply(newValue, operations);
-                                
-                                Resource response = update(context, request, resource.getId(), resource.getRevision(),
-                                        decrypted, newValue);
 
-                                if (ContextUtil.isExternal(context)) {
-                                    response = cullPrivateProperties(response);
-                                }
+                                Resource response = patchResource(context, request, resource, null, operations);
 
-                                activityLogger.log(context, request.getRequestType(), "Patch " + operations.toString(),
-                                        managedId(resource.getId()).toString(), resource.getContent(), response.getContent(),
-                                        Status.SUCCESS);
-                                
                                 handler.handleResult(response.getContent());
                             } catch (ResourceException e) {
                                 handler.handleError(e);
@@ -708,12 +694,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
             ResultHandler<Resource> handler) {
         try {
-            Resource patched = patchResource(context, request, resourceId, request.getRevision(), request.getPatchOperations());
-
-            // only cull private properties if this is an external call
-            if (ContextUtil.isExternal(context)) {
-                patched = cullPrivateProperties(patched);
-            }
+            Resource patched = patchResourceById(context, request, resourceId, request.getRevision(), request.getPatchOperations());
 
             handler.handleResult(patched);
         } catch (ResourceException e) {
@@ -721,8 +702,48 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         }
     }
 
+    /**
+     * Patches the given resource and will also remove private properties if it is an external call based upon context.
+     *
+     * @param context
+     * @param request
+     * @param resourceId
+     * @param revision Expected revision of the resource. Patch will fail if non-null and not matching.
+     * @param patchOperations
+     *
+     * @return The patched Resource with private properties omitted if called externally.
+     *
+     * @throws ResourceException
+     */
+    private Resource patchResourceById(ServerContext context, Request request,
+                                       String resourceId, String revision, List<PatchOperation> patchOperations)
+            throws ResourceException {
+        idRequired(request.getResourceName());
+        noSubObjects(request.getResourceName());
+
+        // Get the oldest value for diffing in the log
+        // JsonValue oldValue = new JsonValue(cryptoService.getRouter().read(repoId(id)));
+        ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
+        Resource resource = connectionFactory.getConnection().read(context, readRequest);
+
+        return patchResource(context, request, resource, revision, patchOperations);
+    }
+
+    /**
+     * Patches the given resource and will also remove private properties if it is an external call based upon context.
+     *
+     * @param context
+     * @param request
+     * @param resource The resource to be patched
+     * @param revision
+     * @param patchOperations
+     *
+     * @return The patched Resource with private properties omitted if called externally.
+     *
+     * @throws ResourceException
+     */
     private Resource patchResource(ServerContext context, Request request,
-            String resourceId, String revision, List<PatchOperation> patchOperations)
+                                   Resource resource, String revision, List<PatchOperation> patchOperations)
         throws ResourceException {
 
         // FIXME: There's no way to decrypt a patch document. :-( Luckily, it'll work for now with patch action.
@@ -734,15 +755,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         do {
             logger.debug("patch name={} id={}", name, request.getResourceName());
             try {
-                idRequired(request.getResourceName());
-                noSubObjects(request.getResourceName());
 
-                // Get the oldest value for diffing in the log
-                // JsonValue oldValue = new JsonValue(cryptoService.getRouter().read(repoId(id)));
-                ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-                Resource oldValue = connectionFactory.getConnection().read(context, readRequest);
-
-                JsonValue decrypted = decrypt(oldValue.getContent()); // decrypt any incoming encrypted properties
+                JsonValue decrypted = decrypt(resource.getContent()); // decrypt any incoming encrypted properties
 
                 // If we haven't defined a rev, we need to get the current rev
                 if (revision == null) {
@@ -757,7 +771,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
                 if (enforcePolicies) {
                     ActionRequest policyAction = Requests.newActionRequest(
-                            ResourceName.valueOf("policy").concat(managedId(resourceId)).toString(), "validateObject");
+                            ResourceName.valueOf("policy").concat(managedId(resource.getId())).toString(), "validateObject");
                     policyAction.setContent(newValue);
                     if (ContextUtil.isExternal(context)) {
                         // this parameter is used in conjunction with the test in policy.js
@@ -772,13 +786,18 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     }
                 }
 
-                Resource resource = update(context, request, resourceId, _rev, oldValue, newValue);
+                Resource patchedResource = update(context, request, resource.getId(), _rev, resource, newValue);
+
                 activityLogger.log(context, request.getRequestType(), "Patch " + patchOperations.toString(),
-                        managedId(resource.getId()).toString(), resource.getContent(), resource.getContent(),
+                        managedId(patchedResource.getId()).toString(), patchedResource.getContent(), patchedResource.getContent(),
                         Status.SUCCESS);
                 retry = false;
                 logger.debug("Patch successful!");
-                return resource;
+
+                if (ContextUtil.isExternal(context)) {
+                    patchedResource = cullPrivateProperties(patchedResource);
+                }
+                return patchedResource;
             } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
                     logger.debug("Unable to update due to revision conflict. Retrying.");
@@ -860,10 +879,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
                     final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
-                    Resource resource = patchResource(context, request, resourceId, null, operations);
-                    if (ContextUtil.isExternal(context)) {
-                        resource = cullPrivateProperties(resource);
-                    }
+                    Resource resource = patchResourceById(context, request, resourceId, null, operations);
                     handler.handleResult(resource.getContent());
                     break;
                 case triggerSyncCheck:
@@ -949,18 +965,16 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Culls properties that are marked private
      *
-     * @param jv
-     *            JsonValue to cull private properties from
-     * @return the supplied JsonValue with private properties culled
+     * @param resource Resource to cull private properties from
+     * @return the supplied Resource with private properties culled
      */
-    private Resource cullPrivateProperties(Resource jv) {
-        // TODO Should this return a copy of the Resource?
+    private Resource cullPrivateProperties(Resource resource) {
         for (ManagedObjectProperty property : properties) {
             if (property.isPrivate()) {
-                jv.getContent().remove(property.getName());
+                resource.getContent().remove(property.getName());
             }
         }
-        return jv;
+        return resource;
     }
     
     /**
