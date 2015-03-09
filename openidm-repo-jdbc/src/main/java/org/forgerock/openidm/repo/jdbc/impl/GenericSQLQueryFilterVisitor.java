@@ -91,7 +91,7 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
      */
     Clause buildNumericValueClause(String propTable, String operand, String placeholder) {
         return where(propTable + ".proptype = 'java.lang.Integer'")
-                .or(propTable + ".proptype = 'java.lang.Double')")
+                .or(propTable + ".proptype = 'java.lang.Double'")
                 .and("CAST(" + propTable + ".propvalue AS DECIMAL) " + operand + " ${" + placeholder + "}");
     }
 
