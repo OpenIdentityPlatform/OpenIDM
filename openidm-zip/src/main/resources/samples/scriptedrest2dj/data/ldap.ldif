@@ -42,6 +42,7 @@ description: Special LDAP acccount used by openIDM
 ou: Administrators
 userPassword: password
 ds-privilege-name: bypass-acl
+ds-privilege-name: changelog-read
 
 dn: ou=People,dc=example,dc=com
 changetype: add

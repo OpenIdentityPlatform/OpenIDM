@@ -62,8 +62,8 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog", [
             if(validatorsManager.formValidated(this.$el)) {
                 var self = this, 
                     patchDefinition = [
-                        {"operation": "replace", "field": "siteImage", "value": this.$el.find("input[name='siteImage']").val()}, 
-                        {"operation": "replace", "field": "passPhrase", "value": this.$el.find("input[name=passPhrase]").val()}
+                        {"operation": "replace", "field": "/siteImage", "value": this.$el.find("input[name='siteImage']").val()}, 
+                        {"operation": "replace", "field": "/passPhrase", "value": this.$el.find("input[name=passPhrase]").val()}
                     ];
                 
                 userDelegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev,  patchDefinition, _.bind(function(r) {

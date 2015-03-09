@@ -43,7 +43,152 @@
                         "effectiveRolesPropName" : "effectiveRoles"
                     }
                 }
-            ]
+            ],
+            "schema" : {
+                "$schema" : "http://forgerock.org/json-schema#",
+                "type" : "object",
+                "title" : "Users",
+                "description" : "User Data",
+                "properties" : {
+                    "userName" : {
+                        "description" : "",
+                        "title" : "User Name",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "password" : {
+                        "description" : "",
+                        "title" : "Password",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "mail" : {
+                        "description" : "",
+                        "title" : "Email Address",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "givenName" : {
+                        "description" : "",
+                        "title" : "First Name",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "sn" : {
+                        "description" : "",
+                        "title" : "Last Name",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "telephoneNumber" : {
+                        "description" : "",
+                        "title" : "Telephone Number",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "accountStatus" : {
+                        "description" : "",
+                        "title" : "Account Status",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "roles" : {
+                        "description" : "",
+                        "title" : "Roles",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "resourceCollection" : {
+                            "path" : "managed/roles",
+                            "query" : {
+                                "queryFilter" : "",
+                                "fields" : [ ],
+                                "sortKeys" : [ ]
+                            }
+                        },
+                        "type" : "string"
+                    },
+                    "postalCode" : {
+                        "description" : "",
+                        "title" : "Postal Code",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "stateProvince" : {
+                        "description" : "",
+                        "title" : "State or Province",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "postalAddress" : {
+                        "description" : "",
+                        "title" : "Postal Address",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "address2" : {
+                        "description" : "",
+                        "title" : "Postal Address (cont)",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "country" : {
+                        "description" : "",
+                        "title" : "Country",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "city" : {
+                        "description" : "",
+                        "title" : "City",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    }
+                },
+                "required" : [
+                    "userName",
+                    "password",
+                    "mail",
+                    "givenName",
+                    "sn",
+                    "accountStatus",
+                    "roles",
+                    "postalCode",
+                    "stateProvince",
+                    "postalAddress",
+                    "address2",
+                    "country",
+                    "city"
+                ],
+                "order" : [
+                    "userName",
+                    "password",
+                    "mail",
+                    "givenName",
+                    "sn",
+                    "telephoneNumber",
+                    "accountStatus",
+                    "roles",
+                    "postalCode",
+                    "stateProvince",
+                    "postalAddress",
+                    "address2",
+                    "country",
+                    "city"
+                ]
+            }
         },
         {
             "name" : "role",

@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -39,12 +39,16 @@ import java.util.concurrent.Future;
  *
  * Keeps the executor loaded to a desirable level, rather than filling up
  * its queue with all tasks up front.
- *
- * @author aegloff
  */
 public abstract class ReconFeeder {
+    
+    /**
+     * The default feed size.
+     */
+    protected static int DEFAULT_FEED_SIZE = 1000;
+    
     CompletionService<Void> completionService;
-    int feedSize = 1000;
+    int feedSize = DEFAULT_FEED_SIZE;
     int submitted = 0;
 
     Iterator<ResultEntry> entriesIter;

@@ -43,9 +43,9 @@
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${username} and accountStatus = 'active'",
             "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
             
-            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND firstid = ${firstId}",
-            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND secondid = ${secondId}",
-            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier}",
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
 
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
             
@@ -132,7 +132,7 @@
                     "linkType" : "linktype",
                     "firstId" : "firstid",
                     "secondId" : "secondid",
-                    "linkQualifier" : "linkQualifier"
+                    "linkQualifier" : "linkqualifier"
                 }
             },
             "ui/notification" : {
@@ -187,7 +187,7 @@
                     "rootActionId" : "rootactionid",
                     "action" : "activity",
                     "message" : "message",
-                    "linkQualifier": "linkQualifier",
+                    "linkQualifier": "linkqualifier",
                     "reconciling" : "reconciling",
                     "reconId" : "reconid",
                     "reconAction" : "reconaction",
@@ -214,7 +214,7 @@
                     "rootActionId" : "rootactionid",
                     "sourceObjectId" : "sourceobjectid",
                     "targetObjectId" : "targetobjectid",
-                    "linkQualifier": "linkQualifier",
+                    "linkQualifier": "linkqualifier",
                     "timestamp" : "activitydate",
                     "mapping" : "mapping",
                     "exception" : "exceptiondetail",

@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -24,6 +24,7 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +34,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -51,6 +54,7 @@ import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -72,10 +76,11 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 /**
- * Reconciliation service implementation
- *
- * @author aegloff
+ * Reconciliation service implementation.
  */
 @Component(name = ReconciliationService.PID, immediate = true, policy = ConfigurationPolicy.OPTIONAL)
 @Service()
@@ -85,10 +90,11 @@ import org.slf4j.LoggerFactory;
         @Property(name = "openidm.router.prefix", value = "/recon/*")
 })
 public class ReconciliationService
-        implements RequestHandler, Reconcile {
+        implements RequestHandler, Reconcile, ReconciliationServiceMBean {
     final static Logger logger = LoggerFactory.getLogger(ReconciliationService.class);
 
     public static final String PID = "org.forgerock.openidm.recon";
+    private static final String MBEAN_NAME = "org.forgerock.openidm.recon:type=Reconciliation";
 
     public enum ReconAction {
         recon, reconByQuery, reconById;
@@ -427,6 +433,8 @@ public class ReconciliationService
             fullReconExecutor = Executors.newFixedThreadPool(maxConcurrentFullRecons);
 
             config = enhancedConfig.getConfigurationAsJson(compContext);
+
+            registerMBean();
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid and could not be parsed, can not start reconciliation service: "
                     + ex.getMessage(), ex);
@@ -449,6 +457,7 @@ public class ReconciliationService
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
+        unregisterMBean();
         logger.info("Reconciliation service stopped.");
     }
 
@@ -458,6 +467,111 @@ public class ReconciliationService
      */
     ServerContext getRouter() {
         return ObjectSetContext.get();
+    }
+
+    private void registerMBean() {
+        try {
+            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+            ObjectName mbeanObjectName = new ObjectName(MBEAN_NAME);
+            mBeanServer.registerMBean(this, mbeanObjectName);
+        } catch (Exception ex) {
+            logger.error("Failed to register reconciliation MBean", ex);
+            throw new RuntimeException("Failed to register reconciliation MBean", ex);
+        }
+    }
+
+    private void unregisterMBean() {
+        try {
+            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+            ObjectName mbeanObjectName = new ObjectName(MBEAN_NAME);
+            mBeanServer.unregisterMBean(mbeanObjectName);
+        } catch (Exception ex) {
+            logger.error("Failed to unregister reconciliation MBean", ex);
+            throw new RuntimeException("Failed to unregister reconciliation MBean", ex);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ExecutorService getThreadPool() {
+        return fullReconExecutor;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getActiveThreads() throws ResourceException {
+        if (fullReconExecutor instanceof ThreadPoolExecutor) {
+            return ((ThreadPoolExecutor) fullReconExecutor).getActiveCount();
+        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
+            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getActiveCount();
+        } else {
+            logger.error("Unable to get the number of active threads in recon thread pool");
+            throw new InternalServerErrorException("Unable to get the number of active threads in recon thread pool");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getCorePoolSize() throws ResourceException {
+        if (fullReconExecutor instanceof ThreadPoolExecutor) {
+            return ((ThreadPoolExecutor) fullReconExecutor).getCorePoolSize();
+        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
+            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getCorePoolSize();
+        } else {
+            logger.error("Unable to get the core pool size in recon thread pool");
+            throw new InternalServerErrorException("Unable to get the core pool size in recon thread pool");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getPoolSize() throws ResourceException {
+        if (fullReconExecutor instanceof ThreadPoolExecutor) {
+            return ((ThreadPoolExecutor) fullReconExecutor).getPoolSize();
+        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
+            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getPoolSize();
+        } else {
+            logger.error("Unable to get the pool size in recon thread pool");
+            throw new InternalServerErrorException("Unable to get the pool size in recon thread pool");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getLargestPoolSize() throws ResourceException {
+        if (fullReconExecutor instanceof ThreadPoolExecutor) {
+            return ((ThreadPoolExecutor) fullReconExecutor).getLargestPoolSize();
+        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
+            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getLargestPoolSize();
+        } else {
+            logger.error("Unable to get the largest pool size in recon thread pool");
+            throw new InternalServerErrorException("Unable to get the largest pool size in recon thread pool");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getMaximumPoolSize() throws ResourceException {
+        if (fullReconExecutor instanceof ThreadPoolExecutor) {
+            return ((ThreadPoolExecutor) fullReconExecutor).getMaximumPoolSize();
+        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
+            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getMaximumPoolSize();
+        } else {
+            logger.error("Unable to get the maximum pool size in recon thread pool");
+            throw new InternalServerErrorException("Unable to get the maximum pool size in recon thread pool");
+        }
     }
 
 }

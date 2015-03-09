@@ -37,6 +37,6 @@ PRGDIR=`dirname "$PRG"`
 OPENIDM_HOME=${OPENIDM_HOME:-`(cd "$PRGDIR"; pwd)`}
 echo "Starting shell in $OPENIDM_HOME"
 
-java -classpath "$OPENIDM_HOME/bin/*:$OPENIDM_HOME/bundle/*" \
+java $JAVA_OPTS -classpath "$OPENIDM_HOME/bin/*:$OPENIDM_HOME/bundle/*" \
      -Dopenidm.system.server.root="$OPENIDM_HOME" \
      org.forgerock.openidm.shell.impl.Main "$@"

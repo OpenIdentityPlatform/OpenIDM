@@ -61,7 +61,7 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
                 var patchDefinitionObject = [], element;
                 
                 if(this.$el.find("input[name=password]").val() !== "") {
-                    patchDefinitionObject.push({operation: "replace", field :"password", value: this.$el.find("input[name=password]").val()});
+                    patchDefinitionObject.push({operation: "replace", field :"/password", value: this.$el.find("input[name=password]").val()});
                 }
                 
                 this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {

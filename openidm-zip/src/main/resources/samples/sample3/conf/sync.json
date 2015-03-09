@@ -72,7 +72,7 @@
             "links" : "systemHrdb_managedUser",
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
+                "source" : "({'_queryFilter': 'uid eq \"' + source.userName + '\"'});"
             },
             "onCreate" : {
                 "type" : "text/javascript",

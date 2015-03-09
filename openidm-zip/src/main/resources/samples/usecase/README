@@ -461,4 +461,4 @@ Usecase6 - Password change reminder
         Once the task scanner was triggered a notification is visible for the user on the OpenIDM UI.
 
     4. To test the workflow the user can change the password either on the UI or using the following REST call:
-        curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/managed/user/user.0?_action=patch" -H "Content-Type: application/json"  --data '[{"operation":"replace", "field":"password", "value":"newPassw0rd"}]'
+        curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/managed/user/user.0?_action=patch" -H "Content-Type: application/json"  --data '[{"operation":"replace", "field":"/password", "value":"newPassw0rd"}]'

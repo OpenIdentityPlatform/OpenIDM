@@ -76,18 +76,18 @@ if (request.method !== "action") {
                         user.securityAnswerAttempts = (typeof (user.securityAnswerAttempts) === "number") ? user.securityAnswerAttempts+1 : 1;
                         
                         // This could throw a policy violation if there is one in place enforcing a maximum number of attempts 
-                        openidm.patch("managed/user/" + user._id, null, [{"operation" : "replace", "field" : "securityAnswerAttempts", "value": user.securityAnswerAttempts}]); 
+                        openidm.patch("managed/user/" + user._id, null, [{"operation" : "replace", "field" : "/securityAnswerAttempts", "value": user.securityAnswerAttempts}]); 
                         
                         if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.additionalParameters.securityAnswer) {
                             throw "Incorrect Answer";
                         } else {
     
                             user = openidm.read("managed/user/" + userQuery.result[0]._id);
-                            patch.push({"operation" : "replace", "field" : "securityAnswerAttempts", "value" : 0});
+                            patch.push({"operation" : "replace", "field" : "/securityAnswerAttempts", "value" : 0});
                             
                             if (request.action === "setNewPasswordForUserName") {
                                 logger.info("Setting new password for {}", request.additionalParameters.username);
-                                patch.push({"operation" : "replace", "field" : "password", "value" : request.additionalParameters.newPassword});
+                                patch.push({"operation" : "replace", "field" : "/password", "value" : request.additionalParameters.newPassword});
                             } else {
                                 // used by the UI to validate passwords before actually submitting them to be changed
                                 response._id = user._id;
@@ -103,7 +103,7 @@ if (request.method !== "action") {
                     }
                     catch (err) {
                         user = openidm.read("managed/user/" + userQuery.result[0]._id);
-                        openidm.patch("managed/user/" + user._id, null, [{"operation" : "replace", "field" : "lastSecurityAnswerAttempt", "value" : (new Date()).toString()}]);
+                        openidm.patch("managed/user/" + user._id, null, [{"operation" : "replace", "field" : "/lastSecurityAnswerAttempt", "value" : (new Date()).toString()}]);
                         
                         response.errorDetail = err;
                         response.result = "error";
