@@ -1812,10 +1812,10 @@ $ <userinput>curl \
             "name" : "systemLdapAccounts_managedUser",
             "source" : "system/ldap/account",
             "target" : "managed/user",
-			"reconSourceQueryPaging" : true,
-			"reconSourceQueryPageSize" : 100,
-...
-   </programlisting>
+            "reconSourceQueryPaging" : true,
+            "reconSourceQueryPageSize" : 100,
+            ...
+        }</programlisting>
    <para>
     The value of <literal>"reconSourceQueryPageSize"</literal> must be a
     positive integer, and specifies the number of entries that will be processed
