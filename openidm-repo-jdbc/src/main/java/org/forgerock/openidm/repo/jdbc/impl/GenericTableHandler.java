@@ -686,6 +686,7 @@ public class GenericTableHandler implements TableHandler {
             public String toSQL() {
                 return "SELECT " + getColumns().toSQL()
                         + getFromClause().toSQL()
+                        + getJoinClause().toSQL()
                         + getWhereClause().toSQL()
                         + getOrderByClause().toSQL()
                         + " LIMIT " + pageSizeParam

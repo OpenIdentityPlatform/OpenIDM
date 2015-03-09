@@ -137,6 +137,7 @@ public class OracleTableHandler extends GenericTableHandler {
                                 + getOrderByClause().toSQL()
                                 + " ) rn "
                                 + getFromClause().toSQL()
+                                + getJoinClause().toSQL()
                                 + getWhereClause().toSQL()
                                 + getOrderByClause().toSQL()
                                 + ") WHERE rn BETWEEN "

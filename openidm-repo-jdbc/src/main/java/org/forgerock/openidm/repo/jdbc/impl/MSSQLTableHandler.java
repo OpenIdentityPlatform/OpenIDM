@@ -185,6 +185,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
                                 + getOrderByClause().toSQL()
                                 + "), obj.fullobject "
                                 + getFromClause().toSQL()
+                                + getJoinClause().toSQL()
                                 + getWhereClause().toSQL()
                                 + ") SELECT * FROM results WHERE rowNo BETWEEN "
                                 + (offsetParam + 1)
