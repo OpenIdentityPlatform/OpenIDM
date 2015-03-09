@@ -341,6 +341,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                 "schema": {
                     "title": "Object Type",
                     "headerTemplate": "{{self.objectName}}",
+                    "format": "grid",
                     "type": "object",
                     "properties": {
                         "objectName": {
