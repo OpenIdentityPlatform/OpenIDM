@@ -537,8 +537,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                                     response = cullPrivateProperties(response);
                                 }
 
-                                activityLogger.log(context, request.getRequestType(), "Patch " + operations.toString(), 
-                                        managedId(resource.getId()).toString(), resource.getContent(), response.getContent(), 
+                                activityLogger.log(context, request.getRequestType(), "Patch " + operations.toString(),
+                                        managedId(resource.getId()).toString(), resource.getContent(), response.getContent(),
                                         Status.SUCCESS);
                                 
                                 handler.handleResult(response.getContent());
@@ -593,6 +593,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             performSyncAction(context, request, _new.getId(), SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), _new.getContent());
 
+            if (ContextUtil.isExternal(context)) {
+                _new = cullPrivateProperties(_new);
+            }
+
             // TODO Check the relative id
             handler.handleResult(_new);
         } catch (ResourceException e) {
@@ -645,6 +649,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             activityLogger.log(context, request.getRequestType(), "update",
                     managedId(resource.getId()).toString(), resource.getContent(), updated.getContent(),
                     Status.SUCCESS);
+
+            if (ContextUtil.isExternal(context)) {
+                updated = cullPrivateProperties(updated);
+            }
+
             handler.handleResult(updated);
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -681,6 +690,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // Perform notifyDelete synchronization
             performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
+
+            // only cull private properties if this is an external call
+            if (ContextUtil.isExternal(context)) {
+                deletedResource = cullPrivateProperties(deletedResource);
+            }
 
             handler.handleResult(deletedResource);
         } catch (ResourceException e) {
