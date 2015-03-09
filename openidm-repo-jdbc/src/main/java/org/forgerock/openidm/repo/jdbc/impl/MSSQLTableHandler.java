@@ -207,7 +207,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
                             @Override
                             Clause buildNumericValueClause(String propTable, String operand, String placeholder) {
                                 return where(propTable + ".proptype = 'java.lang.Integer'")
-                                        .or(propTable + ".proptype = 'java.lang.Double')")
+                                        .or(propTable + ".proptype = 'java.lang.Double'")
                                         .and("(CASE ISNUMERIC(propvalue) WHEN 1 THEN CAST(propvalue AS FLOAT) ELSE null END) " + operand + " ${" + placeholder + "}");
                             }
                         },
