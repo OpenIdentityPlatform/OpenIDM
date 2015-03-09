@@ -60,7 +60,7 @@ define([
 
                         QUnit.ok(true, "Mandatory password change dialog displayed when cleartext password used");
 
-                        QUnit.equal(mandatoryPasswordChangeDialog.$el.find(".validationRules.group-field-errors>.field-rule").length, 5, "Five validation rules for password displayed");
+                        QUnit.equal(mandatoryPasswordChangeDialog.$el.find(".validationRules > .field-rule").length, 5, "Five validation rules for password displayed");
 
                         if (callback) {
                             callback();
