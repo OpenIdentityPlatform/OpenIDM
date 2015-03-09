@@ -338,7 +338,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
                 this.model.modules[moduleId].scriptEditor = InlineScriptEditor.generateScriptEditor({
                     "element": this.$el.find("#"+moduleId).find(".container-augmentSecurityContext .well"),
-                    "eventName": " ",
+                    "eventName": "module" + moduleId + "ScriptEditor",
                     "scriptData": scriptData
                 });
 
@@ -510,11 +510,11 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     $(this.model.modules[toUpdate].module).find(".authModuleDisabled").toggleClass("noteHidden", true);
                 }
 
-                $(this.model.modules[toUpdate].module).find(".form input[type='hidden']").parent().hide();
+                $(this.model.modules[toUpdate].module).find("input[type='hidden']").parent().hide();
 
                 if(authMod === "OPENAM_SESSION"){
-                    openamDeploymentUrl = $(this.model.modules[toUpdate].module).find(".form input[name*='openamDeploymentUrl']");
-                    openamLoginUrl = $(this.model.modules[toUpdate].module).find(".form input[name*='openamLoginUrl']");
+                    openamDeploymentUrl = $(this.model.modules[toUpdate].module).find("input[name*='openamDeploymentUrl']");
+                    openamLoginUrl = $(this.model.modules[toUpdate].module).find("input[name*='openamLoginUrl']");
                     openamDeploymentUrl.focus(function(){
                         openamDeploymentUrl.attr("beforeValue",openamDeploymentUrl.val());
                     });
