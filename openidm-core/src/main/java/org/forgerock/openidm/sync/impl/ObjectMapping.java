@@ -157,7 +157,7 @@ class ObjectMapping {
     private Script validTarget;
     
     /**
-     * A boolean indicating is paging should be used for recon source queries.
+     * A boolean indicating if paging should be used for recon source queries.
      */
     private boolean reconSourceQueryPaging;
     
