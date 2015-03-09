@@ -252,9 +252,9 @@ $ ./startup.sh -p samples/fullStack</screen>
      </para>
      <para>
       For detailed information on the options associated with the
-      <literal>OPENAM_SESSION</literal> module, see
+      <literal>OPENAM_SESSION</literal> module, see the following section:
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-            xlink:href="integrators-guide#openam-session-details">
+            xlink:href="integrators-guide#openam-module-details">
        <citetitle>OPENAM_SESSION Configuration Options</citetitle></link>.
      </para>
     </listitem>
