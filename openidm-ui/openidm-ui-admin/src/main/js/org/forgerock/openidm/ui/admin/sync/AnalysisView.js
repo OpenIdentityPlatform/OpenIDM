@@ -218,15 +218,6 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                                 txt = "<span class='newLinkWarning errorMessage fa fa-exclamation-triangle' title='" + $.t("templates.mapping.analysis.newLinkCreated") + "'></span> " + txt;
                                             }
 
-                                            if(reconRecord.hasLink){
-
-                                                if(!reconRecord.linkQualifier) {
-                                                    reconRecord.linkQualifier = $.t("templates.mapping.analysis.noLinkQualifier");
-                                                }
-
-                                                txt = "<span class='float-right fa fa-chain fa-lg linkIcon' title='" + reconRecord.linkQualifier + "'></span>" + txt;
-                                            }
-
                                             return txt;
                                         } else {
                                             return "Not Found";
