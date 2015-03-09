@@ -2311,12 +2311,13 @@ $ <userinput>curl \
    To return activity information for a specific action, include the
    <literal>_id</literal> of the action in the endpoint, for example:
   </para>
-  <screen><?dbfo pgwide="1"?>$ curl \
+  <informalexample><?dbfo pgwide="1"?>
+  <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"</screen>
+ "https://localhost:8443/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"</screen></informalexample>
   <para>
    Results similar to the following are returned:
   </para>
