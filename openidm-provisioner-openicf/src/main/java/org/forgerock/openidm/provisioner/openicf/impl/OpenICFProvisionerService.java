@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -99,6 +99,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
@@ -133,6 +134,7 @@ import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.Predicate;
@@ -199,9 +201,6 @@ import org.slf4j.LoggerFactory;
  * {@link CollectionResourceProvider} interface with <a
  * href="http://openicf.forgerock.org">OpenICF</a>.
  * <p/>
- *
- * @author Laszlo Hordos
- * @author brmiller
  */
 @Component(name = OpenICFProvisionerService.PID,
         policy = ConfigurationPolicy.REQUIRE,
@@ -751,22 +750,25 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         }
     }
+
     /**
      * @return the smartevent Name for a given query
      */
-/*
-    org.forgerock.openidm.smartevent.Name getQueryEventName(String objectClass, JsonValue params,
-            Map<String, Object> query, String queryId) {
-        String prefix = EVENT_PREFIX + systemName + "/" + objectClass + "/query/";
-        if (params == null) {
-            return org.forgerock.openidm.smartevent.Name.get(prefix + "_default_query");
-        } else if (query != null) {
+    org.forgerock.openidm.smartevent.Name getQueryEventName(String objectClass, QueryRequest request) {
+        String prefix = EVENT_PREFIX + getSystemIdentifierName() + "/" + objectClass + "/query/";
+
+        if (request.getQueryId() != null) {
+            return org.forgerock.openidm.smartevent.Name.get(prefix + request.getQueryId());
+        } else if (request.getQueryExpression() != null) {
             return org.forgerock.openidm.smartevent.Name.get(prefix + "_query_expression");
+        } else if (request.getQueryFilter() != null) {
+            return org.forgerock.openidm.smartevent.Name.get(prefix + "_queryFilter");
         } else {
-            return org.forgerock.openidm.smartevent.Name.get(prefix + queryId);
+            // This should never happen...
+            return org.forgerock.openidm.smartevent.Name.get(prefix + "_UNKNOWN");
         }
     }
-*/
+
     private enum ConnectorAction {
         script, test, livesync
     }
@@ -1395,9 +1397,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         @Override
         public void queryCollection(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
-            EventEntry measure = null;// Publisher.start(getQueryEventName(id,
-                                      // params, query.asMap(),
-                                      // queryId.asString()), null, id);
+            EventEntry measure = Publisher.start(getQueryEventName( objectClass, request), request, null);
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, SearchApiOp.class);
                 if (null == facade) {
@@ -1486,7 +1486,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             } finally {
-//              measure.end();
+                measure.end();
             }
         }
 
@@ -1508,7 +1508,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     activityLogger.log(context, RequestType.READ, "message", getSource(objectClass, uid.getUidValue()), resource.getContent(), resource.getContent(), Status.SUCCESS);
                     handler.handleResult(resource);
                 } else {
-                    handler.handleError(new NotFoundException(request.getResourceName()));
+                    final String matchedUri = context.containsContext(RouterContext.class)
+                            ? context.asContext(RouterContext.class).getMatchedUri()
+                            : "unknown path";
+                    handler.handleError(new NotFoundException("Object " + resourceId + " not found on " + matchedUri));
                 }
             } catch (ResourceException e) {
                 handler.handleError(e);

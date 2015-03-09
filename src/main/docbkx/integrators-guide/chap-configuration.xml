@@ -402,7 +402,6 @@
    },
    "logTo": [
      {
-       "recordDelimiter": ";",
        "logType": "csv",
        "location": "audit"
      },
@@ -694,8 +693,7 @@ $ ./startup.sh</screen>
     "logTo" : [
         {
             "logType" : "csv",
-            "location" : "&amp;{user.home}/audit",
-            "recordDelimiter" : ";"
+            "location" : "&amp;{user.home}/audit"
         }
     ]
 }

@@ -798,73 +798,19 @@ Server: Jetty(8.y.z-SNAPSHOT)
   <title>Replace Default Security Settings</title>
   <indexterm>
    <primary>Passwords</primary>
+   <secondary>Replacing defaults</secondary>
   </indexterm>
-
   <para>
-   The default security settings are adequate for evaluation purposes. For
-   production, change at least the default encryption key, and replace the
-   default administrative user password.
+   The default security settings are adequate for evaluation purposes. In
+   production environments, change at least the password of the default
+   administrative user (<literal>openidm-admin</literal>).
   </para>
-
-  <procedure xml:id="security-change-encryption-keys">
-   <title>To Change the Default Encryption Key</title>
-   <indexterm>
-    <primary>Encryption</primary>
-   </indexterm>
-   <indexterm>
-    <primary>Security</primary>
-    <secondary>Encryption</secondary>
-   </indexterm>
-   <para>
-    By default, OpenIDM uses a symmetric encryption key with the alias
-    <literal>openidm-sym-default</literal>. Change this default key before you
-    deploy OpenIDM in production.
-   </para>
-   <para>
-    As noted in the section on the <link xlink:show="new"
-    xlink:href="integrators-guide#cli-keytool"
-    xlink:role="http://docbook.org/xlink/role/olink">
-    <citetitle>keytool</citetitle></link> command, the default keystore
-    password is <literal>changeit</literal>.
-   </para>
-   <step>
-    <para>
-     Add the new key to the keystore.
-    </para>
-    <screen><userinput>$ cd /path/to/openidm/
-$ keytool \
- -genseckey \
- -alias new-sym-key \
- -keyalg AES \
- -keysize 128 \
- -keystore security/keystore.jceks \
- -storetype JCEKS</userinput>
-    <computeroutput>Enter keystore password:
-Enter key password for &lt;new-sym-key&gt;
-  (RETURN if same as keystore password):
-Re-enter new password:</computeroutput></screen>
-    <para>Additional options associated with the <command>keytool</command>
-     command in OpenIDM are shown in the following file:
-    <filename>openidm/samples/security/keystore_readme.txt</filename>.</para>
-   </step>
-   <step>
-    <para>Change the alias used in
-    <filename>openidm/conf/boot/boot.properties</filename>.</para>
-   </step>
-  </procedure>
-
-  <section xml:id="security-replace-default-user-password">
-   <title>To Replace the Default Administrative User Password</title>
-   <para>
-    After changing the default encryption key, change at least the password
-    of the default administrative user (<literal>openidm-admin</literal>).
-   </para>
-   <para>
-    To change the password of the default administrative user, send a PUT
-    request to the user object. The following example changes the password of
-    the <literal>openidm-admin</literal> user to <literal>Passw0rd</literal>:
-   </para>
-   <screen><userinput>$ curl \
+  <para>
+   To change the password of the default administrative user, send a PUT
+   request to the user object. The following example changes the password of
+   the <literal>openidm-admin</literal> user to <literal>Passw0rd</literal>:
+  </para>
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -882,7 +828,7 @@ Re-enter new password:</computeroutput></screen>
   "password": {
     "$crypto": {
       "value": {
-        "key": "new-sym-key",
+        "key": "openidm-sym-default",
         "iv": "USfN9kARk4QjoyjGa/r8WA==",
         "cipher": "AES/CBC/PKCS5Padding",
         "data": "27tDQg49z8nWqvIOEh7VAg=="
@@ -894,9 +840,7 @@ Re-enter new password:</computeroutput></screen>
   "userName": "openidm-admin",
   "_rev": "2"
 }</computeroutput>
-   </screen>
-
-  </section>
+  </screen>
  </section>
 
  <section xml:id="security-jetty">

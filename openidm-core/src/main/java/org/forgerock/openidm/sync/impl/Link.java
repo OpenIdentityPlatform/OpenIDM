@@ -20,6 +20,7 @@ package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +28,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
+
 // SLF4J
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -43,11 +48,10 @@ import org.forgerock.openidm.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// JSON Fluent library
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
+// SLF4J
+// JSON Fluent library
 
 // OpenIDM
 
@@ -270,10 +274,12 @@ class Link {
         clear();
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(PARAM_QUERY_ID, "links-for-firstId");
-            query.put("linkQualifier", linkQualifier);
-            query.put("linkType", mapping.getLinkType().getName());
-            query.put("firstId", id);
+            query.put(PARAM_QUERY_FILTER,
+                    QueryFilter.and(Arrays.asList(
+                            QueryFilter.equalTo("/linkType", mapping.getLinkType().getName()),
+                            QueryFilter.equalTo("/linkQualifier", linkQualifier),
+                            QueryFilter.equalTo("/firstId", id)))
+                            .toString());
             getLink(query);
         }
     }
@@ -306,10 +312,12 @@ class Link {
         clear();
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(PARAM_QUERY_ID, "links-for-secondId");
-            query.put("linkQualifier", linkQualifier);
-            query.put("linkType", mapping.getLinkType().getName());
-            query.put("secondId", id);
+            query.put(PARAM_QUERY_FILTER,
+                    QueryFilter.and(Arrays.asList(
+                            QueryFilter.equalTo("/linkType", mapping.getLinkType().getName()),
+                            QueryFilter.equalTo("/linkQualifier", linkQualifier),
+                            QueryFilter.equalTo("/secondId", id)))
+                            .toString());
             getLink(query);
         }
     }
@@ -328,9 +336,11 @@ class Link {
         Map<String, Link> sourceIdToLink = new ConcurrentHashMap<String, Link>();
         if (mapping != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(PARAM_QUERY_ID, "links-for-linkType");
-            query.put("linkQualifier", linkQualifier);
-            query.put("linkType", mapping.getLinkType().getName());
+            query.put(PARAM_QUERY_FILTER,
+                    QueryFilter.and(Arrays.asList(
+                            QueryFilter.equalTo("/linkType", mapping.getLinkType().getName()),
+                            QueryFilter.equalTo("/linkQualifier", linkQualifier)))
+                            .toString());
             JsonValue queryResults = linkQuery(mapping.getService().getServerContext(), mapping.getService().getConnectionFactory(), query);
             for (JsonValue entry : queryResults) {
                 Link link = new Link(mapping);

@@ -12,12 +12,12 @@
         "query-all-ids-count" : "select count(_openidm_id) AS total from ${unquoted:_resource}",
         "query-all" : "select * from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "query-all-count" : "select count(*) AS total from ${unquoted:_resource}",
-        "links-for-firstId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND firstId = ${firstId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
-        "links-for-firstId-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND firstId = ${firstId}",
-        "links-for-secondId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND secondId = ${secondId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
-        "links-for-secondId-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND secondId = ${secondId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
-        "links-for-linkType" : "SELECT * FROM ${unquoted:_resource} WHERE linkQualifier = ${linkQualifier} AND linkType = ${linkType} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
-        "links-for-linkType-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkQualifier = ${linkQualifier} AND linkType = ${linkType}",
+        "links-for-firstId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND firstId = ${firstId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-firstId-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND firstId = ${firstId}",
+        "links-for-secondId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND secondId = ${secondId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-secondId-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND secondId = ${secondId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-linkType" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-linkType-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType}",
 
         "credential-query" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${username} AND coalesce(accountStatus, 'active') <> 'inactive'",
         "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
@@ -129,12 +129,12 @@
                         "indexType" : "unique"
                     },
                     {
-                        "propertyNames" : [ "linkQualifier", "linkType", "firstId" ],
+                        "propertyNames" : [ "linkType", "linkQualifier", "firstId" ],
                         "propertyType" : "string",
                         "indexType" : "unique"
                     },
                     {
-                        "propertyNames" : [ "linkQualifier", "linkType", "secondId" ],
+                        "propertyNames" : [ "linkType", "linkQualifier", "secondId" ],
                         "propertyType" : "string",
                         "indexType" : "unique"
                     }

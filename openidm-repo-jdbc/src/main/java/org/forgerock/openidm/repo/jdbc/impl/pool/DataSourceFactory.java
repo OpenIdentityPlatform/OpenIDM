@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,14 +27,15 @@ import com.jolbox.bonecp.BoneCPDataSource;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.util.UUID;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Creates the BoneCP data source containing the BoneCP config.
  */
 public class DataSourceFactory {
     private final static Logger logger = LoggerFactory.getLogger(DataSourceFactory.class);
@@ -48,7 +49,9 @@ public class DataSourceFactory {
         ds.setTransactionRecoveryEnabled(true);// Important: This should be enabled
         ds.setAcquireRetryAttempts(10);//default is 5
         ds.setReleaseHelperThreads(5);
-
+        ds.setStatisticsEnabled(Boolean.parseBoolean(
+                IdentityServer.getInstance().getProperty("openidm.bonecp.statistics.enabled", "false")));
+        ds.setPoolName(UUID.randomUUID().toString());
         // Default if not explicitly set
         if (ds.getMaxConnectionsPerPartition() < 1) {
             ds.setMinConnectionsPerPartition(1);

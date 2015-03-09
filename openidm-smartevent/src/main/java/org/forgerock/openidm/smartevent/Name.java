@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.smartevent;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.forgerock.guava.common.cache.CacheBuilder;
@@ -130,10 +131,8 @@ public class Name {
      *            optional additional tags to associate with this event type
      * @return the event Name object representing the requested event type
      */
-    public final static Name get(String stringifiedName, String[] tags) {
-        Name aName = get(stringifiedName);
-        aName.tags = tags;
-        return aName;
+    public final static Name get(final String stringifiedName, final String[] tags) {
+        return get(stringifiedName).setTags(tags);
     }
 
     /**
@@ -143,11 +142,14 @@ public class Name {
      *            the tags to set
      * @return this Name instance for use as a fluent API
      */
-    public Name setTags(String[] tags) {
-        this.tags = tags;
+    public Name setTags(final String[] tags) {
+        if (tags != null) {
+            this.tags = Arrays.copyOf(tags, tags.length);
+        }
+
         return this;
     }
-    
+
     /**
      * Fluent API to set events publishing type
      * 

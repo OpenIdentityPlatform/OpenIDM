@@ -454,17 +454,16 @@ public class RemoteCommandScope extends CustomCommandScope {
             }
             // TODO Make safe file name
 
-            if (!name.matches("\\w++")) {
+            if (StringUtils.isBlank(name) || !name.matches("\\w++")) {
                 session.getConsole().append("The given name \"").append(name).println(
                         "\" must match [a-zA-Z_0-9] pattern");
                 return;
             }
+
             File finalConfig = new File(temp, "provisioner.openicf-" + name + ".json");
 
             // Common request attributes
             ActionRequest request = Requests.newActionRequest("system", "CREATECONFIGURATION");
-            request.setAdditionalParameter(ActionRequest.FIELD_ACTION, "CREATECONFIGURATION");
-            request.setAdditionalParameter("_action", "CREATECONFIGURATION");
 
             JsonValue responseValue;
             Map<String, Object> configuration = null;
@@ -506,7 +505,10 @@ public class RemoteCommandScope extends CustomCommandScope {
                         return;
                     }
                     configuration = responseValue.asMap();
-                    configuration.put("connectorRef", connectorRef.get(index));
+
+                    // If we don't getObject() JsonValue will wrap the object resulting in a JSON payload of
+                    // { "connectorRef": { ..., "wrappedObject": ... }
+                    configuration.put("connectorRef", connectorRef.get(index).getObject());
                 } else {
                     session.getConsole().println("There are no available connector!");
                 }
@@ -522,10 +524,13 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             // Repeatable phase #2 and #3
             request.setContent(new JsonValue(configuration));
-
             responseValue = resource.action(null, request);
-            responseValue.put("name", name);
-            mapper.writerWithDefaultPrettyPrinter().writeValue(finalConfig, responseValue.getObject());
+
+            configuration = responseValue.asMap();
+            configuration.put("name", name);
+
+            mapper.writerWithDefaultPrettyPrinter().writeValue(finalConfig, configuration);
+
             session.getConsole()
                     .append("Edit the configuration file and run the command again. The configuration was saved to ")
                     .println(finalConfig.getAbsolutePath());

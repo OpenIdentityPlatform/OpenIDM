@@ -71,9 +71,9 @@ public final class ServiceUtil {
         Object result = null;
         if (pair != null) {
             if (requireService) {
-                result = pair.getLeft();
-            } else {
                 result = pair.getRight();
+            } else {
+                result = pair.getLeft();
             }
         }
         return result;
