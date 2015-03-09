@@ -52,6 +52,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.jolbox.bonecp.BoneCPDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -107,7 +108,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Repository service implementation using JDBC
+ * Repository service implementation using JDBC.
  */
 @Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
         enabled = true)
@@ -774,7 +775,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
      *         SCR and needs to be manually registered.
      */
     static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) { 
-        JDBCRepoService bootRepo = new JDBCRepoService(); 
+        JDBCRepoService bootRepo = new JDBCRepoService();
         bootRepo.init(repoConfig, context); 
         return bootRepo; 
     }
@@ -808,6 +809,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
+        shutdownDatabaseConnectionPool();
         logger.info("Repository stopped.");
     }
 
@@ -1038,17 +1040,19 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 Boolean enableConnectionPool =
                         connectionConfig.get("enableConnectionPool").defaultTo(Boolean.FALSE)
                                 .asBoolean();
+                DataSource dataSource = null;
                 if (null == sharedDataSource) {
+                    dataSource = DataSourceFactory.newInstance(connectionConfig);
                     Dictionary<String, String> serviceParams = new Hashtable<String, String>(1);
                     serviceParams.put("osgi.jndi.service.name", "jdbc/openidm");
                     sharedDataSource =
                             bundleContext.registerService(DataSource.class.getName(),
-                                    DataSourceFactory.newInstance(connectionConfig), serviceParams);
+                                    dataSource, serviceParams);
                 }
                 if (enableConnectionPool) {
                     logger.info("DataSource connection pool enabled.");
                     useDataSource = true;
-                    return DataSourceFactory.newInstance(connectionConfig);
+                    return (dataSource == null) ? DataSourceFactory.newInstance(connectionConfig) : dataSource;
                 } else {
                     logger.info("No DataSource connection pool enabled.");
                     return null;
@@ -1134,6 +1138,16 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             return
                     new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
+        }
+    }
+
+    private void shutdownDatabaseConnectionPool() {
+        //set the shared datasource to null so it is reinitialized
+        sharedDataSource = null;
+
+        //close the datasource connection pool
+        if (this.ds instanceof BoneCPDataSource) {
+            ((BoneCPDataSource) ds).close();
         }
     }
 }
