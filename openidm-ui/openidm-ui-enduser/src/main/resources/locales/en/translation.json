@@ -277,7 +277,7 @@
             "newPassword" : "New password",
             "oldPassword" : "Old password",
             "confirmNewPassword" : "Confirm new password",
-            "usersList" : "List of Users",
+            "usersList" : "Users List",
             "addUsers" : "Add Users",
             "name" : "Name",
             "status" : "Status",
