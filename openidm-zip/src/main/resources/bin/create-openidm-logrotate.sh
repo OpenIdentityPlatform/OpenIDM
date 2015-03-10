@@ -1,7 +1,8 @@
 #!/bin/sh
 
-basedir=$(dirname $0)
-cd $basedir/..
+PRGDIR=$(dirname $0)
+
+cd $PRGDIR/..
 
 OPENIDM_HOME=`pwd`
 SCRIPT_NAME='openidmlog'
