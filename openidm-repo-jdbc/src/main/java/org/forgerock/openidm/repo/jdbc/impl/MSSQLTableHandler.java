@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,6 +27,7 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+import static org.forgerock.openidm.repo.util.Clauses.where;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -34,17 +35,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import org.forgerock.openidm.repo.util.Clause;
 
+/**
+ * TableHandler appropriate for MSSQL-specific query syntax.
+ */
 public class MSSQLTableHandler extends GenericTableHandler {
 
     /**
@@ -55,23 +57,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
 
     public MSSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize,
-                new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH) {
-                    @Override
-                    String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
-                        // validate type is integer or double cast all numeric types to decimal
-                        if (isNumeric(valueAssertion)) {
-                            return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
-                                    + "AND (CASE ISNUMERIC(propvalue) WHEN 1 THEN CAST(propvalue AS FLOAT) ELSE null END) " + operand + " ${" + placeholder + "}";
-                        } else if (isBoolean(valueAssertion)) {
-                            // validate type is boolean if valueAssertion is a boolean
-                            return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
-                        } else {
-                            // assume String
-                            return "prop.propvalue " + operand + " ${" + placeholder + "}";
-                        }
-                    }
-                }, sqlExceptionHandler);
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
     @Override
@@ -83,10 +69,8 @@ public class MSSQLTableHandler extends GenericTableHandler {
     protected Map<QueryDefinition, String> initializeQueryMap() {
         Map<QueryDefinition, String> result = super.initializeQueryMap();
         String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
-        String mainTable =
-                dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
-        String propertyTable =
-                dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
+        String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
+        String propertyTable = dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
 
         result.put(
                 QueryDefinition.READFORUPDATEQUERYSTR,
@@ -94,7 +78,8 @@ public class MSSQLTableHandler extends GenericTableHandler {
                         + mainTable
                         + " obj INNER JOIN "
                         + typeTable
-                        + " objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ?");
+                        + " objtype ON obj.objecttypes_id = objtype.id"
+                        + " AND objtype.objecttype = ? WHERE obj.objectid = ?");
         result.put(QueryDefinition.UPDATEQUERYSTR,
                 "UPDATE obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? FROM "
                         + mainTable + " obj WHERE obj.id = ? AND obj.rev = ?");
@@ -104,8 +89,8 @@ public class MSSQLTableHandler extends GenericTableHandler {
     }
     
     /* (non-Javadoc)
-    * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
-    */
+     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
+     */
     @Override
     public void update(String fullId, String type, String localId, String rev, Map<String, Object> obj, Connection connection)
             throws SQLException, IOException, org.forgerock.json.resource.PreconditionFailedException, org.forgerock.json.resource.NotFoundException, org.forgerock.json.resource.InternalServerErrorException {
@@ -124,14 +109,17 @@ public class MSSQLTableHandler extends GenericTableHandler {
             String existingRev = rs.getString("rev");
             long dbId = rs.getLong("id");
             long objectTypeDbId = rs.getLong("objecttypes_id");
-            logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[]{fullId, existingRev, dbId, objectTypeDbId});
+            logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}",
+                    fullId, existingRev, dbId, objectTypeDbId);
 
             if (!existingRev.equals(rev)) {
-                throw new org.forgerock.json.resource.PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
+                throw new org.forgerock.json.resource.PreconditionFailedException(
+                        "Update rejected as current Object revision " + existingRev
+                        + " is different than expected by caller (" + rev + "), "
+                        + "the object has changed since retrieval.");
             }
             updateStatement = getPreparedStatement(connection, QueryDefinition.UPDATEQUERYSTR);
             deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
-
             // Support changing object identifier
             String newLocalId = (String) obj.get("_id");
             if (newLocalId != null && !localId.equals(newLocalId)) {
@@ -142,7 +130,8 @@ public class MSSQLTableHandler extends GenericTableHandler {
             }
             String objString = mapper.writeValueAsString(obj);
 
-            logger.trace("Populating prepared statement {} for {} {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId, existingRev});
+            logger.trace("Populating prepared statement {} for {} {} {} {} {} {}",
+                    updateStatement, fullId, newLocalId, newRev, objString, dbId, existingRev);
             updateStatement.setString(1, newLocalId);
             updateStatement.setString(2, newRev);
             updateStatement.setString(3, objString);
@@ -159,7 +148,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
 
             JsonValue jv = new JsonValue(obj);
             // TODO: only update what changed?
-            logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
+            logger.trace("Populating prepared statement {} for {} {} {}", deletePropStatement, fullId, type, localId);
             deletePropStatement.setString(1, type);
             deletePropStatement.setString(2, localId);
             logger.debug("Update properties del statement: {}", deletePropStatement);
@@ -176,38 +165,68 @@ public class MSSQLTableHandler extends GenericTableHandler {
             CleanupHelper.loggedClose(updateStatement);
             CleanupHelper.loggedClose(deletePropStatement);
         }
-    }    
-    
-    @Override
-    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
-        final int offsetParam = Integer.parseInt((String)params.get(PAGED_RESULTS_OFFSET));
-        final int pageSizeParam = Integer.parseInt((String)params.get(PAGE_SIZE));
-        String filterString = getFilterString(filter, replacementTokens);
-        String innerJoinClause = "";
-        String keysClause = "";
-        
-        // Check for sort keys and build up order-by syntax
-        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
-        if (sortKeys != null && sortKeys.size() > 0) {
-            List<String> innerJoins = new ArrayList<String>();
-            List<String> keys = new ArrayList<String>();
-            prepareSortKeyStatements(sortKeys, innerJoins, keys, replacementTokens);
-            innerJoinClause = StringUtils.join(innerJoins, " ");
-            keysClause = StringUtils.join(keys, ", ");
-        } else {
-            keysClause = "obj.id DESC";
-        }
-        
+    }
 
-        return "WITH results AS ( SELECT rowNo = ROW_NUMBER() OVER( ORDER BY " 
-                + keysClause
-                + " ), obj.fullobject FROM ${_dbSchema}.${_mainTable} obj " 
-                + innerJoinClause
-                + filterString 
-                + ") SELECT * FROM results WHERE rowNo BETWEEN " 
-                + (offsetParam+1)
-                + " AND " 
-                + (offsetParam + pageSizeParam);
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+        final int offsetParam = Integer.parseInt((String) params.get(PAGED_RESULTS_OFFSET));
+        final int pageSizeParam = Integer.parseInt((String) params.get(PAGE_SIZE));
+
+        // Create custom builder which overrides SQL output syntax
+        // note enclosing offsetParam and pageSizeParam - we don't bother passing these to the builder to deal with
+        final SQLBuilder builder =
+                new SQLBuilder() {
+                    @Override
+                    public String toSQL() {
+                        return "WITH results AS ( SELECT rowNo = ROW_NUMBER() OVER ("
+                                + getOrderByClause().toSQL()
+                                + "), obj.fullobject "
+                                + getFromClause().toSQL()
+                                + getJoinClause().toSQL()
+                                + getWhereClause().toSQL()
+                                + ") SELECT * FROM results WHERE rowNo BETWEEN "
+                                + (offsetParam + 1)
+                                + " AND "
+                                + (offsetParam + pageSizeParam);
+                    }
+                };
+
+        // "SELECT obj.* FROM mainTable obj..."
+        builder.from("${_dbSchema}.${_mainTable} obj")
+
+                // join objecttypes to fix OPENIDM-2773
+                .join("${_dbSchema}.objecttypes", "objecttypes")
+                .on(where("obj.objecttypes_id = objecttypes.id")
+                        .and("objecttypes.objecttype = ${otype}"))
+
+                .where(filter.accept(
+                        // override numeric value clause generation to cast propvalue to a number
+                        new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH, builder) {
+                            @Override
+                            Clause buildNumericValueClause(String propTable, String operand, String placeholder) {
+                                return where(propTable + ".proptype = 'java.lang.Integer'")
+                                        .or(propTable + ".proptype = 'java.lang.Double'")
+                                        .and("(CASE ISNUMERIC(propvalue) WHEN 1 THEN CAST(propvalue AS FLOAT) ELSE null END) " + operand + " ${" + placeholder + "}");
+                            }
+                        },
+                        replacementTokens));
+
+        // other half of OPENIDM-2773 fix
+        replacementTokens.put("otype", params.get("_resource"));
+
+        // JsonValue-cheat to avoid an unchecked cast
+        final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
+        // Check for sort keys and build up order-by syntax
+        if (sortKeys != null && sortKeys.size() > 0) {
+            prepareSortKeyStatements(builder, sortKeys, replacementTokens);
+        } else {
+            builder.orderBy("obj.id", false);
+        }
+
+        return builder.toSQL();
     }
     
     

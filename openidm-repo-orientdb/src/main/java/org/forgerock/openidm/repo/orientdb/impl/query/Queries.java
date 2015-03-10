@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,13 +32,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
-import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.StringSQLRenderer;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -55,53 +55,49 @@ import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
  * Configured and add-hoc query support on OrientDB
  * 
  * Queries can contain tokens of the format ${token-name}
- * 
- * @author aegloff
- * @author brmiller
  */
 public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryRequest, List<ODocument>> {
 
     final static Logger logger = LoggerFactory.getLogger(Queries.class);
 
-    private static final QueryFilterVisitor<String, Map<String, String>> QUERY_FILTER_VISITOR =
-            new SQLQueryFilterVisitor<Map<String, String>>() {
-                int objectNumber = 0;
-                @Override
-                public String visitValueAssertion(Map<String, String> objects, String operand, JsonPointer field, Object valueAssertion) {
-                    ++objectNumber;
-                    String value = "v"+objectNumber;
-                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                        objects.put(field.toString(), DocumentUtil.ORIENTDB_PRIMARY_KEY);
-                    } else {
-                        objects.put(field.toString(), field.toString());
-                    }
-                    objects.put(value, String.valueOf(valueAssertion));
-                    return "(${dotnotation:" + field.toString() + "} " + operand + " ${" + value + "})";
-                }
+    private class OrientQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, String>> {
+        int objectNumber = 0;
+        @Override
+        public StringSQLRenderer visitValueAssertion(Map<String, String> objects, String operand, JsonPointer field, Object valueAssertion) {
+            ++objectNumber;
+            String value = "v"+objectNumber;
+            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                objects.put(field.toString(), DocumentUtil.ORIENTDB_PRIMARY_KEY);
+            } else {
+                objects.put(field.toString(), field.toString());
+            }
+            objects.put(value, String.valueOf(valueAssertion));
+            return new StringSQLRenderer("(${dotnotation:" + field.toString() + "} " + operand + " ${" + value + "})");
+        }
 
-                @Override
-                public String visitPresentFilter(Map<String, String> objects, JsonPointer field) {
-                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                        objects.put(field.toString(), DocumentUtil.ORIENTDB_PRIMARY_KEY);
-                    } else {
-                        objects.put(field.toString(), field.toString());
-                    }
-                    return "(${dotnotation:" + field.toString() + "} IS NOT NULL)";
-                }
+        @Override
+        public StringSQLRenderer visitPresentFilter(Map<String, String> objects, JsonPointer field) {
+            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                objects.put(field.toString(), DocumentUtil.ORIENTDB_PRIMARY_KEY);
+            } else {
+                objects.put(field.toString(), field.toString());
+            }
+            return new StringSQLRenderer("(${dotnotation:" + field.toString() + "} IS NOT NULL)");
+        }
 
-                @Override
-                public String visitNotFilter(Map<String, String> objects, QueryFilter subFilter) {
-                    return "(NOT " + subFilter.accept(this, objects) + ")";
-                }
+        @Override
+        public StringSQLRenderer visitNotFilter(Map<String, String> objects, QueryFilter subFilter) {
+            return new StringSQLRenderer("(NOT " + subFilter.accept(this, objects) + ")");
+        }
 
-                @Override
-                public String visitStartsWithFilter(Map<String, String> parameters, JsonPointer field, Object valueAssertion) {
-                    // OrientDB needs double % for "like anything"
-                    return "".equals(valueAssertion)
-                        ? visitValueAssertion(parameters, "LIKE", field, "%%")
-                        : visitValueAssertion(parameters, "LIKE", field, valueAssertion + "%");
-                }
-            };
+        @Override
+        public StringSQLRenderer visitStartsWithFilter(Map<String, String> parameters, JsonPointer field, Object valueAssertion) {
+            // OrientDB needs double % for "like anything"
+            return "".equals(valueAssertion)
+                ? visitValueAssertion(parameters, "LIKE", field, "%%")
+                : visitValueAssertion(parameters, "LIKE", field, valueAssertion + "%");
+        }
+    }
 
     public Queries() {
         super(new HashMap<String, QueryInfo<OSQLSynchQuery<ODocument>>>());
@@ -143,7 +139,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
         if (filter != null) {
             // If there is a filter, use it's query string
             queryString = "SELECT * FROM ${unquoted:_resource} WHERE "
-                    + filter.accept(QUERY_FILTER_VISITOR, params) 
+                    + filter.accept(new OrientQueryFilterVisitor(), params)
                     + params.get(QueryConstants.PAGE_CLAUSE);
         }
         // treat the query created by the filter as a queryExpression

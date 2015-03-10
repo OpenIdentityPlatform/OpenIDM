@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012-2014 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,51 +27,34 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+import static org.forgerock.openidm.repo.util.Clauses.where;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import org.forgerock.openidm.repo.util.Clause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * TableHandler appropriate for Oracle-specific query syntax.
  */
 public class OracleTableHandler extends GenericTableHandler {
     final static Logger logger = LoggerFactory.getLogger(OracleTableHandler.class);
 
     public OracleTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize,
-                new GenericSQLQueryFilterVisitor() {
-                    @Override
-                    String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
-                        // validate type is integer or double cast all numeric types to decimal
-                        if (isNumeric(valueAssertion)) {
-                            return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
-                                    + "AND TO_NUMBER(prop.propvalue) " + operand + " ${" + placeholder + "}";
-                        } else if (isBoolean(valueAssertion)) {
-                            // validate type is boolean if valueAssertion is a boolean
-                            return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
-                        } else {
-                            // assume String
-                            return "prop.propvalue " + operand + " ${" + placeholder + "}";
-                        }
-                    }
-                }, sqlExceptionHandler);
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
     @Override
@@ -96,7 +79,7 @@ public class OracleTableHandler extends GenericTableHandler {
             String objString = mapper.writeValueAsString(obj);
 
             logger.trace("Populating statement {} with params {}, {}, {}, {}",
-                    new Object[]{createStatement, typeId, localId, rev, objString});
+                    createStatement, typeId, localId, rev, objString);
             createStatement.setLong(1, typeId);
             createStatement.setString(2, localId);
             createStatement.setString(3, rev);
@@ -134,40 +117,69 @@ public class OracleTableHandler extends GenericTableHandler {
         result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + mainTable + " obj, " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
 
         return result;
-    }    
-    
+    }
+
+    /**
+     * @inheritDoc
+     */
     @Override
-    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String)params.get(PAGED_RESULTS_OFFSET));
         final int pageSizeParam = Integer.parseInt((String)params.get(PAGE_SIZE));
-        String filterString = getFilterString(filter, replacementTokens);
-        String innerJoinClause = "";
-        String keysClause = "";
-        
-        // Check for sort keys and build up order-by syntax
-        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
-        if (sortKeys != null && sortKeys.size() > 0) {
-            List<String> innerJoins = new ArrayList<String>();
-            List<String> keys = new ArrayList<String>();
-            prepareSortKeyStatements(sortKeys, innerJoins, keys, replacementTokens);
-            innerJoinClause = StringUtils.join(innerJoins, " ");
-            keysClause = StringUtils.join(keys, ", ");
-        } else {
-            keysClause = "obj.id DESC";
-        }
-        
 
-        return "SELECT * FROM ( SELECT obj.fullobject, row_number() over (ORDER BY " 
-                + keysClause
-                + " ) rn FROM ${_dbSchema}.${_mainTable} obj " 
-                + innerJoinClause
-                + filterString 
-                + "ORDER BY "
-                + keysClause
-                + ") WHERE rn BETWEEN " 
-                + (offsetParam+1)
-                + " AND " 
-                + (offsetParam + pageSizeParam)
-                + " ORDER BY rn";
+        // Create custom builder which overrides SQL output syntax
+        // note enclosing offsetParam and pageSizeParam - we don't bother passing these to the builder to deal with
+        final SQLBuilder builder =
+                new SQLBuilder() {
+                    @Override
+                    public String toSQL() {
+                        return "SELECT * FROM ( SELECT obj.fullobject, row_number() OVER ("
+                                + getOrderByClause().toSQL()
+                                + " ) rn "
+                                + getFromClause().toSQL()
+                                + getJoinClause().toSQL()
+                                + getWhereClause().toSQL()
+                                + getOrderByClause().toSQL()
+                                + ") WHERE rn BETWEEN "
+                                + (offsetParam + 1)
+                                + " AND "
+                                + (offsetParam + pageSizeParam)
+                                + " ORDER BY rn";
+                    }
+                };
+
+        // "SELECT obj.* FROM mainTable obj..."
+        builder.from("${_dbSchema}.${_mainTable} obj")
+
+                // join objecttypes to fix OPENIDM-2773
+                .join("${_dbSchema}.objecttypes", "objecttypes")
+                .on(where("obj.objecttypes_id = objecttypes.id")
+                        .and("objecttypes.objecttype = ${otype}"))
+
+                .where(filter.accept(
+                        new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH, builder) {
+                            // override numeric value clause generation to cast propvalue to a number
+                            @Override
+                            Clause buildNumericValueClause(String propTable, String operand, String placeholder) {
+                                return where(propTable + ".proptype = 'java.lang.Integer'")
+                                        .or(propTable + ".proptype = 'java.lang.Double'")
+                                        .and("TO_NUMBER(" + propTable + ".propvalue) " + operand + " ${" + placeholder + "}");
+                            }
+                        },
+                        replacementTokens));
+
+        // other half of OPENIDM-2773 fix
+        replacementTokens.put("otype", params.get("_resource"));
+
+        // JsonValue-cheat to avoid an unchecked cast
+        final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
+        // Check for sort keys and build up order-by syntax
+        if (sortKeys != null && sortKeys.size() > 0) {
+            prepareSortKeyStatements(builder, sortKeys, replacementTokens);
+        } else {
+            builder.orderBy("obj.id", false);
+        }
+
+        return builder.toSQL();
     }
 }
