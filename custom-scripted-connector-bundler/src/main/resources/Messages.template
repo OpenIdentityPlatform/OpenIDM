@@ -1,0 +1,52 @@
+#
+# DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+#
+# Copyright (c) 2015 ForgeRock AS
+#
+# The contents of this file are subject to the terms
+# of the Common Development and Distribution License
+# (the License). You may not use this file except in
+# compliance with the License.
+#
+# You can obtain a copy of the License at
+# http://forgerock.org/license/CDDLv1.0.html
+# See the License for the specific language governing
+# permission and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL
+# Header Notice in each file and include the License file
+# at http://forgerock.org/license/CDDLv1.0.html
+# If applicable, add the following below the CDDL Header,
+# with the fields enclosed by brackets [] replaced by
+# your own identifying information:
+# "Portions Copyrighted [year] [name of copyright owner]"
+#
+## This file maps the annotated display keys from your source files (such as @ConnectorClass
+## and @ConfigurationProperty) to their string values for display in the application's UI
+
+groovy.{{lower packageName}}.connector.display={{displayName}}
+
+{{#properties}}
+{{nameCamelCase}}.display={{displayName}}
+{{nameCamelCase}}.help={{description}}
+{{replace group " " ""}}.group={{group}}
+{{/properties}}
+
+reloadScriptOnExecution.display=Reload Script on Execution
+reloadScriptOnExecution.help=Set to true to reload scripts every time they are executed
+authenticateScriptFileName.display=Authenticate Script filename
+authenticateScriptFileName.help=The filename of the Authenticate script
+createScriptFileName.display=Create Script filename
+createScriptFileName.help=The filename of the Create script
+updateScriptFileName.display=Update Script filename
+updateScriptFileName.help=The filename of the Update script
+deleteScriptFileName.display=Delete Script filename
+deleteScriptFileName.help=The filename of the Delete script
+searchScriptFileName.display=Search Script filename
+searchScriptFileName.help=The filename of the Search script
+syncScriptFileName.display=Sync Script filename
+syncScriptFileName.help=The filename of the Sync script
+schemaScriptFileName.display=Schema Script filename
+schemaScriptFileName.help=The filename of the Schema script
+testScriptFileName.display=Test Script filename
+testScriptFileName.help=The filename of the Test script

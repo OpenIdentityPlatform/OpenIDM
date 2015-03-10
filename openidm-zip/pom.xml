@@ -208,6 +208,11 @@
             <artifactId>openidm-httpclient-fragment</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm.tools</groupId>
+            <artifactId>custom-scripted-connector-bundler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>
