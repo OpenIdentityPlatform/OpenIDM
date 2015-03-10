@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-ui'
@@ -1529,61 +1529,116 @@
  <section xml:id="ui-customizing">
   <title>Changing the UI Theme</title>
   <para>
-   You can customize the theme of the user interface with your own branding. One
-   way to adjust the UI theme, is to edit the properties in the UI theme
-   configuration file
-   (<filename>/path/to/openidm/conf/ui-themeconfig.json</filename>). This file
-   stores detailed color values, background image paths, and a number of other
-   common styling options. Because the UI theme configuration file is part of
-   the configuration store, it is shared by all nodes in a cluster. Changes made
-   to this file do not have to be replicated manually across nodes.
-  </para>
-  <para>
-   To change theme elements that are not included in the UI theme configuration
-   file, you can create a custom theme in the
-   <filename>openidm/ui/extension</filename> directory. By default the user
-   interface reads the stylesheets and images from the
-   <filename>openidm/ui/default</filename> directory. Do not modify the files in
-   this default directory as there is no guarantee that your changes will not be
-   overwritten in the next OpenIDM release. Modifications made in the
-   <filename>openidm/ui/extension</filename> directory can be maintained across
-   product upgrades. The UI searches the <literal>extension</literal> directory
-   first and applies any styles or images located in this directory. Note that
-   files added to the <literal>extension</literal> directory must be manually
-   copied between every node in a cluster.
-  </para>
-  <para>
-   If you want to update the view logic of the UI, you cannot simply add files
-   to the extensions folder. It is assumed that if your deployment requires that
-   level of control of the user interface, you are no longer going to want to be
-   automatically upgraded with subsequent releases. As such, you need to take on
-   the task of maintaining a fork of the UI.
+   You can customize the theme of the user interface. OpenIDM uses the
+   <link xlink:href="http://getbootstrap.com"
+         xlink:show="new"><citetitle>Bootstrap</citetitle></link> framework. You
+   can now download and customize the OpenIDM UI with the
+   Bootstrap themes of your choice. OpenIDM is also configured with the
+   <link xlink:href="http://fortawesome.github.io/Font-Awesome/" xlink:show="new">
+    <citetitle>Font Awesome</citetitle> CSS toolkit</link>.
   </para>
 
-  <section xml:id="ui-style">
-   <title>Changing the Default Stylesheet</title>
+  <section xml:id="ui-bootstrap">
+   <title>OpenIDM UI Themes and Bootstrap</title>
+
    <para>
-    Most changes to the UI stylesheets can be made in the UI theme configuration
-    file (<filename>conf/ui-themeconfig.json</filename>).
+    You can configure a few features of the OpenIDM UI in the
+    <filename>ui-themeconfig.json</filename> file in the
+    <filename>openidm/conf</filename> subdirectory. However, to change most
+    theme-related features of the UI, you will have to take target files from
+    <filename>openidm/ui/default</filename> subdirectories, and copy them to the
+    appropriate <filename>openidm/ui/extension</filename> subdirectory.
    </para>
+
    <para>
-    If you make the following change to that file, that changes the background
-    color of the UI to dark grey.
+    The default OpenIDM UI theme configuration files are stored in the following
+    directories:
    </para>
-   <screen><userinput>$ grep "background-color" /path/to/openidm/conf/ui-themeconfig.json</userinput>
-<computeroutput>"background-color" : "#ababab",</computeroutput>
-   </screen>
+
+   <itemizedlist>
+    <listitem>
      <para>
-      Refresh your browser window for the change to appear.
+      <filename>openidm/ui/default/admin/public/css/common</filename>
      </para>
+     <para>
+      Contains Bootstrap theme files for the Admin UI.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>openidm/ui/default/admin/public/css/fontawesome</filename>
+     </para>
+     <para>
+      Contains Font Awesome CSS toolkit files for the Admin UI.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>openidm/ui/default/enduser/public/css/common</filename>
+     </para>
+     <para>
+      Contains Bootstrap theme files for the Data Management UI.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <filename>openidm/ui/default/enduser/public/css/fontawesome</filename>
+     </para>
+     <para>
+      Contains Font Awesome CSS toolkit files for the Data Management UI.
+     </para>
+    </listitem>
+  </itemizedlist>
+
    <para>
-    The default stylesheets are located in the
-    <filename>openidm/ui/default/enduser/public/css</filename> directory. To
-    customize the stylesheets beyond the properties available in the UI theme
-    configuration file, copy the default stylesheets to
-    <filename>openidm/ui/extension/css</filename>, and edit them according to
-    your requirements.
+    The default configuration files for the Admin and Data Management UIs are
+    identical for theme configuration.
    </para>
+
+   <para>
+    You should not change these files directly. By default the UI reads the
+    stylesheets and images from the <filename>openidm/ui/default</filename>
+    directory. Do not modify the files in this directory. Your changes may be
+    overwritten in the next OpenIDM release.
+   </para>
+
+   <para>
+    To customize your UI, first set up matching subdirectories in the
+    <filename>openidm/ui/extension</filename> subdirectory. For example,
+    assume you want to customize colors, logos, and so on.
+   </para>
+
+   <para>
+    You can set up a new theme, primarily through the
+    <filename>bootstrap.min.js</filename> file. As the default version of this
+    file is in <filename>openidm/ui/default/admin/public/libs</filename>,
+    you would copy a custom <filename>bootstrap.min.js</filename> file to
+    the <filename>openidm/ui/extension/libs</filename> directory.
+   </para>
+
+   <para>
+    You can also set up new custom colors. For that purpose, copy the
+    <filename>variables.less</filename> file from the
+    <filename>openidm/ui/default/admin/public/css/common/</filename>
+    directory to the <filename>openidm/ui/extension/css/common</filename>
+    directory.
+   </para>
+
+   <para>
+    You can then make changes to the <filename>variables.less</filename> file
+    that you just copied. Any changes that you make affects both the Admin and
+    Data Management UIs.
+   </para>
+
+   <note>
+    <para>
+     OpenIDM includes two versions of the <filename>variables.less</filename> file.
+     One is stored in the <filename>public/css/common</filename> subdirectory. The
+     other comes from a Font Awesome download, and can be found in the
+     <filename>public/css/fontawesome/less</filename> subdirectory.
+    </para>
+   </note>
+
   </section>
 
   <section xml:id="ui-logo">
