@@ -1828,9 +1828,24 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 @Override
                 public Filter visitBooleanLiteralFilter(final ObjectClassInfoHelper helper,
                         final boolean value) {
-                    throw new UnsupportedOperationException("visitBooleanLiteralFilter not supported");
+                    return new Filter() {
+                        public boolean accept(ConnectorObject obj) {
+                            return value;
+                        }
+                        public <R extends Object, P extends Object> R accept(org.identityconnectors.framework.common.objects.filter.FilterVisitor<R,P> v, P p) {
+                            // OpenICF team explained that
+                            // return v.visitExtendedFilter(p, this);
+                            // would not yet (1.4) work with all connectors and/or remotely.
+                            // Instead the return null evaluates to always true.       
+                            if (value) {
+                                return null; // OpenICF contract evaluates null return to always true
+                            } else {
+                                throw new UnsupportedOperationException("visitBooleanLiteralFilter only supported for literal true, not false");
+                            }
+                        }
+                    };
                 }
-
+                
                 @Override
                 public Filter visitContainsFilter(ObjectClassInfoHelper helper, JsonPointer field,
                         Object valueAssertion) {
