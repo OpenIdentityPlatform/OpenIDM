@@ -1794,10 +1794,14 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
   <title>Connectors Supported With OpenIDM ${docTargetVersion}</title>
   <para>
    OpenIDM ${docTargetVersion} provides several connectors by default, in
-   the <literal>path/to/openidm/connectors</literal> directory. Additional
-   connectors can be downloaded from the <link
-   xlink:href="http://forgerock.com/download-stack/"
-   xlink:show="new">Open Stack download page</link>.
+   the <literal>path/to/openidm/connectors</literal> directory. The supported
+   connectors that are not bundled with OpenIDM can be downloaded from the <link
+   xlink:href="http://forgerock.com/download-stack/" xlink:show="new">Open Stack
+   download page</link>. The <link
+   xlink:href="http://openicf.forgerock.org/connectors/"
+   xlink:show="new">OpenICF community site</link> includes a number of
+   additional connectors, and indicates the level of support provided for each
+   of those.
   </para>
   <para>
    This section describes the connectors that are supported for use with OpenIDM
