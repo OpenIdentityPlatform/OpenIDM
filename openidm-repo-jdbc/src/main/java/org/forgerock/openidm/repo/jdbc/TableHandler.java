@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -193,7 +193,7 @@ public interface TableHandler {
      * @param params a map containing query parameters
      * @return the raw query String
      */
-    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params);
+    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params);
     
     /**
      * Query if a given exception signifies a well known error type

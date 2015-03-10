@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,7 +21,6 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
 package org.forgerock.openidm.repo.jdbc.impl;
 
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
@@ -56,14 +55,15 @@ public class MSSQLMappedTableHandler extends MappedTableHandler {
     }    
     
     @Override
-    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String)params.get(PAGED_RESULTS_OFFSET));
         final int pageSizeParam = Integer.parseInt((String)params.get(PAGE_SIZE));
         String filterString = getFilterString(filter, replacementTokens);
         String keysClause = "";
         
+        // JsonValue-cheat to avoid an unchecked cast
+        final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
         // Check for sort keys and build up order-by syntax
-        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
         if (sortKeys != null && sortKeys.size() > 0) {
             List<String> keys = new ArrayList<String>();
             prepareSortKeyStatements(sortKeys, keys, replacementTokens);

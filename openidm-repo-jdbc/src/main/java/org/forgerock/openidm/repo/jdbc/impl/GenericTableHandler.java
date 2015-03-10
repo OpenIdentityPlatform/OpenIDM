@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,6 +26,7 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+import static org.forgerock.openidm.repo.util.Clauses.where;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -52,7 +53,6 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SortKey;
@@ -61,8 +61,6 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
-import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,118 +76,7 @@ public class GenericTableHandler implements TableHandler {
      * Maximum length of searchable properties.
      * This is used to trim values due to database index size limitations.
      */
-    private static final int SEARCHABLE_LENGTH = 2000;
-
-    /**
-     * QueryFilterVisitor for generating WHERE clause SQL queries against generic table schema.
-     */
-    static class GenericSQLQueryFilterVisitor extends SQLQueryFilterVisitor<Map<String, Object>> {
-
-        private final int searchableLength;
-
-        GenericSQLQueryFilterVisitor(final int searchableLength){
-            this.searchableLength = searchableLength;
-        }
-
-        GenericSQLQueryFilterVisitor() {
-            this(SEARCHABLE_LENGTH);
-        }
-
-        boolean isNumeric(final Object valueAssertion) {
-            return  valueAssertion instanceof Integer || valueAssertion instanceof Long
-                    || valueAssertion instanceof Float || valueAssertion instanceof Double;
-        }
-
-        boolean isBoolean(final Object valueAssertion) {
-            return valueAssertion instanceof Boolean;
-        }
-
-        private Object trimValue(final Object value) {
-            // Must retain types for getPropTypeValueClause()
-            if (isNumeric(value) || isBoolean(value)) {
-                return value;
-            } else {
-                return StringUtils.left(value.toString(), searchableLength);
-            }
-        }
-
-        /**
-         * Generate the WHERE clause for properties table based on type of value being asserted
-         *
-         * @param operand the comparison operand
-         * @param placeholder the value placeholder
-         * @param valueAssertion the actual value assertion
-         * @return SQL WHERE clause for properties table
-         */
-        String getPropTypeValueClause(String operand, String placeholder, Object valueAssertion) {
-            // validate type is integer or double cast all numeric types to decimal
-            if (isNumeric(valueAssertion)) {
-                return "(prop.proptype = 'java.lang.Integer' OR prop.proptype = 'java.lang.Double') "
-                        + "AND CAST(prop.propvalue AS DECIMAL) " + operand + " ${" + placeholder + "}";
-            } else if (isBoolean(valueAssertion)) {
-                // validate type is boolean if valueAssertion is a boolean
-                return "prop.proptype = 'java.lang.Boolean' AND prop.propvalue " + operand + " ${" + placeholder + "}";
-            } else {
-                // assume String
-                return "prop.propvalue " + operand + " ${" + placeholder + "}";
-            }
-        }
-
-        @Override
-        public String visitContainsFilter(Map<String, Object> parameters, JsonPointer field, Object valueAssertion) {
-            return super.visitContainsFilter(parameters, field, trimValue(valueAssertion));
-        }
-
-        @Override
-        public String visitEqualsFilter(Map<String, Object> parameters, JsonPointer field, Object valueAssertion) {
-            return super.visitEqualsFilter(parameters, field, trimValue(valueAssertion));
-        }
-
-        @Override
-        public String visitStartsWithFilter(Map<String, Object> parameters, JsonPointer field, Object valueAssertion) {
-            return super.visitStartsWithFilter(parameters, field, trimValue(valueAssertion));
-        }
-
-        // key/value number for each key/value placeholder
-        int objectNumber = 0;
-
-        @Override
-        public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
-            ++objectNumber;
-            String key = "k"+objectNumber;
-            String value = "v"+objectNumber;
-
-            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                objects.put(value, valueAssertion);
-                return "(obj.objectid " + operand + " ${" + value + "})";
-            } else {
-                objects.put(key, field.toString());
-                objects.put(value, valueAssertion);
-                return "(EXISTS "
-                        + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
-                        +          "WHERE prop.${_mainTable}_id = obj.id "
-                        +            "AND prop.propkey = ${" + key + "} "
-                        +            "AND " + getPropTypeValueClause(operand, value, valueAssertion) + " "
-                        + "))";
-            }
-        }
-
-        @Override
-        public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
-            if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
-                // NOT NULL is enforced by the schema
-                return "(obj.objectid IS NOT NULL)";
-            } else {
-                ++objectNumber;
-                String key = "k" + objectNumber;
-                objects.put(key, field.toString());
-                return "(EXISTS "
-                        + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
-                        +          "WHERE prop.${_mainTable}_id = obj.id "
-                        +            "AND prop.propkey = ${" + key + "}))";
-            }
-        }
-    };
+    protected static final int SEARCHABLE_LENGTH = 2000;
 
     SQLExceptionHandler sqlExceptionHandler;
 
@@ -206,8 +93,6 @@ public class GenericTableHandler implements TableHandler {
 
     final TableQueries queries;
     
-    final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
-
     Map<QueryDefinition, String> queryMap;
 
     final boolean enableBatching; // Whether to use JDBC statement batching.
@@ -242,22 +127,13 @@ public class GenericTableHandler implements TableHandler {
      * @param maxBatchSize the maximum batch size
      * @param sqlExceptionHandler a handler for SQLExceptions
      */
-    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        this(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, new GenericSQLQueryFilterVisitor(), sqlExceptionHandler);
-    }
+    public GenericTableHandler(JsonValue tableConfig,
+            String dbSchemaName,
+            JsonValue queriesConfig,
+            JsonValue commandsConfig,
+            int maxBatchSize,
+            SQLExceptionHandler sqlExceptionHandler) {
 
-    /**
-     * Create a generic table handler.
-     *
-     * @param tableConfig the table config
-     * @param dbSchemaName the schem name
-     * @param queriesConfig a map of named queries
-     * @param commandsConfig a map of named commands
-     * @param maxBatchSize the maximum batch size
-     * @param queryFilterVisitor the {@link QueryFilterVisitor} for converting a query filter to an SQL statement
-     * @param sqlExceptionHandler a handler for SQLExceptions
-     */
-    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
 
         this.mainTableName = cfg.mainTableName;
@@ -275,9 +151,7 @@ public class GenericTableHandler implements TableHandler {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
-        this.queryFilterVisitor = queryFilterVisitor;
-
-        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, getSearchableLength(), queryFilterVisitor, new GenericQueryResultMapper());
+        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, getSearchableLength(), new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(queriesConfig, commandsConfig, queryMap);
 
@@ -358,7 +232,7 @@ public class GenericTableHandler implements TableHandler {
                 String objString = rs.getString("fullobject");
                 resultMap = mapper.readValue(objString, typeRef);
                 resultMap.put("_rev", rev);
-                logger.debug(" full id: {}, rev: {}, obj {}", new Object[]{fullId, rev, resultMap});
+                logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, resultMap);
                 result = new Resource(localId, rev, new JsonValue(resultMap));
             } else {
                 throw ResourceException.getException(ResourceException.NOT_FOUND,
@@ -392,7 +266,7 @@ public class GenericTableHandler implements TableHandler {
             String objString = mapper.writeValueAsString(obj);
 
             logger.trace("Populating statement {} with params {}, {}, {}, {}",
-                    new Object[]{createStatement, typeId, localId, rev, objString});
+                    createStatement, typeId, localId, rev, objString);
             createStatement.setLong(1, typeId);
             createStatement.setString(2, localId);
             createStatement.setString(3, rev);
@@ -483,7 +357,7 @@ public class GenericTableHandler implements TableHandler {
                     }
                     if (logger.isTraceEnabled()) {
                         logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",
-                                new Object[]{propCreateStatement, dbId, localId, propkey, proptype, propvalue});
+                                propCreateStatement, dbId, localId, propkey, proptype, propvalue);
                     }
                     propCreateStatement.setLong(1, dbId);
                     propCreateStatement.setString(2, propkey);
@@ -497,7 +371,7 @@ public class GenericTableHandler implements TableHandler {
                         int numUpdate = propCreateStatement.executeUpdate();
                     }
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Inserting objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", new Object[]{fullId, propkey, proptype, propvalue});
+                        logger.trace("Inserting objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", fullId, propkey, proptype, propvalue);
                     }
                 }
                 if (enableBatching && batchingCount >= maxBatchSize) {
@@ -522,7 +396,7 @@ public class GenericTableHandler implements TableHandler {
     }
 
     /**
-     * InheritDoc
+     * @inheritDoc
      */
     public boolean isRetryable(SQLException ex, Connection connection) {
         return sqlExceptionHandler.isRetryable(ex, connection);
@@ -574,7 +448,7 @@ public class GenericTableHandler implements TableHandler {
             rs = readTypeStatement.executeQuery();
             if (rs.next()) {
                 typeId = rs.getLong("id");
-                logger.debug("Type: {}, id: {}", new Object[]{type, typeId});
+                logger.debug("Type: {}, id: {}", type, typeId);
             }
         } finally {
             CleanupHelper.loggedClose(rs);
@@ -669,7 +543,7 @@ public class GenericTableHandler implements TableHandler {
             String existingRev = rs.getString("rev");
             long dbId = rs.getLong("id");
             long objectTypeDbId = rs.getLong("objecttypes_id");
-            logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[]{fullId, existingRev, dbId, objectTypeDbId});
+            logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", fullId, existingRev, dbId, objectTypeDbId);
 
             if (!existingRev.equals(rev)) {
                 throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
@@ -687,7 +561,7 @@ public class GenericTableHandler implements TableHandler {
             }
             String objString = mapper.writeValueAsString(obj);
 
-            logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId});
+            logger.trace("Populating prepared statement {} for {} {} {} {} {}", updateStatement, fullId, newLocalId, newRev, objString, dbId);
             updateStatement.setString(1, newLocalId);
             updateStatement.setString(2, newRev);
             updateStatement.setString(3, objString);
@@ -701,7 +575,7 @@ public class GenericTableHandler implements TableHandler {
 
             JsonValue jv = new JsonValue(obj);
             // TODO: only update what changed?
-            logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
+            logger.trace("Populating prepared statement {} for {} {} {}", deletePropStatement, fullId, type, localId);
             deletePropStatement.setString(1, type);
             deletePropStatement.setString(2, localId);
             logger.debug("Update properties del statement: {}", deletePropStatement);
@@ -721,7 +595,7 @@ public class GenericTableHandler implements TableHandler {
     }
 
     /**
-     * @see org.forgerock.openidm.repo.jdbc.internal.GenericTableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
+     * @see org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
      */
     @Override
     public void delete(String fullId, String type, String localId, String rev, Connection connection)
@@ -745,7 +619,7 @@ public class GenericTableHandler implements TableHandler {
 
             // Proceed with the valid delete
             deleteStatement = getPreparedStatement(connection, QueryDefinition.DELETEQUERYSTR);
-            logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[]{deleteStatement, fullId, type, localId, rev});
+            logger.trace("Populating prepared statement {} for {} {} {} {}", deleteStatement, fullId, type, localId, rev);
 
             // Rely on ON DELETE CASCADE for connected object properties to be deleted
             deleteStatement.setString(1, type);
@@ -793,56 +667,77 @@ public class GenericTableHandler implements TableHandler {
     protected PreparedStatement getPreparedStatement(Connection connection, QueryDefinition queryDefinition) throws SQLException {
         return queries.getPreparedStatement(connection, queryMap.get(queryDefinition));
     }
-    
-    @Override
-    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
-        final String offsetParam = (String) params.get(PAGED_RESULTS_OFFSET);
-        final String pageSizeParam = (String) params.get(PAGE_SIZE);
-        String filterString = getFilterString(filter, replacementTokens);
-        
-        // Check for sort keys and build up order-by syntax
-        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
-        if (sortKeys != null && sortKeys.size() > 0) {
-            List<String> innerJoins = new ArrayList<String>();
-            List<String> keys = new ArrayList<String>();
-            prepareSortKeyStatements(sortKeys, innerJoins, keys, replacementTokens);
-            filterString = StringUtils.join(innerJoins, " ") + " " + filterString + " ORDER BY " + StringUtils.join(keys, ", ");
-        }
 
-        return "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj "
-                + filterString + " LIMIT " + pageSizeParam + " OFFSET " + offsetParam;
+    /**
+     * Render and SQL SELECT statement with placeholders for the given query filter.
+     *
+     * @param filter the query filter
+     * @param replacementTokens a map to store any replacement tokens
+     * @param params a map containing query parameters
+     * @return an SQL SELECT statement
+     */
+    @Override
+    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+        final int offsetParam = Integer.parseInt((String) params.get(PAGED_RESULTS_OFFSET));
+        final int pageSizeParam = Integer.parseInt((String) params.get(PAGE_SIZE));
+
+        SQLBuilder builder = new SQLBuilder() {
+            @Override
+            public String toSQL() {
+                return "SELECT " + getColumns().toSQL()
+                        + getFromClause().toSQL()
+                        + getJoinClause().toSQL()
+                        + getWhereClause().toSQL()
+                        + getOrderByClause().toSQL()
+                        + " LIMIT " + pageSizeParam
+                        + " OFFSET " + offsetParam;
+            }
+        };
+
+        // "SELECT obj.* FROM mainTable obj..."
+        builder.addColumn("obj.*")
+                .from("${_dbSchema}.${_mainTable} obj")
+
+                // join objecttypes to fix OPENIDM-2773
+                .join("${_dbSchema}.objecttypes", "objecttypes")
+                .on(where("obj.objecttypes_id = objecttypes.id")
+                        .and("objecttypes.objecttype = ${otype}"))
+
+                // construct where clause by visiting filter
+                .where(filter.accept(new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH, builder), replacementTokens));
+
+        // other half of OPENIDM-2773 fix
+        replacementTokens.put("otype", params.get("_resource"));
+
+        // JsonValue-cheat to avoid an unchecked cast
+        final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
+        // Check for sort keys and build up order-by syntax
+        prepareSortKeyStatements(builder, sortKeys, replacementTokens);
+
+        return builder.toSQL();
     }
-    
+
     /**
      * Loops through sort keys constructing the inner join and key statements.
-     * 
-     * @param sortKeys  a {@link List} of sort keys
-     * @param innerJoins a {@link List} to store INNER JOIN statements
-     * @param keys a {@link List} to store ORDER BY keys
-     * @param replacementTokens a {@link Map} containing replacement tokens for the {@link PreparedStatement}
+     *
+     * @param builder the SQL builder
+     * @param sortKeys a {@link java.util.List} of sort keys
+     * @param replacementTokens a {@link java.util.Map} containing replacement tokens for the {@link java.sql.PreparedStatement}
      */
-    protected void prepareSortKeyStatements(List<SortKey> sortKeys, List<String> innerJoins, List<String> keys, Map<String, Object> replacementTokens) {
+    protected void prepareSortKeyStatements(SQLBuilder builder, List<SortKey> sortKeys, Map<String, Object> replacementTokens) {
+        if (sortKeys == null) {
+            return;
+        }
         for (int i = 0; i < sortKeys.size(); i++) {
             final SortKey sortKey = sortKeys.get(i);
             final String tokenName = "sortKey" + i;
             final String tableAlias = "orderby" + i;
-            final String innerJoin = "INNER JOIN ${_dbSchema}.${_propTable} " + tableAlias + " ON " + tableAlias 
-                    + ".${_mainTable}_id = obj.id AND " + tableAlias + ".propkey = ${" + tokenName + "}";
-            innerJoins.add(innerJoin);
-            keys.add(tableAlias + ".propvalue " + (sortKey.isAscendingOrder() ? "ASC" : " DESC"));
+            builder.join("${_dbSchema}.${_propTable}", tableAlias)
+                    .on(where(tableAlias + ".${_mainTable}_id = obj.id").and(tableAlias + ".propkey = ${" + tokenName + "}"))
+                    .orderBy(tableAlias + ".propvalue", sortKey.isAscendingOrder());
+
             replacementTokens.put(tokenName, sortKey.getField().toString());
         }
-    }
-    
-    /**
-     * Returns a query string representing the supplied filter.
-     * 
-     * @param filter the {@link QueryFilter} object
-     * @param replacementTokens replacement tokens for the query string
-     * @return a query string
-     */
-    protected String getFilterString(QueryFilter filter, Map<String, Object> replacementTokens) {
-        return " WHERE " + filter.accept(queryFilterVisitor, replacementTokens);
     }
 }
 

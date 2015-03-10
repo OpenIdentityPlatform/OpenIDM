@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -60,7 +60,8 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
-import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.StringSQLRenderer;
 import org.forgerock.openidm.util.Accessor;
 import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
@@ -68,9 +69,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handling of tables in a generic (not object specific) layout
- *
- * @author aegloff
- * @author brmiller
  */
 public class MappedTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(MappedTableHandler.class);
@@ -82,7 +80,7 @@ public class MappedTableHandler implements TableHandler {
 
     final LinkedHashMap<String, Object> rawMappingConfig;
     final Mapping explicitMapping;
-    private final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
+    private final QueryFilterVisitor<StringSQLRenderer, Map<String, Object>> queryFilterVisitor;
 
     // The json pointer (used as names) of the properties to replace the ?
     // tokens in the prepared statement,
@@ -123,24 +121,25 @@ public class MappedTableHandler implements TableHandler {
         }
 
         queryFilterVisitor =
-                new SQLQueryFilterVisitor<Map<String, Object>>() {
+                new StringSQLQueryFilterVisitor<Map<String, Object>>() {
                     // value number for each value placeholder
                     int objectNumber = 0;
                     @Override
-                    public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
+                    public StringSQLRenderer visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
                         ++objectNumber;
                         String value = "v"+objectNumber;
                         objects.put(value, valueAssertion);
-                        return explicitMapping.getDbColumnName(field) + " " + operand + " ${" + value + "}";
+                        return new StringSQLRenderer(
+                                explicitMapping.getDbColumnName(field) + " " + operand + " ${" + value + "}");
                     }
 
                     @Override
-                    public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
-                        return explicitMapping.getDbColumnName(field) + " IS NOT NULL";
+                    public StringSQLRenderer visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
+                        return new StringSQLRenderer(explicitMapping.getDbColumnName(field) + " IS NOT NULL");
                     }
                 };
 
-        queries = new TableQueries(this, tableName, null, dbSchemaName, 0, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
+        queries = new TableQueries(this, tableName, null, dbSchemaName, 0, new ExplicitQueryResultMapper(explicitMapping));
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
         String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
@@ -174,8 +173,8 @@ public class MappedTableHandler implements TableHandler {
         updateQueryStr = "UPDATE " + mainTable + " SET " + updateAssign + " WHERE objectid = ?";
         deleteQueryStr = "DELETE FROM " + mainTable + " WHERE objectid = ? AND rev = ?";
 
-        logger.debug("Unprepared query strings {} {} {} {} {}", new Object[] { readQueryStr,
-            createQueryStr, updateQueryStr, deleteQueryStr });
+        logger.debug("Unprepared query strings {} {} {} {} {}",
+                readQueryStr, createQueryStr, updateQueryStr, deleteQueryStr);
 
     }
 
@@ -202,8 +201,7 @@ public class MappedTableHandler implements TableHandler {
             if (rs.next()) {
                 resultValue = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));
                 JsonValue rev = resultValue.get("_rev");
-                logger.debug(" full id: {}, rev: {}, obj {}", new Object[] { fullId, rev,
-                    resultValue });
+                logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, resultValue);
                 result = new Resource(localId, rev.asString(), resultValue);
             } else {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
@@ -305,8 +303,7 @@ public class MappedTableHandler implements TableHandler {
                               // changed rev from the create.
         JsonValue objVal = new JsonValue(obj);
 
-        logger.debug("Preparing statement {} with {}, {}, {}", new Object[] { createStatement,
-            type, localId, rev });
+        logger.debug("Preparing statement {} with {}, {}, {}", createStatement, type, localId, rev);
         populatePrepStatementColumns(createStatement, objVal, tokenReplacementPropPointers);
 
         if (!batchCreate) {
@@ -348,7 +345,7 @@ public class MappedTableHandler implements TableHandler {
                 if (logger.isTraceEnabled()) {
                     logger.trace(
                             "Value for col {} from {} is getting Stringified from type {} to store in a STRING column as value: {}",
-                            new Object[] { colPos, propPointer, rawValue.getClass(), rawValue });
+                            colPos, propPointer, rawValue.getClass(), rawValue);
                 }
                 propValue = mapper.writeValueAsString(rawValue.getObject());
             }
@@ -402,8 +399,7 @@ public class MappedTableHandler implements TableHandler {
             }
 
             JsonValue objVal = new JsonValue(obj);
-            logger.trace("Populating prepared statement {} for {} {} {}", new Object[] {
-                updateStatement, fullId, newLocalId, newRev });
+            logger.trace("Populating prepared statement {} for {} {} {}", updateStatement, fullId, newLocalId, newRev);
             int nextCol =
                     populatePrepStatementColumns(updateStatement, objVal,
                             tokenReplacementPropPointers);
@@ -456,8 +452,7 @@ public class MappedTableHandler implements TableHandler {
 
             // Proceed with the valid delete
             deleteStatement = queries.getPreparedStatement(connection, deleteQueryStr);
-            logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[] {
-                deleteStatement, fullId, type, localId, rev });
+            logger.trace("Populating prepared statement {} for {} {} {} {}", deleteStatement, fullId, type, localId, rev);
 
             deleteStatement.setString(1, localId);
             deleteStatement.setString(2, rev);
@@ -525,13 +520,14 @@ public class MappedTableHandler implements TableHandler {
     }
 
     @Override
-    public String buildRawQuery(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final String offsetParam = (String) params.get(PAGED_RESULTS_OFFSET);
         final String pageSizeParam = (String) params.get(PAGE_SIZE);
         String pageClause = " LIMIT " + pageSizeParam + " OFFSET " + offsetParam;
-        
+
+        // JsonValue-cheat to avoid an unchecked cast
+        final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
         // Check for sort keys and build up order-by syntax
-        final List<SortKey> sortKeys = (List<SortKey>)params.get(SORT_KEYS);
         if (sortKeys != null && sortKeys.size() > 0) {
             List<String> keys = new ArrayList<String>();
             for (int i = 0; i < sortKeys.size(); i++) {
@@ -543,8 +539,9 @@ public class MappedTableHandler implements TableHandler {
             pageClause = " ORDER BY " + StringUtils.join(keys, ", ") + pageClause;
         }
         
-        return "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj WHERE "
-                + filter.accept(queryFilterVisitor, replacementTokens) + pageClause;
+        return "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj"
+                + getFilterString(filter, replacementTokens)
+                + pageClause;
     }
     
     /**
@@ -569,7 +566,7 @@ public class MappedTableHandler implements TableHandler {
      * @return a query string
      */
     protected String getFilterString(QueryFilter filter, Map<String, Object> replacementTokens) {
-        return " WHERE " + filter.accept(queryFilterVisitor, replacementTokens);
+        return " WHERE " + filter.accept(queryFilterVisitor, replacementTokens).toSQL();
     }
 }
 

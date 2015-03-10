@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -50,12 +50,10 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
-import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -166,29 +164,27 @@ public class TableQueries {
     /** Max length of a property. Used for trimming incoming query values */
     final int maxPropLen;
 
-    final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
     final QueryResultMapper resultMapper;
     
     private TableHandler tableHandler;
 
     /**
+     * Constructor.
      *
      * @param tableHandler
      * @param mainTableName
      * @param propTableName
      * @param dbSchemaName
      * @param maxPropLen Max length of propvalues. Used for trimming values if > 0.
-     * @param queryFilterVisitor
      * @param resultMapper
      */
     public TableQueries(TableHandler tableHandler, String mainTableName, String propTableName, String dbSchemaName, int maxPropLen,
-            QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, QueryResultMapper resultMapper) {
+            QueryResultMapper resultMapper) {
         this.tableHandler = tableHandler;
         this.mainTableName = mainTableName;
         this.propTableName = propTableName;
         this.dbSchemaName = dbSchemaName;
         this.maxPropLen = maxPropLen;
-        this.queryFilterVisitor = queryFilterVisitor;
         this.resultMapper = resultMapper;
     }
 
@@ -311,7 +307,6 @@ public class TableQueries {
 
         params.put(PAGED_RESULTS_OFFSET, offsetParam);
         params.put(PAGE_SIZE, pageSizeParam);
-
         QueryFilter queryFilter = (QueryFilter) params.get(QUERY_FILTER);
         String queryExpression = (String) params.get(QUERY_EXPRESSION);
         String queryId = (String) params.get(QUERY_ID);
@@ -319,6 +314,7 @@ public class TableQueries {
             throw new BadRequestException("Either " + QUERY_ID + ", " + QUERY_EXPRESSION + ", or "
                     + QUERY_FILTER + " to identify/define a query must be passed in the parameters. " + params);
         }
+        logger.debug("Querying " + params);
         final PreparedStatement foundQuery;
         try {
             if (queryFilter != null) {
@@ -450,16 +446,19 @@ public class TableQueries {
     PreparedStatement parseQueryFilter(Connection con, QueryFilter filter, Map<String, Object> params)
             throws SQLException, ResourceException {
         Map<String, Object> replacementTokens = new LinkedHashMap<String, Object>();
-        
-        String rawQuery = tableHandler.buildRawQuery(filter, replacementTokens, params);
+
+        String rawQuery = tableHandler.renderQueryFilter(filter, replacementTokens, params);
 
         Map<String, String> replacements = new LinkedHashMap<String, String>();
         replacements.put("_mainTable", mainTableName);
         replacements.put("_propTable", propTableName);
         replacements.put("_dbSchema", dbSchemaName);
+
         TokenHandler tokenHandler = new TokenHandler();
         // Replace the table name tokens.
         String tempQueryString = tokenHandler.replaceSomeTokens(rawQuery, replacements);
+
+        logger.debug("Tokenized statement: {} with replacementTokens: {}", rawQuery, replacementTokens);
 
         // Convert to ? for prepared statement, populate token replacement info
         List<String> tokenNames = tokenHandler.extractTokens(tempQueryString);
