@@ -1,0 +1,110 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Version {{version}}
+ * Author {{author}}
+ */
+package org.forgerock.openicf.connectors.{{lower packageName}}
+
+import org.forgerock.openicf.connectors.{{lower packageName}}.{{packageName}}Configuration
+import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.objects.Uid
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.OperationOptions
+import org.identityconnectors.framework.common.exceptions.ConnectorException
+import org.identityconnectors.framework.common.objects.ResultsHandler
+import org.identityconnectors.framework.common.objects.SyncToken
+
+/**
+ * Built-in accessible objects
+ **/
+
+// OperationType is SYNC or GET_LATEST_SYNC_TOKEN for this script
+def operation = operation as OperationType
+
+// The configuration class created specifically for this connector
+def configuration = configuration as {{packageName}}Configuration
+
+// Default logging facility
+def log = log as Log
+
+// The objectClass of the object to be created, e.g. ACCOUNT or GROUP
+def objectClass = objectClass as ObjectClass
+
+// The handler for the result set
+def handler = handler as ResultsHandler
+
+/**
+ * Script action - Customizable
+ *
+ * Retrieve all objects in the external source updated since token
+ *
+ * This script should use the handler to process the result set
+ **/
+
+/* Log something to demonstrate this script executed */
+log.info("Sync script, operation = " + operation.toString());
+
+switch (operation) {
+    case OperationType.SYNC:
+        // A token representing the last modified time since which we should retrieve newer objects
+        def token = token as SyncToken
+
+        def tstamp = null
+        if (token != null) {
+            tstamp = new java.sql.Timestamp(token)
+        } else {
+            def today = new Date()
+            tstamp = new java.sql.Timestamp(today.time)
+        }
+        switch (objectClass) {
+            {{#objectTypes}}case {{objectClass}}:
+                // Read all updated objects
+                break
+            {{/objectTypes}}
+            default:
+                log.error("Sync script: objectClass " + objectClass + " is not handled by the Sync script")
+                throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                        objectClass.objectClassValue + " is not supported.")
+        }
+        break;
+
+    case OperationType.GET_LATEST_SYNC_TOKEN:
+        switch (objectClass) {
+            {{#objectTypes}}case {{objectClass}}:
+                // Identify the most recent timestamp for this object type
+                break
+            {{/objectTypes}}
+            default:
+                throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                        objectClass.objectClassValue + " is not supported.")
+        }
+
+        // We don't want to return the java.sql.Timestamp, it is not a supported data type
+        // Get the 'long' version
+        return new java.sql.Timestamp(today.time).getTime();
+
+    default:
+        throw new ConnectorException("SyncScript can not handle operation:" + operation.name())
+}

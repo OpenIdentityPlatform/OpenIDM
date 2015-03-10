@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+ Copyright (c) 2015 ForgeRock AS. All rights reserved.
+
+ The contents of this file are subject to the terms
+ of the Common Development and Distribution License
+ (the License). You may not use this file except in
+ compliance with the License.
+
+ You can obtain a copy of the License at
+ http://forgerock.org/license/CDDLv1.0.html
+ See the License for the specific language governing
+ permission and limitations under the License.
+
+ When distributing Covered Code, include this CDDL
+ Header Notice in each file and include the License file
+ at http://forgerock.org/license/CDDLv1.0.html
+ If applicable, add the following below the CDDL Header,
+ with the fields enclosed by brackets [] replaced by
+ your own identifying information:
+ "Portions Copyrighted [year] [name of copyright owner]"
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock.openicf.connectors</groupId>
+        <artifactId>connectors-parent</artifactId>
+        <version>1.4.0.0</version>
+    </parent>
+    <groupId>org.forgerock.openicf.connectors</groupId>
+    <artifactId>{{lower packageName}}-connector</artifactId>
+    <version>1.4.{{version}}</version>
+    <packaging>bundle</packaging>
+    <name>{{name}}</name>
+    <description>{{description}}</description>
+    <properties>
+        <!-- maven-compiler-plugin -->
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <connectorPackage>org.forgerock.openicf</connectorPackage>
+        <connectorClass>{{packageName}}Connector</connectorClass>
+        <openicf.osgi.import.defaults>
+            org.codehaus.groovy*;version="[2.2,3)",
+            groovy.*;version="[2.2,3)",
+            groovyjar*;version="[2.2,3)",
+            groovyx.net.http*;resolution:=optional,
+        </openicf.osgi.import.defaults>
+        <openicf.osgi.embed/>
+    </properties>
+    <repositories>
+        <repository>
+            <id>forgerock-staging-repository</id>
+            <name>ForgeRock Release Repository</name>
+            <url>http://maven.forgerock.org/repo/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>forgerock-snapshots-repository</id>
+            <name>ForgeRock Snapshot Repository</name>
+            <url>http://maven.forgerock.org/repo/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors</groupId>
+            <artifactId>groovy-connector</artifactId>
+            <version>1.4.1.0-RC2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.framework</groupId>
+            <artifactId>connector-framework</artifactId>
+            <version>1.4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.2.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ivy</groupId>
+            <artifactId>ivy</artifactId>
+            <version>2.4.0-rc1</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <providerSelection>2.0</providerSelection>
+                    <sourceEncoding>UTF-8</sourceEncoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generateStubs</goal>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.gmaven.runtime</groupId>
+                        <artifactId>gmaven-runtime-2.0</artifactId>
+                        <version>1.5</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                        <version>2.2.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Require-Bundle>groovy-all</Require-Bundle>
+                        <Export-Package>org.forgerock.openicf.connectors.{{lower packageName}}.*</Export-Package>
+                        <Private-Package>org.forgerock.openicf.*</Private-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.forgerock.maven.plugins</groupId>
+                <artifactId>openicf-maven-plugin</artifactId>
+                <version>1.2.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>reduce-pom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

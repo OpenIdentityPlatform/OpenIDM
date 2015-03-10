@@ -1,0 +1,82 @@
+{
+    "name" : "{{lower packageName}}",
+    "displayName" : "{{displayName}}",
+    "description" : "{{description}}",
+    "version" : "{{version}}",
+    "author" : "{{author}}",
+    "connectorRef" : {
+        "bundleName" : "org.forgerock.openicf.connectors.{{lower packageName}}-connector",
+        "bundleVersion" : "[1.4.0.0,2.0.0.0)",
+        "connectorName" : "org.forgerock.openicf.connectors.{{lower packageName}}.{{packageName}}Connector"
+    },
+    "producerBufferSize" : 100,
+    "connectorPoolingSupported" : true,
+    "poolConfigOption" : {
+        "maxObjects" : 1,
+        "maxIdle" : 1,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "TEST" : -1,
+        "AUTHENTICATE" : -1,
+        "SEARCH" : -1,
+        "UPDATE" : -1,
+        "DELETE" : -1,
+        "SYNC" : -1,
+        "SCHEMA" : -1,
+
+        "GET" : -1,
+        "VALIDATE" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCRIPT_ON_RESOURCE" : -1
+    },
+    "configurationProperties" : { {{#properties}}
+        "{{nameCamelCase}}" : {{{formattedValue}}},
+        {{/properties}}"classpath" : [
+            "&{launcher.project.location}/script/{{lower packageName}}/"
+        ],
+        "reloadScriptOnExecution" : false,
+        "authenticateScriptFileName" : "AuthenticateScript.groovy",
+        "createScriptFileName" : "CreateScript.groovy",
+        "testScriptFileName" : "TestScript.groovy",
+        "searchScriptFileName" : "SearchScript.groovy",
+        "deleteScriptFileName" : "DeleteScript.groovy",
+        "updateScriptFileName" : "UpdateScript.groovy",
+        "syncScriptFileName" : "SyncScript.groovy",
+        "schemaScriptFileName" : "SchemaScript.groovy"
+    },
+    "systemActions" : [ ],
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
+    {{#hasObjectTypes}}"objectTypes" : { {{#objectTypes}}
+        "{{name}}" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "{{id}}",
+            "type" : "{{type}}",
+            "nativeType" : "{{nativeType}}",
+            "properties" : { {{#properties}}
+                "{{name}}" : {
+                    "type" : "{{type}}",
+                    "required" : {{required}},
+                    "nativeName" : "{{nativeName}}",
+                    "nativeType" : "{{nativeType}}"{{#hasItems}},
+                    "items" : { {{#items}}
+                        "type" : "object",
+                        "properties" : { {{#properties}}
+                                "{{name}}" : "{{type}}"{{^isLast}},{{/isLast}}{{/properties}}
+                        }{{^isLast}},{{/isLast}}
+                   {{/items}} }{{/hasItems}}{{#hasFlags}},
+                    "flags" : [{{#flags}}
+                        "{{flag}}"{{^isLast}},{{/isLast}}{{/flags}}
+                    ]{{/hasFlags}}
+                }{{^isLast}},{{/isLast}}{{/properties}}
+            }
+        }{{^isLast}},{{/isLast}}
+   {{/objectTypes}} },{{/hasObjectTypes}}
+    "operationOptions" : {}
+}

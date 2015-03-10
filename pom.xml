@@ -347,6 +347,7 @@
         <module>openidm-patch-base</module>
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
+        <module>custom-scripted-connector-bundler</module>
     </modules>
 
     <profiles>

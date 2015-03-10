@@ -1002,6 +1002,13 @@
                 </includes>
             </unpackOptions>
         </dependencySet>
+        <dependencySet>
+            <unpack>false</unpack>
+            <includes>
+                <include>org.forgerock.openidm.tools:custom-scripted-connector-bundler:*</include>
+            </includes>
+            <outputDirectory>/openidm/tools</outputDirectory>
+        </dependencySet>
 
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
