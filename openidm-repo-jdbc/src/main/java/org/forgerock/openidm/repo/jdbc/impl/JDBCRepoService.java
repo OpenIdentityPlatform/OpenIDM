@@ -1040,19 +1040,17 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 Boolean enableConnectionPool =
                         connectionConfig.get("enableConnectionPool").defaultTo(Boolean.FALSE)
                                 .asBoolean();
-                DataSource dataSource = null;
                 if (null == sharedDataSource) {
-                    dataSource = DataSourceFactory.newInstance(connectionConfig);
                     Dictionary<String, String> serviceParams = new Hashtable<String, String>(1);
                     serviceParams.put("osgi.jndi.service.name", "jdbc/openidm");
                     sharedDataSource =
                             bundleContext.registerService(DataSource.class.getName(),
-                                    dataSource, serviceParams);
+                                    DataSourceFactory.newInstance(connectionConfig), serviceParams);
                 }
                 if (enableConnectionPool) {
                     logger.info("DataSource connection pool enabled.");
                     useDataSource = true;
-                    return (dataSource == null) ? DataSourceFactory.newInstance(connectionConfig) : dataSource;
+                    return DataSourceFactory.newInstance(connectionConfig);
                 } else {
                     logger.info("No DataSource connection pool enabled.");
                     return null;
