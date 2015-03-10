@@ -37,7 +37,6 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
