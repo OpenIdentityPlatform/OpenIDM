@@ -65,7 +65,9 @@ import org.forgerock.openidm.provisioner.SimpleSystemIdentifier;
 import org.forgerock.openidm.provisioner.salesforce.internal.data.SObjectDescribe;
 import org.forgerock.openidm.provisioner.salesforce.internal.metadata.MetadataResourceProvider;
 import org.forgerock.openidm.provisioner.salesforce.internal.schema.SchemaHelper;
-import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.SQLRenderer;
+import org.forgerock.openidm.repo.util.StringSQLRenderer;
+import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouteService;
@@ -633,8 +635,8 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         return describe;
     }
 
-    private static final QueryFilterVisitor<String, Void> SALESFORCE_QUERY_FILTER_VISITOR =
-            new SQLQueryFilterVisitor<Void>() {
+    private static final StringSQLQueryFilterVisitor<Void> SALESFORCE_QUERY_FILTER_VISITOR =
+            new StringSQLQueryFilterVisitor<Void>() {
 
                 private String getField(JsonPointer field) {
                     if (field.size() != 1) {
@@ -649,13 +651,21 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 }
 
                 @Override
-                public String visitValueAssertion(Void parameters, String operand, JsonPointer field, Object valueAssertion) {
-                    return "(" + getField(field) + " " + operand + " '" + String.valueOf(valueAssertion) + "')";
+                public StringSQLRenderer visitValueAssertion(Void parameters, String operand, JsonPointer field, Object valueAssertion) {
+                    return new StringSQLRenderer("(")
+                        .append(getField(field))
+                        .append(" ")
+                        .append(operand)
+                        .append(" '")
+                        .append(String.valueOf(valueAssertion))
+                        .append("')");
                 }
 
                 @Override
-                public String visitPresentFilter(Void parameters, JsonPointer field) {
-                    return "(" + getField(field) + " != null)";
+                public StringSQLRenderer visitPresentFilter(Void parameters, JsonPointer field) {
+                    return new StringSQLRenderer("(")
+                        .append(getField(field))
+                        .append(" != null)");
                 }
             };
 
@@ -664,7 +674,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 + StringUtils.join(SchemaHelper.getObjectProperties(type), ", ")
                 + " FROM " + type
                 + " WHERE "
-                + queryFilter.accept(SALESFORCE_QUERY_FILTER_VISITOR, null);
+                + queryFilter.accept(SALESFORCE_QUERY_FILTER_VISITOR, null).toSQL();
     }
 
     private boolean executeQuery(QueryResultHandler handler, String queryExpression) throws ResourceException {
