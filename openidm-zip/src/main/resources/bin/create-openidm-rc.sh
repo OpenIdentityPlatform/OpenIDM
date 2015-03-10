@@ -1,6 +1,9 @@
 #!/bin/sh
 
-cd ..
+PRGDIR=$(dirname $0)
+
+cd $PRGDIR/..
+
 OPENIDM_HOME=`pwd`
 OPENIDM_USER=`id -un`
 SCRIPT_NAME='openidm'
