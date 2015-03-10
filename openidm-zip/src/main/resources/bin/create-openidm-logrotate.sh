@@ -1,12 +1,14 @@
 #!/bin/sh
 
-cd ..
+basedir=$(dirname $0)
+cd $basedir/..
+
 OPENIDM_HOME=`pwd`
 SCRIPT_NAME='openidmlog'
 
 #########################################
 cat << EOF > bin/${SCRIPT_NAME}
-${OPENIDM_HOME}/audit/* {
+${OPENIDM_HOME}/audit/*.csv {
 daily
 missingok
 rotate 54
