@@ -37,84 +37,85 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
     "org/forgerock/commons/ui/common/util/DateUtil"
 ], function(LineTableView, notificationViewHelper, notificationDelegate, eventManager, constants, conf,dateUtil) {
     var NotificationsView = LineTableView.extend({
-        
+
         typeToIconMapping: [],
-        
+
         events: {
             "click a[name=deleteLink]" : "deleteLink",
             "click a[name=moreItems]" : "moreItems",
             "click a[name=title]" : "title",
             "mouseleave #itemsView" : "closeOpenItems"
         },
-        
+
         generateItemView: function(item) {
             var iconLink, message, requester, requestDate, requestDateString, deleteLink, id, notType;
-            
+
             notType = notificationViewHelper.notificationTypes[item.notificationType];
             if (notType) {
                 iconLink = notificationViewHelper.notificationTypes[item.notificationType].iconPath;
             }
-            
+
             message = item.message;
             requester = item.requester;
             requestDate = dateUtil.formatDate(item.createDate);
-            
-            deleteLink = '<a name="deleteLink" href="#" style="float: right;"><img src="images/cross.png" /></a>';
+
+            deleteLink = '<a class="delete-icon" name="deleteLink" href="#" style="float: right;"><i class="fa fa-times"></i></a>';
             id = item._id;
-            
-            return '<div class="notification-title">' 
-                     + (iconLink ? '<img src="' + iconLink + '"/>' : '')
-                     +  deleteLink + '<a name="title" href="#">' + message + '</a>'
-                     + '<div style="clear: both;"></div>'
-                  + '</div>'
-                  + '<div class="notification-details" style="clear: both;">'
-                      + '<div class="details"> '
-                      + $.t("common.application.requestedBy") +': ' 
-                      + (requester ? requester : $.t("common.user.system")) + '</br>' 
-                      + requestDate + '</div>'
-                      + '<input type="hidden" name="id" value=' + id + ' />'
-                  + '</div>';
+
+
+            return '<div class="notification-title">'
+                +  "<span><i class='message-icon fa fa-comment-o'></i></span>"
+                +  deleteLink + '<a name="title" href="#">' + message + '</a>'
+                + '<div style="clear: both;"></div>'
+                + '</div>'
+                + '<div class="notification-details" style="clear: both;">'
+                + '<div class="details"> '
+                + $.t("common.application.requestedBy") +': '
+                + (requester ? requester : $.t("common.user.system")) + '</br>'
+                + requestDate + '</div>'
+                + '<input type="hidden" name="id" value=' + id + ' />'
+                + '</div>';
         },
-        
+
         noItemsMessage: function(item) {
-            return $.t("openidm.ui.apps.dashboard.NotificationsView.noNotifications");
+            return "<h5 class='text-center'>" + $.t("openidm.ui.apps.dashboard.NotificationsView.noNotifications") + "</h5>";
         },
 
         seeMoreItemsMessage: function(item) {
             return $.t("openidm.ui.apps.dashboard.NotificationsView.seeMoreNotifications");
         },
-        
+
         maxToShow: 0,
-        
+
         getHeightForItemsNumber: function(itemsNumber) {
             return this.itemHeight * ( itemsNumber - 1 ) + this.openItemHeight;
         },
-        
+
         itemHeight: 55,
-        
+
         openItemHeight: 110,
-        
+
         render: function(params) {
             this.parentRender(params);
             this.installAccordion();
         },
-        
+
         installAccordion: function(){
             $("#items").accordion({
-                event: "click", 
+                event: "click",
                 active: false,
                 collapsible:true
             });
         },
-        
+
         deleteLink: function(event) {
             var notificationId, self=this;
             event.preventDefault();
             notificationId = $(event.target).parent().parent().next().find("input[name=id]").val();
-            
+
             notificationDelegate.deleteEntity(notificationId, function() {
                 self.removeItemAndRebuild(notificationId);
-                self.installAccordion(); 
+                self.installAccordion();
             }, function() {
                 eventManager.sendEvent(constants.EVENT_NOTIFICATION_DELETE_FAILED);
                 notificationDelegate.getNotificationsForUser(function(notifications) {
@@ -128,17 +129,17 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
                 });
             });
         },
-        
+
         title: function(event){
             event.preventDefault();
             $("#items").accordion("activate", $(event.target).parent().index() / 2);
         },
-        
+
         closeOpenItems: function(){
             $("#items").accordion( "activate", false );
         }
-    
-    }); 
-    
+
+    });
+
     return NotificationsView;
 });

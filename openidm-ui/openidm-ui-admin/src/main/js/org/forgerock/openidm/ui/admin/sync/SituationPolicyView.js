@@ -94,6 +94,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
             this.model.mapping = args.mapping;
             this.model.mappingName = args.mappingName;
             this.data.docHelpUrl = constants.DOC_URL;
+            this.model.saveCallback = args.saveCallback;
 
             this.parentRender(function () {
                 this.getPatterns().then(function() {
@@ -144,7 +145,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                 // Add default data
                 _(this.model.allPatterns["Default Actions"].policies).each(function(policy) {
                     var newPolicy = $("#situationCopy").clone();
-                    newPolicy.find(".situation").html(this.model.lookup.situations[policy.situation]);
+                    newPolicy.find(".situation span").html(this.model.lookup.situations[policy.situation]);
                     newPolicy.find(".action").val(policy.action);
                     newPolicy.find(".action").find(":selected").html(this.model.lookup.actions[policy.action] + " " + this.data.star);
 
@@ -160,7 +161,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                             break;
                     }
 
-                    newPolicy.find(".info").attr("data-title", policy.note);
+                    newPolicy.find(".info").attr("data-title", $.t(policy.note));
 
                     // Stars the more acceptable choices
                     _(newPolicy.find(".action option")).filter(function(option) {
@@ -178,11 +179,12 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
 
                 this.$el.find("#policyPatterns").val(this.model.currentPattern).change();
 
-                this.$el.find(".info").tooltip({
-                    items: "[data-title]",
-                    tooltipClass: "recon-tooltip",
-                    position : { my: 'right center', at: 'left-35 center' },
-                    content: function () { return $.t($(this).attr("data-title"));}
+                this.$el.find(".info").popover({
+                    content: function () { return $(this).attr("data-title");},
+                    trigger:'hover click',
+                    placement:'top',
+                    html: 'true',
+                    template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
                 });
             }, this));
         },
@@ -238,7 +240,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
 
             _(this.$el.find(".situationRow").not("#situationCopy")).each(function(row) {
                 policies.push({
-                    "situation" : _.invert(this.model.lookup.situations)[$(row).find(".situation").text()],
+                    "situation" : _.invert(this.model.lookup.situations)[$(row).find(".situation span").text()],
                     "action" : $(row).find(".action").val()
                 });
             }, this);
@@ -272,7 +274,8 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
 
         save: function() {
             var definedPolicies = this.getPolicies(),
-                mapping;
+                mapping,
+                _this = this;
 
             ConfigDelegate.readEntity("sync").then(_.bind(function(data) {
                 _(data.mappings).each(function(map, index) {
@@ -285,6 +288,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                 ConfigDelegate.updateEntity("sync", data).then(function() {
                     BrowserStorageDelegate.set("currentMapping", _.extend(mapping, this.recon));
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncPolicySaveSuccess");
+                    _this.model.saveCallback();
                 });
             }, this));
         }

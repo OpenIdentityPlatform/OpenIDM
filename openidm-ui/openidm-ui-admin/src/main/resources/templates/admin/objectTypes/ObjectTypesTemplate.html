@@ -1,33 +1,33 @@
-<div class="selectPanel">
+<div class="col-sm-3 selectPanel">
     {{#if defaultConfigs}}
     <div class="object-config-selector">
         <label for="selectObjectConfig" class="light">{{t "templates.connector.objectTypes.objectTypeConfigs"}}</label>
-        <select data-type="{{defaultConfigs.0.type}}" id="selectObjectConfig" required>
+        <select class="form-control" data-type="{{defaultConfigs.0.type}}" id="selectObjectConfig" required>
             {{#each defaultConfigs}}
-                <option value="{{fileName}}">{{displayName}}</option>
+            <option value="{{fileName}}">{{displayName}}</option>
             {{/each}}
         </select>
     </div>
     {{/if}}
-    <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only json-editor-btn-edit" id="newObjectType"><span class="ui-button-text">{{t "templates.connector.objectTypes.addNewObjecttype"}}</span></button>
-    <select id="objectTypesList" name="objectTypesList" multiple></select>
+    <button class="btn btn-primary json-editor-btn-edit" id="newObjectType">{{t "templates.connector.objectTypes.addNewObjecttype"}}</button>
+    <select class="form-control" id="objectTypesList" name="objectTypesList" multiple></select>
 </div>
 
-<div class="objectTypeForm">
+<div class="col-sm-9 objectTypeForm">
     <div id="objectType"></div>
 
     <div id="multiSelectOptions" style="display:none;">
         <p>{{t "templates.connector.objectTypes.bulkDeleteMsg"}}</p>
-        <button id="deleteMultiple">{{t "templates.connector.objectTypes.deleteObjectTypes"}}</button>
+        <button class="btn" id="deleteMultiple">{{t "templates.connector.objectTypes.deleteObjectTypes"}}</button>
     </div>
 
     <span id="objectTypeButtons">
-        <button class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only json-editor-btn-edit deleteObject'>
-            <span class='ui-button-text'>{{t "templates.connector.objectTypes.deleteObject"}}</span>
+        <button class='btn btn-default deleteObject'>
+            {{t "templates.connector.objectTypes.deleteObject"}}
         </button>
 
-        <button class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only json-editor-btn-edit saveObject'>
-            <span class='ui-button-text'>{{t "templates.connector.objectTypes.saveObject"}}</span>
+        <button class='btn btn-primary saveObject'>
+            {{t "templates.connector.objectTypes.saveObject"}}
         </button>
     </span>
 </div>

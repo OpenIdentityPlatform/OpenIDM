@@ -32,8 +32,8 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "AuthnDelegate"
-], function(AbstractView, validatorsManager, conf, eventManager, constants, uiUtils, ConnectorDelegate) {
+    "bootstrap-dialog"
+], function(AbstractView, validatorsManager, conf, eventManager, constants, uiUtils, ConnectorDelegate, BootstrapDialog) {
     var ObjectTypesDialog = AbstractView.extend({
         template: "templates/admin/objectTypes/ObjectTypesTemplate.html",
         el: "#dialogs",
@@ -143,7 +143,8 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
             JSONEditor.defaults.options.disable_collapse = true;
             JSONEditor.defaults.options.show_errors = "never";
             JSONEditor.defaults.options.template = 'handlebars';
-            JSONEditor.defaults.options.theme = 'jqueryui';
+            JSONEditor.defaults.options.theme = 'bootstrap3';
+            JSONEditor.defaults.options.iconlib = 'fontawesome4';
 
             this.currentObjectTypeLoaded = "savedConfig";
             this.defaultObjectType = $.extend(true, {}, defaultObjectType);
@@ -158,53 +159,49 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
 
             this.data.defaultConfigs = this.objectTypeConfigs[connectorDetails.connectorRef.bundleName];
 
-            btns[$.t('templates.connector.objectTypes.saveObjectType')] = function() {
-                if (callback) {
-                    _this.saveObjectType();
-                    _this.editor.destroy();
-                    $("#objectTypesForm").dialog('close');
-                    callback(_this.objectTypes);
-                }
-            };
-
-            this.currentDialog.dialog({
-                title: "Object Type Generator",
-                modal: true,
-                resizable: false,
-                draggable: false,
-                dialogClass: "objectTypeEditor",
-                width:($(window).width() - 40),
-                height: ($(window).height() - 40),
-                position: { my: "center", at: "center", of: window },
-                buttons: btns,
-                close: function () {
-                    if(_this.currentDialog) {
-                        try {
-                            _this.currentDialog.dialog('destroy').remove();
-                        } catch(e) {
-                            // perhaps the dialog hasn't been initialized ?
-                        }
-                    }
-                }
-            });
-
-            uiUtils.renderTemplate(
-                this.template,
-                this.$el,
-                _.extend({}, conf.globalData, this.data),
-                _.bind(function(){
-                    $("#objectTypesList").height(
-                            $("#objectTypesList").height() -
-                            $("#newObjectType").outerHeight(true) -
-                            parseInt($("#objectTypesList").css("marginBottom"), 10) - 1
+            //change dialog
+            BootstrapDialog.show({
+                title: $.t('templates.connector.objectTypes.objectTypeGenerator'),
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: this.currentDialog,
+                size: BootstrapDialog.SIZE_WIDE,
+                cssClass : "objecttype-window",
+                onshown : function (dialogRef) {
+                    uiUtils.renderTemplate(
+                        _this.template,
+                        _this.$el,
+                        _.extend({}, conf.globalData, this.data),
+                        _.bind(function(){
+                            if (_.size(this.defaultObjectType) > 0) {
+                                this.loadObjectTypeData(this.defaultObjectType);
+                            }
+                        }, _this),
+                        "replace"
                     );
-
-                    if (_.size(this.defaultObjectType) > 0) {
-                        this.loadObjectTypeData(this.defaultObjectType);
+                },
+                buttons: [{
+                    label: $.t('common.form.close'),
+                    action: function(dialogRef){
+                        dialogRef.close();
                     }
-                }, this),
-                "replace"
-            );
+                },
+                    {
+                        label: $.t('templates.connector.objectTypes.saveObjectType'),
+                        cssClass: "btn-primary",
+                        action: function(dialogRef) {
+                            if (callback) {
+                                _this.saveObjectType();
+                                _this.editor.destroy();
+
+                                dialogRef.close();
+
+                                callback(_this.objectTypes);
+                            }
+
+                            dialogRef.close();
+                        }
+                    }]
+            });
         },
 
         /**
@@ -344,6 +341,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                 "schema": {
                     "title": "Object Type",
                     "headerTemplate": "{{self.objectName}}",
+                    "format": "grid",
                     "type": "object",
                     "properties": {
                         "objectName": {

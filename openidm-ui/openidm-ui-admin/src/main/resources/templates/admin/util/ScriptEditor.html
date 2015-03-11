@@ -1,22 +1,11 @@
-<div class="event-hook-body">
-    <label class="light"><span class="icon-button remove-btn script-remove"><i class="fa fa-times-circle"></i></span> {{eventName}}</label>
-
-    {{#if scriptData}}
-    <div class="group-field-block">
-        <div>
-            <span class="event-hook-status">{{t "templates.scriptEditor.type"}}: {{scriptData.type}}</span>
-        </div>
-        <div>
-            <span class="event-hook-status">{{t "templates.scriptEditor.source"}}: {{#if scriptData.file}} {{scriptData.file}} {{else}} {{t "templates.scriptEditor.inline"}} {{/if}} </span><span class="icon-button edit-btn"><i class="fa fa-lg fa-pencil"></i></span>
-        </div>
-    </div>
-    {{else}}
-    <div class="group-field-block">
-        <div class="event-hook-empty">
-            <i class="fa fa-lg fa-code"></i>
-            <div>{{t "templates.scriptEditor.addEvent"}}</div>
-        </div>
-    </div>
-    {{/if}}
-</div>
+<td>
+    {{eventName}}
+</td>
+<td>
+    {{#if scriptData.file}} {{scriptData.file}} {{else}} {{t "templates.scriptEditor.inline"}} {{/if}} <span class="lightenColor">({{scriptData.type}})</span>
+</td>
+<td class="text-right event-hook-body">
+    <span class="icon-button edit-btn"><i class="fa fa-pencil"></i></span> 
+    <span class="icon-button remove-btn script-remove"><i class="fa fa-times-circle"></i></span></label>
+</td>
 

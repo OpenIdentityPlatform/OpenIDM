@@ -60,7 +60,7 @@
                     "addMore" : "Add more apps",
                     "groups" : "Groups",
                     "tasksMenu" : "Tasks",
-                    "allTasks" : "Tasks that are in my group's queue",
+                    "allTasks" : "My group's Tasks",
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process"
                 }
@@ -75,7 +75,7 @@
         },
         "user" : {
             "LoginDialog" : {
-                "refreshOnLogin" : "Should refresh on login" 
+                "refreshOnLogin" : "Should refresh on login"
             },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
@@ -97,17 +97,17 @@
                 "securityDataChange" : "Security data change",
                 "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password.",
                 "selectQuestionAndAnserIfYouWant" : "Please select question and enter your answer if you want to set up a one.",
-                "securityQuestionAndAnserExplanation" : "The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password."
+                "securityQuestionAndAnserExplanation" : "Select a Security Question. Enter an answer. If you forget your password, you'll be prompted with that question."
             },
             "ChangeSiteIdentificationDialogTemplate" : {
-                "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
+                "siteImageAndPhaseExplanation" : "Select a Site Image. Enter a Site Phrase. You'll see both when you log into the genuine website."
             },
             "EnterOldPasswordDialog" : {
                 "passwordAndSecurityQuestionChange" : "Password and security question change",
                 "enterYourOldPassword" : "Please enter your old password"
             },
             "ForgottenPasswordTemplate" : {
-                "forgottenPasswordQuestion" : "Forgotten password?",
+                "forgottenPasswordQuestion" : "Did you forget your password?",
                 "enterLogin" : "Please enter your login in the field below to continue."
             },
             "TermsOfUseTemplate" : {
@@ -131,7 +131,7 @@
                     "requestInitiator" : "Request initiated by"
                 },
                 "TasksDashboardTemplate" : {
-                    "tasksFromGroupsQueue" : "Tasks that are in my group's queue"
+                    "tasksFromGroupsQueue" : "My group's Tasks"
                 },
                 "ProcessUserTaskTableTemplate" : {
                     "requestCount" : "__count__  request",
@@ -168,7 +168,7 @@
         }
     },
     "common" : {
-         "form" : {
+        "form" : {
             "true" : "True",
             "false" : "False",
             "update" : "Update",
@@ -185,7 +185,7 @@
             "delete" : "Delete",
             "details" : "Details",
             "pleaseSelect" : "Please Select",
-            "addUser" : "Add user",
+            "addUser" : "Add User",
             "decision" : "Decision",
             "accept" : "Accept",
             "reject" : "Reject",
@@ -239,15 +239,15 @@
                 "shouldBeLong" : "Should be long value",
                 "wrongDateFormat" : "Wrong format"
             }
-         },
-         "user" : {
+        },
+        "user" : {
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",
             "myProfile" : "My Profile",
             "userProfile" : "User profile",
             "username" : "Username",
-            "emailAddress" : "Email address",
+            "emailAddress" : "Email Address",
             "givenName" : "First Name",
             "familyName" : "Last Name",
             "changePassword" : "Change password",
@@ -271,14 +271,14 @@
             "adaptiveAuthMethod" : "Adaptive auth method",
             "SMS" : "SMS",
             "OAuth" : "OAuth",
-            "createNewAccount" : "Create new account",
+            "createNewUser" : "Create New User",
             "password" : "Password",
             "confirmPassword" : "Confirm Password",
             "newPassword" : "New password",
             "oldPassword" : "Old password",
             "confirmNewPassword" : "Confirm new password",
-            "usersList" : "Users list",
-            "addUsers" : "Add users",
+            "usersList" : "Users List",
+            "addUsers" : "Add Users",
             "name" : "Name",
             "status" : "Status",
             "email" : "Email",
@@ -286,8 +286,8 @@
             "changePhoto" : "Change photo",
             "SKYPE" : "SKYPE",
             "googlePlus" : "Google+"
-         }, 
-         "task" : {
+        },
+        "task" : {
             "unassigned" : "Unassigned",
             "assignToMe" : "Assign to me",
             "claim" : "Claim",
@@ -303,8 +303,8 @@
             "myTasks" : "My tasks",
             "tasksList" : "Tasks list",
             "processes" : "Processes"
-         },
-         "application" : {
+        },
+        "application" : {
             "applicationName" : "Application Name",
             "requestedBy" : "Requested by",
             "yourFrequentlyUsedApplications" : "Your frequently used apps",
@@ -313,8 +313,8 @@
             "addMoreApplications" : "Add more apps",
             "allAvailableApps" : "All available apps",
             "dropApplicationsHere" : "drop apps here"
-         },
-         "notification" : {
+        },
+        "notification" : {
             "notifications" : "Notifications",
             "deleteThisMessage" : "Delete this message",
             "type" : "Notification type",
@@ -324,9 +324,12 @@
                 "warning" : "Warning",
                 "error" : "Error"
             }
-         }
+        }
     },
     "openidm" : {
+        "admin": {
+            "label": "Admin View"
+        },
         "ui" : {
             "common" : {
                 "components" : {
@@ -339,29 +342,29 @@
             "admin" : {
                 "tasks" : {
                     "TasksMenuView" : {
-                        "noTasksAssigned" : "You do not have any tasks assigned to you right now.",
-                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue now.",
+                        "noTasksAssigned" : "You do not have any tasks in your queue.",
+                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue.",
                         "denyDefaultReason" : "Enter a reason for denying this request",
                         "acceptanceForm" : {
                             "for" : "For",
                             "application" : "Application",
                             "requested" : "Requested",
-                            "actions" : "Actions"                            
+                            "actions" : "Actions"
                         },
                         "headers" : {
                             "initiator" : "Initiator",
                             "key" : "Key",
                             "requested" : "Requested",
                             "inQueue" : "In queue",
-                            "actions" : "Actions"    
-                        }   
+                            "actions" : "Actions"
+                        }
                     },
                     "TasksWithMenuView" : {
                         "chooseTask" : "Choose a task"
                     },
                     "StartProcessDashboardView" : {
                         "chooseProcess" : "Please choose a process to start",
-                        "noProcesses": "No processes",
+                        "noProcesses": "You do not have any processes in your queue.",
                         "noDataRequired": "No data required"
                     }
                 },
@@ -375,7 +378,7 @@
                         "profileWillBeDeleted" : "%s account will be deleted."
                     },
                     "ChangeUserPasswordDialog" : {
-                        "securityDataChangeForWhom" : "Security data change for %s" 
+                        "securityDataChangeForWhom" : "Security data change for %s"
                     }
                 }
             },
@@ -385,7 +388,7 @@
                         "noNotifications" : "You have no notifications right now.",
                         "seeMoreNotifications" : "see more notifications"
                     }
-                }, 
+                },
                 "BaseApplicationsView" : {
                     "noApplicationsHere" : "Your have no apps here",
                     "noDefaultApplications" : "Your have no default apps",

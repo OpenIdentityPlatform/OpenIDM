@@ -10,50 +10,49 @@
         <startEvent id="start" activiti:initiator="startUserId" >
             <extensionElements>
                 <activiti:formProperty id="userName"
-                           name="Username"
-                           required="true"
-                           type="string" />
+                                       name="Username"
+                                       required="true"
+                                       type="string" />
                 <activiti:formProperty id="givenName"
-                           name="First Name"
-                           required="true"
-                           type="string" />
+                                       name="First Name"
+                                       required="true"
+                                       type="string" />
                 <activiti:formProperty id="sn"
-                           name="Last Name"
-                           required="true"
-                           type="string" />
+                                       name="Last Name"
+                                       required="true"
+                                       type="string" />
                 <activiti:formProperty id="department"
-                           name="Department"
-                           type="string" />
+                                       name="Department"
+                                       type="string" />
                 <activiti:formProperty id="jobTitle"
-                           name="Job Title"
-                           type="string" />
+                                       name="Job Title"
+                                       type="string" />
                 <activiti:formProperty id="telephoneNumber"
-                           name="Phone Number"
-                           required="true"
-                           type="string" />
+                                       name="Phone Number"
+                                       type="string" />
                 <activiti:formProperty id="mail"
-                           name="Email"
-                           required="true"
-                           type="string" />
+                                       name="Email"
+                                       required="true"
+                                       type="string" />
                 <activiti:formProperty id="startDate"
-                           name="Start Date"
-                           required="true"
-                           type="string" />
+                                       name="Start Date"
+                                       required="true"
+                                       type="string" />
                 <activiti:formProperty id="endDate"
-                           name="End Date"
-                           type="string" />
+                                       name="End Date"
+                                       type="string" />
                 <activiti:formProperty id="password"
-                           name="Password"
-                           required="true"
-                           type="string" />
+                                       name="Password"
+                                       required="true"
+                                       type="string" />
                 <activiti:formProperty id="description"
-                           name="Description"
-                           required="true"
-                           type="string" />
+                                       name="Description"
+                                       required="true"
+                                       type="string" />
                 <activiti:formProperty id="provisionToXML"
-                           name="Create in XMLFile"
-                           type="boolean" />
-                
+                                       name="Create in XMLFile"
+                                       type="boolean" />
+
                 <activiti:formProperty id="_formGenerationTemplate" type="string" default="
 &lt;style&gt;
 #processDetails fieldset {
@@ -76,102 +75,122 @@
 }
 &lt;/style&gt;
 
-    &lt;h2 class=&quot;header&quot;&gt;Contractor Details&lt;/h2&gt;
+    &lt;h3 class=&quot;text-center&quot;&gt;Contractor Details&lt;/h3&gt;
 
-        &lt;fieldset&gt;
-            &lt;div class=&quot;fields&quot;&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.username&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;userName&quot; data-validation-dependents=&quot;password&quot;/&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;mail&quot; /&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.givenName&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;givenName&quot; data-validation-dependents=&quot;password&quot;/&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;sn&quot; data-validation-dependents=&quot;password&quot;/&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-                
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;telephoneNumber&quot; /&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;group-field&quot;&gt;
-                    &lt;div class=&quot;group-field-inputs&quot;&gt;
-                        &lt;div class=&quot;field&quot;&gt;
-                            &lt;label&gt;{{t &quot;common.user.password&quot;}}&lt;/label&gt; 
-                            &lt;input type=&quot;password&quot; name=&quot;password&quot; data-validation-dependents=&quot;passwordConfirm&quot;/&gt;
-                            &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                        &lt;/div&gt;
-
-                        &lt;div class=&quot;field&quot;&gt;
-                            &lt;label&gt;{{t &quot;common.user.confirmPassword&quot;}}&lt;/label&gt; 
-                            &lt;input type=&quot;password&quot; name=&quot;passwordConfirm&quot; data-validator=&quot;passwordConfirm&quot; data-validator-event=&quot;keyup change&quot; /&gt;
-                            &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                        &lt;/div&gt;
-                    &lt;/div&gt;
-                    &lt;div class=&quot;group-field-errors validationRules&quot; data-for-validator=&quot;password passwordConfirm&quot;&gt;
-
-                        &lt;div class=&quot;field-rule&quot;&gt;
-                            &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt; 
-                            &lt;span data-for-validator=&quot;passwordConfirm&quot;&gt;{{t &quot;common.form.validation.confirmationMatchesPassword&quot;}}&lt;/span&gt;
-                        &lt;/div&gt;
-                    &lt;/div&gt;
-                &lt;/div&gt;
-
-                
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Provision to XML&lt;/label&gt; 
-                    &lt;select name=&quot;provisionToXML&quot;&gt;
-                         &lt;option value=&quot;1&quot;&gt;Yes&lt;/option&gt;
-                         &lt;option value=&quot;0&quot;&gt;No&lt;/option&gt;
-                    &lt;/select&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Department&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;department&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Job Title&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;jobTitle&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Description&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;description&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Start Date&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;startDate&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;End Date&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;endDate&quot; /&gt; 
-                &lt;/div&gt;
-
+    &lt;form role=&quot;form&quot; class=&quot;form-horizontal registration&quot;&gt;
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;userName&quot;&gt;{{t &quot;common.user.username&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;userName&quot; name=&quot;userName&quot; data-validation-dependents=&quot;password&quot; autofocus /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
             &lt;/div&gt;
-            
-        &lt;/fieldset&gt;
+        &lt;/div&gt;
 
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;mail&quot;&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;email&quot; id=&quot;mail&quot; name=&quot;mail&quot; /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;userName&quot;&gt;{{t &quot;common.user.givenName&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;givenName&quot; name=&quot;givenName&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;sn&quot;&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;sn&quot; name=&quot;sn&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;telephoneNumber&quot;&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;telephoneNumber&quot; name=&quot;telephoneNumber&quot; /&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;group-field-errors well validationRules col-sm-6 col-sm-offset-3&quot; data-for-validator=&quot;password passwordConfirm&quot;&gt;
+            &lt;div class=&quot;field-rule&quot;&gt;
+                &lt;span class=&quot;error&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;&lt;span data-for-validator=&quot;passwordConfirm&quot;&gt;{{t &quot;common.form.validation.confirmationMatchesPassword&quot;}}&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div style=&quot;clear:both;&quot;&gt;&lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;password&quot;&gt;{{t &quot;common.user.password&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;passwordConfirm&quot;&gt;{{t &quot;common.user.confirmPassword&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;password&quot; id=&quot;passwordConfirm&quot; name=&quot;passwordConfirm&quot; data-validator=&quot;passwordConfirm&quot; data-validator-event=&quot;keyup change&quot; required/&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;provisionToXMLprovisionToXML&quot;&gt;Provision to XML&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;select class=&quot;form-control&quot;  name=&quot;provisionToXML&quot;&gt;
+                    &lt;option value=&quot;1&quot;&gt;Yes&lt;/option&gt;
+                    &lt;option value=&quot;0&quot;&gt;No&lt;/option&gt;
+                &lt;/select&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;department&quot;&gt;Department&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;department&quot; name=&quot;department&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;jobTitle&quot;&gt;Job Title&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;jobTitle&quot; name=&quot;jobTitle&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;description&quot;&gt;Description&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;description&quot; name=&quot;description&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;startDate&quot;&gt;Start Date&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;startDate&quot; name=&quot;startDate&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;endDate&quot;&gt;End Date&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; id=&quot;endDate&quot; name=&quot;endDate&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+    &lt;/form&gt;
+&lt;div style=&quot;clear:both;&quot;>&lt;/div&gt;
 &lt;script&gt;
 require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
   .bindValidators($(&apos;#processDetails form&apos; ), &quot;managed/user/*&quot; );
@@ -180,15 +199,15 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
                 " />
             </extensionElements>
         </startEvent>
-        
+
         <sequenceFlow sourceRef="start" targetRef="requestMadeGateway"/>
-        
+
         <exclusiveGateway id="requestMadeGateway" name="Request Made"></exclusiveGateway>
-        
+
         <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy">
-          <script><![CDATA[ 
+            <script><![CDATA[
             decisionOptions = [ 'accept' : 'common.form.accept' , 'reject' : 'common.form.reject', '__null' : '  ']
-            
+
             readStartUserFromRepoParams = [_queryId:'for-userName',uid:startUserId]
             startUserFromRepo = openidm.query('managed/user', readStartUserFromRepoParams)
             execution.setVariable("startUserFromRepo", startUserFromRepo)
@@ -196,12 +215,12 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
           ]]></script>
         </scriptTask>
         <userTask id="decideApprovalTask" name="Contractor Approval" activiti:candidateGroups="manager">
-          <extensionElements>
-            <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
-              <activiti:value id="accept" name="Accept"></activiti:value>
-              <activiti:value id="reject" name="Reject"></activiti:value>
-            </activiti:formProperty>
-            <activiti:formProperty id="_formGenerationTemplate" type="string" default="
+            <extensionElements>
+                <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+                    <activiti:value id="accept" name="Accept"></activiti:value>
+                    <activiti:value id="reject" name="Reject"></activiti:value>
+                </activiti:formProperty>
+                <activiti:formProperty id="_formGenerationTemplate" type="string" default="
 &lt;style&gt;
 #taskDetails fieldset {
        margin-top: 0;
@@ -223,115 +242,136 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
 }
 &lt;/style&gt;
 
-    &lt;h2 class=&quot;header&quot;&gt;Contractor Details&lt;/h2&gt;
+    &lt;h3 class=&quot;text-center&quot;&gt;Contractor Details&lt;/h3&gt;
 
-        &lt;fieldset&gt;
-            &lt;div class=&quot;fields&quot;&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.username&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;userName&quot; value=&quot;{{variables.userName}}&quot; data-validation-dependents=&quot;password&quot;/&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;mail&quot; value=&quot;{{variables.mail}}&quot; /&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.givenName&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;givenName&quot; value=&quot;{{variables.givenName}}&quot; data-validation-dependents=&quot;password&quot;/&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;sn&quot; value=&quot;{{variables.sn}}&quot; data-validation-dependents=&quot;password&quot;/&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-                
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;telephoneNumber&quot; value=&quot;{{variables.telephoneNumber}}&quot; /&gt; 
-                    &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;group-field&quot;&gt;
-                    &lt;div class=&quot;group-field-inputs&quot;&gt;
-                        &lt;div class=&quot;field&quot;&gt;
-                            &lt;label&gt;{{t &quot;common.user.password&quot;}}&lt;/label&gt; 
-                            &lt;input type=&quot;password&quot; name=&quot;password&quot; value=&quot;{{variables.password}}&quot; data-validation-dependents=&quot;passwordConfirm&quot;/&gt;
-                            &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                        &lt;/div&gt;
-
-                        &lt;div class=&quot;field&quot;&gt;
-                            &lt;label&gt;{{t &quot;common.user.confirmPassword&quot;}}&lt;/label&gt; 
-                            &lt;input type=&quot;password&quot; name=&quot;passwordConfirm&quot; value=&quot;{{variables.password}}&quot; data-validator=&quot;passwordConfirm&quot; data-validator-event=&quot;keyup change&quot; /&gt;
-                            &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
-                        &lt;/div&gt;
-                    &lt;/div&gt;
-                    
-                {{#if assignee}}
-                    &lt;div class=&quot;group-field-errors validationRules&quot; data-for-validator=&quot;password passwordConfirm&quot;&gt;
-
-                        &lt;div class=&quot;field-rule&quot;&gt;
-                            &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt; 
-                            &lt;span data-for-validator=&quot;passwordConfirm&quot;&gt;{{t &quot;common.form.validation.confirmationMatchesPassword&quot;}}&lt;/span&gt;
-                        &lt;/div&gt;
-                    &lt;/div&gt;
-                {{/if}}
-                    
-                &lt;/div&gt;
-
-                
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Provision to XML&lt;/label&gt; 
-                    &lt;select name=&quot;provisionToXML&quot;&gt;
-                         &lt;option value=&quot;1&quot;&gt;Yes&lt;/option&gt;
-                         &lt;option value=&quot;0&quot;&gt;No&lt;/option&gt;
-                    &lt;/select&gt;
-                &lt;/div&gt;
-
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Department&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;department&quot; value=&quot;{{variables.department}}&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Job Title&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;jobTitle&quot; value=&quot;{{variables.jobTitle}}&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Description&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;description&quot; value=&quot;{{variables.description}}&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;Start Date&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;startDate&quot; value=&quot;{{variables.startDate}}&quot; /&gt; 
-                &lt;/div&gt;
-                &lt;div class=&quot;field&quot;&gt;
-                    &lt;label&gt;End Date&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;endDate&quot; value=&quot;{{variables.endDate}}&quot; /&gt; 
-                &lt;/div&gt;
-
-
-                &lt;div class=&quot;field&quot;&gt;  
-                    &lt;label class=&quot;light&quot;&gt;{{t &quot;common.form.decision&quot;}}&lt;/label&gt; 
-                    {{select  variables.decisionOptions &quot;decision&quot; &quot;0&quot; &quot;&quot;  &quot; data-validator='required' &quot;}}
-        
-                    &lt;span class=&quot;ok&quot; style=&quot;&quot;&gt;✔&lt;/span&gt;
-                    &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt; 
-                &lt;/div&gt;
-                
-                
+    &lt;form role=&quot;form&quot; class=&quot;form-horizontal registration&quot;&gt;
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;userName&quot;&gt;{{t &quot;common.user.username&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.userName}}&quot; type=&quot;text&quot; id=&quot;userName&quot; name=&quot;userName&quot; data-validation-dependents=&quot;password&quot; autofocus /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
             &lt;/div&gt;
-            
-        &lt;/fieldset&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;mail&quot;&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input value=&quot;{{variables.mail}}&quot; class=&quot;form-control&quot; type=&quot;email&quot; id=&quot;mail&quot; name=&quot;mail&quot; /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;userName&quot;&gt;{{t &quot;common.user.givenName&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.givenName}}&quot; type=&quot;text&quot; id=&quot;givenName&quot; name=&quot;givenName&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;sn&quot;&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.sn}}&quot; type=&quot;text&quot; id=&quot;sn&quot; name=&quot;sn&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;div class=&quot;validation-message&quot;>&lt;/div&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;>&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;telephoneNumber&quot;&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.telephoneNumber}}&quot; type=&quot;text&quot; id=&quot;telephoneNumber&quot; name=&quot;telephoneNumber&quot; /&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        {{#if assignee}}
+            &lt;div class=&quot;group-field-errors validationRules well col-sm-6 col-sm-offset-3&quot; data-for-validator=&quot;password passwordConfirm&quot;&gt;
+                &lt;div class=&quot;field-rule&quot;&gt;
+                    &lt;span class=&quot;error&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;&lt;span data-for-validator=&quot;passwordConfirm&quot;&gt;{{t &quot;common.form.validation.confirmationMatchesPassword&quot;}}&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div style=&quot;clear:both;&quot;&gt;&lt;/div&gt;
+        {{/if}}
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;password&quot;&gt;{{t &quot;common.user.password&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.password}}&quot; type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;passwordConfirm&quot;&gt;{{t &quot;common.user.confirmPassword&quot;}}&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.password}}&quot; type=&quot;password&quot; id=&quot;passwordConfirm&quot; name=&quot;passwordConfirm&quot; data-validator=&quot;passwordConfirm&quot; data-validator-event=&quot;keyup change&quot; required/&gt;
+                &lt;span class=&quot;error form-control-feedback&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group has-feedback&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;provisionToXMLprovisionToXML&quot;&gt;Provision to XML&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;select class=&quot;form-control&quot;  name=&quot;provisionToXML&quot;&gt;
+                    &lt;option value=&quot;1&quot;&gt;Yes&lt;/option&gt;
+                    &lt;option value=&quot;0&quot;&gt;No&lt;/option&gt;
+                &lt;/select&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;department&quot;&gt;Department&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.department}}&quot; type=&quot;text&quot; id=&quot;department&quot; name=&quot;department&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;jobTitle&quot;&gt;Job Title&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.jobTitle}}&quot;  type=&quot;text&quot; id=&quot;jobTitle&quot; name=&quot;jobTitle&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;description&quot;&gt;Description&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; value=&quot;{{variables.description}}&quot; id=&quot;description&quot; name=&quot;description&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;startDate&quot;&gt;Start Date&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; value=&quot;{{variables.startDate}}&quot; id=&quot;startDate&quot; name=&quot;startDate&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;form-group&quot;&gt;
+            &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;endDate&quot;&gt;End Date&lt;/label&gt;
+            &lt;div class=&quot;col-sm-6&quot;&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;text&quot; value=&quot;{{variables.endDate}}&quot; id=&quot;endDate&quot; name=&quot;endDate&quot;/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+
+
+
+        &lt;div class=&quot;field&quot;&gt;
+            &lt;label class=&quot;light&quot;&gt;{{t &quot;common.form.decision&quot;}}&lt;/label&gt;
+            {{select  variables.decisionOptions &quot;decision&quot; &quot;0&quot; &quot;&quot;  &quot; data-validator='required' &quot;}}
+
+            &lt;span class=&quot;ok&quot; style=&quot;&quot;&gt;✔&lt;/span&gt;
+            &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+
+    &lt;/form&gt;
+    &lt;div style=&quot;clear:both;&quot;>&lt;/div&gt;
 
 &lt;script&gt;
 $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variables.provisionToXML}}&quot;);
@@ -344,10 +384,10 @@ $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variabl
 }());
 {{/if}}
 &lt;/script&gt;
-    
-    
+
+
             "></activiti:formProperty>
-          </extensionElements>
+            </extensionElements>
         </userTask>
         <sequenceFlow sourceRef="requestMadeGateway" targetRef="decisionPrep"/>
         <sequenceFlow sourceRef="decisionPrep" targetRef="decideApprovalTask"/>
@@ -355,25 +395,25 @@ $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variabl
         <scriptTask id="createManagedUser" scriptFormat="groovy">
             <script>
                 user = [userName:userName, givenName:givenName, sn:sn,
-                manager:startUserId, department:department, jobTitle:jobTitle, telephoneNumber:telephoneNumber, 
+                manager:startUserId, department:department, jobTitle:jobTitle, telephoneNumber:telephoneNumber,
                 mail:mail, startDate:startDate, endDate:endDate, password:password, description:description,
                 provisionToXML:provisionToXML]
 
                 openidm.create('managed/user',null, user)
-                
+
                 readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]
                 execution.setVariable("readNewUserFromRepoParams", readNewUserFromRepoParams)
             </script>
         </scriptTask>
-        
-        
+
+
         <exclusiveGateway id="decisionMadeGateway" name="Decision Made"></exclusiveGateway>
         <sequenceFlow sourceRef="decideApprovalTask" targetRef="decisionMadeGateway"></sequenceFlow>
         <sequenceFlow sourceRef="decisionMadeGateway" targetRef="createManagedUser">
-          <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='accept'} ]]></conditionExpression>
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='accept'} ]]></conditionExpression>
         </sequenceFlow>
         <sequenceFlow sourceRef="decisionMadeGateway" targetRef="sendDenyNotification">
-          <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='reject'} ]]></conditionExpression>
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='reject'} ]]></conditionExpression>
         </sequenceFlow>
 
         <sequenceFlow sourceRef="createManagedUser" targetRef="serviceTask"/>
@@ -383,57 +423,57 @@ $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variabl
 
         <scriptTask id="sendAcceptNotification" scriptFormat="groovy">
             <script>
-                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
-                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
-                
+
                 def newRequesterNotification = [
-                                        "receiverId": startUserFromRepo.result[0]._id,
-                                        "requesterId" : "",
-                                        "requester" : "",
-                                        "createDate" : requestDate,
-                                        "notificationType" : "info",
-                                        "notificationSubtype" : "",
-                                        "message" : "The requested user " + userName + " was successfully created"
-                                ];
+                "receiverId": startUserFromRepo.result[0]._id,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "OpenIDM created user " +userName
+                ];
                 def newContractorNotification = [
-                                        "receiverId": newUserFromRepo.result[0]._id,
-                                        "requesterId" : "",
-                                        "requester" : "",
-                                        "createDate" : requestDate,
-                                        "notificationType" : "info",
-                                        "notificationSubtype" : "",
-                                        "message" : "Welcome! Your work days are from " + startDate + " to " + endDate
-                                ];
+                "receiverId": newUserFromRepo.result[0]._id,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "Welcome! Your work days are from " + startDate + " to " + endDate
+                ];
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
                 openidm.create("repo/ui/notification/", null, newContractorNotification)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
-        
+
         <scriptTask id="sendDenyNotification" scriptFormat="groovy">
             <script>
-                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
-                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
-                
+
                 def newRequesterNotification = [
-                                        "receiverId": startUserFromRepo.result[0]._id,
-                                        "requesterId" : "",
-                                        "requester" : "",
-                                        "createDate" : requestDate,
-                                        "notificationType" : "warning",
-                                        "notificationSubtype" : "",
-                                        "message" : "Your request to create user " + userName + " was denied."
-                                ];
+                "receiverId": startUserFromRepo.result[0]._id,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "warning",
+                "notificationSubtype" : "",
+                "message" : "Your request to create user " + userName + " was denied."
+                ];
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
-                
+
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendDenyNotification" targetRef="end"/>
-        
-        
-        
+
+
+
         <endEvent id="end"/>
 
     </process>

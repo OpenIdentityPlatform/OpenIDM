@@ -1,186 +1,139 @@
-<div id="profile" class="content-bg">
-
-    <h1>{{t 'openidm.ui.admin.users.AdminUserProfileView.profileOwnership' profileName}}</h1>
-    
-    <form class="form clearfix" autocomplete="off">
-
-        <input type="hidden" name="_id">
-
-        <div class="clearfix">
-
-            <ul class="float-right link-box">
-                <li><a href="{{url 'adminUserChangePassword' user.userName}}" id="passwordChangeLink" class="ice hrefInput">{{t "common.user.changePassword"}}</a></li>
-            </ul>
-
-            <div class="group-field-block col2">
-                <label for="userName" class="light align-right">{{t "common.user.username"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="text" id="userName" name="userName" autofocus >
-                        <span class="error"></span>
-                    </div>
-                    <div class="validation-message"></div>
-                </div>
+<div class="container">
+    <div class="page-header">
+        <div class='btn-toolbar no-bottom-border pull-right'>
+            <div class='btn-group'>
+                <a class="pull-right" id="passwordChangeLink" href="{{url 'adminUserChangePassword' user.userName}}"><button class="btn btn-primary" type="button" name="changePassword">{{t "common.user.changePassword"}}</button></a>
             </div>
-
         </div>
+        <h3>{{t 'openidm.ui.admin.users.AdminUserProfileView.profileOwnership' profileName}}</h3>
+    </div>
 
+    <div id="profile">
+        <form role="form" class="form-horizontal registration">
+            <input type="hidden" name="_id">
 
-        <div class="clearfix">
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="userName">{{t "common.user.username"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="userName" name="userName" value="" autofocus />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
+            </div>
 
-            <div class="group-field-block col2">
-                <label for="givenName" class="light align-right">{{t "common.user.givenName"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="text" id="givenName" name="givenName" value="" />
-                        <span class="error"></span>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="givenName">{{t "common.user.givenName"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="givenName" name="givenName" value="" autofocus />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
+            </div>
+
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="sn">{{t "common.user.familyName"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="sn" name="sn" value="" autofocus />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
+            </div>
+
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="mail">{{t "common.user.emailAddress"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="email" id="mail" name="mail" value="" autofocus />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">{{t "common.user.role"}}</label>
+                <div class="checkbox col-sm-6">
+                    <div>
+                        {{checkbox roles "roles"}}
                     </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="accountStatus">{{t "common.user.accountStatus"}}</label>
+                <div class="col-sm-6">
+                    <select class="form-control" id="accountStatus" name="accountStatus">
+                        <option value="active">{{t "common.user.active"}}</option>
+                        <option value="inactive">{{t "common.user.inactive"}}</option>
+                    </select>
                     <div class="validation-message"></div>
                 </div>
             </div>
 
-            <div class="group-field-block col2">
-                <label for="sn" class="light align-right">{{t "common.user.familyName"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="text" id="sn" name="sn" value="" />
-                        <span class="error"></span>
-                    </div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="telephoneNumber">{{t "common.user.phoneNumber"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="tel" id="telephoneNumber" name="telephoneNumber" value="" />
                     <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
-   
-        </div>
 
-        <div class="clearfix">
-
-            <div class="group-field-block col2">
-                <label for="mail" class="light align-right">{{t "common.user.emailAddress"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="email" id="mail" name="mail" value="" />
-                        <span class="error"></span>
-                    </div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="postalAddress">{{t "common.user.address1"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="postalAddress" name="postalAddress" value="" autofocus />
                     <div class="validation-message"></div>
                 </div>
             </div>
 
-
-            <div class="group-field-block col2" >
-                <label class="light align-right">{{t "common.user.role"}}</label> 
-                {{checkbox roles "roles"}}
-            </div>
-
-        </div>
-
-
-        <div class="clearfix">
-
-             <div class="group-field-block col2">
-                <label for="sn" class="light align-right">{{t "common.user.accountStatus"}}</label>
-                <select name="accountStatus" >
-                    <option value="active">{{t "common.user.active"}}</option>
-                    <option value="inactive">{{t "common.user.inactive"}}</option>
-                </select>    
-                <div class="validation-message"></div>
-            </div>
-
-            <div class="group-field-block col2">
-                <label for="telephoneNumber" class="light align-right">{{t "common.user.phoneNumber"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="tel" id="telephoneNumber" name="telephoneNumber" value="" />
-                        <span class="error"></span>
-                    </div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="address2">{{t "common.user.address2"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="address2" name="address2" value="" autofocus />
                     <div class="validation-message"></div>
                 </div>
             </div>
 
-        </div>  
-
-        <div class="clearfix">
-
-            <div class="group-field-block col2">
-                <label for="postalAddress" class="light align-right">{{t "common.user.address1"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="text" id="postalAddress" name="postalAddress" value=""  />
-                        <span class="error"></span>
-                    </div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="city">{{t "common.user.city"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="city" name="city" value="" autofocus />
                     <div class="validation-message"></div>
                 </div>
             </div>
 
-            <div class="group-field-block col2">
-                <label for="address2" class="light align-right">{{t "common.user.address2"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="text" id="address2" name="address2" value=""  />
-                        <span class="error"></span>
-                    </div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="postalCode">{{t "common.user.postalCode"}}</label>
+                <div class="col-sm-6">
+                    <input class="form-control" type="text" id="postalCode" name="postalCode" value="" autofocus />
                     <div class="validation-message"></div>
                 </div>
             </div>
 
-        </div>
 
-        <div class="clearfix">
-
-            <div class="group-field-block col2">
-                <label for="city" class="light align-right">{{t "common.user.city"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="text" id="city" name="city" value=""  />
-                        <span class="error"></span>
-                    </div>
-                    <div class="validation-message"></div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="country">{{t "common.user.country"}}</label>
+                <div class="col-sm-6">
+                    <select class="form-control" id="country" name="country"></select>
                 </div>
             </div>
 
-            <div class="group-field-block col2">
-                <label for="postalCode" class="light align-right">{{t "common.user.postalCode"}}</label>
-                <div class="float-left separate-message">
-                    <div class="group-input-span">
-                        <input type="text" id="postalCode" name="postalCode" value=""  />
-                        <span class="error"></span>
-                    </div>
-                    <div class="validation-message"></div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="stateProvince">{{t "common.user.stateProvince"}}</label>
+                <div class="col-sm-6">
+                    <select class="form-control" id="stateProvince" name="stateProvince"></select>
                 </div>
             </div>
 
-        </div>
-
-        <div class="clearfix">
-
-            <div class="group-field-block col2">
-                <label for="country" class="light align-right">{{t "common.user.country"}}</label>
-                <div class="group-input-span">
-                    <select id="country" name="country"></select>  
-                    <span class="error"></span>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <input type="submit" name="saveButton" value="{{t "common.form.update"}}"  class="btn btn-primary" disabled />
+                    <input type="button" name="deleteButton" value="{{t "common.form.delete"}}"  class="btn btn-primary" />
+                    <input type="button" name="backButton" value="{{t "common.form.back"}}"  class="btn btn-primary" />
+                    <input type="text" name="oldUserName" style="display: none" />
                 </div>
             </div>
+        </form>
 
-            <div class="group-field-block col2">
-                <label for="stateProvince" class="light align-right">{{t "common.user.stateProvince"}}</label>
-                <div class="group-input-span">
-                    <select id="stateProvince" name="stateProvince"></select>  
-                    <span class="error"></span>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="float-right group-actions-block">
-            <input type="submit" name="saveButton" value="{{t "common.form.update"}}" class="button" disabled />
-            <input type="button" name="deleteButton" value="{{t "common.form.delete"}}" class="button"/>
-            <input type="button" name="backButton" value="{{t "common.form.back"}}" class="button"/>
-            <input type="text" name="oldUserName" style="display: none" />
-        </div>
-
-        <div style="clear:both;"></div>
-        
-    </form>
-
-    <div id="linkedViewBody"></div>
+        <div id="linkedViewBody"></div>
+    </div>
 </div>
-

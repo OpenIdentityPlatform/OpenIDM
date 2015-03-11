@@ -40,7 +40,7 @@ define("config/validators/AdminValidators", [
             "dependencies": [
             ],
             "validator": function(el, input, callback) {
-                var inputs = input.parent().find("input"),
+                var inputs = input.parent().parent().find("input"),
                     secondInput;
 
                 if(inputs.length !== 2) {
@@ -59,7 +59,11 @@ define("config/validators/AdminValidators", [
                 }
 
                 secondInput = inputs.not(input);
-                secondInput.toggleClass("invalid", false);
+
+                if(secondInput.hasClass("field-error")) {
+                    secondInput.trigger("blur");
+                }
+
                 secondInput.attr("data-validation-status", "ok");
 
                 callback();

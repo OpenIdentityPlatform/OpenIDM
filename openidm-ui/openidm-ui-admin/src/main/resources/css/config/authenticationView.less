@@ -21,398 +21,106 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+#authenticationForm {
+  #group-copy {
+    display: none;
+  }
 
-.authentication-input-body {
-  fieldset {
-    border: 1px #ddd solid;
-    padding-left: 0px;
-    padding-right: 0px;
-    padding-bottom: 5px;
-    background-color: white;
+  .btn-group {
+    margin:0;
 
-    &:not(:first-child) {
-      margin-top: 15px;
+    button i {
+      font-size: 14px;
     }
   }
 
-  legend {
-    height: 25px;
-    padding: 5px 5px 0px 5px;
-    background-color: #80b7ab;
-    border: 2px solid #5fa595;
-    cursor: pointer;
-    margin-left: 10px;
-    color: white;
-
-    &:hover {
-      background-color: lighten(#80b7ab, @button-hover-lightness);
-    }
-
-    span {
-      margin-right: 10px;
-      width: 170px;
-      display: inline-block;
-      text-overflow: ellipsis;
-    }
-  }
-
-  form {
-    &.form {
-      fieldset {
-        .group-lead {
-          padding-top: 0px;
-          margin-top: 15px;
-        }
-        .group-note-lead {
-          padding-top: 0px;
-          margin-top: 10px;
-        }
-      }
-      .group-field-block {
-        padding: 0px 0px 0px 10px;
-        margin-top: 0px;
-        display: block;
-
-        label {
-          display: block;
-          width: 200px;
-          text-align: left;
-          padding-bottom: 0px;
-          font-size: 13px;
-        }
-
-        select, input {
-          padding: 0 5px;
-          height:24px;
-          font-size: 13px;
-        }
-
-        select {
-          width: 262px;
-        }
-
-        .note {
-          font-size: 14px;
-          font-weight: bold;
-        }
-      }
-
-      .no-validation-block {
-        margin-bottom: 10px;
-      }
-
-      .field {
-        margin-bottom: 0px;
-      }
-
-      .group-field-buttons button {
-        margin-bottom: 5px;
-      }
-
-      .group-actions-block {
-        margin-top: 15px;
-      }
-
-      .error {
-        text-align: left;
-        padding-left: 5px;
-        padding-top: 5px;
-      }
-    }
-  }
-  input[type="text"]:disabled,
-  select:disabled {
+  .authModuleDisabled {
     color: #999;
-    opacity: 1;
   }
 
-  .group-field-block {
-    .add-btn {
-      margin-left: 0px;
-
-      span {
-        display: inline-block;
-        width: 140px;
-      }
-    }
+  .authModuleErrors {
+    color: #cd0a0a;
   }
 
-  .filter {
-    font-style: italic;
-    color: #888;
+  .content {
+    padding: 0 20px 0 60px;
   }
 
-  .form-size-s {
-    width: 250px;
-  }
-
-  .outside-element .form-size-m {
-    width: 620px;
-  }
-
-  .inline .inline-right {
-    margin-right: 10px;
-  }
-
-  .group-body {
-    color: #5a646d;
-    margin: 10px 10px 0;
-    background-color: #fff;
-    width: 890px;
-    z-index: 1;
-    position: relative;
-
-    .group > h3 {
+  .basicForm, .advancedForm {
+    h3 {
+      font-size: 14px;
+      text-transform: capitalize;
       i {
-        &:hover {
-        }
-      }
-    }
-
-    .group {
-      .ui-accordion-header {
-        cursor: ns-resize;
-        i{
+        margin-right: 5px;
+        cursor: pointer;
+        & + span {
           cursor: pointer;
         }
       }
-      & > h3 {
-        height: 28px;
-        margin: -1px 0 0;
-        padding: 0;
-        border-radius: 0;
-        border: none;
-        border-top: 1px solid #5a646d;
-        border-bottom: 1px solid #5a646d;
-        background: none;
-        background-color: #fff;
-        color: #5a646d;
+    }
 
+    .btn {
+      font-size: 13px;
+      border-radius: 5px;
+      margin-right: 5px;
+      i {
+        margin: 0;
+      }
+    }
+
+    .btn:last-child {
+      margin-right:0;
+    }
+  }
+
+  .advancedForm {
+    margin-bottom: 15px;
+
+    & > div > .well {
+      display: none;
+    }
+
+    .container-augmentSecurityContext > .well {
+      background-color: white;
+
+      button {
         i {
-          height: 23px;
-          width: 28px;
-          border-left: 1px solid #5a646d;
-          border-right: 1px solid #5a646d;
-          position: absolute;
-          padding-top: 6px;
-          text-align: center;
-
-          &:hover {
-            background-color: #80b7ab;
-          }
+          margin: 0 0 0 10px;
         }
-
-        .authModuleTitle {
-          position: absolute;
-          left: 70px;
-          line-height: 13px;
-          padding-top: 7px;
-        }
-
-        .authModuleDisabled {
-          color: #999;
-        }
-
-        .authModuleErrors {
-          color: #cd0a0a;
-        }
-
-        .authModuleName {
-          margin-right: 10px !important;
-        }
-
-        .noteHidden {
-          display: none;
-        }
-      }
-      h3 {
-        .trash {
-          left: 29px;
-        }
-        .edit {
-          left: 0;
-        }
-        .down {
-          right: 29px;
-        }
-        .up {
-          right: 0;
-        }
-        .ui-state-hover {
-          background: none;
-          background-color: #fff;
-        }
-      }
-
-      .content {
-        height: auto !important;
       }
     }
   }
 
-  #authenticationForm {
-
-    button {
-      .linear-gradient(top, @color-active, darken(@color-active, 10%)) !important;
-      border: 1px solid darken(@color-active, 10%);
+  .noteHidden {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .sortable-list ul li .ui-state-header {
+      padding-left: 40px;
     }
 
-    button:hover {
-      .linear-gradient(top, lighten(@color-active, @button-hover-lightness), @color-active) !important;
-      border: 1px solid darken(@color-active, 10%);
-      color:white;
+    .sortable-list > ul > li .list-header .btn-toolbar {
+      right: 0;
     }
 
-    #authErrorMessage.error-box {
-      width: 880px;
+    .authModuleResource {
+      display: none;
     }
-    .authenticationModules {
-      * {
-        font-size: 13px;
-      }
 
-      select {
-        display: block;
-      }
+    .content {
+      padding: 0;
+    }
 
-      #group-copy {
-        display: none;
-      }
+    .btn-toolbar .btn-group button {
+      display: inline;
+      width: initial;
+      margin-top: 0;
+      padding: 0 0 0 2px;
+      i {
+        margin: 0;
 
-      #addNew {
-        border: dashed 1px #999;
-        color: #bbb;
-        text-align: center;
-        padding: 20px;
-        margin: -1px 10px 10px 10px;
-        cursor: pointer;
-        width: 848px;
-        z-index: 0;
-
-        &:hover {
-          border-color: #5a646d;
-          color: #5a646d;
-        }
-      }
-
-      .saveButton {
-        float: right;
-      }
-
-      .ui-accordion-content {
-        border-radius: initial;
-      }
-
-      .form {
-        * {
-          font-size: 13px;
-          margin: 0 !important;
-          padding: 0 !important;
-          font-style: normal !important;
-        }
-
-        &.advancedForm, &.basicForm {
-          &>div>h3{
-            margin: 10px 0 5px !important;
-            line-height: normal;
-            cursor: pointer;
-            span {
-              display: inline;
-            }
-          }
-
-          .advancedShowHide {
-            margin-right: 10px !important;
-          }
-        }
-
-        .container-defaultUserRoles input {
-          width: 576px !important;
-        }
-
-        label, select, input {
-          display: inline-block !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-
-        select, input {
-          width: 250px !important;
-          height: 24px !important;
-          background-color: #fff;
-        }
-
-        label {
-          width: 220px;
-          margin-top: 10px !important;
-          float: none;
-          font-weight: normal !important;
-          text-align: initial;
-        }
-
-        select {
-          border: 1px solid #aaa;
-          background-color: #fff !important;
-          width: 262px !important;
-        }
-
-        input {
-          padding: 0 5px !important;
-        }
-
-        h3 {
-          margin-top: 10px !important;
-          line-height: initial;
-
-          & > span {
-            padding-top: 6px !important;
-            margin: 0 20px 0 0 !important;
-            display: inline-block;
-            vertical-align: top;
-          }
-        }
-
-        button {
-          padding: 5px !important;
-          margin-right: 10px !important;
-        }
-
-        table {
-          margin-bottom: 10px !important;
-
-          td button {
-            margin: 0 !important;
-          }
-
-          thead th {
-            border: none;
-            background: transparent;
-            padding-bottom: 5px !important;
-          }
-        }
-
-        .ui-buttonset {
-          margin: 0px !important
-        }
-
-        .ui-widget-content {
-          padding: 10px !important;
-          margin: 0 0 10px !important;
-        }
-
-        .form-control {
-          position: relative;
-
-          .ui-state-error {
-            border: none;
-            background: none;
-            position: absolute;
-            left: 465px;
-            top: 10px;
-            font-weight: bold;
-          }
-        }
       }
     }
+
   }
 }

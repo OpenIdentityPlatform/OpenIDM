@@ -1,157 +1,145 @@
-<div class="title-bar">
-    <h1>{{addEditTitle}}</h1>
-    <a href="{{docHelpUrl}}integrators-guide/index.html#chap-users-groups-roles" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+<div class="container">
+<div class="page-header">
+    <h1>{{addEditTitle}}
+        <div  class="pull-right help-link">
+            <a href="{{docHelpUrl}}integrators-guide/index.html#chap-users-groups-roles" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+        </div>
+    </h1>
 </div>
-<div class="resource-input-body">
-    <form id="managedObjectForm" class="form clearfix" autocomplete="off">
-        <div id="managedForm2JS">
-            <fieldset>
-                <legend><span>{{t "common.form.generalDetails"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-                <div class="group-body">
-                    <div class="group-field-block group-lead">
-                        <div class="separate-message">
-                            <label for="managedObjectName" class="light">{{t "templates.managed.managedObjectName"}}</label>
-                            <input id="managedObjectName" class="form-size-l" type="text" name="name" value="{{currentManagedObject.name}}" data-validator="required" data-validator-event="keyup blur" required autofocus>
-                            <span></span>
+<div class="panel panel-default panel-content panel-collapse-group">
+<form id="managedObjectForm" class="form-horizontal" role="form" autocomplete="off">
+    <div id="managedForm2JS">
+        <div class="panel panel-default panel-collapse">
+            <div class="panel-heading" role="tab" id="generalDetailsHeading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#generalDetails" aria-expanded="true" aria-controls="ldapSelectionHeading">{{t "common.form.generalDetails"}}</a>
+                </h4>
+            </div>
+            <div id="generalDetails" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="generalDetails" aria-expanded="true">
+                <div class="panel-body">
+                    <div class="form-group has-feedback">
+                        <label for="managedObjectName" class="col-sm-3 control-label">{{t "templates.managed.managedObjectName"}}</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" id="managedObjectName" name="name" value="{{currentManagedObject.name}}" data-validator="required" data-validator-event="keyup blur" required autofocus/>
                             <div class="validation-message"></div>
+                            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                         </div>
                     </div>
                 </div>
-            </fieldset>
-            <fieldset>
-                <legend><span>Managed Scripts</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-                <div class="group-body">
-                    <div class="group-field-block group-note-lead">
-                        <p class="note">Add script for managed events.</p>
-                        <select class="form-size-m select-button-form" id="managedScriptSelection">
-                            {{#each selectEvents}}
-                            <option value="{{this}}">{{this}}</option>
-                            {{/each}}
-                        </select>
-                        <button type="button" id="addManagedScript" name="addManagedScript" class="button add-btn"><span>Add Script</span><i class="fa fa-lg fa-plus"></i></button>
-                    </div>
-                    <div id="mainHooksBody">
-                        <div class="group-field-block">
-                            {{#each addedEvents}}
-                            <div data-script-type="{{this}}" class="managed-event-hook"></div>
-                            {{/each}}
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-            <fieldset>
-                <legend><span>{{t "templates.managed.managedProperties"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-                <div id="managedPropertyWrapper" class="group-body">
-                    <div class="group-field-block group-note-lead">
-                        <p class="note">{{t "templates.managed.managedPropertyMessage"}}</p>
-                        <button type="button" id="addManagedProperties" name="addManagedProperties" class="button add-btn"><span>{{t "templates.managed.addProperty"}}</span><i class="fa fa-lg fa-plus"></i></button>
-                    </div>
-                    <div style="display:none;" id="managed-object-hidden-property" class="group-field-block small-field-block managed-property">
-                        <div class="separate-message add-remove-block">
-                            <label class="light">{{t "templates.managed.addProperty"}}</label>
-                            <div class="inline inline-medium">
-                                <button type="button" title="" class="clean-btn property-remove remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                                <input  class="form-size-s" autocomplete="off" type="text" name="" value=""/>
-                                <span></span>
-                            </div>
-                            <div class="inline inline-small">
-                                <label class="inline-label light">
-                                    <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
-                                    {{t "templates.managed.encrypted"}}
-                                </label>
-                            </div>
-                            <div class="inline inline-small">
-                                <label class="inline-label light">
-                                    <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
-                                    {{t "templates.managed.private"}}
-                                </label>
-                            </div>
-                            <div class="inline inline-small">
-                                <label class="inline-label light">
-                                    <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
-                                    {{t "templates.managed.virtual"}}
-                                </label>
-                            </div>
-                            <div class="validation-message"></div>
-                        </div>
-                        <div class="group-field-block group-note-lead">
-                            <p class="note">Add script for property events.</p>
-                            <select class="form-size-m select-button-form">
-                                {{#each propertiesEventList}}
-                                <option value="{{this}}">{{this}}</option>
-                                {{/each}}
-                            </select>
-                            <button type="button" class="button add-btn add-property-script"><span>Add Script</span><i class="fa fa-lg fa-plus"></i></button>
-                        </div>
-                        <div class="group-body">
-                            <div class="group-field-block">
-
-                            </div>
-                        </div>
-                    </div>
-                    {{#if currentManagedObject.properties.length}}
-                    {{#each_with_index currentManagedObject.properties}}
-                    <div class="group-field-block small-field-block managed-property">
-                        <div class="separate-message add-remove-block">
-                            <label class="light">{{t "templates.managed.managedProperties"}}</label>
-                            <div class="inline inline-medium">
-                                <button type="button" title="" class="clean-btn property-remove remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                                <input data-validator-event="keyup blur" data-validator="required" class="form-size-s" autocomplete="off" type="text" name="properties[{{index}}].name" value="{{value.name}}"/>
-                                <span></span>
-                            </div>
-                            <div class="inline inline-small">
-                                <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].encryption" {{#if value.encryption}} checked {{/if}}>
-                                <label class="inline-label light">{{t "templates.managed.encrypted"}}</label>
-                            </div>
-                            <div class="inline inline-small">
-                                <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].scope" {{#if value.scope}} checked {{/if}}>
-                                <label class="inline-label light">{{t "templates.managed.private"}}</label>
-                            </div>
-                            <div class="inline inline-small">
-                                <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].type" {{#if value.type}} checked {{/if}}>
-                                <label class="inline-label light">{{t "templates.managed.virtual"}}</label>
-                            </div>
-                            <div class="validation-message"></div>
-                        </div>
-                        <div class="group-field-block group-note-lead">
-                            <p class="note">Add script for property events.</p>
-                            <select class="form-size-m select-button-form">
-                                {{#each value.selectEvents}}
-                                <option value="{{this}}">{{this}}</option>
-                                {{/each}}
-                            </select>
-                            <button type="button" class="button add-btn add-property-script"><span>Add Script</span><i class="fa fa-lg fa-plus"></i></button>
-                        </div>
-                        <div class="group-body">
-                            <div class="group-field-block">
-                                {{#each value.addedEvents}}
-                                <div data-script-type="{{this}}" class="managed-event-hook"></div>
-                                {{/each}}
-                            </div>
-                        </div>
-                    </div>
-                    {{/each_with_index}}
-                    {{/if}}
-                </div>
-            </fieldset>
+            </div>
+        </div>
+        <div class="panel panel-default panel-collapse">
+            <div class="panel-heading" role="tab" id="managedScriptsHeading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#managedScripts" aria-expanded="true" aria-controls="managedScriptsHeading" class="">Managed Scripts</a>
+                </h4>
+            </div>
+            <div id="managedScripts" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="managedScripts" aria-expanded="true"></div>
         </div>
 
-        <fieldset>
-            <legend><span>{{t "templates.managed.managedSchema"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-            <div id="managedSchema" class="group-body">
+
+        <div class="panel panel-default panel-collapse">
+            <div class="panel-heading" role="tab" id="managedPropertiesHeading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#managedProperties" aria-expanded="true" aria-controls="managedPropertiesHeading" class="">{{t "templates.managed.managedProperties"}}</a>
+                </h4>
+            </div>
+            <div id="managedProperties" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="managedProperties" aria-expanded="true">
+                <div class=" col-sm-11">
+                    <label>{{t "templates.managed.managedPropertyMessage"}}</label>
+                </div>
+                <div class="col-sm-3">
+                    <button type="button" id="addManagedProperties" name="addManagedProperties" class="btn btn-primary btn-block"><i class="fa fa-lg fa-plus"></i> <span>{{t "templates.managed.addProperty"}}</span></button>
+                </div>
+                <div class="panel-body">
+                    <div id="managedPropertyWrapper">
+                        <div style="display:none;" id="managed-object-hidden-property" class="col-sm-11 managed-property small-field-block">
+                            <div class="separate-message add-remove-block form-inline">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <button type="button" title="" class="clean-btn property-remove remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                                    </div>
+                                    <input  class="form-control" autocomplete="off" type="text" name="" value=""/>
+                                    <span></span>
+                                    <label class="inline-label">
+                                        <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
+                                        {{t "templates.managed.encrypted"}}
+                                    </label>
+                                    <label class="inline-label">
+                                        <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
+                                        {{t "templates.managed.private"}}
+                                    </label>
+                                    <label class="inline-label">
+                                        <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
+                                        {{t "templates.managed.virtual"}}
+                                    </label>
+                                </div>
+                                <div class="validation-message"></div>
+                            </div>
+                            <div class="managedPropertyEvents"></div>
+
+                        </div>
+                        {{#if currentManagedObject.properties.length}}
+                        {{#each_with_index currentManagedObject.properties}}
+                        <div class="col-sm-11 managed-property small-field-block">
+                            <div class="separate-message add-remove-block form-inline">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <button type="button" title="" class="clean-btn property-remove remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                                    </div>
+                                    <input data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="properties[{{index}}].name" value="{{value.name}}"/>
+                                    <span></span>
+                                    <label class="inline-label">
+                                        <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].encryption" {{#if value.encryption}} checked {{/if}}>
+                                        {{t "templates.managed.encrypted"}}
+                                    </label>
+                                    <label class="inline-label">
+                                        <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].scope" {{#if value.scope}} checked {{/if}}>
+                                        {{t "templates.managed.private"}}
+                                    </label>
+                                    <label class="inline-label">
+                                        <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].type" {{#if value.type}} checked {{/if}}>
+                                        {{t "templates.managed.virtual"}}
+                                    </label>
+                                </div>
+                                <div class="validation-message"></div>
+                            </div>
+                            <div class="managedPropertyEvents"></div>
+                        </div>
+                        {{/each_with_index}}
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="panel panel-connector panel-default panel-collapse">
+    <div class="schema-panel">
+        <div class="panel-heading" role="tab" id="managedSchemaHeading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#managedSchema" aria-expanded="true" aria-controls="managedSchemaHeading" class="">{{t "templates.managed.managedSchema"}}</a>
+            </h4>
+        </div>
+        <div id="managedSchema" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="managedSchema" aria-expanded="true">
+            <div class="panel-body">
                 <div class="schemaEditor jsonEditor"></div>
             </div>
-        </fieldset>
-
-        <div style="display:none;" id="managedErrorMessage" class="float-left alert-box warning-message">
-            <p class="alert-message">
-                <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
-                <span class="message"></span>
-            </p>
         </div>
-        <div class="float-right form-button-bar">
-            <input type="submit" id="addEditManaged" name="addEditButton" value="{{addEditSubmitTitle}}" class="button" disabled="true">
-            <a href="#resources/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="button"></a>
+    </div>
+    <div style="display:none;" id="managedErrorMessage" class="alert-box warning-message">
+        <p class="alert-message">
+            <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
+            <span class="message"></span>
+        </p>
+    </div>
+    <div class="panel-footer clearfix">
+        <div class="pull-right">
+            <a href="#resources/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+            <input type="submit" id="addEditManaged" name="addEditButton" value="{{addEditSubmitTitle}}" class="btn btn-primary" disabled="true">
+            <div style="clear:both;"></div>
         </div>
-    </form>
+    </div>
+</div>
+</div>
 </div>

@@ -45,7 +45,7 @@ define("org/forgerock/openidm/ui/admin/util/AbstractScriptEditor", [
             this.cmBox.setOption("mode", mode);
         },
 
-        scriptSelect: function(event) {
+        scriptSelect: function(event, codeMirror) {
             event.preventDefault();
 
             var targetEle = event.target,
@@ -56,7 +56,8 @@ define("org/forgerock/openidm/ui/admin/util/AbstractScriptEditor", [
                 this.setSelectedScript(filePath, sourceCode);
                 this.cmBox.setOption("readOnly", "");
                 this.$el.find(".inline-code").toggleClass("code-mirror-disabled", false);
-                this.cmBox.focus();
+                codeMirror.refresh();
+                codeMirror.focus();
             } else {
                 this.setSelectedScript(sourceCode, filePath);
                 this.cmBox.setOption("readOnly", "nocursor");
@@ -66,10 +67,12 @@ define("org/forgerock/openidm/ui/admin/util/AbstractScriptEditor", [
         },
 
         setSelectedScript: function(disabledScript, enabledScript) {
+            disabledScript.closest(".panel-body").slideToggle();
             disabledScript.prop("disabled", true);
             disabledScript.toggleClass("invalid", false);
 
             enabledScript.prop("disabled", false);
+            enabledScript.closest(".panel-body").slideToggle();
 
             if(!this.data.noValidation) {
                 disabledScript.removeAttr("data-validator-event");

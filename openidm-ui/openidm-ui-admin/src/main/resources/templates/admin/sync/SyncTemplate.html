@@ -1,23 +1,87 @@
-<div class="sync-input-body">
-    <form id="syncForm" class="form clearfix" autocomplete="off">
-        <fieldset>
-            <legend><span>{{t "templates.situationalPolicies.policies"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-            <div class="group-body" id="policyPattern"></div>
-        </fieldset>
+<div class="tab-pane-body sync-input-body">
+    <div  id="syncForm" class="form clearfix panel-collapse-group">
 
-        <fieldset>
-            <legend><span>{{t "templates.sync.situationalScripts"}}</span><i class="fa fa-lg {{#if hideSituational}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
-            <div class="group-body" id="situationalQueries" {{#if hideSituational}}style="display: none;"{{/if}}></div>
-        </fieldset>
-        
-        <fieldset>
-            <legend><span>{{t "templates.sync.reconciliationScript"}}</span><i class="fa fa-lg {{#if hideRecon}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
-            <div class="group-body" id="reconQueryView" {{#if hideRecon}}style="display: none;"{{/if}}></div>
-        </fieldset>
-        
-        <fieldset id="singleRecordRecon" {{#if hideSingleRecordRecon}}style="display:none;"{{/if}}>
-            <legend><span>{{t "templates.sync.testSync.title"}}</span><i class="fa fa-lg {{#if hideTestSync}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
-            <div class="group-body" id="testSyncView" {{#if hideTestSync}}style="display: none;"{{/if}}></div>
-        </fieldset>
-    </form>
+        <!--Policies-->
+        <div class="panel panel-default panel-collapse">
+            <div class="panel-heading" role="tab" id="policyPatternHeading">
+                <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#sync-situations" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#policyPatternBody" aria-expanded="false" aria-controls="policyPatternHeading">
+                        {{t "templates.situationalPolicies.policies"}}
+                    </a>
+                </h4>
+            </div>
+
+            <div id="policyPatternBody" class="collapse in" role="tabpanel" aria-labelledby="policyPatternHeading" aria-expanded="true">
+                <div class="panel-body">
+                    <div class="group-body">
+                        <p class="panel-description">{{t "templates.sync.policiesDesc"}}</p>
+                        <div id="policyPattern"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Situational Event Scripts-->
+        <div class="panel panel-default panel-collapse">
+            <div class="panel-heading" role="tab" id="situationalQueriesHeading">
+                <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#sync-object-mapping" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#situationalQueriesBody" aria-expanded="false" aria-controls="situationalQueriesHeading">
+                        {{t "templates.sync.situationalScripts"}}
+                    </a>
+                </h4>
+            </div>
+            <div id="situationalQueriesBody" class="collapse {{#unless hideSituational}} in{{/unless}}" role="tabpanel" aria-labelledby="situationalQueriesHeading" aria-expanded="{{#unless hideSituational}} in{{/unless}}">
+                <div class="panel-body">
+                    <div class="group-body">
+                        <p class="panel-description">{{t "templates.sync.situationalEventScriptsDesc"}}</p>
+                        <div id="situationalQueries"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Reconciliation Script-->
+        <div class="panel panel-default panel-collapse">
+            <div class="panel-heading" role="tab" id="reconQueryViewHeading">
+                <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#advanced-dataflow" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#reconQueryViewBody" aria-expanded="false" aria-controls="reconQueryViewHeading">
+                        {{t "templates.sync.reconciliationScript"}}
+                    </a>
+                </h4>
+            </div>
+            <div id="reconQueryViewBody" class="collapse {{#unless hideRecon}} in{{/unless}}" role="tabpanel" aria-labelledby="reconQueryViewHeading" aria-expanded="{{#unless hideRecon}} in{{/unless}}">
+                <div class="panel-body">
+                    <div class="group-body">
+                        <p class="panel-description">{{t "templates.sync.reconScriptDesc"}}</p>
+                        <div id="reconQueryView"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--Single Record Recon-->
+        <div class="panel panel-default panel-collapse" id="singleRecordRecon" {{#if hideSingleRecordRecon}} style="display:none !important;" {{/if}}>
+            <div class="panel-heading" role="tab" id="singleRecordReconHeading">
+                <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#recon-by-id" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#singleRecordReconBody" aria-expanded="false" aria-controls="singleRecordReconHeading">
+                        {{t "templates.sync.testSync.title"}}
+                    </a>
+                </h4>
+            </div>
+            <div id="singleRecordReconBody" class="collapse" role="tabpanel" aria-labelledby="singleRecordReconHeading">
+                <div class="panel-body">
+                    <div class="group-body">
+                        <p class="panel-description">{{t "templates.sync.singleRecordReconDesc"}}</p>
+                        <div id="testSyncView"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>

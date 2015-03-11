@@ -1,26 +1,24 @@
-<div class="group-body">
-    <h3>{{t "templates.mapping.linkQualifiers"}}</h3>
-
-    <form>
-        {{#each linkQualifiers}}
-        <button type="button" class="removeLinkQualifier button icon-button {{#if ../doNotDelete}} doNotDelete{{/if}}">
-            <span class="linkQualifier">{{this}}</span>
-            <i class="fa fa-times fa-lg"></i>
-        </button>
-        {{/each}}
-
-        <span class="addLinkQualifierContainer">
-            <input class="newLinkQualifier" type="text" placeholder="{{t "templates.correlation.linkQualifier"}}"/>
-            <button type="button" class="addLinkQualifier button icon-button">
-                <i class="fa fa-plus fa-lg"></i>
-            </button>
-        </span>
-
-        <div class="float-left alert-box warning-message notValid">
-            <p class="alert-message">
-                <i class="fa alert-message-icon"></i><span class="message-type">{{t "templates.correlation.warning"}}!</span>
-                <span class="message">{{t "templates.mapping.uniqueLinkQualifiers"}}</span>
-            </p>
+<form class="">
+    <div class="form-group addLinkQualifierContainer">
+        <div class="input-group">
+            <input class="form-control newLinkQualifier" autocomplete="off" type="text" placeholder="{{t "templates.correlation.linkQualifier"}}" />
+            <div class="input-group-addon">
+                <button type="button" class="addLinkQualifier clean-btn">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
         </div>
-    </form>
-</div>
+    </div>
+
+    {{#each linkQualifiers}}
+    <button type="button" class="removeLinkQualifier btn btn-primary" {{#if ../doNotDelete}} disabled=true {{/if}}>
+    <span class="linkQualifier">{{this}}</span>
+    <i class="fa fa-times fa-lg"></i>
+    </button>
+    {{/each}}
+
+    <div role="alert" class="notValid alert alert-warning" style="display:none;">
+        <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.correlation.warning"}}!</strong>
+        <span class="message">{{t "templates.mapping.uniqueLinkQualifiers"}}</span>
+    </div>
+</form>

@@ -40,7 +40,8 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                 "change .persisted": "persistedChange",
                 "click .saveSchedule": "saveSchedule",
                 "click .addSchedule": "addSchedule",
-                "click .deleteSchedule": "deleteSchedule"
+                "click .deleteSchedule": "deleteSchedule",
+                "click .nav-tabs li" : "disabled"
             },
             data: {
                 "id": 0
@@ -106,23 +107,31 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
 
                 this.parentRender(_.bind(function() {
                     if (this.invokeService && this.invokeService === "sync") {
-                        this.$el.find(".tabs").tabs({
-                            activate: _.bind(function(event, ui) {
-                                if (this.cron && this.$el.find(".tabs").tabs("option", "active") === 1) {
-                                    this.$el.find(".complexExpression").val(this.cron.cron("convertCronVal", this.cron.cron("value")));
-                                }
-                            }, this)
-                        });
+                        var tabs = this.$el.find(".nav-tabs li"),
+                            tabBodies = this.$el.find(".tab-content .tab-pane");
+
+                        this.$el.find('a[data-toggle="tab"]').on('shown.bs.tab', _.bind(function(e){
+                            var currentTab = $(e.target).text();
+
+                            if(currentTab === "Advanced") {
+                                this.$el.find(".complexExpression").val(this.cron.cron("convertCronVal", this.cron.cron("value")));
+                            }
+                        }, this));
 
                         this.cron = this.$el.find(".cronField").cron();
+
                         defaultCronValue = this.cron.cron("value", this.cron.cron("convertCronVal", this.defaults.schedule));
 
                         if (defaultCronValue === false) {
-                            this.$el.find(".tabs" ).tabs({ active: 1 });
-                            this.$el.find(".tabs" ).tabs({ disabled: [0] });
+                            this.showTab(tabs[1], tabBodies[1]);
+                            this.disableTab(tabs[0]);
+
                             this.$el.find(".complex").show();
                             this.$el.find(".complexExpression").val(this.defaults.schedule);
                         } else {
+                            this.enableTab(tabs[0]);
+                            this.showTab(tabs[0], tabBodies[0]);
+
                             this.$el.find(".advancedText").hide();
                         }
                     } else if (this.invokeService && this.invokeService === "provisioner") {
@@ -169,23 +178,41 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                     }
                 }, this));
             },
+            showTab: function(tab, tabBody) {
+                $(tab).toggleClass("active", true);
+                $(tabBody).toggleClass("active", true);
+            },
+            disableTab: function(tab) {
+                $(tab).find("a").attr("data-toggle", "");
+                $(tab).toggleClass("disabled", true);
+            },
+            enableTab: function(tab){
+                $(tab).find("a").attr("data-toggle", "tab");
+                $(tab).toggleClass("disabled", false);
+            },
+            disabled: function(event) {
+                event.preventDefault();
+            },
 
             expressionChange: function() {
-                var cronValue = this.cron.cron("value", this.cron.cron("convertCronVal", this.$el.find(".complexExpression").val()));
+                var tabs = this.$el.find(".nav-tabs li"),
+                    cronValue = this.cron.cron("value", this.cron.cron("convertCronVal", this.$el.find(".complexExpression").val()));
 
                 if (_(cronValue).isObject()) {
-                    this.$el.find(".tabs" ).tabs({ disabled: [] });
+                    $(tabs[0]).find("a").attr("data-toggle", "tab");
+                    $(tabs[0]).toggleClass("disabled", false);
                     this.$el.find(".complex").hide();
                     this.$el.find(".advancedText").hide();
                 } else {
-                    this.$el.find(".tabs" ).tabs({ disabled: [0] });
+                    $(tabs[0]).find("a").attr("data-toggle", "");
+                    $(tabs[0]).toggleClass("disabled", true);
                     this.$el.find(".complex").show();
                     this.$el.find(".advancedText").show();
                 }
             },
 
             persistedChange: function() {
-                this.$el.find(".misfirePolicyBlock").toggleClass('fieldHidden', !this.$el.find(".persisted").is(":checked"));
+                this.$el.find(".misfirePolicyBlock").toggle();
             },
 
             saveSchedule: function() {
@@ -236,12 +263,12 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
             deleteSchedule: function() {
                 if (this.$el.find(".saveSchedule:visible").length > 0) {
                     SchedulerDelegate.deleteSchedule(this.scheduleId).then(_.bind(function () {
-                        this.$el.find(".schedulerBody").remove();
+                        this.$el.find("#schedules").empty();
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "scheduleDeleted");
                         this.onDelete(this.scheduleId, this.source);
                     }, this));
                 } else {
-                    this.$el.find(".schedulerBody").remove();
+                    this.$el.find("#schedules").empty();
                     this.onDelete(this.scheduleId, this.source);
                 }
             }
@@ -256,4 +283,3 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
 
     return schedulerInstance;
 });
-

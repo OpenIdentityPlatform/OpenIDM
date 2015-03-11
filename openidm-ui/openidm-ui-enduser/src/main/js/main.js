@@ -45,6 +45,9 @@ require.config({
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
+        bootstrap: "libs/bootstrap.min",
+        "bootstrap-dialog": "libs/bootstrap-dialog.min",
+        placeholder: "libs/jquery.placeholder",
         moment: "libs/moment-2.8.1-min",
         contentflow: "libs/contentflow",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
@@ -102,6 +105,15 @@ require.config({
         },
         moment: {
             exports: "moment"
+        },
+        bootstrap: {
+            deps: ["jquery"]
+        },
+        'bootstrap-dialog': {
+            deps: ["jquery", "underscore","backbone", "bootstrap"]
+        },
+        placeholder: {
+            deps: ["jquery"]
         }
     }
 });
@@ -124,6 +136,7 @@ require([
     "moment",
     "doTimeout",
     "handlebars",
+    "placeholder",
     "i18next",
     "jsonEditor",
     "contentflow",
@@ -153,6 +166,7 @@ require([
     moment,
     doTimeout,
     handlebars,
+    placeholder,
     i18next,
     jsonEditor,
     contentflow,
@@ -166,8 +180,4 @@ require([
     window.Backbone = Backbone;
 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
-
 });
-
-
-

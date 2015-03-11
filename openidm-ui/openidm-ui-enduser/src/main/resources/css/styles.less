@@ -23,20 +23,25 @@
  */
 
 /* css basic configuration */
-@import "common/config.less";
 
-/* helpers, functions, columns */
-@import "common/helpers.less";
-@import "fontawesome/less/font-awesome.less"; 
 
-/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
-@import "common/layout.less";
+/* css basic configuration */
+@import "Roboto/fontRoboto.less";
+@import "common/variables.less";
+@import "common/common.less";
 
-/* specific css used in specific modules */
-@import "common/forms.less";
-@import "admin/task-table.less";
-@import "admin/notifications.less";
-@import "admin/contentflow.less";
+/*
+  Library css
+*/
+@import "common/jquery-ui-1.10.3.custom.css";
+@import "common/bootstrap.min.css";
+@import "fontawesome/css/font-awesome.min.css";
+@import "fontawesome/less/variables.less";
+
+/*
+  Specific libraries
+*/
+
 @import "admin/linkedview.less";
-@import "admin/idmTooltip.less";
-@import "jsonEditor.less";
+@import "user.less";
+@import "jqgrid-override.less";

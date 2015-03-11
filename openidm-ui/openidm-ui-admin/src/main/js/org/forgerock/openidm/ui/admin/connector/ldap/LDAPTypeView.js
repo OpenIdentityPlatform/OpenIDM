@@ -30,8 +30,9 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
     "org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/admin/delegates/SecurityDelegate"
-], function(ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog, ConnectorDelegate, uiUtils, securityDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/SecurityDelegate",
+    "bootstrap-dialog"
+], function(ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog, ConnectorDelegate, uiUtils, securityDelegate, BootstrapDialog) {
 
     var LDAPTypeView = ConnectorTypeAbstractView.extend({
         events: {
@@ -248,39 +249,46 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                 event.preventDefault();
             }
 
-            this.$el.find("#certContainer").clone().attr("id","certificateContainerClone").dialog({
-                appendTo: this.$el,
+            //change dialog
+            BootstrapDialog.show({
                 title: "SSL Certificate",
-                autoOpen: true,
-                width: 640,
-                modal: true,
-                open: function (e, ui) {
-                    var saveBtn = $(this).parent(".ui-dialog").find(".ui-dialog-buttonpane .ui-button:first"),
-                        textarea = $("textarea", this),
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: this.$el.find("#certContainer").clone().attr("id","certificateContainerClone"),
+                onshown : function (dialogRef) {
+                    var saveBtn = dialogRef.$modalFooter.find("#sslSaveButton"),
+                        textarea = dialogRef.$modalDialog.find("textarea"),
                         updateBtnStatus = function () {
                             if (textarea.attr("data-validation-status") === "ok") {
                                 saveBtn.prop("disabled", false);
+                                dialogRef.$modalDialog.find("textarea").toggleClass("field-error", false);
+
                             } else {
                                 saveBtn.prop("disabled", true);
+                                dialogRef.$modalDialog.find("textarea").toggleClass("field-error", true);
                             }
                         };
 
-                    validatorsManager.bindValidators(_this.$el.find("#certificateContainerClone"));
-                    validatorsManager.validateAllFields(_this.$el);
+                    $("#certificateContainerClone").show();
+
+                    validatorsManager.bindValidators(dialogRef.$modalDialog);
+                    validatorsManager.validateAllFields(dialogRef.$modalDialog);
 
                     textarea.on("keyup change", updateBtnStatus);
 
                     updateBtnStatus();
                 },
-                close: function(e, ui) {
-                    _this.$el.find('#certificateContainerClone').dialog("destroy");
-                },
-                buttons: [
+                buttons: [{
+                        label: $.t('common.form.cancel'),
+                        action: function(dialogRef){
+                            dialogRef.close();
+                        }
+                    },
                     {
-                        text : $.t("common.form.save"),
+                        label: $.t('common.form.save'),
                         id: "sslSaveButton",
-                        click: function(e) {
-                            var saveBtn = $(this).parent(".ui-dialog").find(".ui-dialog-buttonpane .ui-button:first"),
+                        cssClass: "btn-primary",
+                        action: function(dialogRef) {
+                            var saveBtn = dialogRef.$modalFooter.find("#sslSaveButton"),
                                 certField;
 
                             if (!saveBtn.prop("disabled")) {
@@ -290,15 +298,9 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                                 certField.val(certField.text()); // seems to be necessary for IE
 
                                 validatorsManager.validateAllFields(_this.$el);
-
-                                $(this).dialog("close");
                             }
-                        }
-                    },
-                    {
-                        text: $.t("common.form.cancel"),
-                        click: function() {
-                            $(this).dialog("close");
+
+                            dialogRef.close();
                         }
                     }
                 ]

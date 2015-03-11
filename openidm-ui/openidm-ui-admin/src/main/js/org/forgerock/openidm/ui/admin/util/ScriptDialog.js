@@ -32,13 +32,14 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "libs/codemirror/lib/codemirror",
     "libs/codemirror/mode/groovy/groovy",
-    "libs/codemirror/mode/javascript/javascript"
-], function(AbstractScriptEditor, constants, conf, uiUtils, validatorsManager, codeMirror, groovyMode, jsMode) {
+    "libs/codemirror/mode/javascript/javascript",
+    "bootstrap-dialog"
+], function(AbstractScriptEditor, constants, conf, uiUtils, validatorsManager, codeMirror, groovyMode, jsMode, BootstrapDialog) {
     var ScriptDialog= AbstractScriptEditor.extend({
         element: "#dialogs",
         events: {
             "onValidate": "onValidate",
-            "change input[type='radio']" : "scriptSelect",
+            "change input[type='radio']" : "localScriptChange",
             "click #addPassedVariables" : "addPassedVariable",
             "click #passedVariablesHolder .remove-btn" : "deletePassedVariable",
             "customValidate": "customValidate",
@@ -46,17 +47,15 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
         },
         model : {
             setScript: null,
-            AscriptData: null,
+            scriptData: null,
             noValidation: false,
             disablePassedVariable: false,
             placeHolder: null,
-            codeMirrorHeight: "240px",
-            codeMirrorWidth: "600px"
+            codeMirrorHeight: "240px"
         },
 
-
         render: function (args, callback) {
-            var btns;
+            var _this = this;
 
             this.data = {};
 
@@ -75,83 +74,76 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 this.saveCallback = args.saveCallback;
             }
 
-            btns = [
-                {
-                    id:"scriptDialogCancel",
-                    text: $.t('common.form.cancel'),
-                    click: _.bind(function() {
-                        this.currentDialog.dialog('close');
-                    }, this)
-                },
-                {
-                    id:"scriptDialogOkay",
-                    text: $.t('common.form.ok'),
-                    click: _.bind(function() {
-                        this.generateScript();
-
-                        if (this.saveCallback) {
-                            this.saveCallback();
-                        }
-
-                        this.currentDialog.dialog('close');
-                    }, this)
-                }
-            ];
-
             this.currentDialog = $('<form id="scriptManagerDialogForm"></form>');
-            this.setElement(this.currentDialog);
 
             $('#dialogs').append(this.currentDialog);
+            this.setElement(this.currentDialog);
 
-            this.currentDialog.dialog({
+            BootstrapDialog.show({
                 title: "Script Manager",
-                width:"650",
-                modal: true,
-                resizable: true,
-                draggable: true,
-                buttons: btns,
-                position: { my: "center", at: "center", of: window },
-                close: _.bind(function () {
-                    if(this.currentDialog) {
-                        this.currentDialog.dialog('destroy').remove();
-                    }
-                }, this),
-                open: _.bind(function() {
-                    uiUtils.renderTemplate(this.template, this.$el, _.extend({}, conf.globalData, this.data), _.bind(function(){
-                        var mode;
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: this.currentDialog,
+                size: BootstrapDialog.SIZE_WIDE,
+                onshown : function (dialogRef) {
+                    uiUtils.renderTemplate(_this.template, _this.$el, _.extend({}, conf.globalData, _this.data), _.bind(function () {
+                        var mode = this.$el.find("select").val();
 
-                        mode = this.$el.find("select").val();
-
-                        if(mode === "text/javascript") {
+                        if (mode === "text/javascript") {
                             mode = "javascript";
                         }
 
-                        this.cmBox = codeMirror.fromTextArea(this.$el.find(".scriptSourceCode")[0], {
+                        this.cmBox = codeMirror.fromTextArea(_this.$el.find(".scriptSourceCode")[0], {
                             lineNumbers: true,
                             mode: mode
                         });
 
                         this.cmBox.setSize(this.model.codeMirrorWidth, this.model.codeMirrorHeight);
 
-                        this.cmBox.on("changes", _.bind(function() {
+                        this.cmBox.on("changes", _.bind(function () {
                             this.cmBox.save();
                             this.$el.find(".scriptSourceCode").trigger("blur");
                         }, this));
 
-                        if(this.$el.find("input[name=scriptType]:checked").val() !== "inline-code") {
+                        if (this.$el.find("input[name=scriptType]:checked").val() !== "inline-code") {
                             this.cmBox.setOption("readOnly", "nocursor");
                             this.$el.find(".inline-code").toggleClass("code-mirror-disabled");
                         }
 
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
-                    }, this), "replace");
-                }, this)
+
+                        if (this.data.scriptData && this.data.scriptData.source) {
+                            this.$el.find("#inlineHeading input[type='radio']").trigger("change");
+                        }
+                    }, _this), "replace");
+                },
+                buttons: [{
+                    label: $.t("common.form.cancel"),
+                    id:"scriptDialogCancel",
+                    action: function(dialogRef) {
+                        dialogRef.close();
+                    }
+                }, {
+                    label: $.t('common.form.ok'),
+                    id: "scriptDialogOkay",
+                    cssClass: "btn-primary",
+                    action: _.bind(function(dialogRef) {
+                        this.generateScript();
+                        if (this.saveCallback) {
+                            this.saveCallback();
+                        }
+                        dialogRef.close();
+                    }, _this)
+                }]
             });
 
             if(callback) {
                 callback();
             }
+        },
+
+        localScriptChange: function (event) {
+            this.scriptSelect(event, this.cmBox);
         },
 
         generateScript: function() {

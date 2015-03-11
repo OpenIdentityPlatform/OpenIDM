@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -114,10 +114,10 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     }
                 } else if (field.hasClass("name")) {
 
-                    if (field.siblings(".tag").val() === "extensibleMatchAND") {
+                    if (field.parent().siblings(".tag-body").find(".tag").val() === "extensibleMatchAND") {
                         node.extensible.matchType=field.val();
                         node.name = field.val() + ":1.2.840.113556.1.4.803";
-                    } else if (field.siblings(".tag").val() === "extensibleMatchOR") {
+                    } else if (field.parent().siblings(".tag-body").find(".tag").val() === "extensibleMatchOR") {
                         node.extensible.matchType = field.val();
                         node.name = field.val() + ":1.2.840.113556.1.4.804";
                     } else {
@@ -129,30 +129,29 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     if (field.val() === "extensibleMatchAND") {
                         node.tag = "extensibleMatch";
                         node.extensible = {
-                            matchType: field.siblings(".name").val(),
+                            matchType: field.parent().siblings(".name-body").find(".name").val(),
                             rule: "1.2.840.113556.1.4.803",
-                            value: field.siblings(".value").val(),
+                            value: field.parent().siblings(".value-body").find(".value").val(),
                             type: 169 // comes from ldapjs protocol definition for FILTER_EXT
                         };
-                        node.name = field.siblings(".name").val() + ":1.2.840.113556.1.4.803";
+                        node.name = field.parent().siblings(".name-body").find(".name").val() + ":1.2.840.113556.1.4.803";
                     } else if (field.val() === "extensibleMatchOR") {
                         node.tag = "extensibleMatch";
                         node.extensible = {
-                            matchType: field.siblings(".name").val(),
+                            matchType: field.parent().siblings(".name-body").find(".name").val(),
                             rule: "1.2.840.113556.1.4.804",
-                            value: field.siblings(".value").val(),
+                            value: field.parent().siblings(".value-body").find(".value").val(),
                             type: 169 // comes from ldapjs protocol definition for FILTER_EXT
                         };
-                        node.name = field.siblings(".name").val() + ":1.2.840.113556.1.4.804";
+                        node.name = field.parent().siblings(".name-body").find(".name").val() + ":1.2.840.113556.1.4.804";
                     } else {
                         delete node.extensible;
-                        node.name = field.siblings(".name").val();
+                        node.name = field.parent().siblings(".name-body").find(".name").val();
                         node.tag = field.val();
                     }
 
                 } else if (field.hasClass("value")) {
-
-                    if (field.siblings(".tag").val().match(/^extensibleMatch/)) {
+                    if (field.parent().siblings(".tag-body").find(".tag").val().match(/^extensibleMatch/)) {
                         node.extensible.value = field.val();
                     }
 

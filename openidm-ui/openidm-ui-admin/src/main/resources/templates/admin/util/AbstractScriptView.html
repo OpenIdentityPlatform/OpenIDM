@@ -1,73 +1,110 @@
-<div {{#if inlineEditor}} class="event-hook-inline event-hook-window" {{else}} class="event-hook-window" {{/if}}>
-<div class="event-hook-piece event-type">
-    <label>{{t "templates.scriptEditor.type"}}</label>
-    <select class="event-select">
-        <option value="text/javascript">{{t "templates.scriptEditor.javascript"}}</option>
-        <option value="groovy">{{t "templates.scriptEditor.groovy"}}</option>
-    </select>
-</div>
-<div class="event-hook-piece file-code">
-    <div>
-        <label class="event-hook-title">
-            <input type="radio" name="scriptType" value="file-code" {{#unless scriptData.source}} checked {{/unless}}/>
-            {{t "templates.scriptEditor.filePath"}}
-        </label>
+<div {{#if inlineEditor}} class="row event-hook-inline event-hook-window" {{else}} class="row event-hook-window" {{/if}}>
+<div class="col-sm-6">
+    <div class="form-group event-hook-piece event-type">
+        <label class="control-label">{{t "templates.scriptEditor.type"}}</label>
+        <select class="event-select form-control">
+            <option value="text/javascript">{{t "templates.scriptEditor.javascript"}}</option>
+            <option value="groovy">{{t "templates.scriptEditor.groovy"}}</option>
+        </select>
     </div>
-    <input class="scriptFilePath" autocomplete="off" type="text" name="fileName" {{#if scriptData.source}} value="" disabled="true" {{else}} value="{{scriptData.file}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur focus" data-validator="required" {{/unless}} {{/if}}/>
-    {{#unless disablePassedVariable}}
-    <span></span>
-    <div class="validation-message"></div>
-    {{/unless}}
-</div>
-<div class="event-hook-piece inline-code">
-    <div>
-        <label class="event-hook-title">
-            <input type="radio" name="scriptType" value="inline-code" {{#if scriptData.source}} checked {{/if}}/>
-            {{t "templates.scriptEditor.inline"}}
-        </label>
-    </div>
-    {{#if scriptData.source}}
-    <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur" data-validator="required" {{/unless}} name="sourceCode">{{scriptData.source}}</textarea>
-    {{else}}
-    <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" name="sourceCode" disabled="true"></textarea>
-    {{/if}}
 
-    {{#unless disablePassedVariable}}
-    <span></span>
-    <div class="validation-message"></div>
-    {{/unless}}
-</div>
-
-{{#unless disablePassedVariable}}
-<div class="group-field-block group-note-lead">
-    <p class="note">{{t "templates.scriptEditor.passedVariables"}}</p>
-    <button type="button" field_type="baseContext" id="addPassedVariables" name="addPassedVariables" class="button add-btn"><span>{{t "templates.scriptEditor.addVariable"}}</span><i class="fa fa-lg fa-plus"></i></button>
-</div>
-<div id="passedVariablesHolder">
-    <div style="display:none;" id="hiddenPassedVariable" class="passed-variable-block group-field-block variable-block">
-        <div class="separate-message outside-element">
-            <div class="s-form-holder">
-                <button type="button" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                <input class="form-size-s" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableName"}}" value="{{this.[0]}}" />
-                <input class="form-size-s" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableValue"}}" value="{{this.[1]}}" />
-                <span></span>
+    <div class="panel-group" id="scriptAccordions">
+        <div class="panel panel-default event-hook-piece file-code ">
+            <div class="panel-heading" id="fileHeading">
+                <label class="event-hook-title inline radio">
+                    <input type="radio" class="radio inline" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="file-code" {{#unless scriptData.source}} checked {{/unless}}/>
+                    {{t "templates.scriptEditor.filePath"}}
+                </label>
             </div>
-            <div class="validation-message"></div>
+            <div id="fileCollapse" style="">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#if scriptData.source}} value="" disabled="true" {{else}} value="{{scriptData.file}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur focus" data-validator="required" {{/unless}} {{/if}}/>
+                        {{#unless disablePassedVariable}}
+                        <span></span>
+                        <div class="validation-message"></div>
+                        {{/unless}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default event-hook-piece inline-code">
+            <div class="panel-heading" id="inlineHeading">
+                <label class="event-hook-title inline radio">
+                    <input type="radio" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="inline-code" class="radio inline collapsed" {{#if scriptData.source}} checked {{/if}}/>
+                    {{t "templates.scriptEditor.inline"}}
+                </label>
+            </div>
+            <div id="codeCollapse" class="panel-body">
+                <div id="codemirror" class="col-sm-12">
+                    {{#if scriptData.source}}
+                    <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur" data-validator="required" {{/unless}} name="sourceCode">{{scriptData.source}}</textarea>
+                    {{else}}
+                    <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" name="sourceCode" disabled="true"></textarea>
+                    {{/if}}
+
+                    {{#unless disablePassedVariable}}
+                    <span></span>
+                    <div class="validation-message"></div>
+                    {{/unless}}
+
+                </div>
+            </div>
         </div>
     </div>
-    {{#each passedVariables}}
-    <div class="passed-variable-block group-field-block variable-block">
-        <div class="separate-message outside-element">
-            <div class="s-form-holder">
-                <button type="button" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                <input class="form-size-s" data-validator-event="keyup blur" data-validator="bothRequired" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableName"}}" value="{{this.[0]}}" required/>
-                <input class="form-size-s" data-validator-event="keyup blur" data-validator="bothRequired" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableValue"}}" value="{{this.[1]}}" required />
-                <span></span>
+</div>
+
+<div class="col-sm-6" id="scriptVariables">
+    {{#unless disablePassedVariable}}
+    <div class="well">
+        <label>
+            {{t "templates.scriptEditor.passedVariables"}}
+        </label>
+
+        <div class="panel-body">
+            <div id="passedVariablesHolder">
+                <div style="display:none;" id="hiddenPassedVariable" class="passed-variable-block group-field-block variable-block row">
+                    <div class="separate-message outside-element">
+                        <div class="s-form-holder">
+                            <div class="col-sm-5 textContainer">
+                                <input class="form-size-s form-control" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableName"}}" value="{{this.[0]}}" />
+                            </div>
+                            <div class="col-sm-5 textContainer">
+                                <input class="form-size-s form-control" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableValue"}}" value="{{this.[1]}}" />
+                            </div>
+                            <div class="col-sm-1 col-sm-offset-1">
+                                <div class="btn-group pull-right">
+                                    <button type="button" class="btn clean-btn remove-btn btn-link delete-script "><i class="fa fa-lg fa-times-circle"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{#each passedVariables}}
+                <div class="passed-variable-block group-field-block variable-block row">
+                    <div class="separate-message outside-element">
+                        <div class="s-form-holder">
+                            <div class="col-sm-5 textContainer">
+                                <input class="form-size-s form-control" data-validator-event="keyup blur" data-validator="bothRequired" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableName"}}" value="{{this.[0]}}" required/>
+                            </div>
+                            <div class="col-sm-5 textContainer">
+                                <input class="form-size-s form-control" data-validator-event="keyup blur" data-validator="bothRequired" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableValue"}}" value="{{this.[1]}}" required />
+                            </div>
+                            <div class="col-sm-1 col-sm-offset-1">
+                                <div class="btn-group pull-right">
+                                    <button type="button" class="btn clean-btn remove-btn btn-link delete-script "><i class="fa fa-lg fa-times-circle"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
             </div>
-            <div class="validation-message"></div>
+            <button type="button" field_type="baseContext" id="addPassedVariables" name="addPassedVariables" class="btn btn-primary add-btn"><span>{{t "templates.scriptEditor.addVariable"}}</span><i class="fa fa-lg fa-plus"></i></button>
         </div>
     </div>
-    {{/each}}
+    {{/unless}}
 </div>
-{{/unless}}
 </div>

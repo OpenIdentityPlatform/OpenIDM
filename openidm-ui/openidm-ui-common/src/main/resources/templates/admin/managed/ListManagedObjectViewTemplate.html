@@ -1,22 +1,25 @@
-<div id="{{grid_id}}_container" class="content-bg">
-    <div class="clearfix">
+<div id="{{grid_id}}_container" class="container">
+    <div class="page-header managedObjectsContainer">
         {{#if validObject}}
-        <h1 class="float-left">{{pageTitle}} {{t "common.form.list"}}</h1>
-        <div class="float-right">
-            <a href="#managed/{{objectName}}/add/" class="button" title="{{t "common.form.add"}} {{pageTitle}}">{{t "common.form.add"}} {{pageTitle}}</a>
-            {{#if hasData}}
-            <input type="button"  class="button"  id="reloadGridBtn" value="{{t 'common.form.reloadGrid'}}" />
-            <input type="button"  class="button"  id="clearFiltersBtn" value="{{t 'common.form.clearFilters'}}" disabled />
-            {{/if}}
-        </div>
+	        <div class='btn-toolbar pull-right'>
+	            <div class='btn-group'>
+	                <a href="#managed/{{objectName}}/add/" title="{{t "common.form.add"}} {{pageTitle}}"><button class="btn btn-primary" type="button">{{t "common.form.add"}} {{pageTitle}}</button></a>
+	                {{#if hasData}}
+	                <a href="#"><button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button></a>
+	                <a href="#"><button type="button"  class="btn btn-primary"  id="clearFiltersBtn">{{t 'common.form.clearFilters'}}</button></a>
+	                {{/if}}
+	            </div>
+	        </div>
+	        <h3>{{pageTitle}} {{t "common.form.list"}}</h3>
         {{else}}
-        <h3>{{t "templates.admin.ManagedObjectList.invalidObject"}}</h3>
+            <h3>{{t "templates.admin.ManagedObjectList.invalidObject"}}</h3>
         {{/if}}
     </div>
-        
-    <table id="{{grid_id}}">
-        <tr><td>{{t "templates.admin.ManagedObjectList.noData"}}</td></tr>
-    </table>
-    <div id="{{grid_id}}_pager"></div>
-       
+
+    <div class="managedObjectsContainer">
+        <table id="{{grid_id}}">
+            <tr><td>{{t "templates.admin.ManagedObjectList.noData"}}</td></tr>
+        </table>
+        <div id="{{grid_id}}_pager"></div>
+    </div>
 </div>

@@ -36,15 +36,17 @@ define([
 
     return {
         executeAll: function (server) {
+            QUnit.moduleDone(function() {
+                $(".bootstrap-dialog").remove();
+            });
 
             adminInit(server);
-
-            moTest.executeAll(server);
+            addMappingTest.executeAll(server);
             resourceTest.executeAll(server);
             reconTests.executeAll(server);
-            addMappingTest.executeAll(server);
-            propertyMappingTest.executeAll(server);
             correlationTest.executeAll(server);
+            moTest.executeAll(server);
+            propertyMappingTest.executeAll(server);
         }
     };
 });

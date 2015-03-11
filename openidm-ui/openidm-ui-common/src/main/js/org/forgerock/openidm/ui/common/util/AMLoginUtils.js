@@ -29,7 +29,7 @@
  */
 define("org/forgerock/openidm/ui/common/util/AMLoginUtils", [
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openam/ui/common/delegates/OpenAMProxyDelegate",
+    "org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (conf, openamProxy, eventManager, constants) {

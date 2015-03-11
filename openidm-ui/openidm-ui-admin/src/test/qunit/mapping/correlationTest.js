@@ -55,8 +55,6 @@ define([
                 analysisView.render(mappingDetails, function () {
                     QUnit.ok(analysisView.$el.children().length > 0, "Analysis View properly rendered.");
 
-                    QUnit.ok(analysisView.$el.find(".linkIcon").length === 2, "Two linked records successfully displayed.");
-
                     QUnit.ok(analysisView.$el.find("#changeAssociation").is(":disabled") === true, "Change association properly disabled");
 
                     QUnit.ok(analysisView.$el.find("#singleRecordSync").is(":disabled") === true, "Single record sync button properly disabled");
@@ -69,14 +67,17 @@ define([
 
                     QUnit.ok(analysisView.$el.find("#singleRecordSync").is(":disabled") === false, "Single record sync button properly enabled");
 
-                    analysisView.$el.find("#changeAssociation").trigger("click");
+                        analysisView.$el.find("#changeAssociation").trigger("click");
 
-                    QUnit.ok($("#changeAssociationDialog").length > 0, "Change association window successfully opened from button");
-                    $("#changeAssociationDialog").remove();
+                    _.delay(function(){
+                        QUnit.ok($("#changeAssociationDialog").length > 0, "Change association window successfully opened from button");
 
-                    $("body #analysisView").remove();
+                        $("#changeAssociationDialog").remove();
 
-                    QUnit.start();
+                        $("body #analysisView").remove();
+
+                        QUnit.start();
+                    }, 200);
                 });
             });
 
@@ -98,7 +99,7 @@ define([
 
                     QUnit.ok($("#linkTypeSelect").is(":disabled") === true, "Link Qualifier select disabled");
 
-                    QUnit.ok($("#linkTypeSelect option").length === 0, "Link Qualifier displayed with no options");
+                    QUnit.ok($("#linkTypeSelect option").length === 1, "Link Qualifier displayed with no options");
 
                     ChangeAssociationDialog.$el.find("#search_results li").trigger("click");
                     ChangeAssociationDialog.$el.find("#linkObjectBtn").trigger("click");

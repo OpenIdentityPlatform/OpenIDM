@@ -14,8 +14,9 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
-    "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils"
-], function(AbstractView, conf, uiUtils, eventManager, constants, browserStorageDelegate, autoCompleteUtils) {
+    "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
+    "bootstrap-dialog"
+], function(AbstractView, conf, uiUtils, eventManager, constants, browserStorageDelegate, autoCompleteUtils, BootstrapDialog) {
     var AddPropertyMappingDialog = AbstractView.extend({
         template: "templates/admin/mapping/PropertyMappingDialogAddTemplate.html",
         data: {
@@ -31,8 +32,10 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
         formSubmit: function (event) {
             var property = $(":input[name=propertyList]",this.$el).val(),
                 mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties");
-
-            event.preventDefault();
+            
+            if(event){
+                event.preventDefault();
+            }
 
             if (property.length) {
                 this.$el.empty();
@@ -42,7 +45,8 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
 
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, mappingProperties.length]});
+                this.close();
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, mappingProperties.length.toString()]});
             }
         },
 
@@ -53,7 +57,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 hasPropListValue = propList && propList.length,
                 invalidProp = hasAvailableProps && hasPropListValue && !_.contains(this.data.availableTargetProps,propList),
                 disableSave = function(message){
-                    $("input[type=submit]", this.$el).prop("disabled", true);
+                    $("#scriptDialogUpdate").prop("disabled", true);
                     validationMessage.text(message);
                 };
 
@@ -61,7 +65,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 disableSave($.t("templates.mapping.validPropertyRequired"));
                 return false;
             } else {
-                $("input[type=submit]", this.$el).prop("disabled", false);
+                $("#scriptDialogUpdate").prop("disabled", false);
                 validationMessage.text("");
                 return true;
             }
@@ -69,9 +73,6 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
         },
 
         close: function () {
-            if(this.currentDialog) {
-                this.currentDialog.dialog('destroy').remove();
-            }
             $("#dialogs").hide();
         },
 
@@ -106,35 +107,47 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 },this)
             };
 
-            this.currentDialog = $('<div id="propertyDialog"></div>');
+
+            this.currentDialog = $('<form id="propertyMappingDialogForm"></form>');
+
+            $('#dialogs').append(this.currentDialog);
             this.setElement(this.currentDialog);
-
-            this.currentDialog.dialog({
-                appendTo: $('#dialogs'),
+            
+            BootstrapDialog.show({
                 title: settings.title,
-                position: ['center',25],
-                modal: true,
-                resizable: true,
-                bgiframe: true,
-                width:'850px',
-                dialogClass: "overflow-visible",
-                close: _.bind(function(){
-                    $("#dialogs").hide();
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
-                },this),
-                open: function(){
-
-                    uiUtils.renderTemplate(settings.template, $(this),
-                        _.extend(conf.globalData, _this.data),
-                        function () {
-                            settings.postRender();
-                            $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
-                            _this.$el.parents(".ui-dialog,#dialogs").show();
-                            if(callback){
-                                callback();
-                            }
-                        }, "append");
-                }
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: this.currentDialog,
+                size: BootstrapDialog.SIZE_WIDE,
+                onhide: function(dialogRef){
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
+                },
+                onshown : function (dialogRef) {
+                    uiUtils.renderTemplate(settings.template, _this.$el,
+                            _.extend(conf.globalData, _this.data),
+                            function () {
+                                settings.postRender();
+                                $(':input:first', _this.currentDialog).focus();
+                                if(callback){
+                                    callback();
+                                }
+                            }, "replace");
+                },
+                buttons: [{
+                    label: $.t("common.form.cancel"),
+                    id:"scriptDialogCancel",
+                    action: function(dialogRef) {
+                        dialogRef.close();
+                    }
+                },
+                {
+                    label: $.t("common.form.update"),
+                    id:"scriptDialogUpdate",
+                    cssClass: 'btn-primary',
+                    action: _.bind(function(dialogRef) {
+                        this.formSubmit();
+                        dialogRef.close();
+                    },_this)
+                }]
             });
         }
     });

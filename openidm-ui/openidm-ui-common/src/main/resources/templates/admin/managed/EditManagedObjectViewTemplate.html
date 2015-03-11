@@ -1,16 +1,22 @@
-<div class="float-right">
-    <button class="button" id="saveBtn">{{t "common.form.save"}}</button>
-    {{#unless newObject}}
-        <button class="button" id="resetBtn">{{t "common.form.reset"}}</button>
-        <button class="button" id="deleteBtn">{{t "common.form.delete"}}</button>
-    {{/unless}}
-    <button class="button" id="backBtn">{{t "templates.admin.ManagedObjectEdit.backToList"}}</button>
+<div class="container">
+    <div class="page-header managedObjectsContainer">
+        <div class='btn-toolbar pull-right'>
+            <div class='btn-group'>
+                <a href="#"><button class="btn btn-primary" id="saveBtn">{{t "common.form.save"}}</button></a>
+                {{#unless newObject}}
+                    <a href="#"><button class="btn btn-primary" id="resetBtn">{{t "common.form.reset"}}</button></a>
+                    <a href="#"><button class="btn btn-primary" id="deleteBtn">{{t "common.form.delete"}}</button></a>
+                {{/unless}}
+                <a href="#"><button class="btn btn-primary" id="backBtn">{{t "templates.admin.ManagedObjectEdit.backToList"}}</button></a>
+            </div>
+        </div>
+        <h3>
+        {{#if newObject}}
+            {{t "common.form.add"}}
+        {{else}}
+            {{t "common.form.edit"}}
+        {{/if}}
+        </h3>
+    </div>
+    <div id="managedObject" class="jsonEditor"></div>
 </div>
-<h1>
-    {{#if newObject}}
-        {{t "common.form.add"}}
-    {{else}}
-        {{t "common.form.edit"}}
-    {{/if}}
-</h1>
-<div id="managedObject" class="jsonEditor"></div>

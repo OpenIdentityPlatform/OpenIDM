@@ -69,6 +69,7 @@ define("org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog", [
         render: function(args, callback) {
             this.actions = [];
             this.addAction($.t("common.form.continue"), "submit");
+            this.addTitle($.t("templates.user.EnterOldPasswordDialog.passwordAndSecurityQuestionChange"));
             
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el);

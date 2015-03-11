@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, window */
+/*global require, define, window, JSONEditor */
 
 require.config({
     paths: {
@@ -42,6 +42,10 @@ require.config({
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
+        bootstrap: "libs/bootstrap.min",
+        "bootstrap-dialog": "libs/bootstrap-dialog.min",
+        "bootstrap-tabdrop": "libs/bootstrap-tabdrop-1.0",
+        placeholder: "libs/jquery.placeholder",
         moment: "libs/moment-2.8.1-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
@@ -101,6 +105,18 @@ require.config({
         },
         moment: {
             exports: "moment"
+        },
+        bootstrap: {
+            deps: ["jquery"]
+        },
+        placeholder: {
+            deps: ["jquery"]
+        },
+        'bootstrap-dialog': {
+            deps: ["jquery", "underscore","backbone", "bootstrap"]
+        },
+        'bootstrap-tabdrop': {
+            deps: ["jquery", "bootstrap"]
         }
     }
 });
@@ -123,6 +139,7 @@ require([
     "moment",
     "doTimeout",
     "handlebars",
+    "placeholder",
     "i18next",
     "jsonEditor",
     "gentleSelect",
@@ -150,6 +167,7 @@ require([
     moment,
     doTimeout,
     handlebars,
+    placeholder,
     i18next,
     jsonEditor,
     gentleSelect,
@@ -164,7 +182,7 @@ require([
     window.Backbone = Backbone;
 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+    
+    JSONEditor.defaults.options.theme = 'bootstrap3';
+    JSONEditor.defaults.options.iconlib = "fontawesome4";
 });
-
-
-

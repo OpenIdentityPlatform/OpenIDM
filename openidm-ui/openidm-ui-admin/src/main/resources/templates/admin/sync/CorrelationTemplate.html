@@ -1,21 +1,45 @@
-<div class="correlationBody">
-    <fieldset>
-        <legend><span>{{t "templates.correlation.reconQueries"}}</span><i class="fa fa-lg {{#if hideReconQueries}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
-        <div class="group-body" id="reconQueriesView" {{#if hideReconQueries}}style="display: none;"{{/if}}></div>
-</fieldset>
+<div class="panel-collapse-group">
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading correlationBody" role="tab" id="reconQueriesBaseHeading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#reconQueriesBase" aria-expanded="false" aria-controls="reconQueriesBaseHeading" class="">{{t "templates.correlation.reconQueries"}}</a>
+            </h4>
+        </div>
+        <div id="reconQueriesBase" class="collapse" role="tabpanel" aria-labelledby="reconQueriesBase" aria-expanded="false">
+            <div class="clearfix panel-connector" id="reconQueriesView"></div>
+        </div>
+    </div>
 
-<fieldset>
-    <legend><span>{{t "templates.correlation.objectFilters"}}</span><i class="fa fa-lg {{#if hideObjectFilters}}fa-plus-square-o{{else}}fa-minus-square-o{{/if}}"></i></legend>
-    <div class="group-body" id="objectFiltersView" {{#if hideObjectFilters}}style="display: none;"{{/if}}></div>
-</fieldset>
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading correlationBody" role="tab" id="objectFiltersBaseHeading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#objectFiltersBase" aria-expanded="false" aria-controls="objectFiltersBaseHeading" class="">{{t "templates.correlation.objectFilters"}}</a>
+            </h4>
+        </div>
+        <div id="objectFiltersBase" class="collapse" role="tabpanel" aria-labelledby="objectFiltersBase" aria-expanded="false">
+            <div class="clearfix panel-connector" id="objectFiltersView"></div>
+        </div>
+    </div>
 
-<fieldset>
-    <legend><span>{{t "templates.correlation.associationRules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body" id="correlationQueryView"></div>
-</fieldset>
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading correlationBody" role="tab" id="correlationQueryBaseHeading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#correlationQueryBase" aria-expanded="true" aria-controls="correlationQueryBaseHeading" class="">{{t "templates.correlation.associationRules"}}</a>
+            </h4>
+        </div>
+        <div id="correlationQueryBase" class="collapse in" role="tabpanel" aria-labelledby="correlationQueryBase" aria-expanded="true">
+            <div class="panel-connector"  id="correlationQueryView"></div>
+        </div>
+    </div>
 
-<fieldset>
-    <legend><span>{{t "templates.correlation.dataAssociationManagment"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body" id="analysisView"></div>
-</fieldset>
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading correlationBody" role="tab" id="analysisBaseHeading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#analysisBase" aria-expanded="true" aria-controls="analysisBaseHeading" class="">{{t "templates.correlation.dataAssociationManagment"}}</a>
+            </h4>
+        </div>
+        <div id="analysisBase" class="collapse in" role="tabpanel" aria-labelledby="correlationQueryBase" aria-expanded="true">
+            <div class="panel-connector" id="analysisView"></div>
+        </div>
+    </div>
 </div>

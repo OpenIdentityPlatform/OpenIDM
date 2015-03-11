@@ -56,27 +56,31 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         template: "templates/admin/sync/SyncTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
-        events: {
-            "click .sync-input-body fieldset legend" : "sectionHideShow"
-        },
+        events: {},
         mapping: null,
 
         render: function (args, callback) {
+            this.data.docHelpUrl = constants.DOC_URL;
+            this.model = {
+                args: args,
+                callback: callback
+            };
             MappingBaseView.child = this;
             MappingBaseView.render(args,_.bind(function(){
                 this.loadData(args, callback);
             }, this));
         },
+
         loadData: function(args, callback){
             this.sync = MappingBaseView.data.syncConfig;
             this.recon = MappingBaseView.currentMapping().recon;
             this.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
 
             this.data.mappingName = this.mappingName = args[0];
-            this.data.hideRecon = true;
             this.data.hideSituational = true;
-            this.data.hideTestSync = true;
+            this.data.hideRecon = true;
             this.data.hideSingleRecordRecon = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
+
             _.each(SituationalScriptsView.model.scripts, function(script) {
                 if (_.has(SituationalScriptsView.model, "mapping")) {
                     if (_.has(SituationalScriptsView.model.mapping, script)) {
@@ -95,12 +99,19 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
                     this.data.hideRecon = false;
                 }
             }, this);
+
             this.parentRender(_.bind(function() {
+                SituationPolicyView.render({
+                    sync: this.sync,
+                    mapping: this.mapping,
+                    mappingName: this.data.mappingName,
+                    saveCallback: _.bind(function () {
+                       this.render(this.model.args, this.model.callback);
+                    }, this)
+                });
                 SituationalScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
                 ReconScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
-                SituationPolicyView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
                 TestSyncView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName, recon: MappingBaseView.data.recon});
-
                 MappingBaseView.moveSubmenu();
 
                 if(callback){

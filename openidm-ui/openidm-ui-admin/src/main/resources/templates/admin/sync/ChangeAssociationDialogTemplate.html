@@ -1,23 +1,32 @@
-<form id="changeAssociationForm" class="form">
-    <div id="linkTypeHolder">
-        <label>
-            {{t 'templates.mapping.analysis.linkQualifier'}}
-            <select id="linkTypeSelect" {{#unless linkQualifiers.length}} disabled="true" {{/unless}}>
-            <option value=""></option>
-            {{#each linkQualifiers}}
-            <option value="{{this}}">{{this}}</option>
-            {{/each}}
-            </select>
-        </label>
+<form id="changeAssociationForm" class="form-horizontal">
+    <div class="row">
+        <div id="linkTypeHolder" class="form-group">
+            <label class="col-sm-3 control-label" for="#linkTypeSelect">
+                {{t 'templates.mapping.analysis.linkQualifier'}}
+            </label>
+            <div class="col-sm-8">
+                <select class="form-control" id="linkTypeSelect" {{#unless linkQualifiers.length}} disabled="true" {{/unless}}>
+                <option value=""></option>
+                {{#each linkQualifiers}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+                </select>
+            </div>
+        </div>
     </div>
+
     {{#if sourceObj}}
     <input type="hidden" name="sourceId" value="{{sourceObj._id}}">
     {{{sourceObjRep}}}
+
     <hr/>
-    <fieldset>
-        <input id="targetSearchInput" placeholder="{{t 'templates.mapping.analysis.enterSearchTerms'}}" value="{{searchCriteria}}"/>
-        <button class="button" id="targetSearchBtn">{{t 'templates.mapping.analysis.searchTarget'}}</button>
-    </fieldset>
+    <div class="form-inline">
+        <div class="form-group">
+            <input class="form-control" id="targetSearchInput" placeholder="{{t 'templates.mapping.analysis.enterSearchTerms'}}" value="{{searchCriteria}}"/>
+        </div>
+        <button class="btn btn-primary" id="targetSearchBtn">{{t 'templates.mapping.analysis.searchTarget'}}</button>
+    </div>
+
     {{/if}}
     {{#if results}}
 
@@ -34,7 +43,7 @@
         {{/each}}
     </ul>
 
-    <button class="button float-right" id="linkObjectBtn" style="display:none;" title="{{t 'templates.mapping.analysis.linkToSourceObject'}}"><span class="fa fa-chain"> </span> {{t 'templates.mapping.analysis.linkToSourceObject'}}</button>
+    <button class="btn btn-primary pull-right" id="linkObjectBtn" style="display:none;" title="{{t 'templates.mapping.analysis.linkToSourceObject'}}"><span class="fa fa-chain"> </span> {{t 'templates.mapping.analysis.linkToSourceObject'}}</button>
 
     {{else}}
 

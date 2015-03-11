@@ -46,9 +46,7 @@ define([
                 addMapping(server);
 
                 addMappingView.render([], function () {
-                    QUnit.start();
-
-                    QUnit.equal(addMappingView.$el.find(".title-bar a").length, 1, "Help successfully detected");
+                    QUnit.equal(addMappingView.$el.find(".help").length, 1, "Help successfully detected");
 
                     QUnit.equal(addMappingView.$el.find("#resourceConnectorContainer .resource-body").length, 1, "Resources successfully loaded");
 
@@ -57,11 +55,7 @@ define([
                     addMappingView.$el.find("#resourceConnectorContainer .resource-body:first .add-resource-button").trigger("click");
                     addMappingView.$el.find("#resourceManagedContainer .resource-body:first .add-resource-button").trigger("click");
 
-                    QUnit.stop();
-
                     setTimeout(function(){
-                        QUnit.start();
-
                         QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource:visible").length, 1, "Add mapping source successful");
                         QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource:visible").length, 1, "Add target source successful");
 
@@ -69,35 +63,32 @@ define([
 
                         addMappingView.$el.find(".mapping-swap").trigger("click");
 
-                        QUnit.stop();
-
                         setTimeout(function(){
-                            QUnit.start();
-
                             QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource select").length, 1, "Swap successful");
 
                             addMappingView.$el.find(".add-mapping").trigger("click");
 
-                            QUnit.stop();
-
                             setTimeout(function(){
-                                QUnit.start();
+                                QUnit.equal($(".bootstrap-dialog").length, 1, "Create mapping dialog successfully shown");
 
-                                QUnit.equal($(".ui-dialog").length, 1, "Create mapping dialog successfully shown");
+                                QUnit.ok($(".bootstrap-dialog .mappingName").length > 0, "Mapping name auto generated successfully");
 
-                                QUnit.ok($(".ui-dialog #mappingName").length > 0, "Mapping name auto generated successfully");
+                                $(".bootstrap-dialog .btn-default").click();
 
-                                $(".ui-dialog .ui-dialog-buttonset .ui-button:first").trigger("click");
+                                _.delay(function(){
+                                    QUnit.equal($(".bootstrap-dialog").length, 0, "Create mapping dialog closed");
 
-                                QUnit.equal($(".ui-dialog").length, 0, "Create mapping dialog closed");
+                                    addMappingView.$el.find("#mappingSource .select-resource").trigger("click");
+                                    addMappingView.$el.find("#mappingTarget .select-resource").trigger("click");
 
-                                addMappingView.$el.find("#mappingSource .select-resource").trigger("click");
-                                addMappingView.$el.find("#mappingTarget .select-resource").trigger("click");
+                                    QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource-empty:visible").length, 1, "Removal of source successful");
+                                    QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource-empty:visible").length, 1, "Removal of target successful");
 
-                                QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource-empty:visible").length, 1, "Removal of source successful");
-                                QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource-empty:visible").length, 1, "Removal of target successful");
+                                    QUnit.start();
 
-                            }, 100);
+                                }, 800);
+
+                            }, 400);
 
                         }, 100);
 

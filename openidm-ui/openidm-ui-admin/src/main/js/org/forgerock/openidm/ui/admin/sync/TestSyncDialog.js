@@ -29,60 +29,64 @@ define("org/forgerock/openidm/ui/admin/sync/TestSyncDialog", [
     "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/admin/sync/TestSyncGridView",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function (AbstractView, searchDelegate, conf, TestSyncGridView, uiUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "bootstrap-dialog"
+], function (AbstractView, searchDelegate, conf, TestSyncGridView, uiUtils, BootstrapDialog) {
     var TestSyncDialog = AbstractView.extend({
         template: "templates/admin/sync/TestSyncDialogTemplate.html",
         data: {},
         element: "#dialogs",
-        events: {},    
+        events: {},
         render: function (args, callback) {
-            var btns = [];
-            this.data = _.extend(this.data,args);
-            
-            this.currentDialog = $('<div id="testSyncDialog"></div>');
-            this.setElement(this.currentDialog);
-            $('#dialogs').append(this.currentDialog);
+            var btns = [],
+                _this = this;
 
-            btns.push({
-                text: $.t("common.form.cancel"),
-                click: function() {
-                    if (callback) {
-                        callback(false);
-                    }
-                    delete conf.globalData.testSyncSource;
-                    $("#testSyncDialog").dialog('destroy').remove();
-                }
-            });
-            
-            this.currentDialog.dialog({
+            this.data = _.extend(this.data,args);
+
+            this.dialogContent = $('<div id="testSyncDialog"></div>');
+            this.setElement(this.dialogContent);
+            $('#dialogs').append(this.dialogContent);
+
+            this.currentDialog = new BootstrapDialog({
                 title: $.t("templates.sync.testSync.title"),
-                modal: true,
-                resizable: false,
-                draggable: true,
-                dialogClass: "testSyncDialog",
-                width: 870,
-                position: { my: "center top+25", at: "center top+25", of: window },
-                buttons: btns,
-                close: _.bind(function () {
+                type: BootstrapDialog.TYPE_DEFAULT,
+                size: BootstrapDialog.SIZE_WIDE,
+                message: this.dialogContent,
+                onshown : _.bind(function() {
+                    uiUtils.renderTemplate(
+                        this.template,
+                        this.$el,
+                        _.extend({}, conf.globalData, this.data),
+                        _.bind(function() {
+                            TestSyncGridView.render(this.data);
+                        }, this),
+                        "replace"
+                    );
+                }, _this),
+                onhide : _.bind(function () {
                     if (this.currentDialog) {
                         delete conf.globalData.testSyncSource;
-                        this.currentDialog.dialog('destroy').remove();
                     }
-                }, this)
+                }, _this),
+                buttons: [
+                    {
+                        label: $.t("common.form.cancel"),
+                        action: function(dialogRef) {
+                            if (callback) {
+                                callback(false);
+                            }
+
+                            delete conf.globalData.testSyncSource;
+                            dialogRef.close();
+                        }
+                    }
+                ]
             });
 
-            uiUtils.renderTemplate(
-                this.template,
-                this.$el,
-                _.extend({}, conf.globalData, this.data),
-                _.bind(function() {
-                    TestSyncGridView.render(this.data);
-                }, this),
-                "replace"
-            );
+            this.currentDialog.realize();
+            this.currentDialog.open();
         }
-    }); 
-    
+    });
+
     return new TestSyncDialog();
 });

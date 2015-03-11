@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptEditor",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function(AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, ScriptEditor, uiUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/util/ScriptList"
+], function(AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, ScriptEditor, uiUtils, ScriptList) {
 
     var AddEditManagedView = AdminAbstractView.extend({
         template: "templates/admin/managed/AddEditManagedTemplate.html",
@@ -42,9 +43,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             "onValidate": "onValidate",
             "click #managedObjectForm fieldset legend" : "sectionHideShow",
             "click #addManagedProperties": "addProperty",
-            "click .property-remove" : "removeProperty",
-            "click #addManagedScript" : "addManagedScript",
-            "click .add-property-script" : "addPropertyScript"
+            "click .property-remove" : "removeProperty"
         },
         eventHooks: [],
         propertyHooks: [],
@@ -139,7 +138,6 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 disable_properties: true,
                 show_errors: 'always',
                 template: 'handlebars',
-                theme: 'jqueryui',
                 no_additional_properties: true,
                 additionalItems: false,
                 required_by_default: true
@@ -297,7 +295,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                             "type": "string"
                         },
                         "properties": {
-                            "title": "Properties",
+                            "title": "Schema Properties",
                             "$ref": "#/definitions/managedObject"
                         }
                     }
@@ -513,7 +511,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
         managedRender: function(callback) {
             var tempEvent,
                 scriptOption,
-                tempPropObj = {};
+                tempPropArr;
 
             this.parentRender(_.bind(function () {
                 validatorsManager.bindValidators(this.$el);
@@ -522,32 +520,30 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 this.propertiesCounter = this.$el.find(".add-remove-block").length;
 
                 this.loadSchema();
-
-                _.each(this.$el.find("#mainHooksBody .managed-event-hook"), function(eventHook){
-                    tempEvent = $(eventHook).attr("data-script-type");
-
-                    if(_.isUndefined(this.data.currentManagedObject[tempEvent])) {
-                        scriptOption = null;
-                    } else {
-                        scriptOption = this.data.currentManagedObject[tempEvent];
-                    }
-
-                    this.eventHooks.push(ScriptEditor.generateScriptEditor({"element": $(eventHook), "scriptData": scriptOption, "eventName": tempEvent, "deleteCallback": _.bind(this.removeManagedScript, this)}));
-                }, this);
+                
+                ScriptList.generateScriptList({
+                    element: this.$el.find("#managedScripts"),
+                    label: $.t("templates.managed.addManagedScript"),
+                    selectEvents: this.data.selectEvents,
+                    addedEvents:this.data.addedEvents,
+                    eventHooks: this.eventHooks,
+                    currentObject: this.data.currentManagedObject
+                });
 
 
                 _.each(this.$el.find("#managedPropertyWrapper .small-field-block:visible"), function(managedProperty, index) {
-                    tempPropObj = {};
+                    tempPropArr = [];
 
-                    _.each($(managedProperty).find(".managed-event-hook"), function(eventHook) {
-                        tempEvent = $(eventHook).attr("data-script-type");
-
-                        scriptOption = this.data.currentManagedObject.properties[index][tempEvent];
-
-                        tempPropObj[tempEvent] = ScriptEditor.generateScriptEditor({"element": $(eventHook), "scriptData": scriptOption, "eventName": tempEvent, "deleteCallback": _.bind(this.removePropertyScript, this)});
-                    }, this);
-
-                    this.propertyHooks.push(tempPropObj);
+                    this.propertyHooks.push(tempPropArr);
+                    
+                    ScriptList.generateScriptList({
+                        element: $(managedProperty).find(".managedPropertyEvents"),
+                        label: $.t("templates.managed.addPropertyScript"),
+                        selectEvents: this.data.currentManagedObject.properties[index].selectEvents,
+                        addedEvents:this.data.currentManagedObject.properties[index].addedEvents,
+                        eventHooks: this.propertyHooks[index],
+                        currentObject: this.data.currentManagedObject.properties[index]
+                    });
 
                 }, this);
 
@@ -556,70 +552,6 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 }
 
             }, this));
-        },
-
-        addManagedScript: function() {
-            var selectedEvent = $("#managedScriptSelection").val(),
-                createdElement = "<div data-script-type='" +selectedEvent +"' class='managed-event-hook'></div>";
-
-            this.$el.find("#mainHooksBody .group-field-block").append(createdElement);
-
-            this.eventHooks.push(ScriptEditor.generateScriptEditor({"element": this.$el.find("#mainHooksBody .group-field-block .managed-event-hook:last"), "eventName": selectedEvent, "deleteCallback": _.bind(this.removeManagedScript, this)}));
-
-            this.$el.find("#managedScriptSelection option:selected").remove();
-
-            if(this.$el.find("#managedScriptSelection option").length === 0) {
-                this.$el.find("#managedScriptSelection").prop('disabled', true);
-                this.$el.find("#addManagedScript").prop('disabled', true);
-            }
-        },
-
-        addPropertyScript: function(event) {
-            var targetElement = $(event.currentTarget).parents(".managed-property"),
-                targetIndex = this.$el.find(".managed-property:visible").index(targetElement),
-                selectElement = targetElement.find("select"),
-                selectedEvent = selectElement.val(),
-                createdElement = "<div data-script-type='" +selectedEvent +"' class='managed-event-hook'></div>";
-
-            targetElement.find(".group-body .group-field-block").append(createdElement);
-
-            this.propertyHooks[targetIndex][selectedEvent] = ScriptEditor.generateScriptEditor({"element": targetElement.find(".group-body .group-field-block .managed-event-hook:last"), "eventName": selectedEvent, "deleteCallback": _.bind(this.removePropertyScript, this)});
-
-            $(selectElement).find("option:selected").remove();
-
-            if(selectElement.find("option").length === 0) {
-                selectElement.prop('disabled', true);
-                targetElement.find(".add-property-script").prop('disabled', true);
-            }
-        },
-
-        removeManagedScript: function(scriptObj) {
-            var tempHooks = _.clone(this.eventHooks);
-
-            _.each(tempHooks, function(hook, index){
-                if(hook.getEventName() === scriptObj.eventName) {
-                    this.eventHooks.splice(index, 1);
-                    this.$el.find("#managedScriptSelection").append("<option value='" +scriptObj.eventName +"'>" +scriptObj.eventName +"</option>");
-                    this.$el.find("#managedScriptSelection").prop('disabled', false);
-                    this.$el.find("#addManagedScript").prop('disabled', false);
-                }
-            }, this);
-        },
-
-        removePropertyScript: function(scriptObj) {
-            var targetElement = scriptObj.element.parents(".managed-property"),
-                targetIndex = this.$el.find(".managed-property:visible").index(targetElement),
-                selectElement = targetElement.find("select");
-
-            _.each(this.propertyHooks[targetIndex], function(hook, key){
-                if(hook.getEventName() === scriptObj.eventName) {
-                    delete this.propertyHooks[targetIndex][key];
-
-                    selectElement.append("<option value='" +scriptObj.eventName +"'>" +scriptObj.eventName +"</option>");
-                    selectElement.prop('disabled', false);
-                    targetElement.find(".add-property-script").prop('disabled', false);
-                }
-            }, this);
         },
 
         sectionHideShow: function(event) {
@@ -716,7 +648,10 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             _.each(this.eventHooks, function(hook) {
                 tempScript = hook.getScriptHook();
-                managedObject[tempScript.eventName] = tempScript.script;
+                //make sure script is not null before saving
+                if(tempScript.script) {
+                    managedObject[tempScript.eventName] = tempScript.script;
+                }
             }, this);
 
             if(managedObject.properties !== undefined) {
@@ -742,7 +677,11 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     }
 
                     _.each(this.propertyHooks[index], _.bind(function(propScript, key){
-                        prop[key] = propScript.getScriptHook().script;
+                        tempScript = propScript.getScriptHook();
+                        //make sure script is not null before saving
+                        if(tempScript.script) {
+                            prop[tempScript.eventName] = tempScript.script;
+                        }
                     },this));
                 }, this);
             } else {
@@ -757,7 +696,8 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             var checkboxes,
                 field,
-                input;
+                input,
+                propIndex;
 
             field = this.$el.find("#managed-object-hidden-property").clone();
             field.removeAttr("id");
@@ -777,7 +717,22 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             field.show();
 
-            this.propertyHooks.push({});
+            this.propertyHooks.push([]);
+            
+            propIndex = this.propertyHooks.length - 1;
+            
+            if(!this.data.currentManagedObject.properties) {
+                this.data.currentManagedObject.properties = [];
+            }
+            
+            ScriptList.generateScriptList({
+                element: field.find(".managedPropertyEvents"),
+                label: $.t("templates.managed.addPropertyScript"),
+                selectEvents: this.data.propertiesEventList,
+                addedEvents:[],
+                eventHooks: this.propertyHooks[propIndex],
+                currentObject: this.data.currentManagedObject.properties[propIndex]
+            });
 
             this.$el.find('#managedPropertyWrapper').append(field);
 

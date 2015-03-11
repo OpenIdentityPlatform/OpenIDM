@@ -37,8 +37,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
-    "org/forgerock/openidm/ui/admin/util/ReconDetailsView"
-], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView) {
+    "org/forgerock/openidm/ui/admin/util/ReconDetailsView",
+    "bootstrap-tabdrop"
+], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView, tabdrop) {
 
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
@@ -79,12 +80,23 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             nav.reload();
         },
         moveSubmenu: function(){
-            var submenuClone = $("#submenu").clone(true);
+            var submenuClone = $("#subNavHolder").clone(true),
+                submenuList = submenuClone.find("ul");
 
-            $("#submenu").remove();
-            this.$el.find("#submenuClone").remove();
-            submenuClone.attr("id","submenuClone");
+            $("#subNavHolder").remove();
+            this.$el.find("#subNavHolderClone").remove();
+            submenuClone.attr({
+                "id":"subNavHolderClone",
+                "class": ""
+            });
+            submenuClone.find("#subNavBar").attr("class","");
+            submenuList.attr({
+                "class":"nav nav-tabs",
+                "role":"tablist"
+            });
+            submenuList.find("a").addClass("submenuNavButton");
             submenuClone.insertBefore("#mappingContent", this.$el).show();
+            this.$el.find(".nav-tabs").tabdrop();
         },
         setCurrentMapping: function(mappingObj){
             browserStorageDelegate.set('currentMapping',mappingObj);
@@ -130,10 +142,14 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         render: function(args, callback) {
             var syncConfig,
                 cleanName;
+
+            if(args === "null"){
+                args = UIUtils.getCurrentHash().split("/").slice(1);
+            }
             
             this.route = { url: window.location.hash.replace(/^#/, '') };
             this.data.docHelpUrl = constants.DOC_URL;
-                
+
             //because there are relatively slow queries being called which would slow down the interface if they were called each time
             //decide here whether we want to render all of this view or only the child
             //if this.data.mapping does not exist we know this view has not been loaded
@@ -181,8 +197,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                     connectorUtils.getMappingDetails(this.data.sourceType , this.data.targetType).then(_.bind(function (details) {
                         this.data.mapping.sourceConnector = details.sourceConnector;
                         this.data.mapping.targetConnector = details.targetConnector;
-                        this.data.mapping.targetIcon = details.targetIcon.src;
-                        this.data.mapping.sourceIcon = details.sourceIcon.src;
+                        this.data.mapping.targetIcon = details.targetIcon.iconClass;
+                        this.data.mapping.sourceIcon = details.sourceIcon.iconClass;
 
                         if (this.data.mapping.sourceConnector){
                             this.data.mapping.sourceConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mapping.sourceConnector.connectorRef.connectorName));

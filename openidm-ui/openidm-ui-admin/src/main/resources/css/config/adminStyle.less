@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,264 +26,143 @@
   Base Page Styles
 */
 
-.button-bar {
-  border-bottom: 1px solid #bbb;
-  padding: 10px 0px 10px 0px;
-  height:35px;
-  clear:both;
-}
 
-.subtitle-bar {
-  height: 20px;
-  clear: both;
-  padding-top: 15px;
-}
-
-.subtitle-divider {
-  margin-top:25px;
-  border-top:1px solid #ddd;
-}
-
-.subtitle-bar a {
-  float:right;
-  text-decoration: none;
-}
-
-.subtitle-bar h4 {
-  float:left;
-}
-
-.title-bar {
-  height:45px;
-  border-bottom:1px solid #bbb;
-}
-
-.title-bar.no-bottom-border {
-  border-bottom:none;
-}
-
-.title-bar h1 {
-  float:left;
-  font-size:24px;
-}
-
-.title-bar a {
-  float:right;
-  text-decoration: none;
-  margin-top:25px;
-}
-
-.title-bar .fa-arrow-left {
-  float:none;
-  margin-left:15px;
-}
-
-.button-bar .fa {
-  margin-right:10px;
-}
-
-.button-bar .left-end {
-  margin-left:0px;
-}
-
-.button-bar .right-end {
-  margin-left:0px;
-}
-
-.help-body {
-  margin-top: 5px;
-  margin-bottom: 10px;
-}
-
-.help-body h3{
-  margin-top:10px;
-  color:#5fa595;
-}
-
-.help-body p {
-  padding-bottom:0px;
-}
-
-/*
-  Our version of FontAwesome is older and missing this
-*/
-.fa-icon() {
-  display: inline-block;
-  font: normal normal normal 14px/1 FontAwesome; // shortening font declaration
-  font-size: inherit; // can't have font-size inherit on line above, so need to override
-  text-rendering: auto; // optimizelegibility throws things off #1094
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.fa {
-  background-image:none;
-}
-
-.menu .fa {
+.alert-warning .fa,
+.alert-danger .fa {
   margin-right: 5px;
 }
 
-#footer {
-  height:60px;
-  margin-top:-60px;
-  color:@light-font-color;
-  background-color: #5d6871;
+.subtitle-bar h2 {
+  float: left;
+  margin-top: 0;
 }
 
-.menubar {
+.subtitle-bar a {
+  float: right;
+  text-decoration: none;
+}
+
+.btn .fa {
+  width: 21px;
+  text-align: left;
+}
+
+.dropdown-toggle .fa {
+  text-align: right;
+}
+
+#subNavHolder {
+  display: none;
+}
+
+.back-bar {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+}
+
+.clean-btn:hover {
+  color: #000;
+}
+
+.inline-label {
+  padding-left: 15px;
+}
+
+.panel-collapse-group .panel {
   margin-bottom:0px;
 }
 
-.menubar .menu {
-  background-image:none;
+.scripts-container .group-field-block .border-bottom:first-child {
+    border-bottom: 2px solid #ddd;
 }
 
-body {
-  background-image:none;
+.border-bottom {
+    border-bottom: 1px solid #eee;
 }
 
-button:disabled
-{
-  cursor:default;
+.ui-front {
+    z-index: 10000;
 }
 
-#content {
-  padding-bottom:75px;
+.validation-message {
+    color: @failure-color;
 }
 
-.overflow-visible {
-  overflow: visible;
-}
-
-.script_output {
-  width:550px;
-  height:20px;
-  float:left;
-}
-
-input[type=text].small-text-input {
-  width:20px;
-  margin-right:15px;
-}
-
-.bold-message {
-  font-weight:bold;
-}
-
-/**
-  Alert Box Display
+/*
+    Managed Object Admin
 */
 
-.alert-box {
-  width: 962px;
-  height:25px;
-  margin-bottom:5px;
-  border:black solid 2px;
-  padding: 3px 0px 0px 0px;
-
-  .alert-message {
-    width:920px;
-    padding: 2px 0px 0px 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    float:left;
-  }
-
-  .fa {
-    margin-right:10px;
-  }
-
-  .message-type {
-    font-weight:bold;
-    margin-right:10px;
-  }
-
-  .close-button {
-    float: right;
-    font-size: 21px;
-    font-weight: 700;
-    line-height: 14px;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    filter: alpha(opacity=20);
-    opacity: .2;
-    cursor: pointer;
-    background-color: transparent;
-    border: none;
-    padding:0px;
-    margin-right: 5px;
-  }
-
-  .close-button:hover {
-    filter: alpha(opacity=50);
-    opacity: .5;
-  }
-
-}
-
-.alert-box.error-message {
-  background-color:#f2dede;
-  color:#a94442;
-  border-color:#ebccd1;
-
-  .alert-message-icon {
-    .fa-icon();
-
-    &:before {
-      content:@fa-var-cogs;
-    }
+.schema-panel {
+  border-top: 1px solid #eee;
+  padding-top: 5px;
+  h3 {
+    margin-top: 0px;
   }
 }
 
-.alert-box.warning-message {
-  background-color:#fcf8e3;
-  color:#8a6d3b;
-  border-color:#faebcc;
-
-  .alert-message-icon {
-    .fa-icon();
-
-    &:before {
-      content:@fa-var-warning;
+#managedPropertyWrapper {
+  input[type=text]{
+    width: 300px;
+  }
+  .managed-property {
+    border: 1px solid #efefef;
+    margin-top: 15px;
+    padding: 10px;
+  }
+}
+.scripts-container {
+  margin-top: 15px;
+  .table {
+    margin-top: 15px;
+    td,th {
+        border-top: none;
+        border-bottom: 1px solid #eee;
     }
+    th {
+        border-bottom: 2px solid #ddd;
+    }
+  }
+  .lightenColor {
+    color: @navbar-toggle-color;
   }
 }
 
-.alert-box.success-message {
-  color: #3c763d;
-  background-color: #dff0d8;
-  border-color: #d6e9c6;
-
-  .alert-message-icon {
-    .fa-icon();
-
-    &:before {
-      content:@fa-var-check-square;
+.ui-autocomplete {
+    li.ui-state-focus {
+        color: #fff;
+        background: @base-theme-color;
     }
-  }
+
+    li.ui-menu-item {
+        padding:5px;
+    }
 }
 
-.alert-box.info-message {
-  color: #31708f;
-  background-color: #d9edf7;
-  border-color: #bce8f1;
+@media (max-width: 767px) {
+  .btn-toolbar {
 
-  .alert-message-icon {
-    .fa-icon();
+    .pull-right {
+      float: none !important;
+    }
 
-    &:before {
-      content:@fa-var-comment-o;
+    .btn-group {
+      width: 100%;
+
+      button {
+        display: block;
+        margin-top: 10px;
+        width: 100%;
+      }
+    }
+
+    .btn-group:first-child button{
+      margin-top: 0;
     }
   }
-}
-
-.filter-form .node {
-  padding-left: 10px;
-  input {
-    vertical-align: bottom;
-    &.name {
-      width: 100px;
-    }
+    
+  .addScriptButton {
+      margin-top: 15px;
+      width: 100%;
   }
 }

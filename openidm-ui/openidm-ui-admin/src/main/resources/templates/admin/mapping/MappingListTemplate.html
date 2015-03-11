@@ -1,49 +1,105 @@
-<div class="title-bar">
-    <h1>{{t "templates.mapping.mappingListingTitle"}}</h1>
-    <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
-</div>
-<div class="button-bar">
-    <a href="#mapping/add/"><button type="button" class="icon-button button pull-right" id="addMapping"><span>{{t "templates.connector.addMapping"}}</span><i class="fa fa-lg fa-plus"></i></button></a>
-</div>
+<div class="container">
+    <div class="page-header clearfix title-bar">
+        <h1>{{t "templates.mapping.mappingListingTitle"}}</h1>
+    </div>
 
-{{#if mappingConfig.length}}
-<div id="mappingConfigHolder" class="mapping-listing">
-    {{#each mappingConfig}}
-    <div class="mapping-config-body" mapping="{{name}}">
-        <div class="mapping-config-header">
-            {{name}}
-        </div>
-        <div class="mapping-body">
-            <img class="mapping-icon left-icon" src="{{sourceIcon}}" alt="{{sourceConnector.displayName}}" />
-            <div class="mapping-source">
-                <p class="mapping-header">{{t "templates.mapping.source"}}</p>
-                <p class="mapping-title">{{source}}</p>
-                <p>{{sourceType}}</p>
-            </div>
-            <div class="mapping-arrow">
-                <div class="arrow-box">
-                    <i class="fa fa-arrow-right"></i>
-                </div>
-            </div>
-            <img class="mapping-icon left-icon" src="{{targetIcon}}" alt="{{targetConnector.displayName}}" />
-            <div class="mapping-target">
-                <p class="mapping-header">{{t "templates.mapping.target"}}</p>
-                <p class="mapping-title">{{target}}</p>
-                <p>{{targetType}}</p>
-            </div>
-        </div>
-        <div class="mapping-bottom-bar">
-            <div class="sync-status">
-                <span class="sync-label">{{t "templates.mapping.syncStatus"}}:</span>
-                <span id="{{name}}_syncStatus"></span>
-            </div>
-            <div class="float-right">
-                <button type="button"  name="" class="button icon-button delete-button"><span>{{t "common.form.delete"}}</span><i class="fa fa-lg fa-times-circle-o"></i></button>
-                <button type="button"  name="" class="button icon-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button>
-            </div>
+    <div class="button-bar btn-toolbar" role="toolbar" aria-label="...">
+        <div class="btn-group" role="group" aria-label="...">
+            <a href="#mapping/add/">
+                <button type="button" class="btn btn-primary" id="addMapping">
+                    <i class="fa fa-plus"></i>
+                    {{t "templates.connector.addMapping"}}
+                </button>
+            </a>
         </div>
     </div>
-    {{/each}}
+
+    <div class="section-header">
+        <div class="subtitle-bar">
+            <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+        </div>
+    </div>
+
+
+    {{#if mappingConfig.length}}
+    <div id="mappingConfigHolder" class="mapping-listing mappings-list">
+        {{#each mappingConfig}}
+        <div class="mapping mapping-config-body" mapping="{{name}}">
+            <div class="panel panel-default">
+                <div class="front">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="connector source">
+                                <div class="panel-body">
+                                    <div class="media">
+                                        <a class="media-left" href="#">
+                                            <div class="image circle">
+                                                <i class="mapping-icon left-icon {{sourceIcon}}"></i>
+                                            </div>
+                                        </a>
+                                        <div class="media-body">
+                                            <h4 class="connector-role">{{t "templates.mapping.source"}}</h4>
+                                            <h3>{{source}}</h3>
+                                            <p class="">{{sourceType}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="arrow">
+                                    <div class="arrow-inner">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="connector target">
+                                <div class="panel-body">
+                                    <div class="media">
+                                        <a class="media-left" href="#">
+                                            <div class="image circle">
+                                                <i class="mapping-icon left-icon {{targetIcon}}"></i>
+                                            </div>
+                                        </a>
+                                        <div class="media-body">
+                                            <h4 class="connector-role">{{t "templates.mapping.target"}}</h4>
+                                            <h3>{{target}}</h3>
+                                            <p>{{targetType}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-footer">
+                        <div class="row no-gutters">
+                            <div class="col-sm-6">
+                                <div class="connector-info">
+                                    <h2 class="connector-name mapping-config-header sync-label">
+                                        {{name}}
+                                    </h2>
+                                    <div class="connector-status text-danger">
+                                        <span id="{{name}}_syncStatus"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="connector-actions">
+                                    <div>
+                                        <button type="button" class="btn btn-link button icon-button" id="delete-btn"><i class="fa fa-pencil"></i> <span>{{t "common.form.edit"}}</span></button>
+                                        <button type="button" class="btn btn-link button icon-button delete-button" id="duplicate-btn"><i class="fa fa-times"></i> <span>{{t "common.form.delete"}}</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    {{/if}}
+
+    {{#unless mappingConfig.length}}
+    <div id="noMappingsDefined">{{t "templates.mapping.noMappingsDefined"}}</div>
+    {{/unless}}
 </div>
-{{/if}}
-<div id="noMappingsDefined" {{#if mappingConfig}}style="display:none;"{{/if}}>{{t "templates.mapping.noMappingsDefined"}}</div>
