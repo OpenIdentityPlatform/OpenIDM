@@ -1,162 +1,78 @@
+.event-hook-window {
+  .panel {
+    border: none;
+    margin-left: 6px;
+  }
+  .panel-heading {
+    padding-bottom: 5px;
+  }
+
+  .panel-body {
+    padding: 0 0 0 15px;
+  }
+
+  #scriptAccordions {
+    .inline-code {
+      #codemirror {
+        padding: 0;
+      }
+      .CodeMirror {
+        border: 1px solid #ddd;
+      }
+
+      #codeCollapse {
+        display: none;
+      }
+    }
+
+    .file-code {
+
+    }
+  }
+
+  #scriptVariables {
+    .panel-body {
+      padding: 0;
+    }
+
+    #passedVariablesHolder {
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 15px;
+
+      .passed-variable-block {
+        margin-top: 10px;
+        margin-bottom: 10px;
+
+        .textContainer {
+          padding-right: 0;
+        }
+      }
+    }
+  }
+}
+
+
 /**
   Styles for Script Editor base
 */
 .event-hook-body {
   margin-bottom:10px;
-}
 
-.event-hook-body .event-hook-status {
-  font-weight:normal;
-  font-size:16px;
-  padding-right:15px;
-  padding-left:15px;
-}
+  .event-hook-status {
+    font-weight:normal;
+    font-size:16px;
+    padding-right:15px;
+    padding-left:15px;
+  }
 
-.event-hook-body .icon-button {
-  padding-right:5px;
-  cursor:pointer;
-  color:black;
-}
+  .icon-button {
+    padding-right:5px;
+    cursor:pointer;
+    color:black;
+  }
 
-.event-hook-body .icon-button:hover {
-  color:#5e887f;
-}
-
-.event-hook-body .event-hook-empty {
-  border: dashed 1px #999;
-  color:#bbb;
-  text-align:center;
-  padding:30px;
-  cursor:pointer;
-  width:400px;
-  margin-left:13px;
-}
-
-.event-hook-body .event-hook-empty:hover {
-  border-color:black;
-  color:#5e887f;
-}
-
-.resource-input-body form.form .event-hook-body label {
-  float:none;
-}
-
-form.form .event-hook-body .group-field-block {
-  margin-left:0px;
-  padding-left:8px;
-}
-
-form.form .group-body .group-field-block {
-  min-height:0px;
-}
-
-form.form .group-field-row label span, form.form .group-field-block label span {
-  display:inline;
-  font-size: .9em;
-}
-
-/**
-  Styles for Script Dialog
-*/
-
-.event-hook-window {
-  padding:5px;
-  clear: both;
-}
-
-.event-hook-window label {
-  margin-bottom:10px;
-}
-
-.event-hook-window .event-hook-title {
-  input {
-    margin-right: 5px;
+  .icon-button:hover {
+    color:#5e887f;
   }
 }
-
-.event-hook-window .event-hook-piece {
-  margin-top:15px;
-}
-
-.event-hook-window .event-type {
-  margin-top:0px;
-}
-
-.event-hook-window .file-code input[type="text"] {
-  width: 588px;
-}
-
-.event-hook-window .CodeMirror {
-  min-height:75px;
-  background-color: transparent;
-  display:inline-block;
-}
-
-.event-hook-window  .code-mirror-disabled .CodeMirror{
-  opacity:.6;
-}
-
-.ui-dialog .event-hook-window .inline-code .error {
-  margin-top:0px;
-}
-
-.inline-code .validation-message {
-  width:609px;
-}
-
-.event-hook-window .event-select {
-  width:608px;
-  height:30px;
-}
-
-#passedVariablesHolder .clean-btn {
-  margin-top:5px;
-  background-color:rgb(249, 249, 249);
-}
-
-.variable-block {
-  margin-top:10px;
-}
-
-#addPassedVariables span {
-  display:inline-block;
-  margin-right:10px;
-}
-
-#addPassedVariables {
-  margin-left:0px;
-}
-
-
-.ui-dialog .event-hook-window .error {
-  margin-right:0px;
-  margin-top:5px;
-  color: #d97986;
-  font-weight:bold;
-}
-
-div.ui-dialog .event-hook-window div.validation-message {
-  color: #d97986;
-  text-align:right;
-}
-
-div.ui-dialog .event-hook-window .group-field-block div.validation-message {
-  width:542px;
-}
-
-.s-form-holder {
-  width: 555px;
-}
-
-.event-hook-window .group-note-lead {
-  margin-top:15px;
-}
-
-.file-code .validation-message {
-  width:610px;
-}
-
-pre.CodeMirror-placeholder{
-  color: #ccc;
-}
-

@@ -45,10 +45,10 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./managed/AddEditManagedView",
 
-    "./util/LoginDialog",
     "./util/ConnectorUtils",
     "./util/AbstractScriptEditor",
     "./util/ScriptEditor",
+    "./util/ScriptList",
     "./util/ScriptDialog",
     "./util/AutoCompleteUtils",
     "./util/Scheduler",

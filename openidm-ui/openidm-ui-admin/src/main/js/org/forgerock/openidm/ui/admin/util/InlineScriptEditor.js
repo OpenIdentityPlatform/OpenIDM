@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
         InlineScriptEditor = AbstractScriptEditor.extend({
             noBaseTemplate: true,
             events: {
-                "change input[type='radio']" : "scriptSelect",
+                "change input[type='radio']" : "localScriptChange",
                 "change .event-select" : "changeRenderMode",
                 "click #addPassedVariables" : "addPassedVariable",
                 "click #passedVariablesHolder .remove-btn" : "deletePassedVariable"
@@ -49,8 +49,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 onChange: null,
                 onFocus:null,
                 placeHolder: null,
-                codeMirrorHeight: "inherit",
-                codeMirrorWidth: "600px"
+                codeMirrorHeight: "240px"
             },
 
             /*
@@ -115,7 +114,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                         }, this));
                     }
                     if (this.model.onChange) {
-                            this.$el.find("input:radio, .scriptFilePath").bind("change", _.bind(function () {
+                        this.$el.find("input:radio, .scriptFilePath").bind("change", _.bind(function () {
                             this.model.onChange();
                         }, this));
                     }
@@ -150,12 +149,22 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 }
             },
 
+            localScriptChange: function (event) {
+                this.scriptSelect(event, this.cmBox);
+            },
+
             //If either the file name or inline script are empty this function will return null
             generateScript: function() {
-                var currentSelection = this.$el.find("input[name=scriptType]:checked").val(),
+                var currentSelection,
                     scriptObject = {},
                     inputs,
                     emptyCheck = false;
+                
+                if(this.data.eventName) {
+                    currentSelection = this.$el.find("input[name=" + this.data.eventName + "_scriptType]:checked").val();
+                } else {
+                    currentSelection = this.$el.find("input[name=scriptType]:checked").val();
+                }
 
                 if(currentSelection === "none") {
                     return null;

@@ -63,10 +63,7 @@ define([
 
                         });
 
-
                     });
-
-                    QUnit.ok(LoginView.$el.find('#identificationMessage').length, "Site Identification Prompt displayed");
 
                     LoginView.$el.find("[name=login]").val("openidm-admin").trigger("change");
 

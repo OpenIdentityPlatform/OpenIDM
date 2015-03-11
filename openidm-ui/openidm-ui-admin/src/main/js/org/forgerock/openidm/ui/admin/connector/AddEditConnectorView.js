@@ -164,8 +164,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         _.each(this.data.versionDisplay, function (group) {
                             group.versions = _.map(group.versions, function (v) {
                                 v.selected = v.connectorName === this.data.connectorTypeName &&
-                                             v.bundleVersion === data.connectorRef.bundleVersion &&
-                                             v.systemType === this.data.systemType;
+                                    v.bundleVersion === data.connectorRef.bundleVersion &&
+                                    v.systemType === this.data.systemType;
                                 return v;
                             }, this);
                         }, this);
@@ -228,7 +228,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                                 validatorsManager.bindValidators(this.$el);
 
                                 if (this.data.rangeFound) {
-                                    this.$el.find("#connectorErrorMessage .alert-message .message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range": this.data.oldVersion, "version": data.connectorRef.bundleVersion}));
+                                    this.$el.find("#connectorErrorMessage .message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range": this.data.oldVersion, "version": data.connectorRef.bundleVersion}));
                                     this.$el.find("#connectorErrorMessage").show();
                                 }
 
@@ -804,7 +804,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
 
-            this.$el.find("#connectorErrorMessage .alert-message .message").html(this.parseErrorMessage(error.message));
+            this.$el.find("#connectorErrorMessage .message").html(this.parseErrorMessage(error.message));
             this.$el.find("#connectorErrorMessage").show();
         },
 
@@ -890,6 +890,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
         saveObjectTypes: function(newObjectTypes) {
             this.userDefinedObjectTypes = newObjectTypes;
             this.updateLiveSyncObjects();
+
+            this.$el.find("#connectorChangesPending").show();
         }
     });
 

@@ -1,98 +1,160 @@
-<div class="title-bar">
-    <h1>{{t "templates.connector.resources"}}</h1>
-</div>
-<div class="button-bar">
-    <a href="#connectors/add/"><button type="button" class="pull-left button left-end"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
-    <a href="#managed/add/"><button type="button" class="pull-left button"><i class="fa fa-plus"></i>{{t "templates.connector.addManagedObject"}}</button></a>
-    <a href="#mapping/add/"><button type="button" class="pull-right button right-end"><i class="fa fa-plus"></i>{{t "templates.connector.addMapping"}}</button></a>
-</div>
-<div id="resourceConnectorContainer" class="resource-container">
-    <div class="subtitle-bar">
-        <h4>{{t "templates.connector.connectorTitle"}}</h4>
-        <a href="{{docHelpUrl}}integrators-guide/index.html#openidm-openicf" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
-    </div>
-    <div class="help-body">
-        <p>
-            {{t "templates.connector.whatIsAConnector"}}
-        </p>
-    </div>
-    {{#each currentConnectors}}
-    <div data-resource-type="connector" data-connector-title="{{cleanUrlName}}" class="resource-body">
-        <div class="resource-type-body">
-            <div class="resource-tools">
-                {{#if ok}}
-                <p class="resource-status resource-available"><i class="fa fa-check-circle-o "></i> {{t "templates.connector.activeState"}}</p>
-                {{else}}
-                {{#if enabled}}
-                <p title="{{error}}" class="resource-status resource-unavailable"><i class="fa fa-times-circle"></i> {{t "templates.connector.errorState"}}</p>
-                {{else}}
-                <p title="{{error}}" class="resource-status resource-disabled"><i class="fa fa-times-circle"></i> {{t "templates.auth.disabled"}}</p>
-                {{/if}}
-                {{/if}}
-                <a href="#connectors/edit/{{cleanUrlName}}/"><span class="pull-right resource-edit" title="Edit Connector"><i class="fa fa-pencil"></i></span></a>
-                <span class="pull-right resource-delete connector-delete" title="Delete Connector"><i class="fa fa-times-circle-o"></i></span>
+<section>
+    <div class="container">
+
+        <div class="page-header">
+            <h1>{{t "templates.connector.resources"}}</h1>
+        </div>
+
+        <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+            <div class="btn-group" role="group" aria-label="add connector">
+                <a href="#connectors/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
             </div>
-            <div class="resource-info">
-                <img class="resource-large-icon {{iconClass}}" src="{{iconSrc}}" alt="{{displayName}}" />
-                <p class="resource-given-name">{{name}}</p>
-                <p class="resource-type-name">{{displayName}}</p>
+            <div class="btn-group" role="group" aria-label="add managed">
+                <a href="#managed/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addManagedObject"}}</button></a>
+            </div>
+            <div class="btn-group pull-right" role="group" aria-label="add mapping">
+                <a href="#mapping/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addMapping"}}</button></a>
             </div>
         </div>
-    </div>
-    {{/each}}
-    <a class="add-resource-link" href="#connectors/add/">
-        <div id="connectorsAdd" class="resource-body add-resource-body">
-            <div class="resource-type-inner">
-                <div class="resource-info">
-                    <span><i class="fa fa-plus-circle fa-3x"></i></span>
-                    <p>{{t "templates.connector.addConnector"}}</p>
+
+        <div class="section-header">
+            <div class="subtitle-bar">
+                <h2>{{t "templates.connector.connectorTitle"}}</h2>
+                <a target="_blank" href="http://openidm.forgerock.org/doc/integrators-guide/index.html#openidm-openicf">Help <i class="fa fa-question-circle"></i></a>
+            </div>
+            <div class="clearfix"></div>
+            <div class="help-body">
+                <p>{{t "templates.connector.whatIsAConnector"}}</p>
+            </div>
+        </div>
+
+        <div id="resourceConnectorContainer" class="list-grid">
+            <div class="row">
+                {{#each currentConnectors}}
+                <div class="col-sm-6 col-md-3 ">
+                    <div class="card-container" style="z-index: 5;">
+                        <div  data-resource-type="connector" data-connector-title="{{cleanUrlName}}"  class="card">
+                            <div class="card-heading">
+                                <!-- Single button -->
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#connectors/edit/{{cleanUrlName}}/"><i class="fa fa-pencil"></i>Edit</a></li>
+                                        <li class="connector-delete"><span><i class="fa fa-times"></i>Delete</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <a href="#connectors/edit/{{cleanUrlName}}/">
+                                    <div class="image circle">
+                                        <i class="{{iconClass}}"></i>
+                                    </div>
+                                    <div class="content">
+                                        <div class="main">
+                                            <h3 class="name">{{name}}</h3>
+                                            <p class="cardtype">{{displayName}}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="card-footer">
+                                {{#if ok}}
+                                <span class="text-success"><i class="fa fa-check"></i> {{t "templates.connector.activeState"}}</span>
+                                {{else}}
+                                {{#if enabled}}
+                                <span title="{{error}}" class="text-danger"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
+                                {{else}}
+                                <span title="{{error}}" class="text-warning"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
+                                {{/if}}
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+                <div class="col-sm-6 col-md-3 ">
+                    <div class="add-card" style="z-index: 3;">
+                        <div class="">
+                            <a href="#connectors/add/">
+                                <div class="image circle">
+                                    <i class="fa fa-plus"></i>
+                                </div>
+                                <div class="content">
+                                    {{t "templates.connector.addConnector"}}
+                                </div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </a>
-    {{#unless currentConnectors}}
-    <div class="connector-help">
-        <h4>{{t "templates.connector.resourcesHelpNoConnectorsTitle"}}</h4>
-        <p>
-            {{t "templates.connector.resourcesHelpNoConnectorsBody"}}
-        </p>
-    </div>
-    {{/unless}}
-</div>
-<div style="clear:both;"></div>
-<div id="resourceManagedContainer" class="resource-container">
-    <div class="subtitle-bar subtitle-divider">
-        <h4>{{t "templates.managed.managedTitle"}}</h4>
-        <a href="{{docHelpUrl}}integrators-guide/index.html#chap-users-groups-roles" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
-    </div>
-    <div class="help-body">
-        <p>
-            {{t "templates.connector.whatIsAManagedObject"}}
-        </p>
-    </div>
-    {{#each currentManagedObjects}}
-    <div data-resource-type="managed" data-managed-title="{{name}}" class="resource-body">
-        <div class="resource-type-body managed-type">
-            <div class="resource-tools">
-                <a href="#managed/edit/{{name}}/"><span class="pull-right resource-edit" title="Edit Connector"><i class="fa fa-pencil"></i></span></a>
-                <span class="pull-right resource-delete managed-delete" title="Delete Connector"><i class="fa fa-times-circle-o"></i></span>
+
+        <hr>
+        <div class="section-header">
+            <div class="subtitle-bar">
+                <h2>{{t "templates.managed.managedTitle"}}</h2>
+                <a target="_blank" href="http://openidm.forgerock.org/doc/integrators-guide/index.html#chap-users-groups-roles">Help <i class="fa fa-question-circle"></i></a>
             </div>
-            <div class="resource-info">
-                <img class="resource-large-icon {{iconClass}}" src="{{iconSrc}}" alt="{{t "templates.connector.managedObjectType"}}" />
-                <p class="resource-given-name">{{name}}</p>
-                <p class="resource-type-name">{{t "templates.connector.managedObjectType"}}</p>
+            <div class="clearfix"></div>
+            <div class="help-body">
+                <p>{{t "templates.connector.whatIsAManagedObject"}}</p>
             </div>
         </div>
-    </div>
-    {{/each}}
-    <a class="add-resource-link" href="#managed/add/">
-        <div id="managedAdd" class="resource-body add-resource-body">
-            <div class="resource-type-inner">
-                <div class="resource-info">
-                    <span><i class="fa fa-plus-circle fa-3x"></i></span>
-                    <p>{{t "templates.connector.addManagedObject"}}</p>
+
+        <div id="resourceManagedContainer" class="list-grid">
+            <div class="row">
+                {{#each currentManagedObjects}}
+                <div class="col-sm-6 col-md-3">
+                    <div class="card-container">
+                        <div  data-resource-type="managed" data-managed-title="{{name}}" class="card">
+                            <div class="front">
+                                <div class="card-heading">
+                                    <!-- Single button -->
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-right" role="menu">
+                                            <li><a href="#managed/edit/{{name}}/"><i class="fa fa-pencil"></i>Edit</a></li>
+                                            <li class="managed-delete"><span><i class="fa fa-times"></i>Delete</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="back">
+                                    <a href="#managed/edit/{{name}}/">
+                                        <div class="image circle">
+                                            <i class="icon-database"></i>
+                                        </div>
+                                        <div class="content">
+                                            <div class="main">
+                                                <h3 class="name">{{name}}</h3>
+                                                <p class="cardtype">{{t "templates.connector.managedObjectType"}}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+                <div class="col-sm-6 col-md-3 ">
+                    <div class="add-card" style="z-index: 3;">
+                        <div class="">
+                            <a href="#managed/add/">
+                                <div class="image circle">
+                                    <i class="fa fa-plus"></i>
+                                </div>
+                                <div class="content">
+                                    {{t "templates.connector.addManagedObject"}}
+                                </div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </a>
-</div>
+    </div>
+</section>

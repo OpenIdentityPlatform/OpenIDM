@@ -30,13 +30,13 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/util/ScriptEditor",
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openam/ui/common/delegates/OpenAMProxyDelegate",
+    "org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function(AdminAbstractView, eventManager, constants, router, ConfigDelegate, ScriptEditor, ConnectorDelegate, SiteConfigurationDelegate, conf, openamProxyDelegate, UIUtils) {
+], function(AdminAbstractView, eventManager, constants, router, ConfigDelegate, InlineScriptEditor, ConnectorDelegate, SiteConfigurationDelegate, conf, openamProxyDelegate, UIUtils) {
 
     var AuthenticationView = AdminAbstractView.extend({
         template: "templates/admin/authentication/AuthenticationTemplate.html",
@@ -49,7 +49,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             "click .up": "upModule",
             "click #addNew": "addNewModule",
             "click #submitAuth": "submitAuthModules",
-            "click .form>div>h3": "toggleBasicAdvanced",
+            "click .advancedForm > div > h3": "toggleAdvanced",
             "change #moduleType": "newModuleTypeSet"
         },
 
@@ -76,8 +76,8 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             ],
             resources: [],
             amUIProperties: [
-                "openamLoginUrl",  
-                "openamLoginLinkText", 
+                "openamLoginUrl",
+                "openamLoginLinkText",
                 "openamUseExclusively"
             ],
             amTokenTime: "5",
@@ -92,15 +92,19 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             // Set JSONEditor defaults
             _(JSONEditor.defaults.options).extend({
                 disable_edit_json: true,
-                disable_array_reorder: true,
+                disable_array_reorder: false,
                 disable_collapse: true,
                 disable_properties: true,
-                show_errors: 'always',
+                show_errors: 'never',
                 template: 'handlebars',
-                theme: 'jqueryui',
-                no_additional_properties: false,
+                iconlib: 'fontawesome4',
+                theme: 'bootstrap3',
+                no_additional_properties: true,
+                additionalItems: false,
                 required_by_default: true
             });
+
+            this.data.docHelpUrl = constants.DOC_URL;
 
             var connectorPromise = ConnectorDelegate.currentConnectors(),
                 managedPromise = ConfigDelegate.readEntity("managed");
@@ -133,7 +137,6 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                                     jsonTemplate = Handlebars.compile(jsonTemplate)();
                                     jsonTemplate = $.parseJSON(jsonTemplate);
 
-
                                     // The following code updates the enum values for the queryOnResource property
                                     // Internal/Anonymous User Modules will only need access to the internal repo and can be excluded as that value is set in the template.
                                     if (jsonTemplate.templateName !== "INTERNAL_USER" && jsonTemplate.templateName !== "STATIC_USER" &&
@@ -157,7 +160,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
                     this.$el.find(".authenticationModules .group-body")
                         .accordion({
-                            header: "> div > h3",
+                            header: "> div > .list-header",
                             collapsible: true,
                             icons: false,
                             event: false,
@@ -165,11 +168,11 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         })
                         .sortable({
                             axis: "y",
-                            handle: "h3",
+                            handle: ".list-header",
                             stop: function(event, ui) {
                                 // IE doesn't register the blur when sorting
                                 // so trigger focusout handlers to remove .ui-state-focus
-                                ui.item.children("h3").triggerHandler("focusout");
+                                ui.item.children(".list-header").triggerHandler("focusout");
 
                                 // Refresh accordion to handle new order
                                 $(this).accordion("refresh");
@@ -180,26 +183,26 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             }, this));
         },
 
-        toggleBasicAdvanced: function(e) {
-            this.$el.find(e.target).parentsUntil(".form").find(".advancedShowHide").toggleClass("fa-minus-square-o");
-            this.$el.find(e.target).parentsUntil(".form").find(".advancedShowHide").toggleClass("fa-plus-square-o");
-            this.$el.find(e.target).parentsUntil(".form").find(".ui-widget-content").first().toggle();
+        toggleAdvanced: function(e) {
+            this.$el.find(e.target).parentsUntil(".form").find(".advancedShowHide").toggleClass("fa fa-caret-down");
+            this.$el.find(e.target).parentsUntil(".form").find(".advancedShowHide").toggleClass("fa fa-caret-right");
+            this.$el.find(e.target).parentsUntil(".advancedForm").find(".well").first().toggle();
         },
-        
-        loadJWTTokenTimeSettings: function(){
+
+        loadJWTTokenTimeSettings: function() {
             var props = this.model.defaultAuth.serverAuthContext.sessionModule.properties,
-                convertToSeconds = function(mins){
-                    return mins * 60;
+                convertToSeconds = function(mins) {
+                    return parseInt(mins, 10) * 60;
                 };
-                
-            if(props.maxTokenLifeMinutes){
+
+            if (props.maxTokenLifeMinutes) {
                 props.maxTokenLifeSeconds = props.maxTokenLifeSeconds || convertToSeconds(props.maxTokenLifeMinutes);
             }
-            
-            if(props.tokenIdleTimeMinutes){
+
+            if (props.tokenIdleTimeMinutes) {
                 props.tokenIdleTimeSeconds = props.tokenIdleTimeSeconds || convertToSeconds(props.tokenIdleTimeMinutes);
             }
-            
+
             this.$el.find("#maxTokenLifeSeconds").val(props.maxTokenLifeSeconds);
             this.$el.find("#tokenIdleTimeSeconds").val(props.tokenIdleTimeSeconds);
         },
@@ -266,8 +269,8 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         //add amUIProperties
                         module.properties = _.extend(module.properties,_.pick(conf.globalData,this.model.amUIProperties));
                     }
-                    
-                    
+
+
                     _(module.properties).each(function(value, key) {
                         if (_(jsonEditorBasicFormat).has(key)) {
                             addProperty(jsonEditorBasicFormat, value, key);
@@ -333,15 +336,10 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     schema: this.model.module_types[moduleType].advancedSchema
                 });
 
-                this.model.modules[moduleId].scriptEditor = ScriptEditor.generateScriptEditor({
-                    "element": this.$el.find("#"+moduleId).find(".container-augmentSecurityContext .ui-widget-content"),
-                    "eventName": " ",
-                    "deleteElement": false,
-                    "deleteCallback": _.bind(function() {
-                        this.model.modules[moduleId].scriptEditor.clearScriptHook();
-                    }, this),
-                    "scriptData": scriptData,
-                    "saveCallback": _.noop()
+                this.model.modules[moduleId].scriptEditor = InlineScriptEditor.generateScriptEditor({
+                    "element": this.$el.find("#"+moduleId).find(".container-augmentSecurityContext .well"),
+                    "eventName": "module" + moduleId + "ScriptEditor",
+                    "scriptData": scriptData
                 });
 
                 this.model.modules[moduleId].defaultUserRoles = this.$el.find("#"+moduleId).find(".container-defaultUserRoles input")
@@ -388,8 +386,8 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
                 this.model.modules[moduleId].module.find(".moduleType").val(moduleType);
                 this.model.modules[moduleId].module.find(".advancedForm > div > .ui-widget-content").hide();
-                this.model.modules[moduleId].module.find(".advancedForm>div>h3").prepend("<i class='advancedShowHide fa fa-lg fa-plus-square-o'></i>");
-                this.model.modules[moduleId].module.find(".basicForm>div>h3").prepend("<i class='advancedShowHide fa fa-lg fa-minus-square-o'></i>");
+                this.model.modules[moduleId].module.find(".advancedForm>div>h3").prepend("<i class='advancedShowHide fa fa-caret-right'></i>");
+                //this.model.modules[moduleId].module.find(".basicForm>div>h3").prepend("<i class='advancedShowHide fa fa-lg fa-minus-square-o'></i>");
                 this.makeCustomEditorChanges(moduleId);
 
             } else {
@@ -402,7 +400,11 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
          *
          * @returns {string} keyName
          */
-        addNewModule: function() {
+        addNewModule: function(e) {
+            if (e) {
+                e.preventDefault();
+            }
+
             var newModule = this.$el.find("#group-copy").clone(),
                 keyName = "module_" + this.model.moduleIndex++;
 
@@ -429,12 +431,12 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 userGroupEditorNode;
 
             if (which.target) {
-                selector = $(which.target).closest(".group").find(".ui-accordion-content");
+                selector = $(which.target).closest(".group").find(".content");
             } else {
-                selector = $(which).closest(".group").find(".ui-accordion-content");
+                selector = $(which).closest(".group").find(".content");
             }
 
-            selector.toggle();
+            selector.toggleClass("collapse");
 
             if (selector.is(":visible")) {
                 tempKey = $(which.target).closest(".group").attr("id");
@@ -479,14 +481,11 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             currentGroup.prev(".group").before(currentGroup);
         },
 
-        // Checks for errors and sets the title value on form change
         makeCustomEditorChanges: function(which) {
             var toUpdate = which || null,
                 basicEditor,
                 advancedEditor,
                 authMod,
-                errors,
-                error = false,
                 openamDeploymentUrl,
                 openamLoginUrl;
 
@@ -494,16 +493,15 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 basicEditor = this.model.modules[toUpdate].basicEditor.getValue();
                 advancedEditor = this.model.modules[toUpdate].advancedEditor.getValue();
                 authMod = this.model.modules[toUpdate].name;
-                errors = this.model.modules[toUpdate].module.find(".ui-state-error:visible");
+
+                this.$el.find("#" + toUpdate + " .authModuleName").html(authMod);
 
                 if (authMod === "STATIC_USER" && _.has(basicEditor, "username")) {
-                    this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + basicEditor.username);
+                    this.$el.find("#" + toUpdate + " .authModuleResource").html(basicEditor.username);
                 } else if(_.has(basicEditor, "queryOnResource")) {
-                    this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + basicEditor.queryOnResource);
+                    this.$el.find("#" + toUpdate + " .authModuleResource").html(basicEditor.queryOnResource);
                 } else if(_.has(advancedEditor, "queryOnResource")) {
-                    this.$el.find("#" + toUpdate + " .authModuleName").html(authMod + " - " + advancedEditor.queryOnResource);
-                } else {
-                    this.$el.find("#" + toUpdate + " .authModuleName").html(authMod);
+                    this.$el.find("#" + toUpdate + " .authModuleResource").html(advancedEditor.queryOnResource);
                 }
 
                 if ( (_.has(basicEditor, "enabled") && !basicEditor.enabled) || (_.has(advancedEditor, "enabled") && !advancedEditor.enabled)) {
@@ -512,42 +510,21 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     $(this.model.modules[toUpdate].module).find(".authModuleDisabled").toggleClass("noteHidden", true);
                 }
 
-                if (errors.length > 0) {
-                    $(this.model.modules[toUpdate].module).find(".authModuleErrors").toggleClass("noteHidden", false);
-                } else {
-                    $(this.model.modules[toUpdate].module).find(".authModuleErrors").toggleClass("noteHidden", true);
-                }
+                $(this.model.modules[toUpdate].module).find("input[type='hidden']").parent().hide();
 
-                $(this.model.modules[toUpdate].module).find(".form input[type='hidden']").parent().hide();
-                
                 if(authMod === "OPENAM_SESSION"){
-                    openamDeploymentUrl = $(this.model.modules[toUpdate].module).find(".form input[name*='openamDeploymentUrl']");
-                    openamLoginUrl = $(this.model.modules[toUpdate].module).find(".form input[name*='openamLoginUrl']");
+                    openamDeploymentUrl = $(this.model.modules[toUpdate].module).find("input[name*='openamDeploymentUrl']");
+                    openamLoginUrl = $(this.model.modules[toUpdate].module).find("input[name*='openamLoginUrl']");
                     openamDeploymentUrl.focus(function(){
                         openamDeploymentUrl.attr("beforeValue",openamDeploymentUrl.val());
                     });
                     //unbinding here so that this function does not get bound multiple times
                     openamDeploymentUrl.unbind("blur").blur(_.bind(function(){
                         this.model.modules[toUpdate].advancedEditor.getEditor('root.openamLoginUrl').setValue(
-                                openamLoginUrl.val().replace(openamDeploymentUrl.attr("beforeValue"),openamDeploymentUrl.val())
+                            openamLoginUrl.val().replace(openamDeploymentUrl.attr("beforeValue"),openamDeploymentUrl.val())
                         );
                     },this));
                 }
-            }
-
-            _(this.$el.find(".authModuleErrors")).each(function(module) {
-                if (!$(module).hasClass("noteHidden")) {
-                    error = true;
-                }
-            }, this);
-
-            if (error) {
-                this.$el.find("#authErrorMessage").show();
-                this.$el.find("#submitAuth").prop('disabled', true);
-
-            } else {
-                this.$el.find("#authErrorMessage").hide();
-                this.$el.find("#submitAuth").prop('disabled', false);
             }
         },
 
@@ -561,7 +538,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 newAuth,
                 tempUserRoles,
                 amUISettingsProm;
-            
+
             $(e.target).prop("disabled",true);
 
             // Each Auth Module
@@ -575,7 +552,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     tempModule.enabled = tempEditor.enabled;
                     tempModule.properties = {};
                     tempModule.properties.propertyMapping = {};
-                    
+
                     if(tempModule.name === "OPENAM_SESSION"){
                         amUISettingsProm = this.handleOpenAMUISettings(tempEditor,tempID,authModules);
                         //remove amUIProperties
@@ -611,15 +588,15 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         return role.length > 0;
                     });
 
-                    if (this.model.modules[tempID].scriptEditor.getScriptHook() !== null) {
-                        tempModule.properties.augmentSecurityContext = this.model.modules[tempID].scriptEditor.getScriptHook().script;
+                    if (this.model.modules[tempID].scriptEditor.generateScript() !== null) {
+                        tempModule.properties.augmentSecurityContext = this.model.modules[tempID].scriptEditor.generateScript();
                     }
 
                     // these are undefined for the STATIC_USER module which has no propertyMapping
                     if (typeof tempEditor.propertyMapping !== "undefined"
-                            && tempEditor.propertyMapping !== null
-                            && typeof tempEditor.propertyMapping.userorgroup !== "undefined"
-                            && tempEditor.propertyMapping.userorgroup !== null) {
+                        && tempEditor.propertyMapping !== null
+                        && typeof tempEditor.propertyMapping.userorgroup !== "undefined"
+                        && tempEditor.propertyMapping.userorgroup !== null) {
 
                         if (tempEditor.propertyMapping.userorgroup.length > 0) {
                             tempModule.properties.propertyMapping.userRoles = tempEditor.propertyMapping.userorgroup;
@@ -634,17 +611,14 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                         }
                     }
 
-                    if (_(this.model.modules[tempID].scriptEditor.getScriptHook().script).isObject()) {
-                        tempModule.properties.augmentSecurityContext = this.model.modules[tempID].scriptEditor.getScriptHook().script;
-                    }
                     authModules.push(tempModule);
                 }
             }, this);
-            
-            if(!amUISettingsProm){
-                amUISettingsProm = true;
+
+            if (!amUISettingsProm){
+                amUISettingsProm = $.Deferred().resolve();
             }
-            
+
             amUISettingsProm.then(_.bind(function(){
                 newAuth = _(this.model.defaultAuth).clone();
                 newAuth.serverAuthContext.authModules = authModules;
@@ -654,7 +628,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 newAuth.serverAuthContext.sessionModule.properties.maxTokenLifeMinutes = "";
                 newAuth.serverAuthContext.sessionModule.properties.tokenIdleTimeMinutes = "";
                 newAuth.serverAuthContext.sessionModule.properties.sessionOnly = newAuth.serverAuthContext.sessionModule.properties.sessionOnly === "true";
-                
+
                 ConfigDelegate.updateEntity("authentication", newAuth).then(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
                     $(e.target).prop("disabled",false);
@@ -677,46 +651,46 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                     maxTokenLifeSeconds.val(this.model.defaultTokenTime);
                     tokenIdleTimeSeconds.val(this.model.defaultTokenIdleTime);
                 },this);
-            
+
             amSettings.openamAuthEnabled = amSettings.enabled;
             delete amSettings.enabled;
-            
+
             if(amSettings.openamAuthEnabled){
                 if(amSettings.openamUseExclusively){
                     maxTokenLifeSeconds.val(this.model.amTokenTime);
                     tokenIdleTimeSeconds.val(this.model.amTokenTime);
                 }
-                
+
                 if(!amSettings.openamUseExclusively && maxTokenLifeSeconds.val() === this.model.amTokenTime.toString() && tokenIdleTimeSeconds.val() === this.model.amTokenTime.toString()){
                     //Just in case the user forgot to reset these settings
                     //doing this so that the user will be able to login
                     resetTokenTimes();
                 }
-                
+
                 //validate openamDeploymentUrl
                 openamProxyDelegate.serverinfo(formVal.openamDeploymentUrl).then(_.bind(function(info){
-                    if(info.cookieName){
-                        //set openamSSOTokenCookieName for this module
-                        authModules[parseInt(moduleId.replace("module_",""),10)].properties.openamSSOTokenCookieName = info.cookieName;
-                        confirmed();
-                    } else {
+                        if(info.cookieName){
+                            //set openamSSOTokenCookieName for this module
+                            authModules[parseInt(moduleId.replace("module_",""),10)].properties.openamSSOTokenCookieName = info.cookieName;
+                            confirmed();
+                        } else {
+                            this.$el.find("#submitAuth").prop("disabled",false);
+                            UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
+                        }
+                    },this),
+                    _.bind(function(){
                         this.$el.find("#submitAuth").prop("disabled",false);
                         UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
-                    }
-                },this),
-                _.bind(function(){
-                    this.$el.find("#submitAuth").prop("disabled",false);
-                    UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
-                },this));
+                    },this));
             } else {
                 if(maxTokenLifeSeconds.val() === this.model.amTokenTime.toString() && tokenIdleTimeSeconds.val() === this.model.amTokenTime.toString()){
                     //Just in case the user forgot to reset these settings
                     //doing this so that the user will be able to login
                     resetTokenTimes();
                 }
-                 confirmed();
+                confirmed();
             }
-            
+
             return prom;
         }
     });

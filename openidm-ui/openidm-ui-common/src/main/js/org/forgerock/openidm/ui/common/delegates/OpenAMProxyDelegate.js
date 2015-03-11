@@ -24,7 +24,7 @@
 
 /*global $, define, _ */
 
-define("org/forgerock/openam/ui/common/delegates/OpenAMProxyDelegate", [
+define("org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/util/CookieHelper",

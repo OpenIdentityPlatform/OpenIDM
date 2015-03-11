@@ -22,37 +22,52 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+
 /* css basic configuration */
-@import "common/config.less";
-
-/* helpers, functions, columns */
-@import "common/helpers.less";
-@import "fontawesome/less/font-awesome.less";
-
-/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
-@import "common/layout.less";
-
-/* specific css used in specific modules */
+@import "Roboto/fontRoboto.less";
+@import "common/variables.less";
+@import "common/common.less";
 @import "config/adminConfig.less";
-@import "config/adminStyle.less";
-@import "config/objectTypes.less";
-@import "config/authenticationView.less";
-@import "common/forms.less";
-@import "config/resourcesView.less";
-@import "config/scheduleView.less";
-@import "config/mappingView.less";
-@import "config/connectorView.less";
-@import "config/scriptEditor.less";
-@import "config/scheduler.less";
-@import "config/syncConfig.less";
-@import "config/cronGentleSelect.less";
-@import "config/correlation.less";
-@import "codemirror/codemirror.css";
-@import "config/analysisView.less";
-@import "config/mappingScripts.less";
-@import "config/testSync.less";
-@import "config/saveChanges.less";
-@import "jsonEditor.less";
 
+/*
+  Library css
+*/
+@import "common/jquery-ui-1.10.3.custom.css";
+@import "common/bootstrap.min.css";
+@import "common/bootstrap-dialog.css";
+@import "fontawesome/css/font-awesome.min.css";
+@import "fontawesome/less/variables.less";
+//@import "common/jquery-ui-1.10.3.custom.css";
+
+/*
+  Specific libraries
+*/
+@import "jqgrid-override.less";
+
+@import "config/resourcesView.less";
+@import "config/adminStyle.less";
+@import "icons.less";
+@import "config/cronGentleSelect.less";
+@import "config/scheduler.less";
+@import "config/scheduleView.less";
+@import "config/connectorView.less";
+@import "config/correlation.less";
+@import "config/analysisView.less";
+@import "config/filter.less";
+
+/*
+  specific css used in specific modules
+*/
+
+@import "config/mappingView.less";
+@import "config/scriptEditor.less";
+@import "codemirror/codemirror.css";
+@import "config/authenticationView.less";
+
+/*
+
+@import "config/syncConfig.less";
+@import "config/testSync.less";
+*/
 
 

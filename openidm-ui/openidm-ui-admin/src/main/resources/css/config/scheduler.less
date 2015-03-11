@@ -1,13 +1,19 @@
 #schedules {
-  &.no-validation-block {
-    margin: 0 10px;
+  .deleteSchedule,
+  .addSchedule {
+    margin-left:5px;
   }
+
+  .misfirePolicy {
+    width:200px;
+    display:inline;
+  }
+
   .schedulerBody{
-    background: white;
-    padding: 10px;
-    border: 1px solid #ddd;
-    font-size: 17px;
-    margin: 10px 0;
+
+    h3 {
+      margin-top:0px;
+    }
 
     .group-field-block {
       padding: 0;
@@ -16,12 +22,6 @@
       padding: 10px 15px 0 0;
       margin: 5px 0;
       display: inline-block;
-      vertical-align: top;
-
-      label {
-        width: initial;
-        padding: 4px 4px 4px 0;
-      }
 
       select, input {
         padding: 0 5px;
@@ -32,11 +32,9 @@
         width: 140px;
       }
     }
-    .fieldHidden {
-      display: none;
-    }
-    input[type="checkbox"] {
-      font-size: 25px;
-    }
   }
+}
+
+#liveSyncSchedule .form-group .input-group {
+  padding-left:15px;
 }

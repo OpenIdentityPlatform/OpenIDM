@@ -31,8 +31,9 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/util/MappingUtils",
-    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate"
-], function(AbstractView, MappingBaseView, conf, uiUtils, searchDelegate, mappingUtils, syncDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
+    "bootstrap-dialog"
+], function(AbstractView, MappingBaseView, conf, uiUtils, searchDelegate, mappingUtils, syncDelegate, BootstrapDialog) {
     var ChangeAssociationDialog = AbstractView.extend({
         template: "templates/admin/sync/ChangeAssociationDialogTemplate.html",
         el: "#dialogs",
@@ -81,7 +82,7 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
                 //Get selected linkQualifiers
                 syncDelegate.performAction(this.data.recon._id, mapping, "LINK", sourceId, linkId, linkType).then(_.bind(function(){
                     this.data.reloadAnalysisGrid();
-                    this.currentDialog.dialog('destroy').remove();
+                    this.currentDialog.close();
                 }, this));
             }, this));
         },
@@ -110,56 +111,47 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
             }
         },
         render: function(args, callback) {
-            var readyProm = $.Deferred();
+            var _this = this;
 
-            this.currentDialog = $('<div id="changeAssociationDialog"></div>');
-            this.setElement(this.currentDialog);
-            $('#dialogs').append(this.currentDialog);
+            this.dialogContent = $('<div id="changeAssociationDialog"></div>');
+            this.setElement(this.dialogContent);
+            $('#dialogs').append(this.dialogContent);
+
+            this.currentDialog = new BootstrapDialog({
+                title: $.t("templates.mapping.analysis.changeAssociation"),
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: this.dialogContent,
+                onshown : _.bind(function() {
+                    uiUtils.renderTemplate(
+                        this.template,
+                        this.$el,
+                        _.extend({}, conf.globalData, this.data),
+                        _.bind(function() {
+                            this.$el.find("#linkTypeSelect").val(args.selectedLinkQualifier);
+
+                            if(callback) {
+                                callback();
+                            }
+                        }, this),
+                        "replace");
+                }, _this)
+            });
+
+
             _.extend(this.data,args);
 
             this.data.results = [];
 
-            if(_.keys(this.data.targetObj).length){
+            if(this.data.targetObj !== null && this.data.targetObj._id !== undefined){
                 this.data.results.push({ _id: this.data.targetObj._id , objRep: this.data.targetObjRep });
             }
 
             if(this.data.ambiguousTargetObjectIds.length){
-                this.getAmbiguousMatches().then(readyProm.resolve);
-            } else {
-                readyProm.resolve();
+                this.getAmbiguousMatches();
             }
 
-            readyProm.then(_.bind(function(){
-                this.currentDialog.dialog({
-                    title: $.t("templates.mapping.analysis.changeAssociation"),
-                    modal: true,
-                    resizable: false,
-                    draggable: true,
-                    dialogClass: "changeAssociationDialog",
-                    width: 600,
-                    position: { my: "center top+25", at: "center top+25", of: window },
-                    close: _.bind(function () {
-                        if (this.currentDialog) {
-                            this.data = {};
-                            this.currentDialog.dialog('destroy').remove();
-                        }
-                    }, this),
-                    open: _.bind(function(){
-                        uiUtils.renderTemplate(
-                            this.template,
-                            this.$el,
-                            _.extend({}, conf.globalData, this.data),
-                            _.bind(function() {
-                                this.$el.find("#linkTypeSelect").val(args.selectedLinkQualifier);
-
-                                if(callback) {
-                                    callback();
-                                }
-                            }, this),
-                            "replace");
-                    }, this)
-                });
-            }, this));
+            this.currentDialog.realize();
+            this.currentDialog.open();
         }
     });
 

@@ -77,10 +77,12 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
             }
         },
         
-        render: function(params) {
+        render: function(params, callback) {
             this.editedUsername = params[0];
             this.actions = [];
             this.addAction("Update", "submit");
+
+            this.addTitle ($.t("openidm.ui.admin.users.ChangeUserPasswordDialog.securityDataChangeForWhom", { postProcess: 'sprintf', sprintf: [this.editedUsername] }));
 
             this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {
                 this.show(_.bind(function() {
@@ -92,9 +94,13 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
                     });
 
                     validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + user._id, _.bind(function () {
-                    
-                        this.$el.find("#changeUserPasswordHeadingLabel").text($.t("openidm.ui.admin.users.ChangeUserPasswordDialog.securityDataChangeForWhom", { postProcess: 'sprintf', sprintf: [this.editedUsername] }));
-                        
+                        this.$el.find("input[type=submit]").prop('disabled', true);
+                        this.$el.find("[name=password]").focus();
+
+                        if (callback) {
+                            callback();
+                        }
+
                         this.reloadData();
                     
                     }, this));

@@ -1,15 +1,39 @@
+#mappingContent .panel-footer {
+  border-top:0px;
+}
+
+#reconContainer .form-inline {
+  margin-bottom:15px;
+}
+
+#reconContainer .ui-jqgrid {
+  margin: auto;
+}
+
+#objectFiltersView {
+  .panel-body {
+    padding-top:0px;
+  }
+}
+
+#reconQueriesBase {
+  h3.no-top-margin {
+    margin-top:0px;
+  }
+
+  #sourceQuery {
+    margin-top:15px;
+  }
+}
+
 #correlationQueryWarning{
   width: 510px;
   margin-top: 5px;
 }
 
 .correlationQueryChangesMsg, .correlationQueryAutoMsg {
-  width: 815px;
+  margin:15px 0px 0px 0px;
   display: none;
-}
-
-#correlationQuerySubmit {
-  opacity: 1 !important;
 }
 
 #correlationQueryView, #correlationQueryBuilderView {
@@ -17,40 +41,12 @@
     margin-bottom: 5px;
   }
 
+  .correlationQueries {
+    margin-top:15px;
+  }
+
   .correlationFooter{
-    margin-top: 5px;
-  }
-
-  select {
-    height:30px;
-  }
-  padding: 10px;
-
-  .disabled {
-    h3 {
-      background-color: #F2DEDE;
-
-      .linkQualifierLabel {
-        text-decoration: line-through;
-      }
-
-      i:hover {
-        background-color: #F2DEDE;
-        cursor: default;
-      }
-    }
-  }
-
-  * {
-    font-size: 13px;
-  }
-
-  .group-body {
-    padding: 5px 0 ;
-  }
-
-  .saveCorrelationQuery, .resetCorrelationQuery {
-    float: right;
+    margin:5px 15px 5px 0px;
   }
 
   .undo {
@@ -62,98 +58,17 @@
     text-decoration: underline
   }
 
-  #addNewCorrelationQuery.noLinkQualifiers {
-    cursor: default;
-    &:hover {
-      border-color: #999;
-      span {
-        color: #bbb;
-      }
-    }
-  }
-
   .deleted, .linkQualifierError {
     color: #a94442;
   }
 
-  #addNewCorrelationQuery {
-    border: dashed 1px #999;
-    text-align: center;
-    padding: 10px 0 20px;
-    margin: -1px 0 0;
-    cursor: pointer;
-    z-index: 0;
-
-    h3 {
-      border: none;
-      span {
-        color: #bbb;
-      }
-    }
-
-    &:hover {
-      border-color: #5a646d;
-      span {
-        color: #5a646d;
-      }
-    }
+  .status {
+    display:inline-block;
+    min-width:50px;
   }
 
-  h3 {
-    height: 28px;
-    margin: -1px 0 0;
-    padding: 0;
-    border-radius: 0;
-    border: none;
-    border: 1px solid #5a646d;
-    background: none;
-    background-color: #fff;
-    color: #5a646d;
-    position: relative;
-
-    i {
-      height: 22px;
-      width: 28px;
-      border-right: 1px solid #5a646d;
-      position: absolute;
-      padding-top: 6px;
-      text-align: center;
-      cursor: pointer;
-      z-index: 1;
-
-      &:hover {
-        background-color: #80b7ab;
-      }
-    }
-
-    .trash {
-      left: 29px;
-    }
-
-    .edit {
-      left: 0;
-    }
-
-    .ui-state-hover {
-      background: none;
-      background-color: #fff;
-    }
-
-    .linkQualifierContainer {
-      position: absolute;
-      left: 70px;
-      line-height: 13px;
-      padding-top: 7px;
-      font-weight: normal;
-    }
-    .status {
-      position: relative;
-      display: block;
-      line-height: 13px;
-      padding-top: 7px;
-      font-weight: normal;
-      text-align: center;
-    }
+  .status-column {
+    width:120px;
   }
 
   .linkQualifier {
@@ -191,14 +106,16 @@
       height: 15px;
     }
     &>ul{
-      width: 600px;
-      border: 1px solid #ddd;
-      padding: 10px;
+      padding: 10px 10px 10px 15px;
     }
 
     ul {
+      border-left: 3px #ddd solid;
+      padding-left:5px;
+      margin-top:5px;
+
       div.node {
-        margin: 15px 0 15px 20px;
+        margin: 5px 0 5px 5px;
       }
 
       li {
@@ -206,13 +123,14 @@
         clear:right;
         line-height: 30px;
         position: relative;
+        list-style:none;
 
         input, select {
           width: 200px;
         }
-        button,input[type=button] {
-          width: 26px;
-          line-height: 10px;
+        button, input[type=button] {
+          width: 30px;
+          margin-right: 5px;
           float: right;
           font-size: 8px;
 
@@ -233,6 +151,7 @@
           right: -40px;
           top: 30px;
           padding: 5px;
+          padding-bottom: 20px;
           cursor: pointer;
 
           li {
@@ -245,66 +164,8 @@
       }
     }
   }
-  .queryScript {
-
-    .event-hook-piece {
-      label {
-        display: block;
-        margin: 0;
-        padding: 0;
-        float: none;
-        text-align: left;
-        font-size: inherit;
-      }
-    }
-  }
 }
 
-.correlationBody {
-  legend {
-    height: 25px;
-    padding: 5px 5px 0;
-    background-color: #80b7ab;
-    border: 2px solid #5fa595;
-    cursor: pointer;
-    margin-left: 10px;
-    color: white;
-
-    span {
-      margin-right: 10px;
-      width: 200px;
-      display: inline-block;
-      text-overflow: ellipsis;
-    }
-  }
-
-  legend:hover {
-    background-color: lighten(#80b7ab, @button-hover-lightness);
-  }
-
-  fieldset {
-    border: 1px #ddd solid;
-    padding-left: 0;
-    padding-right: 0;
-    padding-bottom: 10px;
-    background-color: white;
-    margin-top: 15px;
-
-    .group-lead {
-      padding-top: 0;
-      margin-top: 15px;
-    }
-
-    .group-body {
-      padding: 10px ;
-    }
-  }
-
-  .group-actions-block {
-    margin-top: 15px;
-  }
-
-  #scriptQueryRadio {
-    margin-bottom: 10px;
-  }
+.resetCorrelationQuery {
+  margin-right:5px;
 }

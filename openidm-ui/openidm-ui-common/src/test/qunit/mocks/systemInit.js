@@ -26,12 +26,11 @@
 define([
     "text!locales/en/translation.json",
     "text!libs/less-1.5.1-min.js",
+    "text!libs/bootstrap.min.js",
+    "text!libs/bootstrap-dialog.min.js",
     "text!css/styles.less",
-    "text!css/common/config.less",
-    "text!css/common/helpers.less",
-    "text!css/common/layout.less",
-    "text!css/common/forms.less",
-
+    "text!css/common/bootstrap.min.css",
+    "text!css/common/bootstrap-dialog.css",
     "text!templates/common/LoginBaseTemplate.html",
     "text!templates/common/LoginTemplate.html",
     "text!templates/common/NavigationTemplate.html",
@@ -44,11 +43,11 @@ define([
     var staticFiles = [
             "locales/en/translation.json",
             "libs/less-1.5.1-min.js",
+            "libs/bootstrap.min.js",
+            "libs/bootstrap-dialog.min.js",
             "css/styles.less",
-            "css/common/config.less",
-            "css/common/helpers.less",
-            "css/common/layout.less",
-            "css/common/forms.less",
+            "css/common/bootstrap.min.css",
+            "css/common/bootstrap-dialog.css",
 
             "templates/common/LoginBaseTemplate.html",
             "templates/common/LoginTemplate.html",

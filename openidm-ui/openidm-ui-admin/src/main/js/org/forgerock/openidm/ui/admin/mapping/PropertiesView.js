@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define, $, _, Handlebars, form2js, window */
 /*jslint evil: true */
 
 define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
@@ -100,10 +100,12 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: $(e.target).attr('target')}),_.bind(function(){
                 var mapProps = browserStorageDelegate.get(this.mapping.name + "_Properties") || this.data.mapProps;
 
+                //This is removing the correct row from the stored array
                 mapProps.splice(($(e.target).parents("tr")[0].rowIndex - 1), 1);
 
                 browserStorageDelegate.set(this.mapping.name + "_Properties", mapProps);
                 this.checkChanges();
+
                 this.render([this.mapping.name]);
             },this));
         },
@@ -252,7 +254,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         "align": "center",
                         "title": false,
                         "formatter": function(required,opt,row){
-                            return (!required) ? '<button target="' + row.target + '" type="button" title="' + $.t("common.form.removeAttribute") + ': ' + row.target + '" class="glyph-icon glyph-icon-minus-sign removePropertyBtn" style="margin-top:4px;">&nbsp;&nbsp;&nbsp;</button>' : '';
+                            return (!required) ? '<i target="' + row.target + '" title="' + $.t("common.form.removeAttribute") + ': ' + row.target + '" class="fa fa-times-circle removePropertyBtn" style="margin-top:4px;"></i>' : '';
                         }
                     },
                     {
@@ -273,7 +275,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                             return (def.length > 0) ? '<span class="attrTabBtn" style="cursor:pointer;" rowId="' + opt.rowId + '" tab="default">' + def + '</span>' : '';
                         }
                     },
-                    /*
+                    /* SAMPLE TEMPORARILY DISABLED
                      {
                      "name": "script",
                      "label": "Transform Script",
@@ -289,7 +291,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         "align": "center",
                         "title": false,
                         "formatter": function(hasConditionScript,opt,row){
-                            return (hasConditionScript) ? '<button class="glyph-icon glyph-icon-filter attrTabBtn" style="height:17px;margin-bottom:4px;" rowId="' + opt.rowId + '" title="' + $.t('templates.mapping.conditionScriptApplied') + '"  tab="condition">&nbsp;&nbsp;&nbsp;</button>' : '';
+                            return (hasConditionScript) ? '<i class="fa fa-filter attrTabBtn" rowId="' + opt.rowId + '" title="' + $.t('templates.mapping.conditionScriptApplied') + '"  tab="condition"></i>' : '';
                         }
                     }/*,
                      {
@@ -301,7 +303,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
             this.data.mapProps = mapProps;
 
-            /*
+            /* SAMPLE TEMPORARILY DISABLED
              if(this.currentMapping().linkQualifiers) {
              _.each(this.currentMapping().linkQualifiers, function (link) {
              cols.push({
@@ -316,7 +318,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
              }
              */
 
-            /*mappingUtils.setupSampleSearch($("#findSampleSource",this.$el),this.mapping,autocompleteProps, _.bind(function(item){
+            /* SAMPLE TEMPORARILY DISABLED
+            mappingUtils.setupSampleSearch($("#findSampleSource",this.$el),this.mapping,autocompleteProps, _.bind(function(item){
              conf.globalData.sampleSource = item;
              sampleSource = item;
              $('#mappingTable',this.$el).jqGrid('setGridParam', {
@@ -329,9 +332,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                 datatype: "local",
                 data: gridFromMapProps(mapProps),
                 height: 'auto',
-                width: 960,
-                //autowidth: false,
-                //shrinkToFit: false,
+                autowidth:true,
+                shrinkToFit:true,
                 rowNum: mapProps.length,
                 pager: 'mappingTable_pager',
                 hidegrid: false,
@@ -339,13 +341,11 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                 cmTemplate: {sortable:false},
                 onSelectRow: function(id){
                     if(id !== "blankRow"){
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, $('#' + id)[0].rowIndex]});
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, id]});
                     }
                 },
                 beforeSelectRow: function(rowid, e) {
-                    //this prevents the row from being selected if the remove button is clicked
-                    var btn = $('.removeBtn', e.target);
-                    if (e.target.tagName.toUpperCase() === "BUTTON" || btn.length > 0) {
+                    if ($(e.target).hasClass("removePropertyBtn")) {
                         return false;
                     }
                     return true;
@@ -394,6 +394,10 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
         render: function(args, callback) {
             MappingBaseView.child = this;
             MappingBaseView.render(args,_.bind(function(){
+                $(window).resize(function () {
+                    $("#mappingTable").setGridWidth( $('.jqgrid-container').width());
+                });
+
                 this.loadData(args, callback);
             }, this));
         },

@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define, $, _, Handlebars, window */
 
 define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
@@ -139,7 +139,8 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                 total: function (obj) { return Math.ceil(parseInt(totalRecords, 10)/obj.result[0].limit); },
                                 records: function (obj) { return totalRecords; }
                             },
-                            autowidth: true,
+                            autowidth:true,
+                            shrinkToFit:true,
                             height: "100%",
                             url: "/openidm/endpoint/reconResults?_queryId=reconResults&source="+ this.mapping.source +
                                 "&target="+ this.mapping.target +
@@ -217,15 +218,6 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                                 txt = "<span class='newLinkWarning errorMessage fa fa-exclamation-triangle' title='" + $.t("templates.mapping.analysis.newLinkCreated") + "'></span> " + txt;
                                             }
 
-                                            if(reconRecord.hasLink){
-
-                                                if(!reconRecord.linkQualifier) {
-                                                    reconRecord.linkQualifier = $.t("templates.mapping.analysis.noLinkQualifier");
-                                                }
-
-                                                txt = "<span class='float-right fa fa-chain fa-lg linkIcon' title='" + reconRecord.linkQualifier + "'></span>" + txt;
-                                            }
-
                                             return txt;
                                         } else {
                                             return "Not Found";
@@ -299,6 +291,13 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
             this.parentRender(_.bind(function() {
                 if(this.data.recon && !MappingBaseView.data.syncCanceled){
                     this.renderReconResults(null, callback);
+
+                    $(window).resize(function () {
+                        if(this.$el) {
+                            this.$el.find("#analysisGridContainer .recon-grid").setGridWidth(this.$el.find("#analysisGridContainer").width());
+                        }
+                    });
+
                 } else {
                     if(callback) {
                         callback();

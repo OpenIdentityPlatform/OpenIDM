@@ -31,65 +31,41 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptEditor",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
+    "org/forgerock/openidm/ui/admin/util/ScriptList"
 ], function(AdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,
             ScriptEditor,
             InlineScriptEditor,
-            BrowserStorageDelegate) {
+            BrowserStorageDelegate,
+            ScriptList) {
     var MappingScriptsView = AdminAbstractView.extend({
         template: "templates/admin/sync/MappingScriptsTemplate.html",
-        baseTemplate: "templates/admin/AdminBaseTemplate.html",
-
-        addScript: function() {
-            var event = this.$el.find(".scriptEvents option:selected"),
-                defaultScript = null;
-
-            this.$el.find(".scriptContainer").append("<div class='scriptEditor'></div>");
-
-            if (_.has(this.model.mapping, event.val())) {
-                defaultScript = this.model.mapping[event.val()];
-            }
-
-            this.$el.find(".scriptContainer").append("<div class='scriptEditor'></div>");
-
-            this.model.scriptEditors[event.val()] = ScriptEditor.generateScriptEditor({
-                "element": this.$el.find(".scriptContainer .scriptEditor").last(),
-                "eventName": event.val(),
-                "deleteCallback": _.bind(function(script) {
-                    this.model.availableScripts.push(script.eventName);
-                    delete this.model.scriptEditors[script.eventName];
-                    this.updateScripts();
-                }, this),
-                "scriptData": defaultScript
-            });
-
-            this.model.availableScripts.splice(this.model.availableScripts.indexOf(event.val()), 1);
-            this.updateScripts();
-            event.remove();
-        },
-
-        loadDefaultScripts: function() {
-            _.each(_.clone(this.model.scripts), function(script) {
-                if (_.has(this.model.mapping, script)) {
-                    this.$el.find(".scriptEvents").val(script);
-                    this.addScript();
-                }
-            }, this);
-        },
 
         init: function() {
+            var addedEvents = _.keys(_.pick(this.model.mapping,this.model.scripts)),
+                eventName,
+                defaultScript;
+            
             this.model.availableScripts = _.clone(this.model.scripts);
+            this.model.scriptEditors = [];
 
             if (this.model.scripts.length > 1) {
-                this.updateScripts();
-                this.loadDefaultScripts();
+                
+                ScriptList.generateScriptList({
+                    element: this.$el.find(".scriptContainer"),
+                    label: "",
+                    selectEvents: _.difference(this.model.availableScripts, addedEvents),
+                    addedEvents: addedEvents,
+                    eventHooks: this.model.scriptEditors,
+                    currentObject: this.model.mapping
+                });
 
             } else if (this.model.scripts.length === 1) {
-                var eventName = this.model.scripts[0],
-                    defaultScript = null;
+                eventName = this.model.scripts[0];
+                defaultScript = null;
 
                 this.model.singleScript = true;
                 this.$el.find(".addScriptContainer").hide();
@@ -108,49 +84,40 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
             }
         },
 
-        updateScripts: function() {
-            this.$el.find(".scriptEvents").empty();
-
-            _.chain(this.model.availableScripts)
-                .sortBy()
-                .each(function(script) {
-                    this.$el.find(".scriptEvents").append("<option value='" + script + "'>" + script + "</option>");
-                }, this);
-
-            if (this.model.availableScripts.length === 0) {
-                this.$el.find(".addScript").prop('disabled', true);
-                this.$el.find(".scriptEvents").prop('disabled', true);
-                this.$el.find(".allAdded").show();
-            } else {
-                this.$el.find(".addScript").prop('disabled', false);
-                this.$el.find(".scriptEvents").prop('disabled', false);
-                this.$el.find(".allAdded").hide();
-            }
-        },
-
         saveScripts: function(e) {
             e.preventDefault();
 
-            var scriptHook = null;
-
-            // Update the mapping with the script editors, remove any instances of uncompleted editors.
-            _.each(this.model.scriptEditors, function(scriptEditor, eventName) {
-                if (this.model.singleScript) {
-                    scriptHook = scriptEditor.generateScript();
-                } else {
+            var scriptHook = null,
+                tmpEditor,
+                eventName,
+                currentScripts,
+                scriptsToDelete,
+                addRemoveFromMapping = _.bind(function(){
+                    if (! _.isNull(scriptHook)) {
+                        this.model.mapping[eventName] = scriptHook;
+                    } else if (_.has(this.model.mapping, eventName)) {
+                        delete this.model.mapping[eventName];
+                    }
+                },this);
+            
+            if(this.model.singleScript){
+                tmpEditor = this.model.scriptEditors.result;
+                scriptHook = tmpEditor.generateScript();
+                eventName = tmpEditor.model.eventName;
+                addRemoveFromMapping();
+            } else {
+                currentScripts = _.map(this.model.scriptEditors,function(editor) { return editor.getScriptHook().eventName; });
+                scriptsToDelete = _.difference(this.model.availableScripts,currentScripts);
+                
+                // Update the mapping with the script editors, remove any instances of uncompleted editors.
+                _.each(this.model.scriptEditors, function(scriptEditor) {
+                    eventName = scriptEditor.getScriptHook().eventName;
                     scriptHook = scriptEditor.getScriptHook().script;
-                }
+                    addRemoveFromMapping();
+                }, this);
 
-                if (! _.isNull(scriptHook)) {
-                    this.model.mapping[eventName] = scriptHook;
-                } else if (_.has(this.model.mapping, eventName)) {
-                    delete this.model.mapping[eventName];
-                }
-            }, this);
-
-            // Remove any mapping instances of scripts that are not added
-            if (!this.model.singleScript) {
-                _.each(this.model.availableScripts, function(script) {
+                // Remove any mapping instances of scripts that are not added
+                _.each(scriptsToDelete, function(script) {
                     if (_.has(this.model.mapping, script)) {
                         delete this.model.mapping[script];
                     }

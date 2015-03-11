@@ -70,11 +70,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
                     this.saveCallback = _.noop;
                 }
 
-                this.parentRender(function() {
-                    if(callback) {
-                        callback();
-                    }
-                });
+                this.parentRender(callback);
             },
 
             editScriptHook: function() {
@@ -115,12 +111,12 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
             }
         });
 
-    seInstance.generateScriptEditor = function(loadingObject) {
+    seInstance.generateScriptEditor = function(loadingObject,callback) {
         var editor = {};
 
         $.extend(true, editor, new ScriptEditor());
 
-        editor.render(loadingObject);
+        editor.render(loadingObject,callback);
 
         return editor;
     };

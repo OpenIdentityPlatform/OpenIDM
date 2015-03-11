@@ -1,226 +1,265 @@
 {{#unless editState}}
-<fieldset>
-    <legend><span>{{t "templates.connector.ldapConnector.ldapType"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body">
-        <div class="group-field-block group-lead no-validation-block">
-            <label for="ldapTemplateType" class="light">{{t "templates.connector.ldapConnector.ldapType"}}</label>
-            <select data-validator="required" data-validator-event="changed" id="ldapTemplateType" class="form-size-m">
-                {{#each ldapSelector}}
-                <option value="{{fileName}}">{{displayName}}</option>
-                {{/each}}
-            </select>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="ldapSelectionHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#ldapSelection" aria-expanded="true" aria-controls="ldapSelectionHeading" class="">{{t "templates.connector.ldapConnector.ldapType"}}</a>
+        </h4>
+    </div>
+    <div id="ldapSelection" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="ldapSelection" aria-expanded="true">
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="ldapTemplateType" class="col-sm-3 control-label">{{t "templates.connector.ldapConnector.ldapType"}}</label>
+                <div class="col-sm-8">
+                    <select name="enable" class="form-control" data-validator="required" data-validator-event="changed" id="ldapTemplateType">
+                        {{#each ldapSelector}}
+                        <option value="{{fileName}}">{{displayName}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
-</fieldset>
+</div>
 {{/unless}}
-<fieldset>
-    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body">
-        <div class="group-field-block group-lead">
-            <div class="separate-message">
-                <label for="host" class="light">{{t "templates.connector.ldapConnector.host"}}</label>
-                <input id="host" autocomplete="off" data-validator-event="keyup blur" data-validator="required" type="text" class="form-size-l" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" />
-                <span></span>
-                <div class="validation-message"></div>
-            </div>
-        </div>
 
-        <div class="group-field-block" style="display:none" id="certContainer">
-            <div class="separate-message">
-                <textarea id="certificate" name="certificate" class="certificate" placeholder="{{t "templates.connector.ldapConnector.certificateHint"}}" data-validator="certificate" data-validator-event="keyup change blur">{{publicKey}}</textarea>
-                <div class="validation-message"></div>
-            </div>
-        </div>
-
-        <div class="group-field-block">
-            <div class="separate-message small-outside-element">
-                <div class="inline">
-                    <label for="port" class="light">{{t "templates.connector.ldapConnector.port"}}</label>
-                    <input id="port" data-validator-event="keyup blur" data-validator="required" class="form-size-s inline-right" autocomplete="off" type="text" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
-                    <span></span>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#connectorSpecificBase" aria-expanded="true" aria-controls="connectorSpecificBaseHeading" class="">{{t "templates.connector.baseTitle"}}</a>
+        </h4>
+    </div>
+    <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
+        <div class="panel-body">
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="ldapHost">{{t "templates.connector.ldapConnector.host"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="ldapHost" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" data-validator-event="keyup blur" data-validator="required" />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
-                <div class="inline ssl-radio">
-                    <input id="ssl" autocomplete="off" type="checkbox" class="checkbox" name="configurationProperties.ssl" {{#if connectorDefaults.configurationProperties.ssl}} checked{{/if}} value="true">
-                    <label for="ssl" class="label-size-s light">{{t "templates.connector.ldapConnector.ssl"}}</label>
-                </div>
-                <div class="inline inline-link">
-                    <a href="#" id="toggleCert" style="display:none;">{{t "templates.connector.ldapConnector.showCert"}}</a>
+            </div>
+
+            <div class="form-group has-feedback separate-message" style="display:none" id="certContainer">
+                <textarea id="certificate" name="certificate" class="form-control certificate" placeholder="{{t "templates.connector.ldapConnector.certificateHint"}}" data-validator="certificate" data-validator-event="keyup change blur">{{publicKey}}</textarea>
+                <div class="validation-message"></div>
+            </div>
+
+            <div class="form-group has-feedback">
+                <label for="port" class="control-label col-sm-3">{{t "templates.connector.ldapConnector.port"}}</label>
+                <div class="input-group col-sm-7 ldap-port-group">
+                    <input id="port" aria-describedby="ssl-addon" data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
+                    <div class="input-group-addon" id="ssl-addon">
+                        <input id="ssl" autocomplete="off" type="checkbox" name="configurationProperties.ssl" {{#if connectorDefaults.configurationProperties.ssl}} checked{{/if}} value="true">
+                        <label for="ssl">{{t "templates.connector.ldapConnector.ssl"}}</label>
+                        <a href="#" id="toggleCert" style="display:none;">{{t "templates.connector.ldapConnector.showCert"}}</a>
+                    </div>
                 </div>
                 <div class="validation-message"></div>
             </div>
-        </div>
 
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="principal" class="light">{{t "templates.connector.ldapConnector.username"}}</label>
-                <input id="principal" data-validator-event="keyup blur" data-validator="required" class="form-size-l" autocomplete="off" type="text" name="configurationProperties.principal" placeholder="{{t "templates.connector.ldapConnector.usernamePlaceholder"}}" value="{{connectorDefaults.configurationProperties.principal}}" />
-                <span></span>
-                <div class="validation-message"></div>
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="ldapPrincipal">{{t "templates.connector.ldapConnector.username"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="ldapPrincipal" name="configurationProperties.principal" placeholder="{{t "templates.connector.ldapConnector.usernamePlaceholder"}}" value="{{connectorDefaults.configurationProperties.principal}}" data-validator-event="keyup blur" data-validator="required" />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                </div>
             </div>
-        </div>
 
-        <div class="group-field-block no-validation-block">
-            <div class="separate-message">
-                <label for="credentials" class="light">{{t "templates.connector.ldapConnector.password"}}</label>
-                <input id="credentials" autocomplete="off" class="form-size-l" type="password" name="configurationProperties.credentials" value="" {{#if connectorDefaults.configurationProperties.credentials}} placeholder="********" {{/if}} />
+            <div class="form-group has-feedback">
+                <label class="col-sm-3 control-label" for="credentials">{{t "templates.connector.ldapConnector.password"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="password" id="credentials" name="configurationProperties.credentials" value="" {{#if connectorDefaults.configurationProperties.credentials}} placeholder="********" {{/if}} />
+                </div>
             </div>
         </div>
     </div>
-</fieldset>
-<fieldset>
-    <legend><span>{{t "templates.connector.ldapConnector.baseContextTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body connector-array-component" id="baseContextWrapper">
-        <div class="group-field-block group-note-lead">
-            <p class="note">{{t "templates.connector.ldapConnector.baseContextNote"}}</p>
-            <button type="button" field_type="baseContext" id="addBaseContextButton" name="addBaseContextButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-lg fa-plus"></i></button>
-        </div>
-        {{#if connectorDefaults.configurationProperties.baseContexts.length}}
-        {{#each_with_index connectorDefaults.configurationProperties.baseContexts}}
-        <div class="field group-field-block">
-            <div class="separate-message outside-element">
-                <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
-                <div class="inline">
-                    <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
-                    <span></span>
+</div>
+
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="ldapBaseContextHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#ldapBaseContext" aria-expanded="true" aria-controls="ldapBaseContextHeading" class="">{{t "templates.connector.ldapConnector.baseContextTitle"}}</a>
+        </h4>
+    </div>
+    <div id="ldapBaseContext" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="ldapBaseContext" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="baseContextWrapper">
+            <div>
+                <p>{{t "templates.connector.ldapConnector.baseContextNote"}}</p>
+                <button type="button" field_type="baseContext" id="addBaseContextButton" name="addBaseContextButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.baseContexts.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.baseContexts}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
                 </div>
                 <div class="validation-message"></div>
             </div>
-        </div>
-        {{/each_with_index}}
-        {{else}}
-        <div class="field group-field-block">
-            <div class="separate-message outside-element">
-                <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
-                <div class="inline">
-                    <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
-                    <span></span>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
                 </div>
                 <div class="validation-message"></div>
             </div>
+            {{/if}}
         </div>
-        {{/if}}
-    </div>
-    <div class="group-field-block group-note-lead">
-        <p class="note">{{t "templates.connector.ldapConnector.syncMessage"}} <input {{#if baseContextsSameResults}}checked{{/if}} type="checkbox" id="syncBaseContext"></p>
-    </div>
-</fieldset>
-<fieldset id="baseContextsToSynchronizeHolder" {{#if baseContextsSameResults}} style="display:none;" {{/if}}>
-    <legend><span>{{t "templates.connector.ldapConnector.baseContextSyncTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body connector-array-component" id="baseContextsToSynchronizeWrapper">
-        <div class="group-field-block group-note-lead">
-            <button type="button" field_type="baseContextsToSynchronize" id="addBaseContextToSynchronizeButton" name="addBaseContextToSynchronizeButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-lg fa-plus"></i></button>
+        <div class="panel-body">
+            <p>{{t "templates.connector.ldapConnector.syncMessage"}} <input {{#if baseContextsSameResults}}checked{{/if}} type="checkbox" id="syncBaseContext"></p>
         </div>
+    </div>
+</div>
+
+<div class="panel panel-default panel-collapse" id="baseContextsToSynchronizeHolder" {{#if baseContextsSameResults}} style="display:none;" {{/if}}>
+<div class="panel-heading" role="tab">
+    <h4 class="panel-title">
+        <a data-toggle="collapse" href="#baseContextsToSynchronize" aria-expanded="true" aria-controls="baseContextsToSynchronizeHeading" class="">{{t "templates.connector.ldapConnector.baseContextSyncTitle"}}</a>
+    </h4>
+</div>
+<div id="baseContextsToSynchronize" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="ldapBaseContext" aria-expanded="true">
+    <div class="panel-body connector-array-component" id="baseContextsToSynchronizeWrapper">
+        <div>
+            <p>{{t "templates.connector.ldapConnector.baseContextToSyncNote"}}</p>
+            <button type="button" field_type="baseContextsToSynchronize" id="addBaseContextToSynchronizeButton" name="addBaseContextButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-plus"></i></button>
+        </div>
+
         {{#if connectorDefaults.configurationProperties.baseContextsToSynchronize.length}}
         {{#each_with_index connectorDefaults.configurationProperties.baseContextsToSynchronize}}
-        <div class="field group-field-block">
-            <div class="separate-message outside-element">
-                <label class="light">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
-                <div class="inline">
-                    <button type="button" field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContextsToSynchronize" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
-                    <span></span>
+        <div class="form-group has-feedback field">
+            <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
+            <div class="input-group col-sm-8">
+                <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                <div class="input-group-addon">
+                    <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                 </div>
-                <div class="validation-message"></div>
             </div>
+            <div class="validation-message"></div>
         </div>
         {{/each_with_index}}
         {{else}}
-        <div class="field group-field-block">
-            <div class="separate-message outside-element">
-                <label class="light">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
-                <div class="inline">
-                    <button type="button" field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                    <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContextsToSynchronize" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
-                    <span></span>
+        <div class="form-group has-feedback field">
+            <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
+            <div class="input-group col-sm-8">
+                <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                <div class="input-group-addon">
+                    <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                 </div>
-                <div class="validation-message"></div>
             </div>
+            <div class="validation-message"></div>
         </div>
         {{/if}}
     </div>
-</fieldset>
-<fieldset>
-    <legend><span>{{t "templates.connector.ldapConnector.addUsersTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body">
-        <div class="group-field-block group-lead no-validation-block">
-            <label class="light">{{t "templates.connector.ldapConnector.accountSearchFilter"}}</label>
-            <input autocomplete="off" class="filter form-size-l" type="text" id="accountSearchFilter" name="configurationProperties.accountSearchFilter" value="{{connectorDefaults.configurationProperties.accountSearchFilter}}" />
-        </div>
-        <div class="connector-array-component" id="accountObjectClassesWrapper">
-            <div class="group-field-block group-field-buttons">
-                <button type="button" field_type="accountObjectClasses" id="addAccountObjectClassesButton" name="addAccountObjectClassesButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.addAccountObjectClasses"}}</span><i class="fa fa-lg fa-plus"></i></button>
-            </div>
-            {{#if connectorDefaults.configurationProperties.accountObjectClasses.length}}
-                {{#each_with_index connectorDefaults.configurationProperties.accountObjectClasses}}
-                    <div class="group-field-block field">
-                        <div class="separate-message outside-element">
-                            <label class="light">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
-                            <div class="inline">
-                                <button type="button" field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                                <input data-validator-event="keyup blur" data-validator="required" class="form-size-m" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="user" value="{{value}}"/>
-                                <span></span>
-                            </div>
-                            <div class="validation-message"></div>
-                        </div>
-                    </div>
-                {{/each_with_index}}
-            {{else}}
-                <div class="group-field-block field">
-                    <div class="separate-message outside-element">
-                        <label class="light">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
-                        <div class="inline">
-                            <button type="button" field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                            <input data-validator-event="keyup blur" data-validator="required" class="form-size-m" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="user" value=""/>
-                            <span></span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
-                </div>
-            {{/if}}
-        </div>
-    </div>
-</fieldset>
-<fieldset>
-    <legend><span>{{t "templates.connector.ldapConnector.addGroupTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body">
-        <div class="group-field-block group-lead no-validation-block">
-            <label class="light">Group Filter</label>
-            <input autocomplete="off" class="filter form-size-l" type="text" id="groupSearchFilter" name="configurationProperties.groupSearchFilter" value="{{connectorDefaults.configurationProperties.groupSearchFilter}}" />
-        </div>
-        <div class="connector-array-component" id="groupObjectClassesWrapper">
-            <div class="group-field-block">
-                <button type="button" field_type="groupObjectClasses" id="addGroupObjectClassesButton" name="addGroupObjectClassesButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.addGroupObjectClasses"}}</span><i class="fa fa-lg fa-plus"></i></button>
-            </div>
-            {{#if connectorDefaults.configurationProperties.groupObjectClasses.length}}
-                {{#each_with_index connectorDefaults.configurationProperties.groupObjectClasses}}
-                    <div class="group-field-block field">
-                        <div class="separate-message outside-element">
-                            <label class="light">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
-                            <div class="inline">
-                                <button type="button" field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                                <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="group" value="{{value}}"/>
-                                <span></span>
-                            </div>
-                            <div class="validation-message"></div>
-                        </div>
-                    </div>
-                {{/each_with_index}}
-            {{else}}
-                <div class="group-field-block field">
-                    <div class="separate-message outside-element">
-                        <label class="light">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
-                        <div class="inline">
-                            <button type="button" field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                            <input class="form-size-m" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="group" value=""/>
-                            <span></span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
-                </div>
-            {{/if}}
-        </div>
-    </div>
-</fieldset>
+</div>
+</div>
 
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#accountObject" aria-expanded="true" aria-controls="accountObjectHeading" class="">{{t "templates.connector.ldapConnector.addUsersTitle"}}</a>
+        </h4>
+    </div>
+    <div id="accountObject" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="accountObjectClassesWrapper" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="accountObjectClassesWrapper">
+            <div class="form-group">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountSearchFilter"}}</label>
+                <div class="input-group col-sm-8">
+                    <input autocomplete="off" class="form-control filter" type="text" id="accountSearchFilter" name="configurationProperties.accountSearchFilter" value="{{connectorDefaults.configurationProperties.accountSearchFilter}}" />
+                </div>
+            </div>
+
+            <hr/>
+
+            <div>
+                <button type="button" field_type="accountObjectClasses" id="addAccountObjectClassesButton" name="addAccountObjectClassesButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.ldapConnector.addAccountObjectClasses"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.accountObjectClasses.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.accountObjectClasses}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="Account" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="Account" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#groupObject" aria-expanded="true" aria-controls="groupObjectHeading" class="">{{t "templates.connector.ldapConnector.addGroupTitle"}}</a>
+        </h4>
+    </div>
+    <div id="groupObject" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="groupObjectClassesWrapper" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="groupObjectClassesWrapper">
+            <div class="form-group">
+                <label class="control-label col-sm-3">Group Filter</label>
+                <div class="input-group col-sm-8">
+                    <input autocomplete="off" class="form-control filter" type="text" id="groupSearchFilter" name="configurationProperties.groupSearchFilter" value="{{connectorDefaults.configurationProperties.groupSearchFilter}}" />
+                </div>
+            </div>
+
+            <hr/>
+
+            <div>
+                <button type="button" field_type="groupObjectClasses" id="addGroupObjectClassesButton" name="addGroupObjectClassesButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.ldapConnector.addGroupObjectClasses"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.groupObjectClasses.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.groupObjectClasses}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" data-validator-event="keyup blur" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="Group" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group has-feedback field">
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="Group" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+                <div class="validation-message"></div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

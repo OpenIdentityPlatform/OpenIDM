@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
         
         events: {
             "click .dialogActions input[type=submit]": "formSubmit",
-            "click .dialogCloseCross img": "close",
+            "click .dialogCloseCross": "close",
             "click input[name='close']": "close",
             "click input[name='submitAnswer']": "submitAnswer",
             "click .dialogContainer": "stop",
@@ -56,11 +56,13 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
             this.securityQuestions = {};
             this.actions = [];
             this.addAction($.t("common.form.update"), "submit");
+            this.addTitle($.t("templates.user.ForgottenPasswordTemplate.forgottenPasswordQuestion"));
+
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el); 
                 this.$el.find(".dialogActions input[type=submit]").hide();
                 if (conf.forgottenPasswordUserName) {
-                    this.$el.find("input[name=resetUsername]").val(conf.forgottenPasswordUserName);
+                    this.$el.find("input[name=MresetUsername]").val(conf.forgottenPasswordUserName);
                     this.$el.find("input[name=resetUsername]").trigger("change");
                     delete conf.forgottenPasswordUserName;
                 }

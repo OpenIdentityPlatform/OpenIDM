@@ -1,89 +1,101 @@
 <div>
-<form class="filter-form form">
-    <div class="filter">{{filterString}}</div>
+    <form class="filter-form form-horizontal">
+        <div class="filter well">{{filterString}}</div>
 
-    <div class="expressionTree">
-        <fieldset>
-            <div>
+        <div class="expressionTree">
+            <fieldset>
+                <div class="row">
 
-                <ul>
-                    <li index="" class="node">
+                    <ul>
+                        <li  index="" class="node">
 
-                        {{#filterDisplay filter config}}
+                            {{#filterDisplay filter config}}
 
-                        {{#if isExpr}}
+                            {{#if isExpr}}
 
-                        <select class="op">
-                            {{#each options}}
-                            <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
-                            {{/each}}
-                        </select>
+                            <div class="form-group type-form-group">
+                                <div class="col-md-4 type-group">
+                                    <select class="op select-filter form-control">
+                                        {{#each options}}
+                                        <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                                        {{/each}}
+                                    </select>
+                                    <button type="button" field_type="baseContext" title="" class="btn btn-default remove-btn"><i class="fa fa-minus"></i></button>
+                                </div>
+                            </div>
 
-                        <button type="button" field_type="baseContext" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-minus"></i></button>
+                            <div class="form-group filter-group">
+                                <div class="col-md-3 name-body">
+                                    {{#if extensible}}
+                                    <input type="text" value="{{extensible.matchType}}" class="name form-control">
+                                    {{else}}
+                                    <input type="text" value="{{name}}" class="name form-control">
+                                    {{/if}}
+                                </div>
+                                <div class="col-md-4 tag-body">
+                                    <select class="tag form-control">
+                                        {{#each tags}}
+                                        <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
+                                <div class="col-md-3 value-body">
+                                    <input type="text" value="{{value}}" class="value form-control">
+                                </div>
+                            </div>
+                            {{else}}
 
-                        <br>
-                        {{#if extensible}}
-                        <input type="text" value="{{extensible.matchType}}" class="name">
-                        {{else}}
-                        <input type="text" value="{{name}}" class="name">
-                        {{/if}}
+                            <div class="col-md-4 op-body">
+                                <select class="op form-control">
+                                    {{#each options}}
+                                    <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
 
-                        <select class="tag">
-                            {{#each tags}}
-                            <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
-                            {{/each}}
-                        </select>
+                            {{#if isMultiValueType}}
 
-                        <input type="text" value="{{value}}" class="value">
+                            <button type="button" field_type="baseContext" title="" class="btn btn-default add-btn"><i class="fa fa-plus"></i></button>
 
-                        {{else}}
+                            {{/if}}
+                            {{/if}}
 
-                        <select class="op">
-                            {{#each options}}
-                            <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
-                            {{/each}}
-                        </select>
+                            {{#if children.length}}
 
-                        {{#if isMultiValueType}}
-                        <button type="button" field_type="baseContext" title="" class="clean-btn add-btn"><i class="fa fa-lg fa-plus"></i></button>
-                        {{/if}}
-                        {{/if}}
+                            <ul class="subgroup">
 
-                        {{#if children.length}}
+                                {{#each children}}
 
-                        <ul>
+                                <li index="{{index}}" class="node">
 
-                            {{#each children}}
+                                    {{{filterDisplay this ../../config}}}
 
-                            <li index="{{index}}" class="node">
+                                    {{#unless lastChild}}
+                                    {{../../delimiter}}
+                                    {{/unless}}
 
-                                {{{filterDisplay this ../../config}}}
+                                </li>
 
-                                {{#unless lastChild}}
-                                <br>
-                                {{../../delimiter}}
-                                {{/unless}}
+                                {{/each}}
 
-                            </li>
+                            </ul>
 
-                            {{/each}}
+                            {{/if}}
 
-                        </ul>
+                            {{/filterDisplay}}
 
-                        {{/if}}
+                        </li>
+                    </ul>
 
-                        {{/filterDisplay}}
-
-                    </li>
-                </ul>
-
+                </div>
+            </fieldset>
+        </div>
+        {{#if showSubmitButton}}
+        <div class="clearfix">
+            <div class="pull-right">
+                <input type="submit" value="{{t 'common.form.save'}}" class="btn btn-primary">
             </div>
-        </fieldset>
-    </div>
-    {{#if showSubmitButton}}
-    <div class="float-right group-actions-block">
-        <input type="submit" value="{{t 'common.form.save'}}" class="button">
-    </div>
-    {{/if}}
-</form>
+        </div>
+        {{/if}}
+    </form>
 </div>

@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,18 +26,19 @@
 
 define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/openidm/ui/admin/authentication/AuthenticationView"
-], function(AdminAbstractView, AuthenticationView) {
+    "org/forgerock/openidm/ui/admin/authentication/AuthenticationView",
+    "bootstrap-tabdrop"
+], function(AdminAbstractView, AuthenticationView, tabdrop) {
 
     var SettingsView = AdminAbstractView.extend({
         template: "templates/admin/settings/SettingsTemplate.html",
         events: {},
         render: function(args, callback) {
+            this.parentRender(_.bind(function () {
+                AuthenticationView.render();
 
-                this.parentRender(_.bind(function () {
-                    $("#settingsTabs", this.$el).tabs();
-                    AuthenticationView.render();
-                }, this));
+                this.$el.find(".nav-tabs").tabdrop();
+            }, this));
         }
     });
 

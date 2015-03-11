@@ -1,169 +1,107 @@
-<div class="content" id="userregistration">
-    
-    <div class="container-shadow">
-
-        <h1 class="float-left">{{t "templates.user.UserRegistrationTemplate.registerYourAccount"}}</h1>    
-        <div class="float-right" style="padding-top:2px">{{t "templates.user.UserRegistrationTemplate.haveAccoutQuestion"}} <a href="{{url 'login'}}" class="active bold">{{t "templates.user.UserRegistrationTemplate.logIn"}}</a></div>
-   
-        <form action="" method="post" class="form clearfix" autocomplete="off">
-
-            <fieldset class="fieldset col0">
-            
-                <div class="group-field-block">
-                    <label for="userName" class="light align-right">{{t "common.user.username"}}</label>
-                    <div class="float-left separate-message">
-                        <div class="group-input-span">
-                            <input type="text" id="userName" name="userName" value="" data-validation-dependents="password" required autofocus/>
-                            <span class="error">x</span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
+<div class="container">
+    <div class="row registration" id="userRegistration">
+        <div class="col-sm-6 col-sm-offset-3">
+            <form class="form-horizontal" role="form">
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.username"}}' class="form-control input-lg" type="text" id="userName" name="userName" value="" data-validation-dependents="password" required autofocus/>
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
 
-                <div class="group-field-block">
-                    <label for="mail" class="light align-right">{{t "common.user.emailAddress"}}</label>
-                    <div class="float-left separate-message">
-                        <div class="group-input-span">
-                            <input type="email" id="mail" name="mail" value="" required />
-                            <span class="error">x</span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.emailAddress"}}' class="form-control input-lg" type="email" id="mail" name="mail" value="" required />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
 
-                <div class="group-field-block">
-                    <label for="givenName" class="light align-right">{{t "common.user.givenName"}}</label>
-                    <div class="float-left separate-message">
-                        <div class="group-input-span">
-                            <input type="text" id="givenName" name="givenName" value="" data-validation-dependents="password" required/>
-                            <span class="error">x</span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.givenName"}}' class="form-control input-lg" type="text" id="givenName" name="givenName" value="" data-validation-dependents="password" required />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
 
-                <div class="group-field-block">
-                    <label for="sn" class="light align-right">{{t "common.user.familyName"}}</label>
-                    <div class="float-left separate-message">
-                        <div class="group-input-span">
-                            <input type="text" id="sn" name="sn" value="" data-validation-dependents="password" required/>
-                            <span class="error">x</span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.familyName"}}' class="form-control input-lg" type="text" id="sn" name="sn" value="" data-validation-dependents="password" required />
+                    <div class="validation-message"></div>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
 
-                <div class="group-field-block">
-                    <label for="telephoneNumber" class="light align-right">{{t "common.user.phoneNumber"}}</label>
-                    <div class="float-left separate-message">
-                        <div class="group-input-span">
-                            <input type="tel" id="telephoneNumber" name="telephoneNumber" value="" required />
-                            <span class="error">x</span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.phoneNumber"}}' class="form-control input-lg" type="tel" id="telephoneNumber" name="telephoneNumber" value="" required />
                 </div>
 
-            </fieldset>
+                <hr>
 
-        <!-- This hidden input is a work around for Chrome's lack of autocomplete functionality.  The field directly preceding a password field may be autopopulated if the user has a saved username and password on the current domain. -->
-        <input style="display:none;" />
-
-            <fieldset class="fieldset col0">
-
-                <div class="group-field-block ">
-                    <label for="password" class="light align-right">{{t "common.user.password"}}</label>
-                    <div class="group-input-span">
-                        <input type="password" name="password" value="" data-validation-dependents="passwordConfirm" required/>
-                        <span class="error">x</span>
-                    </div>
+                <h4>{{t "common.user.password"}}</h4>
+                <input style="display:none;" />
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.password"}}' class="form-control input-lg" type="password" name="password" value="" data-validation-dependents="passwordConfirm" required/>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
 
-
-                <div class="group-field-block">
-                    <label for="passwordConfirm" class="light align-right">{{t "common.user.confirmPassword"}}</label>
-                    <div class="group-input-span">
-                        <input type="password" name="passwordConfirm" value="" data-validator="passwordConfirm" data-validator-event="keyup change" required />
-                        <span class="error">x</span>
-                    </div>
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.confirmPassword"}}' class="form-control input-lg" type="password" name="passwordConfirm" value="" data-validator="passwordConfirm"
+                           data-validator-event="keyup change" required/>
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
 
-        
-                <div class="group-field-errors validationRules col2b" data-for-validator="password passwordConfirm">
+                <div class="group-field-errors validationRules well" data-for-validator="password passwordConfirm">
                     <div class="field-rule">
-                        <span class="error">x</span><span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
-                    </div>
-                </div>  
-
-            </fieldset>
-
-            {{#securityQuestions}}
-            <fieldset class="fieldset col0">
-
-                <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}</p>
-              
-                <div class="group-field-block">
-                    <label for="securityQuestion" class="light align-right">{{t "common.user.securityQuestion"}}</label>
-                    <div class="group-input-span">
-                        <select id="securityQuestion" name="securityQuestion"></select>  
-                        <span class="error">x</span>
+                        <span class="error"><i class="fa validation-icon"></i></span><span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
                     </div>
                 </div>
 
-                <div class="group-field-block">
-                    <label for="securityAnswer" class="light align-right">{{t "common.user.securityAnswer"}}</label>
-                    <div class="float-left separate-message">
-                        <div class="group-input-span">
-                            <input type="text" name="securityAnswer" />
-                            <span class="error">x</span>
+                {{#securityQuestions}}
+                <div class="form-group form-group-large has-feedback">
+                    <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}</p>
+                    <select class="form-control input-lg" id="securityQuestion" name="securityQuestion"></select>
+                </div>
+
+                <div class="form-group form-group-large has-feedback">
+                    <input placeholder='{{t "common.user.securityAnswer"}}' class="form-control input-lg" type="tel" id="securityAnswer" name="securityAnswer" value="" required />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <div class="validation-message"></div>
+                </div>
+                {{/securityQuestions}}
+
+                {{#siteIdentification}}
+                <fieldset class="fieldset">
+
+                    <p>{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
+
+                    <div id="passPhrasePictures" class="site-image-select" style="padding-bottom:20px;">
+                        <div class="btn-group" data-toggle="buttons">
+                            {{siteImages siteImages}}
                         </div>
+                    </div>
+
+                    <div class="form-group form-group-large has-feedback">
+                        <input placeholder='{{t "common.user.sitePhrase"}}' class="form-control input-lg" type="tel" id="passPhrase" name="passPhrase" value="" required />
                         <div class="validation-message"></div>
+                        <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    </div>
+                </fieldset>
+                {{/siteIdentification}}
+
+                <hr>
+
+                <div class="remember-forgot">
+                    <div class="checkbox pull-left">
+                        <input type="checkbox" name="terms" value="yes" data-validator="termsOfUse"
+                               data-validator-event="click" data-validation-status="error">{{t
+                        "templates.user.UserRegistrationTemplate.agreeToTerms"}} <a href="#register/terms_of_use/"
+                                                                                    id="termOfUseLink" class="ice"
+                                                                                    title="terms">{{t
+                        "templates.user.TermsOfUseTemplate.termsOfUse"}}</a>
                     </div>
                 </div>
 
-            </fieldset>
-            {{/securityQuestions}}
-
-            {{#siteIdentification}}
-            <fieldset class="fieldset col0">
-
-                <p>{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
-                
-                <div class="ContentFlow" id="siteImageFlow">
-                    <div class="loadIndicator"><div class="indicator"></div></div>
-                    <div class="flow">
-                        {{siteImages siteImages}}
-                    </div>
-                    <div class="scrollbar"><div class="slider"></div></div>
-                </div>                     
-                
-           
-                <div class="group-field-block">
-                    <label for="passPhrase" class="light align-right">{{t "common.user.sitePhrase"}}</label>
-                    <div class="float-left separate-message">
-                        <div class="group-input-span">
-                            <input type="text" name="passPhrase" required/>
-                            <span class="error">x</span>
-                        </div>
-                        <div class="validation-message"></div>
-                    </div>
-                </div>
-
-            </fieldset>
-            {{/siteIdentification}}
-
-            <fieldset class="fieldset col0">
-                
-                <div class="float-left field-checkbox separate-message">
-                    <label>
-                        <input type="checkbox" name="terms" value="yes" data-validator="termsOfUse" data-validator-event="click" data-validation-status="error" required/> {{t "templates.user.UserRegistrationTemplate.agreeToTerms"}} <a href="#register/terms_of_use/" id="termOfUseLink" class="ice" title="terms">{{t "templates.user.TermsOfUseTemplate.termsOfUse"}}</a>
-                    </label>
-                    <div class="validation-message validation-message-checkbox"></div>
-                </div>
-
-                <input type="submit" name="register" class="button float-right" value="{{t "common.form.register"}}" disabled/>
-            </fieldset>
-       
-        </form>
+                <input type="submit" name="register" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t "common.form.register"}}"
+                disabled/>
+            </form>
+            <div class="toggle-login-register">
+                Already have an account? <a href="#login/">Login</a>
+            </div>
+        </div>
     </div>
 </div>

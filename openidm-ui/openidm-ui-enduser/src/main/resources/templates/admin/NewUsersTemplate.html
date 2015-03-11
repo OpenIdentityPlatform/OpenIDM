@@ -1,14 +1,18 @@
-<div id="users" class="content-bg">
-    <div class="clearfix">
-        <h1 class="float-left">{{t "common.user.usersList"}}</h1>
-        <div class="float-right">
-        	<a href="#users/add/" class="button" >{{t "common.form.addUser"}}</a>
-        	<input type="button"  class="button"  id="reloadGridBtn" value="{{t 'common.form.reloadGrid'}}" />
-        	<input type="button"  class="button"  id="clearFiltersBtn" value="{{t 'common.form.clearFilters'}}" disabled />
+<div class="container">
+    <div id="users" class="content-bg managedObjectsContainer">
+        <div class="page-header">
+            <div class='btn-toolbar pull-right'>
+                <div class='btn-group'>
+                    <a href="#users/add/"><button class="btn btn-primary" type="button">{{t "common.form.addUser"}}</button></a>
+                    <a href="#"><button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button></a>
+                    <a href="#"><button type="button"  class="btn btn-primary"  id="clearFiltersBtn" disabled>{{t 'common.form.clearFilters'}}</button></a>
+                </div>
+            </div>
+            <h3>{{t "common.user.usersList"}}</h3>
+        </div>
+
+        <div class="managedObjectsContainer">
+            <table id="usersTable"></table>
         </div>
     </div>
-        
-    
-    <table id="usersTable"></table>
-       
 </div>

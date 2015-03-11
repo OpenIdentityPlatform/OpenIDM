@@ -144,7 +144,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
         },
 
         addResourceMapping: function(event) {
-            var resourceSelected = $(event.currentTarget).parents(".resource-body"),
+            var resourceSelected = $(event.currentTarget).closest(".card"),
                 resourceType = resourceSelected.attr("data-resource-type"),
                 resourceData = null,
                 resourceLocation = null;

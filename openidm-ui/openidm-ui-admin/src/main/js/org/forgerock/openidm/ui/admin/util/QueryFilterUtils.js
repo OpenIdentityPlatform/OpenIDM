@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -256,8 +256,8 @@ define("org/forgerock/openidm/ui/admin/util/QueryFilterUtils", [
     obj.checkDepth = function(tokenizer, depth) {
         if (depth > VALUE_OF_MAX_DEPTH) {
             this.conversionError(tokenizer, "The query filter '" + tokenizer
-            + "' cannot be parsed because it contains more than " + VALUE_OF_MAX_DEPTH
-            + " nexted expressions");
+                + "' cannot be parsed because it contains more than " + VALUE_OF_MAX_DEPTH
+                + " nexted expressions");
         } else {
             return true;
         }

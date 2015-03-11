@@ -35,47 +35,47 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
         "icons" : [
             {
                 "type" : "org.identityconnectors.ldap.LdapConnector",
-                "iconClass" : "connector-icon-ldap",
+                "iconClass" : "icon-ldap",
                 "src" : "img/icon-ldap.png"
             },
             {
                 "type" : "org.forgerock.openicf.connectors.xml.XMLConnector",
-                "iconClass" : "connector-icon-xml",
+                "iconClass" : "icon-xml",
                 "src": "img/icon-xml.png"
             },
             {
                 "type" : "org.forgerock.openidm.salesforce",
-                "iconClass" : "connector-icon-cloud",
+                "iconClass" : "icon-cloud",
                 "src": "img/icon-cloud.png"
             },
             {
                 "type" : "org.identityconnectors.databasetable.DatabaseTableConnector",
-                "iconClass" : "connector-icon-databasetable",
+                "iconClass" : "icon-databasetable",
                 "src": "img/icon-db.png"
             },
             {
                 "type" : "org.forgerock.openicf.csvfile.CSVFileConnector",
-                "iconClass" : "connector-icon-csv",
+                "iconClass" : "icon-csv",
                 "src": "img/icon-csv.png"
             },
             {
                 "type" : "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
-                "iconClass" : "connector-icon-cloud",
+                "iconClass" : "icon-cloud",
                 "src": "img/icon-cloud.png"
             },
             {
                 "type" : "org.forgerock.openidm.salesforce.Salesforce",
-                "iconClass" : "connector-icon-cloud",
+                "iconClass" : "icon-cloud",
                 "src": "img/icon-cloud.png"
             },
             {
                 "type" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector",
-                "iconClass" : "connector-icon-scriptedsql",
+                "iconClass" : "icon-scriptedsql",
                 "src": "img/icon-scriptedsql.png"
             },
             {
                 "type" : "managedobject",
-                "iconClass" : "connector-icon-managedobject",
+                "iconClass" : "icon-database",
                 "src": "img/icon-managedobject.png"
             }
 

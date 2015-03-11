@@ -63,9 +63,9 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
 
             _.each(arrayComponents, function(component){
                 if($(component).find(".remove-btn").length === 1) {
-                    $(component).find(".remove-btn").hide();
+                    $(component).find(".input-group-addon").hide();
                 } else {
-                    $(component).find(".remove-btn").show();
+                    $(component).find(".input-group-addon").show();
                 }
             }, this);
         },
@@ -86,7 +86,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
             field.find('input[type=text]').val('');
 
             $('#' + field_type + 'Wrapper').append(field);
-            $('#' + field_type + 'Wrapper').find('.remove-btn').show();
+            $('#' + field_type + 'Wrapper').find('.input-group-addon').show();
 
             validatorsManager.bindValidators(this.$el.find('#' + field_type + 'Wrapper'));
             validatorsManager.validateAllFields(this.$el.find('#' + field_type + 'Wrapper'));
@@ -104,10 +104,10 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
 
             field_type = $(clickedEle).attr('field_type');
 
-            $(clickedEle).parents(".group-field-block").remove();
+            $(clickedEle).parents(".form-group").remove();
 
             if($('#' + field_type + 'Wrapper').find('.field').size() === 1){
-                $('#' + field_type + 'Wrapper').find('.remove-btn').hide();
+                $('#' + field_type + 'Wrapper').find('.input-group-addon').hide();
             }
 
             validatorsManager.bindValidators(this.$el.find('#' + field_type + 'Wrapper'));

@@ -9,72 +9,72 @@
         "messages" : {
             "CommonMessages" : {
                 "authenticationFailed" : "Login/password combination is invalid.",
-                "serviceUnavailable" : "Service unavailable",
-                "unknown" : "Unknown error. Please contact administrator",
+                "serviceUnavailable" : "Service unavailable.",
+                "unknown" : "Unknown error. Please contact administrator.",
                 "loggedIn" : "You have been successfully logged in.",
                 "errorFetchingData" : "Error fetching user data",
                 "loggedOut" : "You have been logged out.",
-                "unauthorized" : "Unauthorized access or session timeout",
-                "internalError" : "Internal server error",
+                "unauthorized" : "Unauthorized access or session timeout.",
+                "internalError" : "Internal server error.",
                 "forbiddenError" : "Forbidden request error.",
                 "notFoundError" : "Not found error.",
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
-                "securityDataChanged" : "Security data has been changed",
+                "securityDataChanged" : "Security data has been changed.",
                 "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
             },
             "UserMessages" : {
-                "changedPassword" : "Password has been changed",
-                "profileUpdateFailed" : "Problem during profile update",
-                "profileUpdateSuccessful" : "Profile has been updated",
+                "changedPassword" : "Password has been changed.",
+                "profileUpdateFailed" : "Problem during profile update.",
+                "profileUpdateSuccessful" : "Profile has been updated.",
                 "userNameUpdated" : "Username has been modified successfully.",
-                "afterRegistration" : "User has been registered successfully",
-                "siteIdentificationChanged" : "Site identification image has been changed",
-                "securityDataChanged" : "Security data has been changed",
-                "userAlreadyExists" : "User already exists",
+                "afterRegistration" : "User has been registered successfully.",
+                "siteIdentificationChanged" : "Site identification image has been changed.",
+                "securityDataChanged" : "Security data has been changed.",
+                "userAlreadyExists" : "User already exists.",
                 "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications."
+                "errorFetchingNotifications" : "Error fetching notifications."
             },
             "AdminMessages" : {
-                "cannotDeleteYourself" : "You can't delete yourself",
-                "userDeleted" : "User has been deleted",
-                "userDeleteError" : "Error when deleting user",
+                "cannotDeleteYourself" : "You cannot delete your own user record.",
+                "userDeleted" : "User has been deleted.",
+                "userDeleteError" : "Error when deleting user.",
                 "userApplicationsUpdate" : "Application settings have been changed.",
                 "completedTask" : "Task has been completed.",
                 "claimedTask" : "Task has been claimed.",
                 "unclaimedTask" : "Task has been unclaimed.",
-                "startedProcess" : "Process has been started",
+                "startedProcess" : "Process has been started.",
                 "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__"
             },
             "ConnectorMessages" : {
                 "connectorSaved" : "Connector has been saved, now testing connector.",
-                "connectorTestFailed" : "Your Validation Failed. See details below.",
-                "connectorSaveFail" : "Failed to save connector please try again.",
-                "connectorTestPass" : "Validation passed",
-                "deleteConnectorSuccess" : "Connector successfully deleted",
-                "deleteConnectorFail" : "Error deleting connector unable to remove connector.",
+                "connectorTestFailed" : "Your validation failed. See details below.",
+                "connectorSaveFail" : "Failed to save connector. Please try again.",
+                "connectorTestPass" : "Validation passed.",
+                "deleteConnectorSuccess" : "Connector successfully deleted.",
+                "deleteConnectorFail" : "Error deleting connector.",
                 "connectorsNotAvailable" : "System currently has no available connectors.",
-                "connectorBadMainVersion" : "Please enter a valid major version (Example: 1.1.0.0)",
-                "connectorBadMinorVersion" : "Please enter a valid minor version (Example: 1.1.0.0)",
-                "connectorVersionChange" : "Saving this connector will result in a version change since the current version is a range. Range __range__ now version __version__"
+                "connectorBadMainVersion" : "Please enter a valid major version (Example: 1.0.0.0).",
+                "connectorBadMinorVersion" : "Please enter a valid minor version (Example: 1.1.0.0).",
+                "connectorVersionChange" : "Saving this connector will result in a version change, because the current version is a range. Range __range__ now version __version__"
             },
             "ManagedObjectMessages" : {
-                "deleteManagedSuccess" : "Managed object successfully deleted",
-                "deleteManagedFail" : "Error deleting managed object unable to remove managed object",
-                "saveSuccessful" : "Managed Object has been saved."
+                "deleteManagedSuccess" : "Managed object successfully deleted.",
+                "deleteManagedFail" : "Unable to remove managed object.",
+                "saveSuccessful" : "Managed object has been saved."
             },
             "ObjectTypeMessages" : {
-                "objectSuccessfullyLoaded" : "Object type Successfully Loaded",
-                "objectFailedToLoad" : "Object type Failed To Load"
+                "objectSuccessfullyLoaded" : "Object type successfully loaded",
+                "objectFailedToLoad" : "Object type failed to load"
             },
             "AuthenticationMessages" : {
                 "saveSuccessful" : "Authentication configuration has been saved.",
                 "authenticationUnavailable": "Authentication is unavailable",
-                "tryToLoginAgain": "Try to login again"
+                "tryToLoginAgain": "Try to log in again"
             },
             "MappingMessages" : {
                 "mappingSaveSuccess": "Mapping successfully updated",
-                "newMappingAdded": "New Mapping successfully created",
+                "newMappingAdded": "New mapping successfully created",
                 "mappingDeleted": "Mapping successfully deleted"
             },
             "SyncMessages" : {
@@ -84,11 +84,11 @@
                 "scheduleSaved" : "The schedule was successfully saved.",
                 "liveSyncSaved": "The LiveSync state has been saved.",
                 "correlationQuerySaved": "The correlation query has been saved.",
-                "reconQueryFilterSaveSuccess": "Reconciliation queries have been saved.",
-                "triggeredBySituationSaved": "The Triggered by Situation scripts have been saved.",
-                "objectFiltersSaved": "The Object Filter scripts have been saved.",
-                "triggeredByReconSaved": "The Triggered by Reconciliation scripts have been saved.",
-                "linkQualifierSaveSuccess": "The Link Qualifiers have been saved."
+                "reconQueryFilterSaveSuccess": "Reconciliation query(s) have been saved.",
+                "triggeredBySituationSaved": "The triggered by situation script(s) have been saved.",
+                "objectFiltersSaved": "The object filter script(s) have been saved.",
+                "triggeredByReconSaved": "The triggered by reconciliation script(s) have been saved.",
+                "linkQualifierSaveSuccess": "The link qualifier(s) have been saved."
             }
         },
         "AppConfiguration" : {
@@ -98,10 +98,10 @@
                     "users" : "Users",
                     "apps" : "Applications",
                     "allApps" : "All applications",
-                    "addMore" : "Add more apps",
+                    "addMore" : "Add more applications",
                     "groups" : "Groups",
                     "tasksMenu" : "Tasks",
-                    "allTasks" : "Tasks that are in my group's queue",
+                    "allTasks" : "Group's Tasks",
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process",
                     "resources" : "Resources",
@@ -113,6 +113,11 @@
     },
     "templates" : {
         "util" : {
+            "scriptList" : {
+                "event": "EVENT",
+                "hook": "HOOK",
+                "addScript": "Add Script"
+            },
             "saveChanges": {
                 "saveMsg": "The following changes will be saved"
             },
@@ -147,9 +152,9 @@
             }
         },
         "MandatoryChangePassword" : {
-            "title" : "Change Your Password",
-            "mandatoryNewPassword" : "The current password is a default password. Please change this password to a more secure value.",
-            "enterNewPasswordToChange" : "Please enter a new password in the fields below."
+            "title" : "Change your password.",
+            "mandatoryNewPassword" : "Please change your password.",
+            "enterNewPasswordToChange" : "Please enter a new password below."
         },
         "user" : {
             "LoginDialog" : {
@@ -158,7 +163,7 @@
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
                 "noAccountQuestion" : "Don't have an account?",
-                "registerAccount" : "Register your account",
+                "registerAccount" : "Register?",
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset your password",
                 "siteIdentificationHeader": "Site Identification",
@@ -173,7 +178,7 @@
                 "orPhone" : ", or phone"
             },
             "ChangeSiteIdentificationDialogTemplate" : {
-                "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
+                "siteImageAndPhaseExplanation" : "When you log into the genuine site, you will see your selected the site image and phrase."
             },
             "EnterOldPasswordDialog" : {
                 "passwordAndSecurityQuestionChange" : "Password and security question change",
@@ -204,7 +209,7 @@
                     "requestInitiator" : "Request initiated by"
                 },
                 "TasksDashboardTemplate" : {
-                    "tasksFromGroupsQueue" : "Tasks that are in my group's queue"
+                    "tasksFromGroupsQueue" : "My group's tasks"
                 },
                 "ProcessUserTaskTableTemplate" : {
                     "requestCount" : "__count__  request",
@@ -212,7 +217,7 @@
                 }
             },
             "UsersTemplate" : {
-                "remainingUsers" : "remaining users"
+                "remainingUsers" : "Remaining users"
             }
         },
         "managed" : {
@@ -229,11 +234,13 @@
             "private" : "Private",
             "virtual" : "Virtual",
             "duplicateNameError" : "Duplicate name detected. Please provide a unique name.",
-            "managedSchema": "Schema"
+            "managedSchema": "Schema",
+            "addPropertyScript": "Add script for property events.",
+            "addManagedScript": "Add script for managed events."
         },
         "scriptEditor": {
             "scriptDelete" : "Are you sure you want to delete this script?",
-            "addEvent" : "Add Event Hook",
+            "addEvent" : "Add event hook",
             "type" : "Type",
             "source" : "Source",
             "bothRequired" : "Both required",
@@ -247,18 +254,20 @@
             "groovy" : "Groovy"
         },
         "mappingScripts": {
-            "allAdded": "All scripts events have been added",
+            "allAdded": "All script events have been added",
             "scriptEvents": "Script Events",
             "addScript": "Add Script"
         },
         "schedule": {
+            "liveSyncTitle" : "LiveSync",
             "schedule": "Scheduling",
+            "liveSyncDescription" : "LiveSync schedules synchronization.",
             "addReconciliationSchedule": "Add Reconciliation Schedule",
             "enableLiveSync": "Enable LiveSync for this mapping",
             "liveSyncEnabled": "LiveSync schedule is enabled.",
             "liveSyncDisabled": "LiveSync schedule is not enabled.",
             "managedObjects": "Incremental changes from the source will automatically be synced to the target system.",
-            "systemObjects1": "Incremental changes from the source system will be synced to the target system every ",
+            "systemObjects1": "Incremental changes from source to target will be synced every ",
             "systemObjects2": "seconds.",
             "noLiveSync": "Incremental changes from the source system are not monitored, visit the resource setup page for the source system to configure this feature."
         },
@@ -271,6 +280,10 @@
             "schedules": "Schedules",
             "situationalScripts":"Situational Event Scripts",
             "reconciliationScript":"Reconciliation Script",
+            "policiesDesc": "Define actions for various synchronization issues.",
+            "situationalEventScriptsDesc": "Action scripts. Add a script for each event.",
+            "reconScriptDesc": "Add a script triggered on reconciliation.",
+            "singleRecordReconDesc": "Test the process on a single record.",
             "testSync": {
                 "title": "Single Record Reconciliation",
                 "sourceProperties": "Source Properties",
@@ -286,6 +299,8 @@
         },
         "correlation": {
             "correlation": "Correlation",
+            "type" : "Type",
+            "status" : "Status",
             "objectFilters": "Individual Record Validation",
             "reconQueries": "Reconciliation Query Filters",
             "sourceQuery": "Source Query",
@@ -310,21 +325,21 @@
             "resetTitle": "Reset Form",
             "changesPending": "You have pending changes.",
             "selectLQ": "Select a link qualifier",
-            "noLQ": "There are no link qualifiers defined to create a query from.",
+            "noLQ": "No link qualifiers are defined, so you cannot create a query.",
             "deleted": "Deleted",
             "edited": "Edited",
             "added": "Added",
             "missingLQMsg": "This correlation query is referencing an undefined link qualifier.  You should remove this correlation query or create the link qualifier.",
             "notAvailableMsg1": "The link qualifier, ",
             "noLQdefined": "No link qualifiers defined",
-            "notAvailableMsg2": ", associated with this property is not available.  Add this link qualifier or update the condition.",
+            "notAvailableMsg2": " associated with this property is not available.  Add this link qualifier or update the condition.",
             "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
             "noCondition": "No Condition",
             "undo": "Undo",
             "query": {
                 "correlationDescription": "List the fields which will be used to match existing items in your source to items in your target:",
-                "correlationAny": "Any of the below fields",
-                "correlationAll": "All of the below fields",
+                "correlationAny": "Any of the following fields",
+                "correlationAll": "All of the following fields",
                 "addField": "Add Field",
                 "addGroup": "Add Group",
                 "and": "AND",
@@ -338,7 +353,7 @@
             "enabled": "Enabled",
             "basicCron": "Basic Cron",
             "advanced": "Advanced",
-            "complex": "Your expression is too complex for the editor, simplify to use the editor.",
+            "complex": "Your expression is too complex for the editor.",
             "persisted": "Persisted",
             "misfirePolicy": "Misfire Policy",
             "fireAndProceed": "Fire and proceed",
@@ -355,12 +370,14 @@
             "currentPolicy": "Current Policy",
             "policies": "Policies",
             "situation": "Situation",
-            "starDef": "indicates an action that is the default for a situation",
-            "hollowStarDef": "indicates a valid action for a given situation",
+            "starDef": "Default",
+            "hollowStarDef": "Valid action",
             "dialogTitle": "Situational Policy Configuration"
         },
         "auth": {
-            "errorsmsg": "Please address the errors in the Authentication modules before proceeding to save.",
+            "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
+            "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order you specify.",
+            "errorsmsg": "Please address the errors in the Authentication modules before saving.",
             "addNew": "Add New Authentication Module",
             "errors": "Errors",
             "disabled": "Disabled",
@@ -403,7 +420,7 @@
             "augmentSecurityContext": "Augment Security Context",
             "basicProperties": "BASIC PROPERTIES",
             "advancedProperties": "ADVANCED PROPERTIES",
-            "allowedAuthIdPatterns": "Allowed Authentication Id Patterns",
+            "allowedAuthIdPatterns": "Allowed Authentication ID Patterns",
             "pattern": "Pattern",
             "servicePrincipal": "Service Principal",
             "keytabFileName": "Keytab File Name",
@@ -415,9 +432,9 @@
             "truststoreType": "Truststore Type",
             "openamUserAttribute": "OpenAM User Attribute",
             "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
-            "openamDeploymentUrl": "OpenAM Deployment Url",
-            "openamDeploymentUrlConfirmation" : "OpenAM Deployment Url is invalid. Would you like to continue?",
-            "openamLoginUrl": "OpenAM Login Url",
+            "openamDeploymentUrl": "OpenAM Deployment URL",
+            "openamDeploymentUrlConfirmation" : "OpenAM Deployment URL is invalid. Would you like to continue?",
+            "openamLoginUrl": "OpenAM Login URL",
             "openamLoginLinkText": "OpenAM Login Link Text",
             "openamUseExclusively": "Require OpenAM Authentication",
             "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
@@ -443,7 +460,7 @@
             "scriptedsql_ScriptedSQLConnector":"Scripted SQL Connector",
             "xml_XMLConnector":"XML Connector",
             "csvfile_CSVFileConnector":"CSV Connector",
-            "googleapps_GoogleAppsConnector" : "Google Connector",
+            "googleapps_GoogleAppsConnector" : "GoogleApps Connector",
             "salesforce_Salesforce":"Salesforce Connector",
             "databasetable_DatabaseTableConnector":"Database Connector",
             "ldap_LdapConnector":"LDAP Connector",
@@ -452,14 +469,14 @@
             "connectorName" : "Connector Name",
             "connectorEnabled" : "Enabled",
             "connectorType" : "Connector Type",
-            "connectorDelete" : "Are you sure you wish to delete this connector?",
+            "connectorDelete" : "Are you sure you want to delete this connector?",
             "connectorError" : "Invalid connector configuration",
             "connectorNameUnknown" : "Unknown",
             "editTitle" : "Edit Connector",
             "addButtonTitle" : "Add",
             "updateButtonTitle" : "Update",
-            "addObjectTypeTitle": "Add ObjectType",
-            "editObjectTypeTitle": "Edit ObjectType",
+            "addObjectTypeTitle": "Add Object Type",
+            "editObjectTypeTitle": "Edit Object Type",
             "readSchema": "Read Schema",
             "validateConnector": "Validate Connector",
             "addConnectorTitle" : "Add Connector",
@@ -469,37 +486,39 @@
             "baseTitle" : "Base Connector Details",
             "resources" : "Resources",
             "resourcesHelpNoConnectorsTitle" : "To allow OpenIDM to manage external data, set up a connector.",
-            "resourcesHelpNoConnectorsBody" : "To get started you first need to create a connector. With multiple connectors, you can map objects between different data sources.",
-            "whatIsAConnector" : "Connectors are external systems, databases, directory services, and so on to be managed by OpenIDM.",
-            "whatIsAManagedObject" : "Managed Objects represent identity data directly controlled by OpenIDM.",
+            "resourcesHelpNoConnectorsBody" : "To get started, create a connector. With multiple connectors, you can map objects between different data sources.",
+            "whatIsAConnector" : "Connectors are external systems, databases, directory services, and so on.",
+            "whatIsAManagedObject" : "Managed Objects represent identity data.",
             "addConnector" : "New Connector",
             "addManagedObject" : "New Managed Object",
             "addMapping" : "New Mapping",
-            "help" : "help",
+            "help" : "Help",
             "managedObjectType" : "Managed Object",
+            "pendingObjectTypes" : "Click Save/Update to save your changes.",
             "liveSync": {
                 "title": "LiveSync Options",
                 "liveSyncFailure": "LiveSync Failure Options",
                 "doNotReattempt": "Do not re-attempt",
                 "retryIndefinitely": "Retry indefinitely",
-                "specificAmount": "Retry a specific amount of times",
-                "retryAttempts": "LiveSync retry attempt",
+                "specificAmount": "Retry a specific number of times",
+                "retryAttempts": "LiveSync retry attempt(s)",
                 "action": "Action to perform after retry attempts",
                 "schedules": "LiveSync Schedules",
                 "noName": "You must specify a name for the connector before you can add LiveSync schedules.",
-                "noObjects": "There are no available objects.  Please validate your connector to retrieve any default objects.  You may have to manually add objects after validating.",
-                "addLiveSync": "Add a LiveSync Scheduler for:"
+                "noObjects": "There are no available objects.  Please validate your connector to retrieve any default objects.  You might have to manually add objects after validating.",
+                "addLiveSync": "Add a LiveSync schedule for:"
 
             },
             "objectTypes": {
-                "saveObjectType": "Save ObjectType and Close",
+                "saveObjectType": "Save Object Type and Close",
                 "discardEdits": "Discard Changes and Close",
-                "bulkDeleteMsg": "You can only perform bulk deletes, please select one objectType to make edits",
-                "deleteObjectTypes": "Delete Selected ObjectTypes",
-                "addNewObjecttype": "Add a new object type",
+                "bulkDeleteMsg": "You can only perform bulk deletes. Please select one Object Type to make edits",
+                "deleteObjectTypes": "Delete Selected Object Types",
+                "addNewObjecttype": "Add a New Object Type",
                 "deleteObject": "Delete Object",
                 "saveObject": "Save Object",
                 "objectTypeConfigs" : "Object Type Configs",
+                "objectTypeGenerator" : "Object Type Generator",
                 "changeConfiguration" : "<p>Are you sure you want to change your LDAP Object Type to a default or saved configuration?</p><p>Please note making this change will cause any unsaved or custom changes to be lost.</p>"
             },
             "errorMessages": {
@@ -589,7 +608,7 @@
                 "xsdicfFilePath" : "XSD ICF File Path",
                 "xsdFilePath" : "XSD File Path",
                 "xmlFilePath" : "XML File Path",
-                "createIfNotExists" : "Create File if it does not exist"
+                "createIfNotExists" : "Create file if it does not exist."
             },
             "scriptedSQLConnector" : {
                 "host" : "Host",
@@ -597,7 +616,7 @@
                 "user" : "User",
                 "password" : "Password",
                 "database" : "Database",
-                "createIfNotExists" : "Create File if it does not exist",
+                "createIfNotExists" : "Create file if it does not exist.",
                 "reloadScriptOnExecution" : "Reload Script On Execution",
                 "jdbcDriver" : "JDBC Driver",
                 "jdbcConnectionUrl" : "JDBC Connection Url",
@@ -612,6 +631,7 @@
                 "syncScriptFileName" : "Sync File Name",
                 "schemaScriptFileName" : "Schema File Name",
                 "driverClassName" : "Driver Class Name",
+                "addClasspath" : "Add Classpath",
                 "classpath" : "Classpath",
                 "autoCommit": "Auto Commit",
                 "scriptFiles": "Script Files"
@@ -626,12 +646,11 @@
                 "table" : "Table",
                 "keyColumn" : "Key Column",
                 "passwordColumn" : "Password Column",
-                "jdcDriver" : "JDC Driver",
+                "jdbcDriver" : "JDBC Driver",
                 "jdcUrlTemplate" : "JDBC Url Template",
-                "passwordColumn" : "Password Column",
                 "enableEmptyString" : "Enable Empty String",
                 "rethrowSQL" : "Rethrow All SQL Exceptions",
-                "natvieTimestamps" : "Native Timestamps",
+                "nativeTimestamps" : "Native Timestamps",
                 "allNative" : "All Native",
                 "validConnectionQuery" : "Valid Connection Query",
                 "changeLogColumn" : "Change Log Column",
@@ -643,10 +662,10 @@
                 "ldapTypeChange" : "Are you sure you want to change to these LDAP details? Any unsaved work will be lost.",
                 "link": "Setup Active Directory",
                 "title": "Data Source: Active Directory",
-                "host": "Host name or IP",
+                "host": "Host Name or IP",
                 "port": "Port",
                 "ssl": "Use SSL?",
-                "syncMessage": "Use these same base contexts for livesync?",
+                "syncMessage": "Use these same base contexts for LiveSync?",
                 "baseContextSyncTitle" : "Contexts to Synchronize",
                 "baseContextToSync" : "Base Contexts to Synchronize",
                 "baseContextToSyncNote" : "During LiveSync operations, OpenIDM searches these base contexts for changes.",
@@ -657,10 +676,10 @@
                 "password": "Password",
                 "accountUserNameAttributes": "Attribute used for login",
                 "baseContextTitle":"Base Context",
-                "baseContext": "Enter the path to your base dn",
+                "baseContext": "Enter your base DN",
                 "baseContextNote": "Be sure to add base contexts which include both your users and your groups.",
                 "baseContextAdd":"Add Base Context",
-                "accountObjectClasses" : "Object Class for users",
+                "accountObjectClasses" : "Object Classes for users",
                 "addAccountObjectClasses" : "Add Object Class",
                 "addUsersTitle": "User Details",
                 "groupObjectClasses": "Object Classes for groups",
@@ -669,12 +688,12 @@
                 "accountSearchFilter": "User Filter",
                 "groupSearchFilter": "Group Filter",
                 "validate": "Validate settings",
-                "checking": "Checking active directory settings...",
-                "connected": "Connection to active directory successful",
-                "failed": "Connection to active directory failed",
+                "checking": "Checking Active Directory settings...",
+                "connected": "Connection to Active Directory successful",
+                "failed": "Connection to Active Directory failed",
                 "authorizeGroups": "Save and Assign Admins",
-                "hideCert": "hide certificate",
-                "showCert": "show certificate",
+                "hideCert": "Hide certificate",
+                "showCert": "Show certificate",
                 "filterTitle": "Update __type__",
                 "errorMessages": {
                     "unknownHost" : "Unknown Host",
@@ -692,18 +711,18 @@
                 "listItemOne" : "Admin SDK API",
                 "gettingStarted" : "Need help getting started?",
                 "listItemTwo" : "Enterprise License Manager API",
-                "needHelp" : "Need help locating your client id and secret?",
+                "needHelp" : "Need help locating your client ID and secret?",
                 "changeHeader" : "Note for new and recently-changed projects",
-                "changeDetails" : "When you create a new project in Google, it can take up to 24 hours for the data to be propagated through Google. If you are setting up OpenIDM with a project that you have just created, or if you have recently changed the Callback URL of your project, you might receive an error when you attempt to validate the client id and secret."
+                "changeDetails" : "When you create a new project in Google, it can take up to 24 hours for the data to be propagated through Google. If you are setting up OpenIDM with a project that you have just created, or if you have recently changed the Callback URL of your project, you might receive an error when you attempt to validate the client ID and secret."
             },
             "salesforce" : {
-                "callbackUrlMessage" : "Be sure your application is configured to use this Callback URL",
+                "callbackUrlMessage" : "Your application must be configured to use this Callback URL",
                 "listHeader" : "You must grant this application all of the following OAuth Scopes:",
                 "listItemOne" : "Access your basic information",
                 "listItemTwo" : "Access and manage your data",
                 "listItemThree" : "Perform requests on your behalf at any time",
-                "changeHeader" : "Note for new and recently-changed apps",
-                "changeDetails" : "When you create a new Connected App, or update your Connected App in Salesforce, it takes some time (at least five minutes) for the data to be propagated through all the Salesforce servers. If you are setting up OpenIDM with a Connected App that you have just created, or if you have recently changed the Callback URL of your Connected App, you might receive an error when you attempt to validate the consumer key and consumer secret. You should therefore wait at least five minutes after creating or updating your Connected App before you attempt to set up Identity Connect with that App.",
+                "changeHeader" : "Note for new and recently-changed applications",
+                "changeDetails" : "When you create a new Connected App, or update your Connected App in Salesforce, it takes some time (at least five minutes) for the data to be propagated through all the Salesforce servers. If you are setting up OpenIDM with a Connected App that you have just created, or if you have recently changed the Callback URL of your Connected App, you might receive an error when you attempt to validate the consumer key and consumer secret. You should therefore wait at least five minutes after creating or updating your Connected App before you attempt to set up OpenIDM with that App.",
                 "needHelpKey" : "Need help locating your consumer key and secret?",
                 "loginUrl" : "Login URL",
                 "clientSecret" : "Consumer Secret",
@@ -712,7 +731,7 @@
             "oAuthGeneral" : {
                 "base" : "Base OAuth Details",
                 "clientSecret": "Client Secret",
-                "clientId" : "Client Id"
+                "clientId" : "Client ID"
             }
         },
         "mapping": {
@@ -726,56 +745,57 @@
             "target": "Target",
             "more" : "more...",
             "mappingListingTitle": "Mapping List",
+            "mappingDetailTitle": "Mapping Detail",
             "addToMapping" : "Add to Mapping",
             "newMapping" : "New Mapping",
             "syncNow": "Reconcile Now",
             "stopSync": "Stop Reconciliation",
             "stoppingSync": "Stopping Reconciliation",
-            "syncComplete": "Reconciliation Complete Please Stand By...",
-            "pleaseStandBy": "Please Stand By",
-            "syncInProgress": "Reconciliation in Progress",
-            "lastSyncCanceled": "Last Reconciliation Canceled",
+            "syncComplete": "Reconciliation complete. Please wait...",
+            "pleaseStandBy": "Please wait.",
+            "syncInProgress": "Reconciliation in progress.",
+            "lastSyncCanceled": "Last reconciliation canceled.",
             "inProgress": "In Progress",
-            "notYetSynced": "Not yet Reconciled",
+            "notYetSynced": "Not yet reconciled.",
             "syncStatus": "Reconciliation Status",
-            "lastSynced": "Last Reconciled",
-            "createMappingDialog" : "Create Mapping",
-            "noObjectType" : "No Object Type",
-            "editMapping": "Edit Mapping",
-            "addMapping": "Add Mapping",
-            "saveNewMapping": "Save New Mapping",
-            "createNewMapping": "Create a New Mapping",
-            "deleteMapping": "Delete Mapping",
-            "selectAnotherResource" : "Select another resource",
-            "selectSourceResource" : "Select a source resource",
-            "selectTargetResource" : "Select a target resource",
-            "noConnectors" : "No Connectors Available",
-            "noManagedObjects" : "No Managed Objects Available",
-            "noResourceSelected" : "No Resource Selected",
-            "createMapping" : "Create Mapping",
-            "createMappingMessage" : "Clicking this button will create a mapping between these two sources. ",
+            "lastSynced": "Last reconciled",
+            "createMappingDialog" : "Create mapping.",
+            "noObjectType" : "No object type.",
+            "editMapping": "Edit mapping.",
+            "addMapping": "Add mapping.",
+            "saveNewMapping": "Save new mapping.",
+            "createNewMapping": "Create a new mapping.",
+            "deleteMapping": "Delete mapping.",
+            "selectAnotherResource" : "Select another resource.",
+            "selectSourceResource" : "Select a source resource.",
+            "selectTargetResource" : "Select a target resource.",
+            "noConnectors" : "No connectors available.",
+            "noManagedObjects" : "No managed objects available.",
+            "noResourceSelected" : "No resource selected.",
+            "createMapping" : "Create mapping",
+            "createMappingMessage" : "Click this button to create a mapping between these two sources. ",
             "saveMappingMessage" : "Please enter a unique mapping name.",
             "mappingName" : "Mapping Name",
             "linkedMapping" : "Linked Mapping",
             "noLinkedMapping" : "No Linked Mapping",
             "properties": "Properties",
             "property": "Property",
-            "confirmDeleteMapping": "Are you sure you want to delete the &quot;__mappingName__&quot; mapping?<br/><br/>**Caution: this action cannot be reversed",
-            "noMappingsDefined": "No Mappings Defined",
-            "addProperty": "Add Property",
-            "sampleSource": "Sample Source",
+            "confirmDeleteMapping": "Are you sure you want to delete the &quot;__mappingName__&quot; mapping?<br/><br/>**Caution: this action cannot be reversed.",
+            "noMappingsDefined": "No mappings defined.",
+            "addProperty": "Add property.",
+            "sampleSource": "Sample source.",
             "confirmRemoveProperty": "Are you sure you want to remove the &quot;__property__&quot; property mapping?",
             "transformRequiredForMulti": "A transformation script is required when mapping from a multiple-value source to a single-value target.",
             "validPropertyRequired": "You must select a valid property name.",
-            "invalidScript": "You cannot save a transformation script containing errors.",
-            "invalidConditionScript": "You cannot save a condition script containing errors.",
-            "completeSourceObject": "Complete Source Object",
-            "changesPending": "Changes Pending",
+            "invalidScript": "You cannot save a transformation script that contains errors.",
+            "invalidConditionScript": "You cannot save a condition script that contains errors.",
+            "completeSourceObject": "Complete source object.",
+            "changesPending": "Changes pending.",
             "clearChanges": "Clear Changes",
             "saveProperties": "Save Properties",
-            "noPropertiesMapped": "No Properties Mapped",
-            "conditionScriptApplied": "Conditional update script applied",
-            "mappingExists": "Mapping for this target property already exists",
+            "noPropertiesMapped": "No properties mapped.",
+            "conditionScriptApplied": "Conditional update script applied.",
+            "mappingExists": "Mapping for this target property already exists.",
             "allPropertiesMapped": "*All target properties have been mapped",
             "numRepresentativeProps":"Number of representative properties",
             "missingRequiredProperties": "Missing Required Properties",
@@ -783,19 +803,19 @@
                 "title": "Target Property: __property__",
                 "valueMapping": "Value Mapping",
                 "valuePrecedence": "Value Precedence",
-                "valuePrecedenceNote": "Since the values mapped may result in multiple values, sort them here to establish which should take precedence (the first value matched will be used).",
+                "valuePrecedenceNote": "Since the values mapped might result in multiple values, sort them here to establish which should take precedence (the first value matched will be used).",
                 "propertyListLabel": "Enter or select the source property that you need",
                 "propertyListHeader": "Property List",
                 "transformationHeader": "Transformation Script",
                 "conditionalUpdateHeader": "Conditional Update Script",
                 "defaultValuesHeader": "Default Values",
-                "transformationSciptLabel": "Enter a transformation script for complex properties",
+                "transformationSciptLabel": "Enter a transformation script for complex properties.",
                 "conditionSciptLabel": "Enter a conditional update script for",
-                "defaultValuesLabel": "Set a default value for this property mapping",
-                "conditionScriptAction": "Action for user",
-                "exampleResult": "Example result",
+                "defaultValuesLabel": "Set a default value for this property mapping.",
+                "conditionScriptAction": "Action for user.",
+                "exampleResult": "Example result.",
                 "currentSourceValue": "Current value for &quot;source&quot;",
-                "transformScriptNote": "Use JavaScript code above to perform advanced mapping operations.<br>This script will be processed for each source object that is mapped, to calculate it's value for this property.<br>The result of the final statement in the script will be used as the value for this property.<br>This script has the &quot;source&quot; variable available to it as input.<br>The value for the &quot;source&quot; variable depends on how you have defined the attribute mapping in the &quot;Attribute List&quot; tab.<br>If you haven't selected any value in the &quot;Property List&quot; tab, then &quot;source&quot; will be the complete source object with properties for each directory property.<br>If you have selected a value in &quot;Property List&quot;, then &quot;source&quot; will be that value.",
+                "transformScriptNote": "Use JavaScript code above to perform advanced mapping operations.<br>This script will be processed for each source object that is mapped, to calculate its value for this property.<br>The result of the final statement in the script will be used as the value for this property.<br>This script has the &quot;source&quot; variable available to it as input.<br>The value for the &quot;source&quot; variable depends on how you have defined the attribute mapping in the &quot;Attribute List&quot; tab.<br>If you haven't selected any value in the &quot;Property List&quot; tab, then &quot;source&quot; will be the complete source object with properties for each directory property.<br>If you have selected a value in &quot;Property List&quot;, then &quot;source&quot; will be that value.",
                 "conditionScriptNote": "Use JavaScript code above to prevent target data from being updated in certain conditions.<br/>This script will be processed for each source object that is mapped.<br/>If the result is true or if there is no script the property will be updated, otherwise updates will not be sent to the target.<br/>This script has the &quot;object&quot; variable available to it as a global.<br/>The &quot;object&quot; variable represents the complete target record with properties for each source property mapping."
             },
             "propertyAdd": {
@@ -897,12 +917,13 @@
             "actions" : "Actions",
             "complete" : "Complete",
             "reset" : "Reset",
-            "copyright" : "Copyright (c) 2010-14 ForgeRock, all rights reserved.",
+            "copyright" : "Copyright (c) 2010-15 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
             "enableCookies" : "Cookies must be enabled to login",
             "reloadGrid" : "Reload Grid",
             "clearFilters" : "Clear Filters",
             "showAllItems" : "Show All Items",
+            "error" : "Error",
             "warning" : "Warning",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
@@ -967,7 +988,7 @@
             "sitePhrase" : "Site Phrase",
             "securityQuestion" : "Security question",
             "securityAnswer" : "Security answer",
-            "adaptiveAuthMethod" : "Adaptive auth method",
+            "adaptiveAuthMethod" : "Adaptive authentication method",
             "SMS" : "SMS",
             "OAuth" : "OAuth",
             "createNewAccount" : "Create new account",
@@ -1008,16 +1029,16 @@
         "application" : {
             "applicationName" : "Application Name",
             "requestedBy" : "Requested by",
-            "yourFrequentlyUsedApplications" : "Your frequently used apps",
-            "applicationsYouHaveAdded" : "Apps you've added",
-            "defaultApplications" : "Default apps",
-            "addMoreApplications" : "Add more apps",
-            "allAvailableApps" : "All available apps",
-            "dropApplicationsHere" : "drop apps here"
+            "yourFrequentlyUsedApplications" : "Your frequently used applications.",
+            "applicationsYouHaveAdded" : "Applications you have added.",
+            "defaultApplications" : "Default applications.",
+            "addMoreApplications" : "Add more applications,",
+            "allAvailableApps" : "All available applications.",
+            "dropApplicationsHere" : "Drop applications here."
         },
         "notification" : {
             "notifications" : "Notifications",
-            "deleteThisMessage" : "Delete this message",
+            "deleteThisMessage" : "Delete this message.",
             "type" : "Notification type",
             "message" : "Message",
             "types" : {
@@ -1040,8 +1061,8 @@
             "admin" : {
                 "tasks" : {
                     "TasksMenuView" : {
-                        "noTasksAssigned" : "You do not have any tasks assigned to you right now.",
-                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue now.",
+                        "noTasksAssigned" : "No tasks assigned.",
+                        "noTasksInGroupQueue" : "Your group has no tasks at this time.",
                         "denyDefaultReason" : "Enter a reason for denying this request",
                         "acceptanceForm" : {
                             "for" : "For",
@@ -1062,7 +1083,7 @@
                     },
                     "StartProcessDashboardView" : {
                         "chooseProcess" : "Please choose a process to start",
-                        "noProcesses": "No processes",
+                        "noProcesses": "No processes in your queue.",
                         "noDataRequired": "No data required"
                     }
                 },
@@ -1084,16 +1105,16 @@
                 "dashboard" : {
                     "NotificationsView" : {
                         "noNotifications" : "You have no notifications right now.",
-                        "seeMoreNotifications" : "see more notifications"
+                        "seeMoreNotifications" : "See more notifications."
                     }
                 },
                 "BaseApplicationsView" : {
-                    "noApplicationsHere" : "Your have no apps here",
-                    "noDefaultApplications" : "Your have no default apps",
-                    "noFrequentlyUsedApplications" : "Your have no frequently used apps"
+                    "noApplicationsHere" : "You have no applications here.",
+                    "noDefaultApplications" : "You have no default applications.",
+                    "noFrequentlyUsedApplications" : "You have no frequently used applications."
                 },
                 "UsersApplicationsView" : {
-                    "noApplications" : "You have no applications"
+                    "noApplications" : "You have no applications."
                 },
                 "FrequentlyUsedApplicationsView" : {
                     "clickHereToAdd" : "Click %shere%s to add."

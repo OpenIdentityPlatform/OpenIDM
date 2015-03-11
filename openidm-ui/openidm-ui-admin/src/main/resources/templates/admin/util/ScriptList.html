@@ -1,0 +1,31 @@
+<div class="panel-body">
+    <div class="scripts-container" style="display:none;">
+        <table class="group-field-block table">
+            <tr>
+                <th>
+                    {{t "templates.util.scriptList.event"}}
+                </th>
+                <th>
+                    {{t "templates.util.scriptList.hook"}}
+                </th>
+                <th></th>
+            </tr>
+            {{#each addedEvents}}
+            <tr data-script-type="{{this}}" class="event-hook"></tr>
+            {{/each}}
+        </table>
+    </div>
+    <label class="control-label">{{label}}</label>
+    <div class="row">
+        <div class="col-sm-5">
+            <select class="form-control btn-block scriptSelection">
+                {{#each selectEvents}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class=" col-sm-3">
+            <button type="button" class="btn btn-primary addScriptButton"><i class="fa fa-lg fa-plus"></i> <span>{{t "templates.util.scriptList.addScript"}}</span></button>
+        </div>
+    </div>
+</div>
