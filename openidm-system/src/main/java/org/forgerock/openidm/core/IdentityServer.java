@@ -44,7 +44,6 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * This class defines the core of the Identity Server.
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 public final class IdentityServer implements PropertyAccessor {

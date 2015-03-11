@@ -30,7 +30,6 @@ package org.forgerock.openidm.smartevent;
  * Events can be used both for * monitoring/low level events * application level
  * events
  * 
- * @author aegloff
  */
 public class Publisher {
 

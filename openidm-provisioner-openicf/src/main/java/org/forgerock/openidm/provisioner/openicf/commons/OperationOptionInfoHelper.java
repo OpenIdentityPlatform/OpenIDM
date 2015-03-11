@@ -38,7 +38,6 @@ import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
  *
- * @author Laszlo Hordos
  */
 public class OperationOptionInfoHelper {
 

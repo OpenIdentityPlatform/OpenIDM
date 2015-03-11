@@ -66,7 +66,6 @@ import org.slf4j.LoggerFactory;
 /**
  * An AbstractScriptedService does ...
  * 
- * @author Laszlo Hordos
  */
 @Component(componentAbstract = true)
 public abstract class AbstractScriptedService implements ScriptCustomizer, ScriptListener {

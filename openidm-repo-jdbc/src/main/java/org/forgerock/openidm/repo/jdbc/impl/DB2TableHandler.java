@@ -32,7 +32,6 @@ import java.sql.SQLException;
 import java.util.Map;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class DB2TableHandler extends GenericTableHandler {

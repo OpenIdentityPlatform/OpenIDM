@@ -35,7 +35,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Provides methods for management of the Jetty configuration
  * 
- * @author ckienle
  */
 public class Config {
 

@@ -52,8 +52,6 @@ import org.slf4j.LoggerFactory;
  * A custom endpoints service to provide a scriptable way to extend and
  * customize the system
  *
- * @author Laszlo Hordos
- * @author aegloff
  */
 @Component(name = EndpointsService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Custom Endpoints Service", immediate = true)

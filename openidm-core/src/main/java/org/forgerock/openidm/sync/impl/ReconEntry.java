@@ -35,7 +35,6 @@ import org.forgerock.openidm.util.DateUtil;
  * A recon audit log entry representation.  Contains any additional fields
  * and logic specific to recon entries.
  * 
- * @author ckienle
  */
 class ReconEntry extends LogEntry {
 

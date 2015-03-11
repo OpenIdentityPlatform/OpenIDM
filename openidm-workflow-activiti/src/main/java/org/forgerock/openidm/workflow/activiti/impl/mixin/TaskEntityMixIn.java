@@ -31,7 +31,6 @@ import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 
 /**
  *
- * @author orsolyamebold
  */
 @JsonIgnoreProperties({"variableInstances", "execution", "taskDefinition", "candidates", "identityLinks", "variables",
     "variablesLocal", "variableNames", "variableNamesLocal", "assignee", "persistentState", "processInstance"})

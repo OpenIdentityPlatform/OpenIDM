@@ -30,7 +30,6 @@ import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
  * access to configuration supplied by OpenIDM,
  * without having to resort to system properties
  *
- * @author aegloff
  */
 public class Param {
 

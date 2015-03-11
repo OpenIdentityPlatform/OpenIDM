@@ -26,7 +26,6 @@ package org.forgerock.openidm.repo.orientdb.impl.query;
 /**
  * Information about a query, and state of the query
  * 
- * @author aegloff
  */
 final class QueryInfo<Q> {
     private boolean usePrepared;

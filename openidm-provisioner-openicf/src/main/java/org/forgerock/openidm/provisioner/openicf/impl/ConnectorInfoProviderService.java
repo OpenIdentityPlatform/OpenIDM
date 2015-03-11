@@ -86,7 +86,6 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
@@ -127,7 +126,6 @@ import org.slf4j.LoggerFactory;
  * service.
  * <p/>
  *
- * @author Laszlo Hordos
  */
 @Component(name = ConnectorInfoProviderService.PID,
         policy = ConfigurationPolicy.OPTIONAL,

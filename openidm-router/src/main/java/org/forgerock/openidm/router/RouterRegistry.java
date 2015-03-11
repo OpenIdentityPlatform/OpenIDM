@@ -29,7 +29,6 @@ import org.forgerock.json.resource.ConnectionProvider;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public interface RouterRegistry extends ConnectionProvider /* RequestHandler */{
 

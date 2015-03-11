@@ -45,8 +45,6 @@ import org.slf4j.LoggerFactory;
  * @param <R> The request type
  * @param <U> The result type
  *
- * @author aegloff
- * @author brmiller
  */
 public abstract class ConfiguredQueries<Q extends OCommandRequest, R extends Request, U> {
 

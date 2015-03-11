@@ -31,7 +31,6 @@ import org.forgerock.openidm.crypto.CryptoService;
 import static org.forgerock.openidm.workflow.activiti.impl.SharedIdentityService.*;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class JsonUser extends JsonValue implements User {

@@ -33,7 +33,6 @@ import com.google.inject.Module;
 /**
  * A ModuleFactory does ...
  *
- * @author Laszlo Hordos
  */
 public class ModuleFactory implements IModuleFactory {
     public Module createModule(ITestContext context, Class<?> testClass) {

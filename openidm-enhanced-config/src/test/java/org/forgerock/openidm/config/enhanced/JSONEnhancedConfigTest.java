@@ -41,7 +41,6 @@ import org.testng.annotations.Test;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public class JSONEnhancedConfigTest {
     @Test

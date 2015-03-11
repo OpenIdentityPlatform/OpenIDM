@@ -50,7 +50,6 @@ import org.identityconnectors.framework.api.operations.*;
  * &lt;/simpleType>
  * </pre>
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 public enum OperationType {

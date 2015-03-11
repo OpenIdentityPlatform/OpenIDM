@@ -36,7 +36,6 @@ import static org.forgerock.json.fluent.JsonValue.object;
 /**
  * A builder for AuditLogFilters.
  *
- * @author brmiller
  */
 class AuditLogFilterBuilder {
 

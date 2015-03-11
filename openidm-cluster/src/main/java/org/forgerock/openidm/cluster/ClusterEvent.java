@@ -33,7 +33,6 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * A cluster event container.
  * 
- * @author ckienle
  */
 public class ClusterEvent {
     

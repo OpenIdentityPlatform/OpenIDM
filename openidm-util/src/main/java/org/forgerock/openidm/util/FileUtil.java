@@ -34,7 +34,6 @@ import java.nio.channels.FileChannel;
 /**
  * The FileUtil class contains common methods to read text files.
  *
- * @author Laszlo Hordos
  */
 public final class FileUtil {
 

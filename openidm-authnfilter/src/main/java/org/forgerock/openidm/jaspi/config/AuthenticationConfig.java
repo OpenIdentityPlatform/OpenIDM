@@ -21,7 +21,6 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * Interface for injecting an implementation which contains the authentication configuration.
  *
- * @author Phill Cunnington
  */
 public interface AuthenticationConfig {
 

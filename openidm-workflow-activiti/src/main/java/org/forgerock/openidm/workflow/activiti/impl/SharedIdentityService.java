@@ -43,7 +43,6 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.router.RouteService;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class SharedIdentityService implements IdentityService {

@@ -32,7 +32,6 @@ import java.util.EventListener;
  * A NAME does ...
  *
  * @ThreadSafe
- * @author Laszlo Hordos
  */
 public interface RouteListener extends EventListener {
     /**

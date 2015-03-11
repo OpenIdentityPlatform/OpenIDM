@@ -29,7 +29,6 @@ import java.sql.SQLException;
 /**
  * DB2 handling of SQLExceptions
  *
- * @author aegloff
  */
 public class DB2SQLExceptionHandler extends DefaultSQLExceptionHandler {
 

@@ -33,7 +33,6 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * A registered servlet script and it's associated configuration, order number, and ID.
  * 
- * @author ckienle
  *
  */
 public interface RegisteredFilter extends Comparable<RegisteredFilter> {

@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Configuration encryption support
  * 
- * @author andreasegloff
  *
  */
 public class ConfigCrypto {

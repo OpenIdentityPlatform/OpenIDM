@@ -33,7 +33,6 @@ import org.identityconnectors.framework.api.ConnectorKey;
  * {@link org.identityconnectors.framework.api.ConnectorInfoManager}. The
  * {@code getConnectorHost} is the key for the ConnectorInfoManager newBuilder.
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 public final class ConnectorReference {

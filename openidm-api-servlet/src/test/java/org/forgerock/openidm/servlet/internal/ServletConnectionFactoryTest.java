@@ -57,7 +57,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * A test of the ServletConnectionFactory and underlying request handler.
  * 
- * @author Laszlo Hordos
  */
 public class ServletConnectionFactoryTest {
 

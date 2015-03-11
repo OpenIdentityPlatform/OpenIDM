@@ -53,7 +53,6 @@ import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.RequestUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptRegistry;
 import org.joda.time.DateTime;
 import org.joda.time.ReadablePeriod;
 import org.slf4j.Logger;

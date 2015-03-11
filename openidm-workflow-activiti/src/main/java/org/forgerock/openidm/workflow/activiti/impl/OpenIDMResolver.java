@@ -29,7 +29,6 @@ import org.activiti.engine.impl.scripting.Resolver;
 /**
  * Custom resolver for OpenIDM (used in scripts)
  *
- * @author orsolyamebold
  */
 public class OpenIDMResolver implements Resolver {
     Bindings bindings;

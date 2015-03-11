@@ -35,7 +35,6 @@ import org.testng.annotations.Test;
 /**
  * The FileUtilTest does a performance comparison on the read[Large]File implementation.
  *
- * @author Laszlo Hordos
  */
 public class FileUtilTest {
 

@@ -50,7 +50,6 @@ import org.forgerock.util.LazyMap;
 /**
  * Custom ExpressionResolver for OpenIDM
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class OpenIDMELResolver extends ELResolver {

@@ -19,7 +19,6 @@ package org.forgerock.openidm.smartevent.core;
 import com.lmax.disruptor.EventFactory;
 
 /**
- * @author aegloff
  */
 
 /**
@@ -27,7 +26,6 @@ import com.lmax.disruptor.EventFactory;
  * with a (fixed) number of entries for the purpose of processing the associated
  * EventEntry
  * 
- * @author aegloff
  * 
  */
 public class DisruptorReferringEventEntry {

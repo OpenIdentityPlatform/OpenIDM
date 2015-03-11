@@ -33,8 +33,6 @@ import org.forgerock.json.fluent.JsonValue;
  * bundle. Use a meta-data.json file to declare a meta data provider for a
  * bundle*
  *
- * @author aegloff
- * @author ckienle
  */
 public interface MetaDataProvider {
 

@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,8 +52,6 @@ import org.slf4j.LoggerFactory;
  * 2. A repo persistence plug-in for the configuration admin is registered for configuration to get loaded/stored in the repository
  * 3. When the OSGi configuration administration service comes up, proceed with handling configuration in files (if enabled)
  *    via the felix file install mechanism
- * 
- * @author aegloff
  */
 public class ConfigBootstrapHelper {
 

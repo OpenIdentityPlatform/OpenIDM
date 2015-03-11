@@ -35,7 +35,6 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -47,9 +46,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A property defined within an managed object. Provides for the specification
  * of triggers to execute during the lifecycle of a managed object.
- *
- * @author Paul C. Bryan
- * @author ckienle
  */
 class ManagedObjectProperty {
 

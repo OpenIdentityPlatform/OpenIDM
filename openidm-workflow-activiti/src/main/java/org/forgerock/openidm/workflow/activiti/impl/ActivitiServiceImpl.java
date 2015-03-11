@@ -72,7 +72,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Workflow service implementation
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 @Component(name = ActivitiServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)

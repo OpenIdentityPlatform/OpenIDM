@@ -31,7 +31,6 @@ import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 
 /**
  *
- * @author orsolyamebold
  */
 @JsonIgnoreProperties({"persistentState"})
 public class HistoricProcessInstanceMixIn {

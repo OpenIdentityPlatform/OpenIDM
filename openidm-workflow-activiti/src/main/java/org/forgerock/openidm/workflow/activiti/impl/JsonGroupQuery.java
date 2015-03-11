@@ -34,7 +34,6 @@ import java.util.List;
 import org.forgerock.json.resource.*;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class JsonGroupQuery extends GroupQueryImpl {

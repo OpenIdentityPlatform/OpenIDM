@@ -44,7 +44,6 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * A Utils class is a collection of common methods used in the script library.
  *
- * @author Laszlo Hordos
  */
 public class Utils {
 

@@ -37,8 +37,6 @@ import org.forgerock.openidm.repo.jdbc.impl.JDBCRepoService;
 /**
  * Meta data provider to describe configuration requirements of this bundle
  *
- * @author aegloff
- * @author ckienle
  */
 public class ConfigMeta implements MetaDataProvider {
 

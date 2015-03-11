@@ -35,7 +35,6 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
  *
  * Specific implementations and/or overrides may be needed for a given database supported.
  *
- * @author aegloff
  */
 public class DefaultSQLExceptionHandler implements SQLExceptionHandler {
 

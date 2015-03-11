@@ -28,7 +28,6 @@ import java.security.KeyStore;
 /**
  * An interface for updating the Crypto Service with a new keystore
  * 
- * @author ckienle
  */
 public interface CryptoUpdateService {
 

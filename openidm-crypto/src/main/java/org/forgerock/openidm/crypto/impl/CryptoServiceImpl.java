@@ -64,8 +64,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Cryptography Service
  *
- * @author Paul C. Bryan
- * @author aegloff
  */
 public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
 

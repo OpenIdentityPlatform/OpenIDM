@@ -30,7 +30,6 @@ import org.forgerock.script.ScriptRegistry;
 /**
  * Custom Session interface providing access to OpenIDM functions from Activiti
  * 
- * @author orsolyamebold
  */
 public interface OpenIDMSession extends Session {
 

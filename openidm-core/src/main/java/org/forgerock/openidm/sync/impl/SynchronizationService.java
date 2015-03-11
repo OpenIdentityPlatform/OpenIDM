@@ -25,8 +25,6 @@ package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 import static org.forgerock.util.Iterables.filter;
 
@@ -75,11 +73,6 @@ import org.slf4j.LoggerFactory;
  * The resource provider for requests on /sync.  Describes the synchronization mappings and dispatches
  * actions to synchronize between source and targets listed in the synchronization mappings described
  * by the sync.json configuration file.  Also supports invocation as a {@link ScheduledService}.
- *
- * @author Paul C. Bryan
- * @author aegloff
- * @author ckienle
- * @author brmiller
  */
 @Component(
     name = "org.forgerock.openidm.sync",

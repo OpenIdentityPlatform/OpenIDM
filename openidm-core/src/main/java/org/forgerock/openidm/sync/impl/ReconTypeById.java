@@ -30,8 +30,6 @@ import java.util.List;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;

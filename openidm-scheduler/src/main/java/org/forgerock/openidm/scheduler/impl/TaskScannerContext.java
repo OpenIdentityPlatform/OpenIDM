@@ -29,10 +29,8 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptRegistry;
 import org.joda.time.Days;
 import org.joda.time.ReadablePeriod;
 

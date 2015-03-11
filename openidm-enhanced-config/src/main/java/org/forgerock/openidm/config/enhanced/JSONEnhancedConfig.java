@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
  * A utility to handle enhanced configuration, including nested lists and maps
  * to represent JSON based structures.
  *
- * @author aegloff
  */
 public class JSONEnhancedConfig implements EnhancedConfig {
 

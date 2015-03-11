@@ -30,14 +30,10 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
-import org.identityconnectors.framework.common.objects.filter.Filter;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public interface OperationHelper {

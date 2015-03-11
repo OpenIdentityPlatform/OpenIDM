@@ -34,7 +34,6 @@ import org.forgerock.json.resource.InternalServerErrorException;
 /**
  * Handles the conversion of query resultsets into Object set result
  *
- * @author aegloff
  */
 public interface QueryResultMapper {
     List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type,

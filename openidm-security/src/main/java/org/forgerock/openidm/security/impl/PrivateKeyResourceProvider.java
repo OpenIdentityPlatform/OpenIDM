@@ -35,9 +35,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
@@ -46,8 +44,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A collection resource provider servicing requests on private key entries in a keystore
- * 
- * @author ckienle
  */
 public class PrivateKeyResourceProvider extends EntryResourceProvider {
 

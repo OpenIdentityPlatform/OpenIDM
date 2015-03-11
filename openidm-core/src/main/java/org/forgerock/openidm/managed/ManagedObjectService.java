@@ -74,7 +74,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides access to managed objects.
  * 
- * @author Paul C. Bryan
  */
 @Component(name = ManagedObjectService.PID, immediate = true,
         policy = ConfigurationPolicy.REQUIRE)

@@ -28,7 +28,6 @@ import java.util.Map;
  * Provide JMX / MBean access for monitoring and management of SmartEvents and
  * in turn the instrumented application
  * 
- * @author aegloff
  */
 public interface StatisticsHandlerMBean {
 

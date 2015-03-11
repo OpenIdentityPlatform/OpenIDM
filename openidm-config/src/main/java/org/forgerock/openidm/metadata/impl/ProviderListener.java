@@ -18,16 +18,9 @@ package org.forgerock.openidm.metadata.impl;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 /**
  * Listener to handle Provider registrations
  * 
- * @author aegloff
  */
 public interface ProviderListener {
 

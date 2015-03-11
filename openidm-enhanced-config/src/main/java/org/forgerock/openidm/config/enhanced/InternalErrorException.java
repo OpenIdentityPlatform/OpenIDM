@@ -28,7 +28,6 @@ package org.forgerock.openidm.config.enhanced;
  * An exception that is throw for internal (possibly transient) errors in 
  * retrieving configuration
  * 
- * @author aegloff
  */
 public class InternalErrorException extends RuntimeException {
 

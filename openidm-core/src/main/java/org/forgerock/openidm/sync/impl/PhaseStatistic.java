@@ -39,8 +39,6 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Holds the (source/target) Phase specific statistics
  *
- * @author gael
- * @author aegloff
  */
 public class PhaseStatistic {
 

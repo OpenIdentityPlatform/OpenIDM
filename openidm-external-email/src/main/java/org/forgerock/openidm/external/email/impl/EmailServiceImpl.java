@@ -55,7 +55,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Email service implementation
  * 
- * @author gael
  */
 @Component(name = EmailServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service

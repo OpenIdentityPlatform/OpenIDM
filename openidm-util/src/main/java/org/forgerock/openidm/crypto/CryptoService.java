@@ -35,8 +35,6 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * Provides encryption and decryption services to OpenIDM components.
  *
- * @author Paul C. Bryan
- * @author aegloff
  */
 public interface CryptoService {
 

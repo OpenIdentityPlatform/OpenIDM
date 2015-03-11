@@ -20,7 +20,6 @@ import java.util.Map;
 /**
  * A handler interface for liveSync failures.
  *
- * @author brmiller
  */
 public interface SyncFailureHandler
 {

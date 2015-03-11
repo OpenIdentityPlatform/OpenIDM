@@ -31,7 +31,6 @@ import org.forgerock.openidm.util.DateUtil;
  * A sync audit log entry representation.  Contains any additional fields
  * and logic specific to sync entries.
  * 
- * @author ckienle
  */
 class SyncEntry extends LogEntry {
 

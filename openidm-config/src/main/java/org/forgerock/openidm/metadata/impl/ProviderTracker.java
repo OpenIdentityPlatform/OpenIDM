@@ -40,8 +40,6 @@ import org.slf4j.LoggerFactory;
  * Keep track of meta data providers, either declared in bundle meta-data, or 
  * registered as services
  * 
- * @author aegloff
- * @author ckienle
  *
  */
 public class ProviderTracker implements ServiceTrackerListener {

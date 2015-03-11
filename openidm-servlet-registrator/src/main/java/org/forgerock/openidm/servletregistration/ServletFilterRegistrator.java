@@ -28,7 +28,6 @@ import org.forgerock.json.fluent.JsonValue;
 
 /**
  * Interface for servlet filter registration services
- * @author aegloff
  */
 public interface ServletFilterRegistrator {
     /**

@@ -52,9 +52,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides internal routing for a top-level object set.
  *
- * @author Paul C. Bryan
- * @author aegloff
- * @author brmiller
  */
 @Component(name = JsonResourceRouterService.PID, policy = ConfigurationPolicy.OPTIONAL,
         metatype = true, configurationFactory = false, immediate = true)

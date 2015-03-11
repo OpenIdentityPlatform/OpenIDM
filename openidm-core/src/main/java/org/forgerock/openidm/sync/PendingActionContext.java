@@ -37,7 +37,6 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * A ServerContext that stores a pending action information during a sync operation.
  *
- * @author ckienle
  */
 public class PendingActionContext extends ServerContext {
 

@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * OSGi bundle activator
- * @author aegloff
  */
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);

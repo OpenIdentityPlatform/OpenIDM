@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Remote client for OpenIDM-Activiti integration
- * @author orsolyamebold
  */
 public class ActivitiIntegrationApplication extends Application {
 

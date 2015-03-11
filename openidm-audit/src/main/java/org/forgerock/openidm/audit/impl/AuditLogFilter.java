@@ -22,7 +22,6 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * An audit log filter.
  *
- * @author brmiller
  */
 interface AuditLogFilter {
     /**

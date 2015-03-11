@@ -31,7 +31,6 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * A NAME does ...
  * 
- * @author Laszlo Hordos
  */
 public interface RouteService {
 

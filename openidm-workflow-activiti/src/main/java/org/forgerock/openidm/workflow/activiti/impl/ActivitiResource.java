@@ -31,7 +31,6 @@ import org.forgerock.openidm.util.ResourceUtil;
 /**
  * Implementation of the Activiti Engine Resource
  *
- * @author orsolyamebold
  */
 public class ActivitiResource implements RequestHandler {
 

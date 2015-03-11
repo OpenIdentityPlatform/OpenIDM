@@ -30,7 +30,6 @@ import org.forgerock.openidm.repo.jdbc.ErrorType;
 /**
  * MySQL handling of SQLExceptions
  *
- * @author aegloff
  */
 public class MySQLExceptionHandler extends DefaultSQLExceptionHandler {
 

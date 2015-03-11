@@ -36,8 +36,6 @@ import org.forgerock.json.fluent.JsonValueException;
  * <p/>
  * Matching id pattern: system/{@code name}/*
  *
- * @author @Laszlo Hordos
- * @author brmiller
  */
 public class SimpleSystemIdentifier implements SystemIdentifier {
 

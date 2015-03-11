@@ -48,7 +48,6 @@ import java.util.Set;
 /**
  * Sample Class Doc
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 @ConnectorClass(displayNameKey = "TEST", configurationClass = TestConfiguration.class)

@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
  * 
  * Commands can contain tokens of the format ${token-name}
  * 
- * @author brmiller
  */
 public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Integer> {
 

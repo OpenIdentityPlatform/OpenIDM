@@ -44,8 +44,6 @@ import org.slf4j.LoggerFactory;
  * Loads and caches the object only once on demand.
  * This class is not thread safe.
  *
- * @author Laszlo
- * @author aegloff
  */
 public class LazyObjectAccessor {
     private static final Logger logger = LoggerFactory.getLogger(ObjectMapping.class);

@@ -34,7 +34,6 @@ import org.identityconnectors.framework.api.ConnectorInfo;
 /**
  * Sample Class Doc
  *
- * @author $author$
  * @version $Revision$ $Date$
  * @since 1.0.0
  */

@@ -29,7 +29,6 @@ import java.util.HashMap;
 import static org.forgerock.openidm.workflow.activiti.impl.SharedIdentityService.*;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class JsonGroup extends JsonValue implements Group {

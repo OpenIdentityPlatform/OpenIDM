@@ -35,8 +35,6 @@ import org.forgerock.json.resource.ServerContext;
 
 /**
  * OpenIDM audit logger
- * @author aegloff
- * @author brmiller
  */
 public interface AuditLogger {
 

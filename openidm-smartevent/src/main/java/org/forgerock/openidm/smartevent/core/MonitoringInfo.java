@@ -19,7 +19,6 @@ package org.forgerock.openidm.smartevent.core;
 /**
  * Holds monitoring and statistics info
  * 
- * @author aegloff
  */
 public class MonitoringInfo {
 

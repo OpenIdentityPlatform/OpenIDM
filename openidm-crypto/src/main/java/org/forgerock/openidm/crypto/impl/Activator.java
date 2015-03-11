@@ -39,8 +39,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Crypto bundle activator
  *
- * @author aegloff
- * @author ckienle
  */
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);

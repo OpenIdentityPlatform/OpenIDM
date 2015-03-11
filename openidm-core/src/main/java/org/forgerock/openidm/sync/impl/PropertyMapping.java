@@ -45,7 +45,6 @@ import org.forgerock.json.fluent.JsonPointer;
 import javax.script.ScriptException;
 
 import org.forgerock.openidm.sync.impl.Scripts.Script;
-import org.forgerock.script.source.SourceUnit;
 
 /**
  * This class contains the necessary logic to map an attribute from the source object to an attribute

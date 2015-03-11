@@ -54,7 +54,6 @@ import org.slf4j.LoggerFactory;
  * 
  * This would invoke this service every 10 seconds
  * 
- * @author aegloff
  */
 @Component(name = "org.forgerock.openidm.demo-scheduled", immediate=true)
 @Service 

@@ -42,8 +42,6 @@ import org.forgerock.json.resource.UpdateRequest;
  * Every repository boot service must provide CRUD access to configuration,
  * And provide built in query support for queryid query-all-ids
  * 
- * @author aegloff
- * @author ckienle
  */
 public interface RepoBootService {
     

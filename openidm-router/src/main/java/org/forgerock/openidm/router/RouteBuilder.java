@@ -43,7 +43,6 @@ import org.osgi.framework.Constants;
 /**
  * A RouteBuilder does ...
  *
- * @author Laszlo Hordos
  */
 public final class RouteBuilder {
 

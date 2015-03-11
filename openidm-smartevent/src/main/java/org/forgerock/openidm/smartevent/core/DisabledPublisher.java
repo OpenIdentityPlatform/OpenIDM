@@ -23,7 +23,6 @@ import org.forgerock.openidm.smartevent.Name;
  * Used when event publishing is disabled Empty method calls may get optimized
  * out by the JIT
  * 
- * @author aegloff
  */
 public class DisabledPublisher implements PluggablePublisher {
 

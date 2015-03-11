@@ -50,7 +50,6 @@ import org.forgerock.openidm.util.ResourceUtil;
 /**
  * A generic collection resource provider servicing requests on entries in a keystore
  * 
- * @author ckienle
  */
 public abstract class EntryResourceProvider extends SecurityResourceProvider implements CollectionResourceProvider {
 

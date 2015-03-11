@@ -38,10 +38,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -57,8 +55,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A system information service to provide an external and internal API to query
  * OpenIDM state and status.
- * 
- * @author aegloff
  */
 @Component(name = InfoService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Info Service", immediate = true)

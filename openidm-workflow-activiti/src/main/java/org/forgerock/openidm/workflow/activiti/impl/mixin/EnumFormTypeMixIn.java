@@ -30,7 +30,6 @@ import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 
 /**
  *
- * @author orsolyamebold
  */
 public class EnumFormTypeMixIn {
     @JsonProperty(ActivitiConstants.ENUM_VALUES)

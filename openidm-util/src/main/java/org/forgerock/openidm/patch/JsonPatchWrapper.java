@@ -37,7 +37,6 @@ import org.forgerock.json.resource.ConflictException;
 /**
  * TODO: Description.
  * 
- * @author Paul C. Bryan
  * @deprecated Implement {@code JsonResource} (or extend
  *             {@code SimpleJsonResource}) instead.
  */

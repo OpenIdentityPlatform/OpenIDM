@@ -78,7 +78,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A JobStore implementation used for persistence with the OpenIdm Repository Service.
  *
- * @author ckienle
  *
  */
 public class RepoJobStore implements JobStore, ClusterEventListener {

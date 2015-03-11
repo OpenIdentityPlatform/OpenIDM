@@ -38,7 +38,6 @@ import org.joda.time.DateTime;
 
 /**
  * Utility class for Activiti workflow integration
- * @author orsolyamebold
  */
 public class ActivitiUtil {
     /**

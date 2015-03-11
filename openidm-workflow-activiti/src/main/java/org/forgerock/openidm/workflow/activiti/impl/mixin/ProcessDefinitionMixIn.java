@@ -29,7 +29,6 @@ import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 
 /**
  *
- * @author orsolyamebold
  */
 @JsonIgnoreProperties({"processDefinition", "identityLinks", "activities", "initial", "initialActivityStack", "persistentState"})
 public abstract class ProcessDefinitionMixIn {

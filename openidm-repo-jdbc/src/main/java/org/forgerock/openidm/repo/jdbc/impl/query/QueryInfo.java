@@ -28,7 +28,6 @@ import java.util.List;
 /**
  * Information about a JDBC query
  *
- * @author aegloff
  */
 final class QueryInfo {
     private String queryString;

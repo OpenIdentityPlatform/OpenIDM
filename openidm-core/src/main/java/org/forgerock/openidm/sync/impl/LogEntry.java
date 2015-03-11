@@ -35,7 +35,6 @@ import org.forgerock.openidm.util.DateUtil;
 /**
   An audit log entry representation
  * 
- * @author ckienle
  */
 class LogEntry {
 

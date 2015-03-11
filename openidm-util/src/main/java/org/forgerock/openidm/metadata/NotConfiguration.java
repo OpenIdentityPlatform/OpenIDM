@@ -29,7 +29,6 @@ import java.io.Serializable;
  * An exception that indicates that a meta data provider knows meta-data is
  * necessary for a given configuration, but it's not a Configuration.
  * 
- * @author Laszlo Hordos
  */
 public class NotConfiguration extends Exception implements Serializable {
 

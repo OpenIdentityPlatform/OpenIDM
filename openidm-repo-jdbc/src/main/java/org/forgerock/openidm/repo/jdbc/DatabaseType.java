@@ -24,7 +24,6 @@
 package org.forgerock.openidm.repo.jdbc;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public enum DatabaseType {

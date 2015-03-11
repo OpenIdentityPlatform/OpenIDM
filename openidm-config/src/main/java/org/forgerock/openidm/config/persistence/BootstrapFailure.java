@@ -19,7 +19,6 @@ package org.forgerock.openidm.config.persistence;
 /**
  * An exception that is thrown if bootstrapping the system failed
  *
- * @author aegloff
  */
 public class BootstrapFailure extends Exception {
 

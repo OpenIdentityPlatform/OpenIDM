@@ -35,7 +35,6 @@ import static com.jayway.restassured.RestAssured.*;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 @Test(groups = { "sample0" })
 public class SampleZeroITCase {

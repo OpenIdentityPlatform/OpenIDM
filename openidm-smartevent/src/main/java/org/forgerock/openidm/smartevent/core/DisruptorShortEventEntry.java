@@ -22,7 +22,6 @@ import org.forgerock.openidm.smartevent.Name;
 import com.lmax.disruptor.EventFactory;
 
 /**
- * @author aegloff
  */
 
 /**
@@ -34,7 +33,6 @@ import com.lmax.disruptor.EventFactory;
  * @deprecated Considering removal as it limits the number of open start events
  *             to the ring buffer size. Plus it is highly sensitive to requiring
  *             end() to be called on the EventEntry
- * @author aegloff
  * 
  */
 public class DisruptorShortEventEntry implements EventEntry {

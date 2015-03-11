@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 
-import com.fasterxml.jackson.module.afterburner.deser.CreatorOptimizer;
-import com.fasterxml.jackson.module.afterburner.ser.SerializerModifier;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
@@ -52,9 +50,6 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
-import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 public final class JsonUtil {
 

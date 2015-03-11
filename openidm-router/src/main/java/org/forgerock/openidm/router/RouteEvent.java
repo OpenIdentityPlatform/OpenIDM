@@ -32,7 +32,6 @@ import java.util.EventObject;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public class RouteEvent extends EventObject {
 

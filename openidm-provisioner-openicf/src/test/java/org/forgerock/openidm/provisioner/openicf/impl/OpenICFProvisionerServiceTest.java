@@ -110,7 +110,6 @@ import static org.mockito.Mockito.when;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implements
         RouterRegistry, ConnectorInfoManager, SyncFailureHandlerFactory {

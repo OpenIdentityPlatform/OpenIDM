@@ -44,7 +44,6 @@ import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricProcessInstanc
 
 /**
  * Resource implementation of ProcessInstance related Activiti operations
- * @author orsolyamebold
  */
 public class ProcessInstanceResource implements CollectionResourceProvider {
 

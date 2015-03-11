@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Directs OSGi logging service entries into the slf4j logger
  *
- * @author aegloff
  */
 public class OsgiLogHandler {
     

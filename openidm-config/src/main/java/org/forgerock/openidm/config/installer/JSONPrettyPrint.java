@@ -20,12 +20,10 @@ import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.impl.Indenter;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.PrettyPrinter;
 
 /**
  * Helper to generate customer formatted (pretty print) Jackson JSON output
  * 
- * @author aegloff
  *
  */
 public class JSONPrettyPrint {

@@ -34,7 +34,6 @@ import org.forgerock.openidm.servletregistration.RegisteredFilter;
 /**
  * A RegisteredFilter implementation
  * 
- * @author ckienle
  */
 public class RegisteredFilterImpl implements RegisteredFilter {
  

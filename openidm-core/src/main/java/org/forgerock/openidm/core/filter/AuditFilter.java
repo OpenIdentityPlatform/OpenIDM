@@ -37,7 +37,6 @@ import org.forgerock.json.resource.UntypedCrossCutFilter;
 /**
  * A NAME does ...
  * 
- * @author Laszlo Hordos
  */
 public class AuditFilter implements UntypedCrossCutFilter<AuditFilter.AuditState> {
 

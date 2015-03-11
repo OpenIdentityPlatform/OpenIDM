@@ -49,8 +49,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
- * @author brmiller
  */
 public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState> {
 

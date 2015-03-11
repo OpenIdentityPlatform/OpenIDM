@@ -63,8 +63,6 @@ import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
  * This view represents one direction of that Link to match the direction of the
  * current mapping context (source/target object set).
  *
- * @author Paul C. Bryan
- * @author aegloff
  */
 class Link {
 

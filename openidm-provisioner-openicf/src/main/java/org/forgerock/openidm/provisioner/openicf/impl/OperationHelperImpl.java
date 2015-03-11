@@ -26,7 +26,6 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.Resource;
@@ -40,7 +39,6 @@ import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
 
-import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -49,7 +47,6 @@ import java.util.Map;
 
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class OperationHelperImpl implements OperationHelper {

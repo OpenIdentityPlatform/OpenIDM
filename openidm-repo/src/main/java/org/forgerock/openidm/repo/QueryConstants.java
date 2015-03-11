@@ -28,7 +28,6 @@ import org.forgerock.json.resource.servlet.HttpUtils;
 /**
  * Map key constants for Repository Queries
  *
- * @author aegloff
  */
 public final class QueryConstants {
     private QueryConstants() {}

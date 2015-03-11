@@ -28,7 +28,6 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * Access to application health status
  * 
- * @author aegloff
  */
 public interface HealthInfo {
     /**

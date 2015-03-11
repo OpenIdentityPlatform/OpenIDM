@@ -27,7 +27,6 @@ package org.forgerock.openidm.cluster;
 /**
  * An interface for the OpenIDM Cluster Management Service
  * 
- * @author ckienle
  */
 public interface ClusterManagementService {
 

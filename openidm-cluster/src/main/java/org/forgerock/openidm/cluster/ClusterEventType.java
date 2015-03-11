@@ -27,7 +27,6 @@ package org.forgerock.openidm.cluster;
 /**
  * An enumeration for cluster event types
  * 
- * @author ckienle
  */
 public enum ClusterEventType {
 

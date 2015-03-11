@@ -20,13 +20,11 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 
 /**
- * @author aegloff
  */
 
 /**
  * Event entry implementation exposed to the user
  * 
- * @author aegloff
  * 
  */
 public class EventEntryImpl implements EventEntry {

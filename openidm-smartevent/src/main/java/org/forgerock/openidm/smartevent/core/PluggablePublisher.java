@@ -22,7 +22,6 @@ import org.forgerock.openidm.smartevent.Name;
 /**
  * Allows to plug in event publishers, and replace them dynamically
  * 
- * @author aegloff
  */
 public interface PluggablePublisher {
 

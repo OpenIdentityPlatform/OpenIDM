@@ -42,7 +42,6 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 // TODO Delete this when openidm-core is migrated
 public class Activator implements BundleActivator {

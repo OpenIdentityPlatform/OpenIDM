@@ -32,7 +32,6 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * Create an audit activity log for a request result.
  *
- * @author brmiller
  */
 public interface ActivityLogger {
 

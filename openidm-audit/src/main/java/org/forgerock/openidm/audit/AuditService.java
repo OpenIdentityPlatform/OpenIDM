@@ -28,7 +28,6 @@ import org.forgerock.json.resource.RequestHandler;
 /**
  * OpenIDM audit service
  *
- * @author aegloff
  */
 public interface AuditService extends RequestHandler {
     /** the AuditService is "registered" on /audit */

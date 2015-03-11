@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 /**
  * Testing of smart event publisher
  * 
- * @author aegloff
  */
 public class PublisherTest {
 

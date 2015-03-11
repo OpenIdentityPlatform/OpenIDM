@@ -37,7 +37,6 @@ import org.osgi.service.component.ComponentConstants;
 /**
  * Custom ExpressionManager for resolving 'openidm' variable in expressions
  *
- * @author orsolyamebold
  */
 public class OpenIDMExpressionManager extends ExpressionManager {
     private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();

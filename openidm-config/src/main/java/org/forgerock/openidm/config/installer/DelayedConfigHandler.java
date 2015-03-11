@@ -21,15 +21,8 @@ import java.util.List;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
-import org.forgerock.openidm.metadata.impl.ProviderTracker;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +30,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles configuration that needs to wait for related meta-data to become available
  * (e.g. for encryption) before it can be provided to OSGi
- * 
- * @author aegloff
  */
 public class DelayedConfigHandler implements ProviderListener {
     final static Logger logger = LoggerFactory.getLogger(DelayedConfigHandler.class);

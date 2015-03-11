@@ -27,7 +27,6 @@ package org.forgerock.openidm.policy;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +59,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A Policy Service for policy validation.
  * 
- * @author Chad Kienle
  */
 @Component(name = PolicyService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Policy Service", immediate = true)

@@ -23,23 +23,17 @@
  */
 package org.forgerock.openidm.http.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.forgerock.openidm.http.SecurityConfigurator;
 
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Apply Jetty security constraints of applicable
- *
- * @author aegloff
+ * Apply Jetty security constraints of applicable.
  */
 public final class JettySecurityConfigurator implements SecurityConfigurator {
     final static Logger logger = LoggerFactory.getLogger(JettySecurityConfigurator.class);

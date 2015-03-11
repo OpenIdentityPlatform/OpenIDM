@@ -33,7 +33,6 @@ import static org.mockito.Mockito.mock;
 /**
  * Config tests for SyncFailureHandlerFactoryImpl factor method.
  *
- * @author brmiller
  */
 public class SyncFailureHandlerFactoryImplTest {
 

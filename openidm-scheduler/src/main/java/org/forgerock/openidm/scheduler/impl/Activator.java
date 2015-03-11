@@ -25,24 +25,14 @@
 
 package org.forgerock.openidm.scheduler.impl;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
-import org.forgerock.openidm.scheduler.SchedulerConfig;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.impl.DirectSchedulerFactory;
-import org.quartz.impl.StdSchedulerFactory;
-import org.quartz.simpl.CascadingClassLoadHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * OSGi bundle activator for scheduler facility
- * @author aegloff
  */
 public class Activator implements BundleActivator {
     private final static Logger logger = LoggerFactory.getLogger(Activator.class);

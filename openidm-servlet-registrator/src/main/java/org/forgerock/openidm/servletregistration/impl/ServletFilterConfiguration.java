@@ -39,8 +39,6 @@ import org.slf4j.LoggerFactory;
  * Takes configuration to register and de-register configured servlet filters,
  * with support to load the filter or supporting classes off a defined class path.
  *
- * @author aegloff
- * @author ckienle
  */
 @Component(
         name = "org.forgerock.openidm.servletfilter",
