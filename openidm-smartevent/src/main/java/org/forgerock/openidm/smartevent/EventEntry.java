@@ -29,7 +29,6 @@ package org.forgerock.openidm.smartevent;
  * calling of end() to complete the event window, and additional info useful for
  * monitoring such as a result to associate with the event.
  * 
- * @author aegloff
  */
 
 public interface EventEntry {

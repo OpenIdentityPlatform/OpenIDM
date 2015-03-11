@@ -33,7 +33,6 @@ import java.util.Map;
  * Handle a LiveSync failure by saving its detail to a dead-letter queue.  The queue
  * is implemented as a repository target.
  *
- * @author brmiller
  */
 public class DeadLetterQueueHandler implements SyncFailureHandler {
 

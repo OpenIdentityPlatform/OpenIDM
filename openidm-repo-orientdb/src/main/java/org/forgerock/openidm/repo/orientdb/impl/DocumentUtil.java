@@ -46,7 +46,6 @@ import static org.forgerock.json.fluent.JsonValue.json;
 /**
  * A utility class for handling and converting OrientDB ODocuments
  * 
- * @author aegloff
  */
 public class DocumentUtil  {
     final static Logger logger = LoggerFactory.getLogger(DocumentUtil.class);

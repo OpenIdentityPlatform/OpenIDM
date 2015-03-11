@@ -98,9 +98,6 @@ import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARA
 /**
  * Provides access to a set of managed objects of a given type: managed/[type]/{id}.
  *
- * @author Paul C. Bryan
- * @author aegloff
- * @author brmiller
  */
 class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 

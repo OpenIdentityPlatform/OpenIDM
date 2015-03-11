@@ -48,7 +48,6 @@ import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskEntityMixIn;
 
 /**
  * Resource implementation of TaskInstance related Activiti operations
- * @author orsolyamebold
  */
 public class TaskInstanceResource implements CollectionResourceProvider {
 

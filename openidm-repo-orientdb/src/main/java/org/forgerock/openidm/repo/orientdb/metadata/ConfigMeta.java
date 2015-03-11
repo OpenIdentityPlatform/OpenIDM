@@ -37,8 +37,6 @@ import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
  * Meta data provider to describe configuration
  * requirements of this bundle
  *
- * @author aegloff
- * @author ckienle
  */
 public class ConfigMeta implements MetaDataProvider {
 

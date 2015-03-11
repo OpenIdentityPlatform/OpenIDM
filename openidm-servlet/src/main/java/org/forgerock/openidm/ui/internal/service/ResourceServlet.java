@@ -56,10 +56,6 @@ import org.slf4j.LoggerFactory;
  * Based on apache felix org/apache/felix/http/base/internal/service/ResourceServlet.java
  *
  * Changes and additions by
- * @author laszlo
- * @author aegloff
- * @author brmiller
- * @author ckienle
  */
 @Component(name = "org.forgerock.openidm.ui.context", 
         immediate = true,

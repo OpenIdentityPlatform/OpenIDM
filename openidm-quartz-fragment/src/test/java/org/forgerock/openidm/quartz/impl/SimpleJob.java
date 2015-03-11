@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
  * This is just a simple job that gets fired off many times by example 1
  * </p>
  * 
- * @author Bill Kratzer
  */
 public class SimpleJob implements Job {
 

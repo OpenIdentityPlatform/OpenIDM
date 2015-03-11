@@ -30,7 +30,6 @@ import org.osgi.framework.BundleContext;
  * A FrameworkPropertyAccessor wraps the {@link BundleContext} and accesses all
  * Framework properties.
  *
- * @author Laszlo Hordos
  */
 public class FrameworkPropertyAccessor implements PropertyAccessor {
 

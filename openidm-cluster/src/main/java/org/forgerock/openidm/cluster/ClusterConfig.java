@@ -1,7 +1,6 @@
 package org.forgerock.openidm.cluster;
 
 import java.util.Properties;
-import java.util.Set;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;

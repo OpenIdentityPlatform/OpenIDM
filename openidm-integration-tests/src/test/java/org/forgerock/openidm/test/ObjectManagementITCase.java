@@ -40,7 +40,6 @@ import static com.jayway.restassured.RestAssured.given;
 /**
  * Integration tests for Authentication
  *
- * @author Laurent Brisirel
  */
 @Test(groups = { "common" })
 public class ObjectManagementITCase {

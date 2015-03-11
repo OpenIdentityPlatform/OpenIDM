@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class DatabaseShutdownHook extends AbstractConnectionHook {

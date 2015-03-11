@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * a way to mark which connector to not apply the OpenIDM authentication mechanism on.
  * Allows for just using SSL mutual auth on a given port.
  *
- * @author aegloff
  */
 public class DisableOpenIDMAuth {
 

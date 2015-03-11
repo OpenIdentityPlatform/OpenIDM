@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
  * Avoids having to extend service tracker each time this is desired,
  * or abusing ServiceTrackerCustomizer for this purpose.
  *
- * @author aegloff
  */
 public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
 

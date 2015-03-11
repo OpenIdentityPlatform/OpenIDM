@@ -33,7 +33,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class JDBCRepoServiceTest {

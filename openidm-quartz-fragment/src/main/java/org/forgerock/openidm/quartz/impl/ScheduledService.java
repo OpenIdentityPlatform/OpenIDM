@@ -33,7 +33,6 @@ import org.forgerock.json.resource.ServerContext;
  * OSGi services wanting to be schedulable via the Scheduler service must
  * implement this interface.
  *
- * @author aegloff
  */
 
 public interface ScheduledService {

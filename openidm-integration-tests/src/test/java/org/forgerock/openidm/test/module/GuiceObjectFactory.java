@@ -35,7 +35,6 @@ import com.google.inject.Injector;
 /**
  * A GuiceObjectFactory does ...
  *
- * @author Laszlo Hordos
  */
 public abstract class GuiceObjectFactory extends AbstractModule implements IObjectFactory {
     private Injector injector;

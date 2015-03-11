@@ -32,7 +32,6 @@ import org.identityconnectors.framework.api.ConnectorInfo;
  * Framework ConnectorFacadeFactory#getConnectorFacadeAsync() is not
  * implemented.
  * 
- * @author Laszlo Hordos
  */
 public interface ConnectorFacadeCallback {
 

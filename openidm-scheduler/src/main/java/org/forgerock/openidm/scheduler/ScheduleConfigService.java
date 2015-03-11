@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Schedule Config Service
  *
- * @author ckienle
  */
 
 @Component(name = "org.forgerock.openidm.schedule", immediate=true, policy=ConfigurationPolicy.REQUIRE, configurationFactory=true)

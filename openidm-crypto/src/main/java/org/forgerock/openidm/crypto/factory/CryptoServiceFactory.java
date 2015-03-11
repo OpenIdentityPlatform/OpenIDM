@@ -26,16 +26,11 @@ package org.forgerock.openidm.crypto.factory;
 
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Cryptography Service Factory The cryptography service can be obtained either
  * though this factory, or the OSGi registry. This avoids bootstrap order issues
  * with decrypting configuration.
- *
- * @author aegloff
- * @author ckienle
  */
 public class CryptoServiceFactory {
 

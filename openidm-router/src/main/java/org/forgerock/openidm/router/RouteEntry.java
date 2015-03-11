@@ -27,7 +27,6 @@ package org.forgerock.openidm.router;
 /**
  * A NAME does ...
  * 
- * @author Laszlo Hordos
  */
 public interface RouteEntry extends RouteService {
 

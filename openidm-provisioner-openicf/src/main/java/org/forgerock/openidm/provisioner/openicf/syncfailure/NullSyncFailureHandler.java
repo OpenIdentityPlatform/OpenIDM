@@ -21,7 +21,6 @@ import java.util.Map;
  * A Null-object SyncFailureHandler that implements the equivalent of an "ignore"
  * operation.
  *
- * @author brmiller
  */
 public class NullSyncFailureHandler implements SyncFailureHandler {
 

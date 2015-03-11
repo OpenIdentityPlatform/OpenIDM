@@ -67,7 +67,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Handling of tables in a generic (not object specific) layout
  *
- * @author aegloff
  */
 public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);

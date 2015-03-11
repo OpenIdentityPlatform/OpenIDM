@@ -29,15 +29,12 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.quartz.impl.RepoJobStore;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Holds a Scheduler's configuration
- * 
- * @author ckienle
+ * Holds a Scheduler's configuration.
  */
 public class SchedulerConfig {
     final static Logger logger = LoggerFactory.getLogger(SchedulerConfig.class);

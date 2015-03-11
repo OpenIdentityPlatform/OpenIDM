@@ -27,7 +27,6 @@ package org.forgerock.openidm.sync.impl;
 /**
  * Represents the different state and stages of the reconciliation process
  *
- * @author aegloff
  */
 enum ReconStage {
 

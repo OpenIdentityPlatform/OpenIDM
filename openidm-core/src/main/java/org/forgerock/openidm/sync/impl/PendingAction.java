@@ -33,8 +33,6 @@ import org.slf4j.LoggerFactory;
  * Pending action handling. Creates and populates a PendingActionContext to 
  * help perform actions as soon as target identifiers become known.
  *
- * @author aegloff
- * @author ckienle
  */
 class PendingAction {
 

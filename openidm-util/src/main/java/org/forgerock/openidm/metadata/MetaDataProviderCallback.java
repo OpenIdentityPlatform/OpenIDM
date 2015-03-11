@@ -27,7 +27,6 @@ package org.forgerock.openidm.metadata;
  * Meta data provider callback interface to explicitly update/refresh the
  * configuration requirements/properties for a bundle.
  * 
- * @author ckienle
  */
 public interface MetaDataProviderCallback {
 

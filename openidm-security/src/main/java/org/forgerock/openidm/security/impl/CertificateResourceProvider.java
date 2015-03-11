@@ -30,23 +30,15 @@ import java.security.cert.X509Certificate;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A collection resource provider servicing requests on certificate entries in a keystore
- * 
- * @author ckienle
  */
 public class CertificateResourceProvider extends EntryResourceProvider {
 
-    private final static Logger logger = LoggerFactory.getLogger(CertificateResourceProvider.class);
-    
     public CertificateResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
         super(resourceName, store, manager, repoService);
     }

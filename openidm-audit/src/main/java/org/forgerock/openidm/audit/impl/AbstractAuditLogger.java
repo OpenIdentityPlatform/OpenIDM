@@ -23,15 +23,10 @@
  */
 package org.forgerock.openidm.audit.impl;
 
-import java.util.Map;
-
 import org.forgerock.json.fluent.JsonValue;
-import org.osgi.framework.BundleContext;
 
 /**
  * Abstract audit logger to implement common attributes.
- *
- * @author brmiller
  */
 public abstract class AbstractAuditLogger implements AuditLogger {
 

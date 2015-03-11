@@ -18,7 +18,6 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 /**
  * A sync-failure handler exception.
  *
- * @author brmiller
  */
 public class SyncHandlerException extends RuntimeException {
     /**

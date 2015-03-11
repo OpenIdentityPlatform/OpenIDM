@@ -28,7 +28,6 @@ import org.forgerock.json.fluent.JsonValue;
 
 /**
  * Interface to manage and access mappings
- * @author aegloff
  */
 public interface Mappings {
     /**

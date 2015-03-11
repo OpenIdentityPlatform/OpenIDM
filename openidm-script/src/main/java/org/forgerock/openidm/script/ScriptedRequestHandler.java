@@ -62,7 +62,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A ScriptedRequestHandler
  * 
- * @author Laszlo Hordos
  */
 public class ScriptedRequestHandler implements Scope, RequestHandler {
 

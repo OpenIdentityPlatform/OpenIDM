@@ -39,7 +39,6 @@ import org.quartz.Trigger;
 /**
  * Test class that contains unit tests for the RepoJobStore class.
  *
- * @author ckienle
  *
  */
 public class TestRepoJobstore extends TestCase {

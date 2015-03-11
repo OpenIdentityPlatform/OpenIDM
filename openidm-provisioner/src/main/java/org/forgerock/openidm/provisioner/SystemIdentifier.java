@@ -29,7 +29,6 @@ package org.forgerock.openidm.provisioner;
 /**
  * SystemIdentifier is a composite key to identify the {@link ProvisionerService} instance.
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 public interface SystemIdentifier {

@@ -27,7 +27,6 @@ package org.forgerock.openidm.core;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public interface PropertyAccessor {
     /**

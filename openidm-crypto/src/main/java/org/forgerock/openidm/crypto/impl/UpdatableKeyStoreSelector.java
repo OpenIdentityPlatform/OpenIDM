@@ -29,14 +29,10 @@ import java.security.KeyStore;
 
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.simple.SimpleKeySelector;
-import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 
 /**
  * Interface to select and keys from a keystore.  Includes an update method
  * update the keystore.
- * 
- * @author ckienle
- *
  */
 public class UpdatableKeyStoreSelector implements SimpleKeySelector {
 

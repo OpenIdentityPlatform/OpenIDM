@@ -21,7 +21,6 @@ import org.forgerock.openidm.sync.ReconAction;
 /**
  * TODO: Description.
  *
- * @author Paul C. Bryan
  */
 enum Situation {
 

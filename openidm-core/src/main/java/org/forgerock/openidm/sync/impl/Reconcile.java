@@ -32,7 +32,6 @@ import org.forgerock.json.resource.ResourceException;
  * Reconciliation service interface.
  * Used for implementation purposed, business logic should
  * instead invoke it via the router.
- * @author aegloff
  */
 public interface Reconcile {
     /**

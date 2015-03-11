@@ -54,7 +54,6 @@ import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskDefinitionMixIn;
 /**
  * Resource implementation of TaskDefinition related Activiti operations
  *
- * @author orsolyamebold
  */
 public class TaskDefinitionResource implements CollectionResourceProvider {
 

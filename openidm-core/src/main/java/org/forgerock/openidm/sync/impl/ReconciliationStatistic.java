@@ -38,7 +38,6 @@ import org.forgerock.openidm.util.DateUtil;
 /**
  * Statistic for a reconciliation run
  * 
- * @author aegloff
  */
 public class ReconciliationStatistic {
     

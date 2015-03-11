@@ -91,7 +91,6 @@ import com.orientechnologies.orient.core.version.OSimpleVersion;
 
 /**
  * Repository service implementation using OrientDB
- * @author aegloff
  */
 @Component(name = OrientDBRepoService.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
 @Service (value = {RepositoryService.class, RequestHandler.class}) // Omit the RepoBootService interface from the managed service

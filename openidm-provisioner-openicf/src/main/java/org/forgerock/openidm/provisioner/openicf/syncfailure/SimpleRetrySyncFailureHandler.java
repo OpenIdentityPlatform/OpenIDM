@@ -24,7 +24,6 @@ import java.util.Map;
 /**
  * A simple sync failure handler that counts retries.
  *
- * @author brmiller
  */
 public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
 

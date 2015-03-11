@@ -34,7 +34,6 @@ import com.lmax.disruptor.dsl.Disruptor;
  * Start event issues EventEntry without limitation on the outstanding start/end
  * events, making it suitable for long(er) time span events/measurements
  * 
- * @author aegloff
  */
 public class DisruptorReferringPublisher implements PluggablePublisher {
 

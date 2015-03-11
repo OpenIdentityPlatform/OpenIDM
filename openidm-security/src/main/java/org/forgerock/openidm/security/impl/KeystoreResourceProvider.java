@@ -48,7 +48,6 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
@@ -57,10 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Services requests on a specific keystore
- *
- * @author Laszlo Hordos
- * @author ckienle
+ * Services requests on a specific keystore.
  */
 public class KeystoreResourceProvider extends SecurityResourceProvider implements SingletonResourceProvider {
 

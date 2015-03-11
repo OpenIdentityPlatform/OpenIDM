@@ -27,7 +27,6 @@ package org.forgerock.openidm.metadata;
  * An exception that indicates that a meta data provider knows meta-data is
  * necessary for a given configuration, but the meta-data is not yet available.
  * 
- * @author aegloff
  */
 public class WaitForMetaData extends Exception {
 

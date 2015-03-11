@@ -61,7 +61,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.AuditConstants;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -1040,7 +1039,6 @@ class ObjectMapping {
      * Reconciliation interface.
      * Implementation is passed to ReconPhase and executed by the ReconTask
      *
-     * @author cgdrake
      */
     private interface Recon {
         /**
@@ -1189,7 +1187,6 @@ class ObjectMapping {
       
     /**
      * Wrapper to submit source/target recon for a given id for concurrent processing
-     * @author aegloff
      */
     class ReconTask implements Callable<Void> {
         String id;
@@ -1231,7 +1228,6 @@ class ObjectMapping {
 
     /**
      * Reconcile the source/target phase, multi threaded or single threaded.
-     * @author aegloff
      */
     class ReconPhase extends ReconFeeder {
         ServerContext parentContext;

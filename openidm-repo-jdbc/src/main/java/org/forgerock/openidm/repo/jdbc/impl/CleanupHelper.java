@@ -36,7 +36,6 @@ import java.sql.SQLException;
 /**
  * Helper in cleaning up JDBC resources
  *
- * @author aegloff
  */
 public class CleanupHelper {
     final static Logger logger = LoggerFactory.getLogger(CleanupHelper.class);

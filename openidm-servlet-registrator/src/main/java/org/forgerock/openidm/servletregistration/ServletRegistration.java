@@ -27,9 +27,6 @@ import java.util.Dictionary;
 /**
  * Interface for registering servlet filters and servlets in OSGi.
  *
- * @author Phill Cunnington
- * @author ckienle
- * @author Alin Brici
  */
 public interface ServletRegistration {
 

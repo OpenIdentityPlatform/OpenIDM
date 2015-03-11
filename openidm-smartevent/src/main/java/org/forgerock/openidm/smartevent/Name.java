@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author aegloff
  */
 
 /**
@@ -52,7 +51,6 @@ import org.slf4j.LoggerFactory;
  * The fluent API allows for easier set-up directly in the declaration example:
  * <code>public static final Name MY_EVENT = Name.get("internal/myevent").setTags(new String[] {MONITOR, APP_EVENT}).setXyz("dummy")</code>
  * 
- * @author aegloff
  * 
  */
 public class Name {

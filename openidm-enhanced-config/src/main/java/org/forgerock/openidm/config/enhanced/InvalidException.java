@@ -27,7 +27,6 @@ package org.forgerock.openidm.config.enhanced;
 /**
  * An exception that is throw for Invalid Configurations.
  * 
- * @author aegloff
  */
 public class InvalidException extends RuntimeException {
 

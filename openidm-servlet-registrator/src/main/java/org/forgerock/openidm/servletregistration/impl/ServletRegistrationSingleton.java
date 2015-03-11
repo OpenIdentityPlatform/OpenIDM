@@ -68,8 +68,6 @@ import org.slf4j.LoggerFactory;
  * Takes configuration to register and de-register configured servlet filters, 
  * with support to load the filter or supporting classes off a defined class path
  * 
- * @author aegloff
- * @author ckienle
  */
 
 @Component(
@@ -261,7 +259,6 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     
     /**
      * Wraps Filter to set the thread context classloader
-     * @author aegloff
      */
     private static class FilterProxy implements InvocationHandler {
         Filter filter;

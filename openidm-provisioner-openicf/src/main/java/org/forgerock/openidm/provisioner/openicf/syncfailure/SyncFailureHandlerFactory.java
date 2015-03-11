@@ -20,7 +20,6 @@ import org.forgerock.json.fluent.JsonValue;
 /**
  * A factory interface to create a {@link SyncFailureHandler}.
  *
- * @author brmiller
  */
 public interface SyncFailureHandlerFactory {
     /**

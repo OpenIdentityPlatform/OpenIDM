@@ -17,8 +17,6 @@
 package org.forgerock.openidm.smartevent.core;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -26,10 +24,6 @@ import org.forgerock.openidm.smartevent.Name;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.SleepingWaitStrategy;
-import com.lmax.disruptor.dsl.Disruptor;
 
 /**
  * Publisher that uses the blocking linked queue to process events.

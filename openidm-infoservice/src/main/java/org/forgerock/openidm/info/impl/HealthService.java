@@ -667,7 +667,6 @@ public class HealthService
     /**
      * Detailed State
      *
-     * @author aegloff
      */
     private static class StateDetail {
         JsonValue jsonState;

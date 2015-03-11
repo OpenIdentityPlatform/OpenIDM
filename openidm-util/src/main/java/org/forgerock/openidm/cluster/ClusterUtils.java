@@ -26,7 +26,6 @@ package org.forgerock.openidm.cluster;
 /**
  * Contains cluster specific labels and utilities
  * 
- * @author ckienle
  */
 public class ClusterUtils {
 

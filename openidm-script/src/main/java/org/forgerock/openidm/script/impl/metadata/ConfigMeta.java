@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A NAME does ...
  * 
- * @author Laszlo Hordos
  */
 public class ConfigMeta implements MetaDataProvider {
 

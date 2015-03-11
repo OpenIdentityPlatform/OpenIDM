@@ -24,8 +24,6 @@ import org.forgerock.script.ScriptRegistry;
 /**
  * An interface to help provide the auth module dependencies from OSGi.
  *
- * @author Phill Cunnington
- * @author brmiller
  */
 public interface OSGiAuthnFilterHelper {
 

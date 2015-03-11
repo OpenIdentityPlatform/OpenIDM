@@ -23,16 +23,13 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Property;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.openidm.repo.RepositoryService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -40,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * OSGi bundle activator
- * @author aegloff
  */
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);

@@ -35,7 +35,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * {@code ServiceTracker<Map<String, Object>, Map<String, Object>>} and gets the
  * Properties.
  *
- * @author Laszlo Hordos
  */
 public class ServicePropertyAccessor implements PropertyAccessor {
 

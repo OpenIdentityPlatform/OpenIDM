@@ -40,7 +40,6 @@ import java.util.List;
 /**
  * A NAME does ...
  * 
- * @author Laszlo Hordos
  */
 public class ConfigMeta implements MetaDataProvider {
 

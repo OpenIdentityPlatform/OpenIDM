@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class JsonValueType implements VariableType {

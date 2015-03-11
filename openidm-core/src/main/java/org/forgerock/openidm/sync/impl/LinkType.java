@@ -17,17 +17,11 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 // SLF4J
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-// JSON Fluent library
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
 import org.forgerock.openidm.config.enhanced.InvalidException;
@@ -36,8 +30,6 @@ import org.forgerock.openidm.config.enhanced.InvalidException;
  * Represents the sharable Link Types,
  * and helpers for mappings to find and use matching link types
  * as mappings can share link sets, bi-directional.
- *
- * @author aegloff
  */
 class LinkType {
 

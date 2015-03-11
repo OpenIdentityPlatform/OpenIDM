@@ -31,7 +31,6 @@ import javax.script.ScriptException;
 /**
  * Handle liveSync failure by calling an external, user-supplied script.
  *
- * @author brmiller
  */
 public class ScriptedSyncFailureHandler implements SyncFailureHandler {
 

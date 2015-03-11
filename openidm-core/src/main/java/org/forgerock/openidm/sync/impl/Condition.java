@@ -28,7 +28,6 @@ import java.util.Map;
 
 import javax.script.ScriptException;
 
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.sync.impl.Scripts.Script;

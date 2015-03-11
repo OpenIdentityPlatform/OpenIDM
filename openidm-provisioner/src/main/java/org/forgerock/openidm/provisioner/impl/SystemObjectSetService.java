@@ -52,7 +52,6 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;

@@ -37,7 +37,6 @@ package org.forgerock.openidm.provisioner.openicf.commons;
  * <li>optional</li>
  * </ul>
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 public enum AttributeFlag {

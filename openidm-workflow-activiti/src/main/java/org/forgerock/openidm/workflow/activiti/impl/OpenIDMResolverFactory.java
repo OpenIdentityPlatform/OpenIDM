@@ -55,7 +55,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Factory for resolving openidm variable in scripts
  *
- * @author orsolyamebold
  */
 public class OpenIDMResolverFactory implements ResolverFactory {
 

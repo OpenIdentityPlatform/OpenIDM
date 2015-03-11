@@ -32,7 +32,6 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * A null-object ActivityLogger that doesn't [log].
  *
- * @author brmiller
  */
 public class NullActivityLogger implements ActivityLogger {
 

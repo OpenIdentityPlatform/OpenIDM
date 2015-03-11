@@ -42,7 +42,6 @@ import com.google.inject.name.Named;
 /**
  * A OpenIDMTestModule does ...
  *
- * @author Laszlo Hordos
  */
 public class OpenIDMTestModule extends AbstractModule {
 

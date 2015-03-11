@@ -26,7 +26,6 @@ package org.forgerock.openidm.security;
 
 /**
  * 
- * @author ckienle
  *
  */
 public interface KeyStoreManager {

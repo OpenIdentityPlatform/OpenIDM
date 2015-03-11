@@ -8,7 +8,6 @@ import java.util.Deque;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public class ObjectSetContext {
 

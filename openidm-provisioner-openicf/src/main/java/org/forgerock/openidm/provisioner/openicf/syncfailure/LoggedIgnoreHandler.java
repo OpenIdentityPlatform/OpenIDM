@@ -23,7 +23,6 @@ import java.util.Map;
 /**
  * A SyncFailureHandler that logs the error and ignores it.
  *
- * @author brmiller
  */
 public class LoggedIgnoreHandler implements SyncFailureHandler {
     /** Logger */

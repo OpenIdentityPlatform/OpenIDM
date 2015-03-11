@@ -40,7 +40,6 @@ import com.lmax.disruptor.dsl.Disruptor;
  * Event handler for monitoring and statistics Expects a single thread assigned
  * to gather the statistics
  * 
- * @author aegloff
  */
 public class StatisticsHandler implements EventHandler<DisruptorReferringEventEntry>,
         StatisticsHandlerMBean {

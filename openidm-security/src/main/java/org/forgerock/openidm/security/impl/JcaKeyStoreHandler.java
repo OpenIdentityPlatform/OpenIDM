@@ -36,14 +36,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-
 /**
  * A NAME does ...
- *
- * @author Laszlo Hordos
  */
 public class JcaKeyStoreHandler implements KeyStoreHandler {
 

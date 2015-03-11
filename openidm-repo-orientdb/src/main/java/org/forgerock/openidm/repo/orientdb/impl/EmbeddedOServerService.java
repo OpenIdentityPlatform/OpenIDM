@@ -51,7 +51,6 @@ import java.util.Map;
 /**
  * Component for embedded OrientDB server
  *
- * @author aegloff
  */
 public class EmbeddedOServerService {
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);

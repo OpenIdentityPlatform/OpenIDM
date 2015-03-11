@@ -29,14 +29,9 @@ import java.util.Map;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 
-import com.orientechnologies.orient.server.OServer;
-import com.orientechnologies.orient.server.OServerMain;
-
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
-import static org.fest.assertions.api.Assertions.assertThat;
-//import static org.fest.assertions.api.MapAssert.entry;
 
 public class DBHelperTest {
 

@@ -285,7 +285,6 @@ public class ContainerUtil  {
  * - Passing arguments of classes loaded by local classloader
  * - Returning types of concrete class loaded by local classloader
  * 
- * @author aegloff
  */
 class SimpleProxy implements java.lang.reflect.InvocationHandler {
     final static Logger logger = LoggerFactory.getLogger(SimpleProxy.class);

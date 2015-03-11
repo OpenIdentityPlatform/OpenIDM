@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Authentication Module for authenticating users using a client certificate.
  *
- * @author brmiller
  */
 public class ClientCertAuthModule implements ServerAuthModule {
 

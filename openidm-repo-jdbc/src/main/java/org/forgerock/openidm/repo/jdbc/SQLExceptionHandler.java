@@ -29,7 +29,6 @@ import java.sql.SQLException;
 /**
  * Interface to help handle SQLExceptions across different DB implementations
  *
- * @author aegloff
  */
 public interface SQLExceptionHandler {
     

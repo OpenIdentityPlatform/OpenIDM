@@ -28,7 +28,6 @@ import org.forgerock.script.ScriptRegistry;
 
 /**
  * Custom Session providing access to OpenIDM functions from Activiti
- * @author orsolyamebold
  */
 public class OpenIDMSessionImpl implements OpenIDMSession {
 

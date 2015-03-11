@@ -30,7 +30,6 @@ import org.osgi.service.http.HttpService;
 /**
  * Interface to configure security
  *
- * @author aegloff
  */
 public interface SecurityConfigurator {
 

@@ -95,9 +95,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides access to OSGi configuration
  *
- * @author aegloff
- * @author ckienle
- * @author brmiller
  */
 @Component(
         name = "org.forgerock.openidm.config.enhanced",

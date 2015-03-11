@@ -40,8 +40,6 @@ import java.util.Map;
  * Meta data provider to describe configuration
  * requirements of this bundle
  *
- * @author aegloff
- * @author ckienle
  */
 public class ConfigMeta implements MetaDataProvider {
     final static Logger logger = LoggerFactory.getLogger(ConfigMeta.class);

@@ -98,7 +98,6 @@ import org.slf4j.LoggerFactory;
 /**
  * External REST connectivity
  *
- * @author aegloff
  */
 @Component(name = RestService.PID, immediate = true, policy = ConfigurationPolicy.IGNORE,
         enabled = true)

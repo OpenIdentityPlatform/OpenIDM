@@ -15,7 +15,6 @@ import org.forgerock.json.resource.UpdateRequest;
 /**
  * A NAME does ...
  * 
- * @author Laszlo Hordos
  */
 public interface ScriptCustomizer {
 

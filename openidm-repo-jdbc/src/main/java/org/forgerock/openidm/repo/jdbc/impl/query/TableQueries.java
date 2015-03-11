@@ -68,8 +68,6 @@ import org.slf4j.LoggerFactory;
  *
  * Queries can contain tokens of the format ${token-name}
  *
- * @author aegloff
- * @author brmiller
  */
 public class TableQueries {
 

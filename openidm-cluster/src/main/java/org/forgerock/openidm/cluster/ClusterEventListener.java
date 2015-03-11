@@ -29,7 +29,6 @@ package org.forgerock.openidm.cluster;
  * in the cluster has failed or timed out.  Implementers of this interface 
  * need to be registered with the ClusterManagementService.
  * 
- * @author ckienle
  *
  */
 public interface ClusterEventListener {

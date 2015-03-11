@@ -51,7 +51,6 @@ import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.FilterCondition;
 import org.forgerock.json.resource.Filters;
 import org.forgerock.json.resource.FutureResult;
-import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
@@ -95,8 +94,6 @@ import java.util.regex.Pattern;
 /**
  * The ConnectionFactory responsible for providing Connections to routing requests initiated
  * from an external request on the api servlet.
- *
- * @author brmiller
  */
 @Component(name = ServletConnectionFactory.PID, policy = ConfigurationPolicy.OPTIONAL,
         configurationFactory = false, immediate = true)

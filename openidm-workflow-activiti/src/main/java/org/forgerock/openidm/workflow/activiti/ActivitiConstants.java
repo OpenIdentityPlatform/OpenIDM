@@ -29,7 +29,6 @@ import org.forgerock.openidm.core.ServerConstants;
 
 /**
  *
- * @author orsolyamebold
  */
 public class ActivitiConstants {
     public static final String PROCESSDEFINITION_PATTERN = "/?processdefinition.*";

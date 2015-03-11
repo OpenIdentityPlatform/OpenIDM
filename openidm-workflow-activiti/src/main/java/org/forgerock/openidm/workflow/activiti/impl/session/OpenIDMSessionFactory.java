@@ -32,7 +32,6 @@ import org.forgerock.script.ScriptRegistry;
  * Custom SessionFactory for OpenIDM
  * Provides access to the OpenIDM functions
  * 
- * @author orsolyamebold
  */
 public class OpenIDMSessionFactory implements SessionFactory {
 

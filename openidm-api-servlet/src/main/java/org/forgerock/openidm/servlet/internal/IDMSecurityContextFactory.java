@@ -27,7 +27,6 @@ package org.forgerock.openidm.servlet.internal;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
@@ -50,7 +49,6 @@ import java.util.List;
  * requests.  Specifically, this class executes each of the augmentation scripts that
  * were registered with the {@link ServletComponent}.
  *
- * @author brmiller
  */
 public class IDMSecurityContextFactory implements HttpServletContextFactory {
 

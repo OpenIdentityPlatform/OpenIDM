@@ -25,7 +25,6 @@
 package org.forgerock.openidm.util;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,17 +40,10 @@ import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.RouterContext;
-import org.forgerock.json.resource.SecurityContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 
 /**
  * Resource utilities.
- *
- * @author Laszlo Hordos
- * @author brmiller
  */
 public class ResourceUtil {
 

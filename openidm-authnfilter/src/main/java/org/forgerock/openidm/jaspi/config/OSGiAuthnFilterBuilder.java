@@ -23,7 +23,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.jaspi.JaspiRuntimeFilter;
@@ -48,7 +47,6 @@ import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,10 +103,6 @@ import java.util.Map;
  * </pre>
  * may be used to inject the OSGi dependencies into other modules as an OSGiAuthnFilterHelper.
  *
- * @author Jonathan Scudder
- * @author Phill Cunnington
- * @author brmiller
- * @author ckienle
  */
 @Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
 @Properties({

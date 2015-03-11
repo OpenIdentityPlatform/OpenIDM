@@ -5,7 +5,6 @@ import org.forgerock.json.resource.ConflictException;
 /**
  * An exception that is thrown during synchronization operations.
  *
- * @author Paul C. Bryan
  */
 public class SynchronizationException extends ConflictException {
 

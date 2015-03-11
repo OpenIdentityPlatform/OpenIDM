@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Queries pre-defined by the system
  * 
- * @author aegloff
  */
 public class PredefinedQueries {
 

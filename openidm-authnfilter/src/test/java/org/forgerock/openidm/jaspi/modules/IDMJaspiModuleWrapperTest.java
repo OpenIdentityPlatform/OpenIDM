@@ -47,8 +47,6 @@ import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 /**
  * Tests IDMUserAuthModule using "internal/user" resource/query
  *
- * @author Phill Cunnington
- * @author brmiller
  */
 public class IDMJaspiModuleWrapperTest {
 

@@ -36,7 +36,6 @@ import org.forgerock.script.ScriptRegistry;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public class Scripts {
 

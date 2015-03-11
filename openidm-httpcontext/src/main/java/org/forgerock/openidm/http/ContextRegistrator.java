@@ -48,8 +48,6 @@ import org.slf4j.LoggerFactory;
  * Http context to share amongst OpenIDM servlets to allow for applying uniform
  * security handling
  * 
- * @author aegloff
- * @author ckienle
  */
 @Component(name = "org.forgerock.openidm.http.context", immediate = true,
         policy = ConfigurationPolicy.IGNORE)

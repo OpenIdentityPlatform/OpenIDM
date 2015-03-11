@@ -40,7 +40,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class DBUnitUtils {

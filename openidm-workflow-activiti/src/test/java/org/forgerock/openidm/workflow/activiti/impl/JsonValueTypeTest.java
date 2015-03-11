@@ -31,7 +31,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class JsonValueTypeTest {

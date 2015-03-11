@@ -39,7 +39,6 @@ import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.util.DateUtil;
-import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

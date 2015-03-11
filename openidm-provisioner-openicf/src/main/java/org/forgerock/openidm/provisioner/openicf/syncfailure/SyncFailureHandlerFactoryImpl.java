@@ -32,7 +32,6 @@ import org.forgerock.script.ScriptRegistry;
 /**
  * A factory service to create the SyncFailureHandler strategy from config.
  *
- * @author bmiller
  */
 @Component(name = SyncFailureHandlerFactoryImpl.PID,
         policy = ConfigurationPolicy.IGNORE,

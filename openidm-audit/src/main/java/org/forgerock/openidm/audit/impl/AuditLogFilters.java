@@ -46,7 +46,6 @@ import static org.forgerock.openidm.audit.impl.AuditServiceImpl.TYPE_RECON;
 /**
  * A utility class containing various factory methods for creating {@link AuditLogFilter}s.
  *
- * @author brmiller
  */
 public class AuditLogFilters {
 

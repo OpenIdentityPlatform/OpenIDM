@@ -49,7 +49,6 @@ import org.testng.internal.ObjectFactoryImpl;
 /**
  * A ITTestSetup start the OpenIDM.
  * 
- * @author Laszlo Hordos
  */
 @Test(groups = { "common" })
 public class ITTestSetup {

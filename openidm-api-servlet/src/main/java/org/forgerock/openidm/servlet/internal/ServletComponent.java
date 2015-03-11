@@ -67,9 +67,6 @@ import org.slf4j.LoggerFactory;
 /**
  * A NAME does ...
  * 
- * @author Laszlo Hordos
- * @author ckienle
- * @author brmiller
  */
 @Component(name = "org.forgerock.openidm.api-servlet",
         immediate = true,

@@ -59,7 +59,6 @@ import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * A Helper to interact with the OrientDB
- * @author aegloff
  */
 public class DBHelper {
     final static Logger logger = LoggerFactory.getLogger(DBHelper.class);

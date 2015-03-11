@@ -29,7 +29,6 @@ package org.forgerock.openidm.util;
  *
  * @param <T>
  *            the class to be accessed
- * @author brmiller
  */
 public interface Accessor<T> {
     /**

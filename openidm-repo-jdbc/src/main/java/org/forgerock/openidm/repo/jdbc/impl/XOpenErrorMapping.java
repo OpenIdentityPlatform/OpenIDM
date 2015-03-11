@@ -39,7 +39,6 @@ import org.forgerock.openidm.repo.jdbc.ErrorType;
  * Use the error type facility sparingly, as it can take
  * DB specific error code implementations, porting and maintenance
  *
- * @author aegloff
  */
 public class XOpenErrorMapping {
 

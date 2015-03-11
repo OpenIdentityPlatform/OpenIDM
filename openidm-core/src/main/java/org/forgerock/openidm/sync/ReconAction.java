@@ -19,7 +19,6 @@ package org.forgerock.openidm.sync;
 /**
  * A Reconciliation action.
  *
- * @author Paul C. Bryan
  */
 public enum ReconAction {
 

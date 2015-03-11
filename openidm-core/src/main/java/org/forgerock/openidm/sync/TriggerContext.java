@@ -35,7 +35,6 @@ import org.forgerock.json.resource.PersistenceConfig;
 /**
  * A ServerContext that stores the source of a trigger during a sync operation.
  *
- * @author brmiller
  */
 public class TriggerContext extends ServerContext {
 

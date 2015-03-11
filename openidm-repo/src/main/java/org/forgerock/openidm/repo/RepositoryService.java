@@ -41,8 +41,6 @@ import org.forgerock.json.resource.UpdateRequest;
  * option. This interface should not be used if the request should be accompanied 
  * by a Context.
  * 
- * @author aegloff
- * @author ckienle
  */
 public interface RepositoryService {
     

@@ -34,7 +34,6 @@ import org.joda.time.format.ISODateTimeFormat;
  * 2011-09-09T14:58:17.654+02:00 <br>
  * 2011-09-09T14:58:17.654Z
  *
- * @author $author$
  * @version $Revision$ $Date$
  */
 public final class DateUtil {

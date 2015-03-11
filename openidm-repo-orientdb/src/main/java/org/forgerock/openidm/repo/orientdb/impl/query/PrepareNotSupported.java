@@ -27,7 +27,6 @@ package org.forgerock.openidm.repo.orientdb.impl.query;
  * An exception to indicate that a statement can not be converted into 
  * a prepared statement 
  *
- * @author aegloff
  */
 public class PrepareNotSupported extends Exception {
 

@@ -28,7 +28,6 @@ package org.forgerock.openidm.quartz.impl;
 /**
  * An exception that is throw for failure during scheduled work execution
  * 
- * @author aegloff
  */
 public class ExecutionException extends Exception {
 

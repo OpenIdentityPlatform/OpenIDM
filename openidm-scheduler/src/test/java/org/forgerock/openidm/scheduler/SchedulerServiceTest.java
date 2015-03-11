@@ -37,7 +37,6 @@ import org.testng.annotations.Test;
 /**
  * Basic unit tests, the main functionality is covered by functional tests
  *
- * @author aegloff
  */
 public class SchedulerServiceTest {
 

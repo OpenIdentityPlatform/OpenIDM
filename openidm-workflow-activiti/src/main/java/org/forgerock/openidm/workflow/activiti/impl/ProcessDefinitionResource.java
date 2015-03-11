@@ -59,7 +59,6 @@ import org.forgerock.openidm.workflow.activiti.impl.mixin.ProcessDefinitionMixIn
 /**
  * Resource implementation of ProcessDefinition related Activiti operations
  *
- * @author orsolyamebold
  */
 public class ProcessDefinitionResource implements CollectionResourceProvider {
 

@@ -40,7 +40,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * Object>>} and tracks all service and initialise the {@link IdentityServer}
  * with {@link org.forgerock.openidm.core.ServicePropertyAccessor}.
  *
- * @author Laszlo Hordos
  */
 public class Activator implements BundleActivator {
 

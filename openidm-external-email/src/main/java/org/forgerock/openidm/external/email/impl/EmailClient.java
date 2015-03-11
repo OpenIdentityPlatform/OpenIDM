@@ -25,7 +25,6 @@
 package org.forgerock.openidm.external.email.impl;
 
 import com.sun.mail.util.MailSSLSocketFactory;
-import java.util.Map;
 
 import java.util.Properties;
 import javax.mail.Message;
@@ -39,8 +38,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 
 /**
- *
- * @author gael
+ * Email client.
  */
 public class EmailClient {
 

@@ -54,7 +54,6 @@ import org.slf4j.LoggerFactory;
  *
  * Invokes the configured ScheduledService in OSGi
  *
- * @author aegloff
  */
 
 public class SchedulerServiceJob implements Job {

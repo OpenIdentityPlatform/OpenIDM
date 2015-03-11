@@ -23,20 +23,23 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.Page;
 import org.activiti.engine.impl.UserQueryImpl;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.forgerock.json.resource.ResourceException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.forgerock.json.resource.*;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class JsonUserQuery extends UserQueryImpl {

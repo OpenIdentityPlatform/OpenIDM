@@ -22,7 +22,6 @@ import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 /**
  * Holds the configuration used to register a servlet filter.
  *
- * @author Phill Cunnington
  */
 public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
 

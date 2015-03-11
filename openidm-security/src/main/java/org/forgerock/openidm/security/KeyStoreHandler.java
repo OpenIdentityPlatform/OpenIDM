@@ -29,8 +29,6 @@ import java.security.KeyStore;
 /**
  * Handles Access to a Java KeyStore
  *
- * @author Laszlo Hordos
- * @author ckienle
  */
 public interface KeyStoreHandler {
 

@@ -40,7 +40,6 @@ import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
 /**
  * A NAME does ...
  *
- * @author Laszlo Hordos
  */
 public class SystemAction {
 

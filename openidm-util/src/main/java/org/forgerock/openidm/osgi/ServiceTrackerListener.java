@@ -29,7 +29,6 @@ import org.osgi.framework.ServiceReference;
 /**
  * Listener to handle state changes in the Service Tracker
  *
- * @author aegloff
  */
 public interface ServiceTrackerListener {
 

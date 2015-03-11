@@ -27,7 +27,6 @@ package org.forgerock.openidm.core;
 /**
  * A SystemPropertyAccessor accesses to System properties.
  *
- * @author Laszlo Hordos
  */
 public class SystemPropertyAccessor implements PropertyAccessor {
 

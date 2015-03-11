@@ -23,27 +23,12 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
-import com.orientechnologies.orient.core.Orient;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConflictException;
 
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.entry;
 
 public class QueryInfoTest {
 

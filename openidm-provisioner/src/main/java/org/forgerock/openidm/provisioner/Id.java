@@ -60,7 +60,6 @@ import org.slf4j.LoggerFactory;
  * system/account
  * }
  *
- * @author $author$
  * @version $Revision$ $Date$
  * @deprecated
  * @see <a

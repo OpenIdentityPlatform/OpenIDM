@@ -44,7 +44,6 @@ import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import java.util.Map;
 
 /**
- * @author $author$
  * @version $Revision$ $Date$
  */
 public class OperationHelperBuilder {

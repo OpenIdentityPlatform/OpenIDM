@@ -33,7 +33,6 @@ import org.forgerock.openidm.crypto.impl.Main;
  * Utility for handling Jetty configuration properties, including properties
  * that may need to be encrypted/obfuscated, and/or may be encrypted/obfuscated
  *
- * @author aegloff
  */
 public class JettyPropertyUtil {
 

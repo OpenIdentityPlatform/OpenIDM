@@ -34,7 +34,6 @@ import com.lmax.disruptor.dsl.Disruptor;
  * @deprecated Considering removal as it limits the number of open start events
  *             to the ring buffer size Plus it is highly sensitive to requiring
  *             end() to be called on the EventEntry
- * @author aegloff
  */
 public class DisruptorShortPublisher implements PluggablePublisher {
 

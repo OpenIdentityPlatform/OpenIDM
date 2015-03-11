@@ -20,7 +20,6 @@ import java.util.Map;
 /**
  * A retry failure handler which retries infinitely.
  *
- * @author brmiller
  */
 public class InfiniteRetrySyncFailureHandler implements SyncFailureHandler {
     /** an instance of the InfiniteRetrySyncFailureHandler -- there only needs to be one */

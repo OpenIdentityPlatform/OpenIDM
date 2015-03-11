@@ -53,7 +53,6 @@ import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONPrettyPrint;
-import org.forgerock.openidm.config.manage.ConfigObjectService;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
