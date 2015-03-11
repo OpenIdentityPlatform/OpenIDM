@@ -55,38 +55,37 @@
    <literal>anonymous</literal>. For more information, see
    <xref linkend="internal-users" />.
   </para>
-  <variablelist>
-   <para>
-    OpenIDM supports HTTP basic authentication, but also supports an enhanced
-    authentication mechanism over the REST interface that is compatible with the
-    AJAX framework. You can use basic authentication headers, or the
-    OpenIDM-specific authentication headers, as follows:
+  <para>
+   OpenIDM supports an enhanced authentication mechanism over the REST
+   interface, that is compatible with the AJAX framework. Although OpenIDM
+   understands the authorization header of the HTTP basic authorization
+   contract, it deliberately does not utilize the full contract. In other words,
+   it does not cause the browser built in mechanism to prompt for username and
+   password. However, OpenIDM does understand utilities such as
+   <literal>curl</literal> that can send the username and password in the
+   Authorization header.
+  </para>
+  <para>
+   In general, the HTTP basic authentication mechanism does not work well with
+   client side web applications, and applications that need to render their own
+   login screens. Because the browser stores and sends the username and password
+   with each request, HTTP basic authentication has significant security
+   vulnerabilities. OpenIDM therefore supports sending the username and password
+   via the authorization header, and returns a token for subsequent access.
+  </para>
+  <para>
+   This document uses the OpenIDM authentication headers in all REST examples,
+   for example:
    </para>
-   <varlistentry>
-    <term>Authentication with HTTP basic authentication headers</term>
-    <listitem>
-     <screen>$ curl --user openidm-admin:openidm-admin</screen>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Authentication with OpenIDM-specific headers</term>
-    <listitem>
-     <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"</screen>
-    </listitem>
-   </varlistentry>
-  </variablelist>
-  <note>
-   <para>
-    This document uses the OpenIDM authentication headers in all REST examples.
-   </para>
-  </note>
+     <screen>$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ ...</screen>
   <para>
    For more information about the OpenIDM authentication mechanism, see
    <link xlink:href="integrators-guide#security-messages"
-         xlink:role="http://docbook.org/xlink/role/olink">
-   <citetitle>Use Message Level Security</citetitle></link>.
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Use Message Level
+    Security</citetitle></link>.
   </para>
 
   <section xml:id="openidm-users">
