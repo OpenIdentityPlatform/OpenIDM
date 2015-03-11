@@ -71,7 +71,7 @@ define("org/forgerock/openidm/ui/admin/sync/TestSyncView", [
                     this.setupSearch();
                     TestSyncGridView.render(this.data);
                 } else {
-                    this.$el.parent().hide();
+                    this.$el.closest("#singleRecordRecon").hide();
                 }
             }, this));
         },
