@@ -56,6 +56,10 @@ public final class Clauses {
         public Clause not() {
             return new NotClause(this);
         }
+        @Override
+        public String toString() {
+            return toSQL();
+        }
     }
 
     /**

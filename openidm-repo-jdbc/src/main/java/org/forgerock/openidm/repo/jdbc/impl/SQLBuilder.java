@@ -423,4 +423,19 @@ abstract class SQLBuilder implements SQLRenderer<String> {
         };
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public abstract String toSQL();
+
+    /**
+     * Return a string representation of this builder.
+     *
+     * @return the SQL string created by this builder
+     */
+    @Override
+    public String toString() {
+        return toSQL();
+    }
 }

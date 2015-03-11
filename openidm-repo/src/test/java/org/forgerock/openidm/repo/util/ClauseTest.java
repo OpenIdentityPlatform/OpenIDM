@@ -71,8 +71,13 @@ public class ClauseTest {
     }
 
     @Test(dataProvider = "sqlData")
-    public void testToString(Clause clause, String sql) {
+    public void testToSQL(Clause clause, String sql) {
         assertThat(clause.toSQL()).isEqualTo(sql);
     }
 
+    // tests equality (of toString) method if we accidentally forget to call Clause#toSQL()
+    @Test(dataProvider = "sqlData")
+    public void testToString(Clause clause, String sql) {
+        assertThat(clause.toString()).isEqualTo(sql);
+    }
 }

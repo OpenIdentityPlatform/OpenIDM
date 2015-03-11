@@ -64,4 +64,14 @@ public class StringSQLRenderer implements SQLRenderer<String> {
     public String toSQL() {
         return sb.toString();
     }
+
+    /**
+     * Provide a string representation of this object.
+     *
+     * @return the SQL string represented by this object.
+     */
+    @Override
+    public String toString() {
+        return toSQL();
+    }
 }
