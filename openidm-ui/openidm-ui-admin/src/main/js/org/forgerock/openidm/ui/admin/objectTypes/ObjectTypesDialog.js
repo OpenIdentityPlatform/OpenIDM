@@ -166,7 +166,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
                 cssClass : "objecttype-window",
-                onshown : function (dialogRef) {
+                onshown : _.bind(function (dialogRef) {
                     uiUtils.renderTemplate(
                         _this.template,
                         _this.$el,
@@ -178,7 +178,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                         }, _this),
                         "replace"
                     );
-                },
+                }, _this),
                 buttons: [{
                     label: $.t('common.form.close'),
                     action: function(dialogRef){
