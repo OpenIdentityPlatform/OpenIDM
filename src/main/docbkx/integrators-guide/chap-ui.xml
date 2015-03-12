@@ -129,10 +129,10 @@
   <para>
    Scroll up and down the Admin UI screen. Review configured
    connectors and managed objects. The screenshots in this section assume that
-   you have started OpenIDM with
-   <link xlink:href="install-guide#more-sample2b"
-   xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
-   <citetitle>Sample 2b - LDAP Two Way</citetitle></link>.
+   you have started OpenIDM with the
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="install-guide#full-stack-sample">
+   <citetitle>Full Stack Sample</citetitle></link>.
   </para>
 
   <para>
@@ -144,6 +144,14 @@
    resources. Mapping the individual object properties enables synchronization
    between the resources.
   </para>
+
+  <note>
+   <para>
+    To edit a configured connector or managed object in the Admin UI, click on
+    it. To delete either a connector or managed object, click the icon in the
+    upper right of the box, and select Delete from the pop-up menu that appears.
+   </para>
+  </note>
 
   <section xml:id="ui-admin-connectors">
    <title>Administering Connectors from the UI</title>
@@ -235,10 +243,10 @@
     </mediaobject>
 
     <para>
-     Start with the <literal>Object Title</literal> and
-     <literal>Object Description</literal>. The <literal>Object Title</literal>
-     is a "human-readable" version of the name of the Managed Object. The
-     <literal>Object Description</literal> allows you to elaborate on the
+     Start with the Readable Title (<literal>Object Title</literal>) and
+     Description (<literal>Object Description</literal>). The
+     Readable Title is a "human-readable" version of the name of the Managed
+     Object. The Description allows you to elaborate on the
      Managed Object.
     </para>
 
@@ -298,10 +306,10 @@
     </listitem>
     <listitem>
      <para><literal>Type</literal></para>
-     <para>Type of property; could be <literal>boolean</literal>,
-      <literal>integer</literal>, <literal>null</literal>,
-      <literal>number</literal>, <literal>object</literal>,
-      <literal>string</literal>, or <literal>Resource Collection</literal>.
+     <para>Type of property; could be <literal>String</literal>,
+      <literal>array</literal>, <literal>boolean</literal>,
+      <literal>integer</literal>, <literal>number</literal>,
+      <literal>object</literal>, or <literal>Resource Collection</literal>.
      </para>
     </listitem>
    </itemizedlist>
@@ -387,7 +395,7 @@
 
    <para>
     The bold grey line determines which properties are displayed for each
-    object in the Data Association Management panel, under the Correlation menu.
+    object in the Data Association Management panel, under the Association tab.
     By default, four properties are displayed. To change the number of
     properties that are displayed, edit the <emphasis>Number of representative
     properties</emphasis>. To include a property in the display, drag it above
@@ -431,7 +439,7 @@
     </listitem>
     <listitem>
      <para>
-      Default values enables you to set a static value for the target attribute.
+      Default Values enables you to set a static value for the target attribute.
      </para>
     </listitem>
    </itemizedlist>
@@ -453,7 +461,7 @@
    </para>
 
    <section xml:id="admin-ui-correlation">
-    <title>Correlation Options</title>
+    <title>Association Options</title>
 
     <para>
      If you are reconciling objects in a source system, with
@@ -464,7 +472,7 @@
      records.
     </para>
     <para>
-     The Correlation panel in the UI enables you to create correlation queries
+     The Association tab in the UI enables you to create correlation queries
      and to associate source and target objects manually.
     </para>
     <para>
@@ -538,12 +546,12 @@
     </mediaobject>
 
     <para>
-     The Correlation panel also enables you to configure reconciliation query
+     The Association tab also allows you to configure reconciliation query
      filters, and to define scripts to determine which individual source and
      target objects should be assessed in a reconciliation operation.
     </para>
     <para>
-     By default, all entries on a source and target system are considered
+     By default, all entries on a source and target system are
      candidates for reconciliation. Reconciliation query filters enable you to
      restrict reconciliation operations to specific entries by defining explicit
      queries that are run on the source or on the target. For more information,
@@ -580,10 +588,11 @@
    </section>
 
    <section xml:id="admin-ui-recon">
-    <title>Reconciliation Options</title>
+    <title>Reconciliation Options (Behaviors)</title>
 
     <para>
-     Before activating reconciliation, you can configure situational policies,
+     Before activating reconciliation, look at the options under the Behaviors
+     tab. You can use these options to configure situational policies,
      action scripts dependent on situational events, and reconciliation scripts.
     </para>
 
@@ -604,7 +613,7 @@
       </para>
       <para>
        To access the following screen, select the Mapping of your choice and
-       select edit. In the sub-tabs that appear, select Reconciliation.
+       select edit. In the sub-tabs that appear, select Behaviors.
       </para>
       <mediaobject>
        <alt>Admin UI Screen, User-Defined Situational Policies</alt>
@@ -662,6 +671,14 @@
       <imagedata fileref="images/admin-ui-single.png" format="PNG" />
      </imageobject>
     </mediaobject>
+
+    <note>
+     <para>
+      If you do not see the Single Record Reconciliation option under the
+      Behaviors tab, it means that you have not yet reconciled that mapping, or
+      the policies that you have set are <emphasis>Read-only</emphasis>.
+     </para>
+    </note>
 
     <para>
      Finally, you should set up a schedule, as described in
@@ -721,7 +738,8 @@
 
    <para>
     You can also configure authentication modules from the Admin UI. To access
-    those modules, click Settings.
+    those modules, click the <literal>openidm-admin</literal> user menu in the
+    upper right, and then click Settings from the pop-up menu that appears.
    </para>
 
    <para>
@@ -794,7 +812,8 @@
   <para>
    The <literal>Profile</literal> link enables the user to modify his username
    or password. The <literal>Change Security Data</literal> link, accessed from
-   the top of the screen, or from the user's Profile page enables the user to
+   the <literal>openidm-admin</literal> drop-down menu in the upper-right
+   corner of the screen, or from the profile page of a user, enables the user to
    change his password and, if this functionality has been enabled, to select a
    new security question.
   </para>
@@ -839,8 +858,8 @@
 ...    
     </programlisting>
     <para>
-     When self-registration is enabled, a "Register your account" link is
-     provided on the login page. When a user creates an account on the account
+     When self-registration is enabled, OpenIDM includes a "Register your
+     account" link on the login page. When a user creates an account on the account
      registration page, a managed object is created in the OpenIDM repository.
      The default policies for managed objects are applied during account
      creation.
@@ -1103,7 +1122,7 @@
    </step>
    <step>
     <para>
-     Complete the fields on the Create new account page.
+     Complete the fields on the Create New User page.
     </para>
     <para>
      Most of these fields are self-explanatory. Be aware that the user interface
@@ -1116,7 +1135,7 @@
      indicated in the panel to the right.
     </para>
     <para>
-     The Admin Role field reflects the roles that are defined in the
+     The Role field reflects the roles that are defined in the
      <filename>ui-configuration.json</filename> file, as well as any managed
      roles that have been added. By default, the roles are mapped as follows:
     </para>
