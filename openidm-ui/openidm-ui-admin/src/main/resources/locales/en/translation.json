@@ -272,7 +272,7 @@
             "noLiveSync": "Incremental changes from the source system are not monitored, visit the resource setup page for the source system to configure this feature."
         },
         "sync": {
-            "sync": "Reconciliation",
+            "sync": "Behaviors",
             "syncTitle": "Reconciliation Configuration",
             "situationalPolicy": "Situational Policy",
             "currentPolicy": "Current Policy",
@@ -298,7 +298,7 @@
             }
         },
         "correlation": {
-            "correlation": "Correlation",
+            "correlation": "Association",
             "type" : "Type",
             "status" : "Status",
             "objectFilters": "Individual Record Validation",
