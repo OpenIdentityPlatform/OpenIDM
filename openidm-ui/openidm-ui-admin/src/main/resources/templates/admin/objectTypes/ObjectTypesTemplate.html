@@ -1,7 +1,7 @@
-<div class="col-sm-3 selectPanel">
+<div class="col-sm-2 selectPanel">
     {{#if defaultConfigs}}
     <div class="object-config-selector">
-        <label for="selectObjectConfig" class="light">{{t "templates.connector.objectTypes.objectTypeConfigs"}}</label>
+        <label for="selectObjectConfig" class="light">{{t "templates.connector.objectTypes.objectTypeConfigs"}}:</label>
         <select class="form-control" data-type="{{defaultConfigs.0.type}}" id="selectObjectConfig" required>
             {{#each defaultConfigs}}
             <option value="{{fileName}}">{{displayName}}</option>
@@ -13,7 +13,7 @@
     <select class="form-control" id="objectTypesList" name="objectTypesList" multiple></select>
 </div>
 
-<div class="col-sm-9 objectTypeForm">
+<div class="col-sm-10 objectTypeForm">
     <div id="objectType"></div>
 
     <div id="multiSelectOptions" style="display:none;">
