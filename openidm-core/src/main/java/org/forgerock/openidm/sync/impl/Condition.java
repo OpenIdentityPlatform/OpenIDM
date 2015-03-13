@@ -122,6 +122,7 @@ class Condition {
             return this.linkQualifier.equals(linkQualifier);
         case SCRIPTED:
             Map<String, Object> scope = new HashMap<String, Object>();
+            scope.put("linkQualifier", linkQualifier);
             try {
                 if (params.isMap()) {
                     scope.putAll(params.asMap());

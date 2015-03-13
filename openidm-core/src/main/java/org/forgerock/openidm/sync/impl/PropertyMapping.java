@@ -170,8 +170,7 @@ class PropertyMapping {
      */
     public boolean evaluateCondition(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, String linkQualifier) 
             throws SynchronizationException {
-        JsonValue params = json(object(field("object", sourceObject),
-                field("linkQualifier", linkQualifier)));
+        JsonValue params = json(object(field("object", sourceObject)));
         if (oldSource != null) {
             params.put("oldSource", oldSource);
         }
