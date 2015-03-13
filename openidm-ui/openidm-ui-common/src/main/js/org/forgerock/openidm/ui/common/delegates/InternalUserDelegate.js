@@ -44,7 +44,11 @@ define("org/forgerock/openidm/ui/common/delegates/InternalUserDelegate", [
             
             for(i = 0; i < patchDefinitionObject.length; i++) {
                 v = patchDefinitionObject[i];
-                
+
+                // replace any leading slashes to translate basic JSON Pointer 
+                // back into regular JS object property references
+                v.field = v.field.replace(/^\//, '');
+
                 user[v.field] = v.value;
             }
             
