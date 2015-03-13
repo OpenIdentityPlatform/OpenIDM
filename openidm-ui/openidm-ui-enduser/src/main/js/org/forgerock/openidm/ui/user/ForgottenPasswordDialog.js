@@ -42,7 +42,7 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
             "click .dialogCloseCross": "close",
             "click input[name='close']": "close",
             "click input[name='submitAnswer']": "submitAnswer",
-            "click .dialogContainer": "stop",
+            "click .modal-content": "stop",
             "onValidate": "onValidate",
             "customValidate": "customValidate",
             "userNameFound": "userNameFound",

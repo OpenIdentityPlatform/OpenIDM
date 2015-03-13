@@ -48,7 +48,7 @@ define("org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog", [
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
             "onValidate": "onValidate",
-            "click .dialogContainer": "stop"
+            "click .modal-content": "stop"
         },
         
         formSubmit: function(event) {
