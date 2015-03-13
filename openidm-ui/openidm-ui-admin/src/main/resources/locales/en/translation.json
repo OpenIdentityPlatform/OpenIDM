@@ -376,7 +376,7 @@
         },
         "auth": {
             "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
-            "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order you specify.",
+            "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order specified.",
             "errorsmsg": "Please address the errors in the Authentication modules before saving.",
             "addNew": "Add New Authentication Module",
             "errors": "Errors",
@@ -487,7 +487,7 @@
             "resources" : "Resources",
             "resourcesHelpNoConnectorsTitle" : "To allow OpenIDM to manage external data, set up a connector.",
             "resourcesHelpNoConnectorsBody" : "To get started, create a connector. With multiple connectors, you can map objects between different data sources.",
-            "whatIsAConnector" : "Connectors are external systems, databases, directory services, and so on.",
+            "whatIsAConnector" : "Connectors provide interfaces to external systems, databases, directory services, and more.",
             "whatIsAManagedObject" : "Managed Objects represent identity data.",
             "addConnector" : "New Connector",
             "addManagedObject" : "New Managed Object",
