@@ -859,10 +859,10 @@
     </programlisting>
     <para>
      When self-registration is enabled, OpenIDM includes a "Register your
-     account" link on the login page. When a user creates an account on the account
-     registration page, a managed object is created in the OpenIDM repository.
-     The default policies for managed objects are applied during account
-     creation.
+     account" link on the <literal>https://localhost:8443/openidmui</literal>
+     login page. When the account registration page is used to create an account,
+     OpenIDM creates a managed object in the OpenIDM repository, and applies
+     default policies for managed objects.
     </para>
     <mediaobject>
      <alt>OpenIDM UI - Self Registration</alt>
@@ -1434,12 +1434,12 @@
      The user record in the linked resource is displayed.
     </para>
     <para>
-     The following image shows the user account for a user <literal>fdoe</literal>,
+     The following image shows the user account for a user <literal>jdoe</literal>,
      as it exists in the LDAP directory to which the managed user repository is
      mapped.
     </para>
      <mediaobject>
-      <alt>New user record for fdoe</alt>
+      <alt>New user record for jdoe</alt>
       <imageobject>
        <imagedata fileref="images/linked-view-fdoe.png" format="PNG" />
       </imageobject>
@@ -1880,13 +1880,13 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
    </step>
    <step>
     <para>
-     Create a new <literal>group-field-block</literal> stanza in the desired
+     Create a new <literal>form-group has-feedback</literal> stanza in the desired
      location. The following excerpt from a modified version of the file shows
      a <literal>group-field-block</literal> named "Employee Title", placed after
      the "common.user.familyName" (Last Name) entry:
     </para>
-    <screen>&lt;div class="group-field-block"&gt;
- &lt;label for="sn" class="light align-right"&gt;{{t "common.user.familyName"}}&lt;/label&gt;
+    <screen>&lt;div class="form-group has-feedback"&gt;
+ &lt;label class="col-sm-3 control-label" for="sn"&gt;{{t "common.user.familyName"}}&lt;/label&gt;
   &lt;div class="float-left separate-message"&gt;
   &lt;div class="group-input-span"&gt;
    &lt;input type="text" id="sn" name="sn" value="" data-validation-dependents="password" /&gt;
