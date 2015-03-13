@@ -83,9 +83,8 @@
    see the <link xlink:show="new"
    xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site. While
    OpenIDM services are designed to run in any OSGi container, currently only
-   <link xlink:show="new"
-   xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link> is
-   supported.
+   <link xlink:show="new" xlink:href="http://felix.apache.org/">Apache
+   Felix</link> is supported.
   </para>
  </glossdef>
 </glossentry>

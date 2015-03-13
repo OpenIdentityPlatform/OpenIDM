@@ -57,17 +57,16 @@
      <varlistentry>
       <term>OSGi</term>
       <listitem>
-       <para>OSGi is a module system and service platform for the Java
-       programming language that implements a complete and dynamic component
-       model. For a good introduction, see the <link xlink:show="new"
-       xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site.
-       OpenIDM currently runs in <link xlink:show="new"
-       xlink:href="http://felix.apache.org/site/index.html">Apache
-       Felix</link>, an implementation of
-       <link xlink:show="new"
-             xlink:href="http://www.osgi.org/Specifications/HomePage">
-        <citetitle>the OSGi Framework and Service Platform</citetitle></link>.
-        <!-- quoting the first line at felix.apache.org, 24 Feb 2015 -->
+       <para>
+        OSGi is a module system and service platform for the Java programming
+        language that implements a complete and dynamic component model. For a
+        good introduction to OSGi, see the <link xlink:show="new"
+        xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site. OpenIDM
+        currently runs in <link xlink:show="new"
+        xlink:href="http://felix.apache.org/">Apache Felix</link>, an
+        implementation of <link xlink:show="new"
+        xlink:href="http://www.osgi.org/Specifications/HomePage"><citetitle>the
+        OSGi Framework and Service Platform</citetitle></link>.
        </para>
       </listitem>
      </varlistentry>
