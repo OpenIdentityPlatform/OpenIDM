@@ -6416,8 +6416,8 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
    <para>
     Install OpenAM as described in the following
     <link xlink:show="new"
-          xlink:href="http://openam.forgerock.org/doc/install-guide/index.html#configure-openam-custom">
-     <citetitle>Procedure: To Configure Custom OpenAM</citetitle></link>.
+          xlink:href="http://docs.forgerock.org/en/openam/12.0.0/install-guide/index.html#configure-openam-custom">
+     <citetitle>Procedure: To Custom Configure OpenAM</citetitle></link>.
    </para>
 
    <para>
@@ -6426,7 +6426,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
     already have an operational instance of OpenAM, set up an external instance
     of OpenDJ as described in the following Procedure:
     <link xlink:show="new"
-          xlink:href="http://openam.forgerock.org/doc/admin-guide/index.html#realm-data-store">
+          xlink:href="http://docs.forgerock.org/en/openam/12.0.0//admin-guide/index.html#realm-data-store">
      <citetitle>To Configure a Data Store</citetitle></link>.
    </para>
   </section>
