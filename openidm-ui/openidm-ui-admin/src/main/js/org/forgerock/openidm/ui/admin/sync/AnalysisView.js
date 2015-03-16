@@ -152,7 +152,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                             datatype: "json",
                             rowNum: 10,
                             rowList: [10,20,50],
-                            multiselect: true,
+                            multiselect: false,
                             multiboxonly: true,
                             hoverrows: true,
                             altRows:true,
@@ -171,11 +171,15 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                             loadComplete: function(data){
                                 $(this).data("rowData",data.result[0].rows);
                                 _this.$el.find("td.ui-search-input input").attr("placeholder",$.t("templates.mapping.analysis.enterSearchTerms"));
-                                $("table.recon-grid", container).find(".cbox").prop("disabled",true);
-                                $("table.recon-grid", container).find(".newLinkWarning").tooltip();
 
-                                //new tooltip
-                                $("table.recon-grid", container).find(".linkIcon").tooltip();
+                                $("table.recon-grid", container).find(".newLinkWarning").popover({
+                                    content: function () { return $(this).attr("data-original-title");},
+                                    trigger:'hover',
+                                    placement:'top',
+                                    container: 'body',
+                                    html: 'true',
+                                    template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+                                });
 
                                 _this.$el.find(".actionButton").prop('disabled',true);
 

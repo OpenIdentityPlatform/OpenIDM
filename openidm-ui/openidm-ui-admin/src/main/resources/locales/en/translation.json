@@ -837,7 +837,7 @@
                 "infoFromSource": "Information from Source",
                 "searchTarget": "Search Target",
                 "linkToSourceObject": "Link To Source Object",
-                "newLinkCreated": "A new Link has been created with this source object. No further action can be taken on this record until after the next &quot;Reconcile Now&quot; event has occurred.",
+                "newLinkCreated": "New link created. No changes to this record until after the next reconciliation.",
                 "newLinksWarning": "__count__ records have changed since last Reconciliation.",
                 "oneNewLinkWarning": "1 record has changed since last Reconciliation",
                 "forResultsToTakeEffect": " for the result of these changes to take effect.",
