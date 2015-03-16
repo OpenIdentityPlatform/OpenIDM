@@ -63,7 +63,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             "change #connectorType" : "loadConnectorTemplate",
             "onValidate": "onValidate",
             "click #connectorForm fieldset legend" : "sectionHideShow",
-            "click .alert-message .close-button": "closeError",
             "click #addEditObjectType": "addEditObjectTypes",
             "click #validateConnector": "validate",
             "change :input" : "setConnectorState",
@@ -228,8 +227,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                                 validatorsManager.bindValidators(this.$el);
 
                                 if (this.data.rangeFound) {
-                                    this.$el.find("#connectorErrorMessage .message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range": this.data.oldVersion, "version": data.connectorRef.bundleVersion}));
-                                    this.$el.find("#connectorErrorMessage").show();
+                                    this.$el.find("#connectorWarningMessage .message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range": this.data.oldVersion, "version": data.connectorRef.bundleVersion}));
+                                    this.$el.find("#connectorWarningMessage").show();
                                 }
 
                                 this.connectorTypeRef = ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" + this.data.currentMainVersion);
@@ -808,10 +807,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             this.$el.find("#connectorErrorMessage").show();
         },
 
-        closeError : function() {
-            this.$el.find("#connectorErrorMessage").hide();
-        },
-
         parseErrorMessage: function(err) {
             var transformErrors = [
                 {
@@ -891,7 +886,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             this.userDefinedObjectTypes = newObjectTypes;
             this.updateLiveSyncObjects();
 
-            this.$el.find("#connectorChangesPending").show();
+
+            this.$el.find("#connectorWarningMessage .message").html($.t("templates.connector.pendingObjectTypes"));
+            this.$el.find("#connectorWarningMessage").show();
         }
     });
 
