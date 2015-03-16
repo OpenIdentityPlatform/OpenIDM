@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-sample'
@@ -148,11 +148,8 @@ orientdb&gt; </screen>
    sample demonstrates how OpenIDM does this by using
    <firstterm>reconciliation</firstterm>. OpenIDM reconciliation compares the
    objects in one object set to mapped objects in another object set.
-   Reconciliation can work in write mode, where OpenIDM writes changes to
-   affected objects, or in report mode, where OpenIDM reports on what changes
-   would be written without making the changes. For a complete explanation of
-   reconciliation and synchronization, see the section on <link
-   xlink:href="integrators-guide#sync-types"
+   For a complete explanation of reconciliation and synchronization, see the
+   section on <link xlink:href="integrators-guide#sync-types"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Types of
    Synchronization</citetitle></link> in the <citetitle>Integrator's
    Guide</citetitle>.
@@ -551,8 +548,10 @@ $ ./startup.sh -p samples/sample1
    After reconciliation, you can use the Admin UI to display user records in
    both the source and target resources. Navigate to the URL where OpenIDM is
    installed. If it is local, navigate to
-   <literal>https://localhost:8443/admin</literal>. Select mappings, you should
-   see the result of the reconciliation.
+   <literal>https://localhost:8443/admin</literal>. Select mappings, select the
+   one mapping (<literal>systemXmlfileAccounts_managedUser</literal>), and click
+   the Association tab. You should see the result of the reconciliation, from
+   source to target, at the bottom of the screen.
   </para>
 
   <mediaobject>

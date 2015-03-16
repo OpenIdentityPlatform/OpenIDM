@@ -444,8 +444,9 @@ $ ./startup.sh -p samples/sample2</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the Data Management View
-      link at the top right of the Admin UI.
+      Retrieve the users in the repository. In the upper-right, select
+      <literal>openidm-admin</literal>. In the pop-up menu that appears, click
+      the Data Management View link.
      </para>
      <para>
       This link opens the Data Management UI. If you did not change your
@@ -785,12 +786,6 @@ $ ./startup.sh -p samples/sample2b</screen>
      <para>
       Click anywhere on the first mapping and click Reconcile Now.
      </para>
-     <mediaobject>
-      <alt>Mappings tab showing reconciliation for Sample 2b</alt>
-      <imageobject>
-       <imagedata fileref="images/sample2b-reconcile.png" format="PNG"/>
-      </imageobject>
-     </mediaobject>
      <para>
       The reconciliation operation creates the two users from the LDAP server in
       the OpenIDM repository.
@@ -798,8 +793,9 @@ $ ./startup.sh -p samples/sample2b</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the Data Management View
-      link at the top right of the Admin UI.
+      Retrieve the users in the repository. Click the
+      <literal>openidm-admin</literal> link in the upper-right, and click
+      Data Management View in the pop-up menu that appears.
      </para>
      <para>
       This link opens the Data Management UI. If you did not change your
@@ -853,7 +849,7 @@ $ ./startup.sh -p samples/sample2b</screen>
      <mediaobject>
       <alt>New user record for fdoe</alt>
       <imageobject>
-       <imagedata fileref="images/sample2b-new-user.png" format="PNG" />
+       <imagedata fileref="images/sample2b-fdoe.png" format="PNG" />
       </imageobject>
      </mediaobject>
     </step>
@@ -878,13 +874,21 @@ $ ./startup.sh -p samples/sample2b</screen>
      </para>
      <para>
       The following image shows that <literal>fdoe</literal> now exists in the
-      linked resource <literal>ldap account</literal>, and shows her entry as it
-      appears on the LDAP server.
+      linked resource <literal>ldap account</literal>.
      </para>
      <mediaobject>
       <alt>New user record for fdoe</alt>
       <imageobject>
        <imagedata fileref="images/sample2b-fdoe.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+     <para>
+      Scroll down to see how her entry appears on the LDAP server.
+     </para>
+     <mediaobject>
+      <alt>New LDAP record for fdoe</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2b-fdoe-ldap.png" format="PNG" />
       </imageobject>
      </mediaobject>
     </step>
@@ -1191,12 +1195,6 @@ $ ./startup.sh -p samples/sample2c</screen>
      <para>
       Click anywhere on the first mapping and click Reconcile Now.
      </para>
-     <mediaobject>
-      <alt>Mappings tab showing reconciliation for Sample 2c</alt>
-      <imageobject>
-       <imagedata fileref="images/sample2b-reconcile.png" format="PNG"/>
-      </imageobject>
-     </mediaobject>
      <para>
       The reconciliation operation creates the two users from the LDAP server in
       the OpenIDM repository.
@@ -1204,8 +1202,9 @@ $ ./startup.sh -p samples/sample2c</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the Data Management View
-      link at the top right of the Admin UI.
+      Retrieve the users in the repository. In the upper-right, click on
+      <literal>openidm-admin</literal>. In the drop-down menu that appears,
+      click the Data Management View link.
      </para>
      <para>
       This link opens the Data Management UI. If you did not change your
@@ -1244,10 +1243,16 @@ $ ./startup.sh -p samples/sample2c</screen>
       </imageobject>
      </mediaobject>
      <para>
-      Note the Linked Systems section of John Doe's profile. The Linked Resource
-      item indicates the external resource on which John Doe's managed object
-      is mapped, in this case, <literal>ldap account</literal>.
+      Scroll down to the Linked Systems section of John Doe's profile. The
+      Linked Resource item indicates the external resource on which John Doe's
+      managed object is mapped, in this case, <literal>ldap account</literal>.
      </para>
+     <mediaobject>
+      <alt>User linked systems details</alt>
+      <imageobject>
+       <imagedata fileref="images/sample2c-jdoe1a.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
      <para>
       In this linked resource, John Doe's <literal>ldapGroups</literal> are
       displayed. Currently, John Doe is a member of
@@ -1268,7 +1273,7 @@ $ ./startup.sh -p samples/sample2c</screen>
      <para>
       Instead, update his managed/user object over REST, as follows:
      </para>
-     <screen><userinput>$ curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1551,12 +1556,6 @@ $ ./startup.sh -p samples/sample2d</screen>
      <para>
       Click anywhere on the third mapping and click Reconcile Now.
      </para>
-     <mediaobject>
-      <alt>Mappings tab showing reconciliation for Sample 2b</alt>
-      <imageobject>
-       <imagedata fileref="images/sample2d-reconcile.png" format="PNG"/>
-      </imageobject>
-     </mediaobject>
      <para>
       The reconciliation operation creates the two groups from the LDAP server in
       the OpenIDM repository.
@@ -1564,7 +1563,7 @@ $ ./startup.sh -p samples/sample2d</screen>
     </step>
     <step>
      <para>
-      Retrieve the groups in the repository by clicking the Correlation link
+      Retrieve the groups in the repository by clicking the Association link
       below the mapping. Scroll down to Data Association Management.
      </para>
      <mediaobject>
