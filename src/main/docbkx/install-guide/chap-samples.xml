@@ -1943,12 +1943,14 @@ mysql &gt; <userinput>select * from users;</userinput>
      <stepalternatives>
       <step>
        <para>
-        To retrieve the users in the repository by using the Administration UI:
+        To retrieve the users in the repository from the Admin UI:
        </para>
        <orderedlist>
         <listitem>
          <para>
-          Click the Data Management View link at the top right of the Admin UI.
+          Click the <literal>openidm-admin</literal> link at the top right of
+          the Admin UI. Click Data Management View in the pop-up menu that
+          appears.
          </para>
          <para>
           This opens the Data Management UI. If you did not change your password
@@ -1978,12 +1980,18 @@ mysql &gt; <userinput>select * from users;</userinput>
           Users tab.
          </para>
          <para>
-          The following image shows the details for the user Rowley Birkin.
+          The following images show details for user Rowley Birkin.
          </para>
          <mediaobject>
-          <alt>Mappings tab showing the users in the repo for Sample 3</alt>
+          <alt>User details, Rowley Birkin, Sample 3</alt>
           <imageobject>
            <imagedata fileref="images/sample3-rowley.png" format="PNG"/>
+          </imageobject>
+         </mediaobject>
+         <mediaobject>
+          <alt>Link details, Rowley Birkin, Sample 3</alt>
+          <imageobject>
+           <imagedata fileref="images/sample3-rowley-linked.png" format="PNG"/>
           </imageobject>
          </mediaobject>
         </listitem>
@@ -6658,7 +6666,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
      <para>
       For details on each of these properties, see the following Appendix on
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-            xlink:href="integrators-guide#openam-session-details">
+            xlink:href="integrators-guide#openam-module-details">
        <citetitle>OPENAM_SESSION Configuration Options</citetitle></link>.
      </para>
     </section>
@@ -7784,7 +7792,8 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
      <itemizedlist>
       <listitem>
        <para>
-        Click on the Salesforce connector to open the Edit Connector dialog.
+        Click on the Salesforce connector and click Edit to open the Edit
+        Connector dialog.
        </para>
       </listitem>
       <listitem>
@@ -7874,8 +7883,9 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
     </step>
     <step>
      <para>
-      Retrieve the users in the repository by clicking the Data Management View
-      link at the top right of the Admin UI.
+      Retrieve the users in the repository. In the upper-right of the screen,
+      click the <literal>openidm-admin</literal> link. In the pop-up menu that
+      appears, click the Data Management View link.
      </para>
      <para>
       This link opens the Data Management UI. If you did not change your
@@ -7908,7 +7918,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
      </para>
      <para>
       The following image shows the details of user <literal>bjensen</literal>.
-      Note the Linked Systems panel at the bottom of the image. This panel shows
+      Scroll down. Note the Linked Systems panel that shows
       the corresponding user record in Salesforce.
      </para>
      <mediaobject>
