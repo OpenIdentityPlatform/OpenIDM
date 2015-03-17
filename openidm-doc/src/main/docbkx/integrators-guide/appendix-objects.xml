@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-objects'
@@ -275,13 +275,17 @@
      <varlistentry>
       <term>onUpdate</term>
       <listitem>
-       <para>Called upon a request to store an object. The "old" and "new"
-       objects are in-scope for the trigger. The "old" object represents a
-       complete object as retrieved from the data store. The trigger can
-       elect to change "new" object properties. If as a result of the
-       trigger the object's "old" and "new" values are identical (that is,
-       update is reverted), the update ends prematurely, though
-       successfully. Throwing an exception causes the update to fail.</para>
+       <para>
+        Called upon a request to store an object. The
+        <literal>oldObject</literal> and <literal>newObject</literal> variables
+        are in-scope for the trigger. The <literal>oldObject</literal>
+        represents a complete object, as retrieved from the data store. The
+        trigger can elect to change <literal>newObject</literal> properties. If,
+        as a result of the trigger, the values of the
+        <literal>oldObject</literal> and <literal>newObject</literal> are
+        identical (that is, update is reverted), the update ends prematurely,
+        but successfully. Throwing an exception causes the update to fail.
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
