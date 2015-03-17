@@ -27,12 +27,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
-import org.forgerock.util.Iterables;
-import org.forgerock.util.promise.Function;
-import org.forgerock.util.promise.NeverThrowsException;
 
 /**
  * An abstract {@link QueryFilterVisitor} to produce SQL using an {@link StringSQLRenderer}.
@@ -95,8 +94,8 @@ public abstract class StringSQLQueryFilterVisitor<P> extends AbstractSQLQueryFil
         final String operandDelimiter = new StringBuilder(" ").append(operand).append(" ").toString();
         return new StringSQLRenderer("(")
                 .append(StringUtils.join(
-                        Iterables.from(subFilters)
-                            .map(new Function<QueryFilter, String, NeverThrowsException>() {
+                        FluentIterable.from(subFilters)
+                            .transform(new Function<QueryFilter, String>() {
                                 @Override
                                 public String apply(QueryFilter filter) {
                                     return filter.accept(StringSQLQueryFilterVisitor.this, parameters).toSQL();

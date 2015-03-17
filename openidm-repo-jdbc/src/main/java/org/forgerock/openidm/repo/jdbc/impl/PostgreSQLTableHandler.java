@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.QueryFilter;
@@ -42,9 +44,6 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
 import org.forgerock.openidm.repo.util.StringSQLRenderer;
 import org.forgerock.openidm.util.ResourceUtil;
-import org.forgerock.util.Iterables;
-import org.forgerock.util.promise.Function;
-import org.forgerock.util.promise.NeverThrowsException;
 
 /**
  * Postgres-specific generic table handler.
@@ -67,10 +66,10 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
         private StringSQLRenderer jsonExtractPathOnField(JsonPointer field, final Map<String, Object> objects) {
             return new StringSQLRenderer("json_extract_path_text(obj.fullobject, ")
                     .append(StringUtils.join(
-                            Iterables.from(Arrays.asList(field.toArray()))
-                                    .map(new Function<String, String, NeverThrowsException>() {
+                            FluentIterable.from(Arrays.asList(field.toArray()))
+                                    .transform(new Function<String, String>() {
                                          @Override
-                                         public String apply(String jsonPath) throws NeverThrowsException {
+                                         public String apply(String jsonPath) {
                                             ++objectNumber;
                                             String placeholder = "p" + objectNumber;
                                             objects.put(placeholder, jsonPath);

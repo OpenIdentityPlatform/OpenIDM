@@ -26,7 +26,6 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.util.Iterables.filter;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
@@ -68,6 +67,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.guava.common.base.Predicate;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -136,7 +137,6 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.ResourceUtil;
-import org.forgerock.util.Predicate;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -1610,7 +1610,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             };
 
             return StringUtils.isNotEmpty(reauthPassword)
-                    && filter(request.getContent().asMap().keySet(), attributesToRunAsUser).iterator().hasNext();
+                    && FluentIterable.from(request.getContent().asMap().keySet()).filter(attributesToRunAsUser).iterator().hasNext();
         }
 
         private Resource getCurrentResource(final ConnectorFacade facade, final Uid uid, final List<JsonPointer> fields)
@@ -2098,7 +2098,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             }
         };
 
-        final Iterable<Entry<String, ObjectClassInfoHelper>> objectClasses = filter(objectTypes.entrySet(), objectClassFilter);
+        final Iterable<Entry<String, ObjectClassInfoHelper>> objectClasses = FluentIterable.from(objectTypes.entrySet()).filter(objectClassFilter);
 
         return objectClasses.iterator().hasNext() ? objectClasses.iterator().next().getKey() : null;
     }

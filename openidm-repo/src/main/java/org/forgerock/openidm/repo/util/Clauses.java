@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.util.Iterables;
-import org.forgerock.util.promise.Function;
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.FluentIterable;
 
 /**
  * A utility class containing factory methods for creating {@link Clause}s.
@@ -93,10 +93,10 @@ public final class Clauses {
 
         String toSQL(String operand) {
             return new StringBuffer("(")
-                    .append(StringUtils.join(Iterables.from(clauses)
-                            .map(new Function<Clause, String, RuntimeException>() {
+                    .append(StringUtils.join(FluentIterable.from(clauses)
+                            .transform(new Function<Clause, String>() {
                                 @Override
-                                public String apply(Clause value) throws RuntimeException {
+                                public String apply(Clause value) {
                                     return value.toSQL();
                                 }
                             }), operand))

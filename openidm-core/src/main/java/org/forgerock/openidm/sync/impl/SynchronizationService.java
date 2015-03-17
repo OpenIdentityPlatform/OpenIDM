@@ -26,8 +26,6 @@ package org.forgerock.openidm.sync.impl;
 import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.json;
 
-import static org.forgerock.util.Iterables.filter;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +41,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.guava.common.base.Predicate;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -63,7 +63,6 @@ import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.util.Predicate;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
@@ -251,7 +250,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             }
         };
 
-        for (final ObjectMapping mapping : filter(mappings, thatMatchSource)) {
+        for (final ObjectMapping mapping : FluentIterable.from(mappings).filter(thatMatchSource)) {
             JsonValue mappingResults = json(array());
             MappingSyncResult result = MappingSyncResult.SUCCESSFUL;
             try {

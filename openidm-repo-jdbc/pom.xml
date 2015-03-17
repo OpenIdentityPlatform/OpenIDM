@@ -64,6 +64,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Commons -->
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>forgerock-guava-collect</artifactId>
+        </dependency>
+
         <!-- Provided OSGi Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>

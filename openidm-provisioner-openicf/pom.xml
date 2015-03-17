@@ -62,6 +62,10 @@
             <artifactId>json-schema</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>forgerock-guava-collect</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
             <version>${openicf.framework.version}</version>

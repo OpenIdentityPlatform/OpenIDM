@@ -32,8 +32,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.base.Predicate;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -54,8 +56,6 @@ import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
-import org.forgerock.util.Predicate;
-import org.forgerock.util.promise.Function;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -70,7 +70,6 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.PROPERTY
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ID;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.USER_CREDENTIAL;
-import static org.forgerock.util.Iterables.from;
 
 /**
  * An implementation of the AuthenticationConfig that reads and holds the authentication configuration.
@@ -122,10 +121,10 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
             };
 
     /** A {@link Function} that returns the auth modules properties as a JsonValue */
-    private static final Function<JsonValue, JsonValue, JsonValueException> toModuleProperties =
-            new Function<JsonValue, JsonValue, JsonValueException>() {
+    private static final Function<JsonValue, JsonValue> toModuleProperties =
+            new Function<JsonValue, JsonValue>() {
                 @Override
-                public JsonValue apply(JsonValue value) throws JsonValueException {
+                public JsonValue apply(JsonValue value) {
                     return value.get(AUTH_MODULE_PROPERTIES_KEY);
                 }
             };
@@ -165,11 +164,11 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
         // filter enabled module configs and get their properties;
         // then filter those with valid auth properties, and build an authenticator
         for (final Authenticator authenticator :
-                from(authModuleConfig)
+                FluentIterable.from(authModuleConfig)
                 .filter(enabledAuthModules)
-                .map(toModuleProperties)
+                .transform(toModuleProperties)
                 .filter(authModulesThatHaveValidAuthenticatorProperties)
-                .map(toAuthenticatorFromProperties)) {
+                .transform(toAuthenticatorFromProperties)) {
             authenticators.add(authenticator);
         }
 

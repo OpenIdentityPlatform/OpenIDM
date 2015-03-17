@@ -50,6 +50,8 @@
             <artifactId>openidm-smartevent</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Commons -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-util</artifactId>
@@ -63,6 +65,10 @@
             <!-- required to check isPublicContext ) -->
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>forgerock-guava-collect</artifactId>
         </dependency>
 
 <!--        <dependency>

@@ -30,10 +30,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.util.Iterables;
-import org.forgerock.util.promise.Function;
-import org.forgerock.util.promise.NeverThrowsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,20 +51,20 @@ public class TokenHandler {
     private static final Pattern tokenPattern = Pattern.compile("\\$\\{(.+?)\\}");
 
     /** {@link Function} to trim leading dot from orient object name */
-    private static final Function<String, String, NeverThrowsException> TRIM_LEADING_DOT =
-            new Function<String, String, NeverThrowsException>() {
+    private static final Function<String, String> TRIM_LEADING_DOT =
+            new Function<String, String>() {
                 @Override
-                public String apply(String object) throws NeverThrowsException {
+                public String apply(String object) {
                     return object.startsWith(".")
                             ? object.substring(1)
                             : object;
                 }
             };
     /** {@link Function} to convert json-pointer path-element to orient field */
-    private static final Function<String, String, NeverThrowsException> JSON_POINTER_PATH_ELEMENT_TO_ORIENT_FIELD =
-            new Function<String, String, NeverThrowsException>() {
+    private static final Function<String, String> JSON_POINTER_PATH_ELEMENT_TO_ORIENT_FIELD =
+            new Function<String, String>() {
                 @Override
-                public String apply(String path) throws NeverThrowsException {
+                public String apply(String path) {
                     // numeric path elements are actually array-indices - add brackets
                     return (path.matches("[0-9]+"))
                             ? "[" + path + "]"
@@ -74,14 +73,14 @@ public class TokenHandler {
             };
 
     /** {@link Function} to convert JsonPointer to dot-notation orient object name */
-    private static final Function<String, String, NeverThrowsException> JSON_POINTER_TO_DOT_NOTATION =
-            new Function<String, String, NeverThrowsException>() {
+    private static final Function<String, String> JSON_POINTER_TO_DOT_NOTATION =
+            new Function<String, String>() {
                 @Override
-                public String apply(String jsonPointer) throws NeverThrowsException {
+                public String apply(String jsonPointer) {
                     return TRIM_LEADING_DOT.apply(
                             StringUtils.join(
-                                    Iterables.from(Arrays.asList(jsonPointer.split("/")))
-                                            .map(JSON_POINTER_PATH_ELEMENT_TO_ORIENT_FIELD),
+                                    FluentIterable.from(Arrays.asList(jsonPointer.split("/")))
+                                            .transform(JSON_POINTER_PATH_ELEMENT_TO_ORIENT_FIELD),
                                     "."));
                 }
             };
