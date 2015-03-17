@@ -32,14 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.openidm.repo.util.AbstractSQLQueryFilterVisitor;
 import org.forgerock.openidm.repo.util.Clause;
 import org.forgerock.openidm.util.ResourceUtil;
-import org.forgerock.util.Iterables;
-import org.forgerock.util.promise.Function;
-import org.forgerock.util.promise.NeverThrowsException;
 
 /**
  * QueryFilterVisitor for generating WHERE clause SQL queries against generic table schema.
@@ -159,10 +158,10 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
      */
     @Override
     public Clause visitAndFilter(final Map<String, Object> parameters, List<QueryFilter> subfilters) {
-        return and(Iterables.from(subfilters).map(
-                new Function<QueryFilter, Clause, NeverThrowsException>() {
+        return and(FluentIterable.from(subfilters).transform(
+                new Function<QueryFilter, Clause>() {
                     @Override
-                    public Clause apply(QueryFilter filter) throws NeverThrowsException {
+                    public Clause apply(QueryFilter filter) {
                         return filter.accept(GenericSQLQueryFilterVisitor.this, parameters);
                     }
                 }));
@@ -173,10 +172,10 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
      */
     @Override
     public Clause visitOrFilter(final Map<String, Object> parameters, List<QueryFilter> subfilters) {
-        return or(Iterables.from(subfilters).map(
-                new Function<QueryFilter, Clause, NeverThrowsException>() {
+        return or(FluentIterable.from(subfilters).transform(
+                new Function<QueryFilter, Clause>() {
                     @Override
-                    public Clause apply(QueryFilter filter) throws NeverThrowsException {
+                    public Clause apply(QueryFilter filter) {
                         return filter.accept(GenericSQLQueryFilterVisitor.this, parameters);
                     }
                 }));

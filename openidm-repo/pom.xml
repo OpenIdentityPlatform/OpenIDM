@@ -38,6 +38,10 @@
             <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>forgerock-guava-collect</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

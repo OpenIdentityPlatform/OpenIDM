@@ -27,12 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.repo.util.Clause;
 import org.forgerock.openidm.repo.util.SQLRenderer;
-import org.forgerock.util.Iterables;
-import org.forgerock.util.promise.Function;
-import org.forgerock.util.promise.NeverThrowsException;
 
 /**
  * An {@link org.forgerock.openidm.repo.util.SQLRenderer} that models an SQL SELECT statement and
@@ -328,10 +327,10 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     }
 
     /** Function to render the SQL from a renderer. */
-    private static final Function<SQLRenderer<String>, String, NeverThrowsException> TO_SQL =
-            new Function<SQLRenderer<String>, String, NeverThrowsException>() {
+    private static final Function<SQLRenderer<String>, String> TO_SQL =
+            new Function<SQLRenderer<String>, String>() {
                 @Override
-                public String apply(SQLRenderer<String> renderer) throws NeverThrowsException {
+                public String apply(SQLRenderer<String> renderer) {
                     return renderer.toSQL();
                 }
             };
@@ -347,7 +346,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
             public String toSQL() {
                 return columns.isEmpty()
                     ? "*"
-                    : StringUtils.join(Iterables.from(columns).map(TO_SQL), ", ");
+                    : StringUtils.join(FluentIterable.from(columns).transform(TO_SQL), ", ");
             }
         };
     }
@@ -365,7 +364,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
         return new SQLRenderer<String>() {
             @Override
             public String toSQL() {
-                return " FROM " + StringUtils.join(Iterables.from(tables).map(TO_SQL), ", ");
+                return " FROM " + StringUtils.join(FluentIterable.from(tables).transform(TO_SQL), ", ");
             }
         };
     }
@@ -386,7 +385,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
         return new SQLRenderer<String>() {
             @Override
             public String toSQL() {
-                return " " + StringUtils.join(Iterables.from(joins).map(TO_SQL), " ");
+                return " " + StringUtils.join(FluentIterable.from(joins).transform(TO_SQL), " ");
             }
         };
     }
@@ -418,7 +417,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
         return new SQLRenderer<String>() {
             @Override
             public String toSQL() {
-                return " ORDER BY " + StringUtils.join(Iterables.from(orderBys).map(TO_SQL), ", ");
+                return " ORDER BY " + StringUtils.join(FluentIterable.from(orderBys).transform(TO_SQL), ", ");
             }
         };
     }

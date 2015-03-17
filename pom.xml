@@ -254,6 +254,7 @@
         <commons.forgerock-rest.version>2.4.3-SNAPSHOT</commons.forgerock-rest.version>
         <commons.forgerock-script.version>1.4.0</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
+        <commons.forgerock-guava.version>18.0.1</commons.forgerock-guava.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
@@ -521,6 +522,11 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>i18n-core</artifactId>
                 <version>${commons.forgerock-i18n.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>forgerock-guava-collect</artifactId>
+                <version>${commons.forgerock-guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>

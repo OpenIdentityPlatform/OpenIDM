@@ -16,11 +16,11 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import org.forgerock.guava.common.base.Function;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.util.promise.Function;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.slf4j.Logger;
@@ -39,13 +39,13 @@ public class ObjectClassInfoHelperFactory {
      */
     private static final Logger logger = LoggerFactory.getLogger(ObjectClassInfoHelperFactory.class);
 
-    private static final Map<ObjectClass, Function<JsonValue, ObjectClassInfoHelper, SchemaException>> factory =
-            new LinkedHashMap<ObjectClass, Function<JsonValue, ObjectClassInfoHelper, SchemaException>>();
+    private static final Map<ObjectClass, Function<JsonValue, ObjectClassInfoHelper>> factory =
+            new LinkedHashMap<ObjectClass, Function<JsonValue, ObjectClassInfoHelper>>();
 
-    private static final Function<JsonValue, ObjectClassInfoHelper, SchemaException> DEFAULT_SCHEMA_PARSER =
-            new Function<JsonValue, ObjectClassInfoHelper, SchemaException>() {
+    private static final Function<JsonValue, ObjectClassInfoHelper> DEFAULT_SCHEMA_PARSER =
+            new Function<JsonValue, ObjectClassInfoHelper>() {
                 @Override
-                public ObjectClassInfoHelper apply(JsonValue schema) throws SchemaException {
+                public ObjectClassInfoHelper apply(JsonValue schema) {
                     try {
                         final ObjectClass objectClass = new ObjectClass(schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS).required().asString());
                         JsonValue properties = schema.get(Constants.PROPERTIES).required().expect(Map.class);
@@ -72,10 +72,10 @@ public class ObjectClassInfoHelperFactory {
                 }
             };
 
-    private static final Function<JsonValue, ObjectClassInfoHelper, SchemaException> ALL_SCHEMA_PARSER =
-            new Function<JsonValue, ObjectClassInfoHelper, SchemaException>() {
+    private static final Function<JsonValue, ObjectClassInfoHelper> ALL_SCHEMA_PARSER =
+            new Function<JsonValue, ObjectClassInfoHelper>() {
                 @Override
-                public ObjectClassInfoHelper apply(JsonValue schema) throws SchemaException {
+                public ObjectClassInfoHelper apply(JsonValue schema) {
                     final ObjectClass objectClass = new ObjectClass(schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS).required().asString());
                     if (schema.isDefined(Constants.PROPERTIES)) {
                         throw new SchemaException(schema, "Properties is not allowed for the __ALL__ object class");

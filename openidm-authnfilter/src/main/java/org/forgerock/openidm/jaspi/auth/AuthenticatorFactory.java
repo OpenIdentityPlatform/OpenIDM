@@ -16,10 +16,10 @@
 
 package org.forgerock.openidm.jaspi.auth;
 
+import org.forgerock.guava.common.base.Function;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.util.promise.Function;
 import org.forgerock.util.promise.NeverThrowsException;
 
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
@@ -31,7 +31,7 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.USER_CRE
 /**
  * A factory Function to build an Authenticator from an auth module config.
  */
-public class AuthenticatorFactory implements Function<JsonValue, Authenticator, NeverThrowsException> {
+public class AuthenticatorFactory implements Function<JsonValue, Authenticator> {
 
     /** property for the username if using static authentication */
     private static final String USERNAME_PROPERTY = "username";
@@ -54,7 +54,7 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator, 
      * @throws NeverThrowsException
      */
     @Override
-    public Authenticator apply(JsonValue jsonValue) throws NeverThrowsException {
+    public Authenticator apply(JsonValue jsonValue) {
         if (!jsonValue.get(QUERY_ID).isNull()) {
             return new ResourceQueryAuthenticator(cryptoService, connectionFactory,
                     jsonValue.get(QUERY_ON_RESOURCE).required().asString(),
