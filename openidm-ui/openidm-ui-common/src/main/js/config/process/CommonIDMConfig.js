@@ -30,24 +30,29 @@ define("config/process/CommonIDMConfig", [
 ], function(constants, eventManager) {
     var ignorePassword = false,
         obj = [
-        {
-            startEvent: constants.EVENT_HANDLE_DEFAULT_ROUTE,
-            description: "",
-            override: true,
-            dependencies: [
-                "org/forgerock/commons/ui/common/main/Router",
-                "org/forgerock/commons/ui/common/main/Configuration"
-            ],
-            processDescription: function(event, router, conf) {
-                if (conf.globalData.userComponent === "repo/internal/user" && _.isString(conf.loggedUser.password) && !ignorePassword) {
-                    eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
-                    ignorePassword = true;
-                } else {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
+            {
+                startEvent: constants.EVENT_HANDLE_DEFAULT_ROUTE,
+                description: "",
+                override: true,
+                dependencies: [
+                    "org/forgerock/commons/ui/common/main/Router",
+                    "org/forgerock/commons/ui/common/main/Configuration",
+                    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
+                ],
+                processDescription: function(event, router, conf, configurationDelegate) {
+                    if (conf.globalData.userComponent === "repo/internal/user" && _.isString(conf.loggedUser.password) && !ignorePassword) {
+                        if (typeof configurationDelegate.checkForDifferences === "function") {
+                            configurationDelegate.checkForDifferences();
+                        }
+
+                        eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
+                        ignorePassword = true;
+                    } else {
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
+                    }
                 }
             }
-        }
-    ];
+        ];
 
     return obj;
 });
