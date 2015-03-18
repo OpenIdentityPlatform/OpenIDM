@@ -6,7 +6,7 @@
     </div>
     <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
         <div class="panel-body">
-            <div>
+            <div class="form-group">
                 <ol>
                     <li>
                         <p>{{t "templates.connector.salesforce.callbackUrlMessage"}}</p>
@@ -23,10 +23,12 @@
                 </ol>
             </div>
             <div class="form-group">
-                {{#each urlTypes}}
-                <label class="url-radio-label" for="{{id}}">{{name}}</label>
-                <input {{#if selected}} checked {{/if}} {{#if readonly}} readonly {{/if}} name="urlRadio" class="url-radio" id="{{id}}" type="radio" value="{{value}}">
-                {{/each}}
+                <div class="radio-group-holder">
+                    {{#each urlTypes}}
+                    <label class="url-radio-label" for="{{id}}">{{name}}</label>
+                    <input {{#if selected}} checked {{/if}} {{#if readonly}} readonly {{/if}} name="urlRadio" class="url-radio" id="{{id}}" type="radio" value="{{value}}">
+                    {{/each}}
+                </div>
             </div>
 
 
@@ -64,10 +66,10 @@
                 </div>
             </div>
 
-            <div class="group-body group-details">
+            <div class="group-details">
                 <u><a target="_blank" href="http://www.salesforce.com/us/developer/docs/api_rest/Content/quickstart_oauth.htm">{{t "templates.connector.salesforce.needHelpKey"}}</a></u>
             </div>
-            <div class="group-body group-details">
+            <div class="group-details">
                 <p><span class="important">{{t "templates.connector.salesforce.changeHeader"}}</span></p>
                 <p class="large-paragraph">
                     {{t "templates.connector.salesforce.changeDetails"}}
