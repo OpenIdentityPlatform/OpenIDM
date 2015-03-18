@@ -19,10 +19,6 @@
         {
             "logType" : "csv",
             "location" : "audit"
-        },
-        {
-            "logType" : "repository",
-            "useForQueries" : true
         }
     ],
     "exceptionFormatter" : {
