@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-whats-new'
@@ -52,6 +52,31 @@
      </para>
     </listitem>
    </varlistentry>
+   
+   <varlistentry>
+    <term>Bootstrap and Font Awesome</term>
+    <listitem>
+     <para>
+      The Web UI is now configured with the Bootstrap front-end framework and
+      Font Awesome font and CSS toolkit. You can now customize OpenIDM with the
+      <link xlink:show="new" xlink:href="http://getbootstrap.com">
+       <citetitle>Bootstrap</citetitle></link> themes and
+      <link xlink:show="new" xlink:href="http://fortawesome.github.io/Font-Awesome/">
+       <citetitle>Font Awesome</citetitle></link> icons of your choice.
+     </para>
+     <para>
+      To review the new customization process, read the following section of the
+      <citetitle>Integrator's Guide</citetitle>:
+      <link xlink:show="new" xlink:href="integrators-guide#ui-customizing"
+            xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>Changing the UI Theme</citetitle></link>.
+     </para>
+     <para>
+      Given the availability and flexibility of Bootstrap, ForgeRock does not
+      support upgrades of custom UI themes.
+     </para>
+    </listitem>
+   </varlistentry>
 
    <varlistentry>
     <term>Addition of an <emphasis>aggregated view</emphasis> to the Data
@@ -64,6 +89,19 @@
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To View a
       User's Account in External Resources</citetitle></link> in the
       <emphasis>Integrator's Guide</emphasis>.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Full Stack Sample</term>
+    <listitem>
+     <para>
+      To illustrate how you can use OpenAM for authentication, to protect users
+      maintained with OpenIDM, based on a data store of users in OpenDJ. you can
+      try the new <link xlink:show="new" xlink:href="install-guide#full-stack-sample"
+                        xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>The Full Stack Sample</citetitle></link>.
      </para>
     </listitem>
    </varlistentry>
