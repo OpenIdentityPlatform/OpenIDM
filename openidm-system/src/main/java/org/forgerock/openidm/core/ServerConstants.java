@@ -59,14 +59,20 @@ public final class ServerConstants {
     }
 
     public static String getDisplayVersion() {
-        StringBuilder sb =
-                new StringBuilder("OpenIDM version \"").append(getVersion()).append(
-                        "\" (revision: ").append(getRevision()).append(")");
+        StringBuilder sb = new StringBuilder("OpenIDM version \"")
+                .append(getVersion())
+                .append("\" (revision: ");
 
-        if (null != getBuild() && !getBuild().isEmpty()) {
+        if (null != getRevision() && !getRevision().isEmpty() && !"0".equals(getRevision())) {
+            sb.append(getRevision()).append(")");
+        } else {
+            sb.append("unknown)");
+        }
+
+        if (null != getBuild() && !getBuild().isEmpty() && !"null".equals(getBuild())) {
             sb.append(' ').append(getBuild());
         }
-        if (null != getBranch() && !getBranch().isEmpty()) {
+        if (null != getBranch() && !getBranch().isEmpty() && !"null".equals(getBranch())) {
             sb.append(' ').append(getBranch());
         }
         return sb.toString();
@@ -75,12 +81,12 @@ public final class ServerConstants {
     /**
      * OpenIDM version number.
      */
-    public static final String VERSION = "0";
+    public static final String VERSION = "unknown";
 
     /**
      * OpenIDM SCM revision number.
      */
-    public static final String SCM_REVISION = "0";
+    public static final String SCM_REVISION = "unknown";
 
     /**
      * The end-of-line character for this platform.
