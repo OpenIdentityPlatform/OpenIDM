@@ -14,6 +14,7 @@
                 "location":"bundle",
                 "includes":[
                     "**/openidm-security-*.jar",
+                    "**/org.apache.felix.log*.jar",
                     "**/org.apache.servicemix.transaction-*.jar"
                 ],
                 "start-level":2,
@@ -80,6 +81,7 @@
                     "**/org.apache.felix.scr-*.jar",
                     "**/org.apache.felix.configadmin*.jar",
                     "**/org.apache.felix.fileinstall*.jar",
+                    "**/org.apache.felix.log*.jar",
                     "**/javax.transaction-*.jar",
                     "**/org.apache.servicemix.transaction-*.jar",
                     "**/openidm-httpcontext-*.jar",
