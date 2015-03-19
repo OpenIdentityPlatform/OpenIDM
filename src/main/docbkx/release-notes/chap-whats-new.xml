@@ -57,8 +57,9 @@
     <term>Bootstrap and Font Awesome</term>
     <listitem>
      <para>
-      The Web UI is now configured with the Bootstrap front-end framework and
-      Font Awesome font and CSS toolkit. You can now customize OpenIDM with the
+      The Web UI now includes three additional components: the Bootstrap
+      front-end framework, a Font Awesome font, and an associated CSS toolkit.
+      You can now customize OpenIDM with the
       <link xlink:show="new" xlink:href="http://getbootstrap.com">
        <citetitle>Bootstrap</citetitle></link> themes and
       <link xlink:show="new" xlink:href="http://fortawesome.github.io/Font-Awesome/">
