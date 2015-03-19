@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-workflow'
@@ -1583,7 +1583,7 @@ $ ./startup.sh -p samples/workflow</screen>
        <literal>manager1</literal> and <literal>user1</literal>.
       </para>
    
-      <screen><?dbfo pgwide="1"?><userinput>$ curl \
+      <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1606,16 +1606,18 @@ $ ./startup.sh -p samples/workflow</screen>
      </step>
      <step>
       <para>
-       Log into the user interface as <literal>user1</literal>, with password
-       <literal>Welcome1</literal>. For information about logging in to the user
-       interface, see <link xlink:href="integrators-guide#ui-overview"
-       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Overview of
-       the Data Management UI</citetitle></link>.
+       Open a browser and navigate to the URL of your deployed OpenIDM system.
+       If it is on the local system, navigate to
+       <literal>https://localhost:8443/openidmui</literal>. Log into the user
+       interface as <literal>user1</literal>, with password
+       <literal>Welcome1</literal>.
       </para>
      </step>
      <step>
       <para>
-       Under "Processes" click "Contractor onboarding process".
+       Note the <literal>1</literal> icon in the "Processes" area. That indicates
+       an existing process. Click "Processes" and then click
+       "Contractor onboarding process".
       </para>
       <mediaobject>
        <alt>User interface - processes</alt>
@@ -1648,7 +1650,8 @@ $ ./startup.sh -p samples/workflow</screen>
      </step>
      <step>
       <para>
-       Under "Tasks that are in my group's queue" click "Contractor Approval".
+       Under "My Group's Tasks", note the <literal>1</literal> that indicates
+       an existing task. click "Contractor Approval".
       </para>
       <mediaobject>
        <alt>Contractor approval</alt>
@@ -1681,7 +1684,7 @@ $ ./startup.sh -p samples/workflow</screen>
        Under Actions, click Details.
       </para>
       <para>
-       The form containing the details of the contractor is displayed.
+       OpenIDM displays the form containing contractor details.
       </para>
      </step>
      <step>
@@ -1836,9 +1839,9 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
    Guide</citetitle>.
   </para>
   <para>
-   The use cases can be run independently, but rely on the data set that is
-   imported during use case 1 - so you <emphasis>must</emphasis> run use case 1
-   before running any of the other use cases.
+   Run use case 1 before running any of the other use cases. Use cases 2 through
+   6 depend on the <filename>hr_data.ldif</filename> file that you will import
+   and reconcile when you run use case 1.
   </para>
   <para>
    The use cases assume an initial data set of twenty "ordinary" managed users
@@ -1979,20 +1982,21 @@ $ ./startup.sh -p samples/usecase/usecase1
       Run reconciliation to populate the managed user repository with the users
       from the OpenDJ server.
      </para>
-     <screen>$ curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHRAccounts_managedUser"
+      </userinput>
      </screen>
     </step>
     <step>
      <para>
       Query the managed users that were created by the reconciliation process.
      </para>
-     <screen><userinput>$ curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -2027,7 +2031,7 @@ $ ./startup.sh -p samples/usecase/usecase1
 }</computeroutput>
      </screen>
      <para>
-      23 users will have been created by the reconciliation process. The default
+      The reconciliation process created 23 users. The default
       password of all the newly created users is <literal>Passw0rd</literal>.
      </para>
     </step>
@@ -2065,8 +2069,9 @@ $ ./shutdown.sh
     workflow.
    </para>
    <para>
-    The use case works with the OpenIDM UI, accessible at the following URL by
-    default: <literal>https://localhost:8443/openidmui/</literal>.
+    The use case works with the OpenIDM Data Management UI. If you deploy OpenIDM
+    on the local system, you can access it at the following URL:
+    <literal>https://localhost:8443/openidmui/</literal>.
    </para>
 
    <procedure xml:id="initiate-onboarding">
@@ -2093,8 +2098,8 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      In this use case, the processes associated with the new user onboarding
-      workflow are visible to any user who logs into the UI.
+      In this use case, any user who logs into the UI can view the
+      the new user onboarding process workflow.
      </para>
      <mediaobject>
       <alt>Processes available to user.1</alt>
@@ -2103,8 +2108,8 @@ $ ./startup.sh -p samples/usecase/usecase2
       </imageobject>
      </mediaobject>
      <para>
-      Click on the User Onboarding Process and complete the fields for a sample
-      new user. Complete at least all mandatory fields.
+      Select the User Onboarding Process link and complete the fields for a
+      sample new user. Complete at least all mandatory fields.
      </para>
      <para>
       <emphasis>Department</emphasis>. Specifies one of four departments to
