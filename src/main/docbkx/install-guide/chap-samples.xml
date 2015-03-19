@@ -6014,7 +6014,7 @@ $ ./ldapmodify \
       assign the noted role, such as <literal>openidm-admin</literal> to any user
       who is a member of one of these groups. For more information on how roles
       are assigned, see the following section in the Integrator's Guide on
-      <link xlink:role="http://docbook.org/roles/xlink/role/olink"
+      <link xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#openidm-roles" xlink:show="new">
       <citetitle>Roles and Authentication</citetitle></link>.
      </para>
@@ -6039,7 +6039,7 @@ $ ./ldapmodify \
        This section describes how you can customize the
        <filename>provisioner.openicf-ldap.json</filename> file. The following
        edits parallel those for <link xlink:show="new"
-       xlink:role="http://docbook.org/roles/xlink/role/olink"
+       xlink:role="http://docbook.org/xlink/role/olink"
        xlink:href="install-guide#more-sample2c"><citetitle>Sample
        2c - Synchronizing LDAP Group Membership</citetitle></link>.
       </para>
@@ -6261,7 +6261,7 @@ $ ./ldapmodify \
       additional applications. Upon approval, OpenIDM can update user accounts
       with the permissions used by OpenAM to control access to that application.
       For more information on workflows, see the Integrator's Guide section to
-      <link xlink:role="http://docbook.org/roles/xlink/role/olink"
+      <link xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#chap-workflow" xlink:show="new">
       <citetitle>Integrating Business Processes and Workflows</citetitle>.
       </link>
@@ -6622,9 +6622,10 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
       are using SSL. If you have a signed certificate, you should import that
       into the OpenIDM truststore file. For more information, see
       the following section of the Integrator's Guide:
-      <link xlink:show="new" xlink:role="http://docbook.org/roles/xlink/role/olink"
-            xlink:href="integrators-guide#security-management-service"><citetitle>
-       Accessing the Security Management Service</citetitle></link>.
+      <link xlink:show="new"
+      xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:href="integrators-guide#security-management-service"><citetitle>Accessing
+       the Security Management Service</citetitle></link>.
      </para>
 
      <para>
