@@ -13,9 +13,9 @@
                   "encryption" : { "key" : "openidm-sym-default" }
                 } 
             ],
-			"onUpdate" : {
+            "onUpdate" : {
                   "type" : "text/javascript",
-                  "source" : "if (newObject.ldapPassword != oldObject.ldapPassword) { newObject.password = newObject.ldapPassword } else if (newObject.adPassword != oldObject.adPassword) { newObject.password = newObject.adPassword }"
+                  "source" : "if (newObject.ldapPassword !== openidm.decrypt(oldObject.ldapPassword)) { newObject.password = newObject.ldapPassword; } else if (newObject.adPassword !== openidm.decrypt(oldObject.adPassword)) { newObject.password = newObject.adPassword; }"
             }
         }
     ]
