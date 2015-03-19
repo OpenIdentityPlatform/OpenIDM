@@ -178,6 +178,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                     count: process.tasks.length,
                     headers: this.getParamsForTaskType(taskType),
                     batchOperation: this.category === 'assigned',
+                    id: process.name.replace(/\s/g, '') + this.category + types,
+                    taskCount: process.tasks.length,
                     tasks: []
                 };
 
@@ -195,22 +197,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             }
 
             this.$el.accordion({header: "table-header", heightStyle: "content", collapsible: true, autoHeight: false, active: active});
-
-            if(this.$el.find("tbody tr").length === 0) {
-                if(this.$el.selector === "myTask") {
-                    $("#userBadge").hide();
-                } else {
-                    $("#groupBadge").hide();
-                }
-            } else {
-                if(this.$el.selector === "#myTasks") {
-                    $("#userBadge").show();
-                    $("#userBadge").html(this.$el.find("tbody tr").length);
-                } else {
-                    $("#groupBadge").show();
-                    $("#groupBadge").html(this.$el.find("tbody tr").length);
-                }
-            }
 
             this.refreshAssignedSelectors();
 
