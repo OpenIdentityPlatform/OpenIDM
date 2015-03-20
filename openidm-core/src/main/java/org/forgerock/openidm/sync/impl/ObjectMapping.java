@@ -306,7 +306,8 @@ class ObjectMapping {
         syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
         linkingEnabled = config.get("enableLinking").defaultTo(Boolean.TRUE).asBoolean();
         reconSourceQueryPaging = config.get("reconSourceQueryPaging").defaultTo(false).asBoolean();
-        reconSourceQueryPageSize = config.get("reconSourceQueryPageSize").defaultTo(ReconFeeder.DEFAULT_FEED_SIZE).asInteger();
+        reconSourceQueryPageSize = config.get("reconSourceQueryPageSize")
+                .defaultTo(reconSourceQueryPaging ? ReconFeeder.DEFAULT_FEED_SIZE : 0).asInteger();
 
         LOGGER.debug("Instantiated {}", name);
     }
