@@ -323,9 +323,10 @@
      <varlistentry>
       <term>onValidate</term>
       <listitem>
-       <para>Validates an object prior to its storage in the data store.
-           Throws an exception in the event of a validation failure.</para>
-       <!-- i18n TBD. -->
+       <para>
+        Validates an object prior to its storage in the data store. If an
+        exception is thrown, the validation fails and the object is not stored.
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -352,9 +353,11 @@
      <varlistentry>
       <term>onValidate</term>
       <listitem>
-       <para>Validates a given property value after its retrieval from and
-       prior to its storage in the data store. Throws an exception in the
-       event of a validation failure.</para>
+       <para>
+        Validates a given property value after its retrieval from and prior to
+        its storage in the data store. If an exception is thrown, the validation
+        fails and the property is not stored.
+       </para>
        <!--  i18n of validation error TBD. -->
       </listitem>
      </varlistentry>
