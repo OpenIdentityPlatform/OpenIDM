@@ -52,7 +52,7 @@
                 "action" : "EXCEPTION",
                 "options" : ["IGNORE", "REPORT", "NOREPORT", "ASYNC"],
                 "color": "red",
-                "note": "templates.mapping.reconAnalysis.ambigousMessage"
+                "note": "templates.mapping.reconAnalysis.ambiguousMessage"
             }, {
                 "situation" : "SOURCE_MISSING",
                 "action" : "EXCEPTION",
