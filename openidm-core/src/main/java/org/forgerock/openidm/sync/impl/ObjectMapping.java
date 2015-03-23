@@ -666,7 +666,7 @@ class ObjectMapping {
                 property.apply(source, oldSource, target, linkQualifier);
             }
             // Apply default mapping, if configured
-            applyDefaultMappings(source, oldSource, target, existingTarget);
+            applyDefaultMappings(source, oldSource, target, existingTarget, linkQualifier);
             
             measure.setResult(target);
         } finally {
@@ -674,7 +674,7 @@ class ObjectMapping {
         }
     }
 
-    private JsonValue applyDefaultMappings(JsonValue source, JsonValue oldSource, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
+    private JsonValue applyDefaultMappings(JsonValue source, JsonValue oldSource, JsonValue target, JsonValue existingTarget, String linkQualifier) throws SynchronizationException {
         JsonValue result = null;
         if (defaultMapping != null) {
             Map<String, Object> queryScope = new HashMap<String, Object>();
@@ -685,6 +685,7 @@ class ObjectMapping {
             queryScope.put("target", target.asMap());
             queryScope.put("config", config.asMap());
             queryScope.put("existingTarget", existingTarget.asMap());
+            queryScope.put("linkQualifier", linkQualifier);
             try {
                 result = json(defaultMapping.exec(queryScope));
             } catch (ScriptThrownException ste) {
@@ -1708,7 +1709,10 @@ class ObjectMapping {
                 action = situation.getDefaultAction();
                 List<Policy> situationPolicies = getPolicies(situation);
                 for (Policy policy : situationPolicies) {
-                    if (policy.getCondition().evaluate(json(field("object", getSourceObject())), getLinkQualifier())) {
+                    if (policy.getCondition().evaluate(
+                            json(object(
+                                    field("object", getSourceObject()),
+                                    field("linkQualifier", getLinkQualifier()))))) {
                         activePolicy = policy;
                         action = activePolicy.getAction(sourceObjectAccessor, 
                                                 targetObjectAccessor, this, getLinkQualifier());
