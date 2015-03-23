@@ -24,9 +24,9 @@
 
 /**
  * @author mbilski
- * 
+ *
  * Endpoint for managing user notifications
- * 
+ *
  */
 (function () {
     var userId = context.security.authorizationId.id, res, ret, params, notification;
@@ -38,27 +38,28 @@
             "userId": userId
         };
         ret = openidm.query("repo/ui/notification", params);
-        
+
         if(ret && ret.result) {
             res = ret.result;
         }
-        
+
         return res;
-        
+
     } else if (request.method === "delete") {
         notification = openidm.read("repo/ui/notification/"+request.resourceName);
-        
-        if(notification.receiverId === userId) {
-            openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
-        } else {
-            throw { 
-                "code" : 403,
-                "message" : "Access denied"
-            };
+
+        if(notification !== null) {
+            if (notification.receiverId === userId) {
+                openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
+            } else {
+                throw {
+                    "code": 403,
+                    "message": "Access denied"
+                };
+            }
         }
-        
     } else {
-        throw { 
+        throw {
             "code" : 403,
             "message" : "Access denied"
         };

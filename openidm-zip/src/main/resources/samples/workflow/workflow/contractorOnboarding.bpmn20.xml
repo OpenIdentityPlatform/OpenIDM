@@ -77,7 +77,6 @@
 
     &lt;h3 class=&quot;text-center&quot;&gt;Contractor Details&lt;/h3&gt;
 
-    &lt;form role=&quot;form&quot; class=&quot;form-horizontal registration&quot;&gt;
         &lt;div class=&quot;form-group has-feedback&quot;&gt;
             &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;userName&quot;&gt;{{t &quot;common.user.username&quot;}}&lt;/label&gt;
             &lt;div class=&quot;col-sm-6&quot;&gt;
@@ -131,7 +130,7 @@
         &lt;div class=&quot;form-group has-feedback&quot;&gt;
             &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;password&quot;&gt;{{t &quot;common.user.password&quot;}}&lt;/label&gt;
             &lt;div class=&quot;col-sm-6&quot;&gt;
-                &lt;input class=&quot;form-control&quot; type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;input class=&quot;form-control&quot; type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot; data-validation-dependents=&quot;passwordConfirm&quot; /&gt;
                 &lt;span class=&quot;error form-control-feedback&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
             &lt;/div&gt;
         &lt;/div&gt;
@@ -189,7 +188,6 @@
             &lt;/div&gt;
         &lt;/div&gt;
 
-    &lt;/form&gt;
 &lt;div style=&quot;clear:both;&quot;>&lt;/div&gt;
 &lt;script&gt;
 require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
@@ -244,7 +242,6 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
 
     &lt;h3 class=&quot;text-center&quot;&gt;Contractor Details&lt;/h3&gt;
 
-    &lt;form role=&quot;form&quot; class=&quot;form-horizontal registration&quot;&gt;
         &lt;div class=&quot;form-group has-feedback&quot;&gt;
             &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;userName&quot;&gt;{{t &quot;common.user.username&quot;}}&lt;/label&gt;
             &lt;div class=&quot;col-sm-6&quot;&gt;
@@ -301,7 +298,7 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
         &lt;div class=&quot;form-group has-feedback&quot;&gt;
             &lt;label class=&quot;col-sm-3 control-label&quot; for=&quot;password&quot;&gt;{{t &quot;common.user.password&quot;}}&lt;/label&gt;
             &lt;div class=&quot;col-sm-6&quot;&gt;
-                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.password}}&quot; type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot; data-validation-dependents=&quot;password&quot; /&gt;
+                &lt;input class=&quot;form-control&quot; value=&quot;{{variables.password}}&quot; type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot; data-validation-dependents=&quot;passwordConfirm&quot; /&gt;
                 &lt;span class=&quot;error form-control-feedback&quot;&gt;&lt;i class=&quot;fa validation-icon&quot;&gt;&lt;/i&gt;&lt;/span&gt;
             &lt;/div&gt;
         &lt;/div&gt;
@@ -370,7 +367,6 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
             &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
         &lt;/div&gt;
 
-    &lt;/form&gt;
     &lt;div style=&quot;clear:both;&quot;>&lt;/div&gt;
 
 &lt;script&gt;
