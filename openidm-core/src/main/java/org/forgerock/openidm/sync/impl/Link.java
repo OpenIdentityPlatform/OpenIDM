@@ -93,7 +93,7 @@ class Link {
     /**
      * Default link qualifier if no link qualifier was specified.
      */
-    public static final String DEFAULT_LINK_QUALIFIER = "defaultLinkQualifier";
+    public static final String DEFAULT_LINK_QUALIFIER = "default";
 
     /**
      * Link qualifier.

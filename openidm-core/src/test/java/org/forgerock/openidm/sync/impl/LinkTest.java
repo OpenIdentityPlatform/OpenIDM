@@ -62,8 +62,8 @@ public class LinkTest {
     @Test
     public void setLinkQualifierTest() {
         Link link = new Link(mock(ObjectMapping.class));
-        link.setLinkQualifier("defaultLinkQualifier");
-        assertEquals(link.linkQualifier, "defaultLinkQualifier");
+        link.setLinkQualifier("default");
+        assertEquals(link.linkQualifier, "default");
     }
 
     @Test
@@ -98,7 +98,7 @@ public class LinkTest {
         objectMapping = new ObjectMapping(synchronizationServiceMock, mappingConfig);
         Link link = new Link(objectMapping);
         objectMapping.linkType = linkTypeMock;
-        link.setLinkQualifier("defaultLinkQualifier");
+        link.setLinkQualifier("default");
 
         when(linkTypeMock.normalizeSourceId(anyString())).thenReturn("sourceId");
         when(linkTypeMock.normalizeTargetId(anyString())).thenReturn("targetId");
@@ -111,7 +111,7 @@ public class LinkTest {
 
         link.create();
 
-        assertEquals(link.linkQualifier, "defaultLinkQualifier");
+        assertEquals(link.linkQualifier, "default");
         assertEquals(link._rev, "testRevision");
         assertEquals(link._id, "testId");
         assertEquals(link.initialized, true);
@@ -131,7 +131,7 @@ public class LinkTest {
         objectMapping = new ObjectMapping(synchronizationServiceMock, mappingConfig);
         Link link = new Link(objectMapping);
         objectMapping.linkType = linkTypeMock;
-        link.setLinkQualifier("defaultLinkQualifier");
+        link.setLinkQualifier("default");
 
         when(linkTypeMock.normalizeSourceId(anyString())).thenReturn("sourceId");
         when(linkTypeMock.normalizeTargetId(anyString())).thenReturn("targetId");
@@ -144,7 +144,7 @@ public class LinkTest {
         link._id = "testId";
         link.update();
 
-        assertEquals(link.linkQualifier, "defaultLinkQualifier");
+        assertEquals(link.linkQualifier, "default");
         assertEquals(link._rev, "testRevision");
         assertEquals(link._id, "testId");
 
@@ -163,7 +163,7 @@ public class LinkTest {
         objectMapping = new ObjectMapping(synchronizationServiceMock, mappingConfig);
         Link link = new Link(objectMapping);
         objectMapping.linkType = linkTypeMock;
-        link.setLinkQualifier("defaultLinkQualifier");
+        link.setLinkQualifier("default");
         link._id = UUID.randomUUID().toString();
 
         when(objectMapping.getService().getServerContext()).thenReturn(new ServerContext(new RootContext()));

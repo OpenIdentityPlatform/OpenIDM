@@ -166,15 +166,19 @@ class ObjectMapping {
     private int reconSourceQueryPageSize;
     
     /**
-     * A Map of correlation queries where the keys are {@link String} instances representing link qualifiers and the 
-     * values are the correlation query {@link Script} instances.
+     * A container for the correlation queries or script.
      */
-    private Map<String, Script> correlationQueries = new HashMap<String, Script>();
-    
+    private Correlation correlation;
+
     /**
      * A {@link List} containing the configured link qualifiers. 
      */
-    private Set<String> linkQualifiers = new HashSet<String>();
+    private Set<String> linkQualifiersList = new HashSet<String>();
+    
+    /**
+     * A {@link Script} used for determining the link qualifiers. 
+     */
+    private Script linkQualifiersScript = null;
     
     /** a script that applies the effective assignments as part of the mapping */
     private Script defaultMapping;
@@ -255,24 +259,17 @@ class ObjectMapping {
         validSource = Scripts.newInstance(config.get("validSource"));
         validTarget = Scripts.newInstance(config.get("validTarget"));
         sourceCondition = config.get("sourceCondition").expect(Map.class);
+        correlation = new Correlation(config);
         JsonValue linkQualifiersValue = config.get("linkQualifiers");
         if (linkQualifiersValue.isNull()) {
             // No link qualifiers configured, so add only the default
-            linkQualifiers.add(Link.DEFAULT_LINK_QUALIFIER);
-        } else if (linkQualifiersValue.isList()) {
-            linkQualifiers.addAll(config.get("linkQualifiers").asSet(String.class));
+            linkQualifiersList.add(Link.DEFAULT_LINK_QUALIFIER);
+        } else if (linkQualifiersValue.isList() || linkQualifiersValue.isSet()) {
+            linkQualifiersList.addAll(config.get("linkQualifiers").asSet(String.class));
+        } else if (linkQualifiersValue.isMap()) {
+            linkQualifiersScript = Scripts.newInstance(linkQualifiersValue);
         } else {
             linkQualifiersValue.expect(List.class);
-        }
-        JsonValue correlationQueryValue = config.get("correlationQuery");
-        if (correlationQueryValue.isList()) {
-            for (JsonValue correlationQuery : correlationQueryValue) {
-                correlationQueries.put(correlationQuery.get("linkQualifier").defaultTo(Link.DEFAULT_LINK_QUALIFIER).asString(), 
-                        Scripts.newInstance(correlationQuery));
-            }
-        } else if (correlationQueryValue.isMap()) {
-            correlationQueries.put(correlationQueryValue.get("linkQualifier").defaultTo(Link.DEFAULT_LINK_QUALIFIER).asString(), 
-                    Scripts.newInstance(correlationQueryValue));
         }
         for (JsonValue jv : config.get("properties").expect(List.class)) {
             properties.add(new PropertyMapping(jv));
@@ -361,6 +358,57 @@ class ObjectMapping {
     public JsonValue getConfig() {
         return config;
     }
+    
+    /**
+     * Returns the complete set of link Qualifiers.
+     * 
+     * @return a {@link Set} object representing the complete set of link qualifiers
+     * @throws SynchronizationException
+     */
+    private Set<String> getAllLinkQualifiers() throws SynchronizationException {
+        return getLinkQualifiers(null, null, true);
+    }
+    
+    /**
+     * Returns a set of link qualifiers for a given source. If the returnAll boolean is used to indicate that all linkQualifiers
+     * should be returned regardless of the source object.
+     * 
+     * @param object the object's value
+     * @param oldValue the source object's old value
+     * @param returnAll true if all link qualifiers should be returned, false otherwise
+     * @return a {@link Set} object representing the complete set of link qualifiers
+     * @throws SynchronizationException
+     */
+    private Set<String> getLinkQualifiers(JsonValue object, JsonValue oldValue, boolean returnAll) throws SynchronizationException {
+        if (linkQualifiersScript != null) {
+            // Execute script to find the list of link qualifiers
+            Map<String, Object> scope = new HashMap<String, Object>();
+            scope.put("mapping", name);
+            scope.put("object", object == null || object.isNull() ? null : object.asMap());
+            scope.put("oldValue", oldValue == null || oldValue.isNull() ? null : oldValue.asMap());
+            scope.put("returnAll", returnAll);
+            try {
+                return json(linkQualifiersScript.exec(scope)).asSet(String.class);
+            } catch (ScriptException se) {
+                LOGGER.debug("{} {} script encountered exception", name, "linkQualifiers", se);
+                throw new SynchronizationException(se);
+            }
+        } else {
+            return linkQualifiersList;
+        }
+    }
+    
+    /**
+     * Returns an object's required ID or null if the object is null.
+     * 
+     * @param object a source or target object
+     * @return a String representing the object's ID
+     */
+    private String getObjectId(JsonValue object) {
+        return object != null && !object.isNull() 
+                ? object.get("_id").required().asString() 
+                : null;
+    }
 
     /**
      * @return The configured name of the link set to use for this object mapping
@@ -433,24 +481,26 @@ class ObjectMapping {
             throws SynchronizationException {
         JsonValue results = json(array());
         LOGGER.trace("Start source synchronization of {} {}", resourceId, (value == null) ? "without a value" : "with a value");
-        
+
+        LazyObjectAccessor sourceObjectAccessor = null;
+        if (sourceDeleted) {
+            sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, null);
+        } else if (value != null) {
+            value.put("_id", resourceId); // unqualified
+            sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, value);
+        } else {
+            sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId);
+        }
+                
         // Loop over correlation queries, performing a sync for each linkQualifier
-        for (String linkQualifier : linkQualifiers) {
+        for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), oldValue, false)) {
             // TODO: one day bifurcate this for synchronous and asynchronous source operation
             SourceSyncOperation op = new SourceSyncOperation();
             op.oldValue = oldValue;
-            op.setCorrelationQuery(correlationQueries.get(linkQualifier));
             op.setLinkQualifier(linkQualifier);
         
             SyncEntry entry = new SyncEntry(op, name, context, dateUtil);
-            if (sourceDeleted) {
-                op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, null);
-            } else if (value != null) {
-                value.put("_id", resourceId); // unqualified
-                op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, value);
-            } else {
-                op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId);
-            }
+            op.sourceObjectAccessor = sourceObjectAccessor;
             entry.sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet, resourceId);
             try {
                 results.add(op.sync());
@@ -932,7 +982,7 @@ class ObjectMapping {
                 allLinks = new HashMap<String, Map<String, Link>>();
                 Integer totalLinkEntries = new Integer(0);
                 reconContext.getStatistics().linkQueryStart();
-                for (String linkQualifier : linkQualifiers) {
+                for (String linkQualifier : getAllLinkQualifiers()) {
                     Map<String, Link> linksByQualifier = Link.getLinksForMapping(ObjectMapping.this, linkQualifier);
                     allLinks.put(linkQualifier, linksByQualifier);
                     totalLinkEntries += linksByQualifier.size();
@@ -1068,21 +1118,18 @@ class ObjectMapping {
                 Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds)
                 throws SynchronizationException {
             reconContext.checkCanceled();
-            for (String linkQualifier : linkQualifiers) {
+            LazyObjectAccessor sourceObjectAccessor = objectEntry == null 
+                    ? new LazyObjectAccessor(service, sourceObjectSet, id) // Load source detail on demand
+                    : new LazyObjectAccessor(service, sourceObjectSet, id, objectEntry); // Pre-queried source detail
+                    
+            for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), null, false)) {
                 SourceSyncOperation op = new SourceSyncOperation();
                 op.reconContext = reconContext;
-                op.setCorrelationQuery(correlationQueries.get(linkQualifier));
                 op.setLinkQualifier(linkQualifier);
                 
                 ReconEntry entry = new ReconEntry(op, name, rootContext, dateUtil);
                 entry.linkQualifier = op.getLinkQualifier();
-                if (objectEntry == null) {
-                    // Load source detail on demand
-                    op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id);
-                } else {
-                    // Pre-queried source detail
-                    op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id, objectEntry);
-                }
+                op.sourceObjectAccessor = sourceObjectAccessor;
                 if (allLinks != null) {
                     String normalizedSourceId = linkType.normalizeSourceId(id);
                     op.initializeLink(allLinks.get(linkQualifier).get(normalizedSourceId));
@@ -1142,10 +1189,9 @@ class ObjectMapping {
         public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, Map<String, 
                 Map<String, Link>> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
             reconContext.checkCanceled();
-            for (String linkQualifier : linkQualifiers) {
+            for (String linkQualifier : getAllLinkQualifiers()) {
                 TargetSyncOperation op = new TargetSyncOperation();
                 op.reconContext = reconContext;
-                op.setCorrelationQuery(correlationQueries.get(linkQualifier));
                 op.setLinkQualifier(linkQualifier);
                 
                 ReconEntry entry = new ReconEntry(op, name, rootContext, dateUtil);
@@ -1375,9 +1421,8 @@ class ObjectMapping {
      */
     public void explicitOp(JsonValue sourceObject, JsonValue targetObject, Situation situation, ReconAction action, String reconId)
             throws SynchronizationException {
-        for (String linkQualifier : linkQualifiers) {
+        for (String linkQualifier : getLinkQualifiers(sourceObject, null, false)) {
             ExplicitSyncOperation linkOp = new ExplicitSyncOperation();
-            linkOp.setCorrelationQuery(correlationQueries.get(linkQualifier));
             linkOp.setLinkQualifier(linkQualifier);
             linkOp.init(sourceObject, targetObject, situation, action, reconId);
             linkOp.sync();
@@ -1464,14 +1509,9 @@ class ObjectMapping {
          * A boolean indicating whether to ignore any configured post action.
          */
         public boolean ignorePostAction = false;
-        
-        /**
-         * The current sync operation's correlation query script
-         */
-        public Script correlationQuery;
 
         /**
-         * TODO: Description.
+         * Performs the sync operation.
          *
          * @return sync results of the {@link SyncOperation}
          * @throws SynchronizationException TODO.
@@ -1481,18 +1521,9 @@ class ObjectMapping {
         protected abstract boolean isSourceToTarget();
         
         /**
-         * Sets the correlation query script for the current sync operation.
-         * 
-         * @param correlationQuery a {@link CorrelationQuery} object.
-         */
-        protected void setCorrelationQuery(Script correlationQuery) {
-            this.correlationQuery = correlationQuery;
-        }
-        
-        /**
          * Sets the link qualifier for the current sync operation.
          * 
-         * @param correlationQuery a {@link CorrelationQuery} object.
+         * @param linkQualifier a link qualifier.
          */
         protected void setLinkQualifier(String linkQualifier) {
             this.linkObject.setLinkQualifier(linkQualifier);
@@ -2054,8 +2085,8 @@ class ObjectMapping {
         }
 
         public void init(JsonValue sourceObject, JsonValue targetObject, Situation situation, ReconAction action, String reconId) {
-            String sourceObjectId = (sourceObject != null && !sourceObject.isNull()) ? sourceObject.get("_id").required().asString() : null;
-            String targetObjectId = (targetObject != null && !targetObject.isNull()) ? targetObject.get("_id").required().asString() : null;
+            String sourceObjectId = getObjectId(sourceObject);
+            String targetObjectId = getObjectId(targetObject);
             this.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceObjectId, sourceObject);
             this.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetObjectId, targetObject);
             this.reconId = reconId;
@@ -2341,6 +2372,7 @@ class ObjectMapping {
         private JsonValue correlateTarget() throws SynchronizationException {
             return correlateTarget(null);
         }
+        
         /**
          * Correlates (finds an associated) target for the given source
          * @param sourceObjectOverride optional explicitly supplied source object to correlate,
@@ -2355,26 +2387,17 @@ class ObjectMapping {
             // TODO: consider if there are cases where this would better be lazy and not get the full target
             if (hasTargetObject()) {
                 result = json(array(getTargetObject()));
-            } else if (correlationQuery != null && (correlateEmptyTargetSet || !hadEmptyTargetObjectSet())) {
+            } else if (correlation.hasCorrelation(getLinkQualifier()) && (correlateEmptyTargetSet || !hadEmptyTargetObjectSet())) {
                 EventEntry measure = Publisher.start(EVENT_CORRELATE_TARGET, getSourceObject(), null);
 
-                Map<String, Object> queryScope = new HashMap<String, Object>();
+                Map<String, Object> scope = new HashMap<String, Object>();
                 if (sourceObjectOverride != null) {
-                    queryScope.put("source", sourceObjectOverride.asMap());
+                    scope.put("source", sourceObjectOverride.asMap());
                 } else {
-                    queryScope.put("source", getSourceObject().asMap());
+                    scope.put("source", getSourceObject().asMap());
                 }
                 try {
-                    Object query = correlationQuery.exec(queryScope);
-                    if (query == null || !(query instanceof Map)) {
-                        throw new SynchronizationException("Expected correlationQuery script to yield a Map");
-                    }
-                    result = json(queryTargetObjectSet((Map)query)).get(QueryResult.FIELD_RESULT).required();
-                } catch (ScriptThrownException ste) {
-                    throw toSynchronizationException(ste, name, "correlationQuery");
-                } catch (ScriptException se) {
-                    LOGGER.debug("{} correlationQuery script encountered exception", name, se);
-                    throw new SynchronizationException(se);
+                    result = correlation.correlate(scope, getLinkQualifier());
                 } finally {
                     measure.end();
                 }
@@ -2415,6 +2438,131 @@ class ObjectMapping {
             }
             return false;
         }
+    }
+    
+    enum CorrelationType {
+        correlationQuery,
+        correlationScript,
+        none
+    }
+    
+    /**
+     * A class used to store and execute correlation queries and scripts.
+     */
+    class Correlation {
+        
+        /**
+         * A Map of correlation queries where the keys are {@link String} instances representing link qualifiers and the 
+         * values are the correlation query {@link Script} instances.
+         */
+        private Map<String, Script> correlationQueries = null;
+        
+        /**
+         * A correlation script which will return a Map object where the keys are {@link String} instances representing link qualifiers and the 
+         * values are the correlation query results.
+         */
+        private Script correlationScript = null;
+        
+        /**
+         * The type of the correlation
+         */
+        private CorrelationType type;
+        
+        /**
+         * Constructor.
+         * 
+         * @param config the mapping configuration
+         * @throws JsonValueException
+         */
+        public Correlation(JsonValue config) throws JsonValueException {
+            JsonValue correlationQueryValue = config.get("correlationQuery");
+            JsonValue correlationScriptValue = config.get("correlationScript");
+            if (!correlationQueryValue.isNull() && !correlationScriptValue.isNull()) {
+                throw new JsonValueException(config, "Cannot configure both correlationQuery and correlationScript in a single mapping");
+            } else if (!correlationQueryValue.isNull()) {
+                correlationQueries = new HashMap<String, Script>();
+                type = CorrelationType.correlationQuery;
+                if (correlationQueryValue.isList()) {
+                    for (JsonValue correlationQuery : correlationQueryValue) {
+                        correlationQueries.put(correlationQuery.get("linkQualifier").defaultTo(Link.DEFAULT_LINK_QUALIFIER).asString(), 
+                                Scripts.newInstance(correlationQuery));
+                    }
+                } else if (correlationQueryValue.isMap()) {
+                    correlationQueries.put(correlationQueryValue.get("linkQualifier").defaultTo(Link.DEFAULT_LINK_QUALIFIER).asString(), 
+                            Scripts.newInstance(correlationQueryValue));
+                }
+            } else if (!correlationScriptValue.isNull()) {
+                type = CorrelationType.correlationScript;
+                correlationScript = Scripts.newInstance(correlationScriptValue);
+            } else {
+                type = CorrelationType.none;
+            }
+        }
+        
+        /**
+         * Returns true if there is a correlation query or script configured for the given link qualifier, false otherwise.
+         * 
+         * @param linkQualifier the link qualifier for the current sync operation.
+         * @return true if correlation is configured, fals otherwise.
+         */
+        public boolean hasCorrelation(String linkQualifier) {
+            switch (type) {
+            case correlationQuery:
+                return correlationQueries.get(linkQualifier) != null;
+            case correlationScript:
+                return true;
+            default:
+                return false;
+            }
+        }
+
+        /**
+         * Performs the correlation.
+         * 
+         * @param scope the scope to use for the correlation script
+         * @param linkQualifier the link qualifier
+         * @return a list of results if no correlation is configured
+         * @throws SynchronizationException if there was an error during correlation
+         */
+        public JsonValue correlate(Map<String, Object> scope, String linkQualifier) throws SynchronizationException {
+            try {
+                switch (type) {
+                case correlationQuery:
+                    // Execute the correlationQuery and return the results
+                    return json(queryTargetObjectSet(execScript(type.toString(), correlationQueries.get(linkQualifier), scope).asMap()))
+                            .get(QueryResult.FIELD_RESULT).required();
+                case correlationScript:
+                    // Execute the correlationScript and return the results corresponding to the given linkQualifier
+                    return json(execScript(type.toString(), correlationScript, scope)).get(linkQualifier);
+                default:
+                    return null;
+                }
+            } catch (ScriptThrownException ste) {
+                throw toSynchronizationException(ste, name, type.toString());
+            } catch (ScriptException se) {
+                LOGGER.debug("{} {} script encountered exception", name, type.toString(), se);
+                throw new SynchronizationException(se);
+            }
+        }
+
+        /**
+         * Executes a script of a given type with the given scope.
+         * 
+         * @param type the type of script (correlationQuery or correlationScript)
+         * @param script the {@link Script} object representing the script
+         * @param scope the script's scope
+         * @return A {@link Map} representing the results
+         * @throws SynchronizationException if the script did not return an expected result
+         * @throws ScriptException if there was an error during execution
+         */
+        private JsonValue execScript(String type, Script script, Map<String, Object> scope) throws SynchronizationException, ScriptException {
+            Object results = script.exec(scope);
+            if (results == null || !(results instanceof Map)) {
+                throw new SynchronizationException("Expected " + type + " script to yield a Map");
+            }
+            return json(results);
+        }
+        
     }
 
     /**
