@@ -146,7 +146,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             if(args === "null"){
                 args = UIUtils.getCurrentHash().split("/").slice(1);
             }
-            
+
             this.route = { url: window.location.hash.replace(/^#/, '') };
             this.data.docHelpUrl = constants.DOC_URL;
 
@@ -253,6 +253,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 }, this));
             } else {
                 this.setSubmenu();
+
+                this.parentRender();
 
                 if(callback){
                     callback();
