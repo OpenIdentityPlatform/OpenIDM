@@ -1,3 +1,26 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2014-2015 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
 package org.forgerock.openidm.sync.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import static org.mockito.Matchers.anyMap;
@@ -73,29 +97,29 @@ public class PolicyTest {
         assertEquals(policies.size(), 8);
 
         assertTrue(getPolicy(Situation.CONFIRMED).getCondition()
-                .evaluate(json(object()), Link.DEFAULT_LINK_QUALIFIER));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
 
         assertTrue(getPolicy(Situation.FOUND).getCondition()
-                .evaluate(json(object()), Link.DEFAULT_LINK_QUALIFIER));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
 
         assertEquals((policies.get(Situation.ABSENT.toString())).size(), 2);
         assertTrue(getPolicy(Situation.ABSENT).getCondition()
-                .evaluate(json(object()), "user"));
+                .evaluate(json(object(field("linkQualifier", "user")))));
 
         assertTrue(getPolicy(Situation.AMBIGUOUS).getCondition()
-                .evaluate(json(object()), Link.DEFAULT_LINK_QUALIFIER));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
 
         assertTrue(getPolicy(Situation.MISSING).getCondition()
-                .evaluate(json(object()), Link.DEFAULT_LINK_QUALIFIER));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
 
         assertTrue(getPolicy(Situation.SOURCE_MISSING).getCondition()
-                .evaluate(json(object()), Link.DEFAULT_LINK_QUALIFIER));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
 
         assertTrue(getPolicy(Situation.UNQUALIFIED).getCondition()
-                .evaluate(json(object()), Link.DEFAULT_LINK_QUALIFIER));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
 
         assertTrue(getPolicy(Situation.UNASSIGNED).getCondition()
-                .evaluate(json(object()), Link.DEFAULT_LINK_QUALIFIER));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
     }
     
     @Test

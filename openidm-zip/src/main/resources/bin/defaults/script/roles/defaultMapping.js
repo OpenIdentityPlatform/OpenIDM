@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -99,6 +99,7 @@ function getConfig(script) {
     scope.sourceObject = source;
     scope.targetObject = target;
     scope.existingTargetObject = existingTarget;
+    scope.linkQualifier = linkQualifier;
     for (var key in config) {
         scope[key] = config[key];
     }
@@ -199,36 +200,42 @@ if (assignments != null) {
                 var assignment = effectiveAssignments[key];
                 var attributes = assignment.attributes;
                 var onAssignment = assignment.onAssignment;
-                // Check if an onAssignment script is configured
-                if (typeof onAssignment !== 'undefined' && onAssignment !== null) {
-                    onAssignment.attributes = attributes;
-                    execOnScript(onAssignment);
-                }
 
-                // Used to carry information across different assignmentOperations
-                var attributesInfo = {};
-                // Loop through attributes, performing the assignementOperations
-                for (var i = 0; i < attributes.length; i++) {
-                    var attribute = attributes[i];
-                    var assignmentOperation = attribute.assignmentOperation;
-                    var value = attribute.value;
-                    var name = attribute.name;
-                    if (assignmentOperation == null) {
-                        // Default to replace and use the entire value
-                        assignmentOperation = defaultAssignmentOperation;
+                // Only map if no linkQualifier was specified or the linkQualifier matches the assignment
+                if (typeof linkQualifier === 'undefined' || linkQualifier === null
+                        || assignment.linkQualifiers.indexOf(linkQualifier) > -1) {
+
+                    // Check if an onAssignment script is configured
+                    if (typeof onAssignment !== 'undefined' && onAssignment !== null) {
+                        onAssignment.attributes = attributes;
+                        execOnScript(onAssignment);
                     }
-                    // Process the assignmentOperation
-                    var config = getConfig(assignmentOperation);
-                    config.attributeName = name;
-                    config.attributeValue = value;
-                    config.attributesInfo = attributesInfo;
-                    // The result of this call should be an object with a field "value" contianing the updated target field's value
-                    var assignmentResult = openidm.action("script", "eval", config, {});
-                    // Set the new target field's value
-                    target[name] = assignmentResult.value;
-                    // Update any passed back attributesInfo
-                    if (assignmentResult.hasOwnProperty("attributesInfo")) {
-                        attributesInfo = assignmentResult.attributesInfo;
+
+                    // Used to carry information across different assignmentOperations
+                    var attributesInfo = {};
+                    // Loop through attributes, performing the assignmentOperations
+                    for (var i = 0; i < attributes.length; i++) {
+                        var attribute = attributes[i];
+                        var assignmentOperation = attribute.assignmentOperation;
+                        var value = attribute.value;
+                        var name = attribute.name;
+                        if (assignmentOperation == null) {
+                            // Default to replace and use the entire value
+                            assignmentOperation = defaultAssignmentOperation;
+                        }
+                        // Process the assignmentOperation
+                        var config = getConfig(assignmentOperation);
+                        config.attributeName = name;
+                        config.attributeValue = value;
+                        config.attributesInfo = attributesInfo;
+                        // The result of this call should be an object with a field "value" containing the updated target field's value
+                        var assignmentResult = openidm.action("script", "eval", config, {});
+                        // Set the new target field's value
+                        target[name] = assignmentResult.value;
+                        // Update any passed back attributesInfo
+                        if (assignmentResult.hasOwnProperty("attributesInfo")) {
+                            attributesInfo = assignmentResult.attributesInfo;
+                        }
                     }
                 }
             }
