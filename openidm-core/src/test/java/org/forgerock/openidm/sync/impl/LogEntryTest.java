@@ -61,7 +61,7 @@ public class LogEntryTest {
         logEntry.targetObjectId = "targetObjectId";
         logEntry.dateUtil = dateUtil;
         logEntry.timestamp = new Date();
-        logEntry.linkQualifier = "defaultLinkQualifier";
+        logEntry.linkQualifier = "default";
         logEntry.op.situation = Situation.LINK_ONLY;
         logEntry.status = ObjectMapping.Status.SUCCESS;
         logEntry.message = "message";
@@ -75,7 +75,7 @@ public class LogEntryTest {
         assertEquals(logEntryVal.get("rootActionId").asString(), testId);
         assertEquals(logEntryVal.get("sourceObjectId").asString(), logEntry.sourceObjectId);
         assertEquals(logEntryVal.get("targetObjectId").asString(), logEntry.targetObjectId);
-        assertEquals(logEntryVal.get("linkQualifier").asString(), "defaultLinkQualifier");
+        assertEquals(logEntryVal.get("linkQualifier").asString(), "default");
         assertTrue(logEntryVal.get("timestamp") != null);
         assertEquals(logEntryVal.get("situation").asString(), Situation.LINK_ONLY.toString());
         assertEquals(logEntryVal.get("action").asString(), null);
