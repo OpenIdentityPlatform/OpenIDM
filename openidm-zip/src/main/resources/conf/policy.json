@@ -126,14 +126,6 @@
                     ]
                 },
                 {
-                    "name" : "telephoneNumber",
-                    "policies" : [
-                        {
-                            "policyId" : "valid-phone-format"
-                        }
-                    ]
-                },
-                {
                     "name" : "securityQuestion",
                     "policies" : [
                         {

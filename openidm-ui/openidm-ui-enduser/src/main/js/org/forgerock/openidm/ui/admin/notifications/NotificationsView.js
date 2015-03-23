@@ -109,8 +109,10 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         },
 
         deleteLink: function(event) {
-            var notificationId, self=this;
+            var notificationId,
+                self = this;
             event.preventDefault();
+
             notificationId = $(event.target).parent().parent().next().find("input[name=id]").val();
 
             notificationDelegate.deleteEntity(notificationId, function() {
@@ -128,15 +130,16 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
                     self.installAccordion();
                 });
             });
+
         },
 
         title: function(event){
             event.preventDefault();
-            $("#items").accordion("activate", $(event.target).parent().index() / 2);
+            $("#items").accordion("option", "activate", $(event.target).parent().index() / 2);
         },
 
         closeOpenItems: function(){
-            $("#items").accordion( "activate", false );
+            $("#items").accordion( "option", "activate", false );
         }
 
     });
