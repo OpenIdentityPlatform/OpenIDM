@@ -6,26 +6,22 @@
     </div>
     <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
         <div class="panel-body">
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="warningLevel">{{t "templates.connector.groovyPoolableConnector.warningLevel"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="warningLevel" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.warningLevel}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="warningLevel" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.warningLevel}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="minimumRecompilationInterval">{{t "templates.connector.groovyPoolableConnector.minimumRecompilationInterval"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="minimumRecompilationInterval" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.minimumRecompilationInterval}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="minimumRecompilationInterval" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.minimumRecompilationInterval}}" />
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="debug">{{t "templates.connector.groovyPoolableConnector.debug"}}</label>
                 <div class="col-sm-8">
-                    <select id="debug" class="form-control" name="configurationProperties.debug" required>
+                    <select id="debug" class="form-control" name="configurationProperties.debug">
                         {{#staticSelect connectorDefaults.configurationProperties.debug}}
                         <option value="true">{{t "common.form.true"}}</option>
                         <option value="false">{{t "common.form.false"}}</option>
@@ -36,7 +32,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="verbose">{{t "templates.connector.groovyPoolableConnector.verbose"}}</label>
                 <div class="col-sm-8">
-                    <select id="verbose" class="form-control" name="configurationProperties.verbose" required>
+                    <select id="verbose" class="form-control" name="configurationProperties.verbose">
                         {{#staticSelect connectorDefaults.configurationProperties.verbose}}
                         <option value="true">{{t "common.form.true"}}</option>
                         <option value="false">{{t "common.form.false"}}</option>
@@ -44,52 +40,40 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="recompileGroovySource">{{t "templates.connector.groovyPoolableConnector.recompileGroovySource"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="recompileGroovySource" name="configurationProperties.recompileGroovySource" value="{{connectorDefaults.configurationProperties.recompileGroovySource}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="recompileGroovySource" name="configurationProperties.recompileGroovySource" value="{{connectorDefaults.configurationProperties.recompileGroovySource}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="tolerance">{{t "templates.connector.groovyPoolableConnector.tolerance"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="tolerance" name="configurationProperties.tolerance" value="{{connectorDefaults.configurationProperties.tolerance}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="tolerance" name="configurationProperties.tolerance" value="{{connectorDefaults.configurationProperties.tolerance}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="sourceEncoding">{{t "templates.connector.groovyPoolableConnector.sourceEncoding"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="sourceEncoding" name="configurationProperties.sourceEncoding" value="{{connectorDefaults.configurationProperties.sourceEncoding}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="sourceEncoding" name="configurationProperties.sourceEncoding" value="{{connectorDefaults.configurationProperties.sourceEncoding}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="targetDirectory">{{t "templates.connector.groovyPoolableConnector.targetDirectory"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="targetDirectory" name="configurationProperties.targetDirectory" value="{{connectorDefaults.configurationProperties.targetDirectory}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="targetDirectory" name="configurationProperties.targetDirectory" value="{{connectorDefaults.configurationProperties.targetDirectory}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="disabledGlobalAst">{{t "templates.connector.groovyPoolableConnector.disabledGlobalAst"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="disabledGlobalAst" name="configurationProperties.disabledGlobalAst" value="{{connectorDefaults.configurationProperties.disabledGlobalAst}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="disabledGlobalAst" name="configurationProperties.disabledGlobalAst" value="{{connectorDefaults.configurationProperties.disabledGlobalAst}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="disabledGlobalAst">{{t "templates.connector.groovyPoolableConnector.disabledGlobalAst"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="disabledGlobalAst" name="configurationProperties.disabledGlobalAst" value="{{connectorDefaults.configurationProperties.disabledGlobalAst}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="disabledGlobalAst" name="configurationProperties.disabledGlobalAst" value="{{connectorDefaults.configurationProperties.disabledGlobalAst}}" />
                 </div>
             </div>
         </div>
@@ -109,27 +93,25 @@
 
             {{#if connectorDefaults.configurationProperties.defaultRequestHeaders.length}}
             {{#each_with_index connectorDefaults.configurationProperties.defaultRequestHeaders}}
-            <div class="form-group has-feedback field">
+            <div class="form-group field">
                 <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.scriptExtensions"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" placeholder="Extension" value="{{value}}"  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" placeholder="Extension" value="{{value}}" />
                     <div class="input-group-addon">
                         <button field_type="groupScriptExtensions" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/each_with_index}}
             {{else}}
-            <div class="form-group has-feedback field">
+            <div class="form-group field">
                 <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.scriptExtensions"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" placeholder="Extension" value=""  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" placeholder="Extension" value="" />
                     <div class="input-group-addon">
                         <button field_type="groupScriptExtensions" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/if}}
         </div>
@@ -149,27 +131,25 @@
 
             {{#if connectorDefaults.configurationProperties.classpath.length}}
             {{#each_with_index connectorDefaults.configurationProperties.classpath}}
-            <div class="form-group has-feedback field">
+            <div class="form-group field">
                 <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.classpath"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}" />
                     <div class="input-group-addon">
                         <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/each_with_index}}
             {{else}}
-            <div class="form-group has-feedback field">
+            <div class="form-group field">
                 <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.classpath"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value="" />
                     <div class="input-group-addon">
                         <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/if}}
         </div>
@@ -182,68 +162,52 @@
         </h4>
     </div>
     <div id="scriptHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptHolder" aria-expanded="true">
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.groovyPoolableConnector.createScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.groovyPoolableConnector.testScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.groovyPoolableConnector.searchScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.groovyPoolableConnector.authenticateScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.groovyPoolableConnector.deleteScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.groovyPoolableConnector.updateScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.groovyPoolableConnector.syncScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.groovyPoolableConnector.schemaScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}"  data-validator-event="keyup blur" data-validator="required" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
@@ -258,16 +222,16 @@
                 <input class="form-control" type="text" id="customizerScriptFileName" name="configurationProperties.customizerScriptFileName" value="{{connectorDefaults.configurationProperties.customizerScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="resolveUsernameScriptFileName">{{t "templates.connector.groovyPoolableConnector.resolveUsernameScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" id="resolveUsernameScriptFileName" data-validator="required" data-validator-event="keyup blur" type="text" name="configurationProperties.resolveUsernameScriptFileName" value="{{connectorDefaults.configurationProperties.resolveUsernameScriptFileName}}" />
+                <input class="form-control" id="resolveUsernameScriptFileName" type="text" name="configurationProperties.resolveUsernameScriptFileName" value="{{connectorDefaults.configurationProperties.resolveUsernameScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="scriptOnResourceFileName">{{t "templates.connector.groovyPoolableConnector.scriptOnResourceFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" id="scriptOnResourceFileName" data-validator="required" data-validator-event="keyup blur" type="text" name="configurationProperties.scriptOnResourceFileName" value="{{connectorDefaults.configurationProperties.scriptOnResourceFileName}}" />
+                <input class="form-control" id="scriptOnResourceFileName" type="text" name="configurationProperties.scriptOnResourceFileName" value="{{connectorDefaults.configurationProperties.scriptOnResourceFileName}}" />
             </div>
         </div>
     </div>
