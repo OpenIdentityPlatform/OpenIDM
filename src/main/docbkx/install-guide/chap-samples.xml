@@ -879,7 +879,7 @@ $ ./startup.sh -p samples/sample2b</screen>
      <mediaobject>
       <alt>New user record for fdoe</alt>
       <imageobject>
-       <imagedata fileref="images/sample2b-fdoe.png" format="PNG" />
+       <imagedata fileref="images/sample2b-fdoe-created.png" format="PNG" />
       </imageobject>
      </mediaobject>
      <para>
@@ -1250,7 +1250,7 @@ $ ./startup.sh -p samples/sample2c</screen>
      <mediaobject>
       <alt>User linked systems details</alt>
       <imageobject>
-       <imagedata fileref="images/sample2c-jdoe1a.png" format="PNG" />
+       <imagedata fileref="images/sample2c-jdoe-ldap.png" format="PNG" />
       </imageobject>
      </mediaobject>
      <para>
@@ -1795,7 +1795,7 @@ OpenIDM version "${docTargetVersion}" (revision: 0) null null
 ... </programlisting>
     <para>
      You can run this script again, at any point, to reset the database.
-     Currently, only Groovy script is supported for these types of actions.
+     Currently, only Groovy scripts are supported for these types of actions.
     </para>
     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
