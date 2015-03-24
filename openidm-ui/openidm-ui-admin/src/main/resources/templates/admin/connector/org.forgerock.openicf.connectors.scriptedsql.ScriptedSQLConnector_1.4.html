@@ -6,42 +6,34 @@
     </div>
     <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
         <div class="panel-body">
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="username">{{t "templates.connector.scriptedSQLConnector.user"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="username" name="configurationProperties.username" value="{{connectorDefaults.configurationProperties.username}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="username" name="configurationProperties.username" value="{{connectorDefaults.configurationProperties.username}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="password">{{t "templates.connector.scriptedSQLConnector.password"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="" {{#if connectorDefaults.configurationProperties.password}} placeholder="********" {{/if}}  data-validator-event="keyup blur" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="" {{#if connectorDefaults.configurationProperties.password}} placeholder="********" {{/if}} />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="driverClassName">{{t "templates.connector.scriptedSQLConnector.driverClassName"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="driverClassName" name="configurationProperties.driverClassName" value="{{connectorDefaults.configurationProperties.driverClassName}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="driverClassName" name="configurationProperties.driverClassName" value="{{connectorDefaults.configurationProperties.driverClassName}}" />
                 </div>
             </div>
-            <div class="form-group has-feedback">
+            <div class="form-group">
                 <label class="col-sm-3 control-label" for="jdbcConnectionUrl">{{t "templates.connector.scriptedSQLConnector.url"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdbcConnectionUrl" name="configurationProperties.url" value="{{connectorDefaults.configurationProperties.url}}"  data-validator-event="keyup blur" data-validator="required" />
-                    <div class="validation-message"></div>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" type="text" id="jdbcConnectionUrl" name="configurationProperties.url" value="{{connectorDefaults.configurationProperties.url}}" />
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="autoCommit">{{t "templates.connector.scriptedSQLConnector.autoCommit"}}</label>
                 <div class="col-sm-8">
-                    <select id="autoCommit" class="form-control" name="configurationProperties.autoCommit" required>
+                    <select id="autoCommit" class="form-control" name="configurationProperties.autoCommit">
                         {{#staticSelect connectorDefaults.configurationProperties.autoCommit}}
                         <option value="true">{{t "common.form.true"}}</option>
                         <option value="false">{{t "common.form.false"}}</option>
@@ -52,7 +44,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="reloadScriptOnExecution">{{t "templates.connector.scriptedSQLConnector.reloadScriptOnExecution"}}</label>
                 <div class="col-sm-8">
-                    <select id="reloadScriptOnExecution" class="form-control" name="configurationProperties.reloadScriptOnExecution" required>
+                    <select id="reloadScriptOnExecution" class="form-control" name="configurationProperties.reloadScriptOnExecution">
                         {{#staticSelect connectorDefaults.configurationProperties.reloadScriptOnExecution}}
                         <option value="true">{{t "common.form.true"}}</option>
                         <option value="false">{{t "common.form.false"}}</option>
@@ -70,69 +62,53 @@
         </h4>
     </div>
     <div id="scriptHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptHolder" aria-expanded="true">
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedSQLConnector.createScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedSQLConnector.testScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedSQLConnector.searchScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedSQLConnector.authenticateScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedSQLConnector.deleteScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedSQLConnector.updateScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" />
             </div>
         </div>
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedSQLConnector.syncScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" />
             </div>
         </div>
 
-        <div class="form-group has-feedback">
+        <div class="form-group">
             <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedSQLConnector.schemaScriptFileName"}}</label>
             <div class="col-sm-8">
-                <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}"  data-validator-event="keyup blur" />
-                <div class="validation-message"></div>
-                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" />
             </div>
         </div>
     </div>
@@ -152,27 +128,25 @@
 
             {{#if connectorDefaults.configurationProperties.classpath.length}}
             {{#each_with_index connectorDefaults.configurationProperties.classpath}}
-            <div class="form-group has-feedback field">
+            <div class="form-group field">
                 <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
                     <div class="input-group-addon">
                         <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/each_with_index}}
             {{else}}
-            <div class="form-group has-feedback field">
+            <div class="form-group field">
                 <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
                     <div class="input-group-addon">
                         <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/if}}
         </div>
