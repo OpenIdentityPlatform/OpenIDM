@@ -1,54 +1,43 @@
-
-<style>
-#targetLinking fieldset {
-       margin-top: 0;
-}
-#targetLinking .group-field {
-       float: left !important;
-       width: 100%;
-}
-#targetLinking .field label {
-       text-align: left;
-}
-#targetLinking .field input,#targetLinking .field select {
-       clear: both;
-}
-#targetLinking .field .validation-message {
-       clear: none !important;
-       margin-left: 20px !important;
-       float: left !important;
-}
-</style>
-
 <h2 class="header">Source Account Details</h2>
-<fieldset>
-    <div class="fields">
-        <div class="field">
-            <label>UserName</label> 
-            <input type="text" value="{{variables.sourceuser.userName}}" readonly/> 
-        </div>
-        <div class="field">
-            <label>Family Name</label> 
-            <input type="text" value="{{variables.sourceuser.sn}}" readonly/> 
-        </div>
-        <div class="field">
-            <label>Given Name</label> 
-            <input type="text" value="{{variables.sourceuser.givenName}}" readonly/> 
-        </div>
-        <div class="field">
-            <label>Email</label> 
-            <input type="text" value="{{variables.sourceuser.mail}}" readonly/> 
-        </div>
-        <div class="field">
-            <label>Department</label> 
-            <input type="text" value="{{variables.sourceuser.department}}" readonly/> 
-        </div>
-        <div class="field">  
-            <label class="light">{{t "Possible targets"}}</label> 
-            {{select  variables.possibleTargets "target" "0" ""  " data-validator='required' "}}
 
-            <span class="ok" style="">✔</span>
-            <div class="validation-message"></div> 
-        </div>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="UserName">User Name</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" value="{{variables.sourceuser.userName}}" name="UserName" readonly/>
     </div>
-</fieldset>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="sn">Family Name</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" value="{{variables.sourceuser.sn}}" name="sn" readonly/>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="givenName">Given Name</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" value="{{variables.sourceuser.givenName}}" name="givenName" readonly/>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="mail">Email</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" value="{{variables.sourceuser.mail}}" name="mail" readonly/>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="department">Department</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" value="{{variables.sourceuser.department}}" name="department" readonly/>
+    </div>
+</div>
+
+<div class="form-group has-feedback">
+    <label class="col-sm-3 control-label">{{t "Possible targets"}}</label>
+    <div class="col-sm-8">
+        {{select  variables.possibleTargets "target" "0" ""  " data-validator='required' "}}
+    </div>
+</div>
