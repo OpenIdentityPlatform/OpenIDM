@@ -2529,6 +2529,8 @@ class ObjectMapping {
          * @throws SynchronizationException if there was an error during correlation
          */
         public JsonValue correlate(Map<String, Object> scope, String linkQualifier) throws SynchronizationException {
+            // Set the link qualifier in the script's scope
+            scope.put("linkQualifier", linkQualifier);
             try {
                 switch (type) {
                 case correlationQuery:
@@ -2537,7 +2539,7 @@ class ObjectMapping {
                             .get(QueryResult.FIELD_RESULT).required();
                 case correlationScript:
                     // Execute the correlationScript and return the results corresponding to the given linkQualifier
-                    return json(execScript(type.toString(), correlationScript, scope)).get(linkQualifier);
+                    return execScript(type.toString(), correlationScript, scope);
                 default:
                     return null;
                 }
@@ -2556,14 +2558,10 @@ class ObjectMapping {
          * @param script the {@link Script} object representing the script
          * @param scope the script's scope
          * @return A {@link Map} representing the results
-         * @throws SynchronizationException if the script did not return an expected result
          * @throws ScriptException if there was an error during execution
          */
-        private JsonValue execScript(String type, Script script, Map<String, Object> scope) throws SynchronizationException, ScriptException {
+        private JsonValue execScript(String type, Script script, Map<String, Object> scope) throws ScriptException {
             Object results = script.exec(scope);
-            if (results == null || !(results instanceof Map)) {
-                throw new SynchronizationException("Expected " + type + " script to yield a Map");
-            }
             return json(results);
         }
         
