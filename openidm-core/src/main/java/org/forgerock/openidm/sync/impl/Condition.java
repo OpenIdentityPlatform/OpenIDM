@@ -91,8 +91,8 @@ class Condition {
     public Condition(JsonValue config) {
         if (config.isNull()) {
             init(Type.TRUE, null, null);
-        } else if (config.get("filter") != null) {
-            init(Type.QUERY_FILTER, QueryFilter.valueOf(config.get("filter").asString()), null);
+        } else if (config.isString()) {
+            init(Type.QUERY_FILTER, QueryFilter.valueOf(config.asString()), null);
         } else {
             init(Type.SCRIPTED, null, Scripts.newInstance(config));
         }
