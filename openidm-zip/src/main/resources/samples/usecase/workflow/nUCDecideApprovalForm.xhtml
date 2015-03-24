@@ -1,139 +1,163 @@
+<h3 class="text-center">User Approval</h3>
 
-<style>
-#taskDetails fieldset {
-       margin-top: 0;
-}
-#taskDetails .group-field {
-       float: left !important;
-       width: 100%;
-}
-#taskDetails .field label {
-       text-align: left;
-}
-#taskDetails .field input,#taskDetails .field select {
-       clear: both;
-}
-#taskDetails .field .validation-message {
-       clear: none !important;
-       margin-left: 20px !important;
-       float: left !important;
-}
-</style>
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="userName">{{t "common.user.username"}}</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" name="userName" value="{{variables.userName}}" data-validation-dependents="password" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
 
-<h2 class="header">User Approval</h2>
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="givenName">{{t "common.user.givenName"}}</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" name="givenName" value="{{variables.givenName}}" data-validation-dependents="password" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
 
-    <fieldset>
-        <div class="fields">
-            <div class="field">
-                <label>{{t "common.user.username"}}</label> 
-                <input type="text" name="userName" value="{{variables.userName}}" data-validation-dependents="password"/> 
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>{{t "common.user.givenName"}}</label> 
-                <input type="text" name="givenName" value="{{variables.givenName}}" data-validation-dependents="password"/> 
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>{{t "common.user.familyName"}}</label> 
-                <input type="text" name="sn" value="{{variables.sn}}" data-validation-dependents="password"/> 
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>{{t "common.user.emailAddress"}}</label> 
-                <input type="text" name="mail" value="{{variables.mail}}" /> 
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>Country</label> 
-                <input type="text" name="country" value="{{variables.country}}" /> 
-            </div>
-            <div class="field">
-                <label>City</label> 
-                <input type="text" name="city" value="{{variables.city}}"/> 
-            </div>
-            <div class="field">
-                <label>State</label> 
-                <input type="text" name="stateProvince" value="{{variables.stateProvince}}" /> 
-            </div>
-            <div class="field">
-                <label>Postal Code</label> 
-                <input type="text" name="postalCode" value="{{variables.postalCode}}"/> 
-            </div>
-            <div class="field">
-                    <label>Address</label> 
-                    <input type="text" name="address1" value="{{variables.address1}}"/> 
-            </div>
-            <div class="field">
-                <label>{{t "common.user.phoneNumber"}}</label> 
-                <input type="text" name="telephoneNumber" value="{{variables.telephoneNumber}}"/> 
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>Department</label> 
-                <select name="department">
-                        <option value="Human Resources">Human Resources</option>
-                        <option value="Production Planning">Production Planning</option>
-                        <option value="Sales &amp; Distribution">Sales & Distribution</option>
-                        <option value="Treasury &amp; Payments">Treasury & Payments</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Start Date (yyyy-MM-dd)</label> 
-                <input type="text" name="startDate" />
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>End Date (yyyy-MM-dd)</label> 
-                <input type="text" name="endDate" />
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            
-            <div class="field">
-                <label>Employee Number</label> 
-                <input type="text" name="employeeNumber" value="{{variables.employeeNumber}}" /> 
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>Display Name</label> 
-                <input type="text" name="displayName" value="{{{variables.displayName}}}"/> 
-                <span class="error">x</span>
-                <div class="validation-message"></div>
-            </div>
-            <div class="field">
-                <label>User Type</label> 
-                <select name="userType">
-                        <option value="employee">Employee</option>
-                        <option value="contractor">Contractor</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Manager</label> 
-                <select name="title">
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                </select>
-            </div>
-            <div class="field">  
-                    <label class="light">{{t "common.form.decision"}}</label> 
-                    <select name="decision" " data-validator='required' " >
-                        <option value="accept">Accept</option>
-                        <option value="reject">Reject</option>
-                    </select>
-        
-                    <span class="ok" style="">✔</span>
-                    <div class="validation-message"></div> 
-                </div>
-        </div>
-    </fieldset>
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="sn">{{t "common.user.familyName"}}</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" name="sn" value="{{variables.sn}}" data-validation-dependents="password" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="mail">{{t "common.user.emailAddress"}}</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" name="mail" value="{{variables.mail}}" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
+
+<div class="form-group">
+<label class="col-sm-3 control-label" for="country">Country</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" value="{{variables.country}}"  name="country" />
+</div>
+</div>
+
+<div class="form-group">
+<label class="col-sm-3 control-label" for="city">City</label>
+<div class="col-sm-8">
+    <input class="form-control" value="{{variables.city}}" type="text" name="city" />
+</div>
+</div>
+
+<div class="form-group">
+<label class="col-sm-3 control-label" for="stateProvince">State</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" value="{{variables.stateProvince}}" name="stateProvince" />
+</div>
+</div>
+
+<div class="form-group">
+<label class="col-sm-3 control-label" for="postalCode">Postal Code</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" value="{{variables.postalCode}}" name="postalCode" />
+</div>
+</div>
+
+<div class="form-group">
+<label class="col-sm-3 control-label" for="address1">Address</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" value="{{variables.address1}}" name="address1" />
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="telephoneNumber">{{t "common.user.phoneNumber"}}</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" value="{{variables.telephoneNumber}}" name="telephoneNumber" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="department">Department</label>
+<div class="col-sm-8">
+    <select class="form-control" name="department">
+        <option value="Human Resources">Human Resources</option>
+        <option value="Production Planning">Production Planning</option>
+        <option value="Sales & Distribution">Sales & Distribution</option>
+        <option value="Treasury & Payments">Treasury & Payments</option>
+    </select>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="startDate">Start Date (yyyy-MM-dd)</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" name="startDate" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="endDate">End Date (yyyy-MM-dd)</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" name="endDate" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
+
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="employeeNumber">Employee Number</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" value="{{variables.employeeNumber}}" name="employeeNumber" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="displayName">Display Name</label>
+<div class="col-sm-8">
+    <input class="form-control" type="text" value="{{{variables.displayName}}}" name="displayName" />
+    <div class="validation-message"></div>
+    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="userType">User Type</label>
+<div class="col-sm-8">
+    <select class="form-control"  name="userType">
+        <option value="employee">Employee</option>
+        <option value="contractor">Contractor</option>
+    </select>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="title">{{t "common.form.decision"}}</label>
+<div class="col-sm-8">
+    <select class="form-control"  name="title">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+    </select>
+</div>
+</div>
+
+<div class="form-group has-feedback">
+<label class="col-sm-3 control-label" for="decision">{{t "common.form.decision"}}</label>
+<div class="col-sm-8">
+    <select class="form-control"  name="decision">
+        <option value="accept">Accept</option>
+        <option value="reject">Reject</option>
+    </select>
+</div>
+</div>
 
 <script>
 $('#taskDetails form select[name=department]').val("{{{variables.department}}}");
