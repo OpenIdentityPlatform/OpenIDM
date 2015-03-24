@@ -32,9 +32,7 @@
                     "action" : "IGNORE"
                 },
                 {
-                    "condition" : {
-                        "filter": "/linkQualifier eq \"user\""
-                    },
+                    "condition" : "/linkQualifier eq \"user\"",
                     "situation" : "ABSENT",
                     "action" : "IGNORE",
                     "postAction" : {
@@ -43,9 +41,7 @@
                     }
                 },
                 {
-                    "condition" : {
-                        "filter" : "/linkQualifier eq \"test\""
-                    },
+                    "condition" : "/linkQualifier eq \"test\"",
                     "situation" : "ABSENT",
                     "action" : "CREATE",
                     "postAction" : {

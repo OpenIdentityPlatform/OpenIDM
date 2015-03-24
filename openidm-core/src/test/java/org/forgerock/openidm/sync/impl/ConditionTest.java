@@ -77,7 +77,7 @@ public class ConditionTest {
 
     @Test(dataProvider = "filterData")
     public void testEvaluate(String filter, Boolean state) throws SynchronizationException {
-        Condition testCondition = new Condition(json(object(field("filter", filter))));
+        Condition testCondition = new Condition(json(filter));
         assertThat(testCondition.evaluate(testObject)).isEqualTo(state);
     }
 }
