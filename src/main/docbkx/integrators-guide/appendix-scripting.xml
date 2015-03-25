@@ -1263,9 +1263,6 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
       print a formatted JSON structure that represents the HTTP request details
       to STDOUT.</para>
      <programlisting language="javascript">console.log(JSON.stringify(context.http, null, 4));</programlisting>
-     <para>
-      For more information, see .
-     </para>
      <note>
       <para>
        These logging functions apply only to JavaScript scripts. To use the
@@ -1669,18 +1666,12 @@ logger = LoggerFactory.getLogger('logger');
         <para>
          property (only when called from a property storage trigger)
         </para>
-        <para>
-         As a property, returns the modified property values from the script.
-        </para>
        </listitem>
       </varlistentry>
       <varlistentry>
        <term>onStore</term>
        <listitem>
         <para>object, property</para>
-        <para>
-         As a property, returns the modified property values from the script.
-        </para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -1704,14 +1695,6 @@ logger = LoggerFactory.getLogger('logger');
        <term>onValidate</term>
        <listitem>
         <para>object, property</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>propertyName</term>
-       <listitem>
-        <para>
-         Name of the property that is changed.
-        </para>
        </listitem>
       </varlistentry>
       <varlistentry>
