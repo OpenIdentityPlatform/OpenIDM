@@ -14,7 +14,7 @@
                     </div>
                     <div class="col-sm-5">
                         <input autocomplete="off" class="form-control" name="source" value="{{property.source}}"/>
-    
+
                         <div class="validation-message"></div>
                     </div>
                     <div class="col-sm-11">
@@ -34,9 +34,9 @@
                         </div>
                         <!-- <span class="error">x</span> -->
                     </div>
-                     
 
-                     
+
+
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="Transformation_Script">
@@ -44,13 +44,13 @@
                     <div class="col-sm-11">
                         <label>{{t "templates.mapping.propertyEdit.transformationSciptLabel"}}</label>
                     </div>
-                       <div class="col-sm-5">
-                           <label for="currentSourceDisplay">{{t "templates.mapping.propertyEdit.currentSourceValue"}}: </label> 
-                           <span class="text-muted"><i>{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}</i></span>
-                       </div>
-                       <div class="col-sm-11">
-                           <div id="transformationScriptHolder"></div>
-                       </div>
+                    <div class="col-sm-5">
+                        <label for="currentSourceDisplay">{{t "templates.mapping.propertyEdit.currentSourceValue"}}: </label>
+                        <span class="text-muted"><i>{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}</i></span>
+                    </div>
+                    <div class="col-sm-11">
+                        <div id="transformationScriptHolder"></div>
+                    </div>
 
 
                     <!--
@@ -72,56 +72,44 @@
             <div role="tabpanel" class="tab-pane" id="Condition_Script">
                 <p>{{t "templates.correlation.conditionScriptInfo"}}</p>
 
-                <div class="radioContainer">
-                    <input type="radio" name="conditionalUpdate" id="conditionalNone" value="none" class="conditionalUpdateType" checked="true"/>
-                    <label for="conditionalNone" class="conditionalUpdateLabel">{{t "templates.correlation.noCondition"}}</label>
+                <div class="btn-group btn-group-tabs" data-toggle="buttons" id="conditionTabButtons" role="tablist">
+                    <label class="btn btn-default">
+                        <input data-target="noneTab" type="radio" name="conditionalUpdate" id="conditionalNone" value="none" class="conditionalUpdateType" aria-controls="conditions-scripts-tab" role="tab" data-toggle="tab"/> {{t "templates.correlation.noCondition"}}
+                    </label>
+                    <label class="btn btn-default">
+                        <input data-target="conditionFilterTab" type="radio" name="conditionalUpdate" id="conditionalFilter" value="conditionalFilter" aria-controls="conditions-scripts-tab" role="tab" data-toggle="tab"  class="conditionalUpdateType"/> {{t "templates.correlation.conditionFilter"}}
+                    </label>
+                    <label class="btn btn-default">
+                        <input data-target="conditionScriptTab" type="radio" name="conditionalUpdate" id="conditionalScript" value="script" aria-controls="conditions-scripts-tab" role="tab" data-toggle="tab"  class="conditionalUpdateType" /> {{t "templates.correlation.script"}}
+                    </label>
                 </div>
 
-                <div class="radioContainer">
-                    <input type="radio" name="conditionalUpdate" id="conditionalLinkQualifier" value="linkQualifier" class="conditionalUpdateType"/>
-                    <label for="conditionalLinkQualifier" class="conditionalUpdateLabel">{{t "templates.correlation.linkQualifier"}}</label>
-                </div>
-                <div class="conditionalLinkQualifiers row">
+                <div class="tab-content">
+                    <div style="display:none;" id="noneTab" class="tab-none">
 
-                    <div class="notAvailable col-sm-12">{{t "templates.correlation.notAvailableMsg1"}}<span></span>{{t "templates.correlation.notAvailableMsg2"}}</div>
-                    <div class="col-sm-6">
-                        <select name="linkQualifier" class="linkQualifier form-control">
-                            {{#if hasLinkQualifiers}}
-                            <option value="" disabled selected>{{t "templates.correlation.selectLQ"}}</option>
-                            {{/if}}
-    
-                            {{#unless hasLinkQualifiers}}
-                            <option value="" disabled selected>{{t "templates.correlation.noLQdefined"}}</option>
-                            {{/unless}}
-    
-                            {{#each availableLinkQualifiers}}
-                            <option value="{{this}}">{{this}}</option>
-                            {{/each}}
-                        </select>
+                    </div>
+                    <div style="display:none;"  id="conditionFilterTab" class="conditionalFilter">
+                        <div class="col-sm-12 filter-form form-horizontal" id="conditionFilterHolder">
+
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div  style="display:none;" id="conditionScriptTab" class="conditionalScript">
+                        <div id="conditionScriptHolder"></div>
+
+                        <!--
+                        <div id="condition_script_output" class="script_output">
+                            <label style="display:inline" for="conditionResult">{{t "templates.mapping.propertyEdit.conditionScriptAction"}} {{sampleUserFullName}}:</label>
+                            <span id="conditionResult"></span>
+                        </div>
+                        -->
+
+                        <!-- <div class="validation-message script_output"></div>
+
+                        <p>{{t "templates.mapping.propertyEdit.conditionScriptNote"}}</p> -->
                     </div>
                 </div>
-
-                <div class="radioContainer">
-                    <input type="radio" name="conditionalUpdate" id="conditionalScript" value="script" class="conditionalUpdateType" />
-                    <label for="conditionalScript" class="conditionalUpdateLabel">{{t "templates.correlation.script"}}</label>
-                </div>
-                <div class="conditionalScript">
-                    <div id="conditionScriptHolder"></div>
-
-                    <!--
-                    <div id="condition_script_output" class="script_output">
-                        <label style="display:inline" for="conditionResult">{{t "templates.mapping.propertyEdit.conditionScriptAction"}} {{sampleUserFullName}}:</label>
-                        <span id="conditionResult"></span>
-                    </div>
-                    -->
-
-                    <!-- <div class="validation-message script_output"></div>
-
-                    <p>{{t "templates.mapping.propertyEdit.conditionScriptNote"}}</p> -->
-                </div>
-
             </div>
-
             <div role="tabpanel" class="tab-pane" id="Default_Values">
                 <div class="row">
                     <div class="col-sm-11">
