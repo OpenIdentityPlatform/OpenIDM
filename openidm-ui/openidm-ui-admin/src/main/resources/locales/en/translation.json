@@ -317,6 +317,7 @@
             "dontRunReconcile": "Save and Don't Reconcile",
             "runReconcile": "Save and Reconcile",
             "queryFilters": "Query Filters",
+            "linkQualifier": "Link Qualifier",
             "conditionFilter": "Condition Filter",
             "empty": "none",
             "save": "Save and Reconcile",
