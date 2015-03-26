@@ -102,6 +102,11 @@
             <artifactId>orientdb-enterprise</artifactId>
             <version>${orientdb.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.xerial.snappy</groupId>
+          <artifactId>snappy-java</artifactId>
+          <version>1.1.1.6</version>
+        </dependency>
 <!--        <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>persistence-api</artifactId>
