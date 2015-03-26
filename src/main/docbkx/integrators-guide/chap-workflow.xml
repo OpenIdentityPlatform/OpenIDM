@@ -2058,8 +2058,7 @@ $ ./shutdown.sh
    </para>
    <para>
     The use case includes three separate workflows - onboarding (creation of the
-    new user), sunrise (commencement of the new user work period) and sunset
-    (termination of the user contract).
+    new user), sunrise (new user start date) and sunset (user end date).
    </para>
    <para>
     The use case also demonstrates email notification with the optional
@@ -2178,7 +2177,7 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Click on the Onboarding Approval task under the My Tasks list and click
+      Click on the Onboarding Approval task under the My group's tasks and click
       Details.
      </para>
      <para>
@@ -2271,7 +2270,7 @@ $ more samples/usecase/usecase2/conf/external.email.json
      <computeroutput>{
         "host" : "smtp.gmail.com",
         "port" : "587",
-        "username" : "my-username"
+        "username" : "my-username",
         "password" : "my-password",
         "mail.smtp.auth" : "true",
         "mail.smtp.starttls.enable" : "true"
@@ -2287,7 +2286,7 @@ $ more samples/usecase/usecase2/conf/external.email.json
        <para>
         Copy the workflow archive (<literal>.bar</literal>) file
         (<filename>samples/usecase/usecase2/workflow/newUserCreate.bar</filename>)
-        to a temporary location.
+        to a temporary location, such as a <filename>/tmp</filename> directory.
        </para>
       </listitem>
       <listitem>
@@ -2323,7 +2322,10 @@ $ grep emailParams newUserCreate.bpmn20.xml</userinput>
         Zip up the amended workflow definition file, and the xhtml templates
         into a workflow <literal>.bar</literal> file.
        </para>
-       <screen><userinput>$ zip newUserCreate.bar newUserCreate.bpmn20.xml nUCDecideApprovalForm.xhtml nUCStartForm.xhtml</userinput>
+    <!-- Added blank lines to avoid conflict with "copy to clipboard" icon in bootstrap HTML output -->
+       <screen>
+
+ $<userinput> zip newUserCreate.bar newUserCreate.bpmn20.xml nUCDecideApprovalForm.xhtml nUCStartForm.xhtml</userinput>
 <computeroutput>updating: nUCDecideApprovalForm.xhtml (deflated 82%)
 updating: nUCStartForm.xhtml (deflated 82%)
 updating: newUserCreate.bpmn20.xml (deflated 85%)</computeroutput></screen>
@@ -2333,7 +2335,7 @@ updating: newUserCreate.bpmn20.xml (deflated 85%)</computeroutput></screen>
         Copy the new <literal>.bar</literal> file to the workflow directory,
         overwriting the existing <literal>.bar</literal> file.
        </para>
-       <screen><userinput>$ cp /tmp/newUserCreate.bar /path/to/openidm/samples/usecase/usecase2/workflow</userinput></screen>
+       <screen>$ <userinput>cp /tmp/newUserCreate.bar /path/to/openidm/samples/usecase/usecase2/workflow</userinput></screen>
       </listitem>
      </orderedlist>
     </step>
