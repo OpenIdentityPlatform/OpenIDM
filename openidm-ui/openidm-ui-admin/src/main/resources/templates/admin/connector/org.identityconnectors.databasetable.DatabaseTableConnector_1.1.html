@@ -39,7 +39,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="database">{{t "templates.connector.databaseTableConnector.database"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="database" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.database}}" />
+                    <input class="form-control" type="text" id="database" name="configurationProperties.database" value="{{connectorDefaults.configurationProperties.database}}" />
                 </div>
             </div>
             <div class="form-group">
@@ -61,15 +61,15 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="jdcDriver">{{t "templates.connector.databaseTableConnector.jdcDriver"}}</label>
+                <label class="col-sm-3 control-label" for="jdbcDriver">{{t "templates.connector.databaseTableConnector.jdbcDriver"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdcDriver" name="configurationProperties.jdcDriver" value="{{connectorDefaults.configurationProperties.jdcDriver}}" />
+                    <input class="form-control" type="text" id="jdbcDriver" name="configurationProperties.jdbcDriver" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="jdcUrlTemplate">{{t "templates.connector.databaseTableConnector.jdcUrlTemplate"}}</label>
+                <label class="col-sm-3 control-label" for="jdbcUrlTemplate">{{t "templates.connector.databaseTableConnector.jdbcUrlTemplate"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdcUrlTemplate" name="configurationProperties.jdcUrlTemplate" value="{{connectorDefaults.configurationProperties.jdcUrlTemplate}}" />
+                    <input class="form-control" type="text" id="jdbcUrlTemplate" name="configurationProperties.jdbcUrlTemplate" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" />
                 </div>
             </div>
             <div class="form-group">
@@ -95,9 +95,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="natvieTimestamps">{{t "templates.connector.databaseTableConnector.nativeTimestamps"}}</label>
+                <label class="col-sm-3 control-label" for="nativeTimestamps">{{t "templates.connector.databaseTableConnector.nativeTimestamps"}}</label>
                 <div class="col-sm-8">
-                    <select id="natvieTimestamps" class="form-control" name="configurationProperties.natvieTimestamps">
+                    <select id="nativeTimestamps" class="form-control" name="configurationProperties.nativeTimestamps">
                         {{#staticSelect connectorDefaults.configurationProperties.nativeTimestamps}}
                         <option value="true">{{t "common.form.true"}}</option>
                         <option value="false">{{t "common.form.false"}}</option>

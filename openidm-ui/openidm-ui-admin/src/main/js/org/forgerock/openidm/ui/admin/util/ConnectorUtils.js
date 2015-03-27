@@ -50,8 +50,8 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
             },
             {
                 "type" : "org.identityconnectors.databasetable.DatabaseTableConnector",
-                "iconClass" : "icon-databasetable",
-                "src": "img/icon-db.png"
+                "iconClass" : "icon-database",
+                "src": "img/icon-managedobject.png"
             },
             {
                 "type" : "org.forgerock.openicf.csvfile.CSVFileConnector",
