@@ -10,7 +10,7 @@
             "CommonMessages" : {
                 "authenticationFailed" : "Login/password combination is invalid.",
                 "serviceUnavailable" : "Service unavailable.",
-                "unknown" : "Unknown error. Please contact administrator.",
+                "unknown" : "Unknown error. Please contact the administrator.",
                 "loggedIn" : "You have been successfully logged in.",
                 "errorFetchingData" : "Error fetching user data",
                 "loggedOut" : "You have been logged out.",
@@ -21,7 +21,7 @@
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
                 "securityDataChanged" : "Security data has been changed.",
-                "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
+                "incorrectRevisionError" : "Cannot update the record because the revision is not the latest."
             },
             "UserMessages" : {
                 "changedPassword" : "Password has been changed.",
@@ -837,7 +837,7 @@
                 "infoFromSource": "Information from Source",
                 "searchTarget": "Search Target",
                 "linkToSourceObject": "Link To Source Object",
-                "newLinkCreated": "New link created. No changes to this record until after the next reconciliation.",
+                "newLinkCreated": "New link created. No changes until after the next reconciliation.",
                 "newLinksWarning": "__count__ records have changed since last Reconciliation.",
                 "oneNewLinkWarning": "1 record has changed since last Reconciliation",
                 "forResultsToTakeEffect": " for the result of these changes to take effect.",
@@ -1104,7 +1104,7 @@
             "apps" : {
                 "dashboard" : {
                     "NotificationsView" : {
-                        "noNotifications" : "You have no notifications right now.",
+                        "noNotifications" : "No notifications.",
                         "seeMoreNotifications" : "See more notifications."
                     }
                 },
