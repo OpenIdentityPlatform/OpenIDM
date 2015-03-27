@@ -9,8 +9,8 @@
         "messages" : {
             "CommonMessages" : {
                 "authenticationFailed" : "Login/password combination is invalid.",
-                "serviceUnavailable" : "Service unavailable",
-                "unknown" : "Unknown error. Please contact with administrator",
+                "serviceUnavailable" : "Service unavailable.",
+                "unknown" : "Unknown error. Please contact the administrator.",
                 "loggedIn" : "You have been successfully logged in.",
                 "errorFetchingData" : "Error fetching user data",
                 "loggedOut" : "You have been logged out.",
@@ -21,23 +21,23 @@
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
                 "securityDataChanged" : "Security data has been changed",
-                "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
+                "incorrectRevisionError" : "Cannot update the record, because the revision is not the latest."
             },
             "UserMessages" : {
-                "changedPassword" : "Password has been changed",
-                "profileUpdateFailed" : "Problem during profile update",
-                "profileUpdateSuccessful" : "Profile has been updated",
+                "changedPassword" : "Password has been changed.",
+                "profileUpdateFailed" : "Problem during profile update.",
+                "profileUpdateSuccessful" : "Profile has been updated.",
                 "userNameUpdated" : "Username has been modified successfully.",
-                "afterRegistration" : "User has been registered successfully",
+                "afterRegistration" : "User has been registered successfully.",
                 "siteIdentificationChanged" : "Site identification image has been changed",
                 "userAlreadyExists" : "User already exists",
                 "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications."
+                "errorFetchingNotifications" : "Error fetching notifications."
             },
             "AdminMessages" : {
-                "cannotDeleteYourself" : "You can't delete yourself",
-                "userDeleted" : "User has been deleted",
-                "userDeleteError" : "Error when deleting user",
+                "cannotDeleteYourself" : "You cannot delete your own user record.",
+                "userDeleted" : "User has been deleted.",
+                "userDeleteError" : "Error when deleting user.",
                 "userApplicationsUpdate" : "Application settings have been changed.",
                 "completedTask" : "Task has been completed.",
                 "claimedTask" : "Task has been claimed.",
@@ -56,22 +56,22 @@
                     "dashboard" : "Dashboard",
                     "users" : "Users",
                     "apps" : "Applications",
-                    "allApps" : "All applications",
-                    "addMore" : "Add more apps",
+                    "allApps" : "All Applications",
+                    "addMore" : "Add More Applications",
                     "groups" : "Groups",
                     "tasksMenu" : "Tasks",
-                    "allTasks" : "My group's Tasks",
-                    "myTasks" : "My tasks",
-                    "startProcess" : "Start process"
+                    "allTasks" : "Group's Tasks",
+                    "myTasks" : "My Tasks",
+                    "startProcess" : "Start Process"
                 }
             }
         }
     },
     "templates" : {
         "MandatoryChangePassword" : {
-            "title" : "Change Your Password",
-            "mandatoryNewPassword" : "The current password is a default password. Please change this password to a more secure value.",
-            "enterNewPasswordToChange" : "Please enter a new password in the fields below."
+            "title" : "Change Your Password.",
+            "mandatoryNewPassword" : "Please change your password.",
+            "enterNewPasswordToChange" : "Please enter a new password below."
         },
         "user" : {
             "LoginDialog" : {
@@ -94,17 +94,17 @@
                 "orPhone" : ", or phone"
             },
             "ChangeSecurityDataDialogTemplate" : {
-                "securityDataChange" : "Security data change",
-                "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password.",
-                "selectQuestionAndAnserIfYouWant" : "Please select question and enter your answer if you want to set up a one.",
+                "securityDataChange" : "Security data change.",
+                "enterNewPasswordToChange" : "Please enter a new password below.",
+                "selectQuestionAndAnserIfYouWant" : "Select a security question and enter your answer, if desired.",
                 "securityQuestionAndAnserExplanation" : "Select a Security Question. Enter an answer. If you forget your password, you'll be prompted with that question."
             },
             "ChangeSiteIdentificationDialogTemplate" : {
                 "siteImageAndPhaseExplanation" : "Select a Site Image. Enter a Site Phrase. You'll see both when you log into the genuine website."
             },
             "EnterOldPasswordDialog" : {
-                "passwordAndSecurityQuestionChange" : "Password and security question change",
-                "enterYourOldPassword" : "Please enter your old password"
+                "passwordAndSecurityQuestionChange" : "Password and security question change.",
+                "enterYourOldPassword" : "Please enter your old password."
             },
             "ForgottenPasswordTemplate" : {
                 "forgottenPasswordQuestion" : "Did you forget your password?",
@@ -119,7 +119,7 @@
                 "changeSiteIdentification" : "Change Site Identification"
             },
             "UserRegistrationTemplate" : {
-                "registerYourAccount" : "Register your account",
+                "registerYourAccount" : "Register your account.",
                 "logIn" : "Log in",
                 "haveAccoutQuestion" : "Already have an account?",
                 "agreeToTerms" : "I agree to the "
@@ -131,7 +131,7 @@
                     "requestInitiator" : "Request initiated by"
                 },
                 "TasksDashboardTemplate" : {
-                    "tasksFromGroupsQueue" : "My group's Tasks"
+                    "tasksFromGroupsQueue" : "My Group's Tasks"
                 },
                 "ProcessUserTaskTableTemplate" : {
                     "requestCount" : "__count__  request",
@@ -140,16 +140,16 @@
             },
             "ChangeUserPasswordDialogTemplate" : {
                 "securityDataChange" : "Security data change",
-                "enterNewPasswordToChange" : "Please enter new password in the fields below to change user's password."
+                "enterNewPasswordToChange" : "Please enter a new password below."
             },
             "UsersTemplate" : {
-                "remainingUsers" : "remaining users"
+                "remainingUsers" : "Remaining users"
             },
             "LinkedTemplate" : {
                 "linkedResource" : "Linked Resource",
                 "linkedSystems" : "Linked Systems",
                 "noLinkedSystems" : "No Linked Systems Available.",
-                "recordMissing" : "Linked record missing"
+                "recordMissing" : "Linked record missing."
             },
             "ManagedObjectEdit":
             {
@@ -200,40 +200,40 @@
             "list" : "List",
             "add" : "Add",
             "edit" : "Edit",
-            "copyright" : "Copyright (c) 2010-14 ForgeRock, all rights reserved.",
+            "copyright" : "Copyright (c) 2010-15 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
-            "enableCookies" : "Cookies must be enabled to login",
+            "enableCookies" : "Cookies must be enabled before you can login",
             "reloadGrid" : "Reload Grid",
             "clearFilters" : "Clear Filters",
             "validation" : {
-                "VALID_PHONE_FORMAT": "Must be a valid phone number",
-                "VALID_NAME_FORMAT": "Must have valid name characters",
-                "VALID_EMAIL_ADDRESS_FORMAT": "Must be a valid email address",
-                "AT_LEAST_X_CAPITAL_LETTERS" : "At least __numCaps__ capital letters",
-                "AT_LEAST_X_NUMBERS" : "At least __numNums__ numbers",
-                "CANNOT_CONTAIN_OTHERS" : "Cannot contain values from: __disallowedFields__",
-                "CANNOT_CONTAIN_CHARACTERS" : "Cannot contain characters: __forbiddenChars__",
-                "MIN_LENGTH" : "At least __minLength__ characters",
-                "REQUIRED" : "Cannot be blank",
-                "VALID_DATE" : "Must be a valid date",
-                "UNIQUE" : "Already exists",
+                "VALID_PHONE_FORMAT": "Must be a valid phone number.",
+                "VALID_NAME_FORMAT": "Must have valid name characters.",
+                "VALID_EMAIL_ADDRESS_FORMAT": "Must be a valid email address.",
+                "AT_LEAST_X_CAPITAL_LETTERS" : "At least __numCaps__ capital letters.",
+                "AT_LEAST_X_NUMBERS" : "At least __numNums__ numbers.",
+                "CANNOT_CONTAIN_OTHERS" : "Cannot contain values from: __disallowedFields__.",
+                "CANNOT_CONTAIN_CHARACTERS" : "Cannot contain characters: __forbiddenChars__.",
+                "MIN_LENGTH" : "At least __minLength__ characters.",
+                "REQUIRED" : "Cannot be blank.",
+                "VALID_DATE" : "Must be a valid date.",
+                "UNIQUE" : "Already exists.",
                 "REAUTH_REQUIRED" : "",
-                "formContainsErrors" : "Form contains validation errors",
-                "atLeastOneCapitalLetter" : "At least one capital letter",
-                "atLeastOneNumber" : "At least one number",
-                "atLeast8Characters" : "At least 8 characters",
-                "cannotMatchLogin" : "Cannot match login",
-                "confirmationMatchesPassword" : "Confirmation matches password",
-                "usernameExists" : "Username already exists",
-                "emailAddressAlreadyExists" : "Email address already exists",
-                "onlyAlphabeticCharacters" : "Only alphabetic characters",
-                "onlyNumbersAndSpecialCharacters" : "Only numbers and special characters",
-                "cannotMatchOldPassword" : "Cannot match old password",
-                "minimum4Characters" : "Minimum 4 characters",
-                "acceptanceRequiredForRegistration" : "Acceptance required for registration",
-                "incorrectPassword" : "Incorrect password",
-                "incorrectSecurityAnswer" : "Incorrect answer",
-                "required" : "Required",
+                "formContainsErrors" : "Form contains validation errors.",
+                "atLeastOneCapitalLetter" : "At least one capital letter.",
+                "atLeastOneNumber" : "At least one number.",
+                "atLeast8Characters" : "At least 8 characters.",
+                "cannotMatchLogin" : "Cannot match login.",
+                "confirmationMatchesPassword" : "Confirmation matches password.",
+                "usernameExists" : "Username already exists.",
+                "emailAddressAlreadyExists" : "Email address already exists.",
+                "onlyAlphabeticCharacters" : "Only alphabetic characters.",
+                "onlyNumbersAndSpecialCharacters" : "Only numbers and special characters.",
+                "cannotMatchOldPassword" : "Cannot match old password.",
+                "minimum4Characters" : "Minimum 4 characters.",
+                "acceptanceRequiredForRegistration" : "To register, you must accept the Terms of Use.",
+                "incorrectPassword" : "Incorrect password.",
+                "incorrectSecurityAnswer" : "Incorrect answer.",
+                "required" : "Required.",
                 "emailNotValid" : "Not a valid email address.",
                 "emailExists" : "Email address already exists.",
                 "shouldBeLong" : "Should be long value",
@@ -268,7 +268,7 @@
             "sitePhrase" : "Site Phrase",
             "securityQuestion" : "Security question",
             "securityAnswer" : "Security answer",
-            "adaptiveAuthMethod" : "Adaptive auth method",
+            "adaptiveAuthMethod" : "Adaptive Authentication Method",
             "SMS" : "SMS",
             "OAuth" : "OAuth",
             "createNewUser" : "Create New User",
@@ -277,7 +277,7 @@
             "newPassword" : "New password",
             "oldPassword" : "Old password",
             "confirmNewPassword" : "Confirm new password",
-            "usersList" : "Users List",
+            "usersList" : "User List",
             "addUsers" : "Add Users",
             "name" : "Name",
             "status" : "Status",
@@ -300,19 +300,19 @@
             "startProcess" : "Start Process",
             "assignee" : "Assignee",
             "taskDetails" : "Task Details",
-            "myTasks" : "My tasks",
-            "tasksList" : "Tasks list",
+            "myTasks" : "My Tasks",
+            "tasksList" : "Task List",
             "processes" : "Processes"
         },
         "application" : {
             "applicationName" : "Application Name",
             "requestedBy" : "Requested by",
-            "yourFrequentlyUsedApplications" : "Your frequently used apps",
-            "applicationsYouHaveAdded" : "Apps you've added",
-            "defaultApplications" : "Default apps",
-            "addMoreApplications" : "Add more apps",
-            "allAvailableApps" : "All available apps",
-            "dropApplicationsHere" : "drop apps here"
+            "yourFrequentlyUsedApplications" : "Your frequently used applications",
+            "applicationsYouHaveAdded" : "Applications you have added",
+            "defaultApplications" : "Default applications",
+            "addMoreApplications" : "Add more applications",
+            "allAvailableApps" : "All available applications",
+            "dropApplicationsHere" : "Drop applications here"
         },
         "notification" : {
             "notifications" : "Notifications",
@@ -342,9 +342,9 @@
             "admin" : {
                 "tasks" : {
                     "TasksMenuView" : {
-                        "noTasksAssigned" : "You do not have any tasks in your queue.",
-                        "noTasksInGroupQueue" : "You do not have any tasks in your group's queue.",
-                        "denyDefaultReason" : "Enter a reason for denying this request",
+                        "noTasksAssigned" : "No tasks assigned.",
+                        "noTasksInGroupQueue" : "Your group has no tasks at this time.",
+                        "denyDefaultReason" : "Enter a reason for denying this request.",
                         "acceptanceForm" : {
                             "for" : "For",
                             "application" : "Application",
@@ -363,8 +363,8 @@
                         "chooseTask" : "Choose a task"
                     },
                     "StartProcessDashboardView" : {
-                        "chooseProcess" : "Please choose a process to start",
-                        "noProcesses": "You do not have any processes in your queue.",
+                        "chooseProcess" : "Please choose a process to start.",
+                        "noProcesses": "No processes in your queue.",
                         "noDataRequired": "No data required"
                     }
                 },
@@ -385,17 +385,17 @@
             "apps" : {
                 "dashboard" : {
                     "NotificationsView" : {
-                        "noNotifications" : "You have no notifications right now.",
-                        "seeMoreNotifications" : "see more notifications"
+                        "noNotifications" : "No notifications.",
+                        "seeMoreNotifications" : "See more notifications."
                     }
                 },
                 "BaseApplicationsView" : {
-                    "noApplicationsHere" : "Your have no apps here",
-                    "noDefaultApplications" : "Your have no default apps",
-                    "noFrequentlyUsedApplications" : "Your have no frequently used apps"
+                    "noApplicationsHere" : "You have no applications here.",
+                    "noDefaultApplications" : "You have no default applications.",
+                    "noFrequentlyUsedApplications" : "You have no frequently used applications."
                 },
                 "UsersApplicationsView" : {
-                    "noApplications" : "You have no applications"
+                    "noApplications" : "You have no applications."
                 },
                 "FrequentlyUsedApplicationsView" : {
                     "clickHereToAdd" : "Click %shere%s to add."
