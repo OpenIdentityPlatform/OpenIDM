@@ -200,10 +200,11 @@ if (assignments != null) {
                 var assignment = effectiveAssignments[key];
                 var attributes = assignment.attributes;
                 var onAssignment = assignment.onAssignment;
+                var linkQualifiers = assignment.linkQualifiers;
 
-                // Only map if no linkQualifier was specified or the linkQualifier matches the assignment
-                if (typeof linkQualifier === 'undefined' || linkQualifier === null
-                        || assignment.linkQualifiers.indexOf(linkQualifier) > -1) {
+                // Only map if no linkQualifiers were specified or the current linkQualifier is in the list of linkQualifiers specified in the assignment
+                if (typeof linkQualifiers === 'undefined' || linkQualifiers === null
+                        || linkQualifiers.indexOf(linkQualifier) > -1) {
 
                     // Check if an onAssignment script is configured
                     if (typeof onAssignment !== 'undefined' && onAssignment !== null) {
