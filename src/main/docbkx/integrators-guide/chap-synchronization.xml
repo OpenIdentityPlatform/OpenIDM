@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-synchronization'
@@ -4259,12 +4259,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <section xml:id="prefetching-links">
    <title>Prefetching Links</title>
 
-   <para>All links are queried at the start of a correlation and the results of
-   that query are used. You can disable the prefetching of links, so that the
-   correlation process looks up each link in the database as it processes each
-   source or target object. You can disable the prefetching of links by adding
-   the <literal>prefetchLinks</literal> property to the mapping, and setting it
-   to <literal>false</literal>, for example:</para>
+   <para>
+    All links are queried at the start of a reconciliation and the results of
+    that query are used. You can disable the prefetching of links, so that the
+    reconciliation process looks up each link in the database as it processes
+    each source or target object. You can disable the prefetching of links by
+    adding the <literal>prefetchLinks</literal> property to the mapping, and
+    setting it to <literal>false</literal>, for example:
+   </para>
 
    <programlisting language="javascript">
 {
