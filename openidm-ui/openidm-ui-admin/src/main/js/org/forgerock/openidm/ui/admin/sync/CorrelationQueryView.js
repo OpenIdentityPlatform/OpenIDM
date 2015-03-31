@@ -32,7 +32,8 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
     "org/forgerock/openidm/ui/admin/sync/CorrelationQueryDialog",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/SaveChangesView",
-    "bootstrap-dialog"
+    "bootstrap-dialog",
+    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
 ], function(AdminAbstractView,
             eventManager,
             constants,
@@ -40,7 +41,8 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             CorrelationQueryDialog,
             BrowserStorageDelegate,
             SaveChangesView,
-            BootstrapDialog) {
+            BootstrapDialog,
+            LinkQualifierUtrils) {
 
     var CorrelationQueryView = AdminAbstractView.extend({
         template: "templates/admin/sync/CorrelationQueryTemplate.html",
@@ -70,7 +72,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             this.model.mappingName = args.mappingName;
             this.model.startSync = args.startSync;
             this.model.changes = args.changes || [];
-            this.model.linkQualifiers = args.mapping.linkQualifiers || ["default"];
+            this.model.linkQualifiers = LinkQualifierUtrils.getLinkQualifier(this.model.mappingName) || ["default"];
             this.model.addedLinkQualifiers = _.union(_.pluck(args.mapping.correlationQuery, "linkQualifier"), _.pluck(this.model.changes, "linkQualifier"));
 
             // Legacy Support

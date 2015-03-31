@@ -299,6 +299,8 @@
         },
         "correlation": {
             "correlation": "Association",
+            "static" : "Static",
+            "dynamic" : "Dynamic",
             "type" : "Type",
             "status" : "Status",
             "objectFilters": "Individual Record Validation",
@@ -334,6 +336,9 @@
             "noLQdefined": "No link qualifiers defined",
             "notAvailableMsg2": " associated with this property is not available.  Add this link qualifier or update the condition.",
             "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
+            "linkQualifierInfo": "Link one record in the source system to multiple records in the target system.",
+            "linkQualifierStaticInfo" : "Static lists will apply each qualifier to every source record.",
+            "linkQualifierScriptInfo" : "Dynamic scripts may return different qualifiers for each source record.",
             "noCondition": "No Condition",
             "undo": "Undo",
             "query": {
@@ -736,6 +741,7 @@
         },
         "mapping": {
             "attributes": "Attributes",
+            "badScript" : "Invalid script. A valid Link Qualifier script returns an array of strings.",
             "linkQualifiers": "Link Qualifiers",
             "uniqueLinkQualifiers": "The link qualifier must be unique.",
             "backToMapping" : "Back to Mappings",

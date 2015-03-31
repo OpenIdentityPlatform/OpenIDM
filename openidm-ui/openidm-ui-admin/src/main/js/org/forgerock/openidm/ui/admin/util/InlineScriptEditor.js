@@ -70,13 +70,11 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 this.model = _.extend(this.model, args);
 
-                this.data = _.pick(this.model, 'scriptData', 'eventName', 'noValidation', 'disablePassedVariable');
+                this.data = _.pick(this.model, 'scriptData', 'eventName', 'noValidation', 'disablePassedVariable', 'placeHolder');
 
                 if (!this.model.disablePassedVariable && this.model.scriptData) {
-                    this.data.passedVariables = _.chain(args.scriptData)
-                        .omit("file", "name", "source", "type")
-                        .pairs()
-                        .value();
+                    this.data.passedVariables = args.scriptData.globals ||
+                    _.omit(args.scriptData, "file", "source", "type");
                 }
 
                 this.parentRender(_.bind(function() {
@@ -96,7 +94,6 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     });
 
                     this.cmBox.setSize(this.model.codeMirrorWidth, this.model.codeMirrorHeight);
-
 
                     this.cmBox.on("focus", _.bind(function (cm, changeObject) {
                         this.saveEvent(this.model.onFocus, cm, changeObject);
@@ -135,6 +132,11 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                         this.$el.find(".inline-code").toggleClass("code-mirror-disabled");
                     }
 
+
+                    if (this.data.scriptData && this.data.scriptData.source) {
+                        this.$el.find("#inlineHeading input[type='radio']").trigger("change");
+                    }
+
                     if(callback) {
                         callback();
                     }
@@ -153,13 +155,17 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 this.scriptSelect(event, this.cmBox);
             },
 
+            refresh: function() {
+                this.cmBox.refresh();
+            },
+
             //If either the file name or inline script are empty this function will return null
             generateScript: function() {
                 var currentSelection,
                     scriptObject = {},
                     inputs,
                     emptyCheck = false;
-                
+
                 if(this.data.eventName) {
                     currentSelection = this.$el.find("input[name=" + this.data.eventName + "_scriptType]:checked").val();
                 } else {
@@ -170,6 +176,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     return null;
                 } else {
                     scriptObject.type = this.$el.find("select").val();
+                    scriptObject.globals = {};
 
                     if (currentSelection === "file-code") {
                         scriptObject.file = this.$el.find("input[type='text']").val();
@@ -189,7 +196,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     _.each(this.$el.find(".passed-variable-block:visible"), function (passedBlock) {
                         inputs = $(passedBlock).find("input[type=text]");
 
-                        scriptObject[$(inputs[0]).val()] = $(inputs[1]).val();
+                        scriptObject.globals[$(inputs[0]).val()] = $(inputs[1]).val();
                     }, this);
 
                     if(emptyCheck) {

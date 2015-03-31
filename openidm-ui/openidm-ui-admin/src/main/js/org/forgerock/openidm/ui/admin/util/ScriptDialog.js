@@ -61,13 +61,11 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
 
             this.model = _.extend(this.model, args);
 
-            this.data = _.pick(this.model, "setScript", "scriptData");
+            this.data = _.pick(this.model, "setScript", "scriptData", "placeHolder");
 
-            if(this.model.scriptData) {
-                this.data.passedVariables = _.chain(args.scriptData)
-                    .omit("file", "name", "source", "type")
-                    .pairs()
-                    .value();
+            if (!this.model.disablePassedVariable && this.model.scriptData) {
+                this.data.passedVariables = args.scriptData.globals ||
+                    _.omit(args.scriptData, "file", "source", "type");
             }
 
             if (args.saveCallback) {
@@ -152,6 +150,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 inputs;
 
             scriptObject.type = this.$el.find("select").val();
+            scriptObject.globals = {};
 
             if(currentSelection === "file-code") {
                 scriptObject.file = this.$el.find("input[type='text']").val();
@@ -162,7 +161,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
             _.each(this.$el.find(".passed-variable-block:visible"), function(passedBlock) {
                 inputs = $(passedBlock).find("input[type=text]");
 
-                scriptObject[$(inputs[0]).val()] = $(inputs[1]).val();
+                scriptObject.globals[$(inputs[0]).val()] = $(inputs[1]).val();
             }, this);
 
             if(this.data.setScript) {
