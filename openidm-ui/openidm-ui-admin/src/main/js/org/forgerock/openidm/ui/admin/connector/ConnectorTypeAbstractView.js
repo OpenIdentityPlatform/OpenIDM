@@ -22,12 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define, $, _, JSONEditor */
 
 define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function(AbstractView, validatorsManager) {
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(AbstractView, validatorsManager, ConnectorDelegate, UIUtils, constants) {
     var ConnectorTypeAbstractView = AbstractView.extend({
         element: "#connectorDetails",
         noBaseTemplate: true,
@@ -39,7 +42,30 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
 
             this.data.connectorDefaults = args.connectorDefaults;
 
-            this.template = base + args.connectorType +".html";
+            ConnectorDelegate.templateCheck(args.connectorType).then(_.bind(function(data){
+                    this.template = base + args.connectorType +".html";
+
+                    UIUtils.templates[constants.host + "templates/admin/connector/" +args.connectorType +".html"] = data;
+
+                    this.renderTemplate(callback, false, args);
+
+                }, this),
+                _.bind(function(result){
+                    this.template = base +"GenericConnector.html";
+
+                    this.renderTemplate(callback, true, args);
+                }, this));
+        },
+
+        renderTemplate: function(callback, jsonEditorLoad, args) {
+            var schema = {
+                    $schema: "http://forgerock.org/json-schema#",
+                    "type": "object",
+                    "properties": {
+
+                    }
+                },
+                orderCount = 0;
 
             this.parentRender(_.bind(function() {
                 if(args.animate) {
@@ -48,14 +74,68 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
                     $("#connectorDetails").show();
                 }
 
-                this.fieldButtonCheck();
+                if(!jsonEditorLoad) {
+                    this.fieldButtonCheck();
 
-                validatorsManager.bindValidators(this.$el);
+                    this.isGeneric = false;
+
+                    validatorsManager.bindValidators(this.$el);
+                } else {
+                    JSONEditor.defaults.options = {
+                        theme: "bootstrap3",
+                        iconlib: "fontawesome4",
+                        disable_edit_json: true,
+                        disable_array_reorder: true,
+                        disable_collapse: true,
+                        disable_properties: true,
+                        show_errors: "never"
+                    };
+
+                    this.isGeneric = true;
+
+                    _.each(this.data.connectorDefaults.configurationProperties, function(value, key, obj) {
+                        if(value === null) {
+                            this.data.connectorDefaults.configurationProperties[key] = "";
+
+                            schema.properties[key] = {
+                                type:"string",
+                                propertyOrder : orderCount
+                            };
+
+                        } else if (value === true || value === false) {
+                            schema.properties[key] = {
+                                type:"boolean",
+                                propertyOrder : orderCount
+                            };
+                        } else {
+                            schema.properties[key] = {
+                                type:"string",
+                                propertyOrder : orderCount
+                            };
+                        }
+
+                        orderCount++;
+                    }, this);
+
+                    this.editor = new JSONEditor(this.$el.find("#genericConnectorBody")[0], {
+                        schema: schema
+                    });
+
+                    this.editor.setValue(this.data.connectorDefaults.configurationProperties);
+                }
 
                 if(callback){
                     callback();
                 }
             }, this));
+        },
+
+        getGenericState: function() {
+            return this.isGeneric;
+        },
+
+        getGenericConnector: function() {
+            return this.editor.getValue();
         },
 
         fieldButtonCheck: function() {
@@ -117,4 +197,3 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
 
     return ConnectorTypeAbstractView;
 });
-
