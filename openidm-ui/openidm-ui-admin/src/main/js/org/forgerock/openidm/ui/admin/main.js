@@ -34,6 +34,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./delegates/SearchDelegate",
     "./delegates/ReconDelegate",
     "./delegates/SecurityDelegate",
+    "./delegates/ScriptDelegate",
 
     "./ResourcesView",
     "./MapResourceView",
@@ -46,6 +47,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./managed/AddEditManagedView",
 
     "./util/ConnectorUtils",
+    "./util/LinkQualifierUtils",
     "./util/AbstractScriptEditor",
     "./util/ScriptEditor",
     "./util/ScriptList",

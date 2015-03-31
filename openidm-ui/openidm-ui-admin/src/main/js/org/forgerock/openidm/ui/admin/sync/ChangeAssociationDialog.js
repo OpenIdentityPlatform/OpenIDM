@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
     "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/util/MappingUtils",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
-    "bootstrap-dialog"
-], function(AbstractView, MappingBaseView, conf, uiUtils, searchDelegate, mappingUtils, syncDelegate, BootstrapDialog) {
+    "bootstrap-dialog",
+    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
+], function(AbstractView, MappingBaseView, conf, uiUtils, searchDelegate, mappingUtils, syncDelegate, BootstrapDialog, LinkQualifierUtil) {
     var ChangeAssociationDialog = AbstractView.extend({
         template: "templates/admin/sync/ChangeAssociationDialogTemplate.html",
         el: "#dialogs",
@@ -74,12 +75,11 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
             var sourceId = this.$el.find("[name=sourceId]").val(),
                 linkId = this.$el.find("[name=found]:checked").val(),
                 mapping = MappingBaseView.currentMapping().name,
-                linkType = this.$el.find("linkTypeSelect").val();
+                linkType = this.$el.find("#linkTypeSelect").val();
 
             e.preventDefault();
 
             syncDelegate.deleteLinks(mapping, sourceId, "firstId").then(_.bind(function(){
-                //Get selected linkQualifiers
                 syncDelegate.performAction(this.data.recon._id, mapping, "LINK", sourceId, linkId, linkType).then(_.bind(function(){
                     this.data.reloadAnalysisGrid();
                     this.currentDialog.close();
@@ -108,6 +108,7 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
             uiUtils.renderTemplate("templates/admin/sync/ChangeAssociationDialogTemplate.html", $("#changeAssociationDialog"), data);
             if(data.searchCriteria){
                 this.$el.find("#targetSearchInput").focus().val(data.searchCriteria);
+                this.$el.find("#linkTypeSelect").val(this.data.selectedLinkQualifier);
             }
         },
         render: function(args, callback) {
@@ -138,7 +139,7 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
             });
 
 
-            _.extend(this.data,args);
+            _.extend(this.data, args);
 
             this.data.results = [];
 
@@ -149,6 +150,8 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
             if(this.data.ambiguousTargetObjectIds.length){
                 this.getAmbiguousMatches();
             }
+
+            this.data.linkQualifiers = LinkQualifierUtil.getLinkQualifier(MappingBaseView.currentMapping().name);
 
             this.currentDialog.realize();
             this.currentDialog.open();

@@ -38,8 +38,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/openidm/ui/admin/util/ReconDetailsView",
-    "bootstrap-tabdrop"
-], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView, tabdrop) {
+    "bootstrap-tabdrop",
+    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
+], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView, tabdrop, LinkQualifierUtil) {
 
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
@@ -228,26 +229,29 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                             };
                         }
 
-                        if(this.data.mapping.recon){
-                            this.data.recon = this.data.mapping.recon;
-                            this.model.syncDetails = this.data.recon;
+                        LinkQualifierUtil.checkLinkQualifier(this.data.mapping).then(_.bind(function(result){
+                            if(this.data.mapping.recon){
+                                this.data.recon = this.data.mapping.recon;
+                                this.model.syncDetails = this.data.recon;
 
-                            if (this.data.recon.ended) {
-                                if(this.data.recon.state === "CANCELED"){
-                                    this.data.syncCanceled = true;
-                                    this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
-                                    this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
+                                if (this.data.recon.ended) {
+                                    if(this.data.recon.state === "CANCELED"){
+                                        this.data.syncCanceled = true;
+                                        this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
+                                        this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
+                                    } else {
+                                        this.data.syncLabel = $.t("templates.mapping.reconAnalysis.completed");
+                                        this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(this.data.recon.ended,"MMMM dd, yyyy HH:mm");
+                                    }
+                                    onReady();
                                 } else {
-                                    this.data.syncLabel = $.t("templates.mapping.reconAnalysis.completed");
-                                    this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(this.data.recon.ended,"MMMM dd, yyyy HH:mm");
+                                    onReady(true);
                                 }
-                                onReady();
                             } else {
-                                onReady(true);
+                                onReady();
                             }
-                        } else {
-                            onReady();
-                        }
+                        }, this));
+
                     }, this));
 
                 }, this));
