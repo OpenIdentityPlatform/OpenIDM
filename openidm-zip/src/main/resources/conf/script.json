@@ -10,7 +10,7 @@
         "groovy.source.encoding": "UTF-8",
         "groovy.target.directory": "&{launcher.install.location}/classes",
         "#groovy.target.bytecode": "1.5",
-        "#groovy.classpath": "&{launcher.install.location}/lib/*",
+        "groovy.classpath": "&{launcher.install.location}/lib",
         "#groovy.output.verbose": "false",
         "#groovy.output.debug": "false",
         "#groovy.errors.tolerance": "10",
