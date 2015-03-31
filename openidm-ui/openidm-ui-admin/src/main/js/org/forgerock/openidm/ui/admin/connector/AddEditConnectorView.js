@@ -672,7 +672,13 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 tempKeys,
                 arrayComponents = $(".connector-array-component");
 
+
             connectorData = form2js('connectorForm', '.', true);
+
+            if(this.connectorTypeRef.getGenericState()) {
+                delete connectorData.root;
+                connectorData.configurationProperties = this.connectorTypeRef.getGenericConnector();
+            }
 
             if (connectorData.enabled === "true") {
                 connectorData.enabled = true;
