@@ -2804,6 +2804,7 @@ $ <userinput>curl \
 ...
 "connectorName" : "org.identityconnectors.ldap.LdapConnector"
     },<emphasis role="heavy">
+
     "syncFailureHandler" : {
         "maxRetries" : 4,
         "postRetryAction" : dead-letter-queue
@@ -3038,7 +3039,8 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   <para>
    You can define actions for particular situations in the
    <literal>policies</literal> section of a synchronization mapping, as shown in
-   the following excerpt.
+   the following excerpt from the <filename>sync.json</filename> file of
+   Sample 2b.
   </para>
 
   <programlisting language="javascript">
@@ -3062,15 +3064,18 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
         },
         {
             "situation": "MISSING",
-            "action": "EXCEPTION"
+            "action": "CREATE"
         },
         {
-            "situation": "UNQUALIFIED",
+            "situation": "SOURCE_MISSING",
             "action": "DELETE"
+        {
+            "situation": "UNQUALIFIED",
+            "action": "IGNORE"
         },
         {
             "situation": "UNASSIGNED",
-            "action": "EXCEPTION"
+            "action": "IGNORE"
         }
     ]
 }</programlisting>
@@ -4018,6 +4023,77 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      Available in Scripts</citetitle></link> in the <citetitle>Scripting
     Appendix</citetitle>.
    </para>
+  </section>
+
+  <section xml:id="sync-link-qualifiers">
+   <title>Using Link Qualifiers in Policies</title>
+
+   <para>
+    If you have configured managed objects such as users with more than one
+    account, you can set different policies, per
+    <emphasis>link qualifier</emphasis>, in the <filename>sync.json</filename>
+    file.
+   </para>
+   <para>
+    The process is similar to the following:
+    <xref linkend="mapping-link-qualifiers" />.
+   </para>
+   <para>
+    You can choose from the list of <literal>linkQualifiers</literal> defined
+    near the start of the <filename>sync.json</filename> file. The following
+    excerpt shows two <literal>linkQualifiers</literal>: <literal>user</literal>
+    and <literal>test</literal>.
+   </para>
+   <programlisting language="javascript">{
+    "mappings" : [
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+            "linkQualifiers" : [
+                "user",
+                "test"
+        ],
+    "properties" : [
+    ... </programlisting>
+
+   <para>
+    Later in the same file, in the <literal>policies</literal> section, you can
+    see different <literal>ABSENT</literal> actions for each link qualifier:
+   </para>
+   <programlisting language="javascript">
+    "policies" : [
+        {
+             "situation" : "CONFIRMED",
+             "action" : "IGNORE"
+        },
+        {
+             "situation" : "FOUND",
+             "action" : "IGNORE
+        }
+        {
+             "condition : "/linkQualifier eq \"user\""
+             }
+             "situation" : "ABSENT",
+             "action" : "IGNORE",
+             "postAction" : {
+                 "type" : "text/javascript",
+                 "source" : "java.lang.System.out.println('Ignored user: \');"
+             }
+        },
+        {
+            "condition : {
+                "filter" : "/linkQualifier eq \"test\""
+             }
+            "situation" : "ABSENT",
+            "action" : "CREATE",
+            "postAction" : {
+                "type" : "text/javascript",
+                "source" : "java.lang.System.out.println('Created user: ');"
+            }
+        },
+        ...
+   </programlisting>
   </section>
  </section>
 
