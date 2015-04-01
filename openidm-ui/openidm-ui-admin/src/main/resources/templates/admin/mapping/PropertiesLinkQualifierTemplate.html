@@ -29,6 +29,10 @@
                         </button>
                         {{/each}}
                     </div>
+                    <div role="alert" class="notValid alert alert-warning" style="display:none;">
+                        <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.correlation.warning"}}!</strong>
+                        <span class="message">{{t "templates.mapping.uniqueLinkQualifiers"}}</span>
+                    </div>
                 </div>
                 <div class="tab-pane" id="scriptLinkQualifier">
                     <p>{{t "templates.correlation.linkQualifierScriptInfo"}}</p>
@@ -40,10 +44,6 @@
                         <span class="message"></span>
                     </div>
                 </div>
-            </div>
-            <div role="alert" class="notValid alert alert-warning" style="display:none;">
-                <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.correlation.warning"}}!</strong>
-                <span class="message"></span>
             </div>
         </div>
     </form>

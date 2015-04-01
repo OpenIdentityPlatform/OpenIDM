@@ -120,9 +120,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
 
                         this.model.scriptResult = result;
 
-                        this.populateScriptLinkQualifier(result);
                         this.$el.find(".linkQualifierSave").prop("disabled", false);
 
+                        this.populateScriptLinkQualifier(result);
                     }, this),
                     _.bind(function(result){
                         this.model.scriptError = true;
@@ -149,7 +149,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                 this.$el.find("#badLinkQualifierScript").hide();
             } else {
                 this.$el.find(".linkQualifierSave").prop("disabled", true);
-                this.$el.find("#badLinkQualifierScript .message").html($.t("templates.mapping.uniqueLinkQualifiers"));
+                this.$el.find("#badLinkQualifierScript .message").html($.t("templates.mapping.badScript"));
                 this.$el.find("#badLinkQualifierScript").show();
             }
         },
