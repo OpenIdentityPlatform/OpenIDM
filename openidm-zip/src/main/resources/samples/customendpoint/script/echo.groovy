@@ -58,7 +58,7 @@ if (request instanceof CreateRequest) {
     ]
 } else if (request instanceof PatchRequest) {
     return [
-            method: "action",
+            method: "patch",
             resourceName: request.resourceName,
             revision: request.revision,
             patch: request.patchOperations,
@@ -92,7 +92,7 @@ if (request instanceof CreateRequest) {
 } else if (request instanceof ActionRequest) {
     return [
             method: "action",
-            actionId: request.actionId,
+            action: request.action,
             content: request.content.getObject(),
             parameters: request.additionalParameters,
             context: context
