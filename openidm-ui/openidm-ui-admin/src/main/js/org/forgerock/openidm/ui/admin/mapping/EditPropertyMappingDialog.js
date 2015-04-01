@@ -41,7 +41,6 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             this.showCondition();
         },
         showTransformSample: function () {
-
             var translatedProperty,
                 scriptValue = null,
                 generatedScript = null;
@@ -297,6 +296,15 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                             function () {
                                 settings.postRender();
                                 _this.currentDialog.find(".nav-tabs").tabdrop();
+
+                                _this.currentDialog.find(".nav-tabs").on("shown.bs.tab", function (e) {
+                                    if($(e.target).attr("href") === "#Transformation_Script"){
+                                        _this.transform_script_editor.refresh();
+                                    } else if ($(e.target).attr("href") === "#Condition_Script") {
+                                        _this.conditional_script_editor.refresh();
+                                    }
+                                });
+
                                 if(callback){
                                     callback();
                                 }
