@@ -49,7 +49,7 @@
                 };
     } else if (request.method === "patch") {
         return {
-                method: "action",
+                method: "patch",
                 resourceName: request.resourceName,
                 revision: request.revision,
                 parameters: request.additionalParameters,
@@ -82,7 +82,7 @@
     } else if (request.method === "action") {
         return {
                 method: "action",
-                actionId: request.actionId,
+                action: request.action,
                 content: request.content,
                 parameters: request.additionalParameters,
                 context: context.current
