@@ -4,10 +4,13 @@
             <select class="correlationQueryType form-control">
                 <option value="none">{{t "templates.correlation.noQuery"}}</option>
                 <option value="queries">{{t "templates.correlation.queries"}}</option>
-                <!--<option value="script">Correlation Script</option>-->
+                <option value="script">{{t "templates.correlation.correlationScript"}}</option>
             </select>
         </div>
         <div class="group-body correlationQueries col-md-12">
+            <p class="help-paragraph">
+                {{t "templates.correlation.correlationQueryHelp"}}
+            </p>
             <table class="table">
                 <tbody>
                 <tr>
@@ -43,6 +46,12 @@
                 </tbody>
             </table>
             <button id="addNewCorrelationQuery" class="btn btn-primary" {{#if noLinkQualifiers}} disabled="true" {{/if}}><i class="fa fa-plus"></i> {{t "templates.correlation.addQuery"}}</button>
+        </div>
+        <div id="correlationScriptBody" class="group-body col-md-12">
+            <p class="help-paragraph">
+                {{t "templates.correlation.correlationScriptHelp"}}
+            </p>
+            <div id="correlationScriptContent"></div>
         </div>
     </div>
     <div role="alert" class="changesPending alert alert-warning correlationQueryChangesMsg">

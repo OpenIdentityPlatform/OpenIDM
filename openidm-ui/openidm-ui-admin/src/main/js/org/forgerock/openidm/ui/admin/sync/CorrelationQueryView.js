@@ -33,7 +33,8 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/SaveChangesView",
     "bootstrap-dialog",
-    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
+    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
 ], function(AdminAbstractView,
             eventManager,
             constants,
@@ -42,7 +43,8 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             BrowserStorageDelegate,
             SaveChangesView,
             BootstrapDialog,
-            LinkQualifierUtrils) {
+            LinkQualifierUtils,
+            InlineScriptEditor) {
 
     var CorrelationQueryView = AdminAbstractView.extend({
         template: "templates/admin/sync/CorrelationQueryTemplate.html",
@@ -72,7 +74,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             this.model.mappingName = args.mappingName;
             this.model.startSync = args.startSync;
             this.model.changes = args.changes || [];
-            this.model.linkQualifiers = LinkQualifierUtrils.getLinkQualifier(this.model.mappingName) || ["default"];
+            this.model.linkQualifiers = LinkQualifierUtils.getLinkQualifier(this.model.mappingName) || ["default"];
             this.model.addedLinkQualifiers = _.union(_.pluck(args.mapping.correlationQuery, "linkQualifier"), _.pluck(this.model.changes, "linkQualifier"));
 
             // Legacy Support
@@ -122,12 +124,32 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             }, this);
 
             this.parentRender(function () {
-                if(_.has(this.model.mapping, "correlationQuery")) {
+                var scriptData = "";
+
+                if((_.has(this.model.mapping, "correlationQuery") && this.model.mapping.correlationQuery.length > 0) || this.model.changes.length > 0) {
                     this.$el.find(".correlationQueryType").val("queries");
+
+                    if(this.model.mapping.correlationQuery === undefined) {
+                        this.model.mapping.correlationQuery = [];
+                    }
+
+                } else if(_.has(this.model.mapping, "correlationScript")) {
+                    scriptData = this.model.mapping.correlationScript;
+                    this.$el.find(".correlationQueryType").val("script");
                 } else {
                     this.model.mapping.correlationQuery = [];
-                    this.changeCorrelationQueryType();
                 }
+
+                this.correlationScript = InlineScriptEditor.generateScriptEditor({
+                    "element": this.$el.find("#correlationScriptContent"),
+                    "eventName": "correlationScript",
+                    "noValidation": false,
+                    "scriptData": scriptData,
+                    "disablePassedVariable": false,
+                    "placeHolder" : "['test', 'default']"
+                });
+
+                this.changeCorrelationQueryType();
                 this.checkButtons();
             });
         },
@@ -144,10 +166,11 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                 }
 
             } else if (this.$el.find(".correlationQueryType").val() === "none") {
-                if (_.has(this.model.mapping, "correlationQuery")) {
-                    showWarning = false;
-                    this.$el.find(".correlationQueryChangesMsg").hide();
-                }
+                showWarning = false;
+                this.$el.find(".correlationQueryChangesMsg").hide();
+
+            } else if (this.$el.find(".correlationQueryType").val() === "script") {
+                showWarning = false;
             }
 
             this.$el.find(".saveCorrelationQuery").prop('disabled', showWarning);
@@ -172,8 +195,6 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                 startSync: this.model.startSync,
                 changes: this.model.changes
             });
-
-            this.checkButtons();
         },
 
         editLinkQualifier: function(e) {
@@ -185,10 +206,16 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
 
         changeCorrelationQueryType: function() {
             this.checkButtons();
+
             if (this.$el.find(".correlationQueryType").val() === "queries") {
                 this.$el.find(".correlationQueries").show();
+                this.$el.find("#correlationScriptBody").hide();
+            } else if (this.$el.find(".correlationQueryType").val() === "script") {
+                this.$el.find(".correlationQueries").hide();
+                this.$el.find("#correlationScriptBody").show();
             } else {
                 this.$el.find(".correlationQueries").hide();
+                this.$el.find("#correlationScriptBody").hide();
             }
         },
 
@@ -250,7 +277,8 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
 
         save: function(callback) {
             var edited,
-                editedIndex;
+                editedIndex,
+                scriptDetails;
 
             if (this.$el.find(".correlationQueryType").val() === "queries") {
                 _.each(this.model.changes, function (change) {
@@ -279,17 +307,33 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
             _.each(this.model.sync.mappings, function(map, key) {
                 if ($(".correlationQueryType").val() === "queries" && map.name === this.model.mappingName) {
                     this.model.sync.mappings[key].correlationQuery = this.model.mapping.correlationQuery;
-                }
-                //Remove the correlation query property if it it set explicitly to "none" or all correlation queries were deleted.
-                if ( ($(".correlationQueryType").val() === "none" && map.name === this.model.mappingName && _.has(this.model.sync.mappings[key], "correlationQuery")) ||
-                    (map.name === this.model.mappingName && _.has(this.model.sync.mappings[key], "correlationQuery") &&this.model.sync.mappings[key].correlationQuery.length === 0 ) ){
-                    delete this.model.sync.mappings[key].correlationQuery;
-                }
+                } else if ($(".correlationQueryType").val() === "none" && map.name === this.model.mappingName){
+                    if(_.has(this.model.sync.mappings[key], "correlationScript")) {
+                        delete this.model.sync.mappings[key].correlationQuery;
+                    }
 
+                    if(_.has(this.model.sync.mappings[key], "correlationScript")) {
+                        delete this.model.sync.mappings[key].correlationScript;
+                    }
+
+                } else if($(".correlationQueryType").val() === "script" && map.name === this.model.mappingName) {
+                    scriptDetails = this.correlationScript.generateScript();
+
+                    if(_.has(this.model.sync.mappings[key], "correlationQuery")) {
+                        delete this.model.sync.mappings[key].correlationQuery;
+                    }
+
+                    if(scriptDetails !== null) {
+                        this.model.sync.mappings[key].correlationScript = this.correlationScript.generateScript();
+                    } else if (this.model.sync.mappings[key].correlationScript !== undefined) {
+                        delete this.model.sync.mappings[key].correlationScript;
+                    }
+                }
 
                 if (map.name === this.model.mappingName) {
                     this.model.mapping = this.model.sync.mappings[key];
                 }
+
             }, this);
 
             ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
@@ -367,7 +411,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: $("<div id='dialogDetails'>" + $.t("templates.correlation.resetMsg") + "</div>"),
                 onshown : function (dialogRef) {
-                    if ($(".correlationQueryType").val() === "none") {
+                    if ($(".correlationQueryType").val() === "none" || $(".correlationQueryType").val() === "script") {
                         changes = null;
                     }
 
