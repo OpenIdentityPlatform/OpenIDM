@@ -2,7 +2,7 @@
     "name" : "{{lower packageName}}",
     "displayName" : "{{displayName}}",
     "description" : "{{description}}",
-    "version" : "{{version}}",
+    "version" : "1.4.{{version}}",
     "author" : "{{author}}",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.{{lower packageName}}-connector",
@@ -35,8 +35,11 @@
     },
     "configurationProperties" : { {{#properties}}
         "{{nameCamelCase}}" : {{{formattedValue}}},
-        {{/properties}}"classpath" : [
-            "&{launcher.project.location}/script/{{lower packageName}}/"
+        {{/properties}}"scriptRoots" : [
+            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/script/{{lower packageName}}/"
+        ],
+        "classpath" : [
+            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/script/{{lower packageName}}/"
         ],
         "reloadScriptOnExecution" : false,
         "authenticateScriptFileName" : "AuthenticateScript.groovy",

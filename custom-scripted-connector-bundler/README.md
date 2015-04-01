@@ -60,10 +60,28 @@ Now it's time to build your custom connector:
 This will produce an OSGi-compatible jar in the ./target directory.  Copy this jar to your OpenICF-compatible
 project or distribute it for others to use.
 
-This jar contains all of the Groovy scripts as well as an OpenIDM provisioner file.  These files need 
-to be extracted to the filesystem as they presently cannot be accessed directly from within the jar:
+This jar contains all of the Groovy scripts which are executed directly from the jar.  These may optionally
+be extracted to the filesystem and run from there with a change to the provisioner JSON file. Change:
 
-    jar -xvf <filename>.jar scripts
+        "scriptRoots" : [
+            "jar:file:&{launcher.install.location}/connectors/awesome-connector-1.0.jar!/script/awesome/"
+        ],
+        "classpath" : [
+            "jar:file:&{launcher.install.location}/connectors/awesome-connector-1.0.jar!/script/awesome/"
+        ],
+
+to:
+
+        "scriptRoots" : [
+            "file:&{launcher.project.location}/<your_extracted_script_location>/"
+        ],
+        "classpath" : [
+            "file:&{launcher.project.location}/<your_extracted_script_location>/"
+        ],
+
+The OpenIDM provisioner file must be extracted to the filesystem as it presently cannot be detected and used
+directly from within the jar:
+
     jar -xvf <filename>.jar conf/provisioner.openicf-*.json
 
 ### Sample configuration file
