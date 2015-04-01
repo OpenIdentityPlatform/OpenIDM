@@ -61,6 +61,6 @@ if (authId == null) {
 }
 
 /* Log something to demonstrate this script executed */
-log.info("Create script, operation = " + operation.toString());
+log.info("Authenticate script, operation = " + operation.toString());
 
 return authId
