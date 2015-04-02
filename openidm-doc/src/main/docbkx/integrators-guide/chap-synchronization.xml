@@ -347,13 +347,12 @@
      represents the core configuration for OpenIDM synchronization.
     </para>
     <para>
-     The <filename>sync.json</filename> file describes a set of mappings. Each
-     mapping specifies how attributes from source objects correspond to
-     attributes on target objects. The source and target indicate the direction
-     of the data flow, so you must define a separate mapping for each data flow.
-     For example, if you want data to flow from an LDAP server to the repository
-     and also from the repository to the LDAP server, you must define two
-     separate mappings.
+     The <filename>sync.json</filename> file defines attribute mappings from a
+     source to a target. You can assign a data store as a source and a target.
+     So if you want to configure two-way synchronization, you must define a
+     separate mapping for each data flow. For example, if you want data to flow
+     from an LDAP server to the repository and also from the repository to the
+     LDAP server, you would define two separate mappings.
     </para>
     <para>
      You can update mappings in the <filename>sync.json</filename> file while
@@ -364,12 +363,12 @@
     <section xml:id="mapping-resources">
      <title>Identifying Resources in a Mapping</title>
      <para>
-      External resources are specified in a mapping as
+      External resources are shown in a mapping as
       <literal>system/<replaceable>name</replaceable>/<replaceable>object-type</replaceable></literal>,
       where <replaceable>name</replaceable> is the name used in the connector
       configuration file, and <replaceable>object-type</replaceable> is the
       object defined in the connector configuration file list of object types.
-      Objects in OpenIDM's internal repository are specified in the mapping as
+      In contrast, objects in OpenIDM's internal repository are specified in the mapping as
       <literal>managed/<replaceable>object-type</replaceable></literal>, where
       <replaceable>object-type</replaceable> is defined in the managed objects
       configuration file (<filename>conf/managed.json</filename>).
@@ -421,8 +420,7 @@
                {
                     "source" : "uid",
                     "target" : "userName",
-                    "condition" : {
-                        "linkQualifier" : "user"
+                    "condition" : "/linkQualifier eq \"user\""
                     }
                },
             ]
@@ -440,9 +438,9 @@
      </para>
      <para>
       To add a flow from the repository to the <literal>ldap</literal> resource,
-      you would define a mapping with source <literal>managed/user</literal>
-      and target <literal>system/ldap/account</literal>. The mapping would be
-      named, for example, <literal>managedUser_systemLdapAccounts</literal>.
+      you would define a mapping with source <literal>managed/user</literal> and
+      target <literal>system/ldap/account</literal>. In this case, the name for
+      the mapping would be <literal>managedUser_systemLdapAccounts</literal>.
      </para>
      <para>
       The following image shows the paths to objects in the OpenIDM namespace.
@@ -478,7 +476,7 @@
      </para>
      <para>
       You can also use the <literal>"default"</literal> property to specify a
-      value that should be assigned to the target property. When determining
+      value to assign to the target property. When determining
       the value of the target property, any associated conditions are evaluated
       first, followed by the transform script, if present. The default value is
       applied (for update and create actions) if the <literal>"source"</literal>
@@ -496,8 +494,8 @@
      <para>
       You can use a mapping configuration to define attribute transformations
       that occur during synchronization. In the following excerpt of the sample
-      mapping, the value of the <literal>displayName</literal> attribute is set
-      using a combination of the <literal>lastName</literal> and
+      mapping, the value of the <literal>displayName</literal> attribute (on the
+      target) is set using a combination of the <literal>lastName</literal> and
       <literal>firstName</literal> attribute values from the source.
      </para>
      <programlisting language="javascript">
@@ -523,33 +521,75 @@
     <section xml:id="mapping-link-qualifiers">
      <title>Using Link Qualifiers in a Mapping</title>
      <para>
-      In certain situations, you might need to identify the
-      <emphasis>type</emphasis> of relationship, or link, that is created when
-      a source object is mapped to a target object. The ability to qualify
-      relationships between objects is useful only in a situation where you have
-      multiple target objects that map to a single source object. For example,
-      you might have one managed user, <literal>scarter</literal> who has two
-      distinct accounts in an LDAP directory, a regular user account
+      When you have multiple target objects that map to a single source object,
+      you should identify the <emphasis>type</emphasis> of relationship, or link.
+      In this situation, you need a <emphasis>link qualifier</emphasis>. For
+      example, assume that you have one managed user, <literal>scarter</literal>,
+      with two distinct accounts in an LDAP directory: a regular user account
       (<literal>scarter</literal>) and a test account
-      (<literal>scarter-test</literal>). Both of these LDAP accounts should be
-      linked to the single managed user object, <literal>scarter</literal>.
+      (<literal>scarter-test</literal>). In that case, you can use a
+      link qualifier to link both of these LDAP accounts to the single managed
+      user object, <literal>scarter</literal>.
+     </para>
+     <!-- TODO: address multiple source object situation -->
+     <para>
+      Link qualifiers are included at the top of each applicable mapping.
+      OpenIDM uses link qualifiers to differentiate multiple target objects.
+      A link qualifier can be static, or dynamic (with a script). A link
+      qualifier uses a property specific to the target object. In a static
+      example, you might define a link qualifier on the <literal>dn</literal>
+      property of the target object.
      </para>
      <para>
-      OpenIDM uses <emphasis>link qualifiers</emphasis> to indicate how the two
-      target objects are distinguished. A link qualifier relates to a specific
-      property in the target object. In this example, a link qualifier might
-      be defined on the <literal>dn</literal> property of the target object, to
-      indicate that it is the value of the target <literal>dn</literal> that
-      will determine the type of link that is created.
+      In contrast, with a dynamic link qualifier, you can evaluate one or more
+      parts of the mapping, including:
      </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        A transformation script for one or more properties.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The condition logic for one or more properties.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        A correlation query between source and target.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        A situational analysis.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Policies that are executed.
+       </para>
+      </listitem>
+     </itemizedlist>
      <para>
-      Link qualifiers are declared at the top of the mapping to which they
-      apply. They can then be referenced in the property mapping, in
-      transformation scripts, and in correlation queries. Each
-      <literal>linkQualifier</literal> within a specific mapping must be
-      unique. If no link qualifier is specified (in the case where there is
-      only one possible correlating target object) a default link qualifier,
-      with the value <literal>"default"</literal>, is used.
+      The sum total of these configurations are used to define how records
+      associated with one link qualifier differ from another.
+     </para>
+
+     <note>
+      <para>
+       Where possible, do use dynamic <emphasis>link qualifiers</emphasis>.
+       When OpenIDM uses a static list of <emphasis>link qualifiers</emphasis>,
+       it has to search through each item in the list before synchronizing each
+       entry, which can affect the performance of your system.
+      </para>
+     </note>
+
+     <para>
+      Each <literal>linkQualifier</literal> within a specific mapping must be
+      unique. If no link qualifier is specified (such as when only one possible
+      correlating target object exists) OpenIDM uses a default link qualifier,
+      with the value <literal>"default"</literal>.
      </para>
     </section>
 
@@ -632,7 +672,7 @@
       <para>
        In the following excerpt of a sample mapping, two link qualifiers
        (<literal>user</literal> and <literal>test</literal>) are declared for
-       the managed user to LDAP mapping.  This example assumes two accounts in
+       the managed user to LDAP mapping. This example assumes two accounts in
        the LDAP directory, a real <literal>user</literal> account and a second,
        <literal>test</literal> account. Both LDAP accounts should be mapped to
        the same managed object.
@@ -647,6 +687,69 @@
             "linkQualifiers" : [ "user", "test" ],
 ...   </programlisting>
       <para>
+       If you have alternative sets of link qualifiers for different source
+       records, you could set up a <filename>linkQualifiers.js</filename>
+       script. That script should return an array of strings. If you need a
+       link qualifiers script, the noted <filename>sync.json</filename> excerpt
+       might look like the following:
+      </para>
+      <programlisting language="javascript">
+{
+    "mappings": [
+        {
+            "name": "managedUser_systemLdapAccounts",
+            "source": "managed/user",
+            "target": "system/MyLDAP/account",
+            "linkQualifiers" : {
+                "type" : "text/javascript",
+                "file" : "script/linkQualifiers.js"
+            }
+... </programlisting>
+      <para>
+       In the <filename>linkQualifiers.js</filename> script, you should include
+       the following scope parameters:
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><literal>mapping</literal></term>
+        <listitem>
+         <para>
+          Name of the current mapping, as defined in <filename>sync.json</filename>
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>object</literal></term>
+        <listitem>
+         <para>
+          The value of the source object. If the source object does not exist,
+          set the value to null.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>oldValue</literal></term>
+        <listitem>
+         <para>
+          The former value of the source object, if any. If the source object is
+          new, set the value to null.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>returnAll</literal></term>
+        <listitem>
+         <para>
+          A boolean option. If set to true, the script returns all link
+          qualifiers.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
+      <para>
+       A <filename>linkQualifiers.js</filename> script
+      </para>
+      <para>
        Link qualifier conditions can be used to specify when a target attribute
        should be set. The following example sets a default value for the
        <literal>description</literal> attribute on a target object, only if
@@ -656,10 +759,8 @@
 {
     "target" : "description",
     "default": "This is a test account",
-    "condition" : {
-        "linkQualifier" : "test"
+    "condition" : "/linkQualifier" eq \"test\""
     }
-},
       </programlisting>
       <para>
        Link qualifiers can be used in conjunction with a transformation script,
@@ -4072,7 +4173,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
              "action" : "IGNORE
         }
         {
-             "condition : "/linkQualifier eq \"user\""
+             "condition" : "/linkQualifier eq \"user\""
              }
              "situation" : "ABSENT",
              "action" : "IGNORE",
@@ -4621,15 +4722,36 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <section xml:id="correlation-expression-builder">
     <title>Using the Expression Builder to Create Correlation Queries</title>
     <para>
-     OpenIDM ${docTargetVersion} provides a declarative correlation option, named
-     the expression builder, that makes it easier to configure correlation
-     queries. The easiest way to use the expression builder to build up a
-     correlation query is by using the Admin UI. The following image shows how the
-     expression builder is used to build up a correlation query for a mapping from
+     OpenIDM ${docTargetVersion} provides a declarative correlation option,
+     named the expression builder, that makes it easier to configure correlation
+     queries.
+    </para>
+    <para>
+     The easiest way to use the expression builder to create a correlation query
+     is through the Admin UI. To access the Expression Builder, navigate to
+     the desired mapping, select Association Rules, toggle the No Correlation
+     Query option to Correlation Queries.
+    </para>
+    <mediaobject>
+     <alt>Admin UI mapping screen, Association Rules</alt>
+     <imageobject>
+      <imagedata fileref="images/association-rules.png" format="PNG"/>
+     </imageobject>
+    </mediaobject>
+
+    <para>
+     Now click Add Correlation query. In the pop-up window that appears, select
+     a link qualifier. (For more information, see
+     <xref linkend="link-qualifier-conditions" />). You can now create your
+     expression.
+    </para>
+    <para>
+     The following image shows how you can use the expression builder to build
+     a correlation query for a mapping from
      <literal>system/ldap/accounts</literal> to <literal>managed/user</literal>
      objects. The query essentially states that, in order for a match to exist
      between the source (LDAP) object and the target (managed) object, both the
-     <literal>userName</literal> and <literal>telephoneNumber</literal> of those
+     <literal>givenName</literal> and <literal>telephoneNumber</literal> of those
      objects must match.
     </para>
     <mediaobject>
@@ -4638,25 +4760,31 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <imagedata fileref="images/expression-builder.png" format="PNG"/>
      </imageobject>
     </mediaobject>
+
+    <para>
+     Click Submit to exit the Correlation Query pop-up window. After creating
+     the Correlation Queries that you need, click Save
+    </para>
     <para>
      The resulting correlation query, in the mapping configuration
      (<literal>sync.json</literal>) is as follows:
     </para>
     <programlisting language="javascript">"correlationQuery" : {
-      "type" : "text/javascript",
-      "expressionTree" : {
-          "all" : [
-              "givenName",
-              "telephoneNumber"
-          ]
-      },
-      "mapping" : "systemLdapAccounts_managedUser",
-      "file" : "ui/correlateTreeToQueryFilter.js"
-  },</programlisting>
+     "linkQualifier" : "user",
+     "expressionTree" : {
+         "all" : [
+             "givenName",
+             "telephoneNumber"
+         ]
+     },
+     "mapping" : "systemLdapAccounts_managedUser",
+     "type" : "text/javascript",
+     "file" : "ui/correlateTreeToQueryFilter.js"
+},</programlisting>
     <para>
-     The logic in the expression builder is in the script
-     <filename>openidm/bin/defaults/script/ui/correlateTreeToQueryFilter.js</filename>
-     which converts the expression into the required query filter.
+     You can find the logic in the expression builder in the following script:
+     <filename>openidm/bin/defaults/script/ui/correlateTreeToQueryFilter.js</filename>.
+     It converts the expression into the required query filter.
     </para>
    </section>
   </section>
