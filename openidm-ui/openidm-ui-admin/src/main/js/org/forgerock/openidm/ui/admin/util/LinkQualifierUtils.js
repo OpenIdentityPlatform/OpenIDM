@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils", [
         if(mapping.linkQualifiers !== undefined) {
 
             if(mapping.linkQualifiers.type) {
-                ScriptDelegate.evalScript(mapping.linkQualifiers).then(_.bind(function(result){
+                ScriptDelegate.evalLinkQualifierScript(mapping.linkQualifiers).then(_.bind(function(result){
                     this.model.linkQualifier[mapping.name] = result;
 
                     linkQualifierPromise.resolve(this.model.linkQualifier[mapping.name]);
