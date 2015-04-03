@@ -127,6 +127,42 @@ define("config/routes/AdminRoutesConfig", [
             url: /^schedule\/(.+)\/$/,
             pattern: "schedule/?/",
             forceUpdate: true
+        },
+        "adminListSystemObjectView" : {
+            view: "org/forgerock/openidm/ui/common/resource/ListResourceView",
+            role: "ui-admin",
+            url: /^resource\/(system)\/(.+)\/(.+)\/list\/$/, 
+            pattern: "resource/?/?/?/list/"
+        },
+        "adminEditSystemObjectView" : {
+            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
+            role: "ui-admin",
+            url: /^resource\/(system)\/(.+)\/(.+)\/edit\/(.+)$/, 
+            pattern: "resource/?/?/?/edit/?"
+        },
+        "adminNewSystemObjectView" : {
+            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
+            role: "ui-admin",
+            url: /^resource\/(system)\/(.+)\/(.+)\/add\/$/, 
+            pattern: "resource/?/?/?/add/"
+        },
+        "adminListManagedObjectView" : {
+            view: "org/forgerock/openidm/ui/common/resource/ListResourceView",
+            role: "ui-admin",
+            url: /^resource\/(managed)\/(.+)\/list\/$/, 
+            pattern: "resource/?/?/list/"
+        },
+        "adminEditManagedObjectView" : {
+            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
+            role: "ui-admin",
+            url: /^resource\/(managed)\/(.+)\/edit\/(.+)$/, 
+            pattern: "resource/?/?/edit/?"
+        },
+        "adminNewManagedObjectView" : {
+            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
+            role: "ui-admin",
+            url: /^resource\/(managed)\/(.+)\/add\/$/, 
+            pattern: "resource/?/?/add/"
         }
     };
 

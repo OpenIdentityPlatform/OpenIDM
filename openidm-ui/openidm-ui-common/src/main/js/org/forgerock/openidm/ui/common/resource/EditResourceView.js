@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,16 +27,16 @@
 /**
  * @author huck.elliott
  */
-define("org/forgerock/openidm/ui/common/managed/EditManagedObjectView", [
+define("org/forgerock/openidm/ui/common/resource/EditResourceView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/common/delegates/ManagedObjectDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages"
-], function(AbstractView, eventManager, constants, uiUtils, managedObjectDelegate, messagesManager) {
-    var EditManagedObjectView = AbstractView.extend({
-        template: "templates/admin/managed/EditManagedObjectViewTemplate.html",
+], function(AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager) {
+    var EditResourceView = AbstractView.extend({
+        template: "templates/admin/resource/EditResourceViewTemplate.html",
         
         events: {
             "click #saveBtn": "save",
@@ -45,30 +45,39 @@ define("org/forgerock/openidm/ui/common/managed/EditManagedObjectView", [
             "click #resetBtn": "reset"
         },
         render: function(args, callback) {
-            var managedObjectPromise,
-                schemaPromise = managedObjectDelegate.getSchema(args[0]);
+            var resourceReadPromise,
+                schemaPromise = resourceDelegate.getSchema(args),
+                objectId = (args[0] === "managed") ? args[2] : args[3];
+            
+            this.data.args = args;
+            
+            this.data.objectType = args[0];
+            this.objectName = args[1];
 
-            if(args[1]){
-                managedObjectPromise = managedObjectDelegate.readEntity(args[1]);
-                this.objectId = args[1];
+            if(objectId){
+                resourceReadPromise = resourceDelegate.readEntity(objectId);
+                this.objectId = objectId;
                 this.data.newObject = false;
             } else {
-                managedObjectPromise = {};
+                resourceReadPromise = $.Deferred().resolve({});
                 this.data.newObject = true;
             }
-            this.objectName = args[0];
             
-            $.when(managedObjectPromise, schemaPromise).then(_.bind(function(managedObject, schema){
+            if (this.data.objectType === "system") {
+                this.objectName += "/" + args[2];
+            }
+            
+            $.when(resourceReadPromise, schemaPromise).then(_.bind(function(resource, schema){
                 this.data.objectTitle = schema.title || this.objectName;
                 this.parentRender(function(){
-                    this.setupEditor(managedObject, schema);
+                    this.setupEditor(resource, schema);
                 });
             },this));
         },
-        setupEditor: function(managedObject, schema){
+        setupEditor: function(resource, schema){
             var propCount = 0,
                 filteredProperties,
-                filteredObject = managedObject[0];
+                filteredObject = resource[0];
             
             this.oldObject = filteredObject;
             
@@ -97,13 +106,22 @@ define("org/forgerock/openidm/ui/common/managed/EditManagedObjectView", [
                 }, this));
             }
             
-            this.editor = new JSONEditor(document.getElementById("managedObject"), { schema: schema });
+            if (this.data.objectType === "system") {
+                schema.title = this.data.objectTitle;
+                if (this.data.newObject) {
+                    _.each(schema.properties,function(p) {
+                        p.required = true;
+                    });
+                }
+            }
+            
+            this.editor = new JSONEditor(document.getElementById("resource"), { schema: schema });
             this.editor.setValue(filteredObject);
             this.addTooltips();
         },
         addTooltips: function(){
             var propertyDescriptionSpan = this.$el.find(".form-control span"),
-                objectHeader = this.$el.find("#managedObject").find("h3:eq(0)"),
+                objectHeader = this.$el.find("#resource").find("h3:eq(0)"),
                 objectDescriptionSpan = objectHeader.next();
             
             $.each(propertyDescriptionSpan, function(){
@@ -116,21 +134,27 @@ define("org/forgerock/openidm/ui/common/managed/EditManagedObjectView", [
                 objectDescriptionSpan.empty();
             }
             
-            this.$el.find(".info").tooltip({
-                tooltipClass: "idm-tooltip",
-                position : { my: 'right center', at: 'left-35 center' }
+            this.$el.find(".info").popover({
+                content: function () { return $(this).attr("data-original-title");},
+                trigger:'hover',
+                placement:'top',
+                container: 'body',
+                html: 'true',
+                template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
             });
         },
         save: function(e){
-            var formVal = this.editor.getValue();
+            var formVal = this.editor.getValue(),
+                successCallback = _.bind(function(){
+                    var msg = (this.data.newObject) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess";
+                    messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.objectTitle })});
+                    this.backToList();
+                }, this);
             
             e.preventDefault();
             
             if(this.data.newObject){
-                managedObjectDelegate.createEntity(null, formVal, _.bind(function(user){
-                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ManagedObjectEdit.addSuccess",{ objectTitle: this.data.objectTitle })});
-                    this.backToList();
-                }, this));
+                resourceDelegate.createEntity(null, formVal, successCallback);
             } else {
                 /*
                 The following _.each() was placed here to account for JSONEditor.setValue() 
@@ -145,37 +169,40 @@ define("org/forgerock/openidm/ui/common/managed/EditManagedObjectView", [
                     }
                 }, this);
                 
-                managedObjectDelegate.patchEntityDifferences({id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, _.bind(function(){
-                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ManagedObjectEdit.editSuccess",{ objectTitle: this.data.objectTitle })});
-                    this.backToList();
-                },this));
+                if (this.data.objectType === "managed") {
+                    resourceDelegate.patchEntityDifferences({id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
+                } else {
+                    resourceDelegate.updateEntity(this.oldObject._id, formVal, successCallback);
+                }
             }
         },
         backToList: function(e){
+            var routeName = (this.data.objectType === "managed") ? "adminListManagedObjectView" : "adminListSystemObjectView";
+            
             if(e){
                 e.preventDefault();
             }
             
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminListManagedObjectView", args: [this.objectName]});
+            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: this.data.args});
         },
         reset: function(e){
             e.preventDefault();
             
-            this.render([this.objectName,this.objectId]);
+            this.render(this.data.args);
         },
         deleteObject: function(e){
             e.preventDefault();
             
-            uiUtils.jqConfirm($.t("templates.admin.ManagedObjectEdit.confirmDelete",{ objectTitle: this.data.objectTitle }), _.bind(function(){
-                managedObjectDelegate.deleteEntity(this.objectId, _.bind(function(){
-                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ManagedObjectEdit.deleteSuccess",{ objectTitle: this.data.objectTitle })});
+            uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.objectTitle }), _.bind(function(){
+                resourceDelegate.deleteEntity(this.objectId, _.bind(function(){
+                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.objectTitle })});
                     this.backToList();
                 }, this));
             }, this));
         }
     }); 
     
-    return new EditManagedObjectView();
+    return new EditResourceView();
 });
 
 

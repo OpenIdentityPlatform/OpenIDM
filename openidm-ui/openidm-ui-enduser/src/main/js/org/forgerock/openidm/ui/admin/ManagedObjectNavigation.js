@@ -46,10 +46,10 @@ define("org/forgerock/openidm/ui/admin/ManagedObjectNavigation", [
 
         return configDelegate.readEntity("managed").then(function(managed){
             _.chain(managed.objects)
-                .reject(function(o){ return !o.schema || _.isEmpty(o.schema.properties) || o.name === "user";  })
+                .reject(function(o){ return !o.schema || _.isEmpty(o.schema.properties) || o.name === "user" || o.name === "role";  })
                 .each(function(o){
                     nav.configuration.links.admin.urls[o.name] = {
-                        "url": "#managed/" + o.name + "/",
+                        "url": "#resource/managed/" + o.name + "/list/",
                         "name": o.schema.title || o.name,
                         "icon": "glyph-icon-star-empty",
                         "inactive": false

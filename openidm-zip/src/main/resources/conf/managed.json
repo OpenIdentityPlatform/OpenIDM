@@ -45,65 +45,74 @@
                 }
             ],
             "schema" : {
-                "$schema" : "http://forgerock.org/json-schema#",
-                "type" : "object",
-                "title" : "Users",
-                "description" : "User Data",
+                "id" : "http://jsonschema.net",
+                "title" : "User",
+                "viewable" : true,
+                "$schema" : "http://json-schema.org/draft-03/schema",
+                "order" : [
+                    "userName",
+                    "givenName",
+                    "sn",
+                    "mail",
+                    "accountStatus",
+                    "telephoneNumber",
+                    "postalAddress",
+                    "address2",
+                    "city",
+                    "postalCode",
+                    "country",
+                    "stateProvince",
+                    "roles"
+                ],
                 "properties" : {
-                    "userName" : {
-                        "description" : "",
-                        "title" : "User Name",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
-                    },
-                    "password" : {
-                        "description" : "",
-                        "title" : "Password",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
-                    },
                     "mail" : {
-                        "description" : "",
                         "title" : "Email Address",
                         "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
-                    },
-                    "givenName" : {
-                        "description" : "",
-                        "title" : "First Name",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "searchable" : true
                     },
                     "sn" : {
-                        "description" : "",
                         "title" : "Last Name",
                         "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "searchable" : true
                     },
-                    "telephoneNumber" : {
-                        "description" : "",
-                        "title" : "Telephone Number",
+                    "address2" : {
+                        "type" : "string",
+                        "title" : "Address 2",
+                        "viewable" : true
+                    },
+                    "givenName" : {
+                        "title" : "First Name",
                         "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "searchable" : true
+                    },
+                    "city" : {
+                        "type" : "string",
+                        "title" : "City",
+                        "viewable" : true
+                    },
+                    "country" : {
+                        "type" : "string",
+                        "title" : "Country",
+                        "viewable" : true
+                    },
+                    "postalCode" : {
+                        "type" : "string",
+                        "title" : "Postal Code",
+                        "viewable" : true
                     },
                     "accountStatus" : {
-                        "description" : "",
-                        "title" : "Account Status",
+                        "title" : "Status",
                         "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "searchable" : true
                     },
                     "roles" : {
                         "description" : "",
                         "title" : "Roles",
                         "viewable" : true,
-                        "searchable" : true,
                         "resourceCollection" : {
                             "path" : "managed/roles",
                             "query" : {
@@ -114,79 +123,34 @@
                         },
                         "type" : "string"
                     },
-                    "postalCode" : {
-                        "description" : "",
-                        "title" : "Postal Code",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                    "telephoneNumber" : {
+                        "type" : "string",
+                        "title" : "Mobile Phone",
+                        "viewable" : true
                     },
                     "stateProvince" : {
-                        "description" : "",
-                        "title" : "State or Province",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "title" : "State/Province",
+                        "viewable" : true
                     },
                     "postalAddress" : {
-                        "description" : "",
-                        "title" : "Postal Address",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "title" : "Address 1",
+                        "viewable" : true
                     },
-                    "address2" : {
-                        "description" : "",
-                        "title" : "Postal Address (cont)",
+                    "userName" : {
+                        "title" : "Username",
                         "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
-                    },
-                    "country" : {
-                        "description" : "",
-                        "title" : "Country",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
-                    },
-                    "city" : {
-                        "description" : "",
-                        "title" : "City",
-                        "viewable" : true,
-                        "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "searchable" : true
                     }
                 },
+                "type" : "object",
                 "required" : [
                     "userName",
-                    "password",
-                    "mail",
                     "givenName",
                     "sn",
-                    "accountStatus",
-                    "roles",
-                    "postalCode",
-                    "stateProvince",
-                    "postalAddress",
-                    "address2",
-                    "country",
-                    "city"
-                ],
-                "order" : [
-                    "userName",
-                    "password",
-                    "mail",
-                    "givenName",
-                    "sn",
-                    "telephoneNumber",
-                    "accountStatus",
-                    "roles",
-                    "postalCode",
-                    "stateProvince",
-                    "postalAddress",
-                    "address2",
-                    "country",
-                    "city"
+                    "mail"
                 ]
             }
         },
@@ -207,6 +171,58 @@
             "onDelete" : {
                 "type" : "text/javascript",
                 "file" : "roles/onDelete-roles.js"
+            },
+            "schema" : {
+                "$schema" : "http://forgerock.org/json-schema#",
+                "type" : "object",
+                "title" : "Role",
+                "description" : "",
+                "properties" : {
+                    "_id" : {
+                        "description" : "",
+                        "title" : "Name",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "properties" : {
+                        "description" : "",
+                        "title" : "Properties",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "type" : "object",
+                        "properties" : {
+                            "description" : {
+                                "description" : "",
+                                "title" : "Description",
+                                "viewable" : true,
+                                "searchable" : false,
+                                "type" : "string"
+                            }
+                        },
+                        "required" : [
+                            "description"
+                        ],
+                        "order" : [
+                            "description"
+                        ]
+                    },
+                    "assignments" : {
+                        "description" : "",
+                        "title" : "Assignments",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "type" : "string"
+                    }
+                },
+                "required" : [
+                    "_id"
+                ],
+                "order" : [
+                    "_id",
+                    "properties",
+                    "assignments"
+                ]
             }
         }
     ]
