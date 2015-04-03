@@ -68,6 +68,9 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
                     connector.cleanUrlName = splitConfig[1] + "_" +splitConfig[2];
                     connector.cleanEditName = splitConfig[2];
+                    
+                    //remove the __ALL__ objectType
+                    connector.objectTypes = _.reject(connector.objectTypes, function(ot) { return ot === "__ALL__"; });
                 }, this));
 
                 this.data.currentConnectors = connectors;

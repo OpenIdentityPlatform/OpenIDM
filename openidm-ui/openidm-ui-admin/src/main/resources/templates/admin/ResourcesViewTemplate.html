@@ -41,6 +41,9 @@
                                         <i class="fa fa-ellipsis-v"></i>
                                     </button>
                                     <ul class="dropdown-menu pull-right" role="menu">
+                                        {{#each objectTypes}}
+                                            <!-- <li><a href="#resource/system/{{../name}}/{{this}}/list/"><i class="fa fa-database"></i>Data ({{this}})</a></li> -->
+                                        {{/each}}
                                         <li><a href="#connectors/edit/{{cleanUrlName}}/"><i class="fa fa-pencil"></i>Edit</a></li>
                                         <li class="connector-delete"><span><i class="fa fa-times"></i>Delete</span></li>
                                     </ul>
@@ -117,6 +120,7 @@
                                             <i class="fa fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu pull-right" role="menu">
+                                            <li><a href="#resource/managed/{{name}}/list/"><i class="fa fa-database"></i>Data</a></li>
                                             <li><a href="#managed/edit/{{name}}/"><i class="fa fa-pencil"></i>Edit</a></li>
                                             <li class="managed-delete"><span><i class="fa fa-times"></i>Delete</span></li>
                                         </ul>

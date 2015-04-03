@@ -218,6 +218,20 @@
             },
             "UsersTemplate" : {
                 "remainingUsers" : "Remaining users"
+            },
+            "ResourceEdit":
+            {
+                "confirmDelete": "Are you sure you want to delete this __objectTitle__?",
+                "backToList": "Back to List",
+                "addSuccess": "Successfully added __objectTitle__",
+                "editSuccess": "Successfully updated __objectTitle__",
+                "deleteSuccess": "Successfully deleted __objectTitle__",
+                "noData": "No Data"
+            },
+            "ResourceList":
+            {
+                "noData": "No Data",
+                "invalidObject": "Invalid Object"
             }
         },
         "managed" : {
@@ -896,6 +910,7 @@
             "add" : "Add",
             "userView" : "Data Management View",
             "ok" : "Okay",
+            "list" : "List",
             "confirm" :"Confirmation",
             "true" : "True",
             "false" : "False",

@@ -82,22 +82,22 @@ define("config/routes/AdminRoutesConfig", [
             pattern: "tasks/?/"
         },
         "adminListManagedObjectView" : {
-            view: "org/forgerock/openidm/ui/common/managed/ListManagedObjectView",
+            view: "org/forgerock/openidm/ui/common/resource/ListResourceView",
             role: "ui-admin",
-            url: /^managed\/(.+)\/$/, 
-            pattern: "managed/?/"
+            url: /^resource\/(managed)\/(.+)\/list\/$/, 
+            pattern: "resource/?/?/list/"
         },
         "adminEditManagedObjectView" : {
-            view: "org/forgerock/openidm/ui/common/managed/EditManagedObjectView",
+            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
             role: "ui-admin",
-            url: /^managed\/(.+)\/edit\/(.+)\/$/, 
-            pattern: "managed/?/edit/?/"
+            url: /^resource\/(managed)\/(.+)\/edit\/(.+)$/, 
+            pattern: "resource/?/?/edit/?"
         },
         "adminNewManagedObjectView" : {
-            view: "org/forgerock/openidm/ui/common/managed/EditManagedObjectView",
+            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
             role: "ui-admin",
-            url: /^managed\/(.+)\/add\/$/, 
-            pattern: "managed/?/add/"
+            url: /^resource\/(managed)\/(.+)\/add\/$/, 
+            pattern: "resource/?/?/add/"
         }
     };
 

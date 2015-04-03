@@ -1,9 +1,9 @@
 <div id="{{grid_id}}_container" class="container">
-    <div class="page-header managedObjectsContainer">
+    <div class="page-header resourcesContainer">
         {{#if validObject}}
 	        <div class='btn-toolbar pull-right'>
 	            <div class='btn-group'>
-	                <a href="#managed/{{objectName}}/add/" title="{{t "common.form.add"}} {{pageTitle}}"><button class="btn btn-primary" type="button">{{t "common.form.add"}} {{pageTitle}}</button></a>
+	                <a href="{{addLinkHref}}" title="{{t "common.form.add"}} {{pageTitle}}"><button class="btn btn-primary" type="button">{{t "common.form.add"}} {{pageTitle}}</button></a>
 	                {{#if hasData}}
 	                <a href="#"><button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button></a>
 	                <a href="#"><button type="button"  class="btn btn-primary"  id="clearFiltersBtn">{{t 'common.form.clearFilters'}}</button></a>
@@ -12,13 +12,13 @@
 	        </div>
 	        <h3>{{pageTitle}} {{t "common.form.list"}}</h3>
         {{else}}
-            <h3>{{t "templates.admin.ManagedObjectList.invalidObject"}}</h3>
+            <h3>{{t "templates.admin.ResourceList.invalidObject"}}</h3>
         {{/if}}
     </div>
 
-    <div class="managedObjectsContainer">
+    <div class="resourcesContainer">
         <table id="{{grid_id}}">
-            <tr><td>{{t "templates.admin.ManagedObjectList.noData"}}</td></tr>
+            <tr><td>{{t "templates.admin.ResourceList.noData"}}</td></tr>
         </table>
         <div id="{{grid_id}}_pager"></div>
     </div>
