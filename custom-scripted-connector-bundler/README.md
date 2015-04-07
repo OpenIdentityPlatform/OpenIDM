@@ -90,6 +90,8 @@ directly from within the jar:
         "packageName" : "Awesome",
         "displayName" : "Awesome Connector",
         "description" : "This is my super awesome connector",
+        "baseConfigurationClass" : "ScriptedConfiguration",
+        "baseConnectorClass" : "ScriptedConnectorBase",
         "version" : "1.0",
         "author" : "Coder McLightningfingers",
         "properties" : [
@@ -206,6 +208,23 @@ directly from within the jar:
             }
         ]
     }
+    
+### Base classes 
+    The possible values for the param baseConfigurationClass are:
+         1. ScriptedConfiguration
+         2. ScriptedCRESTConfiguration
+         3. ScriptedRESTConfiguration
+         4. ScriptedSQLConfiguration
+
+    The possible values for the param baseConnectorClass are:
+         1. ScriptedConnector
+         2. ScriptedCRESTConnector
+         3. ScriptedRESTConnector
+         4. ScriptedSQLConnector
+
+    Keep in mind that the configuration base classes should match the connector base classes. So for example, if you use a
+    baseConfigurationClass as "ScriptedCRESTConfiguration" then the only option that will work for baseConnectorClass is the
+    corresponding ScriptedCRESTConnector base class.
 
 ### Other resources
 

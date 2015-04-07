@@ -43,7 +43,7 @@ import org.identityconnectors.framework.spi.ConfigurationProperty
  * @version {{version}}
  */
 @ConfigurationClass(skipUnsupported = true)
-public class {{packageName}}Configuration extends ScriptedConfiguration {
+public class {{packageName}}Configuration extends {{baseConfigurationClass}} {
 
     // Exposed configuration properties.
 

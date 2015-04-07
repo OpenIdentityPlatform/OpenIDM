@@ -39,6 +39,6 @@ import org.identityconnectors.framework.spi.ConnectorClass;
         messageCatalogPaths = {
             "org/forgerock/openicf/connectors/{{lower packageName}}/Messages"
         })
-public class {{packageName}}Connector extends ScriptedConnectorBase<{{packageName}}Configuration>
+public class {{packageName}}Connector extends {{baseConnectorClass}}<{{packageName}}Configuration>
         implements Connector {
 }
