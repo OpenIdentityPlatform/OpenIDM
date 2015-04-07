@@ -196,13 +196,12 @@ class Condition {
                 @Override
                 public Boolean visitEqualsFilter(final JsonValue p, final JsonPointer field,
                                                  final Object valueAssertion) {
-                    Boolean result = Boolean.TRUE;
                     for (final Object value : getValues(p, field)) {
-                        if (!isCompatible(valueAssertion, value) || compareValues(valueAssertion, value) != 0) {
-                            result = Boolean.FALSE;
+                        if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) == 0) {
+                            return Boolean.TRUE;
                         }
                     }
-                    return result;
+                    return Boolean.FALSE;
                 }
 
                 @Override
@@ -216,7 +215,7 @@ class Condition {
                 public Boolean visitGreaterThanFilter(final JsonValue p, final JsonPointer field,
                                                       final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value) && compareValues(valueAssertion, value) < 0) {
+                        if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) > 0) {
                             return Boolean.TRUE;
                         }
                     }
@@ -227,7 +226,7 @@ class Condition {
                 public Boolean visitGreaterThanOrEqualToFilter(final JsonValue p, final JsonPointer field,
                                                                final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value) && compareValues(valueAssertion, value) <= 0) {
+                        if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) >= 0) {
                             return Boolean.TRUE;
                         }
                     }
@@ -238,7 +237,7 @@ class Condition {
                 public Boolean visitLessThanFilter(final JsonValue p, final JsonPointer field,
                                                    final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value) && compareValues(valueAssertion, value) > 0) {
+                        if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) < 0) {
                             return Boolean.TRUE;
                         }
                     }
@@ -249,7 +248,7 @@ class Condition {
                 public Boolean visitLessThanOrEqualToFilter(final JsonValue p, final JsonPointer field,
                                                             final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value) && compareValues(valueAssertion, value) >= 0) {
+                        if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) <= 0) {
                             return Boolean.TRUE;
                         }
                     }
