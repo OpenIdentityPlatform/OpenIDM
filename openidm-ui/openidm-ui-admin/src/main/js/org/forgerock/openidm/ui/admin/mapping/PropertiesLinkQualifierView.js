@@ -94,6 +94,10 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
 
                 this.linkQualifierScript = inlineScriptEditor.generateScriptEditor({
                         "element": this.$el.find("#scriptLinkQualifierBody"),
+                        "passedVariableBlur" : _.bind(this.showLinkQualifier, this),
+                        "onKeypress" : _.bind(function(){
+                            this.$el.find(".linkQualifierSave").prop("disabled", true);
+                        }, this),
                         "eventName": "linkQualifierScript",
                         "noValidation": true,
                         "scriptData": scriptData,
