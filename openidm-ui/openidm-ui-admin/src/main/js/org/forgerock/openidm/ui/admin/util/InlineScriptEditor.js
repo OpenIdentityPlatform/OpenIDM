@@ -38,7 +38,8 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 "change input[type='radio']" : "localScriptChange",
                 "change .event-select" : "changeRenderMode",
                 "click #addPassedVariables" : "addPassedVariable",
-                "click #passedVariablesHolder .remove-btn" : "deletePassedVariable"
+                "click #passedVariablesHolder .remove-btn" : "deletePassedVariable",
+                "blur #passedVariablesHolder input" : "passedVariableBlur"
             },
             model : {
                 scriptData: null,
@@ -58,9 +59,10 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
              scriptData - Set if you have script data from a previous save or want a default
              eventName - Name to display
              disablePassedVariable - Flag to turn on and off passed variables
-             onBlur - Blur event for code mirror
-             onChange - Change event for code mirror
-             onFocus - focus event for code mirror
+             onBlur - Blur event for code mirror and file
+             onChange - Change event for code mirror and file
+             onFocus - focus event for code mirror and file
+             onKeypress - keypress event for code mirror and file
              placeHolder - A placeholder for code mirror
              */
             render: function (args, callback) {
@@ -74,7 +76,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 if (!this.model.disablePassedVariable && this.model.scriptData) {
                     this.data.passedVariables = args.scriptData.globals ||
-                    _.omit(args.scriptData, "file", "source", "type");
+                        _.omit(args.scriptData, "file", "source", "type");
                 }
 
                 this.parentRender(_.bind(function() {
@@ -98,23 +100,37 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     this.cmBox.on("focus", _.bind(function (cm, changeObject) {
                         this.saveEvent(this.model.onFocus, cm, changeObject);
                     }, this));
+
                     this.cmBox.on("change", _.bind(function (cm, changeObject) {
                         this.saveEvent(this.model.onChange, cm, changeObject);
                     }, this));
+
                     this.cmBox.on("blur", _.bind(function (cm, changeObject) {
                         this.saveEvent(this.model.onBlur, cm, changeObject);
                     }, this));
+
+                    this.cmBox.on("keypress", _.bind(function (cm, changeObject) {
+                        this.saveEvent(this.model.onKeypress, cm, changeObject);
+                    }, this));
+
+                    if (this.model.onKeypress) {
+                        this.$el.find("input:radio, .scriptFilePath").bind("keypress", _.bind(function () {
+                            this.model.onKeypress();
+                        }, this));
+                    }
 
                     if (this.model.onFocus) {
                         this.$el.find("input:radio, .scriptFilePath").bind("focus", _.bind(function () {
                             this.model.onFocus();
                         }, this));
                     }
+
                     if (this.model.onChange) {
                         this.$el.find("input:radio, .scriptFilePath").bind("change", _.bind(function () {
                             this.model.onChange();
                         }, this));
                     }
+
                     if (this.model.onBlur) {
                         this.$el.find("input:radio, .scriptFilePath").bind("blur", _.bind(function () {
                             this.model.onBlur();
@@ -141,6 +157,12 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                         callback();
                     }
                 }, this));
+            },
+
+            passedVariableBlur: function() {
+                if(this.model.passedVariableBlur) {
+                    this.model.passedVariableBlur(event);
+                }
             },
 
             saveEvent: function(callback, cm, changeObject) {

@@ -345,7 +345,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                             "eventName": "",
                             "noValidation": true,
                             "scriptData": prop.transform,
-                            "disablePassedVariable": true,
+                            "disablePassedVariable": false,
                             "onBlur" : _.bind(this.showTransformSample, this),
                             "onChange" :  _.bind(this.showTransformSample, this),
                             "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
@@ -378,7 +378,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                     "eventName": "transform",
                     "noValidation": true,
                     "scriptData": _this.data.property.transform,
-                    "disablePassedVariable": true,
+                    "disablePassedVariable": false,
                     "onBlur" : _this.showTransformSample,
                     "onChange" :  _this.showTransformSample,
                     "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
@@ -390,7 +390,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                     "eventName": "conditional",
                     "noValidation": true,
                     "scriptData": _this.data.property.condition,
-                    "disablePassedVariable": true,
+                    "disablePassedVariable": false,
                     "onBlur" : _this.showCondition,
                     "onChange" :  _this.showCondition
                 },
