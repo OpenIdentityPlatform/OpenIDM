@@ -38,6 +38,44 @@ public class CustomConfiguration extends CustomBaseObject {
     private String description;
     private String version;
     private String author;
+    private String baseConfigurationClass;
+    private String baseConnectorClass;
+
+    /**
+     * Return the connector base class.
+     *
+     * @return
+     */
+    public String getBaseConnectorClass() {
+        return baseConnectorClass;
+    }
+
+    /**
+     * Set the connector base class.
+     *
+     * @param baseConnectorClass
+     */
+    public void setBaseConnectorClass(String baseConnectorClass) {
+        this.baseConnectorClass = baseConnectorClass;
+    }
+
+    /**
+     * Return the configuration base class.
+     *
+     * @return
+     */
+    public String getBaseConfigurationClass() {
+        return baseConfigurationClass;
+    }
+
+    /**
+     * Set the configuration base class.
+     *
+     * @param baseConfigurationClass
+     */
+    public void setBaseConfigurationClass(String baseConfigurationClass) {
+        this.baseConfigurationClass = baseConfigurationClass;
+    }
 
     private List<CustomProperty> properties = new ArrayList<CustomProperty>();
     private List<CustomObjectType> objectTypes = new ArrayList<CustomObjectType>();
