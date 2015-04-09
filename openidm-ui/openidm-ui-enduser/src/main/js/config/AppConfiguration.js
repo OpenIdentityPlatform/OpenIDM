@@ -50,6 +50,10 @@ define("config/AppConfiguration", [
                 }
             },
             {
+                moduleClass: "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
+                configuration: {}
+            },
+            {
                 moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                 configuration: {
                     remoteConfig: true,
