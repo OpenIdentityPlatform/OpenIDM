@@ -1,16 +1,17 @@
 <div id="{{grid_id}}_container" class="container">
     <div class="page-header resourcesContainer">
         {{#if validObject}}
-	        <div class='btn-toolbar pull-right'>
-	            <div class='btn-group'>
-	                <a href="{{addLinkHref}}" title="{{t "common.form.add"}} {{pageTitle}}"><button class="btn btn-primary" type="button">{{t "common.form.add"}} {{pageTitle}}</button></a>
-	                {{#if hasData}}
-	                <a href="#"><button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button></a>
-	                <a href="#"><button type="button"  class="btn btn-primary"  id="clearFiltersBtn">{{t 'common.form.clearFilters'}}</button></a>
-	                {{/if}}
-	            </div>
-	        </div>
-	        <h3>{{pageTitle}} {{t "common.form.list"}}</h3>
+            <div class='btn-toolbar pull-right'>
+                <div class='btn-group'>
+                    <a href="{{addLinkHref}}" title="{{t "common.form.add"}} {{pageTitle}}"><button class="btn btn-primary" type="button">{{t "common.form.add"}} {{pageTitle}}</button></a>
+                    {{#if hasData}}
+                    <a href="#"><button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button></a>
+                    <a href="#"><button type="button"  class="btn btn-primary"  id="clearFiltersBtn">{{t 'common.form.clearFilters'}}</button></a>
+                    <a href="#"><button type="button"  class="btn btn-primary"  id="deleteSelected" disabled>{{t 'common.form.deleteSelected'}}</button></a>
+                    {{/if}}
+                </div>
+            </div>
+            <h3>{{pageTitle}} {{t "common.form.list"}}</h3>
         {{else}}
             <h3>{{t "templates.admin.ResourceList.invalidObject"}}</h3>
         {{/if}}

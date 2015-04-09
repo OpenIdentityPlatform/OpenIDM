@@ -90,6 +90,9 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./login/LoginView",
     
-    "./settings/SettingsView"
+    "./settings/SettingsView",
+    
+    "./role/EditRoleView",
+    "./role/RoleUsersView"
 
 ]);

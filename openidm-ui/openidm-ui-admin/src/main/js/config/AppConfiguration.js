@@ -52,6 +52,12 @@ define("config/AppConfiguration", [
                     }
                 },
                 {
+                    moduleClass: "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
+                    configuration: {
+                        "resource-role" : "org/forgerock/openidm/ui/admin/role/EditRoleView"
+                    }
+                },
+                {
                     moduleClass: "org/forgerock/commons/ui/common/components/Messages",
                     configuration: {
                         messages: {

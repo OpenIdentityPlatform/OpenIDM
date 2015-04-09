@@ -29,176 +29,22 @@
  */
 define("org/forgerock/openidm/ui/common/resource/EditResourceView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
-    "org/forgerock/commons/ui/common/components/Messages"
-], function(AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager) {
+    "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry"
+    
+], function(AbstractView, ResourceEditViewRegistry) {
     var EditResourceView = AbstractView.extend({
-        template: "templates/admin/resource/EditResourceViewTemplate.html",
-        
-        events: {
-            "click #saveBtn": "save",
-            "click #backBtn": "backToList",
-            "click #deleteBtn": "deleteObject",
-            "click #resetBtn": "reset"
-        },
+        events: {},
         render: function(args, callback) {
-            var resourceReadPromise,
-                schemaPromise = resourceDelegate.getSchema(args),
-                objectId = (args[0] === "managed") ? args[2] : args[3];
+            var view,
+                resource = args[1];
             
-            this.data.args = args;
-            
-            this.data.objectType = args[0];
-            this.objectName = args[1];
-
-            if(objectId){
-                resourceReadPromise = resourceDelegate.readEntity(objectId);
-                this.objectId = objectId;
-                this.data.newObject = false;
-            } else {
-                resourceReadPromise = $.Deferred().resolve({});
-                this.data.newObject = true;
+            if (args[0] === "system") {
+                resource += "/" + args[2];
             }
             
-            if (this.data.objectType === "system") {
-                this.objectName += "/" + args[2];
-            }
+            view = ResourceEditViewRegistry.getEditViewModule(resource);
             
-            $.when(resourceReadPromise, schemaPromise).then(_.bind(function(resource, schema){
-                this.data.objectTitle = schema.title || this.objectName;
-                this.parentRender(function(){
-                    this.setupEditor(resource, schema);
-                });
-            },this));
-        },
-        setupEditor: function(resource, schema){
-            var propCount = 0,
-                filteredProperties,
-                filteredObject = resource[0];
-            
-            this.oldObject = filteredObject;
-            
-            filteredProperties = _.omit(schema.properties,function(p) { return !p.viewable; });
-            
-            if(!_.isEmpty(filteredProperties)){
-                filteredObject = _.pick(filteredObject, _.keys(filteredProperties));
-            }
-            
-            JSONEditor.defaults.options = {
-                    theme: "bootstrap3",
-                    iconlib: "fontawesome4",
-                    disable_edit_json: true,
-                    disable_array_reorder: true,
-                    disable_collapse: true,
-                    disable_properties: true,
-                    show_errors: "never"
-            };
-            
-            if(schema.order){
-                _.each(schema.order, _.bind(function(prop){
-                    schema.properties[prop].propertyOrder = propCount++;
-                    if(schema.properties[prop].viewable && !_.has(filteredObject, prop)){
-                        filteredObject[prop] = null;
-                    }
-                }, this));
-            }
-            
-            if (this.data.objectType === "system") {
-                schema.title = this.data.objectTitle;
-                if (this.data.newObject) {
-                    _.each(schema.properties,function(p) {
-                        p.required = true;
-                    });
-                }
-            }
-            
-            this.editor = new JSONEditor(document.getElementById("resource"), { schema: schema });
-            this.editor.setValue(filteredObject);
-            this.addTooltips();
-        },
-        addTooltips: function(){
-            var propertyDescriptionSpan = this.$el.find(".form-control span"),
-                objectHeader = this.$el.find("#resource").find("h3:eq(0)"),
-                objectDescriptionSpan = objectHeader.next();
-            
-            $.each(propertyDescriptionSpan, function(){
-                $(this).after('<i class="fa fa-info-circle info" title="' + $(this).text() + '"/>');
-                $(this).empty();
-            });
-            
-            if(objectDescriptionSpan.text().length > 0){
-                objectHeader.append('<i class="fa fa-info-circle info" title="' + objectDescriptionSpan.text() + '"/>');
-                objectDescriptionSpan.empty();
-            }
-            
-            this.$el.find(".info").popover({
-                content: function () { return $(this).attr("data-original-title");},
-                trigger:'hover',
-                placement:'top',
-                container: 'body',
-                html: 'true',
-                template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
-            });
-        },
-        save: function(e){
-            var formVal = this.editor.getValue(),
-                successCallback = _.bind(function(){
-                    var msg = (this.data.newObject) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess";
-                    messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.objectTitle })});
-                    this.backToList();
-                }, this);
-            
-            e.preventDefault();
-            
-            if(this.data.newObject){
-                resourceDelegate.createEntity(null, formVal, successCallback);
-            } else {
-                /*
-                The following _.each() was placed here to account for JSONEditor.setValue() 
-                turning a property that exists but has a null value into an empty text field. 
-                Upon calling JSONEditor.getValue() the previously null property will be set to and empty string.
-                
-                This loop filters out previously null values that have not been changed.
-                */
-                _.each(_.keys(formVal), function(key){
-                    if(!_.has(this.oldObject, key) && !formVal[key].length){
-                        delete formVal[key];
-                    }
-                }, this);
-                
-                if (this.data.objectType === "managed") {
-                    resourceDelegate.patchEntityDifferences({id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
-                } else {
-                    resourceDelegate.updateEntity(this.oldObject._id, formVal, successCallback);
-                }
-            }
-        },
-        backToList: function(e){
-            var routeName = (this.data.objectType === "managed") ? "adminListManagedObjectView" : "adminListSystemObjectView";
-            
-            if(e){
-                e.preventDefault();
-            }
-            
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: this.data.args});
-        },
-        reset: function(e){
-            e.preventDefault();
-            
-            this.render(this.data.args);
-        },
-        deleteObject: function(e){
-            e.preventDefault();
-            
-            uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.objectTitle }), _.bind(function(){
-                resourceDelegate.deleteEntity(this.objectId, _.bind(function(){
-                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.objectTitle })});
-                    this.backToList();
-                }, this));
-            }, this));
+            view.render(args, callback);
         }
     }); 
     

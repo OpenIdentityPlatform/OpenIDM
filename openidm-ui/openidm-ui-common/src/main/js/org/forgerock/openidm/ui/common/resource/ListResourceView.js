@@ -33,19 +33,21 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
-], function(AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/commons/ui/common/components/Messages"
+], function(AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager) {
     var ListResourceView = AbstractView.extend({
         template: "templates/admin/resource/ListResourceViewTemplate.html",
         
         events: {
             "click #reloadGridBtn": "reloadGrid",
-            "click #clearFiltersBtn": "clearFilters"
+            "click #clearFiltersBtn": "clearFilters",
+            "click #deleteSelected": "deleteSelected"
         },
         
         hasFilters: function(){
             var search = false;
-            $.each($('.ui-search-toolbar').find('input,select'),function(){
+            $.each(this.$el.find('.ui-search-toolbar').find('input,select'),function(){
                 if($(this).val().length > 0){
                     search = true;
                 }
@@ -64,7 +66,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         
         showObject: function(objectId) {
             var args = this.data.args,
-                routeName = (this.data.objectType === "managed") ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+                routeName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
             
             args.push(objectId);
             
@@ -75,7 +77,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         
         clearFilters: function(event){
             var grid_id = this.grid_id_selector,
-                post_data = sessionStorage.getItem(this.data.objectName.replace("/","_") + "ViewGridParams_preTranslation");
+                post_data = sessionStorage.getItem(this.objectNameClean() + "ViewGridParams_preTranslation");
             
             if(post_data){
                 post_data = JSON.parse(post_data);
@@ -126,19 +128,34 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                     this.data.validObject = true;
                     if(schema){
                         this.data.pageTitle = this.data.objectName;
-                        if (schema.title && this.data.objectType === "managed") {
+                        if (schema.title && !this.isSystemResource) {
                             this.data.pageTitle = schema.title;
                         }
                         
                         _.each(schema.properties, _.bind(function(col,colName){
-                            if(col.searchable || this.data.objectType === "system"){
-                                unorderedCols.push(
-                                        {
-                                            "name": colName,
-                                            "label": col.title || colName,
-                                            "formatter": Handlebars.Utils.escapeExpression
-                                        }
-                                );
+                            if(col.searchable || this.isSystemResource){
+                                //if _id is in the schema properties and is searchable get rid of the default
+                                //_id col and replace it with a visible one
+                                if(colName === "_id") {
+                                    cols.splice(0,1); 
+                                    
+                                    unorderedCols.push(
+                                            {
+                                                "name":"_id",
+                                                "key": true,
+                                                "label": col.title || colName,
+                                                "formatter": Handlebars.Utils.escapeExpression
+                                            }
+                                    );
+                                } else {
+                                    unorderedCols.push(
+                                            {
+                                                "name": colName,
+                                                "label": col.title || colName,
+                                                "formatter": Handlebars.Utils.escapeExpression
+                                            }
+                                    );
+                                }
                             }
                         }, this));
                         
@@ -157,7 +174,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         }
                     } else {
                         this.data.pageTitle = this.data.objectName;
-                        $.get(this.getURL() + '?_queryFilter=_id sw ""&_pageSize=1').then(function(qry){
+                        $.get(this.getURL() + '?_queryFilter=true&_pageSize=1').then(function(qry){
                             if(qry.result[0]){
                                 _.each(_.keys(qry.result[0]),function(col){
                                     if(col !== "_id"){
@@ -197,16 +214,46 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             
             return prom;
         },
+        objectNameClean: function() {
+            return this.data.objectName.replace("/","_");
+        },
+        selectedRows: function() {
+            return this.$el.find(this.grid_id_selector).jqGrid('getGridParam','selarrrow');
+        },
+        toggleDeleteSelected: function() {
+            if(this.selectedRows().length === 0) {
+                this.$el.find('#deleteSelected').prop('disabled',true);
+            } else {
+                this.$el.find('#deleteSelected').prop('disabled',false);
+            }
+        },
+        deleteSelected: function(e) {
+            e.preventDefault();
+            
+            uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDeleteSelected",{ objectTitle: this.data.objectName }), _.bind(function(){
+                var promArr = [];
+                _.each(this.selectedRows(), function(objectId) {
+                    promArr.push(resourceDelegate.deleteEntity(objectId));
+                });
+                $.when.apply($,promArr).then(_.bind(function(proms){
+                    this.render(this.data.args, _.bind(function() {
+                        messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess",{ objectTitle: this.data.objectName })});
+                    },this));
+                },this));
+            }, this));
+        },
         
-        render: function(args) {
+        render: function(args, callback) {
             this.data.args = args;
             this.data.addLinkHref = "#resource/" + args[0] + "/" + args[1] + "/add/";
             this.data.objectType = args[0];
             this.data.objectName = args[1];
             this.data.grid_id = args[0] + "ViewTable";
             this.grid_id_selector = "#" + this.data.grid_id;
+            this.isSystemResource = false;
             
             if (this.data.objectType === "system") {
+                this.isSystemResource = true;
                 this.data.objectName += "/" + args[2];
                 this.data.addLinkHref = "#resource/" + args[0] + "/" + args[1] + "/" + args[2] + "/add/";
             }
@@ -219,7 +266,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         var _this = this,
                         grid_id = this.grid_id_selector,
                         pager_id = grid_id + '_pager',
-                        rowNum = sessionStorage.getItem(this.data.objectName.replace("/","_") + "ViewGridRows");
+                        rowNum = sessionStorage.getItem(this.objectNameClean() + "ViewGridRows");
                         
                         uiUtils.buildJQGrid(this, this.data.grid_id, {
                             url: this.getURL(),
@@ -227,20 +274,23 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                             shrinkToFit: cols.length <= 6 || false,
                             rowList: [10,20,50],
                             rowNum: (rowNum) ? parseInt(rowNum, 10) : 10,
-                            sortname: cols[1].name,
+                            sortname: (cols[1] && !this.isSystemResource) ? cols[1].name : cols[0].name,
                             sortorder: 'asc',
                             colModel: cols,
+                            multiselect: true,
                             pager: pager_id,
-                            onCellSelect: function(rowid,iCol,val,e){
-                                var posted_data = $(grid_id).jqGrid('getGridParam','postData');
-                                sessionStorage.setItem(_this.data.objectName.replace("/","_") + "ViewGridParams", JSON.stringify(posted_data));
-                                
-                                if(_this.data.posted_data_preTranslation){
-                                    sessionStorage.setItem(_this.data.objectName.replace("/","_") + "ViewGridParams_preTranslation", JSON.stringify(_this.data.posted_data_preTranslation));
+                            onCellSelect: _.bind(function(rowid,iCol,val,e){
+                                if(iCol !== 0) {
+                                    var posted_data = $(grid_id).jqGrid('getGridParam','postData');
+                                    sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams", JSON.stringify(posted_data));
+                                    
+                                    if(_this.data.posted_data_preTranslation){
+                                        sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams_preTranslation", JSON.stringify(_this.data.posted_data_preTranslation));
+                                    }
+                                    
+                                    _this.showObject(rowid);
                                 }
-                                
-                                _this.showObject(rowid);
-                            },
+                            }, this),
                             jsonReader : {
                                 repeatitems: false,
                                 root: function(obj){ return obj.result; },
@@ -250,7 +300,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                 records: function(obj){ return total.resultCount; }
                             },
                             loadComplete: _.bind(function(data){
-                               var params = sessionStorage.getItem(_this.data.objectName.replace("/","_") + "ViewGridParams_preTranslation");
+                               var params = sessionStorage.getItem(_this.objectNameClean() + "ViewGridParams_preTranslation");
                                if(params){
                                    params = JSON.parse(params);
                                    _.each(cols, function(col){
@@ -264,36 +314,42 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                } 
 
                                
-                               sessionStorage.removeItem(_this.data.objectName.replace("/","_") + "ViewGridParams_preTranslation");
+                               sessionStorage.removeItem(_this.objectNameClean() + "ViewGridParams_preTranslation");
                                
-                               sessionStorage.removeItem(_this.data.objectName.replace("/","_") + "ViewGridParams");
+                               sessionStorage.removeItem(_this.objectNameClean() + "ViewGridParams");
                             }, this),
                             beforeRequest: function(){
                                 var posted_data = $(grid_id).jqGrid('getGridParam','postData');
                                 if(posted_data._queryFilter) {
                                     _this.data.posted_data_preTranslation = _.clone(posted_data);
-                                    sessionStorage.setItem(_this.data.objectName.replace("/","_") + "ViewGridParams_preTranslation", JSON.stringify(posted_data));
+                                    sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams_preTranslation", JSON.stringify(posted_data));
                                 }
                                 _this.gridPage = posted_data.page;
                             },
                             onPaging: function(btn){
                                 if(btn === "records"){
                                     var rows = $('.ui-pg-selbox').val();
-                                    sessionStorage.setItem(_this.data.objectName.replace("/","_") + "ViewGridRows", rows);
+                                    sessionStorage.setItem(_this.objectNameClean() + "ViewGridRows", rows);
                                 }
-                            }
+                            },
+                            onSelectRow: _.bind(function() {
+                                this.toggleDeleteSelected();
+                            }, this),
+                            onSelectAll: _.bind(function() {
+                                this.toggleDeleteSelected();
+                            }, this)
                         }, 
                         { 
                             search: true,
                             searchOperator: "sw",
                             suppressColumnChooser: true,
-                            storageKey: this.data.objectName.replace("/","_"),
+                            storageKey: this.objectNameClean(),
                             serializeGridData: function(view, posted_data){
-                                var cachedParams = sessionStorage.getItem(_this.data.objectName.replace("/","_") + "ViewGridParams");
+                                var cachedParams = sessionStorage.getItem(_this.objectNameClean() + "ViewGridParams");
                                 if(cachedParams && JSON.parse(cachedParams)._queryFilter){
                                     return JSON.parse(cachedParams)._queryFilter;
                                 } else {
-                                    if(_this.data.objectType === "system") {
+                                    if(_this.isSystemResource) {
                                         return cols[1].name + ' sw ""';
                                     } else {
                                         return '_id sw ""';
@@ -302,6 +358,10 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                             },
                             columnChooserOptions: { height: "auto", width: "auto" }
                         });
+                        
+                        if(callback) {
+                            callback();
+                        }
                     });
                 } else {
                     this.parentRender();

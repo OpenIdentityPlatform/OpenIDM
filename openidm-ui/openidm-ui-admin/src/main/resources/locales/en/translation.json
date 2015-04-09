@@ -106,7 +106,8 @@
                     "startProcess" : "Start process",
                     "resources" : "Resources",
                     "mapping" : "Mappings",
-                    "authentication": "Authentication"
+                    "authentication": "Authentication",
+                    "roles": "Roles"
                 }
             }
         }
@@ -222,16 +223,35 @@
             "ResourceEdit":
             {
                 "confirmDelete": "Are you sure you want to delete this __objectTitle__?",
+                "confirmDeleteSelected": "Are you sure you want to delete the selected __objectTitle__s?",
                 "backToList": "Back to List",
                 "addSuccess": "Successfully added __objectTitle__",
                 "editSuccess": "Successfully updated __objectTitle__",
                 "deleteSuccess": "Successfully deleted __objectTitle__",
-                "noData": "No Data"
+                "deleteSelectedSuccess": "Successfully deleted selected __objectTitle__s",
+                "noData": "No Data",
+                "data": "Data"
             },
             "ResourceList":
             {
                 "noData": "No Data",
                 "invalidObject": "Invalid Object"
+            },
+            "RoleUsersTemplate":
+            {
+                "addSelectedSuccess": "Successfully added users to __roleId__",
+                "removeSelectedSuccess": "Successfully removed users from __roleId__",
+                "details": "Details",
+                "users": "Users",
+                "removeUsers": "Remove Users",
+                "addUsers": "Add Users",
+                "details": "Details",
+                "description": "Description",
+                "roleName": "Role Name",
+                "backToRoles": "Back to Roles",
+                "role": "Role",
+                "newRole": "New Role"
+                
             }
         },
         "managed" : {
@@ -926,6 +946,7 @@
             "continue" : "Continue",
             "back" : "Back",
             "delete" : "Delete",
+            "deleteSelected" : "Delete Selected",
             "edit" : "Edit",
             "details" : "Details",
             "pleaseSelect" : "Please Select",
