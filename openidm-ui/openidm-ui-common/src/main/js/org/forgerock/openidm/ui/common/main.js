@@ -29,6 +29,8 @@ define("org/forgerock/openidm/ui/common/main", [
     
     "./resource/ListResourceView",
     "./resource/EditResourceView",
+    "./resource/GenericEditResourceView",
+    "./resource/ResourceEditViewRegistry",
     
     "./delegates/ConfigDelegate",
     "./delegates/InternalUserDelegate",
