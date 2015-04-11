@@ -94,7 +94,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             var passwordValid = validatorsManager.formValidated(this.$el.find("#passwordChange")),
                 passwordSet = this.$el.find("#password").val().length > 0 || this.$el.find("#passwordConfirm").val().length > 0,
                 securityValid = validatorsManager.formValidated(this.$el.find("#securityDataChange")),
-                securityAnswerSet = this.$el.find("#securityAnswer").val().length > 0;
+                securityAnswerSet = this.$el.find("#securityAnswer").length > 0 && this.$el.find("#securityAnswer").val().length > 0;
 
             // Either a password or a security answer must be provided and the option that is not provided must be empty or valid
             if (
