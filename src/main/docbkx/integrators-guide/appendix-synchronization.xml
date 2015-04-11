@@ -28,7 +28,8 @@
  version="5.0"
  xml:lang="en"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xsi:schemaLocation="http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd"
  xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Synchronization Reference</title>
  <indexterm>
@@ -52,20 +53,22 @@
   </para>
   
   <programlisting language="javascript"> {
-  "name"            : <replaceable>string</replaceable>,
-  "source"          : <replaceable>string</replaceable>,
-  "target"          : <replaceable>string</replaceable>,
-  "links"           : <replaceable>string</replaceable>,
-  "validSource"     : <replaceable>script object</replaceable>,
-  "validTarget"     : <replaceable>script object</replaceable>,
-  "correlationQuery": <replaceable>script object</replaceable>,
-  "properties"      : [ <replaceable>property object</replaceable>, ... ],
-  "policies"        : [ <replaceable>policy object</replaceable>, ... ],
-  "onCreate"        : <replaceable>script object</replaceable>,
-  "onUpdate"        : <replaceable>script object</replaceable>,
-  "onLink"          : <replaceable>script object</replaceable>,
-  "onUnlink"        : <replaceable>script object</replaceable>,
-  "result"          : <replaceable>script object</replaceable>
+  "name"             : <replaceable>string</replaceable>,
+  "source"           : <replaceable>string</replaceable>,
+  "target"           : <replaceable>string</replaceable>,
+  "links"            : <replaceable>string</replaceable>,
+  "validSource"      : <replaceable>script object</replaceable>,
+  "validTarget"      : <replaceable>script object</replaceable>,
+  "correlationQuery" : <replaceable>script object</replaceable>,
+  "correlationScript": <replaceable>script object</replaceable>,
+  "linkQualifier"    : <replaceable>script object</replaceable>,
+  "properties"       : [ <replaceable>property object</replaceable>, ... ],
+  "policies"         : [ <replaceable>policy object</replaceable>, ... ],
+  "onCreate"         : <replaceable>script object</replaceable>,
+  "onUpdate"         : <replaceable>script object</replaceable>,
+  "onLink"           : <replaceable>script object</replaceable>,
+  "onUnlink"         : <replaceable>script object</replaceable>,
+  "result"           : <replaceable>script object</replaceable>
 }</programlisting>
 
   <para>
@@ -149,6 +152,21 @@
        Existing Target Objects</citetitle></link> for examples of some common
       targets. The source object is provided in the <literal>"source"</literal>
       property in the script scope.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>correlationScript</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>
+      A script that goes beyond a <literal>correlationQuery</literal> query of
+      a target system. Used when you need another method to determine which
+      records in the target system relate to the given source record. The syntax
+      depends on the target of the correlation. See the section on
+      <link xlink:show="new" xlink:href="integrators-guide#correlation-scripts"
+            xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlation
+      Scripts</citetitle></link> to see how it fits into a mapping.
      </para>
     </listitem>
    </varlistentry>
