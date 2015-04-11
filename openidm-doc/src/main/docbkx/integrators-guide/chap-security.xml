@@ -1150,7 +1150,8 @@ password=<replaceable>password</replaceable></programlisting>
   <para>
    Use a case sensitive database, particularly if you work with systems with
    different identifiers that match except for case. Otherwise correlation
-   queries can pick up identifiers that should not be considered the same.
+   queries or correlation scripts can pick up identifiers that should not be
+   considered the same.
   </para>
  </section>
 

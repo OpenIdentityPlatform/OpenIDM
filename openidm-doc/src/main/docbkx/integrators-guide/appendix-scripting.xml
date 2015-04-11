@@ -28,7 +28,8 @@
   xml:lang="en"
   xmlns="http://docbook.org/ns/docbook"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+  xsi:schemaLocation="http://docbook.org/ns/docbook
+  http://docbook.org/xml/5.0/xsd/docbook.xsd"
   xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Scripting Reference</title>
   <indexterm>
@@ -1533,7 +1534,7 @@ logger = LoggerFactory.getLogger('logger');
           <term>Triggered when correlating objects</term>
           <listitem>
            <para>
-            correlationQuery
+            correlationQuery, correlationScript
            </para>
           </listitem>
          </varlistentry>
@@ -1617,9 +1618,25 @@ logger = LoggerFactory.getLogger('logger');
        </listitem>
       </varlistentry>
       <varlistentry>
+       <term>correlationScript</term>
+       <listitem>
+        <para>source</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
        <term>Custom endpoint scripts</term>
        <listitem>
         <para>request</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>linkQualifier</term>
+       <listitem>
+        <para>target</para>
+        <para>
+         Often used to qualify objects for a <literal>correlationQuery</literal>,
+         a <literal>correlationScript</literal>, or a policy.
+        </para>
        </listitem>
       </varlistentry>
       <varlistentry>

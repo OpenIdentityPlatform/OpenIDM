@@ -92,7 +92,8 @@
   <para>
    You can customize the configuration of connectors, managed objects,
    mapping between resources, and more. You can add and edit properties to be
-   synchronized, configure correlation queries, and enable LiveSync.
+   synchronized, configure correlation queries, set up correlation scripts,
+   and enable LiveSync.
   </para>
 
   <para>
@@ -361,10 +362,11 @@
    </para>
    <para>
     You can create and remove link qualifiers on this screen, and use them when
-    you define correlation queries, or in transformation scripts to set the
-    attribute values on target systems. The link qualifiers that you create here
-    are added to your mapping (<filename>conf/sync.json</filename>) file. For
-    more information about link qualifiers, see <link xlink:show="new"
+    you define correlation queries, set up correlation scripts, or use
+    transformation scripts to set the attribute values on target systems. The
+    link qualifiers that you create here are added to your mapping
+    (<filename>conf/sync.json</filename>) file. For more information about link
+    qualifiers, see <link xlink:show="new"
     xlink:href="integrators-guide#mapping-link-qualifiers"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Link
     Qualifiers in a Mapping</citetitle></link>.
@@ -472,24 +474,53 @@
      records.
     </para>
     <para>
-     The Association tab in the UI enables you to create correlation queries
-     and to associate source and target objects manually.
+     The Association tab in the UI enables you to create correlation queries, or
+     set up correlation scripts, and to associate source and target objects
+     manually.
     </para>
     <para>
      Before you define a correlation query, you must specify at least one link
      qualifier on the <emphasis>Properties</emphasis> panel (as described in the
-     previous section). To configure a correlation query for a mapping, use the
-     Expression Builder, type your JavaScript or Groovy script inline, or
-     reference a file. For more information about correlation, see the section
+     previous section). To configure a correlation query for a mapping you can
+     use the Expression Builder.
+    </para>
+
+    <mediaobject>
+     <alt>Admin UI Screen, Correlation Queries</alt>
+     <imageobject>
+      <imagedata fileref="images/admin-ui-corr.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+
+    <para>
+     Instead of a correlation query, you can set up a correlation script. In
+     a correlation script, you can include the logic otherwise associated with
+     a link qualifier.
+    </para>
+
+    <mediaobject>
+     <alt>Admin UI Screen, Correlation Scripts</alt>
+     <imageobject>
+      <imagedata fileref="images/admin-ui-corr-script.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+
+    <para>
+     For either a correlation query or a correlation script, you can type your
+     JavaScript or Groovy script inline, or otherwise reference a pre-existing
+     script file.
+    </para>
+    <para>
+     For more information about correlation, see the section
      on <link xlink:href="integrators-guide#correlation" xlink:show="new"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+              xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
      Existing Target Objects</citetitle></link>. If there is more than one
      potential target object that should be linked to each source object, use
      the Link Qualifier field to indicate how OpenIDM should create links to
      each target object. For more information about mapping to multiple
      accounts, see <link xlink:show="new"
-     xlink:href="integrators-guide#correlating-multiple-targets"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
+                         xlink:href="integrators-guide#correlating-multiple-targets"
+                         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
      Multiple Target Objects</citetitle></link>.
     </para>
     <para>
@@ -499,13 +530,6 @@
      future reconciliation operations, and they serve as a record of the
      relationship between a source and a target entry.
     </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Correlation Queries</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-corr.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
 
     <para>
      The association rules that are configured in the previous section enable
@@ -717,9 +741,9 @@
 
     <para>
      Once you've set up Reconciliation based on configured properties,
-     correlation queries, and a synchronization schedule, you can start the
-     synchronization process. Try it out! You'll see the results in the target
-     data store.
+     correlation queries or correlation scripts, and a synchronization schedule,
+     you can start the synchronization process. Try it out! You'll see the
+     results in the target data store.
     </para>
 
     <para>
@@ -1637,21 +1661,22 @@
 
    <para>
     You can also set up new custom colors. For that purpose, copy the
-    <filename>variables.less</filename> file from the
+    <filename>idm-variables.less</filename> file from the
     <filename>openidm/ui/default/admin/public/css/common/</filename>
     directory to the <filename>openidm/ui/extension/css/common</filename>
     directory.
    </para>
 
    <para>
-    You can then make changes to the <filename>variables.less</filename> file
+    You can then make changes to the <filename>idm-variables.less</filename> file
     that you just copied. Any changes that you make affects both the Admin and
     Data Management UIs.
    </para>
 
    <note>
     <para>
-     OpenIDM includes two versions of the <filename>variables.less</filename> file.
+     OpenIDM includes two similarly named files: the
+     <filename>idm-variables.less</filename> file.
      One is stored in the <filename>public/css/common</filename> subdirectory. The
      other comes from a Font Awesome download, and can be found in the
      <filename>public/css/fontawesome/less</filename> subdirectory.
