@@ -1,0 +1,84 @@
+<p class="panel-description">{{note}}</p>
+
+<div id="policySettingsTabs" class="tab-menu">
+    <ul class="nav nav-tabs">
+        <li class="" id="restrictToTab"><a data-toggle="tab" href="#restrict">{{t "templates.situationalPolicies.conditionPhrase"}}</a></li>
+        <li class="active" id="actionTab"><a data-toggle="tab" href="#action">{{t "templates.situationalPolicies.actionPhrase"}}</a></li>
+        <li class="" id="actionCompleteTab"><a data-toggle="tab" href="#actionComplete">{{t "templates.situationalPolicies.onCompletePhrase"}}</a></li>
+    </ul>
+</div>
+
+<div class="tab-content no-border panel-body">
+    <div id="restrict" class="tab-pane" role="tabpanel">
+        <p class="panel-description">{{t "templates.situationalPolicies.restrictHelp"}}</p>
+
+        <form class="form">
+
+            <div class="btn-group btn-group-tabs tabButtons" data-toggle="buttons" role="tablist">
+                <a role="presentation" id="conditionFilterTab" class="btn btn-default{{#if defaultConditionFilter}} active{{/if}}" href="#conditionFilterPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.filter"}}</a>
+                <a role="presentation" id="conditionScriptTab" class="btn btn-default{{#if defaultConditionScript}} active{{/if}}" href="#conditionScriptPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.script"}}</a>
+            </div>
+
+            <div class="tab-content no-border row">
+                <div class="tab-pane col-md-12 filter-form form-horizontal{{#if defaultConditionFilter}} active{{/if}}" id="conditionFilterPane"></div>
+
+                <div class="tab-pane col-md-12{{#if defaultConditionScript}} active{{/if}}" id="conditionScriptPane"></div>
+            </div>
+        </form>
+
+    </div>
+
+    <div id="action" class="tab-pane active" role="tabpanel">
+        <p class="panel-description">{{t "templates.situationalPolicies.actionHelp"}}</p>
+
+        <form class="form">
+
+            <div class="btn-group btn-group-tabs tabButtons" data-toggle="buttons" role="tablist">
+                <a role="presentation" id="defaultActionTab" class="btn btn-default{{#if defaultAction}} active{{/if}}" href="#defaultActionPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.defaultAction"}}</a>
+                <a role="presentation" id="workflowTab" class="btn btn-default{{#if defaultWorkflow}} active{{/if}}" href="#workflowPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.workflow"}}</a>
+                <a role="presentation" id="scriptTab" class="btn btn-default{{#if defaultScript}} active{{/if}}" href="#scriptPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.script"}}</a>
+            </div>
+
+            <div class="tab-content no-border row">
+                <div class="tab-pane col-md-6{{#if defaultAction}} active{{/if}}" id="defaultActionPane">
+                    <select class="form-control" aria-describedby="helpBlock">
+                        <option value="CREATE">Create</option>
+                        <option value="UPDATE">Update</option>
+                        <option value="DELETE">Delete</option>
+                        <option value="LINK">Link</option>
+                        <option value="UNLINK">Unlink</option>
+                        <option value="EXCEPTION">Exception</option>
+                        <option value="IGNORE">Ignore</option>
+                        <option value="REPORT">Report</option>
+                        <option value="NOREPORT">No Report</option>
+                        <option value="ASYNC">Async</option>
+                    </select>
+
+                    <span id="helpBlock" class="help-block">{{t "templates.situationalPolicies.activeHelp"}}</span>
+                    <div>
+                        <span class="select-key">★ {{t "templates.situationalPolicies.starDef"}}</span>
+                        <span class="select-key">☆ {{t "templates.situationalPolicies.hollowStarDef"}}</span>
+                    </div>
+                </div>
+
+                <div class="tab-pane col-md-6{{#if defaultWorkflow}} active{{/if}}" id="workflowPane">
+                    <select class="form-control">
+                        {{#each workflows}}
+                        <option value="{{this.key}}">{{this.name}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                <div class="tab-pane col-md-12{{#if defaultScript}} active{{/if}}" id="scriptPane"></div>
+
+            </div>
+        </form>
+
+    </div>
+
+    <div id="actionComplete" class="tab-pane" role="tabpanel">
+        <p class="panel-description">{{t "templates.situationalPolicies.actionCompleteHelp"}}</p>
+
+        <div id="postActionScript"></div>
+    </div>
+</div>

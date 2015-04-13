@@ -1,53 +1,79 @@
-<form id="authenticationForm" class="form clearfix form-policy-editor form-horizontal" autocomplete="off">
+<form id="situationalPolicies" class="form clearfix form-policy-editor form-horizontal" autocomplete="off">
     <div class="row">
         <div class="col-sm-12">
             <div class="form-group form-group-header policyInformation">
                 <label class="control-label">{{t "templates.situationalPolicies.currentPolicy"}}</label>
-                <select id="policyPatterns" class="form-control"></select>
+                <select id="policyPatterns" class="form-control">
+                    {{#each patternNames}}
+                    <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
                 <span id="patternDescription"class="help-block"></span>
             </div>
         </div>
     </div>
 
-    <div id="sessionModuleForm" class="group-body row">
-        <div id="situationCopy" class="col-sm-6 situationRow group-field-block">
-
-            <label class="col-xs-5 situation">
-                <i class="fa color fa-circle"></i>
-                <span>{{t "templates.situationalPolicies.situation"}}</span>
-            </label>
-
-            <div class="col-xs-7">
-                <div class="row">
-                    <select class="col-xs-10 form-control action">
-                        <option value="CREATE">Create</option>
-                        <option value="UPDATE">Update</option>
-                        <option value="DELETE">Delete</option>
-                        <option value="LINK">Link</option>
-                        <option value="UNLINK">Unlink</option>
-                        <option value="EXCEPTION">Exception</option>
-                        <option value="IGNORE">Ignore</option>
-                        <option value="REPORT">Report</option>
-                        <option value="NOREPORT">No Report</option>
-                        <option value="ASYNC">Async</option>
-                    </select>
-                    <button type="button" class="btn btn-link btn-policy-info col-xs-2" data-original-title="" title="">
-                        <i data-title="" class="fa fa-info-circle info"></i>
-                    </button>
-                </div>
-            </div>
-
-        </div>
+    <div class="table-responsive">
+        <table class="group-field-block table">
+            <thead>
+            <tr>
+                <th class=""></th>
+                <th class="col-sm-3">{{t "templates.situationalPolicies.situation"}}</th>
+                <th class="col-sm-2">{{t "templates.situationalPolicies.condition"}}</th>
+                <th class="col-sm-3">{{t "templates.situationalPolicies.action"}}</th>
+                <th class="col-sm-2">{{t "templates.situationalPolicies.onComplete"}}</th>
+                <th class=""></th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#each policies}}
+            <tr data-script-type="validSource" class="event-hook">
+                <td>
+                    <i class="fa color fa-circle {{this.severity}}"></i>
+                </td>
+                <td>
+                    <span class="situation">{{this.situation}}</span>
+                    <i data-title="{{this.note}}" class="fa fa-info-circle note" data-original-title="" title=""></i>
+                </td>
+                <td><em>{{this.displayCondition}}</em></td>
+                <td>
+                    {{#if this.emphasize}}<em>({{/if}}{{this.displayAction}}{{#if this.defaultActionStar}}{{{../../star}}}{{/if}}{{#if this.defaultActionHollow}}{{{../../hollowStar}}}{{/if}}{{#if this.emphasize}})</em>{{/if}}
+                </td>
+                <td><em>{{this.displayPostAction}}</em></td>
+                <td>
+                    <button class="btn btn-link edit-policy"><i class="fa fa-pencil"></i></button>
+                    <button class="btn btn-link delete-policy{{#if disabled}} disabled{{/if}}"><i class="fa fa-times"></i></button>
+                </td>
+            </tr>
+            {{/each}}
+            </tbody>
+        </table>
     </div>
 
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group form-group-header">
+                <select class="form-control situation-list">
+                    {{#each situations}}
+                    <option value="{{value}}">{{readable}}</option>
+                    {{/each}}
+                </select>
+                <button type="submit" class="btn btn-primary add-policy"><i class="fa fa-plus"></i> {{t "templates.situationalPolicies.addPolicyBtn"}}</button>
+                <div>
+                    <span class="select-key">{{{star}}} {{t "templates.situationalPolicies.starDef"}}</span>
+                    <span class="select-key">{{{hollowStar}}} {{t "templates.situationalPolicies.hollowStarDef"}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
 
-<p class="text-muted">{{{star}}} {{t "templates.situationalPolicies.starDef"}}</p>
-<p class="text-muted">{{{hollowStar}}} {{t "templates.situationalPolicies.hollowStarDef"}}</p>
+<div class="panel clearfix">
+    <div role="alert" class="{{#if changes}}changesPending {{/if}}alert alert-warning situationalPolicyChanges">
+        <i class="fa fa-exclamation-circle"></i><strong>{{t 'common.form.warning'}}!</strong>
+        <span class="message">{{t "templates.situationalPolicies.pendingChanges"}}</span>
+    </div>
 
-<div class="panel-footer">
-    <input type="button" class="pull-right btn btn-primary savePolicy" value="{{t 'common.form.save'}}" />
+    <input type="button" class="pull-right btn btn-primary savePolicy" {{#unless changes}}disabled {{/unless}}value="{{t 'common.form.save'}}" />
+    <input type="button" class="pull-right btn btn-default reset" {{#unless changes}}disabled {{/unless}}value="{{t 'common.form.reset'}}" />
 </div>
-
-
-

@@ -1,0 +1,57 @@
+#policyPatternBody {
+  .reset {
+    margin-right:5px;
+  }
+  .select-key {
+    margin: 15px 5px 0 0;
+    display: inline-block;
+  }
+  .situationalPolicyChanges {
+    display: none;
+  }
+  .changesPending {
+    display: block;
+  }
+  table {
+    thead {
+      tr {
+        th {
+          text-transform: uppercase;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        &.event-hook:hover{
+          background-color: #F7F7F7;
+        }
+
+        td {
+          vertical-align: inherit;
+
+          &:last-child {
+            button {
+              padding: 6px 3px;
+              i {
+                margin-left: 0;
+                width: auto;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+#SituationPolicyDialog {
+
+  .tab-pane {
+    padding-top: 15px;
+  }
+
+  .tab-content.no-border{
+    border: none;
+  }
+}

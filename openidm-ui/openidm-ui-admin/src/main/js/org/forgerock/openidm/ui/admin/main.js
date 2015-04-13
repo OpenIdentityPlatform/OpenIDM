@@ -34,6 +34,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./delegates/SearchDelegate",
     "./delegates/ReconDelegate",
     "./delegates/SecurityDelegate",
+    "./delegates/WorkflowDelegate",
     "./delegates/ScriptDelegate",
 
     "./ResourcesView",
@@ -72,6 +73,7 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./sync/SyncView",
     "./sync/SituationPolicyView",
+    "./sync/SituationPolicyDialogView",
     "./sync/CorrelationView",
     "./sync/AnalysisView",
     "./sync/ObjectFiltersView",
