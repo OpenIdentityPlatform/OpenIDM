@@ -25,56 +25,29 @@
 /*global define, $, _, Handlebars, form2js, window */
 
 define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
-    "org/forgerock/openidm/ui/admin/util/AbstractScriptEditor",
-    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "libs/codemirror/lib/codemirror",
-    "libs/codemirror/mode/groovy/groovy",
-    "libs/codemirror/mode/javascript/javascript",
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "bootstrap-dialog"
-], function(AbstractScriptEditor, constants, conf, uiUtils, validatorsManager, codeMirror, groovyMode, jsMode, BootstrapDialog) {
-    var ScriptDialog= AbstractScriptEditor.extend({
+], function(AbstractView, conf, uiUtils, validatorsManager, InlineScriptEditor,  BootstrapDialog) {
+    var ScriptDialog= AbstractView.extend({
         element: "#dialogs",
         events: {
-            "onValidate": "onValidate",
-            "change input[type='radio']" : "localScriptChange",
-            "click #addPassedVariables" : "addPassedVariable",
-            "click #passedVariablesHolder .remove-btn" : "deletePassedVariable",
-            "customValidate": "customValidate",
-            "change .event-select" : "changeRenderMode"
+
         },
-        model : {
-            setScript: null,
-            scriptData: null,
-            noValidation: false,
-            disablePassedVariable: false,
-            placeHolder: null,
-            codeMirrorHeight: "240px"
+        data : {
+
         },
 
         render: function (args, callback) {
             var _this = this;
 
-            this.data = {};
-
-            this.model = _.extend(this.model, args);
-
-            this.data = _.pick(this.model, "setScript", "scriptData", "placeHolder");
-
-            if (!this.model.disablePassedVariable && this.model.scriptData) {
-                this.data.passedVariables = args.scriptData.globals ||
-                    _.omit(args.scriptData, "file", "source", "type");
-            }
-
-            if (args.saveCallback) {
-                this.saveCallback = args.saveCallback;
-            }
-
             this.currentDialog = $('<form id="scriptManagerDialogForm"></form>');
 
             $('#dialogs').append(this.currentDialog);
+
             this.setElement(this.currentDialog);
 
             BootstrapDialog.show({
@@ -83,37 +56,21 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
                 onshown : function (dialogRef) {
-                    uiUtils.renderTemplate(_this.template, _this.$el, _.extend({}, conf.globalData, _this.data), _.bind(function () {
-                        var mode = this.$el.find("select").val();
+                    args.element = _this.$el;
+                    args.validationCallback = _.bind(function(){
 
-                        if (mode === "text/javascript") {
-                            mode = "javascript";
+                        if(validatorsManager.formValidated(this.$el)) {
+                            $("#scriptDialogOkay").prop("disabled", false);
+                        } else {
+                            $("#scriptDialogOkay").prop("disabled", true);
                         }
+                    }, _this);
 
-                        this.cmBox = codeMirror.fromTextArea(_this.$el.find(".scriptSourceCode")[0], {
-                            lineNumbers: true,
-                            mode: mode
-                        });
-
-                        this.cmBox.setSize(this.model.codeMirrorWidth, this.model.codeMirrorHeight);
-
-                        this.cmBox.on("changes", _.bind(function () {
-                            this.cmBox.save();
-                            this.$el.find(".scriptSourceCode").trigger("blur");
-                        }, this));
-
-                        if (this.$el.find("input[name=scriptType]:checked").val() !== "inline-code") {
-                            this.cmBox.setOption("readOnly", "nocursor");
-                            this.$el.find(".inline-code").toggleClass("code-mirror-disabled");
+                    _this.scriptEditor = InlineScriptEditor.generateScriptEditor(args, _.bind(function(){
+                        if(callback) {
+                            callback();
                         }
-
-                        validatorsManager.bindValidators(this.$el);
-                        validatorsManager.validateAllFields(this.$el);
-
-                        if (this.data.scriptData && this.data.scriptData.source) {
-                            this.$el.find("#inlineHeading input[type='radio']").trigger("change");
-                        }
-                    }, _this), "replace");
+                    },  _this));
                 },
                 buttons: [{
                     label: $.t("common.form.cancel"),
@@ -127,54 +84,19 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                     cssClass: "btn-primary",
                     action: _.bind(function(dialogRef) {
                         this.generateScript();
+
                         if (this.saveCallback) {
                             this.saveCallback();
                         }
+
                         dialogRef.close();
                     }, _this)
                 }]
             });
-
-            if(callback) {
-                callback();
-            }
-        },
-
-        localScriptChange: function (event) {
-            this.scriptSelect(event, this.cmBox);
         },
 
         generateScript: function() {
-            var currentSelection = this.$el.find("input[name=scriptType]:checked").val(),
-                scriptObject = {},
-                inputs;
-
-            scriptObject.type = this.$el.find("select").val();
-            scriptObject.globals = {};
-
-            if(currentSelection === "file-code") {
-                scriptObject.file = this.$el.find("input[type='text']").val();
-            } else {
-                scriptObject.source =  this.$el.find("textarea").val();
-            }
-
-            _.each(this.$el.find(".passed-variable-block:visible"), function(passedBlock) {
-                inputs = $(passedBlock).find("input[type=text]");
-
-                scriptObject.globals[$(inputs[0]).val()] = $(inputs[1]).val();
-            }, this);
-
-            if(this.data.setScript) {
-                this.data.setScript({"scriptObject":scriptObject, "hookType":currentSelection});
-            }
-        },
-
-        customValidate: function () {
-            if(validatorsManager.formValidated(this.$el)) {
-                $("#scriptDialogOkay").prop("disabled", false);
-            } else {
-                $("#scriptDialogOkay").prop("disabled", true);
-            }
+            return this.scriptEditor.generateScript();
         }
     });
 
