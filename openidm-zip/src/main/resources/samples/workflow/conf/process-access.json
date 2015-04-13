@@ -13,6 +13,13 @@
                 "matches" : "Contractor onboarding process",
                 "requiresRole" : "manager"
             }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : "chess",
+                "requiresRole" : "openidm-authorized"
+            }
         }
     ]
 }
