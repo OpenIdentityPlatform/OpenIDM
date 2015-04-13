@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,256 +31,529 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
-], function(AbstractView, conf, constants, eventManager, uiUtils, ConfigDelegate, BrowserStorageDelegate) {
-    var SituationPolicyView = AbstractView.extend({
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/WorkflowDelegate",
+    "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView",
+    "bootstrap-dialog"
+], function(
+    AbstractView,
+    conf,
+    constants,
+    eventManager,
+    uiUtils,
+    ConfigDelegate,
+    BrowserStorageDelegate,
+    WorkflowDelegate,
+    SituationPolicyDialog,
+    BootstrapDialog) {
 
+    var SituationPolicyView = AbstractView.extend({
         element: "#policyPattern",
         noBaseTemplate: true,
         template: "templates/admin/sync/SituationPolicyViewTemplate.html",
         events: {
-            "change #policyPatterns": "setPolicies",
-            "change .action": "updatePattern",
-            "click .savePolicy": "save"
+            "change #policyPatterns": "setPattern",
+            "click .savePolicy": "save",
+            "click .reset": "reset",
+            "click .add-policy": "addPolicy",
+            "click .delete-policy": "deletePolicy",
+            "click .edit-policy": "editPolicy"
         },
         data: {
             star: "&#9733;",
-            hollowStar: "&#9734;"
+            hollowStar: "&#9734;",
+            policies:[],
+            docHelpUrl: "",
+            patternNames: [],
+            situations: [],
+            changes: false
         },
         model: {
             successMessage: "triggeredBySituationSaveSuccess",
-            allPatterns: [],
             currentPattern: "",
             lookup: {
-                situations: {
-                    "SOURCE_MISSING": "Source Missing",
-                    "ALL_GONE": "All Gone",
-                    "SOURCE_IGNORED": "Source Ignored",
-                    "UNQUALIFIED": "Unqualified",
-                    "AMBIGUOUS": "Ambiguous",
-                    "FOUND_ALREADY_LINKED": "Found Already Linked",
-                    "CONFIRMED": "Confirmed",
-                    "UNASSIGNED": "Unassigned",
-                    "LINK_ONLY": "Link Only",
-                    "TARGET_IGNORED": "Target Ignored",
-                    "MISSING": "Missing",
-                    "ABSENT": "Absent",
-                    "FOUND": "Found"
-                },
-                actions: {
-                    "IGNORE": "Ignore",
-                    "DELETE": "Delete",
-                    "UNLINK": "Unlink",
-                    "EXCEPTION": "Exception",
-                    "REPORT": "Report",
-                    "NOREPORT": "No Report",
-                    "ASYNC": "Async",
-                    "CREATE": "Create",
-                    "UPDATE": "Update"
-                }
+                "SOURCE_MISSING": "Source Missing",
+                "ALL_GONE": "All Gone",
+                "SOURCE_IGNORED": "Source Ignored",
+                "UNQUALIFIED": "Unqualified",
+                "AMBIGUOUS": "Ambiguous",
+                "FOUND_ALREADY_LINKED": "Found Already Linked",
+                "CONFIRMED": "Confirmed",
+                "UNASSIGNED": "Unassigned",
+                "LINK_ONLY": "Link Only",
+                "TARGET_IGNORED": "Target Ignored",
+                "MISSING": "Missing",
+                "ABSENT": "Absent",
+                "FOUND": "Found",
+                "IGNORE": "Ignore",
+                "DELETE": "Delete",
+                "UNLINK": "Unlink",
+                "EXCEPTION": "Exception",
+                "REPORT": "Report",
+                "NOREPORT": "No Report",
+                "ASYNC": "Async",
+                "CREATE": "Create",
+                "UPDATE": "Update"
 
-            }
+            },
+            sync: {},
+            mapping: {},
+            mappingName: {},
+            saveCallback: {},
+            allPatterns: [],
+            baseSituations: {}
         },
 
-        /***
-         * @param args {object}
-         *      sync {object}
-         *      mapping {object}
-         *      mappingName {string}
-         *
-         */
         render: function(args, callback) {
+            this.data.policies = [];
+            this.data.patternNames = [];
+            this.data.docHelpUrl = constants.DOC_URL;
+            this.data.situations = [];
+            this.data.changes = false;
+
             this.model.sync = args.sync;
             this.model.mapping = args.mapping;
             this.model.mappingName = args.mappingName;
-            this.data.docHelpUrl = constants.DOC_URL;
             this.model.saveCallback = args.saveCallback;
+            this.model.callback = callback;
+            this.model.renderedPolicies = args.policies || _.clone(this.model.mapping.policies, true);
+            this.model.workflows = [];
 
-            this.parentRender(function () {
-                this.getPatterns().then(function() {
+            var finishSetup = function() {
+                _.sortBy(this.model.workflows, function(workflow) { return workflow.name; });
+
+                this.setPolicies(this.model.renderedPolicies);
+
+                this.parentRender(function () {
                     if (callback) {
                         callback();
                     }
+
+                    this.$el.find(".note").popover({
+                        content: function () {
+                            return $(this).attr("data-title");
+                        },
+                        trigger: 'hover click',
+                        placement: 'top',
+                        html: 'true',
+                        template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+                    });
+
+                    this.$el.find("#policyPatterns").val(this.model.currentPattern);
+                    this.$el.find("#patternDescription").text(this.model.allPatterns[this.model.currentPattern].description);
                 });
-            });
-        },
+            };
 
-        getPatterns: function() {
-            var currentPattern = [],
-                currentPolicy = [],
-                patternFound = false;
-
-            function policySorter(policy) {
-                return policy.situation;
+            if (args.changes) {
+                this.data.changes = true;
             }
 
+            $.when(this.getPatterns(), WorkflowDelegate.availableWorkflows()).then(_.bind(function(pattern, workflowData) {
+                _(workflowData[0].result).each(function(workflow) {
+                    this.model.workflows.push({
+                        name: workflow.name,
+                        key: workflow.key
+                    });
+                }, this);
+
+                _.bind(finishSetup, this)();
+            }, this), _.bind(finishSetup, this));
+        },
+
+        /**
+         * Takes an array of properties, detects if that new properties list differes from the saved version and rerenders the ui with these new values.
+         */
+        reRender: function(newPolicies) {
+            var changes = true,
+                newPoliciesFilledIn = [],
+                newPoliciesList = [],
+                systemPoliciesList = [],
+                systemPolicies = {},
+                temp;
+
+            _(this.model.mapping.policies).each(function(policy) {
+                if (_(systemPolicies[policy.situation]).isArray()) {
+                    systemPolicies[policy.situation].push(policy);
+                } else {
+                    systemPolicies[policy.situation] = [policy];
+                }
+            });
+
+            _(newPolicies).each(function(policy) {
+                if (_(newPoliciesList[policy.situation]).isArray()) {
+                    newPoliciesList[policy.situation].push(policy);
+                } else {
+                    newPoliciesList[policy.situation] = [policy];
+                }
+            });
+
+            // Order the properties and fill in any empty situation
+            _(this.model.baseSituations).each(_.bind(function(policy, situationName) {
+                if (_(systemPolicies[situationName]).isArray()) {
+                    _(systemPolicies[situationName]).each (function(situation) {
+                        temp = _.pick(situation, "action", "situation", "condition", "postAction");
+                        if (!_(temp).has("condition")) {
+                            temp.condition = null;
+                        }
+
+                        if (!_(temp).has("postAction")) {
+                            temp.postAction = null;
+                        }
+                        systemPoliciesList = systemPoliciesList.concat(temp);
+                    });
+                } else {
+                    temp = _.pick(policy, "action", "situation", "condition", "postAction");
+                    temp.situation = _.invert(this.model.lookup)[temp.situation];
+                    systemPoliciesList = systemPoliciesList.concat(temp);
+                }
+
+                if (_(newPoliciesList[situationName]).isArray()) {
+                    _(newPoliciesList[situationName]).each (function(situation) {
+                        temp = _.pick(situation, "action", "situation", "condition", "postAction");
+                        if (!_(temp).has("condition")) {
+                            temp.condition = null;
+                        }
+
+                        if (!_(temp).has("postAction")) {
+                            temp.postAction = null;
+                        }
+                        newPoliciesFilledIn = newPoliciesFilledIn.concat(temp);
+                    });
+                } else {
+                    temp = _.pick(policy, "action", "situation", "condition", "postAction");
+                    temp.situation = _.invert(this.model.lookup)[temp.situation];
+                    newPoliciesFilledIn = newPoliciesFilledIn.concat(temp);
+                }
+            }, this));
+
+
+            if (_(newPoliciesFilledIn).isEqual(systemPoliciesList)) {
+                changes = false;
+            }
+
+            this.render({
+                "sync": this.model.sync,
+                "mapping": this.model.mapping,
+                "mappingName": this.model.mappingName,
+                "saveCallback": this.model.saveCallback,
+                "policies": newPolicies,
+                "changes": changes
+            }, this.model.callback);
+            this.delegateEvents();
+        },
+
+        /**
+         * Retrieves the list of patterns and creates an array of the default situations in order.
+         * All policy sets are configured from this base set of situations.
+         */
+        getPatterns: function() {
             return $.getJSON("templates/admin/sync/situationalPolicyPatterns.json", _.bind(function(patterns) {
                 this.model.allPatterns = patterns;
 
                 _(patterns).each(_.bind(function(pattern, name) {
-                    currentPattern = _.chain(pattern.policies)
-                        .map(function(policy) {
-                            return _.omit(policy, "options", "color", "note");
-                        })
-                        .sortBy(policySorter)
-                        .value();
-
-                    currentPolicy = _.sortBy(this.model.mapping.policies, policySorter);
-
-                    this.$el.find("#policyPatterns")
-                        .append($("<option></option>")
-                            .attr("value", name)
-                            .text(name));
-
-                    if (_(currentPattern).isEqual(currentPolicy)) {
-                        patternFound = true;
-                        this.model.currentPattern = name;
-                    }
+                    this.data.patternNames.push(name);
                 }, this));
 
-                if (!patternFound) {
-                    this.model.currentPattern = "Custom";
-                }
-
-                // Add default data
+                // Gets a copy of a the default action policies and formats it for rendering
                 _(this.model.allPatterns["Default Actions"].policies).each(function(policy) {
-                    var newPolicy = $("#situationCopy").clone();
-                    newPolicy.find(".situation span").html(this.model.lookup.situations[policy.situation]);
-                    newPolicy.find(".action").val(policy.action);
-                    newPolicy.find(".action").find(":selected").html(this.model.lookup.actions[policy.action] + " " + this.data.star);
+                    this.model.baseSituations[policy.situation] = {
+                        "severity": "",
+                        "situation": this.model.lookup[policy.situation],
+                        "action": policy.action,
+                        "displayAction": this.model.lookup[policy.action],
+                        "defaultActionStar": true,
+                        "defaultActionHollow": false,
+                        "emphasize": false,
+                        "condition": null,
+                        "displayCondition": "",
+                        "postAction": null,
+                        "displayPostAction": "",
+                        "note": $.t(policy.note),
+                        "disabled": true,
+                        "options": policy.options
+                    };
+
+                    this.data.situations.push({
+                        "value": policy.situation,
+                        "readable": this.model.lookup[policy.situation]
+                    });
 
                     switch (policy.color) {
                         case "red":
-                            newPolicy.find(".color").addClass("failure-display");
+                            this.model.baseSituations[policy.situation].severity = "failure-display";
                             break;
                         case "yellow":
-                            newPolicy.find(".color").addClass("warning-display");
+                            this.model.baseSituations[policy.situation].severity = "warning-display";
                             break;
                         case "green":
-                            newPolicy.find(".color").addClass("success-display");
+                            this.model.baseSituations[policy.situation].severity = "success-display";
                             break;
                     }
-
-                    newPolicy.find(".info").attr("data-title", $.t(policy.note));
-
-                    // Stars the more acceptable choices
-                    _(newPolicy.find(".action option")).filter(function(option) {
-                        if (_(policy.options).indexOf($(option).val()) >= 0) {
-                            $(option).html($(option).text() + " " + this.data.hollowStar);
-
-                            return false;
-                        }
-                    }, this);
-
-                    newPolicy.removeAttr("id");
-                    newPolicy.addClass(policy.situation);
-                    this.$el.find("#situationCopy").before(newPolicy);
                 }, this);
 
-                this.$el.find("#policyPatterns").val(this.model.currentPattern).change();
-
-                this.$el.find(".info").popover({
-                    content: function () { return $(this).attr("data-title");},
-                    trigger:'hover click',
-                    placement:'top',
-                    html: 'true',
-                    template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
-                });
             }, this));
         },
 
         /**
-         * When the select box for policy patterns changes the values below change to reflect those changes
+         * Take an array of policies and formats them for handlebar template rendering.
+         * Some logic is applied to change how information if displayed.
+         *
+         * Order, note, severity are all decided by the baseSituations defined in the getPatterns function.
+         *
+         * This transformed array is saved to the data object.
+         *
+         * @param policies
          */
-        setPolicies: function() {
-            var policies,
-                newPattern = this.$el.find("#policyPatterns").val();
-
-            if (newPattern === "Custom") {
-                policies = this.model.mapping.policies;
-            } else {
-                policies = this.model.allPatterns[newPattern].policies;
-            }
-
-            // First reset to defaults
-            _(this.model.allPatterns["Default Actions"].policies).each(function (policy) {
-                $("." + policy.situation + " .action").val(policy.action);
-            }, this);
-
-            // Apply differences from defaults and the supplied policy
-            _(policies).each(function (policy) {
-                $("." + policy.situation + " .action").val(policy.action);
-            }, this);
-
-            this.$el.find("#patternDescription").text(this.model.allPatterns[newPattern].description);
-        },
-
-        /**
-         * When the select box for a situation changes
-         */
-        updatePattern: function(e) {
-            var currentPolicies = this.getPolicies();
-
-            this.$el.find("#policyPatterns").val(currentPolicies.patternName);
-        },
-
-        /**
-         * Return the array of policies currently set and the pattern name
-         */
-        getPolicies: function() {
-            var policies = [],
-                patternName = "",
-                patternDescription = "",
+        setPolicies: function(policies) {
+            var action = "",
+                condition = "",
+                postAction = "",
+                tempPolicies = [],
+                currentPolicy = [],
                 currentPattern = [],
-                patternFound = false;
+                defaultActionStar = true,
+                defaultActionHollow = false,
+                emphasize = false,
+                patternFound = false,
+                policySorter = function(policy) {
+                    return policy.situation;
+                };
 
-            function policySorter(policy) {
-                return policy.situation;
+            if (policies.length > 0) {
+                _(policies).each(function (policy) {
+                    action = "";
+                    condition = "";
+                    postAction = "";
+                    defaultActionStar = true;
+                    defaultActionHollow = false;
+                    emphasize = false;
+
+                    _.each(this.model.lookup.situations, function(val, key ) {
+                        if (val === policy.situation) {
+                            policy.situation = key;
+                        }
+                    });
+
+                    if (_(policy.action).isObject() && _(policy.action).has("workflowName")) {
+                        action = $.t("templates.situationalPolicies.workflow");
+                        defaultActionStar = false;
+                        emphasize = true;
+                    } else if (_(policy.action).isObject() && _(policy.action).has("type")) {
+                        action = policy.action.type;
+                        defaultActionStar = false;
+                        emphasize = true;
+                    } else if (_(policy.action).isString()) {
+                        action = this.model.lookup[policy.action] || policy.action;
+
+                        if (_(this.model.baseSituations[policy.situation].options).indexOf(policy.action) >= 0) {
+                            defaultActionHollow = true;
+                            defaultActionStar = false;
+                        } else if (this.model.baseSituations[policy.situation].action !== policy.action) {
+                            defaultActionStar = false;
+                        }
+
+                    }
+
+                    if (_(policy.condition).isObject() && _(policy.condition).has("type")) {
+                        condition = "(" + policy.condition.type + ")";
+                    } else if (_(policy.condition).isString() && policy.condition.length > 0) {
+                        condition = "(" + policy.condition + ")";
+                    }
+
+                    if (_(policy.postAction).isObject() && _(policy.postAction).has("type")) {
+                        postAction = "(" + policy.postAction.type + ")";
+                    }
+
+                    if (!_(tempPolicies[policy.situation]).isArray()) {
+                        tempPolicies[policy.situation] = [];
+                    }
+                    tempPolicies[policy.situation].push({
+                        "severity": this.model.baseSituations[policy.situation].severity,
+                        "situation": this.model.lookup[policy.situation],
+                        "action": policy.action,
+                        "displayAction": action,
+                        "defaultActionStar": defaultActionStar,
+                        "defaultActionHollow": defaultActionHollow,
+                        "emphasize": emphasize,
+                        "condition": policy.condition,
+                        "displayCondition": condition,
+                        "postAction": policy.postAction,
+                        "displayPostAction": postAction,
+                        "note": this.model.baseSituations[policy.situation].note,
+                        "disabled": true
+                    });
+
+                }, this);
+
+                // Order the properties and fill in any empty situation
+                _(this.model.baseSituations).each(_.bind(function(policy, situationName) {
+                    if (_(tempPolicies[situationName]).isArray()) {
+                        if (tempPolicies[situationName].length > 1 ) {
+                            _.each(tempPolicies[situationName], function(policy, index) {
+                                tempPolicies[situationName][index].disabled = false;
+                            });
+                        }
+                        this.data.policies = this.data.policies.concat(tempPolicies[situationName]);
+                    } else {
+                        this.data.policies = this.data.policies.concat(policy);
+                    }
+                }, this));
+
+            } else {
+                this.data.policies = this.model.baseSituations;
             }
-
-            _(this.$el.find(".situationRow").not("#situationCopy")).each(function(row) {
-                policies.push({
-                    "situation" : _.invert(this.model.lookup.situations)[$(row).find(".situation span").text()],
-                    "action" : $(row).find(".action").val()
-                });
-            }, this);
-
-            policies = _.sortBy(policies, policySorter);
 
             _(this.model.allPatterns).each(_.bind(function(pattern, name) {
                 currentPattern = _.chain(pattern.policies)
                     .map(function(policy) {
-                        return _.omit(policy, "options", "color", "note");
+                        return _.pick(policy, "action", "situation");
                     })
                     .sortBy(policySorter)
                     .value();
 
-                if (_(currentPattern).isEqual(policies)) {
-                    patternName = name;
-                    patternDescription = pattern.description;
+                currentPolicy = _.chain(policies)
+                    .map(function(policy) {
+                        return _.pick(policy, "action", "situation");
+                    })
+                    .sortBy(policySorter)
+                    .value();
+
+                if (_(currentPattern).isEqual(currentPolicy)) {
                     patternFound = true;
-                    return false;
+                    this.model.currentPattern = name;
                 }
-            },this));
+            }, this));
 
             if (!patternFound) {
-                patternName = "Custom";
-                patternDescription = this.model.allPatterns.Custom.description;
+                this.model.currentPattern = "Custom";
             }
 
-            return {policies: policies, patternName: patternName, patternDescription: patternDescription};
         },
 
+        /**
+         * When the select box for policy patterns changes the ui is re-rendered to reflect the new policies
+         */
+        setPattern: function(e) {
+            var btns = [
+                {
+                    label: $.t("common.form.cancel"),
+                    action: _.bind(function (dialogRef) {
+                        this.reRender(this.model.renderedPolicies);
+                        dialogRef.close();
+                    }, this)
+                },
+                {
+                    label: $.t("common.form.continue"),
+                    cssClass: "btn-primary",
+                    action: _.bind(function (dialogRef) {
+                        if (e.target.value !== "Custom") {
+                            this.reRender(this.model.allPatterns[e.target.value].policies);
+                            this.model.currentPattern = e.target.value;
+                        }
+                        dialogRef.close();
+                    }, this)
+                }
+            ];
+
+            if (this.data.changes) {
+                this.setElement($('<div id="ConfirmPatternChange"></div>'));
+                $('#dialogs').append(this.model.currentDialog);
+                BootstrapDialog.show({
+                    title: $.t("templates.situationalPolicies.confirmChange"),
+                    type: BootstrapDialog.TYPE_DEFAULT,
+                    message: $("<div id='dialogDetails'>" + $.t("templates.situationalPolicies.confirmChangeMsg") + "</div>"),
+                    buttons: btns
+                });
+            } else {
+                if (e.target.value !== "Custom") {
+                    this.reRender(this.model.allPatterns[e.target.value].policies);
+                }
+            }
+        },
+
+        deletePolicy: function(event) {
+            event.preventDefault();
+
+            _(this.$el.find("#situationalPolicies table .event-hook .delete-policy .fa-times")).each(_.bind(function(deleteButton, index) {
+                if (deleteButton === event.target && !$(event.target).parent().hasClass("disabled")) {
+                    _(this.data.policies).each(function(policy, index) {
+                        this.data.policies[index] = _.pick(policy, "action", "situation", "condition", "postAction");
+                        this.data.policies[index].situation = _.invert(this.model.lookup)[this.data.policies[index].situation];
+                    }, this);
+
+                    this.data.policies.splice(index, 1);
+                    this.reRender(this.data.policies);
+                }
+            }, this));
+        },
+
+        addPolicy: function() {
+            SituationPolicyDialog.render({
+                "situation": $(".situation-list").val(),
+                "edit": false,
+                "policy": null,
+                "workflows": this.model.workflows,
+                "basePolicy": this.model.baseSituations[$(".situation-list").val()],
+                "lookup": this.model.lookup,
+                "saveCallback": _.bind(function(policy) {
+                    this.model.renderedPolicies.push(policy);
+                    this.reRender(this.model.renderedPolicies);
+                }, this)
+            });
+        },
+
+        editPolicy: function(event) {
+            _(this.$el.find("#situationalPolicies table .event-hook .edit-policy .fa-pencil")).each(_.bind(function(editButton, index) {
+                if (editButton === event.target) {
+                    SituationPolicyDialog.render({
+                        "situation": _.invert(this.model.lookup)[this.data.policies[index].situation],
+                        "edit": true,
+                        "policy": this.data.policies[index],
+                        "workflows": this.model.workflows,
+                        "basePolicy": this.model.baseSituations[_.invert(this.model.lookup)[this.data.policies[index].situation]],
+                        "lookup": this.model.lookup,
+                        "saveCallback": _.bind(function(policy) {
+                            _(this.data.policies).each(function(policy, index) {
+                                this.data.policies[index] = _.pick(policy, "action", "situation", "condition", "postAction");
+                                this.data.policies[index].situation = _.invert(this.model.lookup)[this.data.policies[index].situation];
+                            }, this);
+
+                            this.data.policies[index] = policy;
+
+                            this.reRender(this.data.policies);
+                        }, this)
+                    });
+                }
+            }, this));
+        },
+
+        reset: function() {
+            this.reRender(this.model.mapping.policies);
+        },
 
         save: function() {
-            var definedPolicies = this.getPolicies(),
+            var policies = [],
                 mapping,
                 _this = this;
+
+            _(this.model.renderedPolicies).each(function(policy) {
+                policy = _.pick(policy, "action", "situation", "postAction", "condition");
+
+                if (!policy.condition) {
+                    delete policy.condition;
+                }
+
+                if (!policy.postAction) {
+                    delete policy.postAction;
+                }
+
+                policies.push(policy);
+            });
 
             ConfigDelegate.readEntity("sync").then(_.bind(function(data) {
                 _(data.mappings).each(function(map, index) {
                     if (map.name === this.model.mapping.name) {
-                        data.mappings[index].policies = definedPolicies.policies;
+                        data.mappings[index].policies = policies;
                         mapping = map;
                     }
                 }, this);
