@@ -99,7 +99,6 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                             this.$el.find(".linkQualifierSave").prop("disabled", true);
                         }, this),
                         "eventName": "linkQualifierScript",
-                        "noValidation": true,
                         "scriptData": scriptData,
                         "disablePassedVariable": false,
                         "onBlur" : _.bind(this.showLinkQualifier, this),
@@ -144,7 +143,6 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                 _.each(data, function(linkQualifier){
                     this.$el.find("#scriptLinkQualifierList").append('<button disabled="true" type="button" class="removeLinkQualifier btn btn-primary">'
                         + '<span class="linkQualifier">' +linkQualifier  +'</span>'
-                        + '<i class="fa fa-times fa-lg"></i>'
                         + '</button>');
                 }, this);
 
@@ -182,9 +180,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                 this.data.linkQualifiers = _.without(this.data.linkQualifiers, $(e.target).closest(".removeLinkQualifier").find(".linkQualifier").text());
                 $(e.target).closest(".removeLinkQualifier").remove();
 
-                if(this.$el.find(".removeLinkQualifier").length === 1) {
+                if(this.$el.find("#staticLinkQualifierList .removeLinkQualifier").length === 1) {
                     this.data.doNotDelete = true;
-                    this.$el.find(".removeLinkQualifier").prop("disabled", true);
+                    this.$el.find("#staticLinkQualifierList .removeLinkQualifier").prop("disabled", true);
                 }
             }
         },
@@ -203,7 +201,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
 
                 this.$el.find(".newLinkQualifier").val("");
 
-                if(this.$el.find(".removeLinkQualifier").length > 1) {
+                if(this.$el.find("#staticLinkQualifierList .removeLinkQualifier").length > 1) {
                     this.$el.find(".removeLinkQualifier").prop("disabled", false);
                     this.data.doNotDelete = false;
                 }

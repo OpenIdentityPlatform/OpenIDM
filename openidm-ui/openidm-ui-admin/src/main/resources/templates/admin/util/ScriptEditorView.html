@@ -1,58 +1,69 @@
-<div {{#if inlineEditor}} class="row event-hook-inline event-hook-window" {{else}} class="row event-hook-window" {{/if}}>
-<div {{#if disablePassedVariable}} class="col-sm-12" {{else}} class="col-sm-6" {{/if}}>
-<div class="form-group event-hook-piece event-type">
-    <label class="control-label">{{t "templates.scriptEditor.type"}}</label>
-    <select class="event-select form-control">
-        <option value="text/javascript">{{t "templates.scriptEditor.javascript"}}</option>
-        <option value="groovy">{{t "templates.scriptEditor.groovy"}}</option>
-    </select>
-</div>
+<div class="row event-hook-inline event-hook-window">
+    <div {{#if disablePassedVariable}} class="col-sm-12" {{else}} class="col-sm-6" {{/if}}>
+    <div class="form-group event-hook-piece event-type">
+        <label class="control-label">{{t "templates.scriptEditor.type"}}</label>
+        <select class="event-select form-control">
+            <option value="text/javascript">{{t "templates.scriptEditor.javascript"}}</option>
+            <option value="groovy">{{t "templates.scriptEditor.groovy"}}</option>
+        </select>
+    </div>
 
-<div class="panel-group" id="scriptAccordions">
-    <div class="panel panel-default event-hook-piece file-code ">
-        <div class="panel-heading" id="fileHeading">
-            <label class="event-hook-title inline radio">
-                <input type="radio" class="radio inline" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="file-code" {{#unless scriptData.source}} checked {{/unless}}/>
-                {{t "templates.scriptEditor.filePath"}}
-            </label>
-        </div>
-        <div id="fileCollapse" style="">
-            <div class="panel-body">
-                <div class="form-group">
-                    <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#if scriptData.source}} value="" disabled="true" {{else}} value="{{scriptData.file}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur focus" data-validator="required" {{/unless}} {{/if}}/>
-                    {{#unless disablePassedVariable}}
-                    <span></span>
-                    <div class="validation-message"></div>
-                    {{/unless}}
+    <div class="panel-group" id="scriptAccordions">
+        <div class="panel panel-default event-hook-piece file-code ">
+            <div class="panel-heading" id="fileHeading">
+                <label class="event-hook-title inline radio">
+                    <input type="radio" class="radio inline" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="file-code" {{#unless scriptData.source}} checked {{/unless}}/>
+                    {{t "templates.scriptEditor.filePath"}}
+                </label>
+            </div>
+            <div id="fileCollapse" style="">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#if scriptData.source}} value="" disabled="true" {{else}} value="{{scriptData.file}}" {{#unless disableValidation}} {{#unless scriptData.source}} data-validator-event="keyup blur focus" data-validator="required" {{/unless}} {{/unless}} {{/if}}/>
+                        {{#unless disableValidation}}
+                        <span></span>
+                        <div class="validation-message"></div>
+                        {{/unless}}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="panel panel-default event-hook-piece inline-code">
-        <div class="panel-heading" id="inlineHeading">
-            <label class="event-hook-title inline radio">
-                <input type="radio" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="inline-code" class="radio inline collapsed" {{#if scriptData.source}} checked {{/if}}/>
-                {{t "templates.scriptEditor.inline"}}
-            </label>
-        </div>
-        <div id="codeCollapse" class="panel-body">
-            <div id="codemirror" class="col-sm-12">
-                {{#if scriptData.source}}
-                <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" {{#unless disablePassedVariable}} data-validator-event="keyup blur" data-validator="required" {{/unless}} name="sourceCode">{{scriptData.source}}</textarea>
-                {{else}}
-                <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" name="sourceCode" disabled="true"></textarea>
-                {{/if}}
+        <div class="panel panel-default event-hook-piece inline-code">
+            <div class="panel-heading" id="inlineHeading">
+                <label class="event-hook-title inline radio">
+                    <input type="radio" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="inline-code" class="radio inline collapsed" {{#if scriptData.source}} checked {{/if}}/>
+                    {{t "templates.scriptEditor.inline"}}
+                </label>
+            </div>
+            <div id="codeCollapse" class="panel-body">
+                <div id="codemirror" class="col-sm-12">
+                    {{#if scriptData.source}}
+                    <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" {{#unless disableValidation}} data-validator-event="keyup blur" data-validator="required" {{/unless}} name="sourceCode">{{scriptData.source}}</textarea>
+                    {{else}}
+                    <textarea class="scriptSourceCode" placeholder="{{placeHolder}}"  name="sourceCode" disabled="true"></textarea>
+                    {{/if}}
 
-                {{#unless disablePassedVariable}}
-                <span></span>
-                <div class="validation-message"></div>
-                {{/unless}}
+                    {{#unless disableValidation}}
+                    <span></span>
+                    <div class="validation-message"></div>
+                    {{/unless}}
 
+                </div>
             </div>
         </div>
+        {{#if showPreview}}
+        <div class="well preview-pane">
+            <i class="preview-button fa fa-search"></i>
+            <div class="preview-results">
+            </div>
+            <div role="alert" class="alert alert-danger script-eval-message" style="display:none;">
+                <i class="fa fa-exclamation-circle"></i><strong>{{t "common.form.error"}}!</strong>
+                <span class="message"></span>
+            </div>
+        </div>
+        {{/if}}
     </div>
-</div>
 </div>
 
 <div class="col-sm-6" id="scriptVariables">

@@ -48,7 +48,6 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./util/ConnectorUtils",
     "./util/LinkQualifierUtils",
-    "./util/AbstractScriptEditor",
     "./util/ScriptEditor",
     "./util/ScriptList",
     "./util/ScriptDialog",
