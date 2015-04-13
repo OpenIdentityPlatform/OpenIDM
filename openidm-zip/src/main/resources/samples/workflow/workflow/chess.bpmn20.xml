@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+    <process id="chess" name="Start a Game of Chess!">
+
+        <startEvent id="start" activiti:initiator="player1Id" activiti:formKey="chessboard.xhtml">
+            <extensionElements>
+                <activiti:formProperty id="grid" type="string" default="" />
+                <activiti:formProperty id="status" type="string" default="active" />
+                <activiti:formProperty id="currentPlayer" type="string" default="white" />
+            </extensionElements>
+        </startEvent>
+
+        <serviceTask id="prepForPlayer2" activiti:expression="black" activiti:resultVariableName="currentPlayer"/>
+
+        <userTask id="joinGameTask" name="Play Chess" activiti:candidateGroups="openidm-authorized, openidm-admin" activiti:formKey="chessboard.xhtml">
+          <extensionElements>
+            <activiti:formProperty id="player2Id" type="string" default="" />
+          </extensionElements>
+         </userTask>
+
+        <scriptTask id="backToPlayer1" scriptFormat="groovy">
+            <script><![CDATA[
+                currentPlayer = "white"
+                nextAssigned = player1Id
+                execution.setVariable("nextAssigned", player1Id)
+                execution.setVariable("currentPlayer", "white")
+            ]]></script>
+        </scriptTask>
+        
+        <userTask id="playGameTask" name="Play Chess" activiti:formKey="chessboard.xhtml">
+          <humanPerformer>
+            <resourceAssignmentExpression>
+              <formalExpression>${nextAssigned}</formalExpression>
+            </resourceAssignmentExpression>
+          </humanPerformer>
+        </userTask>
+        
+        <scriptTask id="updateGameState" scriptFormat="groovy">
+            <script><![CDATA[
+                def nextPlayer
+
+                if (currentPlayer == "white") {
+                    nextPlayer = "black"
+                } else {
+                    nextPlayer = "white"
+                }
+                execution.setVariable("currentPlayer", nextPlayer)
+
+                if (status == "active") {
+                    if (nextPlayer == "white") {
+                        execution.setVariable("nextAssigned", player1Id)
+                    } else {
+                        execution.setVariable("nextAssigned", player2Id)
+                    }
+                }
+
+            ]]></script>
+        </scriptTask>
+        
+        <scriptTask id="sendCompleteNotices" scriptFormat="groovy">
+            <script><![CDATA[
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'")
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"))
+                def message
+                def loser
+                def requestDate = formatUTC.format(new Date())
+                
+                def player1 = openidm.query('managed/user', ["_queryId" : "credential-query", "username" : player1Id])
+                if (!player1 || !player1.result || !player1.result.size()) {
+                    player1 = openidm.query('repo/internal/user', ["_queryId" : "credential-internaluser-query", "username" : player1Id])
+                }
+                
+                def player2 = openidm.query('managed/user', ["_queryId" : "credential-query", "username" : player2Id])
+                if (!player2 || !player2.result || !player2.result.size()) {
+                    player2 = openidm.query('repo/internal/user', ["_queryId" : "credential-internaluser-query", "username" : player2Id])
+                }
+
+                if (status == "stalemate") {
+                    message = "Chess game between " + player1Id + " and " + player2Id + " ended in a stalemate."
+                } else {
+                
+                    if (nextAssigned == player1Id) {
+                        loser = player2Id
+                    } else {
+                        loser = player1Id
+                    } 
+                
+                    message = nextAssigned + " won the game of chess against " + loser + "."
+                }
+                
+                def completeNotification = [
+                                        "receiverId": player1.result[0]._id,
+                                        "requesterId" : "",
+                                        "requester" : "",
+                                        "createDate" : requestDate,
+                                        "notificationType" : "info",
+                                        "notificationSubtype" : "",
+                                        "message" : message
+                                ];
+                                
+                openidm.create("repo/ui/notification", null, completeNotification)
+                completeNotification["receiverId"] = player2.result[0]._id
+                openidm.create("repo/ui/notification", null, completeNotification)
+            ]]></script>
+        </scriptTask>
+
+        <sequenceFlow sourceRef="start" targetRef="prepForPlayer2"/>
+        <sequenceFlow sourceRef="prepForPlayer2" targetRef="gameStartGateway"/>
+        <exclusiveGateway id="gameStartGateway" name="Game Started"></exclusiveGateway>
+        <sequenceFlow sourceRef="gameStartGateway" targetRef="joinGameTask"/>
+
+        <sequenceFlow sourceRef="joinGameTask" targetRef="backToPlayer1"></sequenceFlow>
+        <sequenceFlow sourceRef="backToPlayer1" targetRef="gameJoinedGateway"/>
+        <exclusiveGateway id="gameJoinedGateway" name="Game Joined"></exclusiveGateway>
+        <sequenceFlow sourceRef="gameJoinedGateway" targetRef="playGameTask"/>
+        
+        <sequenceFlow sourceRef="playGameTask" targetRef="updateGameState"/>
+        <sequenceFlow sourceRef="updateGameState" targetRef="gamePlayedGateway"></sequenceFlow>
+        <exclusiveGateway id="gamePlayedGateway" name="Game Played"></exclusiveGateway>
+        <sequenceFlow sourceRef="gamePlayedGateway" targetRef="playGameTask">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${status=='active'} ]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow sourceRef="gamePlayedGateway" targetRef="sendCompleteNotices">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${status!='active'} ]]></conditionExpression>
+        </sequenceFlow>
+        
+        <sequenceFlow sourceRef="sendCompleteNotices" targetRef="end" />
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>

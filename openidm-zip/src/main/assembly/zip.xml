@@ -28,6 +28,12 @@
             <fileMode>0600</fileMode>
             <directoryMode>0700</directoryMode>
         </fileSet>
+
+        <fileSet>
+            <directory>${project.build.directory}/bar-files</directory>
+            <outputDirectory>/openidm</outputDirectory>
+        </fileSet>
+        
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
@@ -40,6 +46,17 @@
                 <exclude>${exclude.salesforce.samples}</exclude>
                 <exclude>${exclude.google.provisioner}</exclude>
                 <exclude>${exclude.salesforce.provisioner}</exclude>
+
+                <!-- 
+                    These particular workflow files are instead bundled as .bar files; 
+                    as raw files they are excluded. See zip-workflow-files in openidm-zip/pom.xml
+                 -->
+                <exclude>**/usecase/workflow/certificationRoles*</exclude>
+                <exclude>**/usecase/workflow/certificationEntitlements*</exclude>
+                <exclude>**/usecase/workflow/manualMatch*</exclude>
+                <exclude>**/usecase/workflow/newUserCreate.bpmn20.xml</exclude>
+                <exclude>**/usecase/workflow/nUC*.xhtml</exclude>
+                <exclude>**/workflow/workflow/chess*</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -621,12 +638,20 @@
                 <include>script/getUserManager.js</include>
                 <include>script/on*.js</include>
                 <include>script/sun*.js</include>
-                <include>workflow/newUserCreate.bar</include>
                 <include>workflow/sunrise.bpmn20.xml</include>
                 <include>workflow/sunset.bpmn20.xml</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase2</outputDirectory>
         </fileSet>
+
+        <fileSet>
+            <directory>${project.build.directory}/bar-files/samples/usecase</directory>
+            <includes>
+                <include>workflow/newUserCreate.bar</include>
+            </includes>
+            <outputDirectory>/openidm/samples/usecase/usecase2</outputDirectory>
+        </fileSet>
+
         <!--Use case 3 User access request-->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -696,10 +721,18 @@
                 <include>script/on*.js</include>
                 <include>script/correlationQuery.js</include>
                 <include>workflow/orphanAccountReport.bpmn20.xml</include>
+            </includes>
+            <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${project.build.directory}/bar-files/samples/usecase</directory>
+            <includes>
                 <include>workflow/manualMatch.bar</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
         </fileSet>
+
         <!--Use case 5 Certification workflow-->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -734,10 +767,18 @@
                 <include>script/getUserManager.js</include>
                 <include>script/on*.js</include>
                 <include>script/roles/effectiveRoles.js</include>
+            </includes>
+            <outputDirectory>/openidm/samples/usecase/usecase5</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${project.build.directory}/bar-files/samples/usecase</directory>
+            <includes>
                 <include>workflow/certification*bar</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase5</outputDirectory>
         </fileSet>
+
         <!--Use case 6 Password change workflow-->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
