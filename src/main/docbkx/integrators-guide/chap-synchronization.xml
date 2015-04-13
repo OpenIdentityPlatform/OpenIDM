@@ -3945,8 +3945,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
         <footnote>
          <para>
           If no link exists for the source object, OpenIDM executes any included
-          correlation logic. If no previous object is available, and a link
-          exists, correlation does not apply.
+          correlation logic. If a link exists, correlation does not apply.
          </para>
         </footnote>
        </entry>
