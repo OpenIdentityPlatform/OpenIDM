@@ -29,7 +29,7 @@ define([
     "text!css/config/adminStyle.less",
     "text!css/config/resourcesView.less",
 
-    "text!css/fontawesome/less/idm-variables.less",
+    "text!css/fontawesome/less/forgerock-variables.less",
     "text!css/fontawesome/less/mixins.less",
     "text!css/fontawesome/less/path.less",
     "text!css/fontawesome/less/core.less",
@@ -51,7 +51,7 @@ define([
             "css/config/adminStyle.less",
             "css/config/resourcesView.less",
 
-            "css/fontawesome/less/idm-variables.less",
+            "css/fontawesome/less/forgerock-variables.less",
             "css/fontawesome/less/mixins.less",
             "css/fontawesome/less/path.less",
             "css/fontawesome/less/core.less",
