@@ -4546,7 +4546,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
 
   <para>
    With a correlation script, you return a list of target record IDs. This
-   script makes us of the "source" object, and possibly the value of a
+   script makes use of the "source" object, and possibly the value of a
    <literal>linkQualifier</literal> to find those matching record IDs.
    There is no restriction imposed on the method for finding these ID values.
   </para>
