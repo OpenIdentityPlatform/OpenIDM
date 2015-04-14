@@ -110,6 +110,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     public static final String CONFIG_MAIL_STARTTLS = "starttls";
     public static final String CONFIG_CONNECTION = "connection";
     public static final String CONFIG_JNDI_NAME = "jndiName";
+    public static final String CONFIG_TABLE_PREFIX = "tablePrefix";
+    public static final String CONFIG_TABLE_PREFIX_IS_SCHEMA = "tablePrefixIsSchema";
     public static final String CONFIG_HISTORY = "history";
     public static final String CONFIG_WORKFLOWDIR = "workflowDirectory";
     private String jndiName;
@@ -172,6 +174,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     private String mailusername;
     private String mailpassword;
     private boolean starttls;
+    private String tablePrefix;
+    private boolean tablePrefixIsSchema;
     private String historyLevel;
     private String workflowDir;
     
@@ -266,6 +270,8 @@ public class ActivitiServiceImpl implements RequestHandler {
                         configuration.setTransactionManager(transactionManager);
                         configuration.setTransactionsExternallyManaged(true);
                         configuration.setDatabaseSchemaUpdate("true");
+                        configuration.setDatabaseTablePrefix(tablePrefix);
+                        configuration.setTablePrefixIsSchema(tablePrefixIsSchema);
 
                         List<SessionFactory> customSessionFactories = configuration.getCustomSessionFactories();
                         if (customSessionFactories == null) {
@@ -420,6 +426,8 @@ public class ActivitiServiceImpl implements RequestHandler {
                 username = config.get(new JsonPointer(CONFIG_ENGINE_USERNAME)).asString();
                 password = config.get(new JsonPointer(CONFIG_ENGINE_PASSWORD)).asString();
             }
+            tablePrefix = config.get(CONFIG_TABLE_PREFIX).defaultTo("").asString();
+            tablePrefixIsSchema = config.get(CONFIG_TABLE_PREFIX_IS_SCHEMA).defaultTo(false).asBoolean();
             historyLevel = config.get(CONFIG_HISTORY).asString();
             workflowDir = config.get(CONFIG_WORKFLOWDIR).defaultTo("workflow").asString();
         }
