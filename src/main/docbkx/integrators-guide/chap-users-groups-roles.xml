@@ -644,9 +644,14 @@
        </listitem>
       </itemizedlist>
       <para>
+       Changes are not always required to roles. In such cases, a
+       <literal>"noOp"</literal> operation is available. It returns the mapped
+       attribute value in the target object.
+      </para>
+      <para>
        The <literal>"mergeWithTarget"</literal>, <literal>"replaceTarget"</literal>
-       and <literal>"removeFromTarget"</literal> operations are aliases, and are
-       defined in the file
+       <literal>"removeFromTarget"</literal>, and <literal>"noOp"</literal>
+       operations are aliases, and are defined in the file
        <filename>openidm/bin/defaults/script/roles/defaultMapping.js</filename>.
       </para>
      </listitem>
