@@ -2,8 +2,8 @@
 <div class="schedulerBody">
     <h3>{{t "templates.scheduler.scheduler"}} - {{scheduleType}}</h3>
     <ul class="nav nav-tabs">
-        <li><a data-toggle="tab" href="#{{id}}_basic">{{t "templates.scheduler.basicCron"}}</a></li>
-        <li><a data-toggle="tab" href="#{{id}}_advanced">{{t "templates.scheduler.advanced"}}</a></li>
+        <li id="basicTab"><a data-toggle="tab" href="#{{id}}_basic">{{t "templates.scheduler.basicCron"}}</a></li>
+        <li id="advancedTab"><a data-toggle="tab" href="#{{id}}_advanced">{{t "templates.scheduler.advanced"}}</a></li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane" id="{{id}}_basic">

@@ -221,7 +221,7 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                     schedule.misfirePolicy = this.$el.find(".misfirePolicy").val();
                     schedule.persisted = this.$el.find(".persisted").is(":checked");
 
-                    if (this.data.scheduleType === "Reconciliation" && this.$el.find(".tabs").tabs("option", "active") === 1) {
+                    if (this.data.scheduleType === "Reconciliation" && this.$el.find("#advancedTab").hasClass("active")) {
                         schedule.schedule = this.$el.find(".complexExpression").val();
                     } else if(this.data.scheduleType === "Reconciliation") {
                         schedule.schedule = this.cron.cron("convertCronVal", this.cron.cron("value"));
