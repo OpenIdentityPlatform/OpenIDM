@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id="chap-configuration"
@@ -123,6 +123,27 @@
        configuration of the workflow engine.</para>
    </listitem>
   </itemizedlist>
+  <para>
+   The following image shows the paths to objects in the OpenIDM namespace.
+  </para>
+  <mediaobject xml:id="figure-service-tree"><?dbfo pgwide="1"?>
+   <alt>OpenIDM namespace and object paths</alt>
+   <imageobject>
+    <imagedata fileref="images/ServiceTree.png" format="PNG" />
+   </imageobject>
+   <textobject>
+    <para>
+     The image shows paths to objects in the OpenIDM namespace.
+    </para>
+   </textobject>
+   <caption>
+    <para>
+     OpenIDM stores managed objects in the repository, and exposes them under
+     <literal>/openidm/managed</literal>. System objects on external resources
+     are exposed under <literal>/openidm/system</literal>.
+    </para>
+   </caption>
+  </mediaobject>
 
   <itemizedlist xml:id="multiple-instance-configuration-objects">
    <title>Multiple Instance Configuration Objects</title>
