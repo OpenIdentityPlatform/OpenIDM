@@ -174,7 +174,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                         //Filter down to the current edited connector Type
                         this.data.versionDisplay = _.filter(this.data.versionDisplay, function(connector){
-                            return $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.connectorTypeName)) === connector.groupName;
+                            return  data.displayName  === connector.groupName;
                         }, this);
 
                         data.connectorRef.bundleVersion = this.versionRangeCheck(data.connectorRef.bundleVersion);
