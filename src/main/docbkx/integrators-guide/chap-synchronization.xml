@@ -808,8 +808,7 @@
         If the value is<emphasis>true</emphasis>, make sure that the script
         does not attempt to use the
         <literal>object</literal>
-        variable, as it
-        will be null.
+        variable, as it will be null.
        </para>
       </listitem>
      </itemizedlist>
