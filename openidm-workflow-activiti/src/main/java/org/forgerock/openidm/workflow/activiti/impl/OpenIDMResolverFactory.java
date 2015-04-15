@@ -72,6 +72,32 @@ public class OpenIDMResolverFactory implements ResolverFactory {
         ScriptRegistry scriptRegistry = session.getOpenIDMScriptRegistry();
         JsonValue openidmContext = (JsonValue) variableScope.getVariable(ActivitiConstants.OPENIDM_CONTEXT);
 
+        if (openidmContext == null) {
+
+            LoggerFactory.getLogger(OpenIDMResolverFactory.class).debug("Could not find openidmcontext variable from " +
+                    "current execution. Copying from parent..");
+
+            //bug OPENIDM-3044, if a parent workflow uses callActivity to launch child workflow,
+            //then openidmcontext needs to be explicitly added because it will not have been
+            //copied
+            ExecutionEntity executionEntity = Context.getExecutionContext().getExecution();
+            ExecutionEntity superExecutionEntity = executionEntity.getSuperExecution();
+            String executionEntityId = executionEntity.getId();
+            String superExecutionEntityId = superExecutionEntity.getId();
+            if (executionEntityId != null && superExecutionEntityId != null
+                   && !executionEntityId.equals(superExecutionEntity.getId())) {
+
+                JsonValue parentVariable = (JsonValue) superExecutionEntity.getVariable(ActivitiConstants.OPENIDM_CONTEXT);
+                if (parentVariable != null) {
+                    variableScope.setVariable(ActivitiConstants.OPENIDM_CONTEXT, parentVariable);
+                    openidmContext = parentVariable;
+                } else {
+                    LoggerFactory.getLogger(OpenIDMResolverFactory.class).error("Unable to find openidmcontext");
+                    throw new ActivitiException("Unable to find openidmcontext");
+                }
+            }
+        }
+
         try {
             if (variableScope instanceof ExecutionEntity) {
                 ActivityBehavior activityBehavior = ((ExecutionEntity) variableScope).getActivity().getActivityBehavior();
