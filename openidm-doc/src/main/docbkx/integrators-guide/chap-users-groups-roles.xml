@@ -310,8 +310,8 @@
      <literal>/openidm/managed/role</literal>
      context path, as follows.
     </para>
-    <screen>
-     <userinput>$ curl \
+    <screen>$
+     <userinput>curl \
       --cacert self-signed.crt \
       --header "X-OpenIDM-Username: openidm-admin" \
       --header "X-OpenIDM-Password: openidm-admin" \
@@ -350,11 +350,11 @@
      role, created previously, to user
      <literal>bjensen</literal>.
     </para>
-    <screen>
-     <userinput>$ curl \
+    <screen>$
+     <userinput>curl \
       --cacert self-signed.crt \
-      --header "X-OpenIDM-Username: openidm-admin" \
       --header "X-OpenIDM-Password: openidm-admin" \
+      --header "X-OpenIDM-Username: openidm-admin" \
       --header "Content-Type: application/json" \
       --header "If-Match: *" \
       --request PATCH \
@@ -363,7 +363,6 @@
       "operation": "add",
       "field": "/roles/-",
       "value": "managed/role/newrole"
-
       }
       ]' \
       "https://localhost:8443/openidm/managed/user/bjensen"
@@ -451,8 +450,8 @@
      <literal>bjensen</literal>. The query returns the complete user object.
     </para>
 
-    <screen>
-     <userinput>$ curl \
+    <screen>$
+     <userinput>curl \
       --cacert self-signed.crt \
       --header "X-OpenIDM-Username: openidm-admin" \
       --header "X-OpenIDM-Password: openidm-admin" \
@@ -498,23 +497,25 @@
      attribute with its previous value
      (<literal>"openidm-authorized"</literal>).
     </para>
-    <screen>$ curl \
-     --cacert self-signed.crt \
-     --header "X-OpenIDM-Username: openidm-admin" \
-     --header "X-OpenIDM-Password: openidm-admin" \
-     --header "Content-Type: application/json" \
-     --header "If-Match: *" \
-     --request PATCH \
-     --data '[
+    <screen>$
+     <userinput>curl \
+      --cacert self-signed.crt \
+      --header "X-OpenIDM-Username: openidm-admin" \
+      --header "X-OpenIDM-Password: openidm-admin" \
+      --header "Content-Type: application/json" \
+      --header "If-Match: *" \
+      --request PATCH \
+      --data '[
      {
-     "operation": "replace",
-     "field": "/roles",
-     "value": [
-     "openidm-authorized"
-     ]
+      "operation": "replace",
+      "field": "/roles",
+      "value": [
+      "openidm-authorized"
+      ]
      }
-     ]' \
-     "https://localhost:8443/openidm/managed/user/bjensen"
+      ]' \
+      "https://localhost:8443/openidm/managed/user/bjensen"
+     </userinput>
     </screen>
     <para>
      In the role definition, you can specify what should happen when an
@@ -531,8 +532,8 @@
      <literal>newrole</literal>
      role, created previously.
     </para>
-    <screen>
-     <userinput>$ curl \
+    <screen>$
+     <userinput>curl \
       --cacert self-signed.crt \
       --header "X-OpenIDM-Username: openidm-admin" \
       --header "X-OpenIDM-Password: openidm-admin" \
@@ -1045,6 +1046,7 @@
      "source" : "managed/user",
      "target" : "system/ldap/account",
      "links" : "systemLdapAccounts_managedUser",
+     },
      "assignmentsToMap": [
      "ldap"
      ],
@@ -1158,8 +1160,8 @@
       definition with the ID<literal>ldap-role</literal>. The role ID is used
       to assign the role directly to the user entry.
      </para>
-     <screen>
-      <userinput>$ curl \
+     <screen>$
+      <userinput>curl \
        --cacert self-signed.crt \
        --header "X-OpenIDM-Username: openidm-admin" \
        --header "X-OpenIDM-Password: openidm-admin" \
@@ -1300,8 +1302,8 @@
       user entry to verify that her
       effective assignments have been updated.
      </para>
-     <screen>
-      <userinput>$ curl \
+     <screen>$
+      <userinput>curl \
        --cacert self-signed.crt \
        --header "X-OpenIDM-Username: openidm-admin" \
        --header "X-OpenIDM-Password: openidm-admin" \
