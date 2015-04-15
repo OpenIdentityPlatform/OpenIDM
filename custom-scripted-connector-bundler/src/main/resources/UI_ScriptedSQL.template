@@ -1,0 +1,177 @@
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#connectorSpecificBase" aria-expanded="true" aria-controls="connectorSpecificBaseHeading" class="">{{t "templates.connector.baseTitle"}}</a>
+        </h4>
+    </div>
+    <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="username">{{t "templates.connector.scriptedSQLConnector.user"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="username" name="configurationProperties.username" value="{{connectorDefaults.configurationProperties.username}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="password">{{t "templates.connector.scriptedSQLConnector.password"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="" {{#if connectorDefaults.configurationProperties.password}} placeholder="********" {{/if}} />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="driverClassName">{{t "templates.connector.scriptedSQLConnector.driverClassName"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="driverClassName" name="configurationProperties.driverClassName" value="{{connectorDefaults.configurationProperties.driverClassName}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="jdbcConnectionUrl">{{t "templates.connector.scriptedSQLConnector.url"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="jdbcConnectionUrl" name="configurationProperties.url" value="{{connectorDefaults.configurationProperties.url}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="autoCommit">{{t "templates.connector.scriptedSQLConnector.autoCommit"}}</label>
+                <div class="col-sm-8">
+                    <select id="autoCommit" class="form-control" name="configurationProperties.autoCommit">
+                        {{#staticSelect connectorDefaults.configurationProperties.autoCommit}}
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
+                        {{/staticSelect}}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="reloadScriptOnExecution">{{t "templates.connector.scriptedSQLConnector.reloadScriptOnExecution"}}</label>
+                <div class="col-sm-8">
+                    <select id="reloadScriptOnExecution" class="form-control" name="configurationProperties.reloadScriptOnExecution">
+                        {{#staticSelect connectorDefaults.configurationProperties.reloadScriptOnExecution}}
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
+                        {{/staticSelect}}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="scriptHolderHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#scriptHolder" aria-expanded="true" aria-controls="scriptHolderHeading" class="">{{t "templates.connector.scriptedSQLConnector.scriptFiles"}}</a>
+        </h4>
+    </div>
+    <div id="scriptHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptHolder" aria-expanded="true">
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedSQLConnector.createScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedSQLConnector.testScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedSQLConnector.searchScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedSQLConnector.authenticateScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedSQLConnector.deleteScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedSQLConnector.updateScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedSQLConnector.syncScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedSQLConnector.schemaScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="classpathHolderHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#classpathHolder" aria-expanded="true" aria-controls="classpathHolderHeading" class="">{{t "templates.connector.scriptedSQLConnector.classpath"}}</a>
+        </h4>
+    </div>
+    <div id="classpathHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="classpathHolder" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="classpathWrapper">
+            <div>
+                <button type="button" field_type="classpath" id="addClasspathButton" name="addClasspathButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedSQLConnector.addClasspath"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.classpath.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.classpath}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            {{#if connectorDefaults.configurationProperties.scriptRoots.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.scriptRoots}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.scriptRoots"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptRoots[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="scriptRoots" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.scriptRoots"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptRoots[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="scriptRoots" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

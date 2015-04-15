@@ -1,0 +1,366 @@
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#connectorSpecificBase" aria-expanded="true" aria-controls="connectorSpecificBaseHeading" class="">{{t "templates.connector.baseTitle"}}</a>
+        </h4>
+    </div>
+    <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="serviceAddress">{{t "templates.connector.scriptedCrest.serviceAddress"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="serviceAddress" name="configurationProperties.serviceAddress" value="{{connectorDefaults.configurationProperties.serviceAddress}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="proxyAddress">{{t "templates.connector.scriptedCrest.proxyAddress"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="proxyAddress" name="configurationProperties.proxyAddress" value="{{connectorDefaults.configurationProperties.proxyAddress}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="username">{{t "templates.connector.scriptedCrest.username"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="username" name="configurationProperties.username" value="{{connectorDefaults.configurationProperties.username}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="password">{{t "templates.connector.scriptedCrest.password"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="defaultAuthMethod">{{t "templates.connector.scriptedCrest.defaultAuthMethod"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="defaultAuthMethod" name="configurationProperties.defaultAuthMethod" value="{{connectorDefaults.configurationProperties.defaultAuthMethod}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="defaultContentType">{{t "templates.connector.scriptedCrest.defaultContentType"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="defaultContentType" name="configurationProperties.defaultContentType" value="{{connectorDefaults.configurationProperties.defaultContentType}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="sourceEncoding">{{t "templates.connector.scriptedCrest.sourceEncoding"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="sourceEncoding" name="configurationProperties.sourceEncoding" value="{{connectorDefaults.configurationProperties.sourceEncoding}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="minimumRecompilationInterval">{{t "templates.connector.scriptedCrest.minimumRecompilationInterval"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="minimumRecompilationInterval" name="configurationProperties.sourceEncoding" value="{{connectorDefaults.configurationProperties.minimumRecompilationInterval}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="warningLevel">{{t "templates.connector.scriptedCrest.warningLevel"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="warningLevel" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.warningLevel}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="tolerance">{{t "templates.connector.scriptedCrest.tolerance"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="tolerance" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.tolerance}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="targetDirectory">{{t "templates.connector.scriptedCrest.targetDirectory"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="targetDirectory" name="configurationProperties.targetDirectory" value="{{connectorDefaults.configurationProperties.targetDirectory}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="recompileGroovySource">{{t "templates.connector.scriptedCrest.recompileGroovySource"}}</label>
+                <div class="col-sm-8">
+                    <select id="recompileGroovySource" class="form-control" name="configurationProperties.recompileGroovySource">
+                        {{#staticSelect connectorDefaults.configurationProperties.recompileGroovySource}}
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
+                        {{/staticSelect}}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="debug">{{t "templates.connector.scriptedCrest.debug"}}</label>
+                <div class="col-sm-8">
+                    <select id="debug" class="form-control" name="configurationProperties.debug">
+                        {{#staticSelect connectorDefaults.configurationProperties.debug}}
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
+                        {{/staticSelect}}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="verbose">{{t "templates.connector.scriptedCrest.verbose"}}</label>
+                <div class="col-sm-8">
+                    <select id="verbose" class="form-control" name="configurationProperties.verbose">
+                        {{#staticSelect connectorDefaults.configurationProperties.verbose}}
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
+                        {{/staticSelect}}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="groupDefaultRequestHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#groupDefaultRequest" aria-expanded="true" aria-controls="groupDefaultRequestHeading" class="">{{t "templates.connector.scriptedCrest.defaultHeadersTitle"}}</a>
+        </h4>
+    </div>
+    <div id="groupDefaultRequest" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="groupDefaultRequest" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="groupDefaultRequestHeadersWrapper">
+            <div>
+                <button type="button" field_type="groupDefaultRequestHeaders" name="groupDefaultRequestHeaders" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedCrest.addDefaultRequestHeaders"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.defaultRequestHeaders.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.defaultRequestHeaders}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.defaultRequestHeaders"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.defaultRequestHeaders[]" placeholder="Request Header" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="groupDefaultRequestHeaders" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.defaultRequestHeaders"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.defaultRequestHeaders[]" placeholder="Request Header" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="groupDefaultRequestHeaders" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="groupScriptExtensionsHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#groupScriptExtensions" aria-expanded="true" aria-controls="groupScriptExtensionsHeading" class="">{{t "templates.connector.scriptedCrest.scriptExtensionsTitle"}}</a>
+        </h4>
+    </div>
+    <div id="groupScriptExtensions" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="groupScriptExtensions" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="groupScriptExtensionsWrapper">
+            <div>
+                <button type="button" field_type="groupScriptExtensions" name="groupScriptExtensions" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedCrest.addScriptExtensions"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.defaultRequestHeaders.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.defaultRequestHeaders}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.scriptExtensions"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" placeholder="Extension" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="groupScriptExtensions" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.scriptExtensions"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptExtensions[]" placeholder="Extension" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="groupScriptExtensions" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="groupDisabledGlobalASTTransformationsHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#groupScriptExtensions" aria-expanded="true" aria-controls="groupDisabledGlobalASTTransformationsHeading" class="">{{t "templates.connector.scriptedCrest.disabledGlobalASTTransformationsTitle"}}</a>
+        </h4>
+    </div>
+    <div id="groupDisabledGlobalASTTransformations" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="groupDisabledGlobalASTTransformations" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="groupDisabledGlobalASTTransformationsWrapper">
+            <div>
+                <button type="button" field_type="groupDisabledGlobalASTTransformations" name="groupDisabledGlobalASTTransformations" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedCrest.addDisabledGlobalASTTransformations"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.disabledGlobalASTTransformations.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.disabledGlobalASTTransformations}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.disabledGlobalASTTransformations"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.disabledGlobalASTTransformations[]" placeholder="Global AST Transformations" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="groupDisabledGlobalASTTransformations" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.disabledGlobalASTTransformations"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.disabledGlobalASTTransformations[]" placeholder="Global AST Transformations" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="groupDisabledGlobalASTTransformations" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="classpathHolderHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#classpathHolder" aria-expanded="true" aria-controls="classpathHolderHeading" class="">{{t "templates.connector.scriptedCrest.classpath"}}</a>
+        </h4>
+    </div>
+    <div id="classpathHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="classpathHolder" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="classpathWrapper">
+            <div>
+                <button type="button" field_type="classpath" id="addClasspathButton" name="addClasspathButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedCrest.addClasspath"}}</span><i class="fa fa-plus"></i></button>
+            </div>
+
+            {{#if connectorDefaults.configurationProperties.classpath.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.classpath}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="classpath" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            {{#if connectorDefaults.configurationProperties.scriptRoots.length}}
+            {{#each_with_index connectorDefaults.configurationProperties.scriptRoots}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.scriptRoots"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptRoots[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value="{{value}}"  />
+                    <div class="input-group-addon">
+                        <button field_type="scriptRoots" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/each_with_index}}
+            {{else}}
+            <div class="form-group field">
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.scriptRoots"}}</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.scriptRoots[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value=""  />
+                    <div class="input-group-addon">
+                        <button field_type="scriptRoots" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="scriptHolderHeading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#scriptHolder" aria-expanded="true" aria-controls="scriptHolderHeading" class="">{{t "templates.connector.scriptedCrest.scriptTitle"}}</a>
+        </h4>
+    </div>
+    <div id="scriptHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptHolder" aria-expanded="true">
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedCrest.createScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedCrest.testScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedCrest.searchScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedCrest.authenticateScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedCrest.deleteScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedCrest.updateScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedCrest.syncScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedCrest.schemaScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="scriptBaseClass">{{t "templates.connector.scriptedCrest.scriptBaseClass"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="scriptBaseClass" name="configurationProperties.scriptBaseClass" value="{{connectorDefaults.configurationProperties.scriptBaseClass}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="customizerScriptFileName">{{t "templates.connector.scriptedCrest.customizerScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" id="customizerScriptFileName" name="configurationProperties.customizerScriptFileName" value="{{connectorDefaults.configurationProperties.customizerScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="resolveUsernameScriptFileName">{{t "templates.connector.scriptedCrest.resolveUsernameScriptFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" id="resolveUsernameScriptFileName" type="text" name="configurationProperties.resolveUsernameScriptFileName" value="{{connectorDefaults.configurationProperties.resolveUsernameScriptFileName}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="scriptOnResourceFileName">{{t "templates.connector.scriptedCrest.scriptOnResourceFileName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control" id="scriptOnResourceFileName" type="text" name="configurationProperties.scriptOnResourceFileName" value="{{connectorDefaults.configurationProperties.scriptOnResourceFileName}}" />
+            </div>
+        </div>
+    </div>
+</div>

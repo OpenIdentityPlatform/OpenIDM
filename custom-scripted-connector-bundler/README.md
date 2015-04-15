@@ -57,6 +57,9 @@ Now it's time to build your custom connector:
 
     $ mvn install
 
+
+#### Groovy Script Location
+
 This will produce an OSGi-compatible jar in the ./target directory.  Copy this jar to your OpenICF-compatible
 project or distribute it for others to use.
 
@@ -79,10 +82,40 @@ to:
             "file:&{launcher.project.location}/<your_extracted_script_location>/"
         ],
 
-The OpenIDM provisioner file must be extracted to the filesystem as it presently cannot be detected and used
-directly from within the jar:
 
-    jar -xvf <filename>.jar conf/provisioner.openicf-*.json
+#### OpenIDM Provisioner Configuration
+
+The OpenIDM provisioner file must be extracted to the filesystem as it presently cannot be detected and used
+directly from within the jar.  To identify the filename grep the jar's catalog:
+
+    jar -tvf <filename>.jar | grep "provisioner*json"
+
+The file should appear in a conf/ directory.  Next extract the file to the conf directory on your local filesystem:
+
+    jar -xvf <filename>.jar <provisioner filename>
+    
+
+#### OpenIDM UI Connector Template
+
+The Admin UI provides a default template for configuration of connectors that lack a specialized template. If
+you prefer to have a specialized template to use with your new connector there is one in the connector bundle
+for this purpose. Because the UI template is named after this connector you must first identify the file:
+
+    jar -tvf <filename>.jar | grep "1.4.html"
+    
+Using the sample configuration this will be named:
+
+    ui/org.forgerock.openicf.connectors.awesome.AwesomeConnector_1.4.html
+    
+Next extract the file from the connector jar (using the example above):
+
+    jar -xvf ui/org.forgerock.openicf.connectors.awesome.AwesomeConnector_1.4.html
+    
+Then move it to the correct directory for the UI to find it:
+
+    mv ui/org.forgerock.openicf.connectors.awesome.AwesomeConnector_1.4.html \
+    ui/default/admin/public/templates/admin/connector/
+
 
 ### Sample configuration file
 
@@ -90,8 +123,7 @@ directly from within the jar:
         "packageName" : "Awesome",
         "displayName" : "Awesome Connector",
         "description" : "This is my super awesome connector",
-        "baseConfigurationClass" : "ScriptedConfiguration",
-        "baseConnectorClass" : "ScriptedConnectorBase",
+        "baseConnectorType" : "GROOVY",
         "version" : "1.0",
         "author" : "Coder McLightningfingers",
         "properties" : [
@@ -209,22 +241,15 @@ directly from within the jar:
         ]
     }
     
+
 ### Base classes 
-    The possible values for the param baseConfigurationClass are:
-         1. ScriptedConfiguration
-         2. ScriptedCRESTConfiguration
-         3. ScriptedRESTConfiguration
-         4. ScriptedSQLConfiguration
+    The possible values for the param baseConnectorType are:
+         1. GROOVY              Non-pooled Groovy connector
+         2. POOLABLEGROOVY      Poolable Groovy connector
+         2. CREST               CREST-based connector
+         3. REST                REST-based connector
+         4. SQL                 Connector with SQL support
 
-    The possible values for the param baseConnectorClass are:
-         1. ScriptedConnector
-         2. ScriptedCRESTConnector
-         3. ScriptedRESTConnector
-         4. ScriptedSQLConnector
-
-    Keep in mind that the configuration base classes should match the connector base classes. So for example, if you use a
-    baseConfigurationClass as "ScriptedCRESTConfiguration" then the only option that will work for baseConnectorClass is the
-    corresponding ScriptedCRESTConnector base class.
 
 ### Other resources
 

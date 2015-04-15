@@ -23,9 +23,19 @@
  */
 package org.forgerock.openicf.connectors.{{lower packageName}};
 
+import java.util.Set;
+
+import org.apache.http.client.HttpClient;
+import org.forgerock.openicf.misc.scriptedcommon.OperationType;
 import org.forgerock.openicf.misc.scriptedcommon.ScriptedConnectorBase;
+import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.OperationOptions;
+import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Connector;
 import org.identityconnectors.framework.spi.ConnectorClass;
+
+import groovy.lang.Binding;
 
 /**
  * Main implementation of the {{displayName}} Connector.
@@ -39,6 +49,19 @@ import org.identityconnectors.framework.spi.ConnectorClass;
         messageCatalogPaths = {
             "org/forgerock/openicf/connectors/{{lower packageName}}/Messages"
         })
-public class {{packageName}}Connector extends {{baseConnectorClass}}<{{packageName}}Configuration>
+public class {{packageName}}Connector extends ScriptedConnectorBase<{{packageName}}Configuration>
         implements Connector {
+
+    public static final String CUSTOMIZED_CONNECTION = "customizedConnection";
+
+    protected Binding createBinding(Binding arguments, OperationType action,
+            ObjectClass objectClass, Uid uid, Set<Attribute> attributes, OperationOptions options) {
+        Binding b = super.createBinding(arguments, action, objectClass, uid, attributes, options);
+
+        HttpClient client = (({{packageName}}Configuration) getScriptedConfiguration()).getHttpClient();
+        b.setVariable(CONNECTION, client);
+        b.setVariable(CUSTOMIZED_CONNECTION, (({{packageName}}Configuration) getScriptedConfiguration())
+                .getDecoratedObject(client));
+        return b;
+    }
 }
