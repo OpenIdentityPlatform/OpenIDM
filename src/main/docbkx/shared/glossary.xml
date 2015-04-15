@@ -26,11 +26,121 @@
 <glossary xml:id='openidm-glossary'
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
 <title>OpenIDM Glossary</title>
 
 <glossentry>
+ <glossterm>assignment</glossterm>
+ <glossdef>
+  <para>
+   The definition of an<emphasis>assignment</emphasis>, in the context of roles,
+   depends on the following:
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>Does the assignment imply what account a user should have?</para>
+    <para>
+     For example, if you want to assign a user to (or remove a user from) a role
+     of Airplane Mechanics, the details within that role define what OpenIDM
+     executes on changing the account.
+    </para>
+   </listitem>
+   <listitem>
+    <para>What happens when a user gets (loses) an assignment?</para>
+    <para>
+     OpenIDM may execute a custom
+     <literal>onAssignment</literal>
+     or an
+     <literal>onUnassignment</literal>
+     script.
+    </para>
+   </listitem>
+   <listitem>
+    <para>What is the assignment operation?</para>
+    <para>
+     When an administrator assigns a role to (on unassigns a role from) a user,
+     OpenIDM processes that change with one of the following operations:
+    </para>
+    <programlisting>"assignmentOperation" : "mergeWithTarget"</programlisting>
+    <programlisting>"unassignmentOperation" : "removeFromTarget"
+    </programlisting>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   Some assignments may include an<literal>entitlement</literal>, where the
+   associated role includes access rights to specified resources.
+  </para>
+
+  <para>
+   For more information, see the following section:
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="integrators-guide#sample-role-definition">
+    <citetitle>A
+     Sample Role Definition for Two Remote Systems
+    </citetitle>
+   </link>
+   .
+  </para>
+ </glossdef>
+</glossentry>
+
+ <glossentry>
+  <glossterm>correlation query</glossterm>
+  <glossdef>
+   <para>
+    A correlation query specifies an expression that matches existing entries in
+    a source repository to one or more entries on a target repository. While a
+    correlation query may be built with a script, it is
+    <emphasis>not</emphasis>
+    a correlation script.
+   </para>
+   <para>
+    As noted in the following section:
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+          xlink:href="integrators-guide#correlation">
+     <citetitle>Correlating
+      Existing Target Objects
+     </citetitle>
+    </link>
+    , you can set up a
+    query definition, such as<literal>_queryId</literal>,<literal>
+    _queryFilter</literal>, or<literal>_queryExpression</literal>, possibly
+    with the help of a<literal>linkQualifier</literal>.
+   </para>
+  </glossdef>
+ </glossentry>
+
+ <glossentry>
+  <glossterm>correlation script</glossterm>
+  <glossdef>
+   <para>
+    A correlation script matches existing entries in a source repository, and
+    returns the IDs of one or more matching entries on a target repository.
+    While it skips the intermediate step associated with a<literal>correlation
+    query</literal>, a correlation script can be relatively complex, based on
+    the
+    operations of the script.
+   </para>
+  </glossdef>
+ </glossentry>
+
+ <glossentry>
+  <glossterm>entitlement</glossterm>
+  <glossdef>
+   <para>
+    An entitlement is a collection of attributes that can be added to a user
+    entry via roles. As such, it is a specialized type of
+    <literal>assignment</literal>. A user or device with an entitlement, gets
+    access rights to specified resources. An entitlement is a property of a
+    managed object.
+   </para>
+  </glossdef>
+ </glossentry>
+
+ <glossentry>
  <glossterm>JSON</glossterm>
  <glossdef>
   <para>JavaScript Object Notation, a lightweight data interchange format 
@@ -120,6 +230,48 @@
 </glossentry>
 
 <glossentry>
+ <glossterm>role</glossterm>
+ <glossdef>
+  <para>
+   OpenIDM includes two different types of roles: default OpenIDM roles and
+   provisioning roles most often associated with workflows. In both cases,
+   roles can be set up as an
+   <literal>assignment</literal>
+   for one or more
+   accounts.
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     OpenIDM includes four default roles:<literal>openidm-reg</literal>,
+     <literal>openidm-admin</literal>,<literal>openidm-authorized</literal>,
+     and<literal>openidm-cert</literal>. For more information see the following
+     section on
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#openidm-roles">
+      <citetitle>Roles and
+       Authentication
+      </citetitle>
+     </link>
+     .
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     OpenIDM supports the configuration of custom managed roles that can be
+     assigned to specific accounts. For more information, see the section on
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#configuring-custom-roles">
+      <citetitle>Configuring Custom Roles</citetitle>
+     </link>
+     .
+    </para>
+   </listitem>
+  </itemizedlist>
+ </glossdef>
+</glossentry>
+
+ <glossentry>
  <glossterm>source object</glossterm>
  <glossdef>
   <para>In the context of reconciliation, a source object is a data object on 
