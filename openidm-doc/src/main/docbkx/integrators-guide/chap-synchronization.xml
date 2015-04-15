@@ -684,8 +684,8 @@
             }
 ... </programlisting>
       <para>
-       In the <filename>linkQualifiers.js</filename> script, you should include
-       the following scope parameters:
+       The <literal>linkQualifiers</literal> script can use the following
+       variables:
       </para>
       <variablelist>
        <varlistentry>
@@ -701,7 +701,8 @@
         <listitem>
          <para>
           The value of the source object. If the source object does not exist,
-          set the value to null.
+          the value is null. For more information, see
+          <xref linkend="link-qualifier-object" />.
          </para>
         </listitem>
        </varlistentry>
@@ -710,7 +711,9 @@
         <listitem>
          <para>
           The former value of the source object, if any. If the source object is
-          new, set the value to null.
+          new, <literal>oldValue</literal> will be null. When there are deleted
+          objects, <literal>oldValue</literal> will be populated only if the
+          source is <emphasis>managed</emphasis>.
          </para>
         </listitem>
        </varlistentry>
@@ -718,8 +721,8 @@
         <term><literal>returnAll</literal></term>
         <listitem>
          <para>
-          A boolean option. If set to true, the script returns all link
-          qualifiers.
+          A boolean option. If set to true, the script must return all known
+          link qualifiers.
          </para>
         </listitem>
        </varlistentry>
@@ -771,6 +774,43 @@
        queries or scripts, see <xref linkend="correlating-multiple-targets" />.
       </para>
      </section>
+    </section>
+
+
+    <section xml:id="link-qualifier-object">
+     <title>Conditions related to the Object Variable</title>
+
+     <itemizedlist>
+      <listitem>
+       <para>
+        You can expect that the value of the <emphasis>object</emphasis> variable
+        provided in the <literal>linkQualifiers</literal> script is null,
+        during a sync or a LiveSync delete event.
+       </para>
+       <para>
+        If your source system is an OpenIDM Managed Object, you can still
+        get all details about the deleted object through its
+        <literal>oldValue</literal>.
+       </para>
+       <para>
+        If your source system is external, you will not have access to the
+        <literal>oldValue</literal>. In that case, you can mimic the behavior of
+        the <literal>returnAll</literal> variable, and return all known link
+        qualifiers.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        You can create a <literal>linkQualifiers</literal> script
+        to first check for the value of <literal>returnAll</literal>.
+       </para>
+       <para>
+        If the value is <emphasis>true</emphasis>, the script does not attempt
+        to use the <literal>object</literal> variable.
+       </para>
+      </listitem>
+     </itemizedlist>
+
     </section>
 
     <section xml:id="filtering-source-and-target">
@@ -4395,6 +4435,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    script makes use of the "source" object, and possibly the value of a
    <literal>linkQualifier</literal> to find those matching record IDs.
    There is no restriction imposed on the method for finding these ID values.
+   Be aware, such scripts may be relatively complex.
   </para>
 
   <!--
