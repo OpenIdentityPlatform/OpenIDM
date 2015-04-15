@@ -240,7 +240,7 @@
     </para>
     <para>
      The connector configuration is defined in the file
-     <filename>conf/provisioner-*.json</filename>). One provisioner file exists
+     <filename>conf/provisioner-*.json</filename>. One provisioner file exists
      for each external resource to which you are connecting.
     </para>
    </listitem>
