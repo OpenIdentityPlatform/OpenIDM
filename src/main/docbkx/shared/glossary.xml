@@ -75,8 +75,9 @@
    For more information, see the following section:
    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
          xlink:href="integrators-guide#sample-role-definition">
-    <citetitle>A Sample Role Definition for Two Remote
-     Systems</citetitle></link>.
+    <citetitle>A Sample Role Definition for Two Remote Systems</citetitle>
+   </link>
+   .
   </para>
  </glossdef>
 </glossentry>
