@@ -278,7 +278,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         this.activityLogger = new RouterActivityLogger(connectionFactory);
     }
 
-    void unbindConnectionFactory(final RouteService service) {
+    void unbindConnectionFactory(final ConnectionFactory connectionFactory) {
         this.connectionFactory = null;
         // ConnectionFactory has gone away, use null activity logger
         this.activityLogger = NullActivityLogger.INSTANCE;
