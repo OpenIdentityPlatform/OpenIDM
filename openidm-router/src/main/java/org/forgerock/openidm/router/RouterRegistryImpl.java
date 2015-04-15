@@ -101,10 +101,10 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         this.routerTracker = routerTracker;
 
         String flt =
-                "(|(" + Constants.OBJECTCLASS + "=" + CollectionResourceProvider.class.getName()
-                        + ")" + "(" + Constants.OBJECTCLASS + "="
-                        + SingletonResourceProvider.class.getName() + ")" + "("
-                        + Constants.OBJECTCLASS + "=" + RequestHandler.class.getName() + "))";
+                "(|" + "(" + Constants.OBJECTCLASS + "=" + CollectionResourceProvider.class.getName() + ")"
+                     + "(" + Constants.OBJECTCLASS + "=" + SingletonResourceProvider.class.getName() + ")"
+                     + "(" + Constants.OBJECTCLASS + "=" + RequestHandler.class.getName() + ")"
+                + ")";
         try {
             resourceTracker = new ServiceTracker(context, FrameworkUtil.createFilter(flt), this);
         } catch (InvalidSyntaxException e) {
