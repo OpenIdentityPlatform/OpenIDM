@@ -35,12 +35,14 @@
  <para>
   OpenIDM does not control the structure of objects that are stored in its
   repository. You can define any kind of managed object, but a definition for
-  users, groups and roles is provided by default.
+  users, groups and roles is provided by default. Managed objects, and their
+  properties are defined in your project's
+  <filename>conf/managed.json</filename> file.
  </para>
  <para>
-  This chapter describes how to work with these default managed objects. More
-  information about the OpenIDM object model is provided in the <link
-  xlink:show="new" xlink:href="integrators-guide#appendix-objects"
+  This chapter describes how to work with the default managed objects that are
+  provided with OpenIDM. More information about the OpenIDM object model is
+  provided in the <link xlink:show="new" xlink:href="integrators-guide#appendix-objects"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
   Objects Reference</citetitle></link>.
  </para>
@@ -1251,4 +1253,142 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
    </section>
 
  </section>
+
+ <section xml:id="sync-encrypted-values">
+  <title>Using Encrypted Values</title>
+  <indexterm>
+   <primary>Synchronization</primary>
+   <secondary>Encryption</secondary>
+  </indexterm>
+  <para>
+   OpenIDM supports reversible encryption of attribute values for managed
+   objects. Attribute values that might be encrypted include passwords,
+   authentication questions, credit card numbers, and social security numbers.
+   If passwords are already encrypted on the external resource, they are
+   generally excluded from the synchronization process. For more information,
+   see <link xlink:href="integrators-guide#chap-passwords"
+   xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Managing Passwords</citetitle></link>.
+  </para>
+  <para>
+   You configure encryption in the managed object configuration (in the
+   <filename>conf/managed.json</filename> file). The following extract of that
+   file shows a managed object configuration that encrypts and decrypts
+   <literal>securityAnswer</literal>, <literal>ssn</literal>, and
+   <literal>password</literal> attributes using the default symmetric
+   key, and additional scripts for extra passwords.
+  </para>
+  <programlisting language="javascript">
+{
+    "objects": [
+        {
+            "name": "user",
+            ...
+            "properties": [
+                {
+                    "name": "securityAnswer",
+                    "encryption": {
+                        "key": "openidm-sym-default"
+                    }
+                },
+                {
+                    "name": "ssn",
+                    "encryption": {
+                        "key": "openidm-sym-default"
+                    }
+                },
+                {
+                    "name": "password",
+                    "encryption": {
+                        "key": "openidm-sym-default"
+                    }
+                }
+            ],
+            ...
+          }
+    ]
+} </programlisting>
+  <para>
+   Do not use the default symmetric key, <literal>openidm-sym-default</literal>,
+   in production. See the chapter on <link xlink:href="integrators-guide#chap-security"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
+   and Hardening OpenIDM</citetitle></link> for instructions on adding your
+   own symmetric key.
+  </para>
+ </section>
+
+ <section xml:id="restricting-http-access">
+  <title>Restricting HTTP Access to Sensitive Data</title>
+  <para>
+   You can protect specific sensitive managed data by marking the corresponding
+   properties as "private". Private data, whether it is encrypted or not, is not
+   accessible over the REST interface. Properties that are marked as private are
+   removed from an object when that object is retrieved over REST.
+  </para>
+  <para>
+   To mark a property as private, set its <literal>"scope"</literal> to
+   <literal>"private"</literal> in the <filename>conf/managed.json</filename>
+   file.
+  </para>
+  <para>
+   The following extract of the <filename>managed.json</filename> file shows how
+   HTTP access is prevented on the <literal>password</literal> and
+   <literal>securityAnswer</literal> properties.
+  </para>
+  <programlisting language="javascript">
+"properties" : [
+    {
+        "name" : "securityAnswer",
+        "encryption" : {
+            "key" : "openidm-sym-default"
+        },
+        "scope" : "private"
+    },
+    {
+        "name" : "password",
+        "encryption" : {
+            "key" : "openidm-sym-default"
+        },
+        "scope" : "private"
+    },
+...</programlisting>
+  <para>
+   A potential caveat with using private properties is that private properties
+   are <emphasis>removed</emphasis> if an object is updated by using an HTTP
+   <literal>PUT</literal> request. A <literal>PUT</literal> request replaces the
+   entire object in the repository. Because properties that are marked as
+   private are ignored in HTTP requests, these properties are effectively
+   removed from the object when the update is done. To work around this
+   limitation, do not use <literal>PUT</literal> requests if you have configured
+   private properties. Instead, use a <literal>PATCH</literal> request to update
+   only those properties that need to be changed.
+  </para>
+  <para>
+   For example, to update the <literal>givenName</literal> of user jdoe, you
+   could run the following command:
+  </para>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '[
+    {
+    "operation":"replace",
+    "field":"/givenName",
+    "value":"Jon"
+    }
+ ]' \
+ "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"</userinput>
+  </screen>
+  <note>
+   <para>
+    The filtering of private data applies only to direct HTTP read and query
+    calls on managed objects. No automatic filtering is done for internal
+    callers, and the data that these callers choose to expose.
+   </para>
+  </note>
+ </section>
+
 </chapter>
