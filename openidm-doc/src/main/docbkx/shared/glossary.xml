@@ -50,11 +50,8 @@
    <listitem>
     <para>What happens when a user gets (loses) an assignment?</para>
     <para>
-     OpenIDM may execute a custom
-     <literal>onAssignment</literal>
-     or an
-     <literal>onUnassignment</literal>
-     script.
+     OpenIDM may execute a custom <literal>onAssignment</literal>
+     or an <literal>onUnassignment</literal> script.
     </para>
    </listitem>
    <listitem>
@@ -78,11 +75,8 @@
    For more information, see the following section:
    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
          xlink:href="integrators-guide#sample-role-definition">
-    <citetitle>A
-     Sample Role Definition for Two Remote Systems
-    </citetitle>
-   </link>
-   .
+    <citetitle>A Sample Role Definition for Two Remote
+     Systems</citetitle></link>.
   </para>
  </glossdef>
 </glossentry>
@@ -93,20 +87,15 @@
    <para>
     A correlation query specifies an expression that matches existing entries in
     a source repository to one or more entries on a target repository. While a
-    correlation query may be built with a script, it is
-    <emphasis>not</emphasis>
+    correlation query may be built with a script, it is <emphasis>not</emphasis>
     a correlation script.
    </para>
    <para>
     As noted in the following section:
     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
           xlink:href="integrators-guide#correlation">
-     <citetitle>Correlating
-      Existing Target Objects
-     </citetitle>
-    </link>
-    , you can set up a
-    query definition, such as<literal>_queryId</literal>,<literal>
+     <citetitle>Correlating Existing Target Objects</citetitle></link>, you can
+    set up a query definition, such as<literal>_queryId</literal>,<literal>
     _queryFilter</literal>, or<literal>_queryExpression</literal>, possibly
     with the help of a<literal>linkQualifier</literal>.
    </para>
@@ -121,8 +110,7 @@
     returns the IDs of one or more matching entries on a target repository.
     While it skips the intermediate step associated with a<literal>correlation
     query</literal>, a correlation script can be relatively complex, based on
-    the
-    operations of the script.
+    the operations of the script.
    </para>
   </glossdef>
  </glossentry>
@@ -249,11 +237,7 @@
      section on
      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
            xlink:href="integrators-guide#openidm-roles">
-      <citetitle>Roles and
-       Authentication
-      </citetitle>
-     </link>
-     .
+      <citetitle>Roles and Authentication</citetitle></link>.
     </para>
    </listitem>
    <listitem>
@@ -262,9 +246,7 @@
      assigned to specific accounts. For more information, see the section on
      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
            xlink:href="integrators-guide#configuring-custom-roles">
-      <citetitle>Configuring Custom Roles</citetitle>
-     </link>
-     .
+      <citetitle>Configuring Custom Roles</citetitle></link>.
     </para>
    </listitem>
   </itemizedlist>
