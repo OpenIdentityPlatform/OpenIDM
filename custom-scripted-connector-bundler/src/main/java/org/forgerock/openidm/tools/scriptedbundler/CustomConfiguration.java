@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.tools.scriptedbundler;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,44 +40,7 @@ public class CustomConfiguration extends CustomBaseObject {
     private String description;
     private String version;
     private String author;
-    private String baseConfigurationClass;
-    private String baseConnectorClass;
-
-    /**
-     * Return the connector base class.
-     *
-     * @return
-     */
-    public String getBaseConnectorClass() {
-        return baseConnectorClass;
-    }
-
-    /**
-     * Set the connector base class.
-     *
-     * @param baseConnectorClass
-     */
-    public void setBaseConnectorClass(String baseConnectorClass) {
-        this.baseConnectorClass = baseConnectorClass;
-    }
-
-    /**
-     * Return the configuration base class.
-     *
-     * @return
-     */
-    public String getBaseConfigurationClass() {
-        return baseConfigurationClass;
-    }
-
-    /**
-     * Set the configuration base class.
-     *
-     * @param baseConfigurationClass
-     */
-    public void setBaseConfigurationClass(String baseConfigurationClass) {
-        this.baseConfigurationClass = baseConfigurationClass;
-    }
+    private BaseConnectorType baseType = BaseConnectorType.GROOVY;
 
     private List<CustomProperty> properties = new ArrayList<CustomProperty>();
     private List<CustomObjectType> objectTypes = new ArrayList<CustomObjectType>();
@@ -166,8 +131,37 @@ public class CustomConfiguration extends CustomBaseObject {
      *
      * @param author
      */
+
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    /**
+     * Return the connector base connector type.
+     *
+     * @return
+     */
+    public BaseConnectorType getBaseConnectorType() {
+        return baseType;
+    }
+
+    /**
+     * Set the connector base connector type.
+     *
+     * @param baseType
+     */
+    public void setBaseConnectorType(String baseType) {
+        this.baseType = BaseConnectorType.valueOf(baseType);
+    }
+
+    /**
+     * Helper method for handlebars template, not a configuration parameter.
+     *
+     * @return
+     */
+    @JsonIgnore
+    public Object getConfigBaseClass() {
+        return baseType.getConfigBaseClass();
     }
 
     /**
