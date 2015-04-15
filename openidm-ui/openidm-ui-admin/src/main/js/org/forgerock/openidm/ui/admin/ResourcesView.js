@@ -58,8 +58,6 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
             $.when(connectorPromise, managedPromise, repoCheckPromise, iconPromise).then(_.bind(function(connectors, managedObjects, configFiles, iconList){
                 _.each(connectors, _.bind(function(connector){
-                    connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
-
                     tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName, iconList);
                     connector.iconClass = tempIconClass.iconClass;
                     connector.iconSrc = tempIconClass.src;
@@ -68,7 +66,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
                     connector.cleanUrlName = splitConfig[1] + "_" +splitConfig[2];
                     connector.cleanEditName = splitConfig[2];
-                    
+
                     //remove the __ALL__ objectType
                     connector.objectTypes = _.reject(connector.objectTypes, function(ot) { return ot === "__ALL__"; });
                 }, this));
