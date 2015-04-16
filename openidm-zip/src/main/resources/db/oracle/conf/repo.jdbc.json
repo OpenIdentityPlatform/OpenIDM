@@ -9,6 +9,7 @@
         "defaultCatalog" : "openidm",
         "maxBatchSize" : 100,
         "maxTxRetry" : 5,
+        "enableConnectionPool" : true,
         "connectionTimeoutInMs" : 30000
     },
     "queries" : {
