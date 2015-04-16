@@ -36,7 +36,6 @@ import org.identityconnectors.framework.common.objects.ObjectClass
 import org.identityconnectors.framework.common.objects.OperationOptions
 import org.identityconnectors.framework.common.objects.SearchResult
 import org.identityconnectors.framework.common.objects.filter.Filter
-import org.identityconnectors.framework.common.objects.ResultsHandler
 
 /**
  * Built-in accessible objects
@@ -60,8 +59,8 @@ def filter = filter as Filter
 // Additional options for this operation
 def options = options as OperationOptions
 
-// The handler for the result set
-def handler = handler as ResultsHandler
+// The handler for the result set is named 'handler' and does not need to be defined.  Its formal type
+// is Closure<Boolean>.
 
 /**
  * Script action - Customizable
