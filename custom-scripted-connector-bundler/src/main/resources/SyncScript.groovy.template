@@ -33,7 +33,6 @@ import org.identityconnectors.framework.common.objects.Uid
 import org.identityconnectors.framework.common.objects.ObjectClass
 import org.identityconnectors.framework.common.objects.OperationOptions
 import org.identityconnectors.framework.common.exceptions.ConnectorException
-import org.identityconnectors.framework.common.objects.ResultsHandler
 import org.identityconnectors.framework.common.objects.SyncToken
 
 /**
@@ -52,8 +51,8 @@ def log = log as Log
 // The objectClass of the object to be created, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass
 
-// The handler for the result set
-def handler = handler as ResultsHandler
+// The handler for the result set is named 'handler' and does not need to be defined.  Its formal type
+// is Closure<Boolean>.
 
 /**
  * Script action - Customizable
