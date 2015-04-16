@@ -68,7 +68,12 @@
     samples require additional software, such as an external LDAP server or
     database.
    </para>
-   
+   <para>
+    Many of the procedures in this chapter refer to paths such as
+    <filename>sample<replaceable>x</replaceable>/...</filename>. In each of
+    these cases, the complete path is assumed to be
+    <filename>/path/to/openidm/samples/sample<replaceable>x</replaceable>/...</filename>.
+   </para>
    <para>
     When you move from one sample to the next, bear in mind that you are
     changing the OpenIDM configuration. For information on how configuration
@@ -2481,8 +2486,8 @@ ADD operation successful for DN ou=Groups,dc=example,dc=com</computeroutput>
      <para>
       To configure the mapping between JSON resources and LDAP entries, copy the
       the configuration file for the HTTP connection handler
-      (<filename>/path/to/openidm/samples/scriptedrest2dj/data/http-config.json</filename>)
-      to OpenDJ's configuration directory.
+      (<filename>scriptedrest2dj/data/http-config.json</filename>) to OpenDJ's
+      configuration directory.
      </para>
      <screen><userinput>$ cd /path/to/opendj
 $ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json config/</userinput></screen>
@@ -2958,8 +2963,8 @@ ADD operation successful for DN ou=Groups,dc=example,dc=com</computeroutput>
      <para>
       To configure the mapping between JSON resources and LDAP entries, copy the
       the configuration file for the HTTP connection handler
-      (<filename>/path/to/openidm/samples/scriptedcrest2dj/data/http-config.json</filename>)
-      to OpenDJ's configuration directory.
+      (<filename>scriptedcrest2dj/data/http-config.json</filename>) to OpenDJ's
+      configuration directory.
      </para>
      <screen><userinput>$ cd /path/to/opendj
 $ cp /path/to/openidm/samples/scriptedcrest2dj/data/http-config.json config/</userinput></screen>
@@ -4437,7 +4442,7 @@ $ ./startup.sh -p samples/sample4</screen>
     <step>
      <para>
       Copy the template <filename>external.email.json</filename> file from
-      the <filename>/path/to/openidm/samples/misc</filename> directory:
+      the <filename>samples/misc</filename> directory:
      </para>
      <screen>$ cd /path/to/openidm
 $ cp samples/misc/external.email.json samples/sample5/conf
@@ -4455,9 +4460,9 @@ $ cp samples/misc/external.email.json samples/sample5/conf
     <step>
      <para>
       Edit the <filename>reconStats.js</filename> file from the
-      <filename>/path/to/openidm/samples/sample5/script</filename> directory.
-      Near the start of the file, configure the OpenIDM email service to send
-      statistics to the email addresses of your choice:
+      <filename>sample5/script</filename> directory. Near the start of the file,
+      configure the OpenIDM email service to send statistics to the email
+      addresses of your choice:
      </para>
      <programlisting language="javascript">
 var params = {
@@ -4652,12 +4657,11 @@ $ ./startup.sh -p samples/sample5</screen>
 
   <para>
    Sample 5b is similar to sample 5 in that it simulates two external resources
-   with XML files (located in the
-   <filename>/path/to/samples/sample5b/data</filename> directory). The
-   <filename>xml_LDAP_Data.xml</filename> file simulates an LDAP data source.
-   OpenIDM creates the <filename>xml_AD_Data.xml</filename> file when you start
-   OpenIDM with the sample. Sample 5b adds the <literal>onSync</literal> script
-   hook to the process, configured in the
+   with XML files (located in the <filename>sample5b/data</filename> directory).
+   The <filename>xml_LDAP_Data.xml</filename> file simulates an LDAP data
+   source. OpenIDM creates the <filename>xml_AD_Data.xml</filename> file when
+   you start OpenIDM with the sample. Sample 5b adds the
+   <literal>onSync</literal> script hook to the process, configured in the
    <filename>sample5b/conf/managed.json</filename> file.
   </para>
 
@@ -4733,9 +4737,8 @@ $ ./startup.sh -p samples/sample5b</screen>
     As a result of the implicit synchronization from the managed object
     repository, that change is reflected almost immediately on the external
     resources. For sample 5b, you should see the changes in both XML files in
-    the <filename>/path/to/openidm/sample5b/data</filename> directory.
-    Alternatively, you can query the external resources over REST, as described
-    previously.
+    the <filename>sample5b/data</filename> directory. Alternatively, you can
+    query the external resources over REST, as described previously.
    </para>
    <para>
     The synchronization is successful, across all configured external resources,
@@ -4812,10 +4815,9 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
    resource. Sample 6 includes configuration files for two scenarios, depending
    on whether you have a live Active Directory (AD) service, or whether you
    need to simulate an AD service with an OpenDJ server. Each scenario is
-   associated with a file in the
-   <filename>/path/to/sample6/alternatives</filename> directory. The file you
-   select should be copied to the <filename>/path/to/sample6/conf</filename>
-   directory.
+   associated with a file in the <filename>sample6/alternatives</filename>
+   directory. Depending on your scenario, copy the corresponding file to the
+   <filename>sample6/conf</filename> directory.
   </para>
 
   <variablelist>
@@ -4872,7 +4874,7 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
    <para>
     During installation, populate OpenDJ with the data in the
     <filename>Example.ldif</filename> file, available in the
-    <filename>/path/to/sample6/data</filename> directory.
+    <filename>sample6/data</filename> directory.
    </para>
 
    <para>
@@ -5158,11 +5160,10 @@ Starting Directory Server ....... Done.
      <para>
       To load the data for the simulated AD instance, launch the OpenDJ control
       panel, add the simulated AD baseDN (<literal>dc=fakead,dc=com</literal>),
-      and then import the <filename>/path/to/sample6/data/AD.ldif</filename>
-      file. When you import the <filename>AD.ldif</filename> file, select
-      "Append to Existing Data", not "Overwrite Existing Data". Otherwise, the
-      data in the <literal>dc=example,dc=com</literal> baseDN will be
-      overwritten.
+      and then import the <filename>sample6/data/AD.ldif</filename> file. When
+      you import the <filename>AD.ldif</filename> file, select "Append to
+      Existing Data", not "Overwrite Existing Data". Otherwise, the data in the
+      <literal>dc=example,dc=com</literal> baseDN will be overwritten.
      </para>
     </section>
 
@@ -5535,9 +5536,8 @@ $ ./startup.sh -p samples/sample7</screen>
 
    <para>
     The sample script file, <filename>scim.js</filename> in the
-    <filename>/path/to/samples/sample7/script</filename> directory,
-    transforms the user data from the resource into the JSON object layout
-    required by SCIM schema.
+    <filename>sample7/script</filename> directory, transforms the user data from
+    the resource into the JSON object layout required by SCIM schema.
    </para>
   </section>
  </section>
@@ -5563,9 +5563,10 @@ $ ./startup.sh -p samples/sample7</screen>
    <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample8</screen>
 
-   <para>The <filename>sync.json</filename> file in the
-    <filename>/path/to/samples/sample8/conf</filename> directory includes
-    brief examples of log messages.
+   <para>
+    The <filename>sync.json</filename> file in the
+    <filename>sample8/conf</filename> directory includes brief examples of log
+    messages.
    </para>
   </section>
 
@@ -6896,9 +6897,9 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
   </para>
 
   <para>
-   If you want to use any of the audit features demonstrated in this sample,
-   copy information from files in the /path/to/samples/audit-sample directory.
-   This can help you set up auditing for any other sample.
+   To use any of the audit features that are demonstrated in this sample, copy
+   information from files in the <filename>samples/audit-sample</filename>
+   directory. This can help you to set up auditing for any other sample.
   </para>
 
   <section xml:id="audit-config-files">
@@ -6912,7 +6913,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
    <itemizedlist>
     <para>
      The key configuration files, in the
-     <literal>/path/to/samples/audit-sample</literal> directory, are as follows:
+     <filename>samples/audit-sample</filename> directory, are as follows:
     </para>
     <listitem>
      <para>
@@ -7088,9 +7089,9 @@ $ ./startup.sh -p samples/audit-sample</screen>
    <para>
     Alternatively, open the
     <filename>schedule-reconcile_systemXmlAccounts_managedUser.json</filename>
-    file in the <literal>/path/to/openidm/samples/audit-sample/conf</literal>
-    directory and change the value of the <literal>"enabled"</literal> directive
-    to turn on scheduled reconciliation:
+    file in the <literal>audit-sample/conf</literal> directory and change the
+    value of the <literal>"enabled"</literal> directive to turn on scheduled
+    reconciliation:
    </para>
 
    <screen>"enabled" : true,</screen>
