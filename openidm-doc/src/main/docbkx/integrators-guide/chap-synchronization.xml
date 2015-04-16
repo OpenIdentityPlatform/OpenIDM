@@ -457,10 +457,10 @@
      </para>
      <para>
       You can also use the <literal>"default"</literal> property to specify a
-      value to assign to the target property. When determining
-      the value of the target property, any associated conditions are evaluated
-      first, followed by the transform script, if present. The default value is
-      applied (for update and create actions) if the <literal>"source"</literal>
+      value to assign to the target property. When OpenIDM determines the value
+      of the target property, any associated conditions are evaluated first,
+      followed by the transform script, if present. The default value is applied
+      (for update and create actions) if the <literal>"source"</literal>
       property and the <literal>"transform"</literal> script yield a null value.
       The default value overrides the target value, if one exists.
      </para>
@@ -556,9 +556,9 @@
 
      <note>
       <para>
-       Where possible, do use dynamic <emphasis>link qualifiers</emphasis>.
-       When OpenIDM uses a static list of <emphasis>link qualifiers</emphasis>,
-       it has to search through each item in the list before synchronizing each
+       Where possible, do use dynamic <emphasis>link qualifiers</emphasis>. When
+       OpenIDM uses a static list of <emphasis>link qualifiers</emphasis>, it
+       has to search through each item in the list before synchronizing each
        entry, which can affect the performance of your system.
       </para>
      </note>
@@ -692,7 +692,8 @@
         <term><literal>mapping</literal></term>
         <listitem>
          <para>
-          Name of the current mapping, as defined in <filename>sync.json</filename>
+          The name of the current mapping, as defined in
+          <filename>sync.json</filename>.
          </para>
         </listitem>
        </varlistentry>
@@ -788,8 +789,8 @@
         during a sync or a LiveSync delete event.
        </para>
        <para>
-        If your source system is an OpenIDM Managed Object, you can still
-        get all details about the deleted object through its
+        If your source system is an OpenIDM managed object, you can still get
+        all details about the deleted object through its
         <literal>oldValue</literal>.
        </para>
        <para>
@@ -801,14 +802,13 @@
       </listitem>
       <listitem>
        <para>
-        You can create a <literal>linkQualifiers</literal> script
-        to first check for the value of <literal>returnAll</literal>.
+        You can create a <literal>linkQualifiers</literal> script to first
+        check for the value of <literal>returnAll</literal>.
        </para>
        <para>
-        If the value is<emphasis>true</emphasis>, make sure that the script
-        does not attempt to use the
-        <literal>object</literal>
-        variable, as it will be null.
+        If the value is<emphasis>true</emphasis>, make sure that the script does
+        not attempt to use the <literal>object</literal> variable, as it will be
+        null.
        </para>
       </listitem>
      </itemizedlist>
@@ -836,15 +836,16 @@
       <varlistentry>
        <term>validSource</term>
        <listitem>
-        <para>A script that determines if a source object is valid to be
-         mapped. The script yields a boolean value: <literal>true</literal>
-         indicates that the source object is valid; <literal>false</literal>
-         can be used to defer mapping until some condition is met. In the root
-         scope, the source object is provided in the <literal>"source"</literal>
-         property. If the script is not specified, then all source objects are
-         considered valid.</para>
-
-         <programlisting language="javascript">
+        <para>
+         A script that determines if a source object is valid to be mapped. The
+         script yields a boolean value: <literal>true</literal> indicates that
+         the source object is valid; <literal>false</literal> can be used to
+         defer mapping until some condition is met. In the root scope, the
+         source object is provided in the <literal>"source"</literal> property.
+         If the script is not specified, then all source objects are considered
+         valid.
+        </para>
+        <programlisting language="javascript">
 {
     "validSource": {
         "type": "text/javascript",
@@ -857,16 +858,17 @@
       <varlistentry>
        <term>validTarget</term>
        <listitem>
-        <para>A script, used during reconciliation's second phase, that
-        determines if a target object is valid to be mapped. The script yields
-        a boolean value: <literal>true</literal> indicates that the target
-        object is valid; <literal>false</literal> indicates that the target
-        object should not be included in reconciliation. In the root scope, the
-        source object is provided in the <literal>"target"</literal> property.
-        If the script is not specified, then all target objects are considered
-        valid for mapping.</para>
-
-         <programlisting language="javascript">
+        <para>
+         A script, used during reconciliation's second phase, that determines if
+         a target object is valid to be mapped. The script yields a boolean
+         value: <literal>true</literal> indicates that the target object is
+         valid; <literal>false</literal> indicates that the target object should
+         not be included in reconciliation. In the root scope, the source object
+         is provided in the <literal>"target"</literal> property. If the script
+         is not specified, then all target objects are considered valid for
+         mapping.
+        </para>
+        <programlisting language="javascript">
 {
     "validTarget": {
         "type": "text/javascript",
@@ -884,8 +886,8 @@
       Examples already shown in this section use <literal>source.<replaceable
       >attributeName</replaceable></literal> to retrieve attributes from the
       source objects. Your scripts can also write to target attributes using
-      <literal>target.<replaceable>attributeName</replaceable></literal>
-     syntax, as shown in the following example.
+      <literal>target.<replaceable>attributeName</replaceable></literal> syntax,
+      as shown in the following example.
      </para>
      <programlisting language="javascript">
 {
@@ -979,10 +981,10 @@
      the target.
     </para>
    </note>
-
-   <para>The following example derives a DN for an LDAP entry when the entry
-   is created in the internal repository.</para>
-
+   <para>
+    The following example derives a DN for an LDAP entry when the entry is
+    created in the internal repository.
+   </para>
    <programlisting language="javascript">
 {
     "onCreate": {
@@ -1006,19 +1008,19 @@
     <primary>Synchronization</primary>
     <secondary>Reusing links</secondary>
    </indexterm>
-
-   <para>When two mappings exist to synchronize the same objects bidirectionally,
-   you can use the <literal>links</literal> property in one mapping to have
-   OpenIDM use the same internally managed link for both mappings. Otherwise,
-   if no <literal>links</literal> property is specified, OpenIDM maintains a
-   link for each mapping.</para>
-
-   <para>The following excerpt shows two mappings, one from MyLDAP accounts
-   to managed users, and another from managed users to MyLDAP accounts. In
-   the second mapping, the <literal>link</literal> property tells OpenIDM
-   to reuse the links created in the first mapping, rather than create new
-   links.</para>
-
+   <para>
+    When two mappings exist to synchronize the same objects bidirectionally, you
+    can use the <literal>links</literal> property in one mapping to have OpenIDM
+    use the same internally managed link for both mappings. Otherwise, if no
+    <literal>links</literal> property is specified, OpenIDM maintains a link for
+    each mapping.
+   </para>
+   <para>
+    The following excerpt shows two mappings, one from MyLDAP accounts to
+    managed users, and another from managed users to MyLDAP accounts. In the
+    second mapping, the <literal>link</literal> property tells OpenIDM to reuse
+    the links created in the first mapping, rather than create new links.
+   </para>
    <programlisting language="javascript">
 {
     "mappings": [
@@ -1035,7 +1037,6 @@
         }
     ]
 }</programlisting>
-
    </section>
  </section>
 
@@ -3900,11 +3901,12 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <title>Synchronization Actions</title>
 
    <variablelist>
-    <para>Once OpenIDM has assigned a situation to an object, OpenIDM takes
-    the actions configured in the mapping. If no action is configured, then
-    OpenIDM takes the default action for the situation. OpenIDM supports the
-    following actions.</para>
-
+    <para>
+     Once OpenIDM has assigned a situation to an object, OpenIDM takes the
+     actions configured in the mapping. If no action is configured, then OpenIDM
+     takes the default action for the situation. OpenIDM supports the following
+     actions.
+    </para>
     <varlistentry>
      <term>"CREATE"</term>
      <listitem>
@@ -4642,8 +4644,8 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       value (<literal>for-userName</literal>) matches the name of the query
       specified in <filename>openidm/conf/repo.orientdb.json</filename>. The
       <literal>source.name</literal> value replaces <literal>${uid}</literal> in
-      the query. OpenIDM replaces <literal>${unquoted:_resource}</literal> in the
-      query with the name of the table that holds managed objects.
+      the query. OpenIDM replaces <literal>${unquoted:_resource}</literal> in
+      the query with the name of the table that holds managed objects.
      </para>
     </section>
 
@@ -4652,13 +4654,13 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
 
      <para>
       OpenIDM ${docTargetVersion} provides a declarative correlation option,
-      named the expression builder, that makes it easier to configure correlation
-      queries.
+      named the expression builder, that makes it easier to configure
+      correlation queries.
      </para>
      <para>
-      The easiest way to use the expression builder to create a correlation query
-      is through the Admin UI. To access the Expression Builder, navigate to
-      the desired mapping, select Association Rules, and then change the No
+      The easiest way to use the expression builder to create a correlation
+      query is through the Admin UI. To access the Expression Builder, navigate
+      to the desired mapping, select Association Rules, and then change the No
       Correlation Query option to Correlation Queries.
      </para>
      <mediaobject>
