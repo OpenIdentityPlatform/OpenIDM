@@ -54,7 +54,7 @@ def log = log as Log
 def updateAttributes = new AttributesAccessor(attributes as Set<Attribute>)
 
 // The Uid of the object to be updated
-def uid = id as String
+def uid = id as Uid
 
 // The objectClass of the object to be updated, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass
