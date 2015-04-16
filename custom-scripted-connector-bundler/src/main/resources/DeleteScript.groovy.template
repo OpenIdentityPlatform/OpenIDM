@@ -46,7 +46,7 @@ def configuration = configuration as {{packageName}}Configuration
 def log = log as Log
 
 // The Uid of the object to be deleted
-def uid = id as String
+def uid = id as Uid
 
 // The objectClass of the object to be deleted, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass

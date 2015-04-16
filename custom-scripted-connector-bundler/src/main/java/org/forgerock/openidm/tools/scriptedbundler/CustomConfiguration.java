@@ -42,6 +42,7 @@ public class CustomConfiguration extends CustomBaseObject {
     private String author;
     private BaseConnectorType baseType = BaseConnectorType.GROOVY;
 
+    private List<ProvidedProperty> providedProperties = new ArrayList<ProvidedProperty>();
     private List<CustomProperty> properties = new ArrayList<CustomProperty>();
     private List<CustomObjectType> objectTypes = new ArrayList<CustomObjectType>();
 
@@ -162,6 +163,34 @@ public class CustomConfiguration extends CustomBaseObject {
     @JsonIgnore
     public Object getConfigBaseClass() {
         return baseType.getConfigBaseClass();
+    }
+
+    /**
+     * Return the properties for this object.
+     *
+     * @return
+     */
+    public List<ProvidedProperty> getProvidedProperties() {
+        return flagLast(providedProperties);
+    }
+
+    /**
+     * Set the properties for this object.
+     *
+     * @param providedProperties
+     */
+    public void setProvidedProperties(List<ProvidedProperty> providedProperties) {
+        this.providedProperties.clear();
+        this.providedProperties.addAll(flagLast(providedProperties));
+    }
+
+    /**
+     * Return whether this object has properties.
+     *
+     * @return
+     */
+    public boolean getHasProvidedProperties() {
+        return !providedProperties.isEmpty();
     }
 
     /**

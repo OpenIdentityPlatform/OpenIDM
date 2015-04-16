@@ -52,7 +52,7 @@ def log = log as Log
 def createAttributes = new AttributesAccessor(attributes as Set<Attribute>)
 
 // The Uid of the object to be created, usually null indicating the Uid should be generated
-def uid = id as String
+def uid = id as Uid
 
 // The objectClass of the object to be created, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass

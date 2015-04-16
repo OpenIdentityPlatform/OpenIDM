@@ -126,7 +126,7 @@ public class SourceGenerator {
                 String contents = hbtemplate.apply(config);
 
                 FileUtils.write(new File(outputPath + outputFilename), contents);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new IOException("Failed to read contents of " + template.getInputName(), e);
             }
         }

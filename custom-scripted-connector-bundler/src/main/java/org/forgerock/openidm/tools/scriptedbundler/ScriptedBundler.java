@@ -36,6 +36,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This is the main class for this project.  It accepts a JSON configuration file and attempts to generate a set of
@@ -97,8 +98,19 @@ public class ScriptedBundler {
             config.setDescription("This is my super awesome connector");
             config.setVersion("1.0");
             config.setAuthor("Coder McLightningfingers");
-            config.setProperties(new ArrayList<CustomProperty>() {{
-                add(new CustomProperty() {{
+            config.setProvidedProperties(Arrays.asList(
+                new ProvidedProperty() {{
+                    setName("provided1");
+                    setValue("default");
+                    setType("String");
+                }},
+                new ProvidedProperty() {{
+                    setName("provided2");
+                    setValue(2);
+                    setType("Integer");
+                }}));
+            config.setProperties(Arrays.asList(
+                new CustomProperty() {{
                     setOrder(0);
                     setType("String");
                     setName("FirstProperty");
@@ -108,8 +120,8 @@ public class ScriptedBundler {
                     setDisplayMessage("This is my first property");
                     setHelpMessage("This should be a String value");
                     setGroup("default");
-                }});
-                add(new CustomProperty() {{
+                }},
+                new CustomProperty() {{
                     setOrder(1);
                     setType("Double");
                     setName("SecondProperty");
@@ -119,8 +131,7 @@ public class ScriptedBundler {
                     setDisplayMessage("This is my second property");
                     setHelpMessage("This should be a Double value");
                     setGroup("default");
-                }});
-            }});
+                }}));
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config));
         } catch (Exception e) {
             /* no user input, won't happen */

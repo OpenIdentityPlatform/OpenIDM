@@ -27,14 +27,14 @@
         "DELETE" : -1,
         "SYNC" : -1,
         "SCHEMA" : -1,
-
         "GET" : -1,
         "VALIDATE" : -1,
         "SCRIPT_ON_CONNECTOR" : -1,
         "SCRIPT_ON_RESOURCE" : -1
     },
-    "configurationProperties" : { {{#properties}}
-        "{{nameCamelCase}}" : {{{formattedValue}}},
+    "configurationProperties" : {
+        {{#providedProperties}}"{{nameCamelCase}}" : {{{formattedValue}}},
+        {{/providedProperties}}{{#properties}}"{{nameCamelCase}}" : {{{formattedValue}}},
         {{/properties}}"scriptRoots" : [
             "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/script/{{lower packageName}}/"
         ],
