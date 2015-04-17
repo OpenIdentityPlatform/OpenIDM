@@ -1447,6 +1447,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     operationOptionsBuilder.setSortKeys(sortKeys);
                 }
 
+                // Override ATTRS_TO_GET if fields are specified within the Request
+                if (!request.getFields().isEmpty()) {
+                    objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, request.getFields());
+                }
+
                 final JsonValue logValue = json(array());
                 SearchResult searchResult = facade.search(objectClassInfoHelper.getObjectClass(), filter,
                         new ResultsHandler() {
