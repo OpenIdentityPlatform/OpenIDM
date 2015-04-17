@@ -190,7 +190,6 @@
                     <instructions>
                         <Require-Bundle>groovy-all</Require-Bundle>
                         <Export-Package>org.forgerock.openicf.connectors.{{lower packageName}}.*</Export-Package>
-                        <Private-Package>org.forgerock.openicf.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
