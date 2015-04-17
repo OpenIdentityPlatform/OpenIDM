@@ -998,6 +998,7 @@
                 <include>org.apache.olingo:*</include>
                 <include>com.fasterxml:aalto-xml</include>
                 <include>org.apache.tomcat:tomcat-jdbc</include>
+                <include>org.forgerock.openicf.connectors.groovy:*</include>
             </includes>
         </dependencySet>
         <dependencySet>
