@@ -130,6 +130,7 @@ public class CustomObjectType extends CustomBaseObject {
      * @param type
      */
     public void setType(String type) {
+        type = type.toLowerCase();
         if (OBJECT_TYPES.contains(type)) {
             this.type = type;
         } else {
