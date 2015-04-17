@@ -80,6 +80,7 @@ public class CustomObjectTypePropertyItemProperty extends CustomBaseObject {
      * @param type
      */
     public void setType(String type) {
+        type = type.toLowerCase();
         if (PROPERTY_TYPES.contains(type)) {
             this.type = type;
         } else {

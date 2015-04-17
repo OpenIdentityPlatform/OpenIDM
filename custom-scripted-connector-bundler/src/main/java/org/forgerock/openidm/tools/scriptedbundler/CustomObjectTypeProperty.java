@@ -116,6 +116,7 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
      * @param type
      */
     public void setType(String type) {
+        type = type.toLowerCase();
         if (PROPERTY_TYPES.keySet().contains(type)) {
             this.type = type;
         } else {

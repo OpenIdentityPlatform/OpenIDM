@@ -69,20 +69,20 @@ public class CustomProperty extends CustomBaseObject {
      * Supported types for configuration properties.
      */
     private static final List<String> CONFIG_STRING_TYPES = Arrays.asList(
-        "String",
-        "URI",
-        "File",
-        "GuardedString",
-        "Script"
+        "string",
+        "uri",
+        "file",
+        "guardedstring",
+        "script"
     );
-    private static final List<String> CONFIG_CHAR_TYPES = Arrays.asList("Character");
+    private static final List<String> CONFIG_CHAR_TYPES = Arrays.asList("character");
     private static final List<String> CONFIG_RAW_TYPES = Arrays.asList(
-        "Long",
-        "Double",
-        "Float",
-        "Integer",
-        "Boolean",
-        "GuardedByteArray"
+        "long",
+        "double",
+        "float",
+        "integer",
+        "boolean",
+        "guardedbytearray"
     );
     private static final List<String> CONFIG_SUPPORTED_TYPES = new ArrayList<String>();
     static {
@@ -136,6 +136,7 @@ public class CustomProperty extends CustomBaseObject {
      * @param type
      */
     public void setType(String type) {
+        type = type.toLowerCase();
         if (CONFIG_SUPPORTED_TYPES.contains(type)) {
             this.type = type;
         } else {
