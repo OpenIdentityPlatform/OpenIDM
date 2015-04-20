@@ -656,13 +656,145 @@ h4.connector-role {
   Properties styles
 */
 
-.jqgrid-container {
-  margin-top: 20px;
+.popover-content .code-tooltip {
+  max-height:200px;
+  white-space:pre;
+}
+
+/*
+  Properties Grid related styles
+*/
+
+#attributesBody {
+  .tool-group-right {
+    clear:both;
+  }
+
+  #numRepresentativeProps {
+    display: block;
+  }
+
+  #findSampleSource {
+    display: block;
+  }
+
+  .ui-autocomplete-input {
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  #previewDropDown {
+    top:35px;
+    left:18px;
+    text-transform: none;
+    letter-spacing:0px;
+  }
+
+  #previewDropdownButton {
+    width:80px;
+  }
+
+  #previewHolder {
+
+    .caret {
+      color: #333333;
+    }
+
+    position:relative;
+    bottom:18px;
+  }
+
+  #previewTitle {
+    font-weight:bold;
+    color:#333333;
+    text-transform: uppercase;
+    letter-spacing:1px;
+  }
+
+  .badge{
+    color: #555;
+    background-color: rgba(0,0,0,.1);
+    border: none;
+    height: 23px;
+    width: 23px;
+    padding: 5px 7px;
+  }
+
+  .ui-jqgrid-hbox {
+    height:55px;
+    padding-top:25px;
+  }
+
+  .ui-jqgrid-hdiv {
+    border-bottom: 1px solid #cccccc !important;
+  }
+
+  tr th {
+    border-right:0px;
+    height:35px;
+    font-size:13px;
+    text-transform: uppercase;
+    letter-spacing:1px;
+  }
+
+  .properties-badge {
+    margin-right:5px;
+  }
+
+  .jqgrid-container {
+    margin-top: 20px;
+  }
+
+  .removePropertyBtn {
+    cursor:pointer;
+    color: #777;
+  }
+
+  .removePropertyBtn:hover {
+    color:@base-theme-color;
+  }
+}
+
+@media (min-width: 768px) {
+  #attributesBody {
+    #previewDropdownButton {
+      width:auto;
+    }
+
+    .tool-group-right {
+      clear:none;
+    }
+
+    #numRepresentativeProps {
+      width:35px;
+      padding-right:0px;
+      display:inline-block;
+    }
+
+    #findSampleSource {
+      width:200px;
+      display:inline-block;
+    }
+  }
 }
 
 .removeLinkQualifier {
   margin-top: 15px;
   margin-right:5px;
+}
+
+#numRepresentativeProps {
+  margin-right:10px;
+}
+
+#attributesBody .ui-jqgrid-hdiv,
+#mappingTable_preview {
+  overflow:visible;
+}
+
+#gbox_mappingTable {
+  border-top:0px;
 }
 
 .linkqualifier-message {

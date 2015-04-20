@@ -26,6 +26,7 @@
 
 define("config/main", [
     "./process/CommonIDMConfig",
+    "./process/AdminIDMConfig",
     "./process/CommonConfig",
 
     "./routes/AdminRoutesConfig",

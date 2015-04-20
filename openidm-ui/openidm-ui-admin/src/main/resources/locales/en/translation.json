@@ -75,7 +75,8 @@
             "MappingMessages" : {
                 "mappingSaveSuccess": "Mapping successfully updated",
                 "newMappingAdded": "New mapping successfully created",
-                "mappingDeleted": "Mapping successfully deleted"
+                "mappingDeleted": "Mapping successfully deleted",
+                "mappingEvalError" : "Error in script evaluation process"
             },
             "SyncMessages" : {
                 "policySaveSuccessful" : "The situational policy has been saved.",
@@ -798,6 +799,8 @@
             }
         },
         "mapping": {
+            "conditionalUpon" : "Conditional Upon:",
+            "transformationScriptApplied" : "Transformation script applied",
             "attributes": "Attributes",
             "badScript" : "Invalid script. A valid Link Qualifier script returns an array of strings.",
             "linkQualifiers": "Link Qualifiers",
@@ -846,7 +849,7 @@
             "property": "Property",
             "confirmDeleteMapping": "Are you sure you want to delete the &quot;__mappingName__&quot; mapping?<br/><br/>**Caution: this action cannot be reversed.",
             "noMappingsDefined": "No mappings defined.",
-            "addProperty": "Add property.",
+            "addProperty": "Add property",
             "sampleSource": "Sample source.",
             "confirmRemoveProperty": "Are you sure you want to remove the &quot;__property__&quot; property mapping?",
             "transformRequiredForMulti": "A transformation script is required when mapping from a multiple-value source to a single-value target.",
@@ -855,7 +858,8 @@
             "invalidConditionScript": "You cannot save a condition script that contains errors.",
             "completeSourceObject": "Complete source object.",
             "changesPending": "Changes pending.",
-            "clearChanges": "Clear Changes",
+            "sampleSource" : "Sample Source",
+            "undoAllChanges": "Undo All Changes",
             "saveProperties": "Save Properties",
             "noPropertiesMapped": "No properties mapped.",
             "conditionScriptApplied": "Conditional update script applied.",
@@ -871,7 +875,7 @@
                 "propertyListLabel": "Enter or select the source property that you need",
                 "propertyListHeader": "Property List",
                 "transformationHeader": "Transformation Script",
-                "conditionalUpdateHeader": "Conditional Update Script",
+                "conditionalUpdateHeader": "Conditional Update",
                 "defaultValuesHeader": "Default Values",
                 "transformationSciptLabel": "Enter a transformation script for complex properties.",
                 "conditionSciptLabel": "Enter a conditional update script for",
@@ -950,6 +954,7 @@
         "form" : {
             "add" : "Add",
             "userView" : "Data Management View",
+            "removeAttribute" : "Remove Attribute",
             "ok" : "Okay",
             "list" : "List",
             "confirm" :"Confirmation",

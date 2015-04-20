@@ -104,6 +104,10 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.MappingMessages.mappingDeleted",
             type: "info"
         },
+        "mappingEvalError" : {
+            msg: "config.messages.MappingMessages.mappingEvalError",
+            type: "error"
+        },
         "syncPolicySaveSuccess" : {
             msg: "config.messages.SyncMessages.policySaveSuccessful",
             type: "info"
