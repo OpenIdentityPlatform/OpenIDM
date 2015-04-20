@@ -59,6 +59,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/QueryFilterUtils",
     "./util/AutoCompleteUtils",
     "./util/SaveChangesView",
+    "./util/FilterEvaluator",
 
     "./objectTypes/ObjectTypesDialog",
 
@@ -81,6 +82,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./sync/ReconScriptsView",
     "./sync/ReconQueriesView",
     "./sync/QueryFilterEditor",
+    "./sync/LinkQualifierFilterEditor",
     "./sync/CorrelationQueryBuilderView",
     "./sync/CorrelationQueryDialog",
     "./sync/CorrelationQueryView",

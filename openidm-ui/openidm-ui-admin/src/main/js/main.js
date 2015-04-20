@@ -46,6 +46,7 @@ require.config({
         "bootstrap-dialog": "libs/bootstrap-dialog.min",
         "bootstrap-tabdrop": "libs/bootstrap-tabdrop-1.0",
         placeholder: "libs/jquery.placeholder",
+        selectize : "libs/selectize-0.12.1-min",
         moment: "libs/moment-2.8.1-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
@@ -106,6 +107,9 @@ require.config({
         moment: {
             exports: "moment"
         },
+        selectize: {
+            deps: ["jquery"]
+        },
         bootstrap: {
             deps: ["jquery"]
         },
@@ -144,6 +148,7 @@ require([
     "jsonEditor",
     "gentleSelect",
     "cron",
+    "selectize",
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -172,6 +177,7 @@ require([
     jsonEditor,
     gentleSelect,
     cron,
+    selectize,
     i18n,
     constants,
     eventManager) {
@@ -182,7 +188,7 @@ require([
     window.Backbone = Backbone;
 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
-    
+
     JSONEditor.defaults.options.theme = 'bootstrap3';
     JSONEditor.defaults.options.iconlib = "fontawesome4";
 });

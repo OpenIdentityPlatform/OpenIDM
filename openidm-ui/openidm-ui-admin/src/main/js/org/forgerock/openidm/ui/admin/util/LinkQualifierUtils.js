@@ -39,19 +39,24 @@ define("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils", [
         if(mapping.linkQualifiers !== undefined) {
 
             if(mapping.linkQualifiers.type) {
-                ScriptDelegate.evalLinkQualifierScript(mapping.linkQualifiers).then(_.bind(function(result){
-                    this.model.linkQualifier[mapping.name] = result;
-
+                if(this.model.linkQualifier[mapping.name] !== null &&  this.model.linkQualifier[mapping.name] !== undefined) {
                     linkQualifierPromise.resolve(this.model.linkQualifier[mapping.name]);
-                }, this));
+                } else {
+                    ScriptDelegate.evalLinkQualifierScript(mapping.linkQualifiers).then(_.bind(function(result){
+                        this.model.linkQualifier[mapping.name] = result;
 
+                        linkQualifierPromise.resolve(this.model.linkQualifier[mapping.name]);
+                    }, this));
+                }
             } else {
                 this.model.linkQualifier[mapping.name] = mapping.linkQualifiers;
 
                 linkQualifierPromise.resolve(this.model.linkQualifier[mapping.name]);
             }
         } else {
-            linkQualifierPromise.resolve(null);
+            this.model.linkQualifier[mapping.name] = ['default'];
+
+            linkQualifierPromise.resolve(this.model.linkQualifier[mapping.name]);
         }
 
         return linkQualifierPromise;
