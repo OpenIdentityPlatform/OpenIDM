@@ -35,6 +35,7 @@ import javax.script.SimpleBindings;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ConnectionProvider;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.PersistenceConfig;
@@ -77,8 +78,9 @@ public class ServletConnectionFactoryTest {
         requestHandler.addRoute("/system/OpenDJ/account", new MemoryBackend());
         requestHandler.addRoute("/system/AD/account", new MemoryBackend());
 
+        final ConnectionFactory connectionFactory = Resources.newInternalConnectionFactory(requestHandler);
         Bindings globalScope = new SimpleBindings();
-        globalScope.put("openidm", FunctionFactory.getResource());
+        globalScope.put("openidm", FunctionFactory.getResource(connectionFactory));
 
         ScriptRegistryImpl sr =
                 new ScriptRegistryImpl(new HashMap<String, Object>(), ServiceLoader
@@ -87,7 +89,7 @@ public class ServletConnectionFactoryTest {
                 new ConnectionProvider() {
                     @Override
                     public Connection getConnection(String connectionId) throws ResourceException {
-                        return Resources.newInternalConnection(requestHandler);
+                        return connectionFactory.getConnection();
                     }
 
                     @Override
