@@ -334,7 +334,9 @@ public class ServletConnectionFactory implements ConnectionFactory {
                     @Override
                     public void handleResult(Object result) {
                         try {
-                            handler.handleResult(result);
+                            if (handler != null) {
+                                handler.handleResult(result);
+                            }
                         } finally {
                             measure.end();
                         }
@@ -342,7 +344,9 @@ public class ServletConnectionFactory implements ConnectionFactory {
                     @Override
                     public void handleError(ResourceException error) {
                         try {
-                            handler.handleError(error);
+                            if (handler != null) {
+                                handler.handleError(error);
+                            }
                         } finally {
                             measure.end();
                         }
@@ -364,7 +368,9 @@ public class ServletConnectionFactory implements ConnectionFactory {
                     }
                     public void handleResult(QueryResult result) {
                         try {
-                            handler.handleResult(result);
+                            if (handler != null) {
+                                handler.handleResult(result);
+                            }
                         } finally {
                             measure.end();
                         }
@@ -372,7 +378,9 @@ public class ServletConnectionFactory implements ConnectionFactory {
                     @Override
                     public void handleError(ResourceException error) {
                         try {
-                            handler.handleError(error);
+                            if (handler != null) {
+                                handler.handleError(error);
+                            }
                         } finally {
                             measure.end();
                         }

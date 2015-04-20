@@ -60,6 +60,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -119,6 +120,10 @@ import org.slf4j.LoggerFactory;
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "PersistenceConfigReference", referenceInterface = PersistenceConfig.class,
             bind = "setPersistenceConfig", unbind = "unsetPersistenceConfig",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
+    @Reference(name = "ConnectionFactoryReference", referenceInterface = ConnectionFactory.class,
+            bind = "setConnectionFactory", unbind = "unsetConnectionFactory",
+            target = "(service.pid=org.forgerock.openidm.internal)",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "ScriptEngineFactoryReference",
             referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",
@@ -302,29 +307,35 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         logger.info("OpenIDM Script Service component is deactivated.");
     }
 
-    @Override
-    public void setPersistenceConfig(PersistenceConfig persistenceConfig) {
-        super.setPersistenceConfig(persistenceConfig);
-        openidm.put("create", ResourceFunctions.CREATE);
-        openidm.put("read", ResourceFunctions.READ);
-        openidm.put("update", ResourceFunctions.UPDATE);
-        openidm.put("patch", ResourceFunctions.PATCH);
-        openidm.put("query", ResourceFunctions.QUERY);
-        openidm.put("delete", ResourceFunctions.DELETE);
-        openidm.put("action", ResourceFunctions.ACTION);
+    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+        openidm.put("create", ResourceFunctions.newCreateFunction(connectionFactory));
+        openidm.put("read", ResourceFunctions.newReadFunction(connectionFactory));
+        openidm.put("update", ResourceFunctions.newUpdateFunction(connectionFactory));
+        openidm.put("patch", ResourceFunctions.newPatchFunction(connectionFactory));
+        openidm.put("query", ResourceFunctions.newQueryFunction(connectionFactory));
+        openidm.put("delete", ResourceFunctions.newDeleteFunction(connectionFactory));
+        openidm.put("action", ResourceFunctions.newActionFunction(connectionFactory));
         logger.info("Resource functions are enabled");
     }
 
-    public void unsetPersistenceConfig(PersistenceConfig persistenceConfig) {
-        openidm.remove("create", ResourceFunctions.CREATE);
-        openidm.remove("read", ResourceFunctions.READ);
-        openidm.remove("update", ResourceFunctions.UPDATE);
-        openidm.remove("patch", ResourceFunctions.PATCH);
-        openidm.remove("query", ResourceFunctions.QUERY);
-        openidm.remove("delete", ResourceFunctions.DELETE);
-        openidm.remove("action", ResourceFunctions.ACTION);
-        super.setPersistenceConfig(null);
+    public void unsetConnectionFactory(ConnectionFactory connectionFactory) {
+        openidm.remove("create");
+        openidm.remove("read");
+        openidm.remove("update");
+        openidm.remove("patch");
+        openidm.remove("query");
+        openidm.remove("delete");
+        openidm.remove("action");
         logger.info("Resource functions are disabled");
+    }
+
+    @Override
+    public void setPersistenceConfig(PersistenceConfig persistenceConfig) {
+        super.setPersistenceConfig(persistenceConfig);
+    }
+
+    public void unsetPersistenceConfig(PersistenceConfig persistenceConfig) {
+        super.setPersistenceConfig(null);
     }
 
     protected void bindCryptoService(final CryptoService cryptoService) {
