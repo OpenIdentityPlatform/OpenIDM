@@ -1673,17 +1673,6 @@
     and Data Management UIs.
    </para>
 
-   <note>
-    <para>
-     OpenIDM includes two similarly named files: the
-     <filename>forgerock-variables.less</filename> and the
-     <filename>variables.less</filename> files.
-     One is stored in the <filename>public/css/common</filename> subdirectory. The
-     other comes from a Font Awesome download, and can be found in the
-     <filename>public/css/fontawesome/less</filename> subdirectory.
-    </para>
-   </note>
-
   </section>
 
   <section xml:id="ui-logo">
