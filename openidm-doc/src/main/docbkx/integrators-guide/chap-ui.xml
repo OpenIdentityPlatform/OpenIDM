@@ -1661,22 +1661,23 @@
 
    <para>
     You can also set up new custom colors. For that purpose, copy the
-    <filename>idm-variables.less</filename> file from the
+    <filename>forgerock-variables.less</filename> file from the
     <filename>openidm/ui/default/admin/public/css/common/</filename>
     directory to the <filename>openidm/ui/extension/css/common</filename>
     directory.
    </para>
 
    <para>
-    You can then make changes to the <filename>idm-variables.less</filename> file
-    that you just copied. Any changes that you make affects both the Admin and
-    Data Management UIs.
+    You can then make changes to the <filename>forgerock-variables.less</filename>
+    file that you just copied. Any changes that you make affects both the Admin
+    and Data Management UIs.
    </para>
 
    <note>
     <para>
      OpenIDM includes two similarly named files: the
-     <filename>idm-variables.less</filename> file.
+     <filename>forgerock-variables.less</filename> and the
+     <filename>variables.less</filename> files.
      One is stored in the <filename>public/css/common</filename> subdirectory. The
      other comes from a Font Awesome download, and can be found in the
      <filename>public/css/fontawesome/less</filename> subdirectory.
