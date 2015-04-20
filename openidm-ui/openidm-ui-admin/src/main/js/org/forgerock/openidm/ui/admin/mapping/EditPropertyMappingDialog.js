@@ -19,10 +19,10 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
-    "org/forgerock/openidm/ui/admin/sync/QueryFilterEditor",
+    "org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor",
     "bootstrap-dialog",
     "bootstrap-tabdrop"
-], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, inlineScriptEditor, QueryFilterEditor, BootstrapDialog, tabdrop) {
+], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, inlineScriptEditor, LinkQualifierFilterEditor, BootstrapDialog, tabdrop) {
     var EditPropertyMappingDialog = AbstractView.extend({
         template: "templates/admin/mapping/PropertyMappingDialogEditTemplate.html",
         el: "#dialogs",
@@ -37,76 +37,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             if ($(e.target).val().length || _.has(this.data.property, "source")) {
                 this.data.property.source = $(e.target).val();
             }
-            this.showTransformSample();
-            this.showCondition();
         },
-        showTransformSample: function () {
-            var translatedProperty,
-                scriptValue = null,
-                generatedScript = null;
-
-            if (conf.globalData.sampleSource && this.data.property) {
-                if(this.transform_script_editor !== undefined) {
-                    generatedScript = this.transform_script_editor.generateScript();
-
-                    if(generatedScript && generatedScript.source && generatedScript.type === "text/javascript") {
-                        scriptValue = generatedScript.source;
-                    }
-                }
-
-                if(scriptValue) {
-                    // only passing in the script source to the translation function; default and simple association results purposely ignored.
-                    translatedProperty = syncDelegate.translatePropertyToTarget(conf.globalData.sampleSource, {
-                        source: this.data.property.source,
-                        target: this.data.property.target,
-                        transform: {
-                            type: "text/javascript",
-                            source: scriptValue
-                        }
-                    });
-
-                    $("#exampleResult", this.currentDialog).val(translatedProperty[1]);
-                } else {
-                    $("#exampleResult", this.currentDialog).val("");
-                }
-                this.validateMapping();
-            }
-
-        },
-
-        showCondition: function () {
-
-            var conditionAction,
-                scriptValue = null,
-                generatedScript = null;
-
-            if (conf.globalData.sampleSource && this.data.property ) {
-
-                if(this.conditional_script_editor !== undefined) {
-                    generatedScript = this.conditional_script_editor.generateScript();
-
-                    if(generatedScript && generatedScript.source && generatedScript.type === "text/javascript") {
-                        scriptValue = generatedScript.source;
-                    }
-                }
-                if(scriptValue) {
-                    conditionAction = syncDelegate.conditionAction(conf.globalData.sampleSource, {
-                        source: this.data.property.source,
-                        target: this.data.property.target,
-                        condition: {
-                            type: "text/javascript",
-                            source: scriptValue
-                        }
-                    });
-
-                    $("#conditionResult", this.currentDialog).text(conditionAction);
-                } else {
-                    $("#conditionResult", this.currentDialog).text("");
-                }
-                this.validateMapping();
-            }
-        },
-
 
         conditionalUpdateType: function () {
             var type = this.currentDialog.find(".conditionalUpdateType:checked").val(),
@@ -114,7 +45,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
 
             if (type === "conditionalFilter") {
                 if(this.conditionFilterEditor === null) {
-                    this.conditionFilterEditor = new QueryFilterEditor();
+                    this.conditionFilterEditor = new LinkQualifierFilterEditor();
 
                     if (_.has(this.data.property, "condition")) {
                         if (!_.has(this.data.property.condition, "type")) {
@@ -124,6 +55,8 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
 
                     this.conditionFilterEditor.render({
                         "queryFilter": filter,
+                        "mappingName" : this.data.mappingName,
+                        "mapProps": this.data.mapProps,
                         "element": "#" + "conditionFilterHolder",
                         "resource": ""
                     });
@@ -341,16 +274,13 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 } else if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&
                     typeof (prop.transform.source) === "string") {
                     this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
-                            "element": this.currentDialog.find("#transformationScriptHolder"),
-                            "eventName": "",
-                            "noValidation": true,
-                            "scriptData": prop.transform,
-                            "disablePassedVariable": false,
-                            "onBlur" : _.bind(this.showTransformSample, this),
-                            "onChange" :  _.bind(this.showTransformSample, this),
-                            "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
-                        },
-                        _.bind(this.showTransformSample, this));
+                        "element": this.currentDialog.find("#transformationScriptHolder"),
+                        "eventName": "",
+                        "noValidation": true,
+                        "scriptData": prop.transform,
+                        "disablePassedVariable": false,
+                        "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
+                    });
 
                     selectedTab = 1;
                 } else if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
@@ -374,27 +304,22 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             }
 
             _this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
-                    "element": _this.currentDialog.find("#transformationScriptHolder"),
-                    "eventName": "transform",
-                    "noValidation": true,
-                    "scriptData": _this.data.property.transform,
-                    "disablePassedVariable": false,
-                    "onBlur" : _this.showTransformSample,
-                    "onChange" :  _this.showTransformSample,
-                    "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
-                },
-                _this.showTransformSample);
+                "element": _this.currentDialog.find("#transformationScriptHolder"),
+                "eventName": "transform",
+                "noValidation": true,
+                "scriptData": _this.data.property.transform,
+                "disablePassedVariable": false,
+                "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
+            });
 
             _this.conditional_script_editor = inlineScriptEditor.generateScriptEditor({
-                    "element": _this.currentDialog.find("#conditionScriptHolder"),
-                    "eventName": "conditional",
-                    "noValidation": true,
-                    "scriptData": _this.data.property.condition,
-                    "disablePassedVariable": false,
-                    "onBlur" : _this.showCondition,
-                    "onChange" :  _this.showCondition
-                },
-                _this.showCondition);
+                "element": _this.currentDialog.find("#conditionScriptHolder"),
+                "eventName": "conditional",
+                "noValidation": true,
+                "scriptData": _this.data.property.condition,
+                "disablePassedVariable": false
+            });
+
             _this.conditionalUpdateType();
 
             $('#mappingDialogTabs a', this.currentDialog).click(function (e) {
@@ -406,8 +331,6 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             $('#mappingDialogTabs a:first', this.currentDialog).tab('show');
 
             $('#mappingDialogTabs .active :input:first', this.currentDialog).focus();
-
-            this.showTransformSample();
 
             this.data.availableSourceProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
 

@@ -65,7 +65,7 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
 
                 return {current: node, parent: previousNode, path: objectPath};
             },
-            removeNode: function (e) {
+            removeNode: function (e, callback) {
                 var context = this.getExpressionContext(e);
 
                 if (!_.isNull(context.parent)) {
@@ -81,9 +81,9 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     this.data.filterString = "";
                 }
 
-                this.renderExpressionTree();
+                this.renderExpressionTree(callback);
             },
-            addNode: function (e) {
+            addNode: function (e, callback) {
                 var context = this.getExpressionContext(e),
                     node = context.current;
 
@@ -91,9 +91,9 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
 
                 this.data.filterString = this.getFilterString();
 
-                this.renderExpressionTree();
+                this.renderExpressionTree(callback);
             },
-            updateNodeValue: function (e) {
+            updateNodeValue: function (e, callback) {
                 var context = this.getExpressionContext(e),
                     node = context.current,
                     field = $(e.target),
@@ -165,14 +165,18 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                 }
 
                 if (redrawContainer) {
-                    this.renderExpressionTree();
+                    this.renderExpressionTree(callback);
                 } else {
                     this.$el.find(".filter").text(this.getFilterString());
                 }
             },
 
-            renderExpressionTree: function () {
-                uiUtils.renderTemplate(this.template, this.$el, _.extend({}, conf.globalData, this.data), $.noop(), "replace");
+            renderExpressionTree: function (callback) {
+                if(callback) {
+                    uiUtils.renderTemplate(this.template, this.$el, _.extend({}, conf.globalData, this.data), callback, "replace");
+                } else {
+                    uiUtils.renderTemplate(this.template, this.$el, _.extend({}, conf.globalData, this.data), $.noop(), "replace");
+                }
             }
         }),
         filterDisplayClosure;

@@ -30,9 +30,9 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
-    "org/forgerock/openidm/ui/admin/sync/QueryFilterEditor",
+    "org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor",
     "bootstrap-dialog"
-], function(AbstractView, MappingBaseView, conf, uiUtils, InlineScriptEditor, QueryFilterEditor, BootstrapDialog) {
+], function(AbstractView, MappingBaseView, conf, uiUtils, InlineScriptEditor, LinkQualifierFilterEditor, BootstrapDialog) {
     var SituationPolicyDialogView = AbstractView.extend({
         template: "templates/admin/sync/SituationPolicyDialogTemplate.html",
         el: "#dialogs",
@@ -49,6 +49,8 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
             var _this = this,
                 title = "";
 
+            this.data.mappingName = args.mappingName;
+            this.data.mappingProperties = args.mapProps;
             this.data.situation = args.situation;
             this.data.edit = args.edit;
             this.data.defaultAction = false;
@@ -163,9 +165,11 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                             });
 
                             // Load Query Filter Editor
-                            this.model.conditionFilterEditor = new QueryFilterEditor();
+                            this.model.conditionFilterEditor = new LinkQualifierFilterEditor();
 
                             this.model.conditionFilterEditor.render({
+                                "mappingName" : this.data.mappingName,
+                                "mapProps": this.data.mappingProperties,
                                 "queryFilter": conditionFilter || "",
                                 "element": "#conditionFilterPane",
                                 "resource" : ""
