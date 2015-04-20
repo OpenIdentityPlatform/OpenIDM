@@ -35,12 +35,12 @@
                                 <label for="numRepresentativeProps" class="inline">{{t "templates.mapping.numRepresentativeProps"}}:</label>
                                 <input type="text" class="form-control" id="numRepresentativeProps" value="{{numRepresentativeProps}}">
                             </div>
-                            <!--
+
                             <div class="form-group">
                                 <label for="findSampleSource" class="inline">{{t "templates.mapping.sampleSource"}}:</label>
                                 <input type="text" id="findSampleSource" class="form-control" value="{{sampleSource_txt}}">
                             </div>
-                            -->
+
                         </form>
                     </div>
                 </div>
@@ -55,8 +55,8 @@
                 {{#if missingRequiredProperties}}
                 <button type="button" id="missingRequiredPropertiesButton" class="btn btn-primary">{{t "common.form.add"}} {{t "templates.mapping.missingRequiredProperties"}} ({{missingRequiredProperties.length}})</button>
                 {{/if}}
-                <button type="button" id="updateMappingButton" class="btn btn-primary">{{t "templates.mapping.saveProperties"}}<i class="fa fa-lg fa-save"></i></button>
-                <button type="button" id="clearChanges" class="btn btn-primary">{{t "templates.mapping.clearChanges"}}<i class="fa fa-lg fa-refresh"></i></button>
+                <button type="button" id="clearChanges" class="btn btn-default">{{t "templates.mapping.undoAllChanges"}}</button>
+                <button type="button" id="updateMappingButton" class="btn btn-primary">{{t "templates.mapping.saveProperties"}}</button>
             </div>
         </div>
     </div>

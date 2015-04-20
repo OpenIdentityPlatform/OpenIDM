@@ -244,7 +244,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
                 BrowserStorageDelegate.set("currentMapping", mapping);
 
-                this.render(this.model.mappingName);
+                EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
             }, this));
         }
     });

@@ -80,7 +80,8 @@ define("config/AppConfiguration", [
                     configuration: {
                         processConfigurationFiles: [
                             "config/process/CommonConfig",
-                            "config/process/CommonIDMConfig"
+                            "config/process/CommonIDMConfig",
+                            "config/process/AdminIDMConfig"
                         ]
                     } 
                 },

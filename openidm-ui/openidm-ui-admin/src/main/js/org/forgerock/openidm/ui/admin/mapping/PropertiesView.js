@@ -37,7 +37,12 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/MappingUtils",
-    "org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView"
+    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
+    "org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView",
+    "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
+    "org/forgerock/openidm/ui/admin/util/FilterEvaluator",
+    "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
+    "org/forgerock/openidm/ui/admin/sync/QueryFilterEditor"
 ], function(AdminAbstractView,
             MappingBaseView,
             eventManager,
@@ -49,7 +54,12 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             connectorDelegate,
             configDelegate,
             mappingUtils,
-            PropertiesLinkQualifierView) {
+            LinkQualifierUtil,
+            PropertiesLinkQualifierView,
+            ScriptDelegate,
+            FilterEvaluator,
+            QueryFilterUtils,
+            QueryFilterEditor) {
 
     var PropertiesView = AdminAbstractView.extend({
         template: "templates/admin/mapping/PropertiesTemplate.html",
@@ -64,6 +74,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             "click #clearChanges": "clearChanges",
             "click #missingRequiredPropertiesButton": "addRequiredProperties"
         },
+        sampleDisplay: [],
         currentMapping: function(){
             return MappingBaseView.currentMapping();
         },
@@ -157,106 +168,241 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             browserStorageDelegate.set(this.mapping.name + "_Properties", props);
             this.render([this.mapping.name]);
         },
+        //Returns a promise and determines if a transform and/or conditional needs to be eval
+        sampleEvalCheck: function(sampleDetails, globals, prop) {
+            var samplePromise =  $.Deferred(),
+                filterCheck,
+                sampleSource = conf.globalData.sampleSource || {},
+                qfe = new QueryFilterEditor();
+
+            if(sampleDetails.hasCondition) {
+                if(_.isString(sampleDetails.condition)) {
+                    filterCheck = FilterEvaluator.evaluate(qfe.transform(QueryFilterUtils.convertFrom(sampleDetails.condition)), { "linkQualifier": globals.linkQualifier, "object": sampleSource});
+
+                    if(filterCheck) {
+                        if(sampleDetails.hasTransform) {
+                            ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults){
+                                samplePromise.resolve({
+                                    conditionResults: {
+                                        result: true
+                                    },
+                                    transformResults: transformResults
+                                });
+                            }, function(e) {
+                                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                            });
+                        } else {
+                            samplePromise.resolve({
+                                conditionResults: {
+                                    result: true
+                                }
+                            });
+                        }
+                    } else {
+                        samplePromise.resolve({
+                            conditionResults: {
+                                result: false
+                            },
+                            transformResults: ""
+                        });
+                    }
+                } else {
+                    ScriptDelegate.evalScript(sampleDetails.condition, { "linkQualifier": globals.linkQualifier, "object": sampleSource}).then(function(conditionResults){
+                            if(sampleDetails.hasTransform && conditionResults === true) {
+                                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults){
+                                    samplePromise.resolve({
+                                        conditionResults: {
+                                            result: conditionResults
+                                        },
+                                        transformResults: transformResults
+                                    });
+                                }, function(e) {
+                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                                });
+                            } else {
+                                samplePromise.resolve({
+                                    conditionResults: {
+                                        result: conditionResults
+                                    }
+                                });
+                            }
+                        },
+                        function(e) {
+                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                        });
+                }
+            } else if (sampleDetails.hasTransform) {
+                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults){
+                    samplePromise.resolve({
+                        transformResults: transformResults
+                    });
+                }, function(e) {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                });
+            } else {
+                samplePromise.resolve(null);
+            }
+
+            return samplePromise;
+        },
         loadMappingPropertiesGrid: function() {
             var _this = this,
                 mapProps = browserStorageDelegate.get(this.mapping.name + "_Properties") || browserStorageDelegate.get("currentMapping").properties,
                 sampleSource = conf.globalData.sampleSource || {},
                 autocompleteProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps),
-                gridFromMapProps = function (props) {
-                    return _.chain(props)
-                        .map(function (prop) {
-                            var sampleData = null,
-                                type = "",
-                                source = {},
-                                sourceProp = "",
-                                required = false,
-                                def = "",
-                                script = "",
-                                object = {},
-                                hasConditionScript = false;
+                processDisplayDetails = function(evalResults, gridDetailsPromise, props) {
+                    var propCounter = 0;
 
-                            if(_.has(prop, "condition")) {
-                                //if(typeof(prop.condition) === "object" && prop.condition.type === "text/javascript" &&
-                                //        typeof(prop.condition.source) === "string"){
+                    gridDetailsPromise.resolve(
+                        _.chain(props)
+                            .map(function (prop) {
+                                var sampleData = null,
+                                    sourceProp = "",
+                                    hasConditionScript = false,
+                                    conditionScript = null,
+                                    hasTransformScript = false,
+                                    transformScript = null;
 
-                                hasConditionScript = true;
-                                object = sampleSource;
+                                if(_.has(prop, "condition")) {
+                                    hasConditionScript = true;
+                                    conditionScript = prop.condition;
+                                }
 
-                                try {
-                                    if(!eval(prop.condition.source) && prop.condition.source.length > 0){
-                                        sampleData = "WILL NOT UPDATE";
+                                if(_.has(prop, "transform")) {
+                                    hasTransformScript = true;
+
+                                    if(prop.transform.source) {
+                                        transformScript = prop.transform.source;
+                                    } else {
+                                        transformScript = "File: " +prop.transform.file;
                                     }
-                                } catch (e) {
-                                    sampleData = "ERROR WITH CONDITION";
                                 }
-                                //}
-                            }
 
-                            if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&
-                                typeof (prop.transform.source) === "string" && sampleData === null) {
+                                if(evalResults !== null && evalResults[propCounter] !== null) {
+                                    if(_.isObject(evalResults[propCounter].conditionResults)) {
+                                        if(evalResults[propCounter].conditionResults.result === true) {
+                                            if(evalResults[propCounter].transformResults) {
+                                                sampleData = evalResults[propCounter].transformResults;
+                                            } else {
+                                                sampleData = sampleSource[prop.source];
+                                            }
+                                        } else {
+                                            sampleData = "";
+                                        }
+                                    } else {
+                                        if(evalResults[propCounter].transformResults) {
+                                            sampleData = evalResults[propCounter].transformResults;
+                                        } else {
+                                            sampleData = sampleSource[prop.source];
+                                        }
+                                    }
+                                } else if (typeof(prop.source) !== "undefined" && prop.source.length) {
 
-                                if (typeof(prop.source) !== "undefined" && prop.source.length) {
-                                    source = sampleSource[prop.source];
-                                } else {
-                                    source = sampleSource;
-                                }
-                                try {
-                                    sampleData = eval(prop.transform.source); // references to "source" variable expected within this string
-                                } catch (err) {
-                                    sampleData = "ERROR WITH SCRIPT";
-                                }
-                                script = prop.transform.source;
-                                if (typeof(prop.source) !== "undefined" && prop.source.length) {
+                                    if(sampleData === null){
+                                        sampleData = sampleSource[prop.source];
+                                    }
                                     sourceProp = prop.source;
                                 }
 
-                            } else if (typeof(prop.source) !== "undefined" && prop.source.length) {
+                                if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
 
-                                if(sampleData === null){
-                                    sampleData = sampleSource[prop.source];
-                                }
-                                sourceProp = prop.source;
-
-                            }
-
-                            if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
-
-                                if (sampleData === null || sampleData === undefined) {
-                                    sampleData = prop["default"];
+                                    if (sampleData === null || sampleData === undefined) {
+                                        sampleData = prop["default"];
+                                    }
                                 }
 
-                                def = prop["default"];
+                                propCounter++;
+
+                                return {
+                                    "target": Handlebars.Utils.escapeExpression(prop.target),
+                                    "source": Handlebars.Utils.escapeExpression(sourceProp),
+                                    "preview": Handlebars.Utils.escapeExpression(decodeURIComponent((sampleData || ""))),
+                                    "iconDisplay": {
+                                        "hasCondition": hasConditionScript,
+                                        "conditionScript" : conditionScript,
+                                        "hasTransform" : hasTransformScript,
+                                        "transformScript" : transformScript
+                                    }
+                                };
+
+                            }).value()
+                    );
+                },
+                gridFromMapProps = function (props) {
+                    var propertyDetails = _.clone(props),
+                        gridDetailsPromise = $.Deferred(),
+                        evalPromises = [],
+                        globals = {
+                            source : {
 
                             }
+                        },
+                        evalCheck,
+                        tempDetails = {};
 
-                            /*
-                             if(!$("#findSampleSource",this.$el).val().length){
-                             sampleData = "";
-                             }
-                             */
+                    _this.sampleDisplay = [];
 
-                            return {
-                                "target": Handlebars.Utils.escapeExpression(prop.target),
-                                "source": Handlebars.Utils.escapeExpression(sourceProp),
-                                "default": Handlebars.Utils.escapeExpression(def),
-                                "script": Handlebars.Utils.escapeExpression(script),
-                                "sample": Handlebars.Utils.escapeExpression(decodeURIComponent((sampleData || ""))),
-                                "required": required,
-                                "hasConditionScript": hasConditionScript
+                    if(!_.isEmpty(sampleSource)) {
+                        _.each(propertyDetails, function (item) {
+
+                            globals = {
+                                source: {
+
+                                }
                             };
-                        }).value();
+
+                            tempDetails = {};
+
+                            if(item.condition || item.transform) {
+                                globals.linkQualifier = _this.currentLinkQualifier;
+
+                                if(sampleSource[item.source]) {
+                                    globals.source = sampleSource[item.source];
+                                } else {
+                                    globals.source = sampleSource;
+                                }
+                            }
+
+                            if(item.condition) {
+                                tempDetails.hasCondition = true;
+                                tempDetails.condition = item.condition;
+                            } else {
+                                tempDetails.hasCondition = false;
+                            }
+
+                            if (item.transform) {
+                                tempDetails.hasTransform = true;
+                                tempDetails.transform = item.transform;
+                            } else {
+                                tempDetails.hasTransform = false;
+                            }
+
+                            evalCheck = _this.sampleEvalCheck(tempDetails, globals, item);
+
+                            tempDetails.results = evalCheck;
+
+                            _this.sampleDisplay.push(tempDetails);
+
+                            evalPromises.push(evalCheck);
+                        });
+                    }
+
+                    if(evalPromises.length > 0) {
+
+                        $.when.apply($, evalPromises).then(function() {
+                            var evalResults = arguments;
+
+                            processDisplayDetails(evalResults, gridDetailsPromise, props);
+                        }, function(e) {
+                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                        });
+                    } else {
+                        processDisplayDetails(null, gridDetailsPromise, props);
+                    }
+
+                    return gridDetailsPromise;
                 },
                 cols = [
-                    {
-                        "name": "required",
-                        "label": "&nbsp;",
-                        "width": "25px",
-                        "align": "center",
-                        "title": false,
-                        "formatter": function(required,opt,row){
-                            return (!required) ? '<i target="' + row.target + '" title="' + $.t("common.form.removeAttribute") + ': ' + row.target + '" class="fa fa-times-circle removePropertyBtn" style="margin-top:4px;"></i>' : '';
-                        }
-                    },
                     {
                         "name": "source",
                         "label": $.t("templates.mapping.source"),
@@ -268,114 +414,160 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         "width": "175px"
                     },
                     {
-                        "name": "default",
-                        "label": "Default",
-                        "width": "115px",
-                        "formatter": function(def,opt,row){
-                            return (def.length > 0) ? '<span class="attrTabBtn" style="cursor:pointer;" rowId="' + opt.rowId + '" tab="default">' + def + '</span>' : '';
+                        "name": "iconDisplay",
+                        "label": "&nbsp;",
+                        "width": "50px",
+                        "align": "center",
+                        "title": false,
+                        "formatter": function(iconDisplay,opt,row){
+                            var iconElement = "";
+
+                            if(iconDisplay.hasCondition) {
+
+                                if(_.isObject(iconDisplay.conditionScript)) {
+                                    if(iconDisplay.conditionScript.source) {
+                                        iconDisplay.conditionScript = iconDisplay.conditionScript.source;
+                                    } else {
+                                        iconDisplay.conditionScript = "File: " +iconDisplay.conditionScript.file;
+                                    }
+                                }
+
+                                iconElement = iconElement + '<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-filter"></i>'
+                                    +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +iconDisplay.conditionScript +'</pre></div></span>';
+                            }
+
+                            if(iconDisplay.hasTransform) {
+                                iconElement = iconElement + '<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
+                                    +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +iconDisplay.transformScript +'</pre></div></span>';
+                            }
+
+                            return iconElement;
                         }
                     },
-                    /* SAMPLE TEMPORARILY DISABLED
-                     {
-                     "name": "script",
-                     "label": "Transform Script",
-                     "width": "150px",
-                     "formatter": function(script,opt,row){
-                     return (script.length > 0) ? '<span class="attrTabBtn" style="cursor:pointer;" rowId="' + opt.rowId + '" tab="transform">' + script + '</span>' : '';
-                     }
-                     },*/
                     {
-                        "name": "hasConditionScript",
+                        "name": "preview",
+                        "label": '<div id="previewHolder" class="btn-group"><button id="previewDropdownButton" role="button" type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
+                            +'<span id="previewTitle">Preview </span><span id="previewDropdownType" class="text-muted"></span> <span class="caret"></span>'
+                            +'</button>'
+                            +'<ul id="previewDropDown" class="dropdown-menu" role="menu"></ul></div>',
+                        "classes": "preview-information",
+                        "width": "175px"
+                    },
+                    {
+                        "name": "required",
                         "label": "&nbsp;",
                         "width": "25px",
                         "align": "center",
                         "title": false,
-                        "formatter": function(hasConditionScript,opt,row){
-                            return (hasConditionScript) ? '<i class="fa fa-filter attrTabBtn" rowId="' + opt.rowId + '" title="' + $.t('templates.mapping.conditionScriptApplied') + '"  tab="condition"></i>' : '';
+                        "formatter": function(required,opt,row){
+                            return (!required) ? '<i target="' + row.target + '" title="' + $.t("common.form.removeAttribute") + ': ' + row.target + '" class="fa fa-times removePropertyBtn" style="margin-top:4px;"></i>' : '';
                         }
-                    }/*,
-                     {
-                     "name": "sample",
-                     "label": "Sample",
-                     "width": "175px"
-                     }*/
+                    }
                 ];
 
             this.data.mapProps = mapProps;
 
-            /* SAMPLE TEMPORARILY DISABLED
-             if(this.currentMapping().linkQualifiers) {
-             _.each(this.currentMapping().linkQualifiers, function (link) {
-             cols.push({
-             "name": link,
-             "label": link,
-             "width": "150px",
-             "formatter": function (script, opt, row) {
-             return link;//(script.length > 0) ? '<span class="attrTabBtn" style="cursor:pointer;" rowId="' + opt.rowId + '" tab="transform">' + script + '</span>' : '';
-             }
-             });
-             });
-             }
-             */
-
-            /* SAMPLE TEMPORARILY DISABLED
             mappingUtils.setupSampleSearch($("#findSampleSource",this.$el),this.mapping,autocompleteProps, _.bind(function(item){
-             conf.globalData.sampleSource = item;
-             sampleSource = item;
-             $('#mappingTable',this.$el).jqGrid('setGridParam', {
-             datatype: 'local',
-             data: gridFromMapProps(mapProps)
-             }).trigger('reloadGrid');
-             }, this)); */
+                conf.globalData.sampleSource = item;
+                sampleSource = item;
 
-            $('#mappingTable').jqGrid( {
-                datatype: "local",
-                data: gridFromMapProps(mapProps),
-                height: 'auto',
-                autowidth:true,
-                shrinkToFit:true,
-                rowNum: mapProps.length,
-                pager: 'mappingTable_pager',
-                hidegrid: false,
-                colModel: cols,
-                cmTemplate: {sortable:false},
-                onSelectRow: function(id){
-                    if(id !== "blankRow"){
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, id]});
+                gridFromMapProps(mapProps).then(function(gridResults) {
+                    $('#mappingTable',this.$el).jqGrid('setGridParam', {
+                        datatype: 'local',
+                        data: gridResults
+                    }).trigger('reloadGrid');
+                });
+            }, this));
+
+            gridFromMapProps(mapProps).then(function(gridResults) {
+                $('#mappingTable').jqGrid({
+                    datatype: "local",
+                    data: gridResults,
+                    height: 'auto',
+                    autowidth: true,
+                    shrinkToFit: true,
+                    rowNum: mapProps.length,
+                    pager: 'mappingTable_pager',
+                    hidegrid: false,
+                    colModel: cols,
+                    cmTemplate: {sortable: false},
+                    onSelectRow: function (id) {
+                        if (id !== "blankRow") {
+                            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, id]});
+                        }
+                    },
+                    beforeSelectRow: function (rowid, e) {
+                        if ($(e.target).hasClass("removePropertyBtn")) {
+                            return false;
+                        }
+                        return true;
+                    },
+                    loadComplete: function (data) {
+                        var appendElement;
+
+                        if (!data.rows.length) {
+                            $('#mappingTable').addRowData("blankRow", {"required": true, "target": $.t("templates.mapping.noPropertiesMapped"), "default": "", "script": "", "hasConditionScript": false});
+                            _this.$el.find("#findSampleSource").parent().hide();
+                        }
+
+                        _this.setNumRepresentativePropsLine();
+
+                        $(".properties-badge").popover({
+                            content: function () { return $(this).find(".tooltip-details").clone().show();},
+                            trigger:'hover',
+                            placement:'top',
+                            container: 'body',
+                            html: 'true',
+                            template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+                        });
+
+                        $("#previewDropDown").empty();
+
+                        $("#previewDropdownType").html("(" + _this.currentLinkQualifier + ")");
+
+                        $('#previewDropdownButton').dropdown();
+
+                        _.each(_this.linkQualifiers, function (value) {
+                            appendElement = $('<li><span data-linkQualifier="' + value + '" class="select-preview-item">' + value + '</span></li>');
+
+                            $("#previewDropDown").append(appendElement);
+
+                            appendElement.bind("click", function (event) {
+                                var element = event.target;
+                                event.preventDefault();
+
+                                _this.currentLinkQualifier = $(element).attr("data-linkQualifier");
+
+                                $('#previewDropdownButton').dropdown("toggle");
+
+                                gridFromMapProps(mapProps).then(function(gridResults) {
+                                    $('#mappingTable',this.$el).jqGrid('setGridParam', {
+                                        datatype: 'local',
+                                        data: gridResults
+                                    }).trigger('reloadGrid');
+                                });
+                            });
+                        });
                     }
-                },
-                beforeSelectRow: function(rowid, e) {
-                    if ($(e.target).hasClass("removePropertyBtn")) {
-                        return false;
+                }).jqGrid('sortableRows', {
+                    update: function (ev, ui) {
+                        var item = ui.item[0];
+
+                        mapProps.splice((item.rowIndex - 1), 0, _this.draggedRow);
+
+                        browserStorageDelegate.set(_this.mapping.name + "_Properties", mapProps);
+
+                        _this.setNumRepresentativePropsLine();
+                        _this.checkChanges();
+                    },
+                    start: function (ev, ui) {
+                        _this.draggedRow = mapProps[(ui.item[0].rowIndex - 1)];
+
+                        mapProps.splice((ui.item[0].rowIndex - 1), 1);
+
+                        $("#mappingTable", _this.$el).find("tr td").css("border-bottom-width", "");
                     }
-                    return true;
-                },
-                loadComplete: function(data){
-                    if (!data.rows.length) {
-                        $('#mappingTable').addRowData("blankRow", {"required":true,"target":$.t("templates.mapping.noPropertiesMapped"), "default":"", "script":"", "hasConditionScript":false});
-                        _this.$el.find("#findSampleSource").parent().hide();
-                    }
-
-                    _this.setNumRepresentativePropsLine();
-                }
-            }).jqGrid('sortableRows',{
-                update: function(ev,ui){
-                    var item = ui.item[0];
-
-                    mapProps.splice((item.rowIndex - 1), 0, _this.draggedRow);
-
-                    browserStorageDelegate.set(_this.mapping.name + "_Properties", mapProps);
-
-                    _this.setNumRepresentativePropsLine();
-                    _this.checkChanges();
-                },
-                start: function(ev, ui){
-                    _this.draggedRow = mapProps[(ui.item[0].rowIndex - 1)];
-
-                    mapProps.splice((ui.item[0].rowIndex - 1), 1);
-
-                    $("#mappingTable", _this.$el).find("tr td").css("border-bottom-width","");
-                }
+                });
             });
         },
         checkAvailableProperties: function(){
@@ -393,6 +585,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
         },
         render: function(args, callback) {
             MappingBaseView.child = this;
+
             MappingBaseView.render(args,_.bind(function(){
                 $(window).resize(function () {
                     $("#mappingTable").setGridWidth( $('.jqgrid-container').width());
@@ -407,6 +600,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             this.data.numRepresentativeProps = browserStorageDelegate.get(this.mapping.name + "_numRepresentativeProps",true) || 4;
             this.data.requiredProperties = [];
             this.data.missingRequiredProperties = [];
+
+            this.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
+            this.currentLinkQualifier = this.linkQualifiers[0];
 
             if(conf.globalData.sampleSource && this.mapping.properties.length){
                 this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
@@ -430,7 +626,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             }, this));
         },
         setNumRepresentativePropsLine: function(){
-            $("#mappingTable", this.$el).find("tr:eq(" + this.data.numRepresentativeProps + ") td").css("border-bottom-width","10px");
+            $("#mappingTable", this.$el).find("tr:eq(" + this.data.numRepresentativeProps + ") td").css("border-bottom-width","5px");
         },
         buildAvailableObjectsMap: function(){
             var sourceProm = $.Deferred(),
@@ -504,8 +700,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
             configDelegate.updateEntity("sync", {"mappings" : syncMappings}).then(_.bind(function(){
                 delete MappingBaseView.data.mapping;
+
                 this.render([this.currentMapping().name]);
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
             }, this));
         }
     });

@@ -22,39 +22,26 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define, _, $, window */
 
-define("org/forgerock/openidm/ui/admin/delegates/ScriptDelegate", [
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function(constants, AbstractDelegate) {
-
-    var obj = new AbstractDelegate(constants.host + "/openidm/script");
-
-    obj.evalScript = function(script, additionalGlobals) {
-
-        if(additionalGlobals) {
-            script.globals = _.extend(script.globals, additionalGlobals);
-        }
-
-        return obj.serviceCall({
-            url: "?_action=eval",
-            type: "POST",
-            data: JSON.stringify(script),
-            errorsHandlers : {
-                "error": {
-                    status: "500"
+define("config/process/AdminIDMConfig", [
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(constants) {
+    var obj = [
+            {
+                startEvent: constants.EVENT_QUALIFIER_CHANGED,
+                description: "",
+                override: true,
+                dependencies: [
+                    "org/forgerock/commons/ui/common/main/Router",
+                    "org/forgerock/commons/ui/common/main/Configuration",
+                    "org/forgerock/openidm/ui/admin/mapping/PropertiesView"
+                ],
+                processDescription: function(event, router, conf, PropertiesView) {
+                    PropertiesView.render([event]);
                 }
             }
-        });
-    };
-
-    obj.evalLinkQualifierScript = function(script) {
-        script.globals = script.globals || {};
-        script.globals.returnAll = true;
-
-        return obj.evalScript(script);
-    };
+        ];
 
     return obj;
 });
