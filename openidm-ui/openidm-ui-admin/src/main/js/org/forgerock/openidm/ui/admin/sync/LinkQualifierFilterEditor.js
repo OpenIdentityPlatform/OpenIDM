@@ -153,8 +153,8 @@ define("org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor", [
                 displayValue;
 
             _.each(this.model.sourceProps, function(source) {
-                if(source.source !== undefined) {
-                    baseElement.append('<option value="/object/' +source.source +'">' +source.source +'</option>');
+                if(source !== undefined) {
+                    baseElement.append('<option value="/object/' +source +'">' +source +'</option>');
                 }
             });
 
