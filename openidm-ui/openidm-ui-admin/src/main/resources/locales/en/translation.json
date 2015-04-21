@@ -875,7 +875,7 @@
                 "propertyListLabel": "Enter or select the source property that you need",
                 "propertyListHeader": "Property List",
                 "transformationHeader": "Transformation Script",
-                "conditionalUpdateHeader": "Conditional Update",
+                "conditionalUpdateHeader": "Conditional Updates",
                 "defaultValuesHeader": "Default Values",
                 "transformationSciptLabel": "Enter a transformation script for complex properties.",
                 "conditionSciptLabel": "Enter a conditional update script for",
