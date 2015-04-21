@@ -33,6 +33,10 @@ define("org/forgerock/openidm/ui/admin/delegates/ScriptDelegate", [
 
     obj.evalScript = function(script, additionalGlobals) {
 
+        if(_.isUndefined(script.globals) || _.isNull(script.globals)) {
+            script.globals = {};
+        }
+
         if(additionalGlobals) {
             script.globals = _.extend(script.globals, additionalGlobals);
         }
