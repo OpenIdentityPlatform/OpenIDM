@@ -113,15 +113,18 @@
                         "description" : "",
                         "title" : "Roles",
                         "viewable" : true,
-                        "resourceCollection" : {
-                            "path" : "managed/roles",
-                            "query" : {
-                                "queryFilter" : "",
-                                "fields" : [ ],
-                                "sortKeys" : [ ]
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string",
+                            "resourceCollection" : {
+                                "path" : "managed/roles",
+                                "query" : {
+                                    "queryFilter" : "",
+                                    "fields" : [ ],
+                                    "sortKeys" : [ ]
+                                }
                             }
-                        },
-                        "type" : "string"
+                        }
                     },
                     "telephoneNumber" : {
                         "type" : "string",
