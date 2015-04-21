@@ -56,7 +56,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                     this.conditionFilterEditor.render({
                         "queryFilter": filter,
                         "mappingName" : this.data.mappingName,
-                        "mapProps": this.data.mapProps,
+                        "mapProps": this.data.availableSourceProps,
                         "element": "#" + "conditionFilterHolder",
                         "resource": ""
                     });
@@ -268,6 +268,8 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 _this = this,
                 prop = this.data.property;
 
+            this.data.availableSourceProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
+
             if (prop) {
                 if (typeof(prop.source) !== "undefined" && prop.source.length) {
                     selectedTab = 0;
@@ -331,8 +333,6 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             $('#mappingDialogTabs a:first', this.currentDialog).tab('show');
 
             $('#mappingDialogTabs .active :input:first', this.currentDialog).focus();
-
-            this.data.availableSourceProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
 
             if(this.data.availableSourceProps){
                 autoCompleteUtils.selectionSetup($("input[name='source']:last", this.currentDialog), _.sortBy(this.data.availableSourceProps,function(s){ return s; }));
