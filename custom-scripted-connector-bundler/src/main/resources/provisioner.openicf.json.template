@@ -69,11 +69,11 @@
                     "nativeName" : "{{nativeName}}",
                     "nativeType" : "{{nativeType}}"{{#hasItems}},
                     "items" : { {{#items}}
-                        "type" : "object",{{#hasNativeType}}
-                        "nativeType" : "{{nativeType}}",{{/hasNativeType}}{{#hasProperties}}
+                        "type" : "object"{{#hasNativeType}},
+                        "nativeType" : "{{nativeType}}"{{/hasNativeType}}{{#hasProperties}},
                         "properties" : { {{#properties}}
                                 "{{name}}" : "{{type}}"{{^isLast}},{{/isLast}}{{/properties}}
-                        }{{^isLast}},{{/isLast}}{{/hasProperties}}
+                        }{{/hasProperties}}
                    {{/items}} }{{/hasItems}}{{#hasFlags}},
                     "flags" : [{{#flags}}
                         "{{flag}}"{{^isLast}},{{/isLast}}{{/flags}}
