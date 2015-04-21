@@ -122,6 +122,16 @@ define("org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor", [
 
                 $(currentSelect)[0].selectize.setValue($(currentSelect).val());
 
+                $(currentSelect)[0].selectize.on('option_add', function(value, data){
+                    if(_this.model.previousSelectizeAdd !== value) {
+                        _this.model.previousSelectizeAdd = "/object/" + value;
+
+                        $(currentSelect)[0].selectize.removeOption(value);
+                        $(currentSelect)[0].selectize.addOption({value: "/object/" + value, text: value});
+                        $(currentSelect)[0].selectize.addItem("/object/" + value);
+                    }
+                });
+
                 $(this).bind("change", function() {
                     var value = $(this).val(),
                         parent = $(this).closest(".node");
@@ -139,10 +149,13 @@ define("org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor", [
         createNameDropdown: function() {
             var baseElement = $('<select style="width:100%;" class="name form-control"><option value="/linkQualifier">Link Qualifier</option></select>'),
                 appendElement,
-                tempValue;
+                tempValue,
+                displayValue;
 
             _.each(this.model.sourceProps, function(source) {
-                baseElement.append('<option value="/object/' +source.source +'">' +source.source +'</option>');
+                if(source.source !== undefined) {
+                    baseElement.append('<option value="/object/' +source.source +'">' +source.source +'</option>');
+                }
             });
 
             this.$el.find(".name").each(function(name, index){
@@ -150,8 +163,9 @@ define("org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor", [
                 appendElement = baseElement.clone();
 
                 if(tempValue.length > 0 && appendElement.find("option[value='/object/" +tempValue  +"']").length === 0 && appendElement.find("option[value='" +tempValue  +"']").length === 0) {
-                    appendElement.append('<option value="/object/' +tempValue +'">' +tempValue +'</option>');
-                    tempValue = "object/" + tempValue;
+                    displayValue = tempValue.replace("/object/", "");
+
+                    appendElement.append('<option value="' +tempValue +'">' +displayValue +'</option>');
                 }
 
                 $(this).replaceWith(appendElement);

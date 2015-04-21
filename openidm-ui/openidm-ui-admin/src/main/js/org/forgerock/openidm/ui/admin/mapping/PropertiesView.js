@@ -278,6 +278,10 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                     }
                                 }
 
+                                if (typeof(prop.source) !== "undefined" && prop.source.length) {
+                                    sourceProp = prop.source;
+                                }
+
                                 if(evalResults !== null && evalResults[propCounter] !== null) {
                                     if(_.isObject(evalResults[propCounter].conditionResults)) {
                                         if(evalResults[propCounter].conditionResults.result === true) {
@@ -297,11 +301,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                         }
                                     }
                                 } else if (typeof(prop.source) !== "undefined" && prop.source.length) {
-
                                     if(sampleData === null){
                                         sampleData = sampleSource[prop.source];
                                     }
-                                    sourceProp = prop.source;
                                 }
 
                                 if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
@@ -422,7 +424,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         "formatter": function(iconDisplay,opt,row){
                             var iconElement = "";
 
-                            if(iconDisplay.hasCondition) {
+                            if(iconDisplay !== undefined && iconDisplay.hasCondition) {
 
                                 if(_.isObject(iconDisplay.conditionScript)) {
                                     if(iconDisplay.conditionScript.source) {
@@ -436,7 +438,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                     +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +iconDisplay.conditionScript +'</pre></div></span>';
                             }
 
-                            if(iconDisplay.hasTransform) {
+                            if(iconDisplay !== undefined && iconDisplay.hasTransform) {
                                 iconElement = iconElement + '<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
                                     +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +iconDisplay.transformScript +'</pre></div></span>';
                             }
