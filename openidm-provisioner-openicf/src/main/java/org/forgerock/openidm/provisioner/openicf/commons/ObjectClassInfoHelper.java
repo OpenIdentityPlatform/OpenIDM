@@ -106,21 +106,24 @@ public class ObjectClassInfoHelper {
             final List<JsonPointer> fieldFilters) {
         boolean returnResource = false;
         if (null != fieldFilters) {
+            Set<String> attrsToGet = new HashSet();
             for (JsonPointer field : fieldFilters) {
                 if (field.isEmpty() || returnResource || !Resource.FIELD_CONTENT_ID.equals(field.leaf()) || !Resource.FIELD_CONTENT_REVISION.equals(field.leaf())){
                     returnResource = true;
                 }
                 if (field.isEmpty()) {
-                    builder.setAttributesToGet(attributesReturnedByDefault);
+                    attrsToGet.addAll(attributesReturnedByDefault);
                     continue;
                 }
+                
                 for (AttributeInfoHelper attribute : attributes) {
                     if (attribute.getName().equals(field.leaf()) && attribute.getAttributeInfo().isReadable()) {
-                        builder.setAttributesToGet(attribute.getAttributeInfo().getName());
+                        attrsToGet.add(attribute.getAttributeInfo().getName());
                         break;
                     }
                 }
             }
+            builder.setAttributesToGet(attrsToGet);
         }
         return returnResource;
     }
