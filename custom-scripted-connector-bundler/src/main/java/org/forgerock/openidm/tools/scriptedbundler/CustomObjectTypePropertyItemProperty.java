@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A single property of an objectType item, contained in {@link CustomObjectTypePropertyItem}.
+ * A single property of an objectType item, contained in {@link CustomObjectTypePropertyItems}.
  *
  * Represented in JSON as:
  * <pre><blockquote>

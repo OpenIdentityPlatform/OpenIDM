@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.tools.scriptedbundler;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ import java.util.List;
  * <pre><blockquote>
  *      {
  *          "type" : "object",
+ *          "nativeType" : "object",
  *          "properties" : [{
  *              "name" : "uid",
  *              "type" : "string"
@@ -41,9 +44,10 @@ import java.util.List;
  *      }
  * </blockquote></pre>
  */
-public class CustomObjectTypePropertyItem extends CustomBaseObject {
+public class CustomObjectTypePropertyItems extends CustomBaseObject {
 
     private String type;
+    private String nativeType;
 
     private List<CustomObjectTypePropertyItemProperty> properties = new ArrayList<CustomObjectTypePropertyItemProperty>();
 
@@ -67,6 +71,35 @@ public class CustomObjectTypePropertyItem extends CustomBaseObject {
     }
 
     /**
+     * Return the native type of this item.
+     *
+     * @return
+     */
+    public String getNativeType() {
+        return nativeType;
+    }
+
+    /**
+     * Set the native type of this item.
+     *
+     * @param nativeType
+     */
+    public void setNativeType(String nativeType) {
+        this.nativeType = nativeType;
+    }
+
+    /**
+     * Return whether this item has a nativeType property.  nativeType is optional.  This
+     * is a template function.
+     *
+     * @return
+     */
+    @JsonIgnore
+    public Boolean hasNativeType() {
+        return nativeType != null;
+    }
+
+    /**
      * Return the list of {@link CustomObjectTypePropertyItemProperty} for this item.
      *
      * @return
@@ -83,5 +116,15 @@ public class CustomObjectTypePropertyItem extends CustomBaseObject {
     public void setProperties(List<CustomObjectTypePropertyItemProperty> properties) {
         this.properties.clear();
         this.properties.addAll(flagLast(properties));
+    }
+
+    /**
+     * Return whether this item has properties (optional).  This is a template function.
+     *
+     * @return
+     */
+    @JsonIgnore
+    public Boolean getHasProperties() {
+        return !properties.isEmpty();
     }
 }
