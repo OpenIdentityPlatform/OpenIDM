@@ -266,7 +266,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                 }
             }, this));
 
-            console.log("refresing selectors");
+            console.log("refreshing selectors");
         },
 
         getUserLink: function(userName, userNameId, requesterDisplayName) {
