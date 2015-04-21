@@ -892,6 +892,7 @@
                 <exclude>org.hibernate.javax.persistence:*</exclude>
                 <exclude>org.javassist:*</exclude>
                 <exclude>*:*:js</exclude>
+                <exclude>*:*:css</exclude>
                 <exclude>*:*:zip</exclude>
                 <exclude>*:*:pom</exclude>
                 <exclude>com.google.oauth-client:google-oauth-client</exclude>
