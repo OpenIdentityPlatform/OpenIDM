@@ -185,10 +185,11 @@ public class CustomConfiguration extends CustomBaseObject {
     }
 
     /**
-     * Return whether this object has properties.
+     * Return whether this object has properties.  This is a template function.
      *
      * @return
      */
+    @JsonIgnore
     public boolean getHasProvidedProperties() {
         return !providedProperties.isEmpty();
     }
@@ -213,10 +214,11 @@ public class CustomConfiguration extends CustomBaseObject {
     }
 
     /**
-     * Return whether this object has properties.
+     * Return whether this object has properties.  This is a template function.
      *
      * @return
      */
+    @JsonIgnore
     public boolean getHasProperties() {
         return !properties.isEmpty();
     }
@@ -241,10 +243,11 @@ public class CustomConfiguration extends CustomBaseObject {
     }
 
     /**
-     * Return whether this object has object types.
+     * Return whether this object has object types. This is a template function.
      *
      * @return
      */
+    @JsonIgnore
     public boolean getHasObjectTypes() {
         return !objectTypes.isEmpty();
     }

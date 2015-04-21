@@ -67,15 +67,10 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
     private static final Map<String,String> PROPERTY_TYPES = new HashMap<String,String>() {{
         put("string", "String.class");
         put("array", "Object.class");
+        put("boolean", "Boolean.class");
+        put("integer", "Integer.class");
+        put("object", "Object.class");
     }};
-    /*
-    static {
-        PROPERTY_TYPES.put("string", "String.class");
-        PROPERTY_TYPES.put("array", "Object.class");
-    }
-    */
-
-    private static final List<String> NATIVE_TYPES = Arrays.asList("string", "object");
 
     private String name;
     private String type;
@@ -83,7 +78,7 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
     private String nativeName;
     private String nativeType;
     private List<CustomObjectTypePropertyFlag> flags = new ArrayList<CustomObjectTypePropertyFlag>();
-    private List<CustomObjectTypePropertyItem> items = new ArrayList<CustomObjectTypePropertyItem>();
+    private CustomObjectTypePropertyItems items;
 
     /**
      * Return the name of this property.
@@ -190,11 +185,7 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
      * @param nativeType
      */
     public void setNativeType(String nativeType) {
-        if (NATIVE_TYPES.contains(nativeType)) {
-            this.nativeType = nativeType;
-        } else {
-            throw new UnsupportedOperationException("objectType property nativeType '" + type + "' is not supported");
-        }
+        this.nativeType = nativeType;
     }
 
     /**
@@ -221,6 +212,7 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
      *
      * @return
      */
+    @JsonIgnore
     public boolean getHasFlags() {
         return !flags.isEmpty();
     }
@@ -230,8 +222,8 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
      *
      * @return
      */
-    public List<CustomObjectTypePropertyItem> getItems() {
-        return flagLast(items);
+    public CustomObjectTypePropertyItems getItems() {
+        return items;
     }
 
     /**
@@ -239,9 +231,8 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
      *
      * @param items
      */
-    public void setItems(List<CustomObjectTypePropertyItem> items) {
-        this.items.clear();
-        this.items.addAll(flagLast(items));
+    public void setItems(CustomObjectTypePropertyItems items) {
+        this.items = items;
     }
 
     /**
@@ -249,7 +240,8 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
      *
      * @return
      */
+    @JsonIgnore
     public boolean getHasItems() {
-        return !items.isEmpty();
+        return items != null;
     }
 }

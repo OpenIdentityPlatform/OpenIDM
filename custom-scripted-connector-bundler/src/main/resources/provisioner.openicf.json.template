@@ -39,7 +39,7 @@
             "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/script/{{lower packageName}}/"
         ],
         "classpath" : [
-            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/script/{{lower packageName}}/"
+            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/scriptclass/{{lower packageName}}/"
         ],
         "reloadScriptOnExecution" : false,
         "authenticateScriptFileName" : "AuthenticateScript.groovy",
@@ -69,10 +69,11 @@
                     "nativeName" : "{{nativeName}}",
                     "nativeType" : "{{nativeType}}"{{#hasItems}},
                     "items" : { {{#items}}
-                        "type" : "object",
+                        "type" : "object",{{#hasNativeType}}
+                        "nativeType" : "{{nativeType}}",{{/hasNativeType}}{{#hasProperties}}
                         "properties" : { {{#properties}}
                                 "{{name}}" : "{{type}}"{{^isLast}},{{/isLast}}{{/properties}}
-                        }{{^isLast}},{{/isLast}}
+                        }{{^isLast}},{{/isLast}}{{/hasProperties}}
                    {{/items}} }{{/hasItems}}{{#hasFlags}},
                     "flags" : [{{#flags}}
                         "{{flag}}"{{^isLast}},{{/isLast}}{{/flags}}
