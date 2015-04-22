@@ -1,0 +1,182 @@
+{
+  "packageName" : "HRDB",
+  "displayName" : "HRDB-ScriptedSQLConnector",
+  "description" : "ScriptedSQL connector used to connect to the HRDB within sample 3",
+  "baseConnectorType" : "SQL",
+  "version" : "1.0",
+  "author" : "ForgeRock",
+  "providedProperties" : [
+    {
+      "name" : "username",
+      "value" : "root",
+      "type" : "String"
+    },
+    {
+      "name" : "password",
+      "value" : "password",
+      "type" : "String"
+    },
+    {
+      "name" : "driverClassName",
+      "value" : "com.mysql.jdbc.Driver",
+      "type" : "String"
+    },
+    {
+      "name" : "url",
+      "value" : "jdbc:mysql://localhost:3306/hrdb",
+      "type" : "String"
+    }
+  ],
+  "objectTypes" : [
+    {
+      "name" : "group",
+      "id" : " __GROUP__",
+      "type" : "object",
+      "nativeType" : "__GROUP__",
+      "objectClass" : "ObjectClass.GROUP_NAME",
+      "properties" : [
+        {
+          "name" : "name",
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "gid",
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "gid",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "description",
+          "type" : "string",
+          "required" : false,
+          "nativeName" : "description",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "users",
+          "type" : "array",
+          "nativeName" : "users",
+          "nativeType" : "object",
+          "items" : {
+            "type" : "object",
+            "properties" : [
+              {
+                "name" : "uid",
+                "type" : "string"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name" : "organization",
+      "id" : " organization",
+      "type" : "object",
+      "nativeType" : "organization",
+      "objectClass" : "ORG",
+      "properties" : [
+        {
+          "name" : "name",
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "description",
+          "type" : "string",
+          "required" : false,
+          "nativeName" : "description",
+          "nativeType" : "string"
+        }
+      ]
+    },
+    {
+      "name" : "account",
+      "id" : " __ACCOUNT__",
+      "type" : "object",
+      "nativeType" : "__ACCOUNT__",
+      "objectClass" : "ObjectClass.ACCOUNT_NAME",
+      "properties" : [
+        {
+          "name" : "firstName",
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "firstName",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "email",
+          "type" : "string",
+          "nativeName" : "email",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "cars",
+          "type" : "array",
+          "nativeName" : "cars",
+          "nativeType" : "object",
+          "items" : {
+            "type" : "object",
+            "properties" : [
+              {
+                "name" : "year",
+                "type" : "string"
+              },
+              {
+                "name" : "make",
+                "type" : "string"
+              },
+              {
+                "name" : "model",
+                "type" : "string"
+              }
+            ]
+          }
+        },
+        {
+          "name" : "password",
+          "type" : "string",
+          "nativeName" : "password",
+          "nativeType" : "string",
+          "flags" : [
+            "NOT_READABLE",
+            "NOT_RETURNED_BY_DEFAULT"
+          ]
+        },
+        {
+          "name" : "uid",
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "fullName",
+          "type" : "string",
+          "nativeName" : "fullname",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "lastName",
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "lastname",
+          "nativeType" : "string"
+        },
+        {
+          "name" : "organization",
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "organization",
+          "nativeType" : "string"
+        }
+      ]
+    }
+  ]
+}

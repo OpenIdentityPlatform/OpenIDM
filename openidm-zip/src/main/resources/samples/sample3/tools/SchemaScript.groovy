@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,22 +21,46 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * @author Gael Allioux <gael.allioux@forgerock.com>
+ * Version 1.0
+ * Author ForgeRock
  */
+package org.forgerock.openicf.connectors.hrdb
 
-import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.connectors.hrdb.HRDBConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
+import org.forgerock.openicf.misc.scriptedcommon.ICFObjectBuilder
 
-import java.sql.Connection
+/**
+ * Built-in accessible objects
+ **/
+
+// OperationType is SCHEMA for this script
+def operation = operation as OperationType
+
+// The configuration class created specifically for this connector
+def configuration = configuration as HRDBConfiguration
+
+// Default logging facility
+def log = log as Log
+
+// The schema builder object
+def builder = builder as ICFObjectBuilder
+
+/**
+ * Script action - Customizable
+ *
+ * Build the schema for this connector that describes what the ICF client will see.  The schema
+ * might be statically built or may be built from data retrieved from the external source.
+ *
+ * This script should use the builder object to create the schema.
+ **/
 
 import static org.identityconnectors.framework.common.objects.AttributeInfo.Flags.REQUIRED
 import static org.identityconnectors.framework.common.objects.AttributeInfo.Flags.MULTIVALUED
 
-def operation = operation as OperationType
-def configuration = configuration as ScriptedSQLConfiguration
-def connection = connection as Connection
-def log = log as Log
+/* Log something to demonstrate this script executed */
+log.info("Schema script, operation = " + operation.toString());
 
 builder.schema({
     objectClass {

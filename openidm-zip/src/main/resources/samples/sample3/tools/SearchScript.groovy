@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,29 +21,50 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * @author Gael Allioux <gael.allioux@forgerock.com>
+ * Version 1.0
+ * Author ForgeRock
  */
+package org.forgerock.openicf.connectors.hrdb
 
 import groovy.sql.Sql
-import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
-import org.forgerock.openicf.misc.scriptedcommon.MapFilterVisitor
+import org.forgerock.openicf.connectors.hrdb.HRDBConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.objects.Uid
+import org.forgerock.openicf.misc.scriptedcommon.MapFilterVisitor
 import org.identityconnectors.framework.common.objects.AttributeBuilder
 import org.identityconnectors.framework.common.objects.ObjectClass
 import org.identityconnectors.framework.common.objects.OperationOptions
 import org.identityconnectors.framework.common.objects.SearchResult
 import org.identityconnectors.framework.common.objects.filter.Filter
+import org.identityconnectors.framework.common.objects.ResultsHandler
 
 import java.sql.Connection
 
+/**
+ * Built-in accessible objects
+ **/
+
+// OperationType is SEARCH for this script
 def operation = operation as OperationType
-def configuration = configuration as ScriptedSQLConfiguration
-def connection = connection as Connection
-def filter = filter as Filter
+
+// The configuration class created specifically for this connector
+def configuration = configuration as HRDBConfiguration
+
+// Default logging facility
 def log = log as Log
+
+// The objectClass of the object to be searched, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass
+
+// The search filter for this operation
+def filter = filter as Filter
+
+// Additional options for this operation
 def options = options as OperationOptions
+
+
+def connection = connection as Connection
 def ORG = new ObjectClass("organization")
 
 

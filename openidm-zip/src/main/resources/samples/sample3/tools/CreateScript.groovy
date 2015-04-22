@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,12 +21,13 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * @author Gael Allioux <gael.allioux@forgerock.com>
+ * Version 1.0
+ * Author ForgeRock
  */
-
+package org.forgerock.openicf.connectors.hrdb
 
 import groovy.sql.Sql
-import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.connectors.hrdb.HRDBConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
 import org.identityconnectors.framework.common.objects.Attribute
@@ -37,20 +38,42 @@ import org.identityconnectors.framework.common.objects.Uid
 
 import java.sql.Connection
 
+/**
+ * Built-in accessible objects
+ **/
+
+// OperationType is CREATE for this script
 def operation = operation as OperationType
-def createAttributes = new AttributesAccessor(attributes as Set<Attribute>)
-def configuration = configuration as ScriptedSQLConfiguration
-def connection = connection as Connection
-def uid = id as String
+
+// The configuration class created specifically for this connector
+def configuration = configuration as HRDBConfiguration
+
+// Default logging facility
 def log = log as Log
+
+// Set of attributes describing the object to be created
+def createAttributes = new AttributesAccessor(attributes as Set<Attribute>)
+
+// The Uid of the object to be created, usually null indicating the Uid should be generated
+def uid = id as Uid
+
+// The objectClass of the object to be created, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass
-def options = options as OperationOptions
+
+/**
+ * Script action - Customizable
+ *
+ * Create a new object in the external source.  Connectors that do not support this should
+ * throw an UnsupportedOperationException.
+ *
+ * This script should return a Uid object that represents the ID of the newly created object
+ **/
+
+/* Log something to demonstrate this script executed */
+log.info("Create script, operation = " + operation.toString());
+
 def ORG = new ObjectClass("organization")
-
-
-
-log.info("Entering " + operation + " Script");
-
+def connection = connection as Connection
 def sql = new Sql(connection);
 
 switch (objectClass) {
