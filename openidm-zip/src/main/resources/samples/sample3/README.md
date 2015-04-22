@@ -143,12 +143,11 @@ need to have it displayed in the UI. It has also both the scripts and provisione
     
     Inside the connector jar we just created search for a file containing "1.4.html".
     
+        $ cd path/to/openidm
         $ jar -tvf connectors/hrdb-connector-1.4.1.0.jar | grep "1.4.html"
     
     Extract the file you found above into the /path/to/openidm/ui directory.
         
-        #OPENIDM-3108 Scripted bundler generates a UI template for the connector
-        $ cd OpenIDM-Install/ 
         $ jar -xvf connectors/hrdb-connector-1.4.1.0.jar ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
         $ mkdir -p ui/extension/templates/admin/connector; mv ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html ui/extension/templates/admin/connector
         
