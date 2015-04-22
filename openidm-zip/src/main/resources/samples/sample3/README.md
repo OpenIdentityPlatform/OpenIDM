@@ -113,7 +113,7 @@ Description: Generate classes and files necessary to build a custom connector. U
    $ cp create-connector/target/hrdb-connector-1.4.1.0.jar ../../connectors/
    
 At this point we now have a connector that is ready to go in OpenIDM. This connector has all the necessary files you will
-need to have it displayed in the UI as well as the having both the scripts and provisioner config ready to go.
+need to have it displayed in the UI. It has also both the scripts and provisioner config ready to go.
 
 6. Load the provisioner.openicf-hrdb.json file into the sample3/conf directory to be used.
 
