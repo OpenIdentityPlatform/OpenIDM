@@ -140,7 +140,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
                 "scriptId" : "ResetDatabase",
                 "actions" : [
                     {
-                        "systemType" :  ".*ScriptedSQLConnector",
+                        "systemType" :  ".*HRDBConnector",
                         "actionType" : "Groovy",
                         "actionFile" : "tools/ResetDatabaseScript.groovy"
                     }
