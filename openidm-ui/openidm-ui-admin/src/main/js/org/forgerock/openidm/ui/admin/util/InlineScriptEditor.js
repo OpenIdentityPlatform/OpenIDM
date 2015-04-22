@@ -82,6 +82,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 this.data = _.pick(this.model, 'disableValidation', 'showPreview', 'scriptData', 'eventName', 'disablePassedVariable', 'placeHolder');
                 if (!this.model.disablePassedVariable && this.model.scriptData) {
+                    if(args.scriptData.globals === null) {
+                        args.scriptData.globals = {};
+                    }
                     this.data.passedVariables = args.scriptData.globals ||
                     _.omit(args.scriptData, "file", "source", "type");
                 }

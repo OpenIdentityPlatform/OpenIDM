@@ -96,6 +96,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./settings/SettingsView",
     
     "./role/EditRoleView",
-    "./role/RoleUsersView"
+    "./role/RoleUsersView",
+    "./role/RoleEntitlementsListView",
+    "./role/RoleEntitlementsEditView"
 
 ]);

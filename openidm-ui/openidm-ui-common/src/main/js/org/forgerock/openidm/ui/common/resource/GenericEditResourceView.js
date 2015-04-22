@@ -54,9 +54,10 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             this.data.objectType = args[0];
             this.isSystemResource = false;
             this.objectName = args[1];
+            this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
 
             if(objectId){
-                resourceReadPromise = resourceDelegate.readEntity(objectId);
+                resourceReadPromise = resourceDelegate.readResource(this.data.serviceUrl, objectId);
                 this.objectId = objectId;
                 this.data.newObject = false;
             } else {
@@ -126,7 +127,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             this.editor.setValue(filteredObject);
             this.addTooltips();
         },
-        /* To accomodate a popover the addTooltips function transforms the following html:
+        /* To accommodate a popover the addTooltips function transforms the following html:
          * 
          * <div class=" form-group">
          *      <label class=" control-label">Username</label>
@@ -178,7 +179,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             e.preventDefault();
             
             if(this.data.newObject){
-                resourceDelegate.createEntity(formVal._id, formVal, successCallback);
+                resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
             } else {
                 /*
                 The following _.each() was placed here to account for JSONEditor.setValue() 
@@ -194,9 +195,9 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 }, this);
                 
                 if (!this.isSystemResource) {
-                    resourceDelegate.patchEntityDifferences({id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
+                    resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
                 } else {
-                    resourceDelegate.updateEntity(this.oldObject._id, formVal, successCallback);
+                    resourceDelegate.updateResource(this.data.serviceUrl, this.oldObject._id, formVal, successCallback);
                 }
             }
         },
@@ -218,7 +219,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             e.preventDefault();
             
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.objectTitle }), _.bind(function(){
-                resourceDelegate.deleteEntity(this.objectId, _.bind(function(){
+                resourceDelegate.deleteResource(this.data.serviceUrl, this.objectId, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.objectTitle })});
                     this.backToList();
                 }, this));

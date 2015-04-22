@@ -252,7 +252,31 @@
                 "backToRoles": "Back to Roles",
                 "role": "Role",
                 "newRole": "New Role"
-                
+            },
+            "RoleEntitlementsTemplate": 
+            {
+                "entitlements": "Entitlements",
+                "description": "Define provisioning for users with this role.",
+                "addEntitlement": "Add an Entitlement",
+                "editEntitlement": "Edit Entitlement: __entitlementName__",
+                "assignmentSaveSuccess": "Successfully saved __assignment__",
+                "assignmentAddSuccess": "Successfully added __assignment__",
+                "assignmentDeleteSuccess": "Successfully deleted __assignment__",
+                "deleteEntitlementConfirm" : "Are you sure you want to delete this entitlement (__assignment__)?",
+                "nameOfEntitlement": "Name of your entitlement",
+                "attributes": "Attributes",
+                "events": "Events",
+                "attributesDescription": "Add attributes to map to this resource.",
+                "value": "Value",
+                "operations": "Operations",
+                "assignmentOperation": "Assignment Operation",
+                "unassignmentOperation": "Unassignment Operation",
+                "mergeWithTarget": "Merge with Target",
+                "removeFromTarget": "Remove from Target",
+                "replaceTarget": "Replace Target",
+                "noOp": "No Operation",
+                "addAttribute": "Add an attribute",
+                "entitlementDuplicationError": "Cannot have two entitlements of the same name."
             }
         },
         "managed" : {

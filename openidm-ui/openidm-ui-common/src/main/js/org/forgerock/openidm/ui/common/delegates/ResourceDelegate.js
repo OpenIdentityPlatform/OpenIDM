@@ -41,10 +41,6 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             objectName2 = args[2],
             provisionerProm;
         
-        //overriding this value here so it will not have to be changed
-        //on calls to createEntity, patchEntity, deleteEntity
-        obj.serviceUrl = "/" + constants.context + "/" + objectType + "/" + objectName;
-        
         if(objectType === "managed") {
             return configDelegate.readEntity("managed").then(function(managed){
                 var managedObject = _.findWhere(managed.objects,{ name: objectName });
@@ -82,6 +78,33 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
                 return "invalidObject";
             }
         }
+    };
+    
+    obj.createResource = function (serviceUrl) {
+        return AbstractDelegate.prototype.createEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
+    };
+    obj.readResource = function (serviceUrl) {
+        return AbstractDelegate.prototype.readEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
+    };
+    obj.updateResource = function (serviceUrl) {
+        return AbstractDelegate.prototype.updateEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
+    };
+    obj.deleteResource = function (serviceUrl) {
+        return AbstractDelegate.prototype.deleteEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
+    };
+    obj.patchResourceDifferences = function (serviceUrl) {
+        return AbstractDelegate.prototype.patchEntityDifferences.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
+    };
+    
+    
+    obj.getServiceUrl = function(args) {
+        var url = "/" + constants.context + "/" + args[0] + "/" + args[1];
+        
+        if(args[0] === "system") {
+            url += "/" + args[2];
+        }
+        
+        return url;
     };
     
     return obj;
