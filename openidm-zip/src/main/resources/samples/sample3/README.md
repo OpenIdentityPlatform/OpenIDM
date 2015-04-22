@@ -25,19 +25,21 @@
 Sample 3 - Scripted SQL
 =======================
 
-This sample demonstrates creating a new CustomScriptedSQL connector using the
-custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar that is included in the tools
-directory of the OpenIDM zip file. This sample will rely on this new custom
-connector you create. It will provide an example configuration and a handful of 
-groovy scripts that will be used to communicate with the SQL server. 
+This sample demonstrates creating a new CustomScriptedSQL connector, using the
+custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar that is included in the
+tools directory of the OpenIDM zip file. The sample relies on the new custom
+connector that you will create with the connector bundler. It provides an
+example configuration and a handful of Groovy scripts that are used to
+communicate with an SQL server.
+
 This example requires a fresh installation of OpenIDM. It also requires that you 
 have Maven installed. 
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/install-guide/index.html#more-sample3
+http://openidm.forgerock.org/doc/bootstrap/install-guide/index.html#more-sample3
 
-This sample also demonstrates the use of complex data types. Complex types
-can be stored, retrieved and synced like any other property of an object. These
+This sample also demonstrates the use of complex data types. Complex types can
+be stored, retrieved and synced like any other property of an object. These
 types can be mapped to your external data sources in any way you choose but are
 generally stored in the managed data as JSON represented as a String. This may
 be customized further to do additional work with or transformation on that data.
@@ -50,21 +52,22 @@ user is created or updated in the external repo. In both cases the script is
 explicitly included in the sync.json file but could just as easily have referenced
 an external file for the script source instead. For more information see:
 
-http://openidm.forgerock.org/doc/webhelp/integrators-guide/appendix-scripting.html
+http://openidm.forgerock.org/doc/bootstrap/integrators-guide/appendix-scripting.html
 
 The scripted connector supports any number of custom scripted endpoints. These are
 configured via the provisioner script and currently support only Groovy. See
 provisioner.openicf-scriptedsql.json and tools/ResetDatabaseScript.groovy for a
 sample implementation. Step 5 below executes this script.
 
-CAVEAT: Because MySQL cannot "un-hash" user passwords there is no way for a recon
+CAVEAT: Because MySQL cannot "un-hash" user passwords, there is no way for a recon
 to retrieve and store the password in the managed user object in OpenIDM. This may
-impact configurations that support multiple external repos insofar as passwords
-will likely not be in sync immediately after a mysql -> managed recon. Despite
-creating any missing users in the managed repo during recon their passwords are
-empty so those same users synced into the other external repos will have blank
-passwords. Some additional scripting may be required to handle this situation
-depending on the requirements of your deployment.
+impact configurations that support multiple external repositories in that
+passwords are unlikely to be in sync immediately after a mysql -> managed recon.
+Despite creating any missing users in the managed repo during reconciliation,
+their passwords are empty, so those same users synchronized to the other
+external repositories will have blank passwords. Some additional scripting may
+be required to handle this situation, depending on the requirements of your
+deployment.
 
 
 Setup the Database
@@ -84,22 +87,25 @@ Setup the Database
 Create the CustomScriptedSQL Connector
 --------------------------------------
 
-Description: Generate classes and files necessary to build a custom connector. Using those generated files we will build
- a custom ScriptedSQL connector we will use for the rest of this sample.
+Description: In this section, you generate the classes and files necessary to
+build a custom connector. Using these generated files, you build the custom
+ScriptedSQL connector that will be used in the rest of this sample.
 
-1. From sample3/create-connector directory, run the following command using the custom config 
-   provided in the sample3/data directory.
+1. From the sample3/create-connector directory, run the following command, using
+   the custom config provided in the sample3/data directory.
 
    $ cd path/to/openidm/samples/sample3/create-connector
    $ java -jar ../../../tools/custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar -c ../data/scriptedsql.json
 
-2. Copy the provided sample scripts into connector src directory; these will become part of the custom connector.
+2. Copy the provided sample scripts into the connector src directory; these will
+   become part of the custom connector.
 
     $ cp ../tools/* src/main/resources/script/hrdb/
     
-    if you see reason to modify the scripts provided now is the time to do so.
+   If you need to modify the scripts provided, now is the time to do so.
 
-3. Build the custom connector. You should be in the sample3/create-connector directory
+3. Build the custom connector. (You should be in the sample3/create-connector
+   directory.)
 
     $ mvn install
 
@@ -107,24 +113,28 @@ Description: Generate classes and files necessary to build a custom connector. U
 
     $ cd ..
 
-5. Copy the connector you just created from the create-connector directory to the connectors directory of OpenIDM. If 
-   you are in the sample3 directory, run this command. 
+5. Copy the connector that you created from the create-connector directory to
+   the connectors directory of OpenIDM. If you are in the sample3 directory, run
+   this command:
    
    $ cp create-connector/target/hrdb-connector-1.4.1.0.jar ../../connectors/
    
-At this point we now have a connector that is ready to go in OpenIDM. This connector has all the necessary files you will
-need to have it displayed in the UI. It has also both the scripts and provisioner config ready to go.
+   At this point you have a connector that is ready to be used in OpenIDM. This
+   connector has all the necessary files that will allow it to be displayed in
+   the UI. It also has both the scripts and provisioner config that allow it to
+   be used.
 
-6. Load the provisioner.openicf-hrdb.json file into the sample3/conf directory to be used.
+6. Load the provisioner.openicf-hrdb.json file into the sample3/conf directory
+   so that it can be used.
 
     $ jar -xvf ../../connectors/hrdb-connector-1.4.1.0.jar conf/provisioner.openicf-hrdb.json
     
-    it should show you that the file has been inflated:
+    The output should show that the file has been inflated:
     
         inflated: conf/provisioner.openicf-hrdb.json
         
 7. Replace the "systemActions" value inside the sample3/conf/provisioner.openicf-hrdb.json
- with the value below:
+   with the following value:
         [
             {
                 "scriptId" : "ResetDatabase",
@@ -138,15 +148,18 @@ need to have it displayed in the UI. It has also both the scripts and provisione
             }
         ]
 
-8. For demonstration purposes we are going to also copy the generated html template file associated with this connector
-    that will be used to display the connector in the UI. 
+8. For the purposes of demonstrating this sample, copy the generated html
+   template file associated with this connector. This file will be used to
+   display the connector in the UI.
     
-    Inside the connector jar we just created search for a file containing "1.4.html".
+   Inside the connector jar that you created, search for a file containing
+   "1.4.html".
     
         $ cd path/to/openidm
         $ jar -tvf connectors/hrdb-connector-1.4.1.0.jar | grep "1.4.html"
     
-    Extract the file you found above into the /path/to/openidm/ui directory.
+   Extract the file that you found in the preceding step into the
+   /path/to/openidm/ui directory.
         
         $ jar -xvf connectors/hrdb-connector-1.4.1.0.jar ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
         $ mkdir -p ui/extension/templates/admin/connector; mv ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html ui/extension/templates/admin/connector
