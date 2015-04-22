@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,44 +21,71 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * @author Gael Allioux <gael.allioux@forgerock.com>
+ * Version 1.0
+ * Author ForgeRock
  */
+package org.forgerock.openicf.connectors.hrdb
 
 import groovy.sql.Sql
-import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.connectors.hrdb.HRDBConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.Uid
 import org.identityconnectors.framework.common.exceptions.ConnectorException
 import org.identityconnectors.framework.common.objects.Attribute
 import org.identityconnectors.framework.common.objects.AttributesAccessor
 import org.identityconnectors.framework.common.objects.ObjectClass
 import org.identityconnectors.framework.common.objects.OperationOptions
-import org.identityconnectors.framework.common.objects.Uid
 
 import java.sql.Connection
 
-def operation = operation as OperationType
-def updateAttributes = new AttributesAccessor(attributes as Set<Attribute>)
-def configuration = configuration as ScriptedSQLConfiguration
-def connection = connection as Connection
-def id = id as String
-def log = log as Log
-def objectClass = objectClass as ObjectClass
-def options = options as OperationOptions
-def uid = uid as Uid
-def ORG = new ObjectClass("organization")
+/**
+ * Built-in accessible objects
+ **/
 
-log.info("Entering " + operation + " Script");
+// OperationType is UPDATE for this script
+def operation = operation as OperationType
+
+// The configuration class created specifically for this connector
+def configuration = configuration as HRDBConfiguration
+
+// Default logging facility
+def log = log as Log
+
+// Set of attributes describing the object to be updated
+def updateAttributes = new AttributesAccessor(attributes as Set<Attribute>)
+
+// The Uid of the object to be updated
+def uid = id as Uid
+
+// The objectClass of the object to be updated, e.g. ACCOUNT or GROUP
+def objectClass = objectClass as ObjectClass
+
+/**
+ * Script action - Customizable
+ *
+ * Update an object in the external source.  Connectors that do not support this should
+ * throw an UnsupportedOperationException.
+ *
+ * This script should return the Uid of the updated object
+ **/
+
+/* Log something to demonstrate this script executed */
+log.info("Create script, operation = " + operation.toString());
+
+def connection = connection as Connection
 def sql = new Sql(connection);
+def ORG = new ObjectClass("organization")
 
 switch (operation) {
     case OperationType.UPDATE:
         switch (objectClass) {
             case ObjectClass.ACCOUNT:
                 sql.executeUpdate("""
-                        UPDATE 
+                        UPDATE
                             users
-                        SET 
+                        SET
                             fullname = ?,
                             firstname = ?,
                             lastname = ?,
@@ -66,7 +93,7 @@ switch (operation) {
                             organization = ?,
                             password = coalesce(sha1(?), password),
                             timestamp = now()
-                        WHERE 
+                        WHERE
                             id = ?
                         """,
                         [
@@ -80,9 +107,9 @@ switch (operation) {
                         ]
                 );
                 sql.executeUpdate("DELETE FROM car WHERE users_id=?",
-                    [
-                            uid.uidValue
-                    ]
+                        [
+                                uid.uidValue
+                        ]
                 );
                 updateAttributes.findMap("cars").each {
                     sql.executeInsert(
@@ -100,14 +127,14 @@ switch (operation) {
 
             case ObjectClass.GROUP:
                 sql.executeUpdate("""
-                        UPDATE 
+                        UPDATE
                             groups
                         SET
                             description = ?,
                             name = ?,
                             gid = ?,
                             timestamp = now()
-                        WHERE 
+                        WHERE
                             id = ?
                         """,
                         [
@@ -136,12 +163,12 @@ switch (operation) {
 
             case ORG:
                 sql.executeUpdate("""
-                        UPDATE 
+                        UPDATE
                             Organizations
-                        SET 
+                        SET
                             description = ?,
                             timestamp = now()
-                        WHERE 
+                        WHERE
                             id = ?
                         """,
                         [

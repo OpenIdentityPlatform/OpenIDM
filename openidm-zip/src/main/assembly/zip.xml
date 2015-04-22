@@ -236,13 +236,6 @@
         </fileSet>
         <!-- Setup Sample3  -->
         <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-scriptedsql.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample3/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
                 <include>conf/**</include>
@@ -999,7 +992,7 @@
                 <include>org.apache.olingo:*</include>
                 <include>com.fasterxml:aalto-xml</include>
                 <include>org.apache.tomcat:tomcat-jdbc</include>
-                <include>org.forgerock.openicf.connectors.groovy:*</include>
+                <include>org.forgerock.openicf.connectors:groovy-connector</include>
             </includes>
         </dependencySet>
         <dependencySet>

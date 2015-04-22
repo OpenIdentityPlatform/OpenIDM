@@ -43,7 +43,7 @@ import java.sql.Connection
 // curl -k --header "X-OpenIDM-Username: openidm-admin" \
 // --header "X-OpenIDM-Password: openidm-admin" \
 // --header "Content-Type: application/json" \
-// --request POST "https://localhost:8443/openidm/system/scriptedsql?_action=script&scriptId=ResetDatabase" \
+// --request POST "https://localhost:8443/openidm/system/hrdb?_action=script&scriptId=ResetDatabase" \
 // -d "{\"arg1\":\"foo\",\"arg2\":\"bar\"}"
 //
 // These arguments can be accessed here by name, e.g.

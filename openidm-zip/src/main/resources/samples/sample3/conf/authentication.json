@@ -68,7 +68,7 @@
                         "type" : "text/javascript",
                         "file" : "auth/populateAsManagedUser.js"
                     },
-                    "queryOnResource" : "system/scriptedsql/account",
+                    "queryOnResource" : "system/hrdb/account",
                     "propertyMapping" : {
                         "authenticationId" : "uid"
                     },
