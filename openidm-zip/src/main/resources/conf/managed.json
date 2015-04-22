@@ -195,6 +195,13 @@
                         "searchable" : false,
                         "type" : "object",
                         "properties" : {
+                            "name" : {
+                                "description" : "The role name, used for display purposes.",
+                                "title" : "Name",
+                                "viewable" : true,
+                                "searchable" : true,
+                                "type" : "string"
+                            },
                             "description" : {
                                 "description" : "",
                                 "title" : "Description",
@@ -204,9 +211,11 @@
                             }
                         },
                         "required" : [
+                            "name",
                             "description"
                         ],
                         "order" : [
+                            "name",
                             "description"
                         ]
                     },
@@ -219,7 +228,8 @@
                     }
                 },
                 "required" : [
-                    "_id"
+                    "_id",
+                    "properties"
                 ],
                 "order" : [
                     "_id",

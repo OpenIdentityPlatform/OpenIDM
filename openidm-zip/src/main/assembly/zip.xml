@@ -847,6 +847,76 @@
             </includes>
             <outputDirectory>/openidm/ui/default/admin/public/templates/admin/connector/configs/ldap</outputDirectory>
         </fileSet>
+        <!-- Setup roles samples  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/roles</directory>
+            <includes>
+                <include>README.md</include>
+            </includes>
+            <outputDirectory>/openidm/samples/roles/</outputDirectory>
+        </fileSet>
+        <!-- Roles CRUD operations -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/roles/crudops</directory>
+            <includes>
+                <include>README.md</include>
+            </includes>
+            <outputDirectory>/openidm/samples/roles/crudops/</outputDirectory>
+        </fileSet>
+        <!-- Provisioning with Roles -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/roles/provrole/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/roles/provrole/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/roles/provrole/</outputDirectory>
+        </fileSet>
+        <!-- Roles and Multi-account linking (linkqualifiers) -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/roles/linkqualrole/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/roles/linkqualrole/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/roles/linkqualrole/</outputDirectory>
+        </fileSet>
     </fileSets>
     <!-- sample6 -->
     <files>
