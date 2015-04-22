@@ -141,7 +141,7 @@ need to have it displayed in the UI. It has also both the scripts and provisione
 8. For demonstration purposes we are going to also copy the generated html template file associated with this connector
     that will be used to display the connector in the UI. 
     
-    Search for the file inside the connector jar we just created for a file containing "1.4.html".
+    Inside the connector jar we just created search for a file containing "1.4.html".
     
         $ jar -tvf connectors/hrdb-connector-1.4.1.0.jar | grep "1.4.html"
     
