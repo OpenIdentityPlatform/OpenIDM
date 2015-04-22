@@ -180,9 +180,8 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
                         // Update the target (working copy)
                         target[oldAttribute.name] = unassignmentResult;
                         // Update the existingTarget, in order to carry changes over to additional operations that may use the existingTarget
-                        if (typeof existingTarget !== 'undefined' && existingTarget !== null) {
-                            existingTarget[oldAttribute.name] = unassignmentResult;
-                        }
+                       // if (typeof existingTarget !== 'undefined' && existingTarget !== null) {
+                       //     existingTarget[oldAttribute.name] = unassignmentResult;
                     }
                 }
             }

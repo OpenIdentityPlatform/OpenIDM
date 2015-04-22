@@ -58,3 +58,17 @@ cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top
 
+dn: cn=Employees,ou=Groups,dc=example,dc=com
+cn: Employees
+objectClass: groupOfUniqueNames
+objectClass: top
+
+dn: cn=Contractors,ou=Groups,dc=example,dc=com
+cn: Contractors
+objectClass: groupOfUniqueNames
+objectClass: top
+
+dn: cn=Chat Users,ou=Groups,dc=example,dc=com
+cn: Chat Users
+objectClass: groupOfUniqueNames
+objectClass: top
