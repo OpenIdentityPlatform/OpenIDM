@@ -26,7 +26,7 @@ Sample 3 - Scripted SQL
 =======================
 
 This sample demonstrates creating a new CustomScriptedSQL connector using the
-custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar that is include in the tools
+custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar that is included in the tools
 directory of the OpenIDM zip file. This sample will rely on this new custom
 connector you create. It will provide an example configuration and a handful of 
 groovy scripts that will be used to communicate with the SQL server. 
@@ -87,9 +87,10 @@ Create the CustomScriptedSQL Connector
 Description: Generate classes and files necessary to build a custom connector. Using those generated files we will build
  a custom ScriptedSQL connector we will use for the rest of this sample.
 
-1. Navigate to the ../samples/sample3/create-connector directory. Run the following command using the custom config 
+1. From sample3/create-connector directory, run the following command using the custom config 
    provided in the sample3/data directory.
 
+   $ cd path/to/openidm/samples/sample3/create-connector
    $ java -jar ../../../tools/custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar -c ../data/scriptedsql.json
 
 2. Copy the provided sample scripts into connector src directory; these will become part of the custom connector.
@@ -107,7 +108,7 @@ Description: Generate classes and files necessary to build a custom connector. U
     $ cd ..
 
 5. Copy the connector you just created from the create-connector directory to the connectors directory of OpenIDM. If 
-   you are in the ../samples/sample3 directory, run this command. 
+   you are in the sample3 directory, run this command. 
    
    $ cp create-connector/target/hrdb-connector-1.4.1.0.jar ../../connectors/
    
@@ -122,7 +123,7 @@ need to have it displayed in the UI as well as the having both the scripts and p
     
         inflated: conf/provisioner.openicf-hrdb.json
         
-7. Replace the "systemActions" value inside the ../samples/sample3/conf/provisioner.openicf-hrdb.json
+7. Replace the "systemActions" value inside the sample3/conf/provisioner.openicf-hrdb.json
  with the value below:
         [
             {
