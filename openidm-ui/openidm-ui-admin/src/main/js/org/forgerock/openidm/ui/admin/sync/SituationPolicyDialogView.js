@@ -41,25 +41,28 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
         },
         model: {},
         data: {
-            star: "&#9733;",
-            hollowStar: "&#9734;"
+
         },
 
         render: function(args, callback) {
             var _this = this,
                 title = "";
 
-            this.data.mappingName = args.mappingName;
-            this.data.mappingProperties = args.mapProps;
-            this.data.situation = args.situation;
-            this.data.edit = args.edit;
-            this.data.defaultAction = false;
-            this.data.defaultWorkflow = false;
-            this.data.defaultScript = false;
-            this.data.defaultConditionScript = false;
-            this.data.defaultConditionFilter = true;
-            this.data.note = args.basePolicy.note;
-            this.data.workflows = args.workflows;
+            this.data = {
+                star: "&#9733;",
+                hollowStar: "&#9734;",
+                situation: args.situation,
+                edit: args.edit,
+                defaultAction: false,
+                defaultWorkflow: false,
+                defaultScript: false,
+                defaultConditionScript: false,
+                defaultConditionFilter: true,
+                note: args.basePolicy.note,
+                workflows: args.workflows,
+                mappingName: args.mappingName,
+                mappingProperties: args.mapProps
+            };
 
             this.model.policy = args.policy;
             this.model.basePolicy = args.basePolicy;
@@ -132,7 +135,6 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                                 actionScriptData = this.model.action;
                             } else if (this.data.edit) {
                                 this.$el.find("#defaultActionPane select").val(this.model.action);
-
                             }
 
                             // Set condition value
@@ -143,24 +145,33 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                             }
 
                             // Load Script Editors
-                            this.model.scriptPaneEditor = InlineScriptEditor.generateScriptEditor({
-                                "element": $("#scriptPane"),
-                                "eventName": "scriptPane",
-                                "noValidation": true,
+                            this.model.actionScriptPaneEditor = InlineScriptEditor.generateScriptEditor({
+                                "element": this.$el.find("#actionScriptPane"),
+                                "eventName": "actionScriptPane",
+                                "disableValidation": false,
+                                "validationCallback": _.bind(function(valid) {
+                                    if (this.model.currentActionTab === "scriptTab") {
+                                        if (valid) {
+                                            this.toggleActiveAlert(false);
+                                        } else {
+                                            this.toggleActiveAlert(true);
+                                        }
+                                    }
+                                }, this),
                                 "scriptData": actionScriptData
                             });
 
                             this.model.conditionScriptPaneEditor = InlineScriptEditor.generateScriptEditor({
-                                "element": $("#conditionScriptPane"),
+                                "element": this.$el.find("#conditionScriptPane"),
                                 "eventName": "conditionScriptPane",
-                                "noValidation": true,
+                                "disableValidation": true,
                                 "scriptData": conditionScriptData
                             });
 
-                            this.model.actionScriptPaneEditor = InlineScriptEditor.generateScriptEditor({
-                                "element": $("#postActionScript"),
+                            this.model.postActionScriptPaneEditor = InlineScriptEditor.generateScriptEditor({
+                                "element": this.$el.find("#postActionScript"),
                                 "eventName": "postActionScript",
-                                "noValidation": true,
+                                "disableValidation": true,
                                 "scriptData": this.model.postAction
                             });
 
@@ -178,8 +189,19 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                             this.$el.find('a[data-toggle="tab"]').on('shown.bs.tab', _.bind(function (e) {
                                 this.model.actionScriptPaneEditor.refresh();
                                 this.model.conditionScriptPaneEditor.refresh();
-                                this.model.scriptPaneEditor.refresh();
+                                this.model.postActionScriptPaneEditor.refresh();
                             }, this));
+
+                            this.model.currentActionTab = this.$el.find("#action .tabButtons .active").attr("id");
+
+                            this.actionValidation(this.model.currentActionTab);
+
+                            this.$el.find('#action .tabButtons .btn').on('shown.bs.tab', _.bind(function (e) {
+                                this.model.currentActionTab = $(e.target).attr("id");
+
+                                this.actionValidation(this.model.currentActionTab);
+                            }, this));
+
                         }, _this),
                         "replace");
                 },
@@ -210,7 +232,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                                     "file": "workflow/triggerWorkflowFromSync.js"
                                 };
                             } else {
-                                returnPolicy.action = this.model.scriptPaneEditor.generateScript();
+                                returnPolicy.action = this.model.actionScriptPaneEditor.generateScript();
                             }
 
                             // Get Condition
@@ -221,7 +243,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                                 returnPolicy.condition = this.model.conditionScriptPaneEditor.generateScript();
                             }
 
-                            temp = this.model.actionScriptPaneEditor.generateScript();
+                            temp = this.model.postActionScriptPaneEditor.generateScript();
                             if (temp !== null) {
                                 returnPolicy.postAction = temp;
                             }
@@ -231,6 +253,34 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                         }, this)
                     }]
             });
+        },
+
+        actionValidation: function(id) {
+            if (id === "workflowTab") {
+                if (this.$el.find("#workflowPane select").val() === "noWorkflows") {
+                    this.toggleActiveAlert(true);
+                } else {
+                    this.toggleActiveAlert(false);
+                }
+            } else if (id === "scriptTab") {
+                if (this.model.actionScriptPaneEditor.generateScript() === null) {
+                    this.toggleActiveAlert(true);
+                } else {
+                    this.toggleActiveAlert(false);
+                }
+            } else {
+                this.toggleActiveAlert(false);
+            }
+        },
+
+        toggleActiveAlert: function(show) {
+            if (show) {
+                this.$el.find(".activeAlert").show();
+                this.$el.parentsUntil(".modal-dialog").find("#submitPolicyDialog").prop("disabled", true);
+            } else {
+                this.$el.find(".activeAlert").hide();
+                this.$el.parentsUntil(".modal-dialog").find("#submitPolicyDialog").prop("disabled", false);
+            }
         },
 
         sectionControl: function(event) {

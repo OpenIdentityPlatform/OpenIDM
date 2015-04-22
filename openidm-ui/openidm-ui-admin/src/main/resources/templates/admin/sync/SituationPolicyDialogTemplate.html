@@ -36,7 +36,7 @@
             <div class="btn-group btn-group-tabs tabButtons" data-toggle="buttons" role="tablist">
                 <a role="presentation" id="defaultActionTab" class="btn btn-default{{#if defaultAction}} active{{/if}}" href="#defaultActionPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.defaultAction"}}</a>
                 <a role="presentation" id="workflowTab" class="btn btn-default{{#if defaultWorkflow}} active{{/if}}" href="#workflowPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.workflow"}}</a>
-                <a role="presentation" id="scriptTab" class="btn btn-default{{#if defaultScript}} active{{/if}}" href="#scriptPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.script"}}</a>
+                <a role="presentation" id="scriptTab" class="btn btn-default{{#if defaultScript}} active{{/if}}" href="#actionScriptPane" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.situationalPolicies.script"}}</a>
             </div>
 
             <div class="tab-content no-border row">
@@ -61,16 +61,22 @@
                     </div>
                 </div>
 
-                <div class="tab-pane col-md-6{{#if defaultWorkflow}} active{{/if}}" id="workflowPane">
-                    <select class="form-control">
-                        {{#each workflows}}
-                        <option value="{{this.key}}">{{this.name}}</option>
-                        {{/each}}
+                <div class="tab-pane panel col-md-6{{#if defaultWorkflow}} active{{/if}}" id="workflowPane">
+                    <select class="form-control" {{#unless workflows.length}} disabled="true"{{/unless}}>
+                    {{#each workflows}}
+                    <option value="{{this.key}}">{{this.name}}</option>
+                    {{else}}
+                    <option value="noWorkflows" selected="selected">{{t "templates.situationalPolicies.noWorkflows"}}</option>
+                    {{/each}}
                     </select>
                 </div>
 
-                <div class="tab-pane col-md-12{{#if defaultScript}} active{{/if}}" id="scriptPane"></div>
+                <div class="tab-pane col-md-12{{#if defaultScript}} active{{/if}}" id="actionScriptPane"></div>
+            </div>
 
+            <div role="alert" class="alert alert-warning activeAlert">
+                <i class="fa fa-exclamation-circle"></i><strong>{{t 'common.form.warning'}}!</strong>
+                <span class="message">{{t "templates.situationalPolicies.actionAlert"}}</span>
             </div>
         </form>
 
@@ -81,4 +87,5 @@
 
         <div id="postActionScript"></div>
     </div>
+
 </div>

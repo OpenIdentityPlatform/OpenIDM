@@ -32,9 +32,12 @@ define("org/forgerock/openidm/ui/admin/delegates/WorkflowDelegate", [
     var obj = new AbstractDelegate(constants.host + "/openidm/workflow/");
 
     obj.availableWorkflows = function() {
-        var errorHandlers = {
-            "error": {
+        var errorHandlers =  {
+            "notFound": {
                 status: "404"
+            },
+            "internalError": {
+                status: "500"
             }
         };
 
@@ -47,7 +50,3 @@ define("org/forgerock/openidm/ui/admin/delegates/WorkflowDelegate", [
 
     return obj;
 });
-
-
-
-

@@ -59,15 +59,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
             "click .delete-policy": "deletePolicy",
             "click .edit-policy": "editPolicy"
         },
-        data: {
-            star: "&#9733;",
-            hollowStar: "&#9734;",
-            policies:[],
-            docHelpUrl: "",
-            patternNames: [],
-            situations: [],
-            changes: false
-        },
+        data: {},
         model: {
             successMessage: "triggeredBySituationSaveSuccess",
             currentPattern: "",
@@ -105,11 +97,15 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
         },
 
         render: function(args, callback) {
-            this.data.policies = [];
-            this.data.patternNames = [];
-            this.data.docHelpUrl = constants.DOC_URL;
-            this.data.situations = [];
-            this.data.changes = false;
+            this.data = {
+                star: "&#9733;",
+                hollowStar: "&#9734;",
+                policies:[],
+                docHelpUrl: constants.DOC_URL,
+                patternNames: [],
+                situations: [],
+                changes: false
+            };
 
             this.model.sync = args.sync;
             this.model.mapping = args.mapping;
@@ -474,8 +470,8 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
         deletePolicy: function(event) {
             event.preventDefault();
 
-            _(this.$el.find("#situationalPolicies table .event-hook .delete-policy .fa-times")).each(_.bind(function(deleteButton, index) {
-                if (deleteButton === event.target && !$(event.target).parent().hasClass("disabled")) {
+            _(this.$el.find("#situationalPolicies table .event-hook .delete-policy")).each(_.bind(function(deleteButton, index) {
+                if (deleteButton === event.currentTarget && !$(event.currentTarget).parent().hasClass("disabled")) {
                     _(this.data.policies).each(function(policy, index) {
                         this.data.policies[index] = _.pick(policy, "action", "situation", "condition", "postAction");
                         this.data.policies[index].situation = _.invert(this.model.lookup)[this.data.policies[index].situation];
@@ -505,8 +501,10 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
         },
 
         editPolicy: function(event) {
-            _(this.$el.find("#situationalPolicies table .event-hook .edit-policy .fa-pencil")).each(_.bind(function(editButton, index) {
-                if (editButton === event.target) {
+            event.preventDefault();
+
+            _(this.$el.find("#situationalPolicies table .event-hook .edit-policy")).each(_.bind(function(editButton, index) {
+                if (editButton === event.currentTarget) {
                     SituationPolicyDialog.render({
                         "mappingName" : this.data.mappingName,
                         "mapProps": this.model.mapping.properties,

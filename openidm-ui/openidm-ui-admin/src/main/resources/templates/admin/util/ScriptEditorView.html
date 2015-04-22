@@ -19,7 +19,7 @@
             <div id="fileCollapse" style="">
                 <div class="panel-body">
                     <div class="form-group">
-                        <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#if scriptData.source}} value="" disabled="true" {{else}} value="{{scriptData.file}}" {{#unless disableValidation}} {{#unless scriptData.source}} data-validator-event="keyup blur focus" data-validator="required" {{/unless}} {{/unless}} {{/if}}/>
+                        <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#if scriptData.source}} value="" disabled="true" {{else}} value="{{scriptData.file}}" {{#unless disableValidation}} data-validator-event="keyup blur focus" data-validator="required" {{/unless}} {{/if}}/>
                         {{#unless disableValidation}}
                         <span></span>
                         <div class="validation-message"></div>
