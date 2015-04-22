@@ -28,6 +28,7 @@
               </li>
               <li class="active"><a href="#role-settings" role="tab" data-toggle="tab" aria-expanded="true"><span class="fa fa-list"></span> {{t "templates.admin.RoleUsersTemplate.details"}}</a></li>
               {{#unless newRole}}
+              <li class=""><a href="#role-entitlements" role="tab" data-toggle="tab" aria-expanded="false"><span class="fa fa-database"></span> {{t "templates.admin.RoleEntitlementsTemplate.entitlements"}}</a></li>
               <li class=""><a href="#role-users" role="tab" data-toggle="tab" aria-expanded="false"><span class="fa fa-users"></span> {{t "templates.admin.RoleUsersTemplate.users"}}</a></li>
               {{/unless}}
            </ul>
@@ -68,6 +69,9 @@
                     </div>
                  </div>
               </div>
+           </div>
+           <div role="tabpanel" class="tab-pane" id="role-entitlements">
+              
            </div>
            <div role="tabpanel" class="tab-pane" id="role-users">
               

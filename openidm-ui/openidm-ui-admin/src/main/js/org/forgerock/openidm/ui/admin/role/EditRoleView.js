@@ -34,8 +34,9 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
-    "org/forgerock/openidm/ui/admin/role/RoleUsersView"
-], function(AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager, roleUsersView) {
+    "org/forgerock/openidm/ui/admin/role/RoleUsersView",
+    "org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView"
+], function(AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager, roleUsersView, roleEntitlementsListView) {
     var EditRoleView = AbstractView.extend({
         template: "templates/admin/role/EditRoleViewTemplate.html",
         
@@ -50,9 +51,10 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 roleId = args[2];
             
             this.data.args = args;
+            this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
     
             if(roleId){
-                rolePromise = resourceDelegate.readEntity(roleId);
+                rolePromise = resourceDelegate.readResource(this.data.serviceUrl, roleId);
                 this.data.newRole = false;
             } else {
                 rolePromise = $.Deferred().resolve({});
@@ -60,10 +62,14 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
             }
             
             $.when(rolePromise, schemaPromise).then(_.bind(function(role, schema){
+                if(role.length && !role[0].assignments) {
+                    role[0].assignments = {};
+                }
                 this.data.role = role[0];
                 this.parentRender(_.bind(function(){
                     if(!this.data.newRole) {
                         roleUsersView.render(this.data.args);
+                        roleEntitlementsListView.render(this.data.args, this.data.role);
                     }
                 },this));
             },this));
@@ -73,15 +79,21 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 successCallback = _.bind(function(){
                     var msg = (this.data.newRole) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess";
                     messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.args[1] })});
-                    this.backToList();
+                    if(this.data.newRole) {
+                        this.data.args.push(formVal.role._id);
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminEditManagedObjectView", args: this.data.args});
+                    } else {
+                        this.data.role._rev++;
+                    }
+                    this.render(this.data.args);
                 }, this);
             
             e.preventDefault();
             
             if(this.data.newRole){
-                resourceDelegate.createEntity(formVal.role._id, formVal.role, successCallback);
+                resourceDelegate.createResource(this.data.serviceUrl, formVal.role._id, formVal.role, successCallback);
             } else {
-                resourceDelegate.patchEntityDifferences({id: this.data.role._id, rev: this.data.role._rev}, this.data.role, formVal.role, successCallback);
+                resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.data.role._id, rev: this.data.role._rev}, this.data.role, formVal.role, successCallback);
             }
         },
         backToList: function(e){
@@ -95,7 +107,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
             e.preventDefault();
             
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }), _.bind(function(){
-                resourceDelegate.deleteEntity(this.data.role._id, _.bind(function(){
+                resourceDelegate.deleteResource(this.data.serviceUrl, this.data.role._id, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role._id })});
                     this.backToList();
                 }, this));

@@ -232,9 +232,9 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDeleteSelected",{ objectTitle: this.data.objectName }), _.bind(function(){
                 var promArr = [];
-                _.each(this.selectedRows(), function(objectId) {
-                    promArr.push(resourceDelegate.deleteEntity(objectId));
-                });
+                _.each(this.selectedRows(), _.bind(function(objectId) {
+                    promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId));
+                }, this));
                 $.when.apply($,promArr).then(_.bind(function(proms){
                     this.render(this.data.args, _.bind(function() {
                         messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess",{ objectTitle: this.data.objectName })});
@@ -251,6 +251,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             this.data.grid_id = args[0] + "ViewTable";
             this.grid_id_selector = "#" + this.data.grid_id;
             this.isSystemResource = false;
+            this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
             
             if (this.data.objectType === "system") {
                 this.isSystemResource = true;

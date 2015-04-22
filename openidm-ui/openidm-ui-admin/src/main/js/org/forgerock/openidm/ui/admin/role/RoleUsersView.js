@@ -57,6 +57,9 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                 args = _.clone(this.data.args,true);
             
             args[1] = "user";
+            
+            this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
+            
             resourceDelegate.getSchema(args).then(_.bind(function(schema){
                 var cols = [],
                     unorderedCols = [];
@@ -169,7 +172,7 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                 }
                 
                 if(doUpdate) {
-                    promArr.push(resourceDelegate.updateEntity(rowdata._id, rowdata));
+                    promArr.push(resourceDelegate.updateResource(this.data.serviceUrl, rowdata._id, rowdata));
                 }
             },this));
             
