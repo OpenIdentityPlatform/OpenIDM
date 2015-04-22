@@ -132,7 +132,7 @@ equal to "Contractor", and displays the result in a nice format :
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
-               'https://localhost:8443/openidm/managed/role?_queryFilter=/properties.name+eq+"Contractor"&_prettyPrint=true'
+               'https://localhost:8443/openidm/managed/role?_queryFilter=/properties/name+eq+"Contractor"&_prettyPrint=true'
 
                {
                  "result" : [ {
