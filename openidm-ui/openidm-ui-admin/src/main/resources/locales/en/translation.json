@@ -436,7 +436,9 @@
             "addPolicy": "Add Policy for Situation:",
             "conditionPhrase": "When these <strong>Conditions</strong> apply",
             "actionPhrase": "Perform this <strong>Action</strong>",
-            "onCompletePhrase": "And <strong>On Complete</strong>"
+            "onCompletePhrase": "And <strong>On Complete</strong>",
+            "noWorkflows": "No Available Workflows",
+            "actionAlert": "You must provide a value for the action."
         },
         "auth": {
             "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
@@ -802,7 +804,7 @@
             "conditionalUpon" : "Conditional Upon:",
             "transformationScriptApplied" : "Transformation script applied",
             "attributes": "Attributes",
-            "badScript" : "Invalid script. A valid Link Qualifier script returns an array of strings.",
+            "badScript" : "Invalid; a Link Qualifier script must return an array of strings",
             "linkQualifiers": "Link Qualifiers",
             "uniqueLinkQualifiers": "The link qualifier must be unique.",
             "backToMapping" : "Back to Mappings",

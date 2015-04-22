@@ -81,10 +81,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 this.model = _.extend(this.model, args);
 
                 this.data = _.pick(this.model, 'disableValidation', 'showPreview', 'scriptData', 'eventName', 'disablePassedVariable', 'placeHolder');
-
                 if (!this.model.disablePassedVariable && this.model.scriptData) {
                     this.data.passedVariables = args.scriptData.globals ||
-                        _.omit(args.scriptData, "file", "source", "type");
+                    _.omit(args.scriptData, "file", "source", "type");
                 }
 
                 this.parentRender(_.bind(function() {
@@ -229,7 +228,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                         this.$el.find(".scriptSourceCode").removeAttr("data-validation-status").removeAttr("data-validator-event").removeAttr("data-validator").unbind("blur");
                     } else {
-                        this.$el.find(".scriptSourceCode").attr("data-validator-event", "blur").attr("data-validator", "required");
+                        this.$el.find(".scriptSourceCode").attr("data-validator-event", "keyup blur focus").attr("data-validator", "required");
 
                         this.$el.find(".scriptFilePath").removeAttr("data-validator-event").removeAttr("data-validation-status").removeAttr("data-validator").unbind("blur").unbind("focus").unbind("keyup");
                     }
@@ -304,16 +303,8 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
             },
 
             customValidate: function() {
-                var currentSelection;
-
-                if(this.data.eventName) {
-                    currentSelection = this.$el.find("input[name=" + this.data.eventName + "_scriptType]:checked").val();
-                } else {
-                    currentSelection = this.$el.find("input[name=scriptType]:checked").val();
-                }
-
                 if(this.model.validationCallback) {
-                    this.model.validationCallback(currentSelection);
+                    this.model.validationCallback(validatorsManager.formValidated(this.$el));
                 }
             },
 

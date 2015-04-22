@@ -20,6 +20,24 @@ define("config/validators/AdminValidators", [
                 callback();
             }
         },
+        "whitespace": {
+            "name": "No whitespace allowed.",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                if (/\s/.test($(input).val())) {
+                    callback(["Cannot contain spaces"]);
+                    return;
+                }
+
+                if ($(input).val().length === 0) {
+                    callback(["Required"]);
+                    return;
+                }
+
+                callback();
+            }
+        },
         "certificate": {
             "name": "Valid Certificate String",
             "dependencies": [
