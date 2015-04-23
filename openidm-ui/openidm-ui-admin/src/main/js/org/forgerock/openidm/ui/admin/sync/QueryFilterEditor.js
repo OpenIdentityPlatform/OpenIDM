@@ -71,7 +71,6 @@ define("org/forgerock/openidm/ui/admin/sync/QueryFilterEditor", [
                         } else {
                             return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
                         }
-                    break;
                     case "none":
                         return "";
                     default:
