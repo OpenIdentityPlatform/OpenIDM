@@ -72,7 +72,7 @@ require.config({
             exports: "spin"
         },
         jsonEditor: {
-            exports: "jsonEditor"
+            exports: "JSONEditor"
         },
         cron: {
             deps: ["jquery"]
