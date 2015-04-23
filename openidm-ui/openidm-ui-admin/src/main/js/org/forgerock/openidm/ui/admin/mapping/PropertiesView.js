@@ -702,7 +702,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
             configDelegate.updateEntity("sync", {"mappings" : syncMappings}).then(_.bind(function(){
                 delete MappingBaseView.data.mapping;
-
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
                 this.render([this.currentMapping().name]);
             }, this));
         }
