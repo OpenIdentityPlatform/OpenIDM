@@ -68,7 +68,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 this.data.role = role[0];
                 this.parentRender(_.bind(function(){
                     if(!this.data.newRole) {
-                        roleUsersView.render(this.data.args);
+                        roleUsersView.render(this.data.args, this.data.role);
                         roleEntitlementsListView.render(this.data.args, this.data.role);
                     }
                 },this));
@@ -76,11 +76,11 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
         },
         saveRole: function(e){
             var formVal = form2js('addEditRoleForm', '.', true),
-                successCallback = _.bind(function(){
+                successCallback = _.bind(function(role){
                     var msg = (this.data.newRole) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess";
                     messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.args[1] })});
                     if(this.data.newRole) {
-                        this.data.args.push(formVal.role._id);
+                        this.data.args.push(role._id);
                         eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminEditManagedObjectView", args: this.data.args});
                     } else {
                         this.data.role._rev++;
@@ -91,7 +91,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
             e.preventDefault();
             
             if(this.data.newRole){
-                resourceDelegate.createResource(this.data.serviceUrl, formVal.role._id, formVal.role, successCallback);
+                resourceDelegate.createResource(this.data.serviceUrl, null, formVal.role, successCallback);
             } else {
                 resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.data.role._id, rev: this.data.role._rev}, this.data.role, formVal.role, successCallback);
             }
@@ -108,7 +108,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
             
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }), _.bind(function(){
                 resourceDelegate.deleteResource(this.data.serviceUrl, this.data.role._id, _.bind(function(){
-                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role._id })});
+                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role.properties.name })});
                     this.backToList();
                 }, this));
             }, this));
