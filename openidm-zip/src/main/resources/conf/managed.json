@@ -184,8 +184,8 @@
                     "_id" : {
                         "description" : "",
                         "title" : "Name",
-                        "viewable" : true,
-                        "searchable" : true,
+                        "viewable" : false,
+                        "searchable" : false,
                         "type" : "string"
                     },
                     "properties" : {
@@ -206,7 +206,7 @@
                                 "description" : "",
                                 "title" : "Description",
                                 "viewable" : true,
-                                "searchable" : false,
+                                "searchable" : true,
                                 "type" : "string"
                             }
                         },
