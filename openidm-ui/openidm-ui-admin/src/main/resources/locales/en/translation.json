@@ -140,6 +140,7 @@
                     "greaterOrEqual": "GTE (>=)",
                     "lessOrEqual": "LTE (<=)",
                     "equalityMatch": "is equal to",
+                    "pr": "is present",
                     "ne": "is not equal to",
                     "co": "contains",
                     "lt": "LT (<)",

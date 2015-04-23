@@ -55,6 +55,7 @@ define("org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor", [
                         "expr"
                     ],
                     tags: [
+                        "pr",
                         "equalityMatch",
                         "ne",
                         "approxMatch",

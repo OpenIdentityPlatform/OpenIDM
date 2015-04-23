@@ -126,28 +126,41 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
 
                 } else if (field.hasClass("tag")) {
 
-                    if (field.val() === "extensibleMatchAND") {
-                        node.tag = "extensibleMatch";
-                        node.extensible = {
-                            matchType: field.parent().siblings(".name-body").find(".name").val(),
-                            rule: "1.2.840.113556.1.4.803",
-                            value: field.parent().siblings(".value-body").find(".value").val(),
-                            type: 169 // comes from ldapjs protocol definition for FILTER_EXT
-                        };
-                        node.name = field.parent().siblings(".name-body").find(".name").val() + ":1.2.840.113556.1.4.803";
-                    } else if (field.val() === "extensibleMatchOR") {
-                        node.tag = "extensibleMatch";
-                        node.extensible = {
-                            matchType: field.parent().siblings(".name-body").find(".name").val(),
-                            rule: "1.2.840.113556.1.4.804",
-                            value: field.parent().siblings(".value-body").find(".value").val(),
-                            type: 169 // comes from ldapjs protocol definition for FILTER_EXT
-                        };
-                        node.name = field.parent().siblings(".name-body").find(".name").val() + ":1.2.840.113556.1.4.804";
-                    } else {
-                        delete node.extensible;
-                        node.name = field.parent().siblings(".name-body").find(".name").val();
-                        node.tag = field.val();
+                    switch (field.val()) {
+                        case "extensibleMatchAND":
+                            node.tag = "extensibleMatch";
+                            node.extensible = {
+                                matchType: field.parent().siblings(".name-body").find(".name").val(),
+                                rule: "1.2.840.113556.1.4.803",
+                                value: field.parent().siblings(".value-body").find(".value").val(),
+                                type: 169 // comes from ldapjs protocol definition for FILTER_EXT
+                            };
+                            node.name = field.parent().siblings(".name-body").find(".name").val() + ":1.2.840.113556.1.4.803";
+                            break;
+
+                        case "extensibleMatchOR":
+                            node.tag = "extensibleMatch";
+                            node.extensible = {
+                                matchType: field.parent().siblings(".name-body").find(".name").val(),
+                                rule: "1.2.840.113556.1.4.804",
+                                value: field.parent().siblings(".value-body").find(".value").val(),
+                                type: 169 // comes from ldapjs protocol definition for FILTER_EXT
+                            };
+                            node.name = field.parent().siblings(".name-body").find(".name").val() + ":1.2.840.113556.1.4.804";
+                            break;
+
+                        case "pr":
+                            delete node.extensible;
+                            field.parent().siblings(".value-body").css("display", "none");
+                            node.name = field.parent().siblings(".name-body").find(".name").val();
+                            node.tag = field.val();
+                            break;
+
+                        default:
+                            delete node.extensible;
+                            field.parent().siblings(".value-body").css("display", "");
+                            node.name = field.parent().siblings(".name-body").find(".name").val();
+                            node.tag = field.val();
                     }
 
                 } else if (field.hasClass("value")) {
@@ -233,6 +246,7 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
             }),
             "delimiter": $.t($.t("templates.util.filter.delimiters." + rules.op)), // will only be valid for and and or
             "isExpr": rules.op === "expr",
+            "unary": rules.tag === "pr", // there might be other unary tags later
             "isMultiValueType": (rules.op === "and" || rules.op === "or"),
             "config": config
         }));

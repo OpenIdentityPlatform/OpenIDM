@@ -33,10 +33,11 @@ define("org/forgerock/openidm/ui/admin/util/FilterEvaluator", [
                 parts = parts.splice(1);
             }
             return _.reduce(parts, function (entry, key) {
-                return entry[key];
+                return entry ? entry[key] : undefined;
             }, object);
         },
         evaluate: function (filter, object) {
+            var value;
             switch (filter.op) {
                 case "none":
                     // no filter means everything evaluates to true
@@ -58,23 +59,26 @@ define("org/forgerock/openidm/ui/admin/util/FilterEvaluator", [
                         }
                     }, false, this);
                 case "expr":
+                    value = this.getValueFromJSONPointer(filter.name, object);
                     switch (filter.tag) {
                         case "equalityMatch":
-                            return this.getValueFromJSONPointer(filter.name, object) === filter.value;
+                            return value === filter.value;
                         case "ne":
-                            return this.getValueFromJSONPointer(filter.name, object) !== filter.value;
+                            return value !== filter.value;
                         case "approxMatch":
-                            return this.getValueFromJSONPointer(filter.name, object).indexOf(filter.value) === 0;
+                            return value.indexOf(filter.value) === 0;
                         case "co":
-                            return this.getValueFromJSONPointer(filter.name, object).indexOf(filter.value) !== -1;
+                            return value.indexOf(filter.value) !== -1;
                         case "greaterOrEqual":
-                            return this.getValueFromJSONPointer(filter.name, object) >= filter.value;
+                            return value >= filter.value;
                         case "gt":
-                            return this.getValueFromJSONPointer(filter.name, object) > filter.value;
+                            return value > filter.value;
                         case "lessOrEqual":
-                            return this.getValueFromJSONPointer(filter.name, object) <= filter.value;
+                            return value <= filter.value;
                         case "lt":
-                            return this.getValueFromJSONPointer(filter.name, object) < filter.value;
+                            return value < filter.value;
+                        case "pr":
+                            return value !== null && value !== undefined;
                     }
                     break;
             }
