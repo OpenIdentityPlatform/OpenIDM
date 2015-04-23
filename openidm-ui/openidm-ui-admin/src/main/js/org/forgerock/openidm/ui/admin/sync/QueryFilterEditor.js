@@ -64,12 +64,18 @@ define("org/forgerock/openidm/ui/admin/sync/QueryFilterEditor", [
                 }
             },
             serialize: function (node) {
-                if (node.op === "expr") {
-                    return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
-                } else if (node.op === "none") {
-                    return "";
-                } else {
-                    return "(" + _.map(node.children, this.serialize, this).join(" " + node.op + " ") + ")";
+                switch (node.op) {
+                    case "expr":
+                        if (node.tag === "pr") {
+                            return node.name + ' pr';
+                        } else {
+                            return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
+                        }
+                    break;
+                    case "none":
+                        return "";
+                    default:
+                        return "(" + _.map(node.children, this.serialize, this).join(" " + node.op + " ") + ")";
                 }
             },
             getFilterString: function () {
