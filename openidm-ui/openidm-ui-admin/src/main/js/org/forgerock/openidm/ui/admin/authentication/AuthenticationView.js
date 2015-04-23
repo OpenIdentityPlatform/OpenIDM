@@ -329,11 +329,13 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
             if (moduleType !== "choose") {
                 this.model.modules[moduleId].name = moduleType;
                 this.model.modules[moduleId].basicEditor = new JSONEditor(this.model.modules[moduleId].module.find(".basicForm")[0], {
-                    schema: this.model.module_types[moduleType].mainSchema
+                    schema: this.model.module_types[moduleType].mainSchema,
+                    uuid: moduleId
                 });
 
                 this.model.modules[moduleId].advancedEditor = new JSONEditor(this.model.modules[moduleId].module.find(".advancedForm")[0], {
-                    schema: this.model.module_types[moduleType].advancedSchema
+                    schema: this.model.module_types[moduleType].advancedSchema,
+                    uuid: moduleId
                 });
 
                 this.model.modules[moduleId].scriptEditor = InlineScriptEditor.generateScriptEditor({

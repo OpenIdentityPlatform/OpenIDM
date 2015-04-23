@@ -112,7 +112,8 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
                 disable_edit_json: true,
                 disable_array_reorder: true,
                 disable_collapse: true,
-                schema:{}
+                schema:{},
+                uuid: attrName
             });
             
             editor.on('change', _.bind(function () {

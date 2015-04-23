@@ -22,27 +22,22 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define , _, $*/
 
-define("org/forgerock/openidm/ui/common/main", [
-    "./MandatoryPasswordChangeDialog",
-    
-    "./resource/ListResourceView",
-    "./resource/EditResourceView",
-    "./resource/GenericEditResourceView",
-    "./resource/ResourceEditViewRegistry",
-    
-    "./delegates/ConfigDelegate",
-    "./delegates/InternalUserDelegate",
-    "./delegates/PolicyDelegate",
-    "./delegates/SiteConfigurationDelegate",
-    "./delegates/OpenAMProxyDelegate",
-    "./delegates/ResourceDelegate",
-
-    "./login/InternalLoginHelper",
-    "./login/AuthenticationUnavailable",
-    
-    "./util/Constants",
-    "./util/AMLoginUtils",
-    "./util/JSONEditorSetupUtils"
-]);
+/**
+ * @author huck.elliott
+ */
+define("org/forgerock/openidm/ui/common/util/JSONEditorSetupUtils", [
+    "jsonEditor"
+], function (JSONEditor) {
+        var JSONEditorPostBuild = JSONEditor.AbstractEditor.prototype.postBuild;
+        JSONEditor.AbstractEditor.prototype.postBuild = function () {
+            var ret = JSONEditorPostBuild.apply(this, arguments);
+            if (this.path && this.input && this.label && !this.input.id && !this.label.htmlFor) {
+                this.input.id = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
+                this.label.htmlFor = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
+            }
+            return ret;
+        };
+        
+});
