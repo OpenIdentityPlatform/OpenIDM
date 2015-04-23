@@ -288,7 +288,7 @@ additional property, called _assignmentsToMap :
 Now if you take a look at bjensen directly in the directory you should see the
 attribute _employeeType_ being populated properly :
 
-            $ ldapsearch -p 1389 -h localhost -b "dc=example,dc=com" -D "cn=Directory Manager" -W - -s sub uid=bjensen dn uid employeeType
+            $ ldapsearch -p 1389 -h localhost -b "dc=example,dc=com" -D "cn=Directory Manager" -w - -s sub uid=bjensen dn uid employeeType
 
             # bjensen, People, example.com
             dn: uid=bjensen,ou=People,dc=example,dc=com
@@ -358,7 +358,7 @@ assignments/ldap/attributes
 After adding this new entitlement to the Employee role, bjensen should be
 added to the Chat Users and Employees groups.
 
-               $ ldapsearch -p 1389 -h localhost -b "dc=example,dc=com" -D "cn=Directory Manager" -W - -s sub uid=bjensen dn uid employeeType isMemberOf
+               $ ldapsearch -p 1389 -h localhost -b "dc=example,dc=com" -D "cn=Directory Manager" -w - -s sub uid=bjensen dn uid employeeType isMemberOf
 
                # bjensen, People, example.com
                dn: uid=bjensen,ou=People,dc=example,dc=com
