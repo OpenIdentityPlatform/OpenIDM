@@ -71,7 +71,7 @@ require.config({
             exports: "form2js"
         },
         jsonEditor: {
-            exports: "jsonEditor"
+            exports: "JSONEditor"
         },
         contentflow: {
             exports: "contentflow"
