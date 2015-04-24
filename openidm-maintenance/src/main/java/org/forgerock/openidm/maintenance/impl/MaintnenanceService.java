@@ -69,7 +69,8 @@ import org.slf4j.LoggerFactory;
  * maintenance and upgrade mechanisms over REST
  */
 @Component(name = MaintnenanceService.PID, policy = ConfigurationPolicy.IGNORE,
-description = "OpenIDM Product Upgrade Management Service", immediate = true)
+        metatype = true,
+        description = "OpenIDM Product Upgrade Management Service", immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),

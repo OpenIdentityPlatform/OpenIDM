@@ -25,11 +25,12 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,15 +45,58 @@ public class FileState {
     }
 
     // Pathname of the checksum file.
-    private static final File CHECKSUM_FILE = new File("checksums.csv");
+    private final Path checksums;
 
     // Cache of the checksum file's contents.
-    private static final Map<String,String> digest = new HashMap<String, String>();
+    private final Map<String, String> digest = new HashMap<String, String>();
 
-    private static Map<String, String> getDigests() {
-        if (digest.isEmpty() && CHECKSUM_FILE.exists()) {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(CHECKSUM_FILE));
+    FileState(Path checksums) throws FileNotFoundException {
+        if (!Files.exists(checksums)) {
+            throw new FileNotFoundException(checksums + " does not exist");
+        }
+        this.checksums = checksums;
+    }
+
+    /**
+     * Return the current state of a shipped file.
+     *
+     * @param shippedFile a path to the original, shipped file.
+     * @return the current file state
+     */
+    public State getCurrentFileState(Path shippedFile) {
+        if (!Files.exists(shippedFile)) {
+            return State.MISSING;
+        }
+        return Arrays.equals(getCurrentDigest(shippedFile), getOriginalDigest(shippedFile))
+            ? State.UNCHANGED
+            : State.DIFFERS;
+    }
+
+    /**
+     * Returns the digest of the original, shipped file.
+     *
+     * @param shippedFile the original, shipped file.
+     * @return the digest
+     */
+    private byte[] getOriginalDigest(Path shippedFile) {
+        // TODO implement
+        return new byte[] { };
+    }
+
+    /**
+     * Computes and returns the digest of a current file on disk.
+     *
+     * @param currentFile the current file
+     * @return the digest
+     */
+    private byte[] getCurrentDigest(Path currentFile) {
+        // TODO implement
+        return new byte[] { };
+    }
+
+    private Map<String, String> getDigests() {
+        if (digest.isEmpty()) {
+            try (final BufferedReader reader = Files.newBufferedReader(checksums, Charset.defaultCharset())) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (!line.startsWith("#") && line.length() > 2) {
@@ -71,39 +115,4 @@ public class FileState {
         return digest;
     }
 
-    /**
-     * Return the current state of a shipped file.
-     *
-     * @param shippedFile the original, shipped file.
-     * @return
-     */
-    public State currentState(Path shippedFile) {
-        return State.UNCHANGED;
-    }
-
-    /**
-     * Returns the digest of the original, shipped file.
-     *
-     * @param shippedFile the original, shipped file.
-     * @return the digest
-     */
-    public static byte[] getOriginalDigest(Path shippedFile) {
-        // TODO implement
-        return new byte[] { };
-    }
-
-    /**
-     * Computes and returns the digest of a current file on disk.
-     *
-     * @param currentFile the current file
-     * @return the digest
-     */
-    public static byte[] getCurrentDigest(Path currentFile) {
-        // TODO implement
-        return new byte[] { };
-    }
-
-    private FileState() {
-        // prevent instantiation
-    }
 }
