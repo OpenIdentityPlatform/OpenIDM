@@ -30,12 +30,14 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class to retrieve digests of original, shipped files and files as they presently exist.
+ * Utility class to retrieve digestCache of original, shipped files and files as they presently exist.
  */
 public class FileState {
     public enum State {
@@ -44,17 +46,37 @@ public class FileState {
         UNCHANGED
     }
 
-    // Pathname of the checksum file.
-    private final Path checksums;
-
     // Cache of the checksum file's contents.
-    private final Map<String, String> digest = new HashMap<String, String>();
+    private final Map<String, String> digestCache = new HashMap<String, String>();
 
-    FileState(Path checksums) throws FileNotFoundException {
+    // MessageDigest appropriate for algorithm used for checksum
+    private final MessageDigest digest;
+
+    FileState(Path checksums) throws IOException, NoSuchAlgorithmException {
         if (!Files.exists(checksums)) {
-            throw new FileNotFoundException(checksums + " does not exist");
+            throw new FileNotFoundException(checksums.toString() + " does not exist");
         }
-        this.checksums = checksums;
+
+        // assumes csv of #File,md5sum
+        try (final BufferedReader reader = Files.newBufferedReader(checksums, Charset.defaultCharset())) {
+            // read first line for algorithm header
+            String line = reader.readLine();
+            String[] parts = line.split(",");
+            if (line == null || !line.startsWith("#") || parts.length < 2) {
+                throw new IllegalArgumentException(checksums.toString() + " format is invalid.");
+            }
+            digest = MessageDigest.getInstance(parts[1]);
+
+            // read other lines
+            while ((line = reader.readLine()) != null) {
+                parts = line.split(",");
+                if (!line.startsWith("#") && parts.length > 1) {
+                    digestCache.put(parts[0], parts[1]);
+                } else {
+                    throw new IllegalArgumentException(checksums.toString() + " has incomplete line.");
+                }
+            }
+        }
     }
 
     /**
@@ -63,7 +85,7 @@ public class FileState {
      * @param shippedFile a path to the original, shipped file.
      * @return the current file state
      */
-    public State getCurrentFileState(Path shippedFile) {
+    public State getCurrentFileState(Path shippedFile) throws IOException {
         if (!Files.exists(shippedFile)) {
             return State.MISSING;
         }
@@ -73,46 +95,22 @@ public class FileState {
     }
 
     /**
-     * Returns the digest of the original, shipped file.
+     * Returns the digestCache of the original, shipped file.
      *
      * @param shippedFile the original, shipped file.
-     * @return the digest
+     * @return the digestCache
      */
     private byte[] getOriginalDigest(Path shippedFile) {
-        // TODO implement
-        return new byte[] { };
+        return digestCache.get(shippedFile.toString()).getBytes(Charset.defaultCharset());
     }
 
     /**
-     * Computes and returns the digest of a current file on disk.
+     * Computes and returns the digestCache of a current file on disk.
      *
      * @param currentFile the current file
-     * @return the digest
+     * @return the digestCache
      */
-    private byte[] getCurrentDigest(Path currentFile) {
-        // TODO implement
-        return new byte[] { };
+    private byte[] getCurrentDigest(Path currentFile) throws IOException {
+        return digest.digest(Files.readAllBytes(currentFile));
     }
-
-    private Map<String, String> getDigests() {
-        if (digest.isEmpty()) {
-            try (final BufferedReader reader = Files.newBufferedReader(checksums, Charset.defaultCharset())) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (!line.startsWith("#") && line.length() > 2) {
-                        String[] parts = line.split(",");
-                        if (parts.length == 2) {
-                            digest.put(parts[0], parts[1]);
-                        }
-                    }
-                }
-            } catch (FileNotFoundException e) {
-
-            } catch (IOException e) {
-
-            }
-        }
-        return digest;
-    }
-
 }

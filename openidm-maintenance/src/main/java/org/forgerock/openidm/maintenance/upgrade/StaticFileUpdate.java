@@ -57,7 +57,7 @@ public class StaticFileUpdate {
     /**
      * @return whether the static file has been changed
      */
-    boolean isChanged() {
+    boolean isChanged() throws IOException {
         return exists()
                 && FileState.State.DIFFERS.equals(fileState.getCurrentFileState(path));
     }
