@@ -39,8 +39,8 @@ import java.util.Map;
 /**
  * Utility class to retrieve digestCache of original, shipped files and files as they presently exist.
  */
-public class FileState {
-    public enum State {
+public class FileStateChecker {
+    public enum FileState {
         MISSING,
         DIFFERS,
         UNCHANGED
@@ -59,7 +59,7 @@ public class FileState {
      * @throws IOException on failure to read file, bad format, etc.
      * @throws NoSuchAlgorithmException if checksum algorithm in checksum file is unknown
      */
-    FileState(Path checksums) throws IOException, NoSuchAlgorithmException {
+    FileStateChecker(Path checksums) throws IOException, NoSuchAlgorithmException {
         if (!Files.exists(checksums)) {
             throw new FileNotFoundException(checksums.toString() + " does not exist");
         }
@@ -93,13 +93,13 @@ public class FileState {
      * @param shippedFile a path to the original, shipped file.
      * @return the current file state
      */
-    public State getCurrentFileState(Path shippedFile) throws IOException {
+    public FileState getCurrentFileState(Path shippedFile) throws IOException {
         if (!Files.exists(shippedFile)) {
-            return State.MISSING;
+            return FileState.MISSING;
         }
         return Arrays.equals(getCurrentDigest(shippedFile), getOriginalDigest(shippedFile))
-            ? State.UNCHANGED
-            : State.DIFFERS;
+            ? FileState.UNCHANGED
+            : FileState.DIFFERS;
     }
 
     /**
