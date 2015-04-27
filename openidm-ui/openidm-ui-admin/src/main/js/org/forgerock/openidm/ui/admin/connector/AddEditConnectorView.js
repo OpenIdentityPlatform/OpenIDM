@@ -158,8 +158,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         this.data.addEditObjectTypeTitle = $.t("templates.connector.editObjectTypeTitle");
                         this.data.addEditSubmitTitle = $.t("common.form.update");
 
-                        data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.connectorTypeName));
-
                         _.each(this.data.versionDisplay, function (group) {
                             group.versions = _.map(group.versions, function (v) {
                                 v.selected = v.connectorName === this.data.connectorTypeName &&
@@ -174,7 +172,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                         //Filter down to the current edited connector Type
                         this.data.versionDisplay = _.filter(this.data.versionDisplay, function(connector){
-                            return  data.connectorRef.displayName  === connector.groupName;
+                            return  data.connectorRef.connectorName  === connector.versions[0].connectorName;
                         }, this);
 
                         data.connectorRef.bundleVersion = this.versionRangeCheck(data.connectorRef.bundleVersion);
@@ -776,6 +774,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     this.userDefinedObjectType = null;
                     this.$el.find("#addEditObjectType").prop('disabled', false);
                     this.$el.find("#addEditConnector").prop('disabled', false);
+                    this.$el.find("#connectorErrorMessage").hide();
 
                 }, this), _.bind(function(result) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
