@@ -34,27 +34,27 @@ import org.testng.annotations.Test;
 
 /**
  */
-public class FileStateTest {
+public class FileStateCheckerTest {
 
     @Test(expectedExceptions = FileNotFoundException.class)
     public void testChecksumFileNotFound() throws IOException, NoSuchAlgorithmException {
-        new FileState(Paths.get("foo"));
+        new FileStateChecker(Paths.get("foo"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testChecksumFileMissingHeader() throws IOException, NoSuchAlgorithmException, URISyntaxException {
-        new FileState(Paths.get(getClass().getResource("/missingheader.csv").toURI()));
+        new FileStateChecker(Paths.get(getClass().getResource("/missingheader.csv").toURI()));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testChecksumFileBadFormat() throws IOException, NoSuchAlgorithmException, URISyntaxException {
-        new FileState(Paths.get(getClass().getResource("/badformat.csv").toURI()));
+        new FileStateChecker(Paths.get(getClass().getResource("/badformat.csv").toURI()));
     }
 
     @Test(expectedExceptions = NoSuchAlgorithmException.class)
     public void testChecksumFileNoSuchAlgorithm() throws IOException, NoSuchAlgorithmException, URISyntaxException {
         System.out.println(Files.currentFolder());
-        new FileState(Paths.get(getClass().getResource("/unknownalgorithm.csv").toURI()));
+        new FileStateChecker(Paths.get(getClass().getResource("/unknownalgorithm.csv").toURI()));
     }
 
 }

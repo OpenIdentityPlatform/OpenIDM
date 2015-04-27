@@ -39,12 +39,12 @@ public class StaticFileUpdate {
     private static final String NEW_SUFFIX = ".idm-new";
 
     private final Path path;
-    private final FileState fileState;
+    private final FileStateChecker fileStateChecker;
     private final Archive archive;
 
-    StaticFileUpdate(Path path,  FileState fileState,  Archive archive) {
+    StaticFileUpdate(Path path,  FileStateChecker fileStateChecker,  Archive archive) {
         this.path = path;
-        this.fileState = fileState;
+        this.fileStateChecker = fileStateChecker;
         this.archive = archive;
     }
 
@@ -60,7 +60,7 @@ public class StaticFileUpdate {
      */
     boolean isChanged() throws IOException {
         return exists()
-                && FileState.State.DIFFERS.equals(fileState.getCurrentFileState(path));
+                && FileStateChecker.FileState.DIFFERS.equals(fileStateChecker.getCurrentFileState(path));
     }
 
     /**
