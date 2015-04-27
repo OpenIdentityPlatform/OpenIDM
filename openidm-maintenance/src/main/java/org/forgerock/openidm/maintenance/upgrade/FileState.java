@@ -59,23 +59,23 @@ public class FileState {
 
         // Assumes csv of #File,MD5.
         // Supports MD5, SHA-1 and SHA-256 at a minimum.
-        try (final BufferedReader reader = Files.newBufferedReader(checksums, Charset.defaultCharset())) {
-            // read first line for algorithm header
-            String line = reader.readLine();
-            String[] parts = line.split(",");
-            if (!line.startsWith("#") || parts.length < 2) {
-                throw new IllegalArgumentException(checksums.toString() + " format is invalid.");
-            }
-            digest = MessageDigest.getInstance(parts[1]);
+        final BufferedReader reader = Files.newBufferedReader(checksums, Charset.defaultCharset());
 
-            // read other lines
-            while ((line = reader.readLine()) != null) {
-                parts = line.split(",");
-                if (!line.startsWith("#") && parts.length > 1) {
-                    digestCache.put(parts[0], parts[1]);
-                } else {
-                    throw new IllegalArgumentException(checksums.toString() + " has incomplete line.");
-                }
+        // read first line for algorithm header
+        String line = reader.readLine();
+        String[] parts = line.split(",");
+        if (!line.startsWith("#") || parts.length < 2) {
+            throw new IllegalArgumentException(checksums.toString() + " format is invalid.");
+        }
+        digest = MessageDigest.getInstance(parts[1]);
+
+        // read other lines
+        while ((line = reader.readLine()) != null) {
+            parts = line.split(",");
+            if (!line.startsWith("#") && parts.length > 1) {
+                digestCache.put(parts[0], parts[1]);
+            } else {
+                throw new IllegalArgumentException(checksums.toString() + " has incomplete line.");
             }
         }
     }
