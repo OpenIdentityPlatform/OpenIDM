@@ -57,12 +57,13 @@ public class FileState {
             throw new FileNotFoundException(checksums.toString() + " does not exist");
         }
 
-        // assumes csv of #File,md5sum
+        // Assumes csv of #File,MD5.
+        // Supports MD5, SHA-1 and SHA-256 at a minimum.
         try (final BufferedReader reader = Files.newBufferedReader(checksums, Charset.defaultCharset())) {
             // read first line for algorithm header
             String line = reader.readLine();
             String[] parts = line.split(",");
-            if (line == null || !line.startsWith("#") || parts.length < 2) {
+            if (!line.startsWith("#") || parts.length < 2) {
                 throw new IllegalArgumentException(checksums.toString() + " format is invalid.");
             }
             digest = MessageDigest.getInstance(parts[1]);
