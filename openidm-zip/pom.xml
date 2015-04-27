@@ -745,8 +745,8 @@
                         <phase>prepare-package</phase>
                         <configuration>
                             <fileset>
-                                <directory>./target/openidm-${project.version}.zip</directory>
-                                <outputDirectory>./target/tmp</outputDirectory>
+                                <directory>${project.build.directory}/openidm-${project.version}.zip</directory>
+                                <outputDirectory>${project.build.directory}/tmp</outputDirectory>
                             </fileset>
                         </configuration>
                     </execution>
@@ -769,7 +769,7 @@
                 <configuration>
                     <fileSets>
                         <fileSet>
-                            <directory>./target/tmp/openidm</directory>
+                            <directory>${project.build.directory}/tmp/openidm</directory>
                         </fileSet>
                     </fileSets>
                     <algorithms>
@@ -798,11 +798,11 @@
                         <phase>package</phase>
                         <configuration>
                             <fileset>
-                                <directory>./target</directory>
+                                <directory>${project.build.directory}</directory>
                                 <includes>
                                     <include>checksums.csv</include>
                                 </includes>
-                                <outputDirectory>./target/openidm-${project.version}.zip/openidm</outputDirectory>
+                                <outputDirectory>${project.build.directory}/openidm-${project.version}.zip/openidm</outputDirectory>
                             </fileset>
                         </configuration>
                     </execution>
