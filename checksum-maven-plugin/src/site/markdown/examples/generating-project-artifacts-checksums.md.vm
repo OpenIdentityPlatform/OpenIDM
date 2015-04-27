@@ -1,0 +1,29 @@
+Generating project artifacts checksums
+======================================
+
+This configuration will generate checksum digest files for the project main and attached artifacts:
+
+    <project>
+      ...
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>artifacts</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <!-- put your configurations here -->
+            </configuration>
+          </plugin>
+          ...
+        </plugins>
+      </build>
+      ...
+    </project>

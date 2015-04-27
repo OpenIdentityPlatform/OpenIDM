@@ -1,0 +1,65 @@
+Generating project dependencies checksums
+=========================================
+
+This configuration will generate checksum digest summary file for the project dependencies:
+
+    <project>
+      ...
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>dependencies</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <csvSummaryFile>dependencies-checksums.csv</csvSummaryFile>
+            </configuration>
+          </plugin>
+          ...
+        </plugins>
+      </build>
+      ...
+    </project>
+
+
+Filtering by scopes and types
+-----------------------------
+
+Dependencies can be filtered by scope and type:
+
+    <project>
+      ...
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>dependencies</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <scopes>
+                <scope>compile</scope>
+              </scopes>
+              <types>
+                <type>jar</type>
+              </types>
+            </configuration>
+          </plugin>
+          ...
+        </plugins>
+      </build>
+      ...
+    </project>

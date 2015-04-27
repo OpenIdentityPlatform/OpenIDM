@@ -1,0 +1,20 @@
+# Project build directory
+/target/
+
+# Intellij IDEA project files
+.idea
+*.iml
+*.ipr
+*.iws
+
+# Eclipse project files
+.settings
+.project
+.classpath
+
+# Maven release plugin files
+pom.xml.releaseBackup
+release.properties
+
+# Integration tests logs
+*.log
