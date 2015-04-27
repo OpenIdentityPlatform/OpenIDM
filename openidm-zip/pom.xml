@@ -186,6 +186,11 @@
             <artifactId>openidm-workflow-activiti</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-maintenance</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-remote</artifactId>
