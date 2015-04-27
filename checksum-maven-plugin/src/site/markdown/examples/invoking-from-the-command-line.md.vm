@@ -1,0 +1,8 @@
+Invoking from the command line
+==============================
+
+This plugin can be invoked from the command line this way:
+
+    mvn ${project.groupId}:${project.artifactId}:${project.version}:file -Dfile=the-file-to-process
+
+This will calculate and output the checksum of `the-file-to-process` for every algorithm supported by the plugin.

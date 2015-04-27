@@ -1,0 +1,33 @@
+Generating checksum summary files
+=================================
+
+Rather than generating individual files in the form <<<file.algorithm>>>, the plugin can gather hashcodes in CSV or
+XML files:
+
+    <project>
+      ...
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>artifacts</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <csvSummary>true</csvSummary>
+              <csvSummaryFile>artifacts-checksums.csv</csvSummaryFile>
+              <xmlSummary>true</xmlSummary>
+              <xmlSummaryFile>artifacts-checksums.xml</xmlSummaryFile>
+            </configuration>
+          </plugin>
+          ...
+        </plugins>
+      </build>
+      ...
+    </project>

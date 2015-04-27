@@ -648,7 +648,7 @@
                 <executions>
                     <execution>
                         <id>unpack-studio-ui</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <tasks>
                                 <unzip dest="${project.build.directory}/orientdb-community-${orientdb.studio.version}">
@@ -672,7 +672,7 @@
                 <executions>
                     <execution>
                         <id>zip-workflow-files</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
 
                         <configuration>
                             <tasks>
@@ -724,13 +724,91 @@
                 <executions>
                     <execution>
                         <id>zip-assembly</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>truezip-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>explode-archive</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <fileset>
+                                <directory>./target/openidm-${project.version}.zip</directory>
+                                <outputDirectory>./target/tmp</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>net.ju-n.maven.plugins</groupId>
+                <artifactId>checksum-maven-plugin</artifactId>
+                <version>1.3-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>generate-checksums</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <fileSets>
+                        <fileSet>
+                            <directory>./target/tmp/openidm</directory>
+                        </fileSet>
+                    </fileSets>
+                    <algorithms>
+                        <algorithm>MD5</algorithm>
+                    </algorithms>
+                    <individualFiles>false</individualFiles>
+                    <quiet>true</quiet>
+                    <summaryRoot>./target/tmp/openidm/</summaryRoot>
+                    <xmlSummary>true</xmlSummary>
+                    <xmlSummaryFile>checksums.xml</xmlSummaryFile>
+                    <csvSummary>true</csvSummary>
+                    <csvSummaryFile>checksums.csv</csvSummaryFile>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>truezip-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>add-checksums-to-archive</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <fileset>
+                                <directory>./target</directory>
+                                <includes>
+                                    <include>checksums.csv</include>
+                                </includes>
+                                <outputDirectory>./target/openidm-${project.version}.zip/openidm</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!--plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jslint-maven-plugin</artifactId>

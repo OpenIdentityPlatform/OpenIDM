@@ -1,0 +1,32 @@
+Usage
+=====
+
+To use ${project.artifactId} as a part of your project build, declare it as any other plugin:
+
+    <project>
+      ...
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal><!-- put the goal name here --></goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <!-- put your configurations here -->
+            </configuration>
+          </plugin>
+          ...
+        </plugins>
+      </build>
+      ...
+    </project>
+
+
+See the examples sections for concrete examples of use.

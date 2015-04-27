@@ -1,0 +1,50 @@
+Using custom checksum algorithms
+================================
+
+This plugin supports CRC and checksum algorithms provided by the
+[Java specification](http://download.oracle.com/javase/1.5.0/docs/guide/security/CryptoSpec.html#AppA)
+and the [Bouncy Castle](http://www.bouncycastle.org) library. By default, the plugin uses MD5 and SHA-1
+algorithms. Here is how to configure to use all the algorithms supported:
+
+     <project>
+       ...
+       <build>
+         <plugins>
+           <plugin>
+             <groupId>${project.groupId}</groupId>
+             <artifactId>${project.artifactId}</artifactId>
+             <version>${project.version}</version>
+             <executions>
+               <execution>
+                 <goals>
+                   <goal><!-- put the goal name here --></goal>
+                 </goals>
+               </execution>
+             </executions>
+             <configuration>
+               <algorithms>
+                 <algorithm>Cksum</algorithm>
+                 <algorithm>CRC32</algorithm>
+                 <algorithm>MD2</algorithm>
+                 <algorithm>MD4</algorithm>
+                 <algorithm>MD5</algorithm>
+                 <algorithm>SHA-1</algorithm>
+                 <algorithm>SHA-224</algorithm>
+                 <algorithm>SHA-256</algorithm>
+                 <algorithm>SHA-384</algorithm>
+                 <algorithm>SHA-512</algorithm>
+                 <algorithm>RIPEMD128</algorithm>
+                 <algorithm>RIPEMD160</algorithm>
+                 <algorithm>RIPEMD256</algorithm>
+                 <algorithm>RIPEMD320</algorithm>
+                 <algorithm>GOST3411</algorithm>
+                 <algorithm>Tiger</algorithm>
+                 <algorithm>Whirlpool</algorithm>
+               </algorithms>
+             </configuration>
+           </plugin>
+           ...
+         </plugins>
+       </build>
+       ...
+     </project>
