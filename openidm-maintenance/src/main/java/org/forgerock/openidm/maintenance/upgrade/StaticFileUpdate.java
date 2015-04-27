@@ -28,9 +28,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
- * Updates / replaces / adds a new file in the distribution.
+ * Updates / replaces / adds a new static file in the distribution.
  */
 public class StaticFileUpdate {
 
@@ -72,7 +73,7 @@ public class StaticFileUpdate {
         if (isChanged()) {
             Files.move(path, Paths.get(path.toString() + OLD_SUFFIX));
         }
-        Files.copy(archive.getInputStream(path), path);
+        Files.copy(archive.getInputStream(path), path, StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
@@ -81,9 +82,9 @@ public class StaticFileUpdate {
      * @throws IOException
      */
     void keep() throws IOException {
-        if (isChanged()) {
-            Files.copy(archive.getInputStream(path), Paths.get(path.toString() + NEW_SUFFIX));
+        if (!isChanged()) {
+            throw new IOException("The file " + path.toString() + " does not exist - cannot \"keep\" it");
         }
-        throw new IOException("The file " + path.toString() + " does not exist - cannot \"keep\" it");
+        Files.copy(archive.getInputStream(path), Paths.get(path.toString() + NEW_SUFFIX));
     }
 }

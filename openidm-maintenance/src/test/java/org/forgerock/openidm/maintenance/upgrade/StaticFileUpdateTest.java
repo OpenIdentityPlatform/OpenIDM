@@ -24,13 +24,17 @@
 
 package org.forgerock.openidm.maintenance.upgrade;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
@@ -39,6 +43,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.Test;
 
 /**
+ * Tests updating static files.
  */
 public class StaticFileUpdateTest {
 
@@ -51,9 +56,14 @@ public class StaticFileUpdateTest {
 
     @AfterSuite
     public void destroyTempDirPath() throws IOException {
-        Files.delete(tempPath);
+        FileUtils.deleteDirectory(tempPath.toFile());
     }
 
+    /**
+     * Test that a path does not exist.
+     *
+     * @throws IOException
+     */
     @Test
     public void testDoesNotExist() throws IOException {
         Path file = tempPath.resolve("test");
@@ -63,7 +73,9 @@ public class StaticFileUpdateTest {
         assertFalse(update.exists());
     }
 
-    // when(archive.getInputStream(any(Path.class))).thenReturn(Files.newInputStream(file));
+    /**
+     * Test that a path exists.
+     */
     @Test
     public void testExists() throws IOException {
         Path file = Files.createTempFile(tempPath, null, null);
@@ -74,11 +86,107 @@ public class StaticFileUpdateTest {
         Files.delete(file);
     }
 
-    /*
-    try (PrintWriter writer = new PrintWriter(Files.newOutputStream(file))) {
-        writer.write("Hello, world!");
-    } catch (IOException e) {
-        fail("IOException creating file");
+    /**
+     * Test that a path is unchanged.
+     */
+    @Test
+    public void testUnchanged() throws IOException {
+        Path file = Files.createTempFile(tempPath, null, null);
+        FileState fileState = mock(FileState.class);
+        when(fileState.getCurrentFileState(file)).thenReturn(FileState.State.UNCHANGED);
+        Archive archive = mock(Archive.class);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileState, archive);
+        assertFalse(update.isChanged());
     }
-    */
+
+    /**
+     * Test that a path differs.
+     */
+    @Test
+    public void testDiffers() throws IOException {
+        Path file = Files.createTempFile(tempPath, null, null);
+        FileState fileState = mock(FileState.class);
+        when(fileState.getCurrentFileState(file)).thenReturn(FileState.State.DIFFERS);
+        Archive archive = mock(Archive.class);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileState, archive);
+        assertTrue(update.isChanged());
+    }
+
+    /**
+     * Test a replacement on an unchangaed path.
+     */
+    @Test
+    public void testReplaceIsUnchanged() throws IOException {
+        byte[] newBytes = "newcontent".getBytes();
+        Path file = Files.createTempFile(tempPath, null, null);
+        FileState fileState = mock(FileState.class);
+        when(fileState.getCurrentFileState(file)).thenReturn(FileState.State.UNCHANGED);
+        Archive archive = mock(Archive.class);
+        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
+        StaticFileUpdate update = new StaticFileUpdate(file, fileState, archive);
+        update.replace();
+        assertThat(Files.readAllBytes(file)).isEqualTo(newBytes);
+        assertFalse(Files.exists(Paths.get(file + ".idm-old")));
+        assertFalse(Files.exists(Paths.get(file + ".idm-new")));
+    }
+
+    /**
+     * Test a replacement on a path with differences.  The file should be updated, with the old content
+     * moved to &lt;filename&gt;.idm-old
+     */
+    @Test
+    public void testReplaceDiffers() throws IOException {
+        byte[] oldBytes = "oldcontent".getBytes();
+        byte[] newBytes = "newcontent".getBytes();
+        Path file = Files.createTempFile(tempPath, null, null);
+        Files.write(file, oldBytes);
+        FileState fileState = mock(FileState.class);
+        when(fileState.getCurrentFileState(file)).thenReturn(FileState.State.DIFFERS);
+        Archive archive = mock(Archive.class);
+        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
+        StaticFileUpdate update = new StaticFileUpdate(file, fileState, archive);
+        update.replace();
+        assertThat(Files.readAllBytes(file)).isEqualTo(newBytes);
+        assertThat(Files.readAllBytes(Paths.get(file + ".idm-old"))).isEqualTo(oldBytes);
+        assertFalse(Files.exists(Paths.get(file + ".idm-new")));
+    }
+
+    /**
+     * Test keeping a file with no differences.  This should throw an exception as there are no differences
+     * to keep.
+     */
+    @Test(expectedExceptions = IOException.class)
+    public void testKeepIsUnchanged() throws IOException {
+        byte[] oldBytes = "oldcontent".getBytes();
+        byte[] newBytes = "newcontent".getBytes();
+        Path file = Files.createTempFile(tempPath, null, null);
+        Files.write(file, oldBytes);
+        FileState fileState = mock(FileState.class);
+        when(fileState.getCurrentFileState(file)).thenReturn(FileState.State.UNCHANGED);
+        Archive archive = mock(Archive.class);
+        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
+        StaticFileUpdate update = new StaticFileUpdate(file, fileState, archive);
+        update.keep();
+    }
+
+    /**
+     * Test keeping a file with differences.  The file should retain the old content, with the new content
+     * written to &lt;filename&gt;.idm-new.
+     */
+    @Test
+    public void testKeepDiffers() throws IOException {
+        byte[] oldBytes = "oldcontent".getBytes();
+        byte[] newBytes = "newcontent".getBytes();
+        Path file = Files.createTempFile(tempPath, null, null);
+        Files.write(file, oldBytes);
+        FileState fileState = mock(FileState.class);
+        when(fileState.getCurrentFileState(file)).thenReturn(FileState.State.DIFFERS);
+        Archive archive = mock(Archive.class);
+        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
+        StaticFileUpdate update = new StaticFileUpdate(file, fileState, archive);
+        update.keep();
+        assertThat(Files.readAllBytes(file)).isEqualTo(oldBytes);
+        assertThat(Files.readAllBytes(Paths.get(file + ".idm-new"))).isEqualTo(newBytes);
+        assertFalse(Files.exists(Paths.get(file + ".idm-old")));
+    }
 }
