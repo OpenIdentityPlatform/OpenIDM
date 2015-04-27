@@ -52,6 +52,13 @@ public class FileState {
     // MessageDigest appropriate for algorithm used for checksum
     private final MessageDigest digest;
 
+    /**
+     * Construct the FileState object from a checksums file.
+     *
+     * @param checksums the checksum file
+     * @throws IOException on failure to read file, bad format, etc.
+     * @throws NoSuchAlgorithmException if checksum algorithm in checksum file is unknown
+     */
     FileState(Path checksums) throws IOException, NoSuchAlgorithmException {
         if (!Files.exists(checksums)) {
             throw new FileNotFoundException(checksums.toString() + " does not exist");
