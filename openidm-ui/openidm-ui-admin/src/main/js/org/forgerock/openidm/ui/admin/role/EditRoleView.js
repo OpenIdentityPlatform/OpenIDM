@@ -48,7 +48,8 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
         render: function(args, callback) {
             var rolePromise,
                 schemaPromise = resourceDelegate.getSchema(args),
-                roleId = args[2];
+                roleId = args[2],
+                assignment = args[3];
             
             this.data.args = args;
             this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
@@ -69,8 +70,15 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 this.parentRender(_.bind(function(){
                     if(!this.data.newRole) {
                         roleUsersView.render(this.data.args, this.data.role);
-                        roleEntitlementsListView.render(this.data.args, this.data.role);
+                        roleEntitlementsListView.render(this.data.args, this.data.role, _.bind(function() {
+                            if(assignment) {
+                                this.$el.find('[href="#role-entitlements"]').click();
+                                this.$el.find("#edit-assignment-" + assignment).click();
+                            }
+                        }, this));
                     }
+                    
+                    this.$el.find(":input.form-control:first").focus();
                 },this));
             },this));
         },

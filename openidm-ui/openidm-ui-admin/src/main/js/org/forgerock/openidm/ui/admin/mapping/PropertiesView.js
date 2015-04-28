@@ -39,6 +39,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
     "org/forgerock/openidm/ui/admin/util/MappingUtils",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView",
+    "org/forgerock/openidm/ui/admin/mapping/MappingRoleEntitlementsView",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/FilterEvaluator",
     "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
@@ -56,6 +57,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             mappingUtils,
             LinkQualifierUtil,
             PropertiesLinkQualifierView,
+            MappingRoleEntitlementsView,
             ScriptDelegate,
             FilterEvaluator,
             QueryFilterUtils,
@@ -619,6 +621,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                     this.checkChanges();
 
                     PropertiesLinkQualifierView.render(this.currentMapping().name);
+
+                    MappingRoleEntitlementsView.render(this.currentMapping().name);
 
                     MappingBaseView.moveSubmenu();
                     if(callback){

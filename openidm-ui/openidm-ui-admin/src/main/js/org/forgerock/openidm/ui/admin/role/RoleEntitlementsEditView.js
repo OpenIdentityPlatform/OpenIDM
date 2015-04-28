@@ -37,19 +37,32 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
     "org/forgerock/commons/ui/common/components/Messages",
     "bootstrap-dialog",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
-], function(AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager, BootstrapDialog, conf, InlineScriptEditor) {
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+], function(AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager, BootstrapDialog, conf, InlineScriptEditor, configDelegate) {
     var RoleEntitlementsEditView = AbstractView.extend({
         element: "#dialogs",
         template: "templates/admin/role/RoleEntitlementsEditViewTemplate.html",
         noBaseTemplate: true,
         events: {
             "click #btn-add-attribute": "addAttribute",
-            "click .btn-delete-attribute": "deleteAttribute"
+            "click .btn-delete-attribute": "deleteAttribute",
+            "click .mappingLink": "closeDialog",
+            "click #addMapping": "addMapping",
+            "click .removeMapping": "removeMapping"
+        },
+        closeDialog: function(e) {
+            this.bsDialog.close();
         },
         render: function (args, role, assignmentName, listView, callback) {
             var _this = this,
-                dialogTitle = (assignmentName) ? $.t("templates.admin.RoleEntitlementsTemplate.editEntitlement",{entitlementName: assignmentName}) : $.t("templates.admin.RoleEntitlementsTemplate.addEntitlement");
+                dialogTitle = (assignmentName) ? $.t("templates.admin.RoleEntitlementsTemplate.editEntitlement",{entitlementName: assignmentName}) : $.t("templates.admin.RoleEntitlementsTemplate.addEntitlement"),
+                removeAssignmentNameFromRoute = _.bind(function() {
+                    if(this.data.assignmentRouteParam) {
+                        this.data.args.pop();
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminEditManagedObjectView", args: this.data.args});
+                    }
+                }, this);
 
             this.currentDialog = $('<div id="roleEntitlementsEditContainer"></div>');
             this.data.args = args;
@@ -59,35 +72,22 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
             this.data.assignmentName = assignmentName;
             this.data.JSONEditors = [];
             this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
+            this.data.assignmentRouteParam = args[3];
 
             $('#dialogs').append(this.currentDialog);
 
             this.setElement(this.currentDialog);
             
-            
-            BootstrapDialog.show({
+            this.bsDialog = BootstrapDialog.show({
                 title: dialogTitle,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
                 onshown : function (dialogRef) {
-                    uiUtils.renderTemplate(_this.template, _this.$el,
-                            _.extend(conf.globalData, _this.data),
-                            function () {
-                                if(!_this.data.assignment) {
-                                    _this.data.newAssignment = true;
-                                    _this.addAttribute();
-                                } else {
-                                    _this.setJSONEditors();
-                                    _this.data.newAssignment = false;
-                                }
-                                _this.setScripts();
-                                _this.setAttributeOperationsPopovers();
-                                
-                                if(callback){
-                                    callback();
-                                }
-                            }, "replace");
+                    _this.loadData(callback);
+                },
+                onhide: function() {
+                    removeAssignmentNameFromRoute();
                 },
                 buttons: [{
                     label: $.t("common.form.cancel"),
@@ -106,6 +106,35 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
                     }
                 }]
             });
+        },
+        loadData: function(callback) {
+            configDelegate.readEntity("sync").then(_.bind(function(sync) {
+                this.data.sync = _.omit(sync,"_id");
+                this.data.mappings = _.filter(sync.mappings, function(m) { 
+                                        return _.contains(m.assignmentsToMap, this.data.assignmentName);
+                                     }, this);
+                this.data.availableMappings = _.filter(sync.mappings, function(m) { 
+                                                return !_.contains(m.assignmentsToMap, this.data.assignmentName);
+                                              }, this);
+                
+                uiUtils.renderTemplate(this.template, this.$el,
+                        _.extend({}, conf.globalData, this.data),
+                        _.bind(function () {
+                            if(!this.data.assignment) {
+                                this.data.newAssignment = true;
+                                this.addAttribute();
+                            } else {
+                                this.setJSONEditors();
+                                this.data.newAssignment = false;
+                            }
+                            this.setScripts();
+                            this.setAttributeOperationsPopovers();
+                            
+                            if(callback){
+                                callback();
+                            }
+                        }, this), "replace");
+            }, this));
         },
         convertAttibuteValueToJSONEditor: function(attrName, attrValue) {
             var editor = new JSONEditor(this.$el.find("[attrName=" + attrName + "]")[0], {
@@ -265,6 +294,49 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
                 });
             });
             
+        },
+        mappingAction: function(mappingName,addMapping) {
+            var msg = (addMapping) ? "addMappingSuccess" : "removeMappingSuccess";
+            
+            this.data.sync.mappings = _.map(this.data.sync.mappings, function(mapping) {
+                if(mapping.name === mappingName) {
+                    if(addMapping) {
+                        if(!mapping.assignmentsToMap) {
+                            mapping.assignmentsToMap = [];
+                        }
+                        mapping.assignmentsToMap.push(this.data.assignmentName);
+                    } else {
+                        mapping.assignmentsToMap = _.reject(mapping.assignmentsToMap, function(a) { 
+                                                        return a === this.data.assignmentName; 
+                                                   }, this);
+                    }
+                }
+                
+                return mapping;
+            }, this);
+            
+            configDelegate.updateEntity("sync", this.data.sync).then(_.bind(function() {
+                this.loadData(_.bind(function() {
+                    this.$el.find('[href="#role-edit-mappings"]').click();
+                    messagesManager.messages.addMessage({"message": $.t("templates.admin.RoleEntitlementsTemplate." + msg,{ assignmentName: this.data.assignmentName, mappingName: mappingName })});
+                }, this));
+            }, this));
+        },
+        addMapping: function(e) {
+            var mappingName = this.$el.find("#mappingSelection").val();
+            
+            e.preventDefault();
+            
+            if(mappingName.length) {
+                this.mappingAction(mappingName, true);
+            }
+        },
+        removeMapping: function(e) {
+            var mappingName = $(e.target).closest(".removeMapping").attr("mapping");
+            
+            e.preventDefault();
+            
+            this.mappingAction(mappingName);
         }
     }); 
     

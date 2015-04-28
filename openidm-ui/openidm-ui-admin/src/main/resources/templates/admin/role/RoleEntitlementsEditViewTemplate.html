@@ -1,15 +1,17 @@
 <div role="tabpanel">
     {{#unless assignmentName}}
-	<div class="form-group">
-	    <label class="control-label">{{t "templates.admin.RoleEntitlementsTemplate.nameOfEntitlement"}}: </label>
-	    <input type="text" class="form-control assignment-name" autocomplete="off">
-	</div>
+    <div class="form-group">
+        <label class="control-label">{{t "templates.admin.RoleEntitlementsTemplate.nameOfEntitlement"}}: </label>
+        <input type="text" class="form-control assignment-name" autocomplete="off">
+    </div>
     {{/unless}}
    <!-- Nav tabs -->
    <ul class="nav nav-tabs">
       <li class="active"><a href="#role-edit-attributes" data-toggle="tab">{{t "templates.admin.RoleEntitlementsTemplate.attributes"}}</a></li>
       <li><a href="#role-edit-events" data-toggle="tab">{{t "templates.admin.RoleEntitlementsTemplate.events"}}</a></li>
-      <!-- <li><a href="#role-edit-mappings" data-toggle="tab">Mappings</a></li> -->
+      {{#if assignmentName}}
+      <li><a href="#role-edit-mappings" data-toggle="tab">{{t "templates.admin.RoleEntitlementsTemplate.mappings"}}</a></li>
+      {{/if}}
    </ul>
    <!-- Tab panes -->
    <div class="tab-content">
@@ -184,8 +186,60 @@
             </div>
          </form>
       </div>
-      <!-- <div class="tab-pane " id="role-edit-mappings">
-         
-      </div> -->
+      <div class="tab-pane " id="role-edit-mappings">
+           <p class="panel-description">{{t "templates.admin.RoleEntitlementsTemplate.addEntitlementToMapping"}}</p>
+           <div class="list-table">
+              <ul class="list-group">
+                 <li class="list-group-header">
+                    <div class="row">
+                       <div class="col-xs-10 ">
+                          <div class="row">
+                             <div class="col-md-4">
+                                {{t "templates.admin.RoleEntitlementsTemplate.mapping"}}
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                 </li>
+                 {{#unless mappings}}
+                    <li class="list-group-item">{{t "templates.admin.RoleEntitlementsTemplate.noMappings"}}</li>
+                 {{/unless}}
+                 {{#each mappings}}
+                 <li class="list-group-item">
+                    <div class="row">
+                       <div class="col-xs-10">
+                          <div class="list=group-item-content">
+                             <div class="row">
+                                <div class="col-md-4">
+                                   <div class="list-table-label">{{t "templates.admin.RoleEntitlementsTemplate.mapping"}}:</div>
+                                   <a class="mappingLink" href="#properties/{{name}}/">{{name}}</a>
+                                </div>
+                             </div>
+                          </div>
+                       </div>
+                       <div class="col-xs-2 ">
+                          <div class="btn-group pull-right">
+                             <button class="btn btn-link removeMapping" mapping="{{name}}"><i class="fa fa-times"></i></button>
+                          </div>
+                       </div>
+                    </div>
+                 </li>
+                 {{/each}}
+              </ul>
+              <div class="row add-item-inline clearfix">
+                 <div class="form-group col-sm-5">
+                    <select class="form-control assignment-list" id="mappingSelection">
+                       <option value="">{{t "templates.admin.RoleEntitlementsTemplate.selectMapping"}}</option>
+                       {{#each availableMappings}}
+                       <option value="{{name}}">{{name}}</option>
+                       {{/each}}
+                    </select>
+                 </div>
+                 <div class="form-group col-sm-2">
+                    <button type="button" class="btn btn-default" id="addMapping"><i class="fa fa-plus"></i> {{t "templates.admin.RoleEntitlementsTemplate.addToMapping"}}</button>
+                 </div>
+              </div>
+           </div>
+      </div>
    </div>
 </div>

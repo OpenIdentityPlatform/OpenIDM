@@ -20,10 +20,16 @@ define("org/forgerock/openidm/ui/admin/delegates/SearchDelegate", [
                             .reject(function(p){ return !p; })
                             .map(function(p){
                                 var op = operator;
+                                
                                 if(p === "_id" && op !== "neq"){
                                     op = "eq";
                                 }
-                                return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
+                                
+                                if(op !== "pr") {
+                                    return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
+                                } else {
+                                    return p + ' pr';
+                                }
                             })
                             .value();
             

@@ -71,6 +71,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./mapping/PropertiesView",
     "./mapping/AddPropertyMappingDialog",
     "./mapping/EditPropertyMappingDialog",
+    "./mapping/MappingRoleEntitlementsView",
 
     "./sync/SyncView",
     "./sync/SituationPolicyView",
