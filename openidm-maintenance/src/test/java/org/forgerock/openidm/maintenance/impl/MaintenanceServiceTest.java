@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -30,7 +32,6 @@ import java.util.List;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Requests;
@@ -42,8 +43,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentInstance;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
  * Test the Maintenance Service
@@ -59,8 +58,8 @@ public class MaintenanceServiceTest {
     public void setUp() {
         List<Component> testComponents = new ArrayList<Component>();
         testComponents.add(new TestComponent(1, "test.component.one"));
-        testComponents.add(new TestComponent(1, "test.component.two"));
-        testComponents.add(new TestComponent(1, "test.component.three"));
+        testComponents.add(new TestComponent(2, "test.component.two"));
+        testComponents.add(new TestComponent(3, "test.component.three"));
         maintenanceService.scrService = new TestScrService(testComponents);
         maintenanceService.setMaintenanceModeComponents(new String[] {
                 "test.component.one",
@@ -70,17 +69,18 @@ public class MaintenanceServiceTest {
     }
     
     @Test
-    public void testEnableMaintenanceMode() throws Exception {
+    public void testMaintenanceMode() throws Exception {
         ActionRequest enableAction = Requests.newActionRequest("maintenance", "enable");
-        JsonValue result = connection.action(new RootContext(), enableAction);
-        assertThat(result.get("maintenanceEnabled").asBoolean());
-    }
-    
-    @Test
-    public void testDisableMaintenanceMode() throws Exception {
+        assertThat(connection.action(new RootContext(), enableAction).get("maintenanceEnabled").asBoolean());
+        assertThat(maintenanceService.scrService.getComponent(1).getState() == Component.STATE_DISABLED);
+        assertThat(maintenanceService.scrService.getComponent(2).getState() == Component.STATE_DISABLED);
+        assertThat(maintenanceService.scrService.getComponent(3).getState() == Component.STATE_ACTIVE);
+        
         ActionRequest disableAction = Requests.newActionRequest("maintenance", "disable");
-        JsonValue result = connection.action(new RootContext(), disableAction);
-        assertThat(!result.get("maintenanceEnabled").asBoolean());
+        assertThat(!connection.action(new RootContext(), disableAction).get("maintenanceEnabled").asBoolean());
+        assertThat(maintenanceService.scrService.getComponent(1).getState() == Component.STATE_ACTIVE);
+        assertThat(maintenanceService.scrService.getComponent(2).getState() == Component.STATE_ACTIVE);
+        assertThat(maintenanceService.scrService.getComponent(3).getState() == Component.STATE_ACTIVE);
     }
 
 
