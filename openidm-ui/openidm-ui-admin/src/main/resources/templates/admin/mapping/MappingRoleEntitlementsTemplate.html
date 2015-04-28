@@ -1,0 +1,53 @@
+<div class="panel-body">
+    {{#unless rolesForAssignmentsToMap}}
+        {{t "templates.admin.RoleEntitlementsTemplate.noEntitlements"}}
+    {{/unless}}
+    {{#each rolesForAssignmentsToMap}}
+       <div class="mapped-entitlement">
+           <div class="mapped-entitlement-heading">
+              <h4>{{assignment}}</h4>
+           </div>
+           {{#each roles}}
+           <div class="entitlement-meta">
+              <span class="text-muted">Role: </span> 
+              <a href="#resource/managed/role/edit/{{roleId}}/{{../assignment}}">{{roleName}}</a>
+           </div>
+           <div class="list-table">
+              <ul class="list-group">
+                 <li class="list-group-header">
+                    <div class="row">
+                       <div class="col-md-3">
+                          {{t "templates.mapping.targetProperty"}}
+                       </div>
+                       <div class="col-md-5">
+                          {{t "templates.admin.RoleEntitlementsTemplate.value"}}
+                       </div>
+                       <div class="col-md-4">
+                          {{t "templates.admin.RoleEntitlementsTemplate.operations"}}
+                       </div>
+                    </div>
+                 </li>
+                 {{#each attributes}}
+                 <li class="list-group-item">
+                    <div class="list-group-item-content">
+                       <div class="row">
+                          <div class="col-md-3">
+                             {{name}}
+                          </div>
+                          <div class="col-md-5">
+                             <pre>{{value}}</pre>
+                          </div>
+                          <div class="col-md-4">
+                             <span class="text-muted">On assignment:</span> {{assignmentOperation}}<br>
+                             <span class="text-muted">On unassignment:</span> {{unassignmentOperation}}
+                          </div>
+                       </div>
+                    </div>
+                 </li>
+                 {{/each}}
+              </ul>
+           </div>
+           {{/each}}
+        </div>
+    {{/each}}
+</div>

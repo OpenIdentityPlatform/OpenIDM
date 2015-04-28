@@ -277,7 +277,16 @@
                 "replaceTarget": "Replace Target",
                 "noOp": "No Operation",
                 "addAttribute": "Add an attribute",
-                "entitlementDuplicationError": "Cannot have two entitlements of the same name."
+                "entitlementDuplicationError": "Cannot have two entitlements of the same name.",
+                "addEntitlementToMapping": "Add this entitlement to one or more mappings.",
+                "mappings": "Mappings",
+                "mapping": "Mapping",
+                "addToMapping": "Add to a Mapping",
+                "noEntitlements": "No entitlements attached to this role",
+                "selectMapping": "Select a mapping...",
+                "noMappings": "No mappings attached to this entitlement",
+                "addMappingSuccess": "Successfully added &quot;__assignmentName__&quot; entitlement to &quot;__mappingName__&quot;.",
+                "removeMappingSuccess": "Successfully removed &quot;__assignmentName__&quot; entitlement from &quot;__mappingName__&quot;."
             }
         },
         "managed" : {
@@ -894,6 +903,9 @@
             "allPropertiesMapped": "*All target properties have been mapped",
             "numRepresentativeProps":"Number of representative properties",
             "missingRequiredProperties": "Missing Required Properties",
+            "roleEntitlementsDescription": "View role entitlements assigned to this mapping.",
+            "roleEntitlements": "Role Entitlements",
+            "targetProperty": "Target Property",
             "propertyEdit": {
                 "title": "Target Property: __property__",
                 "valueMapping": "Value Mapping",

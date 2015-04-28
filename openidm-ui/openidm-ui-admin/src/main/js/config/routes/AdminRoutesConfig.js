@@ -163,6 +163,12 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: /^resource\/(managed)\/(.+)\/add\/$/, 
             pattern: "resource/?/?/add/"
+        },
+        "adminEditRoleEntitlementView" : {
+            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
+            role: "ui-admin",
+            url: /^resource\/(managed)\/(role)\/edit\/(.+)\/(.+)$/, 
+            pattern: "resource/?/?/edit/?/?"
         }
     };
 

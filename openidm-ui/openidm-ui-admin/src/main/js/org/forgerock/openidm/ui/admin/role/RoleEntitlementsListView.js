@@ -54,7 +54,9 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView", [
         editAssignment: function(e) {
             var assignmentName = $(e.target).closest(".role-assignment-item").attr("assignmentName");
             
-            e.preventDefault();
+            if(e) {
+                e.preventDefault();
+            }
             
             roleEntitlementsEditView.render(this.data.args, this.data.role, assignmentName, this);
         },
