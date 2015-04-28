@@ -25,6 +25,7 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -52,6 +53,9 @@ public class FileStateChecker {
     // MessageDigest appropriate for algorithm used for checksum
     private final MessageDigest digest;
 
+    // Path to checksums file
+    private final Path checksums;
+
     /**
      * Construct the FileState object from a checksums file.
      *
@@ -64,9 +68,11 @@ public class FileStateChecker {
             throw new FileNotFoundException(checksums.toString() + " does not exist");
         }
 
+        this.checksums = checksums;
+
         // Assumes csv of #File,MD5.
         // Supports MD5, SHA-1 and SHA-256 at a minimum.
-        try (final BufferedReader reader = Files.newBufferedReader(checksums, Charset.defaultCharset())) {
+        try (final BufferedReader reader = Files.newBufferedReader(this.checksums, Charset.defaultCharset())) {
             // read first line for algorithm header
             String line = reader.readLine();
             String[] parts = line.split(",");
@@ -103,6 +109,17 @@ public class FileStateChecker {
     }
 
     /**
+     * Record a new/updated checksum in the digest cache and persist it to disk.
+     *
+     * @param newFile the file for which a checksum should be added or updated.
+     * @throws IOException
+     */
+    public void recordUpdate(Path newFile) throws IOException {
+        digestCache.put(newFile.toString(), Arrays.toString(getCurrentDigest(newFile)));
+        persistChecksums();
+    }
+
+    /**
      * Returns the digestCache of the original, shipped file.
      *
      * @param shippedFile the original, shipped file.
@@ -120,5 +137,26 @@ public class FileStateChecker {
      */
     private byte[] getCurrentDigest(Path currentFile) throws IOException {
         return digest.digest(Files.readAllBytes(currentFile));
+    }
+
+    /**
+     * Persist the current digest cache to disk.
+     *
+     * @throws IOException
+     */
+    private void persistChecksums() throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(checksums, Charset.defaultCharset());
+
+        // Write the header line.
+        writer.write("#File," + digest.getAlgorithm());
+        writer.newLine();
+
+        // Write all of the checksums.
+        for (String path : digestCache.keySet()) {
+            writer.write(path + "," + digestCache.get(path));
+            writer.newLine();
+        }
+
+        writer.close();
     }
 }
