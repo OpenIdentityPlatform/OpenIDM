@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-auditing'
@@ -653,7 +653,7 @@
    Actions</citetitle></link>.</para>
    
    <para>The <literal>watchedFields</literal> parameter enables you to specify 
-   a list of fields that should be "watched" for changes. When the value of one 
+   a list of fields that should be monitored for changes. When the value of one
    of the fields in this list changes, the change is logged in the audit log, 
    under the column <literal>"changedFields"</literal>. Fields are listed in 
    comma-separated format, for example:</para>
