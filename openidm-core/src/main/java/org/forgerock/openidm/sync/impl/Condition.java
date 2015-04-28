@@ -273,7 +273,7 @@ class Condition {
                 @Override
                 public Boolean visitPresentFilter(final JsonValue p, final JsonPointer field) {
                     final JsonValue value = p.get(field);
-                    return value != null;
+                    return value != null && !value.isNull();
                 }
 
                 @Override
