@@ -24,6 +24,7 @@
 package org.forgerock.openidm.sync.impl;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.QueryFilter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -45,7 +46,8 @@ public class ConditionTest {
                 field("name", "alice"),
                 field("age", 1234L),
                 field("balance", 3.14159),
-                field("isAdmin", false))
+                field("isAdmin", false),
+                field("nullVal", null))
             ),
             field("linkQualifier", "test")));
 
@@ -64,6 +66,8 @@ public class ConditionTest {
                 { "/object/name co \"al\"", true },
                 { "/object/name sw \"al\"", true },
                 { "/object/name pr", true },
+                { "/object/missing pr", false },
+                { "/object/nullVal pr", false },
                 { "/object/age lt 18 or /object/age gt 30", true },
                 { "/object/age lt 1000 or /object/age gt 3000", false },
                 { "/object/age lt 18 and /object/age gt 30", false },
