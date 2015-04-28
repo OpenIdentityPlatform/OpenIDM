@@ -33,6 +33,7 @@ import org.fest.util.Files;
 import org.testng.annotations.Test;
 
 /**
+ * Test the FileStateChecker.
  */
 public class FileStateCheckerTest {
 
