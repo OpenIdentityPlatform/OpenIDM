@@ -35,17 +35,21 @@ import java.nio.file.StandardCopyOption;
  */
 public class StaticFileUpdate {
 
-    private static final String OLD_SUFFIX = ".idm-old";
-    private static final String NEW_SUFFIX = ".idm-new";
+    static final String IDM_SUFFIX = ".idm-";
 
     private final Path path;
     private final FileStateChecker fileStateChecker;
     private final Archive archive;
+    private final ProductVersion currentVersion;
+    private final ProductVersion upgradedVersion;
 
-    StaticFileUpdate(Path path,  FileStateChecker fileStateChecker,  Archive archive) {
+    StaticFileUpdate(Path path, FileStateChecker fileStateChecker, Archive archive,
+            ProductVersion currentVersion, ProductVersion upgradedVersion) {
         this.path = path;
         this.fileStateChecker = fileStateChecker;
         this.archive = archive;
+        this.currentVersion = currentVersion;
+        this.upgradedVersion = upgradedVersion;
     }
 
     /**
@@ -71,7 +75,7 @@ public class StaticFileUpdate {
      */
     void replace() throws IOException {
         if (isChanged()) {
-            Files.move(path, Paths.get(path.toString() + OLD_SUFFIX));
+            Files.move(path, Paths.get(path.toString() + IDM_SUFFIX + currentVersion.toString()));
         }
         Files.copy(archive.getInputStream(path), path, StandardCopyOption.REPLACE_EXISTING);
     }
@@ -85,6 +89,6 @@ public class StaticFileUpdate {
         if (!isChanged()) {
             throw new IOException("The file " + path.toString() + " does not exist - cannot \"keep\" it");
         }
-        Files.copy(archive.getInputStream(path), Paths.get(path.toString() + NEW_SUFFIX));
+        Files.copy(archive.getInputStream(path), Paths.get(path.toString() + IDM_SUFFIX + upgradedVersion.toString()));
     }
 }
