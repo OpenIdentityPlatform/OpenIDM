@@ -3195,7 +3195,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       </para>
 
       <para>
-       Default action: log an <literal>EXCEPTION</literal>.
+       Default action: throw an <literal>EXCEPTION</literal>.
       </para>
 
       <para>
@@ -3232,7 +3232,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        situation is detected during source object changes and reconciliation.
       </para>
       <para>
-       Default action: log an <literal>EXCEPTION</literal>.
+       Default action: throw an <literal>EXCEPTION</literal>.
       </para>
 
       <para>
@@ -3249,7 +3249,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        detected during reconciliation operations and during source object changes.
       </para>
       <para>
-       Default action: log an <literal>EXCEPTION</literal>.
+       Default action: throw an <literal>EXCEPTION</literal>.
       </para>
       <para>
        Other valid actions: <literal>CREATE, UNLINK, IGNORE, REPORT, NOREPORT.
@@ -3331,7 +3331,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        changes.
       </para>
       <para>
-       Default action: Log an <literal>EXCEPTION</literal>.
+       Default action: throw an <literal>EXCEPTION</literal>.
       </para>
       <para>
        Other valid actions: <literal>UNLINK, IGNORE, REPORT, NOREPORT,
@@ -3447,7 +3447,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        is detected only during reconciliation operations.
       </para>
       <para>
-       Default action: log an <literal>EXCEPTION</literal>.
+       Default action: throw an <literal>EXCEPTION</literal>.
       </para>
       <para>
        Other valid actions: <literal>IGNORE, REPORT, NOREPORT, ASYNC</literal>
@@ -3496,7 +3496,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        reconciliation.
       </para>
       <para>
-       Default action: log an "EXCEPTION".
+       Default action: throw an <literal>EXCEPTION</literal>.
       </para>
       <para>
        Other valid actions: <literal>DELETE, UNLINK, IGNORE, REPORT,
