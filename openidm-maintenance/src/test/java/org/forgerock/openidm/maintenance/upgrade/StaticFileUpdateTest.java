@@ -38,6 +38,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
+import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.IDM_SUFFIX;
 
 
 import org.testng.annotations.Test;
@@ -46,6 +47,9 @@ import org.testng.annotations.Test;
  * Tests updating static files.
  */
 public class StaticFileUpdateTest {
+
+    private static ProductVersion oldVersion = new ProductVersion("3.2.0", "5000");
+    private static ProductVersion newVersion = new ProductVersion("4.0.0", "6000");
 
     Path tempPath;
 
@@ -69,7 +73,7 @@ public class StaticFileUpdateTest {
         Path file = tempPath.resolve("test");
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
         Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         assertFalse(update.exists());
     }
 
@@ -81,7 +85,7 @@ public class StaticFileUpdateTest {
         Path file = Files.createTempFile(tempPath, null, null);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
         Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         assertTrue(update.exists());
         Files.delete(file);
     }
@@ -95,7 +99,7 @@ public class StaticFileUpdateTest {
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
         when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.UNCHANGED);
         Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         assertFalse(update.isChanged());
     }
 
@@ -108,7 +112,7 @@ public class StaticFileUpdateTest {
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
         when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.DIFFERS);
         Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         assertTrue(update.isChanged());
     }
 
@@ -123,11 +127,11 @@ public class StaticFileUpdateTest {
         when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.UNCHANGED);
         Archive archive = mock(Archive.class);
         when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         update.replace();
         assertThat(Files.readAllBytes(file)).isEqualTo(newBytes);
-        assertFalse(Files.exists(Paths.get(file + ".idm-old")));
-        assertFalse(Files.exists(Paths.get(file + ".idm-new")));
+        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + oldVersion.toString())));
+        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + newVersion.toString())));
     }
 
     /**
@@ -144,11 +148,11 @@ public class StaticFileUpdateTest {
         when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.DIFFERS);
         Archive archive = mock(Archive.class);
         when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         update.replace();
         assertThat(Files.readAllBytes(file)).isEqualTo(newBytes);
-        assertThat(Files.readAllBytes(Paths.get(file + ".idm-old"))).isEqualTo(oldBytes);
-        assertFalse(Files.exists(Paths.get(file + ".idm-new")));
+        assertThat(Files.readAllBytes(Paths.get(file + IDM_SUFFIX + oldVersion.toString()))).isEqualTo(oldBytes);
+        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + newVersion.toString())));
     }
 
     /**
@@ -165,7 +169,7 @@ public class StaticFileUpdateTest {
         when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.UNCHANGED);
         Archive archive = mock(Archive.class);
         when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         update.keep();
     }
 
@@ -183,10 +187,10 @@ public class StaticFileUpdateTest {
         when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.DIFFERS);
         Archive archive = mock(Archive.class);
         when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive);
+        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
         update.keep();
         assertThat(Files.readAllBytes(file)).isEqualTo(oldBytes);
-        assertThat(Files.readAllBytes(Paths.get(file + ".idm-new"))).isEqualTo(newBytes);
-        assertFalse(Files.exists(Paths.get(file + ".idm-old")));
+        assertThat(Files.readAllBytes(Paths.get(file + IDM_SUFFIX + newVersion.toString()))).isEqualTo(newBytes);
+        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + oldVersion.toString())));
     }
 }
