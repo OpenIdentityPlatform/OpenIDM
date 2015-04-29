@@ -67,7 +67,7 @@ public class StaticFileUpdate {
 
     /**
      * Replaces this static file with the new one from the archive.  If the file has been changed, copy it to
-     * <em>&lt;filepath&gt;-.idm-old</em>.
+     * <em>&lt;filepath&gt;-.idm-old</em>.  Supports copying fresh file for one that is missing.
      *
      * @throws IOException
      */
