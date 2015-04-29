@@ -112,11 +112,16 @@ public class FileStateChecker {
     /**
      * Record a new/updated checksum in the digest cache and persist it to disk.
      *
-     * @param newFile the file for which a checksum should be added or updated.
+     * @param newFile the file for which a checksum should be added, updated or removed.
      * @throws IOException
      */
-    public void recordUpdate(Path newFile) throws IOException {
-        digestCache.put(newFile.toString(), Arrays.toString(getCurrentDigest(newFile)));
+    public void updateState(Path newFile) throws IOException {
+        try {
+            digestCache.put(newFile.toString(), Arrays.toString(getCurrentDigest(newFile)));
+        } catch (IOException e) {
+            // File does not exist, remove entry.
+            digestCache.remove(newFile.toString());
+        }
         persistChecksums();
     }
 
