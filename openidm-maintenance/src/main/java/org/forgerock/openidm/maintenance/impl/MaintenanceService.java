@@ -29,6 +29,7 @@ import static org.forgerock.json.fluent.JsonValue.object;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import org.apache.felix.scr.ScrService;
 import org.apache.felix.scr.annotations.Activate;
@@ -52,6 +53,7 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
@@ -132,6 +134,12 @@ public class MaintenanceService implements RequestHandler {
      * A boolean indicating if maintenance mode is currently enabled
      */
     private boolean maintenanceEnabled = false;
+    
+    /**
+     * A lock used in the enabling and disabling of maintenance mode.
+     */
+    private Semaphore maintenanceModeLock = new Semaphore(1);
+    
     /**
      * An array of component names representing the components to disable during maintenance mode.
      */
@@ -175,83 +183,107 @@ public class MaintenanceService implements RequestHandler {
      */
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        switch (request.getActionAsEnum(Action.class)) {
-            case status:
-                handleMaintenanceStatus(handler);
-                break;
-            case enable:
-                enableMaintenanceMode();
-                handleMaintenanceStatus(handler);
-                break;
-            case disable:
-                disableMaintenanceMode();
-                handleMaintenanceStatus(handler);
-                break;
-            case upgrade:
-                enableMaintenanceMode();
-                // attempt to perform an upgrade via REST
-                try {
-                    new UpgradeManager()
-                            .execute(request.getAdditionalParameter("url"),
-                                    IdentityServer.getFileForWorkingPath(""),
-                                    IdentityServer.getFileForInstallPath(""),
-                                    request.getAdditionalParameters());
-                } catch (InvalidArgsException ex) {
-                    handler.handleError(new BadRequestException(ex.getMessage(), ex));
-                } catch (UpgradeException ex) {
-                    handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
-                } finally {
+        try {
+            switch (request.getActionAsEnum(Action.class)) {
+                case status:
+                    handleMaintenanceStatus(handler);
+                    break;
+                case enable:
+                    enableMaintenanceMode();
+                    handleMaintenanceStatus(handler);
+                    break;
+                case disable:
                     disableMaintenanceMode();
-                }
-                break;
-            default:
-                handler.handleError(new NotSupportedException(request.getAction() + " is not supported"));
-                break;
+                    handleMaintenanceStatus(handler);
+                    break;
+                case upgrade:
+                    enableMaintenanceMode();
+                    // attempt to perform an upgrade via REST
+                    try {
+                        new UpgradeManager()
+                                .execute(request.getAdditionalParameter("url"),
+                                        IdentityServer.getFileForWorkingPath(""),
+                                        IdentityServer.getFileForInstallPath(""),
+                                        request.getAdditionalParameters());
+                    } catch (InvalidArgsException ex) {
+                        handler.handleError(new BadRequestException(ex.getMessage(), ex));
+                    } catch (UpgradeException ex) {
+                        handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+                    } finally {
+                        disableMaintenanceMode();
+                    }
+                    break;
+                default:
+                    handler.handleError(new NotSupportedException(request.getAction() + " is not supported"));
+                    break;
+            }
+        } catch (ResourceException e) {
+            handler.handleError(e);
         }
     }
 
     /**
      * Enables maintenance mode by disabling the currently active (or unsatisfied) components contained in 
      * the list of maintenance mode components.
+     * 
+     * @throws ResourceException if an error occurs when attempting to enable maintenance mode
      */
-    private void enableMaintenanceMode() {
-		logger.info("Enabling maintenence mode");
-    	List<String> componentNames = Arrays.asList(maintenanceModeComponents);
-        maintenanceEnabled = true;
-        org.apache.felix.scr.Component[] components = scrService.getComponents();
-		logger.debug("Found {} components", components.length);
-        for (org.apache.felix.scr.Component component : components) {
-        	if (componentNames.contains(component.getName())
-        			&& (component.getState() == org.apache.felix.scr.Component.STATE_UNSATISFIED
-                			|| component.getState() == org.apache.felix.scr.Component.STATE_ACTIVE
-                			|| component.getState() == org.apache.felix.scr.Component.STATE_ACTIVATING)) {
-        		logger.info("Disabling component id: {}, name: {}", component.getId(), component.getName());
-        		component.disable();
-        	} else {
-        		logger.debug("Ignoring component id: {}, name: {}", component.getId(), component.getName());
-        	}
+    private void enableMaintenanceMode() throws ResourceException {
+        if (maintenanceModeLock.tryAcquire()) {
+            try {
+                logger.info("Enabling maintenence mode");
+                List<String> componentNames = Arrays.asList(maintenanceModeComponents);
+                maintenanceEnabled = true;
+                org.apache.felix.scr.Component[] components = scrService.getComponents();
+                logger.debug("Found {} components", components.length);
+                for (org.apache.felix.scr.Component component : components) {
+                    if (componentNames.contains(component.getName())
+                            && (component.getState() == org.apache.felix.scr.Component.STATE_UNSATISFIED
+                                    || component.getState() == org.apache.felix.scr.Component.STATE_ACTIVE || component
+                                    .getState() == org.apache.felix.scr.Component.STATE_ACTIVATING)) {
+                        logger.info("Disabling component id: {}, name: {}", component.getId(), component.getName());
+                        component.disable();
+                    } else {
+                        logger.debug("Ignoring component id: {}, name: {}", component.getId(), component.getName());
+                    }
+                }
+            } finally {
+                maintenanceModeLock.release();
+            }
+        } else {
+            throw new InternalServerErrorException("Cannot enable maintenance mode, change is already in progress");
         }
     }
 
     /**
      * Disables maintenance mode by enabling the currently disabled components contained in the list of 
      * maintenance mode components.
+     * 
+     * @throws ResourceException if an error occurs when attempting to enable maintenance mode
      */
-    private void disableMaintenanceMode() {
-		logger.info("Disabling maintenence mode");
-    	List<String> componentNames = Arrays.asList(maintenanceModeComponents);
-        maintenanceEnabled = false;
-        org.apache.felix.scr.Component[] components = scrService.getComponents();
-		logger.debug("Found {} components", components.length);
-        for (org.apache.felix.scr.Component component : components) {
-        	if (componentNames.contains(component.getName()) 
-        			&& (component.getState() == org.apache.felix.scr.Component.STATE_DISABLED
-                			|| component.getState() == org.apache.felix.scr.Component.STATE_DISABLING)) {
-        		logger.info("Enabling component id: {}, name: {}", component.getId(), component.getName());
-        		component.enable();
-        	} else {
-        		logger.debug("Ignoring component id: {}, name: {}", component.getId(), component.getName());
-        	}
+    private void disableMaintenanceMode() throws ResourceException {
+        if (maintenanceModeLock.tryAcquire()) {
+            try {
+                logger.info("Disabling maintenence mode");
+                List<String> componentNames = Arrays.asList(maintenanceModeComponents);
+                maintenanceEnabled = false;
+                org.apache.felix.scr.Component[] components = scrService.getComponents();
+                logger.debug("Found {} components", components.length);
+                for (org.apache.felix.scr.Component component : components) {
+                    if (componentNames.contains(component.getName()) 
+                            && (component.getState() == org.apache.felix.scr.Component.STATE_DISABLED
+                            || component.getState() == org.apache.felix.scr.Component.STATE_DISABLING)) {
+                        logger.info("Enabling component id: {}, name: {}", component.getId(), component.getName());
+                        component.enable();
+                    } else {
+                        logger.debug("Ignoring component id: {}, name: {}", component.getId(), component.getName());
+                    }
+                }
+            } finally {
+                maintenanceModeLock.release();
+            }
+        } else {
+            throw new InternalServerErrorException("Cannot disable maintenance mode, change is already in progress");
         }
 
     }
