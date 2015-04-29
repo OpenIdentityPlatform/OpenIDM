@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document, window */
+/*global define, $, form2js, _, js2form, document, window, d3 */
 
 /**
  * @author mbilski
@@ -39,8 +39,21 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/user/delegates/CountryStateDelegate",
     "org/forgerock/openidm/ui/user/delegates/RoleDelegate",
-    "org/forgerock/openidm/ui/admin/linkedView/LinkedView"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router, countryStateDelegate, roleDelegate, LinkedView) {
+    "org/forgerock/openidm/ui/admin/linkedView/LinkedView",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
+], function(AbstractView,
+            validatorsManager,
+            uiUtils,
+            userDelegate,
+            eventManager,
+            constants,
+            conf,
+            confirmationDialog,
+            router,
+            countryStateDelegate,
+            roleDelegate,
+            LinkedView,
+            ResourceDelegate) {
     var AdminUserProfileView = AbstractView.extend({
         template: "templates/admin/AdminUserProfileTemplate.html",
         events: {
@@ -63,6 +76,10 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 delete data.oldEmail;
                 oldUserName = data.oldUserName;
                 delete data.oldUserName;
+
+                if(data.manager) {
+                    data.manager = this.resourcePath +"/" +data.manager;
+                }
 
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
 
@@ -90,34 +107,37 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
 
         render: function(userName, callback) {
             userName = userName[0].toString();
+            this.data.host = constants.host;
 
             $.when(
                 userDelegate.getForUserName(userName),
-                roleDelegate.getAllRoles()
+                roleDelegate.getAllRoles(),
+                ResourceDelegate.getSchema(["managed", "user"])
             ).then(
-                _.bind(function(user, roles) {
-
+                _.bind(function(user, roles, schema) {
                     var managedRoleMap = _.chain(roles.result)
                         .map(function (r) { return [r._id, r.properties.name || r._id]; })
                         .object()
                         .value();
 
                     this.editedUser = user;
+                    this.schema = schema;
+                    this.resourcePath =  this.schema.properties.manager.resourceCollection.path;
+                    this.searchableManagerFields = schema.properties.manager.resourceCollection.query.fields;
                     this.data.user = user;
                     this.data.roles = _.extend({}, conf.globalData.userRoles, managedRoleMap);
                     this.data.profileName = user.givenName + ' ' + user.sn;
 
-                    this.parentRender(_.bind(function() {
-                        this.linkedView = new LinkedView();
-                        this.linkedView.element = "#linkedViewBody";
+                    ResourceDelegate.searchResource('manager sw "' +this.resourcePath +"/" +this.editedUser._id +'"', this.resourcePath).then(_.bind(function(reports) {
+                        this.data.reports = reports.result;
 
-                        this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-                        validatorsManager.bindValidators(this.$el.find("form"), userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
-
-                            this.reloadData();
-                            this.linkedView.render({"id": user._id}, callback);
-
-                        }, this));
+                        if (this.editedUser.manager) {
+                            ResourceDelegate.readResource("/openidm/" + this.resourcePath, this.editedUser.manager.replace(this.resourcePath + "/", "")).then(_.bind(function (manager) {
+                                this.completeRender(user, roles, schema, userName, callback, manager);
+                            }, this));
+                        } else {
+                            this.completeRender(user, roles, schema, userName, callback, null);
+                        }
                     }, this));
                 }, this),
 
@@ -126,7 +146,180 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 }
             );
         },
+        completeRender: function(user, roles, schema, userName, callback, manager) {
+            this.parentRender(_.bind(function() {
+                this.linkedView = new LinkedView();
+                this.linkedView.element = "#linkedViewBody";
 
+                this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
+                validatorsManager.bindValidators(this.$el.find("form"), userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
+                    this.reloadData();
+
+                    this.$el.find("#manager").selectize({
+                        valueField: '_id',
+                        labelField: 'userName',
+                        searchField: 'userName',
+                        create: false,
+                        preload: true,
+                        render: {
+                            item: function(item, escape) {
+                                return '<div>' +
+                                    '<span class="manager-title">' +
+                                    '<span class="manager-fullname"><i class="fa fa-user"></i>' + escape(item.givenName) +' ' +escape(item.sn) + '<span class="manager-email caption"> (' + escape(item.mail) + ')</span></span>' +
+                                    '</span>' +
+                                    '</div>';
+                            },
+                            option: function(item, escape) {
+                                return '<div>' +
+                                    '<span class="manager-title">' +
+                                    '<span class="manager-fullname"><i class="fa fa-user"></i>' + escape(item.givenName) +' ' +escape(item.sn) + '<span class="manager-username caption"> (' + escape(item.userName) + ')</span></span>' +
+                                    '</span>' +
+                                    '<span class="caption manager-email">' + escape(item.mail) + '</span>' +
+
+                                    '</div>';
+                            }
+                        },
+                        load: _.bind(function(query, callback) {
+                            var queryFilter = null;
+
+                            if (!query.length) {
+                                return callback();
+                            }
+
+                            _.each(this.searchableManagerFields, function(field){
+                                if(queryFilter === null) {
+                                    queryFilter = field +' sw "' +query +'"';
+                                } else {
+                                    queryFilter = queryFilter + ' or ' +field +' sw "' +query +'"';
+                                }
+                            });
+
+                            ResourceDelegate.searchResource(queryFilter, this.resourcePath).then(function(search) {
+                                    callback(search.result);
+                                },
+                                function(){
+                                    callback();
+                                }
+                            );
+
+                        }, this)
+                    });
+
+                    if(manager) {
+                        this.$el.find("#manager")[0].selectize.addOption(manager);
+                        this.$el.find("#manager")[0].selectize.setValue(manager._id);
+                    }
+
+                    this.linkedView.render({"id": user._id}, callback);
+
+                    $('#reportsHolder .table tbody tr[data-href]').bind("click", function(){
+                        document.location = $(this).attr('data-href');
+                    });
+
+
+                    if(this.data.reports.length > 0){
+                        this.loadTree();
+                    }
+
+                }, this));
+            }, this));
+        },
+        loadTree: function() {
+            var treeData = {
+                    "name" : this.editedUser.givenName + " " +this.editedUser.sn,
+                    "parent" : "null",
+                    "url" : constants.host +"/openidmui/index.html#users/show/" +this.editedUser.userName +"/",
+                    "children" : [
+
+                    ]
+                },
+                margin = {
+                    top: 20,
+                    right: 120,
+                    bottom: 20,
+                    left: 120
+                },
+                width = 1024 - margin.right - margin.left,
+                height = 500 - margin.top - margin.bottom,
+                i = 0,
+                tree = d3.layout.tree().size([height, width]),
+                diagonal = d3.svg.diagonal().projection(function(d) {
+                    return [d.y, d.x];
+                }),
+                svg = d3.select("#reportsGraphBody").append("svg")
+                    .attr("width", width + margin.right + margin.left)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+                root = null,
+                update = function(source) {
+                    var nodes = tree.nodes(root).reverse(),
+                        links = tree.links(nodes),
+                        nodeEnter,
+                        node,
+                        link;
+
+                    //Normalize for fixed-depth.
+                    nodes.forEach(function(data) { data.y = data.depth * 180; });
+
+                    //Declare the nodes
+                    node = svg.selectAll("g.node").data(nodes, function(data) {
+                        if(!data.id) {
+                            data.id = ++i;
+                        }
+
+                        return data.id;
+                    });
+
+                    //Enter the nodes.
+                    nodeEnter = node.enter().append("g")
+                        .attr("class", "node")
+                        .attr("transform", function(data) {
+                            return "translate(" + data.y + "," + data.x + ")";
+                        });
+
+                    //Add Circles
+                    nodeEnter.append("circle")
+                        .attr("r", 10)
+                        .style("fill", "#fff");
+
+                    //Add Text
+                    nodeEnter.append("svg:a")
+                        .attr("xlink:href", function(data){return data.url;})
+                        .append("text")
+                        .attr("x", function(data) {
+                            return data.children || data._children ? -13 : 13;
+                        })
+                        .attr("dy", ".35em")
+                        .attr("text-anchor", function(data) {
+                            return data.children || data._children ? "end" : "start";
+                        })
+                        .text(function(data) { return data.name; })
+                        .style("fill-opacity", 1);
+
+                    //Generate the paths
+                    link = svg.selectAll("path.link").data(links, function(d) {
+                        return d.target.id;
+                    });
+
+                    //Add the paths
+                    link.enter().insert("path", "g")
+                        .attr("class", "link")
+                        .attr("d", diagonal);
+                };
+
+            _.each(this.data.reports, function(item){
+                treeData.children.push({
+                    "name" : item.givenName + " " +item.sn,
+                    "parent" : "null",
+                    "url" : constants.host +"/openidmui/index.html#users/show/" +item.userName +"/"
+                });
+            });
+
+            root = treeData;
+
+            update(root);
+        },
         loadStates: function() {
             var country = this.$el.find('select[name="country"]').val();
 
@@ -160,6 +353,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
 
         reloadData: function() {
             js2form(this.$el.find("form")[0], this.editedUser);
+
             this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             this.$el.find("input[name=deleteButton]").val($.t("common.form.delete"));
             this.$el.find("input[name=backButton]").val($.t("common.form.back"));
@@ -199,5 +393,3 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
 
     return new AdminUserProfileView();
 });
-
-

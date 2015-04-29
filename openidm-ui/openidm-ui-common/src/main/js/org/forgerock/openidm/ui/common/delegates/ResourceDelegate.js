@@ -34,17 +34,17 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
 ], function(constants, AbstractDelegate, configDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/");
-    
+
     obj.getSchema = function(args){
         var objectType = args[0],
             objectName = args[1],
             objectName2 = args[2],
             provisionerProm;
-        
+
         if(objectType === "managed") {
             return configDelegate.readEntity("managed").then(function(managed){
                 var managedObject = _.findWhere(managed.objects,{ name: objectName });
-                
+
                 if(managedObject){
                     if(managedObject.schema){
                         return managedObject.schema;
@@ -61,25 +61,25 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             if (provisionerProm) {
                 return $.when(provisionerProm).then(function(prov){
                     var schema;
-                        
-                        if(prov.objectTypes){
-                            schema = prov.objectTypes[objectName2];
-                            if(schema){
-                                schema.title = objectName;
-                                return schema;
-                            } else {
-                                return false;
-                            }
+
+                    if(prov.objectTypes){
+                        schema = prov.objectTypes[objectName2];
+                        if(schema){
+                            schema.title = objectName;
+                            return schema;
                         } else {
-                            return "invalidObject";
+                            return false;
                         }
+                    } else {
+                        return "invalidObject";
+                    }
                 });
             } else {
                 return "invalidObject";
             }
         }
     };
-    
+
     obj.createResource = function (serviceUrl) {
         return AbstractDelegate.prototype.createEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
     };
@@ -95,20 +95,22 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     obj.patchResourceDifferences = function (serviceUrl) {
         return AbstractDelegate.prototype.patchEntityDifferences.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
     };
-    
-    
+
     obj.getServiceUrl = function(args) {
         var url = "/" + constants.context + "/" + args[0] + "/" + args[1];
-        
+
         if(args[0] === "system") {
             url += "/" + args[2];
         }
-        
+
         return url;
     };
-    
+
+    obj.searchResource = function(filter, serviceUrl) {
+        return obj.serviceCall({
+            url: serviceUrl +"?_queryFilter="+filter
+        });
+    };
+
     return obj;
 });
-
-
-

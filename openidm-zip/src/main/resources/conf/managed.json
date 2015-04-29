@@ -146,6 +146,26 @@
                         "viewable" : true,
                         "type" : "string",
                         "searchable" : true
+                    },
+                    "manager" : {
+                        "description" : "",
+                        "title" : "Manager",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "resourceCollection" : {
+                            "path" : "managed/user",
+                            "query" : {
+                                "queryFilter" : "true",
+                                "fields" : [
+                                    "userName",
+                                    "mail"
+                                ],
+                                "sortKeys" : [
+                                    "userName"
+                                ]
+                            }
+                        },
+                        "type" : "string"
                     }
                 },
                 "type" : "object",

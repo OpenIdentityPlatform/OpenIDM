@@ -70,21 +70,6 @@
 
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>selectize</artifactId>
-            <version>0.12.1</version>
-            <classifier>min</classifier>
-            <type>js</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>selectize</artifactId>
-            <version>0.12.1</version>
-            <classifier>bootstrap3</classifier>
-            <type>css</type>
-        </dependency>
-
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>jquery.jqGrid</artifactId>
             <version>4.5.4</version>
             <classifier>min</classifier>

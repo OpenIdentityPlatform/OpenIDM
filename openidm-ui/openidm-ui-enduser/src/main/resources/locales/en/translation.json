@@ -244,6 +244,7 @@
             }
         },
         "user" : {
+            "manager" : "Manager",
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",
