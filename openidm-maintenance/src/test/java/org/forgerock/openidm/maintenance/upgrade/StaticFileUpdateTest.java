@@ -121,7 +121,7 @@ public class StaticFileUpdateTest {
     @Test
     public void testUnchanged() throws IOException {
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.UNCHANGED);
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.UNCHANGED);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         assertFalse(update.isChanged(tempFile));
     }
@@ -132,7 +132,7 @@ public class StaticFileUpdateTest {
     @Test
     public void testDiffers() throws IOException {
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.DIFFERS);
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.DIFFERS);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         assertTrue(update.isChanged(tempFile));
     }
@@ -143,7 +143,7 @@ public class StaticFileUpdateTest {
     @Test
     public void testReplaceIsUnchanged() throws IOException {
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.UNCHANGED);
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.UNCHANGED);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         update.replace(tempFile);
         assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
@@ -159,7 +159,7 @@ public class StaticFileUpdateTest {
     public void testReplaceDiffers() throws IOException {
         Files.write(tempFile, oldBytes);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.DIFFERS);
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.DIFFERS);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         update.replace(tempFile);
         assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
@@ -175,7 +175,7 @@ public class StaticFileUpdateTest {
     public void testKeepIsUnchanged() throws IOException {
         Files.write(tempFile, oldBytes);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.UNCHANGED);
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.UNCHANGED);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         update.keep(tempFile);
     }
@@ -188,7 +188,7 @@ public class StaticFileUpdateTest {
     public void testKeepDiffers() throws IOException {
         Files.write(tempFile, oldBytes);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.DIFFERS);
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.DIFFERS);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         update.keep(tempFile);
         assertThat(Files.readAllBytes(tempFile)).isEqualTo(oldBytes);
