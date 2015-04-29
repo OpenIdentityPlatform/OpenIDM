@@ -728,9 +728,10 @@ var results = openidm.query("system/ScriptedSQL/account", params)
     <term>Presence expression</term>
     <listitem>
      <para>
+      Evaluates to <literal>true</literal> when a
       <literal><replaceable>json-pointer</replaceable> pr</literal> matches any
       object in which the <replaceable>json-pointer</replaceable> is present,
-      for example:
+      and contains a non-null value. For example, take the following query:
      </para>
      <programlisting language="javascript">
 "_queryFilter" : '/mail pr'
@@ -785,6 +786,10 @@ var results = openidm.query("system/ScriptedSQL/account", params)
     }
   ]
 }</computeroutput></screen>
+     <para>
+      Evaluates to <literal>false</literal> for elements that are present with
+      a <literal>null</literal> value, and for elements that are missing.
+     </para>
     </listitem>
    </varlistentry>
 
