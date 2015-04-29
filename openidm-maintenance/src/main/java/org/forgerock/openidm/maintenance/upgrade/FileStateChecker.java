@@ -42,11 +42,6 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
  * Utility class to retrieve digestCache of original, shipped files and files as they presently exist.
  */
 public class FileStateChecker {
-    public enum FileState {
-        MISSING,
-        DIFFERS,
-        UNCHANGED
-    }
 
     /** Hex adapter for converting hex sums in checksum file to byte arrays */
     private static final HexBinaryAdapter hexAdapter = new HexBinaryAdapter();

@@ -64,20 +64,20 @@ public class FileStateCheckerTest {
         Path checksumFile = Paths.get(getClass().getResource("/checksums.csv").toURI());
         FileStateChecker checker = new FileStateChecker(checksumFile);
         assertThat(checker.getCurrentFileState(checksumFile.resolveSibling("file0")))
-                .isEqualTo(FileStateChecker.FileState.MISSING);
+                .isEqualTo(FileState.MISSING);
     }
 
     @Test
     public void testFileUnchanged() throws IOException, NoSuchAlgorithmException, URISyntaxException {
         FileStateChecker checker = new FileStateChecker(Paths.get(getClass().getResource("/checksums.csv").toURI()));
         assertThat(checker.getCurrentFileState(Paths.get(getClass().getResource("/file1").toURI())))
-                .isEqualTo(FileStateChecker.FileState.UNCHANGED);
+                .isEqualTo(FileState.UNCHANGED);
     }
 
     @Test
     public void testFileDiffers() throws IOException, NoSuchAlgorithmException, URISyntaxException {
         FileStateChecker checker = new FileStateChecker(Paths.get(getClass().getResource("/checksums.csv").toURI()));
         assertThat(checker.getCurrentFileState(Paths.get(getClass().getResource("/file2").toURI())))
-                .isEqualTo(FileStateChecker.FileState.DIFFERS);
+                .isEqualTo(FileState.DIFFERS);
     }
 }
