@@ -36,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
  * Utility class to retrieve digestCache of original, shipped files and files as they presently exist.
@@ -46,6 +47,9 @@ public class FileStateChecker {
         DIFFERS,
         UNCHANGED
     }
+
+    /** Hex adapter for converting hex sums in checksum file to byte arrays */
+    private static final HexBinaryAdapter hexAdapter = new HexBinaryAdapter();
 
     // Cache of the checksum file's contents.
     private final Map<String, String> digestCache = new HashMap<String, String>();
@@ -120,13 +124,25 @@ public class FileStateChecker {
     }
 
     /**
+     * Get the path of the provided file relative to the checksum file's path.  We assume the checksum
+     * file is at the root of the project, so all files in the digestCache (sourced from the checksums
+     * file) are relative to this root.
+     *
+     * @param file a file in the distribution
+     * @return the path of the file relative to the checksum file (root path)
+     */
+    private Path getRelativzedPath(Path file) {
+        return checksums.getParent().relativize(file);
+    }
+
+    /**
      * Returns the digestCache of the original, shipped file.
      *
      * @param shippedFile the original, shipped file.
      * @return the digestCache
      */
     private byte[] getOriginalDigest(Path shippedFile) {
-        return digestCache.get(shippedFile.toString()).getBytes(Charset.defaultCharset());
+        return hexAdapter.unmarshal(digestCache.get(getRelativzedPath(shippedFile).toString()));
     }
 
     /**
