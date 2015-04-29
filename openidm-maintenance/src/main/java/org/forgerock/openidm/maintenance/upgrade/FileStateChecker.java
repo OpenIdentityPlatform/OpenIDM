@@ -57,7 +57,7 @@ public class FileStateChecker {
     private final Path checksums;
 
     /**
-     * Construct the FileState object from a checksums file.
+     * Construct the FileStateChecker from a checksums file.
      *
      * @param checksums the checksum file
      * @throws IOException on failure to read file, bad format, etc.
@@ -70,7 +70,7 @@ public class FileStateChecker {
 
         this.checksums = checksums;
 
-        // Assumes csv of #File,MD5.
+        // Assumes csv of #File,algorithm.
         // Supports MD5, SHA-1 and SHA-256 at a minimum.
         try (final BufferedReader reader = Files.newBufferedReader(this.checksums, Charset.defaultCharset())) {
             // read first line for algorithm header
