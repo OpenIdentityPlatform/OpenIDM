@@ -50,6 +50,8 @@ require.config({
         placeholder: "libs/jquery.placeholder",
         moment: "libs/moment-2.8.1-min",
         contentflow: "libs/contentflow",
+        selectize : "libs/selectize-0.12.1-min",
+        d3 : "libs/d3-3.5.5-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         UserDelegate: "org/forgerock/openidm/ui/user/delegates/UserDelegate",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
@@ -88,7 +90,7 @@ require.config({
         },
         jqgrid: {
             deps: ["jqueryui", "i18nGrid"]
-        }, 
+        },
         xdate: {
             exports: "xdate"
         },
@@ -105,6 +107,12 @@ require.config({
         },
         moment: {
             exports: "moment"
+        },
+        d3: {
+            exports: "d3"
+        },
+        selectize: {
+            deps: ["jquery"]
         },
         bootstrap: {
             deps: ["jquery"]
@@ -140,6 +148,8 @@ require([
     "i18next",
     "jsonEditor",
     "contentflow",
+    "selectize",
+    "d3",
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -170,6 +180,8 @@ require([
     i18next,
     jsonEditor,
     contentflow,
+    selectize,
+    d3,
     i18n,
     constants,
     eventManager) {

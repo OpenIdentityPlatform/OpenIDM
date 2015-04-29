@@ -72,6 +72,14 @@
     </dependency>
 
     <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>d3</artifactId>
+        <version>3.5.5</version>
+        <classifier>min</classifier>
+        <type>js</type>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
     </dependency>

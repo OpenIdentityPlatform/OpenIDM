@@ -44,7 +44,7 @@
     <dependencySets>
         <dependencySet>
             <includes>
-                <include>org.forgerock.commons.ui.libs:*</include>
+                <include>org.forgerock.commons.ui.libs:*:js</include>
             </includes>
             <excludes>
                 <exclude>org.forgerock.commons.ui.libs:contentflow</exclude>
@@ -57,6 +57,12 @@
                 <include>org.forgerock.commons.ui.libs:contentflow</include>
             </includes>
             <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
+        <dependencySet>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:*:css</include>
+            </includes>
+            <outputDirectory>/css</outputDirectory>
         </dependencySet>
     </dependencySets>
 </assembly>

@@ -125,15 +125,77 @@
             </div>
 
             <div class="form-group">
-                <div class="col-sm-offset-3 col-sm-9">
-                    <input type="submit" name="saveButton" value="{{t "common.form.update"}}"  class="btn btn-primary" disabled />
+                <label class="col-sm-3 control-label" for="manager">{{t "common.user.manager"}}</label>
+                <div class="col-sm-6 manager-search">
+                    <select class="form-control" id="manager" name="manager"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9 pull-right">
+                    <input type="button" name="backButton" value="{{t "common.form.back"}}"  class="btn btn-default" />
                     <input type="button" name="deleteButton" value="{{t "common.form.delete"}}"  class="btn btn-primary" />
-                    <input type="button" name="backButton" value="{{t "common.form.back"}}"  class="btn btn-primary" />
+                    <input type="submit" name="saveButton" value="{{t "common.form.update"}}"  class="btn btn-primary" disabled />
                     <input type="text" name="oldUserName" style="display: none" />
                 </div>
             </div>
         </form>
 
-        <div id="linkedViewBody"></div>
+        <div id="reportsHolder">
+            <ul class="nav nav-tabs">
+                <li class="nav active"><a href="#reportsList" data-toggle="tab">Reports List</a></li>
+                <li class="nav"><a href="#reportsGraph" data-toggle="tab">Reports Graph</a></li>
+                <li class="nav"><a href="#linkedSystems" data-toggle="tab">Linked Systems</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="reportsList">
+                    <div class="panel">
+                        <div class="panel-body table-responsive">
+                            {{#if reports.length}}
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th class="col-sm-3">{{t "common.user.username"}}</th>
+                                    <th class="col-sm-2">{{t "common.user.name"}}</th>
+                                    <th class="col-sm-3">{{t "common.user.emailAddress"}}</th>
+                                    <th class="col-sm-2">{{t "common.user.accountStatus"}}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{#each reports}}
+                                <tr data-href="{{../host}}/openidmui/index.html#users/show/{{this.userName}}/">
+                                    <td>{{this.userName}}</td>
+                                    <td>{{this.givenName}}  {{this.sn}}</td>
+                                    <td>{{this.mail}}</td>
+                                    <td>{{this.accountStatus}}</td>
+                                </tr>
+                                {{/each}}
+                                </tbody>
+                            </table>
+                            {{else}}
+                            <h3>No Reports</h3>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="reportsGraph">
+                    <div class="panel">
+                        <div id="reportsGraphBody" class="panel-body">
+                            {{#if reports.length}}
+
+                            {{else}}
+                            <h3>No Reports</h3>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="linkedSystems">
+                    <div class="panel">
+                        <div class="panel-body" id="linkedViewBody"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
