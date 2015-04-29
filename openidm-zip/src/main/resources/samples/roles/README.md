@@ -22,12 +22,12 @@
      * "Portions Copyrighted [year] [name of copyright owner]"
      */
 
-Roles Samples : All you ever wanted to know about Roles in OpenIDM
+Roles Samples: All you ever wanted to know about Roles in OpenIDM
 ==================================================================
 
 The samples available in the sub-directories provide all the information
 you need to manage Roles in OpenIDM, via either REST or via the Administrative
-UI. The following use cases are covered :
+UI. The following use cases are covered:
 * Create a role
 * Update a role
 * Create a role with an assignment (entitlement) or update an existing
@@ -38,7 +38,7 @@ UI. The following use cases are covered :
   an external system (OpenDJ, based on sample 2b)
 * Delete a role
 
-We will also address the following scenario, specific to multi-account linking :
+We will also address the following scenario, specific to multi-account linking:
 * using linkQualifiers to derive role membership
 
 
@@ -46,10 +46,10 @@ CRUD operations for Roles
 -------------------------
 
 Available as part of the "crudops" sample. Provides a list of operations that
-can be performed via REST or via the UI to managed roles in OpenIDM.
+can be performed via REST or via the UI to manage roles in OpenIDM.
 
-Use Case : the "Employee" and "Contractor" roles (common in most companies) will
-be created, searched, updated, assigned to a user via the REST API ; the
+Use Case: the "Employee" and "Contractor" roles (common in most companies) will
+be created, searched, updated, assigned to a user via the REST API; the
 "Contractor" role will be deallocated from the user and deleted. That same
 Contractor role will be (re)created via the Admin UI, updated and finally
 deleted again.
@@ -62,11 +62,11 @@ and configurations necessary for the provisioning of a set of attributes based
 on role membership. The set of attributes will be pushed with the rest of the
 user information to OpenDJ (based on sample2b).
 
-Use Case : all regular (full-time) employees of the company must have their
+Use Case: all regular (full-time) employees of the company must have their
 employee type set and they must all be a member of the _Employees_ and
 the _Chat Users_ groups in the corporate directory (OpenDJ). In turn,
 contractors must also have their employee type set but they will only be part
-of the _Contractors_ group (no chatting for contractors !). Roles will be used
+of the _Contractors_ group (no chatting for contractors!). Roles will be used
 to set the required properties on the external resource (OpenDJ).
 
 Multi-account linking and Roles

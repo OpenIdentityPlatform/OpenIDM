@@ -22,7 +22,7 @@
      * "Portions Copyrighted [year] [name of copyright owner]"
      */
 
-Roles Sample : Roles and Provisioning 
+Roles Sample: Roles and Provisioning 
 =====================================
 
 One of the great features of OpenIDM Roles is the ability to provision a set
@@ -33,23 +33,23 @@ roles example that was provided in the _crudops_ sample. This example will
 also build on _sample2b_ to provision user entries from Managed User to OpenDJ.
 
 As an employee of the company a worker should be added to a couple of groups in
-OpenDJ (presumably to get access to some internal applications) : the Employees
+OpenDJ (presumably to get access to some internal applications): the Employees
 group and the Chat Users group. But as a Contractor, workers will be added
 to the Contractors group only. We also want the type of employee to be set
 properly in OpenDJ, based on the role allocated to each user.
 
 
-Pre-requisites : we assume that you are familiar with _sample2b_ and already
+Pre-requisites: we assume that you are familiar with _sample2b_ and already
 have installed OpenDJ according to the instructions and configuration provided
 in that sample. We also assume here that you have reconciled the entries as
 explained in that sample's section 2 & 4, but for this current sample.
 
-Note : the Example.ldif provided with this sample should be loaded to OpenDJ,
+Note: the Example.ldif provided with this sample should be loaded to OpenDJ,
 if that wasn't done previously.
 
         $ opendj/bin/ldapmodify -a -c --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost --port 1389 --filename openidm/samples/roles/provrole/data/Example.ldif
 
-This sample should be ran like the others using the following command :
+This sample should be run like the others using the following command:
 
         $ nohup ./startup.sh -p samples/roles/provrole > logs/console.out 2>&1&
 
@@ -59,25 +59,24 @@ reconciliation for the first mapping (DJ --> Managed User) in order to populate
 the user entries.
 
 
-This sample provides all the information you need to get the following use
-cases covered :
+This sample provides all the information you need to cover the following use
+cases:
 
 * Update a role with an entitlement (called assignments in OpenIDM)
 * Assign a role to a user and observe the entitlements for that user
-* Specify how entitlements will be propagated to external system (OpenDJ)
+* Specify how entitlements will be propagated to an external system (OpenDJ)
 * Deallocate a role from a user and observe how the entitlements are withdrawn
   from the external system
 
-Note : throughout this document we refer to entitlements and assignments
+Note: throughout this document we refer to entitlements and assignments
 interchangeably, as they relate to roles.
 
 
-1. Update the Employee role to add the proper groups and employee type
+1. Update the Employee role to add the correct groups and employee type
 
-Let's take a look at the roles we created in the _crudops_ sample first :
+Let's take a look at the roles we created in the _crudops_ sample first:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -105,11 +104,11 @@ Let's take a look at the roles we created in the _crudops_ sample first :
                }
 
 Now, according to our company's policy, we need to make sure that every employee
-will have the proper _employeeType_ attribute in OpenDJ (corporate directory).
+will have the correct _employeeType_ attribute in OpenDJ (corporate directory).
 
-This is achieved in several steps. The first one is to add an _assignment_
+This is achieved in several steps. The first one is to add an _assignments_
 property to the Employee role. Since we already have that role we will just
-patch that entry :
+patch that entry:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -141,11 +140,10 @@ patch that entry :
 
 2. Allocate the Employee role to bjensen
 
-In order to fully leverage _sample2b_ we will use Barb Jensen as the employee.
-Let's take a look at the roles we should have right now :
+In order to fully leverage _sample2b_ we will use Barbara Jensen as the employee.
+Let's take a look at the roles we should have right now:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -175,9 +173,9 @@ Let's take a look at the roles we should have right now :
 
 Or something along those lines.
 
-Note : since the last step in the _crudops_ sample was to delete the Contractor
+Note: since the last step in the _crudops_ sample was to delete the Contractor
 role via the Admin UI, you might have to issue the following request again to
-populate the Contractor role :
+populate the Contractor role:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -193,12 +191,11 @@ populate the Contractor role :
                }' \
                https://localhost:8443/openidm/managed/role/Contractor
 
-Once you have both roles listed, we just need to assign the Employee role to
-bjensen. But first we need to find out what the identifier is for bjensen's
-entry :
+Once you have both roles listed, you just need to assign the Employee role to
+bjensen. But first you need to find out what the identifier is for bjensen's
+entry:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -213,7 +210,7 @@ entry :
                  "remainingPagedResults" : -1
                }
 
-Therefore we can assign the Employee role by using :
+Therefore you can assign the Employee role by using:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -233,10 +230,9 @@ Therefore we can assign the Employee role by using :
                {"displayName":"Barbara Jensen","description":"Created for OpenIDM","givenName":"Barbara","mail":"bjensen@example.com","telephoneNumber":"1-360-229-7105","sn":"Jensen","userName":"bjensen","ldapGroups":["cn=openidm2,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized","managed/role/Employee"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized","managed/role/Employee"],"_id":"8ff9639f-2a89-48a2-a0fd-9df4d5297eeb","_rev":"4","effectiveAssignments":{"ldap":{"attributes":[{"name":"employeeType","value":"Employee","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Employee"}]}}}
 
 Let's take a closer look at bjensen's entry for what we're really interested
-in, i.e. the roles, effective roles and effective assignments :
+in, i.e. the roles, effective roles and effective assignments:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -273,7 +269,7 @@ list the _employeeType_ attribute.
 3. Pushing assignments out to OpenDJ (external system)
 
 This sample's sync.json adds on to _sample2b_'s mapping by incorporating an
-additional property, called _assignmentsToMap :
+additional property, called _assignmentsToMap_:
 
             ....
             "name" : "managedUser_systemLdapAccounts",
@@ -286,7 +282,7 @@ additional property, called _assignmentsToMap :
             ....
 
 Now if you take a look at bjensen directly in the directory you should see the
-attribute _employeeType_ being populated properly :
+attribute _employeeType_ being populated properly:
 
             $ ldapsearch -p 1389 -h localhost -b "dc=example,dc=com" -D "cn=Directory Manager" -w - -s sub uid=bjensen dn uid employeeType
 
@@ -299,10 +295,9 @@ Now let's make this a little more interesting by adding the groups that an
 Employee should have in the corporate directory (OpenDJ).
 
 We just need to update the Employee role with the appropriate entitlements.
-First, let's look at the Employee role entry one more time :
+First, let's look at the Employee role entry one more time:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -327,7 +322,7 @@ First, let's look at the Employee role entry one more time :
                  }
                }
 
-We simply need to add the entitlement for groups under :
+We simply need to add the entitlement for groups under:
 assignments/ldap/attributes
 
         $ curl --insecure \
@@ -369,29 +364,26 @@ added to the Chat Users and Employees groups.
 
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
                'https://localhost:8443/openidm/system/ldap/account?_queryFilter=/uid+sw+"bjensen"&_fields=dn,uid,employeeType,ldapGroups&_prettyPrint=true'
 
-{
-  "result" : [ {
-    "dn" : "uid=bjensen,ou=People,dc=example,dc=com",
-    "ldapGroups" : [ "cn=Chat User,ou=Groups,dc=example,dc=com", "cn=Employees,ou=Groups,dc=example,dc=com" ]
-  } ],
-  "resultCount" : 1,
-  "pagedResultsCookie" : null,
-  "remainingPagedResults" : -1
-}
-
-Note : the incomplete display above of the uid and employeeType attributes
-is a known issue (OPENIMD-3200).
-
+               {
+                 "result" : [ {
+                   "dn" : "uid=bjensen,ou=People,dc=example,dc=com",
+                   "uid" : "bjensen",
+                   "employeeType" : "Employee",
+                   "ldapGroups" : [ "cn=Chat Users,ou=Groups,dc=example,dc=com", "cn=Employees,ou=Groups,dc=example,dc=com",  ]
+                 } ],
+                 "resultCount" : 1,
+                 "pagedResultsCookie" : null,
+                 "remainingPagedResults" : -1
+               }
 
 Let's continue with adding the appropriate entitlements to the Contractor role
 and allocating that role to jdoe, who is a contractor and therefore not
-entitled to access the internal chat application :
+entitled to access the internal chat application:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -426,10 +418,9 @@ entitled to access the internal chat application :
 
 Now we just need to allocate the Contractor role to jdoe and he should be
 automatically added to the Contractors group in OpenDJ. Let's first take a look
-at jdoe's entry to make sure we know the value of the identifier :
+at jdoe's entry to make sure we know the value of the identifier:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -444,7 +435,7 @@ at jdoe's entry to make sure we know the value of the identifier :
                  "remainingPagedResults" : -1
                }
 
-Now we can update jdoe's entry with the Contractor role :
+Now we can update jdoe's entry with the Contractor role:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -468,33 +459,29 @@ employee type has been set and that jdoe has been added to the Contractors
 group.
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
                'https://localhost:8443/openidm/system/ldap/account?_queryFilter=/uid+sw+"jdoe"&_prettyPrint=true'
 
-{
-  "result" : [ {
-    "sn" : "Doe",
-    "telephoneNumber" : "1-415-599-1100",
-    "employeeType" : "Contractor",
-    "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
-    "cn" : "John Doe",
-    "uid" : "jdoe",
-    "ldapGroups" : [ "cn=openidm,ou=Groups,dc=example,dc=com", "cn=Contractors,ou=Groups,dc=example,dc=com" ],
-    "givenName" : "John",
-    "mail" : "jdoe@example.com",
-    "description" : "Created for OpenIDM",
-    "_id" : "uid=jdoe,ou=People,dc=example,dc=com"
-  } ],
-  "resultCount" : 1,
-  "pagedResultsCookie" : null,
-  "remainingPagedResults" : -1
-}
-
-Note : we didn't request specific attributes via the "fields" parameter because
-of a known issue preventing some attributes to be displayed (OPENIDM-3200).
+               {
+                 "result" : [ {
+                   "sn" : "Doe",
+                   "telephoneNumber" : "1-415-599-1100",
+                   "employeeType" : "Contractor",
+                   "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
+                   "cn" : "John Doe",
+                   "uid" : "jdoe",
+                   "ldapGroups" : [ "cn=openidm,ou=Groups,dc=example,dc=com", "cn=Contractors,ou=Groups,dc=example,dc=com" ],
+                   "givenName" : "John",
+                   "mail" : "jdoe@example.com",
+                   "description" : "Created for OpenIDM",
+                   "_id" : "uid=jdoe,ou=People,dc=example,dc=com"
+                 } ],
+                 "resultCount" : 1,
+                 "pagedResultsCookie" : null,
+                 "remainingPagedResults" : -1
+               }
 
 
 4. Removing a role from a user
@@ -502,28 +489,27 @@ of a known issue preventing some attributes to be displayed (OPENIDM-3200).
 Now we know what happens with entitlements when a role is assigned to a user,
 let's take a look at what happens when a role is deallocated from a user entry.
 
-Again, we take a look at jdoe's entry to find out about its state :
+Again, we take a look at jdoe's entry to find out about its state:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
                'https://localhost:8443/openidm/managed/user?_queryFilter=/userName+eq+"jdoe"&_fields=_id,roles&_prettyPrint=true'
 
-{
-  "result" : [ {
-    "_id" : "3f9ada28-2809-4909-aadf-815567b00a4d",
-    "roles" : [ "openidm-authorized", "managed/role/Contractor" ]
-  } ],
-  "resultCount" : 1,
-  "pagedResultsCookie" : null,
-  "remainingPagedResults" : -1
-}
+               {
+                 "result" : [ {
+                   "_id" : "3f9ada28-2809-4909-aadf-815567b00a4d",
+                   "roles" : [ "openidm-authorized", "managed/role/Contractor" ]
+                 } ],
+                 "resultCount" : 1,
+                 "pagedResultsCookie" : null,
+                 "remainingPagedResults" : -1
+               }
 
 We therefore need to remove the 2nd element of the roles array (index = 1) in
 order to remove the Contractor role -- also please note the entry's identifier
-that is used in the request's URL :
+that is used in the request's URL:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -542,37 +528,36 @@ that is used in the request's URL :
                {"displayName":"John Doe","description":"Created for OpenIDM","givenName":"John","mail":"jdoe@example.com","telephoneNumber":"1-415-599-1100","sn":"Doe","userName":"jdoe","ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"_id":"3f9ada28-2809-4909-aadf-815567b00a4d","_rev":"3","effectiveAssignments":{}}
 
 This results in jdoe's entry in OpenDJ not belonging to the Contractors group
-anymore and its employee type being undefined.
+anymore and its employee type being undefined."
 
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
                'https://localhost:8443/openidm/system/ldap/account?_queryFilter=/uid+sw+"jdoe"&_prettyPrint=true'
 
-{
-  "result" : [ {
-    "sn" : "Doe",
-    "telephoneNumber" : "1-415-599-1100",
-    "employeeType" : null,
-    "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
-    "cn" : "John Doe",
-    "uid" : "jdoe",
-    "ldapGroups" : [ "cn=openidm,ou=Groups,dc=example,dc=com" ],
-    "givenName" : "John",
-    "mail" : "jdoe@example.com",
-    "description" : "Created for OpenIDM",
-    "_id" : "uid=jdoe,ou=People,dc=example,dc=com"
-  } ],
-  "resultCount" : 1,
-  "pagedResultsCookie" : null,
-  "remainingPagedResults" : -1
-} 
+               {
+                 "result" : [ {
+                   "sn" : "Doe",
+                   "telephoneNumber" : "1-415-599-1100",
+                   "employeeType" : null,
+                   "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
+                   "cn" : "John Doe",
+                   "uid" : "jdoe",
+                   "ldapGroups" : [ "cn=openidm,ou=Groups,dc=example,dc=com" ],
+                   "givenName" : "John",
+                   "mail" : "jdoe@example.com",
+                   "description" : "Created for OpenIDM",
+                   "_id" : "uid=jdoe,ou=People,dc=example,dc=com"
+                 } ],
+                 "resultCount" : 1,
+                 "pagedResultsCookie" : null,
+                 "remainingPagedResults" : -1
+               } 
 
 
-Note : some additional samples might be provided to demonstrate the different
+Note: some additional samples might be provided to demonstrate the different
 assignment operations (merge, replace, remove, etc.).
 
 This is pretty much everything you need to know about roles and entitlements
@@ -586,8 +571,8 @@ Appendix
 --------
 
 If you need to reload the Employee and Contractor roles entirely without
-going through each step in the those samples, here are the REST request
-to do just that :
+going through each step in the samples, here are the REST requests
+to do just that:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
