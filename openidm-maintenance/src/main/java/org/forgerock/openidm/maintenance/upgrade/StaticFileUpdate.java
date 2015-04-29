@@ -37,15 +37,13 @@ public class StaticFileUpdate {
 
     static final String IDM_SUFFIX = ".idm-";
 
-    private final Path path;
     private final FileStateChecker fileStateChecker;
     private final Archive archive;
     private final ProductVersion currentVersion;
     private final ProductVersion upgradedVersion;
 
-    StaticFileUpdate(Path path, FileStateChecker fileStateChecker, Archive archive,
+    StaticFileUpdate(FileStateChecker fileStateChecker, Archive archive,
             ProductVersion currentVersion, ProductVersion upgradedVersion) {
-        this.path = path;
         this.fileStateChecker = fileStateChecker;
         this.archive = archive;
         this.currentVersion = currentVersion;
@@ -55,15 +53,15 @@ public class StaticFileUpdate {
     /**
      * @return whether the static file exists
      */
-    boolean exists() {
+    boolean exists(Path path) {
         return Files.exists(path);
     }
 
     /**
      * @return whether the static file has been changed
      */
-    boolean isChanged() throws IOException {
-        return exists()
+    boolean isChanged(Path path) throws IOException {
+        return exists(path)
                 && FileStateChecker.FileState.DIFFERS.equals(fileStateChecker.getCurrentFileState(path));
     }
 
@@ -73,8 +71,8 @@ public class StaticFileUpdate {
      *
      * @throws IOException
      */
-    void replace() throws IOException {
-        if (isChanged()) {
+    void replace(Path path) throws IOException {
+        if (isChanged(path)) {
             Files.move(path, Paths.get(path.toString() + IDM_SUFFIX + currentVersion.toString()));
         }
         Files.copy(archive.getInputStream(path), path, StandardCopyOption.REPLACE_EXISTING);
@@ -85,8 +83,8 @@ public class StaticFileUpdate {
      *
      * @throws IOException
      */
-    void keep() throws IOException {
-        if (!isChanged()) {
+    void keep(Path path) throws IOException {
+        if (!isChanged(path)) {
             throw new IOException("The file " + path.toString() + " does not exist - cannot \"keep\" it");
         }
         Files.copy(archive.getInputStream(path), Paths.get(path.toString() + IDM_SUFFIX + upgradedVersion.toString()));

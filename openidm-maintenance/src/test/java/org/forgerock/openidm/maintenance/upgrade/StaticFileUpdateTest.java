@@ -31,8 +31,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -40,18 +43,27 @@ import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.IDM_SUFFIX;
 
-
-import org.testng.annotations.Test;
-
 /**
  * Tests updating static files.
  */
 public class StaticFileUpdateTest {
 
-    private static ProductVersion oldVersion = new ProductVersion("3.2.0", "5000");
-    private static ProductVersion newVersion = new ProductVersion("4.0.0", "6000");
+    private static final ProductVersion oldVersion = new ProductVersion("3.2.0", "5000");
+    private static final ProductVersion newVersion = new ProductVersion("4.0.0", "6000");
 
-    Path tempPath;
+    private static final byte[] oldBytes = "oldcontent".getBytes();
+    private static final byte[] newBytes = "newcontent".getBytes();
+
+    private Path getOldVersionPath(Path file) {
+        return Paths.get(file + IDM_SUFFIX + oldVersion.toString());
+    }
+
+    private Path getNewVersionPath(Path file) {
+        return Paths.get(file + IDM_SUFFIX + newVersion.toString());
+    }
+
+    private Path tempPath;
+    private Path tempFile;
 
     @BeforeSuite
     public void createTempDirPath() throws IOException {
@@ -63,6 +75,25 @@ public class StaticFileUpdateTest {
         FileUtils.deleteDirectory(tempPath.toFile());
     }
 
+    @BeforeMethod
+    public void createTempFile() throws IOException {
+        tempFile = Files.createTempFile(tempPath, null, null);
+    }
+
+    @AfterMethod
+    public void deleteTempFile() throws IOException {
+        Files.deleteIfExists(tempFile.resolveSibling(getNewVersionPath(tempFile)));
+        Files.deleteIfExists(tempFile.resolveSibling(getOldVersionPath(tempFile)));
+        Files.delete(tempFile);
+    }
+
+    private StaticFileUpdate getStaticFileUpdate(FileStateChecker fileStateChecker) {
+        Archive archive = mock(Archive.class);
+        when(archive.getInputStream(tempFile)).thenReturn(new ByteArrayInputStream(newBytes));
+        StaticFileUpdate update = new StaticFileUpdate(fileStateChecker, archive, oldVersion, newVersion);
+        return update;
+    }
+
     /**
      * Test that a path does not exist.
      *
@@ -71,10 +102,8 @@ public class StaticFileUpdateTest {
     @Test
     public void testDoesNotExist() throws IOException {
         Path file = tempPath.resolve("test");
-        FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        assertFalse(update.exists());
+        StaticFileUpdate update = getStaticFileUpdate(mock(FileStateChecker.class));
+        assertFalse(update.exists(file));
     }
 
     /**
@@ -82,12 +111,8 @@ public class StaticFileUpdateTest {
      */
     @Test
     public void testExists() throws IOException {
-        Path file = Files.createTempFile(tempPath, null, null);
-        FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        assertTrue(update.exists());
-        Files.delete(file);
+        StaticFileUpdate update = getStaticFileUpdate(mock(FileStateChecker.class));
+        assertTrue(update.exists(tempFile));
     }
 
     /**
@@ -95,12 +120,10 @@ public class StaticFileUpdateTest {
      */
     @Test
     public void testUnchanged() throws IOException {
-        Path file = Files.createTempFile(tempPath, null, null);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.UNCHANGED);
-        Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        assertFalse(update.isChanged());
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.UNCHANGED);
+        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
+        assertFalse(update.isChanged(tempFile));
     }
 
     /**
@@ -108,12 +131,10 @@ public class StaticFileUpdateTest {
      */
     @Test
     public void testDiffers() throws IOException {
-        Path file = Files.createTempFile(tempPath, null, null);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.DIFFERS);
-        Archive archive = mock(Archive.class);
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        assertTrue(update.isChanged());
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.DIFFERS);
+        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
+        assertTrue(update.isChanged(tempFile));
     }
 
     /**
@@ -121,17 +142,13 @@ public class StaticFileUpdateTest {
      */
     @Test
     public void testReplaceIsUnchanged() throws IOException {
-        byte[] newBytes = "newcontent".getBytes();
-        Path file = Files.createTempFile(tempPath, null, null);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.UNCHANGED);
-        Archive archive = mock(Archive.class);
-        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        update.replace();
-        assertThat(Files.readAllBytes(file)).isEqualTo(newBytes);
-        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + oldVersion.toString())));
-        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + newVersion.toString())));
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.UNCHANGED);
+        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
+        update.replace(tempFile);
+        assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
+        assertFalse(Files.exists(getOldVersionPath(tempFile)));
+        assertFalse(Files.exists(getNewVersionPath(tempFile)));
     }
 
     /**
@@ -140,19 +157,14 @@ public class StaticFileUpdateTest {
      */
     @Test
     public void testReplaceDiffers() throws IOException {
-        byte[] oldBytes = "oldcontent".getBytes();
-        byte[] newBytes = "newcontent".getBytes();
-        Path file = Files.createTempFile(tempPath, null, null);
-        Files.write(file, oldBytes);
+        Files.write(tempFile, oldBytes);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.DIFFERS);
-        Archive archive = mock(Archive.class);
-        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        update.replace();
-        assertThat(Files.readAllBytes(file)).isEqualTo(newBytes);
-        assertThat(Files.readAllBytes(Paths.get(file + IDM_SUFFIX + oldVersion.toString()))).isEqualTo(oldBytes);
-        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + newVersion.toString())));
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.DIFFERS);
+        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
+        update.replace(tempFile);
+        assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
+        assertThat(Files.readAllBytes(getOldVersionPath(tempFile))).isEqualTo(oldBytes);
+        assertFalse(Files.exists(getNewVersionPath(tempFile)));
     }
 
     /**
@@ -161,16 +173,11 @@ public class StaticFileUpdateTest {
      */
     @Test(expectedExceptions = IOException.class)
     public void testKeepIsUnchanged() throws IOException {
-        byte[] oldBytes = "oldcontent".getBytes();
-        byte[] newBytes = "newcontent".getBytes();
-        Path file = Files.createTempFile(tempPath, null, null);
-        Files.write(file, oldBytes);
+        Files.write(tempFile, oldBytes);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.UNCHANGED);
-        Archive archive = mock(Archive.class);
-        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        update.keep();
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.UNCHANGED);
+        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
+        update.keep(tempFile);
     }
 
     /**
@@ -179,18 +186,13 @@ public class StaticFileUpdateTest {
      */
     @Test
     public void testKeepDiffers() throws IOException {
-        byte[] oldBytes = "oldcontent".getBytes();
-        byte[] newBytes = "newcontent".getBytes();
-        Path file = Files.createTempFile(tempPath, null, null);
-        Files.write(file, oldBytes);
+        Files.write(tempFile, oldBytes);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(file)).thenReturn(FileStateChecker.FileState.DIFFERS);
-        Archive archive = mock(Archive.class);
-        when(archive.getInputStream(file)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(file, fileStateChecker, archive, oldVersion, newVersion);
-        update.keep();
-        assertThat(Files.readAllBytes(file)).isEqualTo(oldBytes);
-        assertThat(Files.readAllBytes(Paths.get(file + IDM_SUFFIX + newVersion.toString()))).isEqualTo(newBytes);
-        assertFalse(Files.exists(Paths.get(file + IDM_SUFFIX + oldVersion.toString())));
+        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileStateChecker.FileState.DIFFERS);
+        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
+        update.keep(tempFile);
+        assertThat(Files.readAllBytes(tempFile)).isEqualTo(oldBytes);
+        assertThat(Files.readAllBytes(getNewVersionPath(tempFile))).isEqualTo(newBytes);
+        assertFalse(Files.exists(getOldVersionPath(tempFile)));
     }
 }
