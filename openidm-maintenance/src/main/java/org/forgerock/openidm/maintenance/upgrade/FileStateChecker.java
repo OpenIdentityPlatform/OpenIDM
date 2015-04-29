@@ -39,7 +39,9 @@ import java.util.Map;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
- * Utility class to retrieve digestCache of original, shipped files and files as they presently exist.
+ * Utility class to provide file state for files in the distribution.  Currently implemented by comparing
+ * the digest of the original, shipped files with the digest of the files as they presently exist on the
+ * filesystem.
  */
 public class FileStateChecker {
 
