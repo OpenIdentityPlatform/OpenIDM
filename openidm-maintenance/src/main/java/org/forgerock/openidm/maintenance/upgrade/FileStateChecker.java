@@ -126,7 +126,7 @@ public class FileStateChecker {
      * @param file a file in the distribution
      * @return the path of the file relative to the checksum file (root path)
      */
-    private Path getRelativzedPath(Path file) {
+    private Path getRelativizedPath(Path file) {
         return checksums.getParent().relativize(file);
     }
 
@@ -137,7 +137,7 @@ public class FileStateChecker {
      * @return the digestCache
      */
     private byte[] getOriginalDigest(Path shippedFile) {
-        return hexAdapter.unmarshal(digestCache.get(getRelativzedPath(shippedFile).toString()));
+        return hexAdapter.unmarshal(digestCache.get(getRelativizedPath(shippedFile).toString()));
     }
 
     /**
