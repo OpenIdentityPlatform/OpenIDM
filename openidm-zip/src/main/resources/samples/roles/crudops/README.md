@@ -22,12 +22,12 @@
      * "Portions Copyrighted [year] [name of copyright owner]"
      */
 
-Roles Sample : Managing Roles via REST and via the UI
+Roles Sample: Managing Roles via REST and via the UI
 =====================================================
 
 This sample provides all the information you need to manage Roles in
 OpenIDM, via either REST or via the Administrative UI. The following use
-cases are covered :
+cases are covered:
 * Create a role
 * Update a role
 * Query all roles
@@ -35,7 +35,7 @@ cases are covered :
 * Query all users and their roles
 * Delete a role
 
-Note : this sample doesn't contain any particular configuration. So OpenIDM
+Note: this sample doesn't contain any particular configuration. So OpenIDM
 can just be started with the following command
 
         $ nohup ./startup.sh > logs/console.out 2>&1&
@@ -67,7 +67,7 @@ object you create.
                {"properties":{"name":"Employee","description":"Role assigned to workers on the payroll."},"_id":"Employee","_rev":"1"}
 
 
-In this case the role's identifier, as shown by the response above, will be :
+In this case the role's identifier, as shown by the response above, will be:
 "Employee".
 
 But you can also use a POST request, in which case the server will
@@ -96,10 +96,9 @@ any renaming will potentially create conflicts and referential integrity issues.
 
 2. Reading (and searching) the Employee and Contractor roles
 
-A read of the Employee role is by itself very simple :
+It is a simple process to read the Employee role:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -109,10 +108,9 @@ A read of the Employee role is by itself very simple :
 
 ... but it is a little more complicated to read the Contractor role. Of course
 the same query can be applied by using the system-generated identifier, but it
-is rather unsightly :
+is rather unsightly:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -121,14 +119,13 @@ is rather unsightly :
                {"properties":{"name":"Contractor","description":"Role assigned to contract workers."},"_id":"c22316ba-2096-4272-af10-9b17c17e555b","_rev":"1"}
 
 An easier way to retrieve a role with a server side (or system) generated
-identifier is to use the query filter facility (see section 7.3.1 in the
-Integrator's guide).
+identifier is to use the query filter facility (see the section "Common Filter Expressions" 
+in the Integrator's guide: http://openidm.forgerock.org/doc/bootstrap/integrators-guide/index.html#query-filters).
 
-The query below uses a filter expression to retrieve a role with a name
-equal to "Contractor", and displays the result in a nice format :
+The following query uses a filter expression to retrieve a role with a name
+equal to "Contractor", and displays the result in a clear format:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -148,11 +145,10 @@ equal to "Contractor", and displays the result in a nice format :
                  "remainingPagedResults" : -1
                }
 
-In addition we can retrieve all the managed roles currently available via the
-following query filter request :
+In addition we can retrieve all the managed roles currently available by using the
+following query filter request:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -183,10 +179,10 @@ following query filter request :
 3. Assigning the Employee role to a user
 
 The queries above allowed us to see how easy it is to create roles through
-the REST interface. But by themselves they don't do very much. A role becomes
+the REST interface, but by themselves they don't do very much. A role becomes
 somewhat more meaningful when a user is assigned that role.
 
-Let's use Felicitas Doe, the user we encounter in sample2b, as our test user :
+Let's use Felicitas Doe, the user we encounter in sample2b, as our test user:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -206,14 +202,14 @@ Let's use Felicitas Doe, the user we encounter in sample2b, as our test user :
 
                {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"1"}
 
-As can be seen from the result output, our new user only has one role : openidm-
-authorized ; this role is assigned automatically when new users are created.
+As can be seen from the result output, our new user has only one role: openidm-
+authorized; this role is assigned automatically when new users are created.
 But it is slightly different than the managed roles we've dealt with so far.
 It is an internal role used for authorization decisions inside OpenIDM.
 
 So, how do we assign the Employee role to this new user who is now on the
-payroll ? Well we need to update the user entry via a PATCH request and add
-a pointer to the role itself :
+payroll? We need to update the user entry via a PATCH request and add
+a pointer to the role itself:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -232,10 +228,9 @@ a pointer to the role itself :
 
                {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized",["managed/role/Employee"]],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized","managed/role/Employee"],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"2"}
 
-Let's take a closer look at Felicitas' entry using the query filter mechanism :
+Let's take a closer look at Felicitas' entry using the query filter mechanism:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -264,7 +259,7 @@ Let's imagine that the Employee role was erroneously assigned to Felicitas.
 We now need to remove this role from her entry. To do that we need to use
 a JSON Patch _remove_ operation. Since the role is part of an array, and is
 actually the 2nd element of that array (see output in section 3 above) the
-resulting PATCH request would look like : 
+resulting PATCH request would look as follows: 
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -292,7 +287,7 @@ we will do with the Contractor role. But first let's take a look at what would
 happen if we tried to remove a role already assigned to a user.
 
 Let's, temporarily, add the Contractor role to Felicitas -- notice the role
-with server-side generated identifier :
+with server-side generated identifier:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -311,7 +306,7 @@ with server-side generated identifier :
 
                {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized","managed/role/c22316ba-2096-4272-af10-9b17c17e555b"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized","managed/role/c22316ba-2096-4272-af10-9b17c17e555b"],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"6","effectiveAssignments":{}}
 
-Now let's try and delete the Contractor role :
+Now let's try and delete the Contractor role:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -322,8 +317,8 @@ Now let's try and delete the Contractor role :
 
                {"code":409,"reason":"Conflict","message":"Cannot delete a role that is currently assigned"}
 
-So we cannot delete a role that has been assigned to one or more users. We
-first need to deallocate that role from the user entry :
+So, we cannot delete a role that has been assigned to one or more users. 
+We must first deallocate that role from the user entry:
 
 
         $ curl --insecure \
@@ -342,7 +337,7 @@ first need to deallocate that role from the user entry :
 
                {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"7","effectiveAssignments":{}}
 
-So now let's try and delete the Contractor role again :
+Now let's try and delete the Contractor role again:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -353,10 +348,9 @@ So now let's try and delete the Contractor role again :
 
                {"properties":{"name":"Contractor","description":"Role assigned to contract workers."},"_id":"c22316ba-2096-4272-af10-9b17c17e555b","_rev":"1"}
 
-Let's verify that the Contractor role has been deleted :
+Let's verify that the Contractor role has been deleted:
 
         $ curl --insecure \
-               --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
@@ -385,12 +379,12 @@ the Admin UI.
 
 1. Create the Contractor role again
 
-Login to the Admin UI at :
+Login to the Admin UI at:
 https://localhost:8443/admin
 (or whatever applies for the hostname where OpenIDM is deployed.)
 
 If you are using the default credentials provided with the product for the
-Administrative User, you will have to use :
+Administrative User, you must use:
 username : openidm-admin 
 password : openidm-admin
 
@@ -403,10 +397,10 @@ role listed as one of the items (only one if you've followed all the steps
 above).
 
 To create the Contractor role again, click the "Add Role" button on the right
-corner. You should now be able to enter the new role name : Contractor , and
-the role description : Role assigned to contract workers.
+corner. You should now be able to enter the new role name: Contractor, and
+the role description: Role assigned to contract workers.
 
-Then simply click the "Create" button, and voila ! You're done creating a role.
+Then simply click the "Create" button, and voilà! You're done creating a role.
 
 2. Reading (and searching) roles
 
@@ -429,22 +423,22 @@ In our case we want to select fdoe (Felicitas entry) and we need to click on
 "Add Users". Felicitas entry will now be showing with a checkmark in the
 "Has Role" column.
 
-You can also verify that Felicitas indeed has the Contractor role by selecting
-the "Data Management View" in the top rigth corner menu. If you click then on
-the user tab, you should see the list of users present in the system. Select
-Felicitas' entry. The profile should show the Contractor role with a checkmark.
+You can also verify that Felicitas has the Contractor role by selecting
+the "Data Management View" from the top right corner menu. Click on the user tab
+to see the list of users present in the system. Select Felicitas' entry. 
+The profile should show the Contractor role with a checkmark.
 
-This is as well another way to add the role Contractor to the user : from the
-user's profile page, just select the desired role and click on "Update".
+Another way to add the Contractor role to the user is simply to select the 
+required role from the user's profile page, and then click Update.
 
 For example, select the "Employee" role from Felicitas' profile page and click
 "Save". She now has both the Contractor and the Employee role. Surely we must
-be mistaken !
+be mistaken!
 
-4.Removing the Employee role from a user
+4. Removing the Employee role from a user
 
 By unchecking the Employee role from Felicitas' profile page we can easily
-remove the Employee role from her entry (click "Save" !)
+remove the Employee role from her entry (click "Save"!)
 
 We can also go back to the Admin View (top right corner) and select "Data" from
 the 3 vertical dots of the managed roles card.
@@ -462,4 +456,4 @@ Contractor role (checkmark, don't click on the role itself). Click on "Delete
 Selected" and the Contractor role will be deleted.
 
 
-See the other samples for more information on roles ! 
+See the other samples for more information on roles! 
