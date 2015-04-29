@@ -72,7 +72,7 @@ define("config/AppConfiguration", [
                     moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                     configuration: {
                         remoteConfig: true,
-                        delegate: "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
+                        delegate: "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate"
                     }
                 },
                 {
@@ -118,11 +118,6 @@ define("config/AppConfiguration", [
                     moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                     configuration: {
                         userBar: [
-                            {
-                                "id": "settings",
-                                "href": "#settings/",
-                                "i18nKey": "common.form.settings"
-                            },
                             {
                                 "id": "user_link",
                                 "href": "../openidmui",
@@ -175,6 +170,18 @@ define("config/AppConfiguration", [
                                                 "inactive": false
                                             }
                                         }
+                                    },
+                                    "roles": {
+                                        "url": "#resource/managed/role/list/",
+                                        "name": "config.AppConfiguration.Navigation.links.roles",
+                                        "icon": "fa fa-group",
+                                        "inactive": false
+                                    },
+                                    "settings": {
+                                        "url": "#settings/",
+                                        "name": "common.form.settings",
+                                        "icon": "fa fa-wrench",
+                                        "inactive": false
                                     }
                                 }
                             }
