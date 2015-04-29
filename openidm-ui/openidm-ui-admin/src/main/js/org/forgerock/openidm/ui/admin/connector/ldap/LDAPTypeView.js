@@ -100,7 +100,11 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                 }
             }
 
-            this.data.baseContextsSameResults = this.compareBaseContext(this.data.connectorDefaults.configurationProperties.baseContexts, this.data.connectorDefaults.configurationProperties.baseContextsToSynchronize);
+            if(!_.isUndefined(this.data.connectorDefaults.configurationProperties.baseContexts) && !_.isUndefined(this.data.connectorDefaults.configurationProperties.baseContextsToSynchronize)) {
+                this.data.baseContextsSameResults = this.compareBaseContext(this.data.connectorDefaults.configurationProperties.baseContexts, this.data.connectorDefaults.configurationProperties.baseContextsToSynchronize);
+            } else {
+                this.data.baseContextsSameResults = true;
+            }
 
             if(this.data.editState) {
                 securityDelegate.getPublicKeyCert("truststore", "openidm_" +args.connectorDefaults.name).then(_.bind(function(cert){
@@ -113,7 +117,9 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
             } else {
                 this.ldapParentRender(args, _.bind(function(){
                     this.fieldButtonCheck();
-                    callback();
+                    if(callback) {
+                        callback();
+                    }
                 }, this));
             }
         },
@@ -278,11 +284,11 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     updateBtnStatus();
                 },
                 buttons: [{
-                        label: $.t('common.form.cancel'),
-                        action: function(dialogRef){
-                            dialogRef.close();
-                        }
-                    },
+                    label: $.t('common.form.cancel'),
+                    action: function(dialogRef){
+                        dialogRef.close();
+                    }
+                },
                     {
                         label: $.t('common.form.save'),
                         id: "sslSaveButton",
