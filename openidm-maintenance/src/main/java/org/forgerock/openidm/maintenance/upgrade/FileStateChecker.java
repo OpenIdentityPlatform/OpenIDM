@@ -143,7 +143,7 @@ public class FileStateChecker {
      * @param shippedFile the original, shipped file.
      * @return the digestCache
      */
-    private byte[] getOriginalDigest(Path shippedFile) {
+    protected byte[] getOriginalDigest(Path shippedFile) {
         return hexAdapter.unmarshal(digestCache.get(getRelativizedPath(shippedFile).toString()));
     }
 
@@ -153,7 +153,7 @@ public class FileStateChecker {
      * @param currentFile the current file
      * @return the digestCache
      */
-    private byte[] getCurrentDigest(Path currentFile) throws IOException {
+    protected byte[] getCurrentDigest(Path currentFile) throws IOException {
         return digest.digest(Files.readAllBytes(currentFile));
     }
 
