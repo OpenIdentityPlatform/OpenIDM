@@ -46,22 +46,22 @@
   <authorgroup>
    <author>
     <personname>
-     <firstname>Mark </firstname><surname>Craig</surname>
+     <firstname>Mark</firstname> <surname>Craig</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Lana </firstname><surname>Frost</surname>
+     <firstname>Lana</firstname> <surname>Frost</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Mike </firstname><surname>Jang</surname>
+     <firstname>Mike</firstname> <surname>Jang</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Andi </firstname><surname>Egloff</surname>
+     <firstname>Andi</firstname> <surname>Egloff</surname>
     </personname>
     <xinclude:include href="../shared/affiliation-fr.xml"/>
    </author>
