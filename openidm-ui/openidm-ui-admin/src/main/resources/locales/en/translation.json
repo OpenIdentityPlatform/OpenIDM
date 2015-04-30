@@ -286,7 +286,9 @@
                 "selectMapping": "Select a mapping...",
                 "noMappings": "No mappings attached to this entitlement",
                 "addMappingSuccess": "Successfully added &quot;__assignmentName__&quot; entitlement to &quot;__mappingName__&quot;.",
-                "removeMappingSuccess": "Successfully removed &quot;__assignmentName__&quot; entitlement from &quot;__mappingName__&quot;."
+                "removeMappingSuccess": "Successfully removed &quot;__assignmentName__&quot; entitlement from &quot;__mappingName__&quot;.",
+                "condition": "Condition",
+                "linkQualifiers": "Link Qualifiers"
             }
         },
         "managed" : {
