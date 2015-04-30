@@ -11,6 +11,7 @@
       <li><a href="#role-edit-events" data-toggle="tab">{{t "templates.admin.RoleEntitlementsTemplate.events"}}</a></li>
       {{#if assignmentName}}
       <li><a href="#role-edit-mappings" data-toggle="tab">{{t "templates.admin.RoleEntitlementsTemplate.mappings"}}</a></li>
+      <li><a href="#role-edit-condition" data-toggle="tab">{{t "templates.admin.RoleEntitlementsTemplate.condition"}}</a></li>
       {{/if}}
    </ul>
    <!-- Tab panes -->
@@ -240,6 +241,10 @@
                  </div>
               </div>
            </div>
+      </div>
+      <div class="tab-pane " id="role-edit-condition">
+         <label class="control-label" for="assignmentLinkQualifiers">{{t "templates.admin.RoleEntitlementsTemplate.linkQualifiers"}}: </label>
+         <input id="assignmentLinkQualifiers" type="text" style="display:none;" value="{{assignment.linkQualifiers}}"/>
       </div>
    </div>
 </div>

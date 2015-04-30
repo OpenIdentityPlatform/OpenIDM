@@ -129,6 +129,7 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
                             }
                             this.setScripts();
                             this.setAttributeOperationsPopovers();
+                            this.setLinkQualifers();
                             
                             if(callback){
                                 callback();
@@ -222,10 +223,15 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
             var invalid = false,
                 doSave = _.bind(function() {
                     var onAssignment = this.data.onAssignmentScript.generateScript(),
-                        onUnassignment = this.data.onUnassignmentScript.generateScript();
+                        onUnassignment = this.data.onUnassignmentScript.generateScript(),
+                        linkQualifiers = this.$el.find("#assignmentLinkQualifiers").val().split(",");
                     
                     this.data.role.assignments[this.data.assignmentName] = { attributes: this.getAttributes() };
-
+                    
+                    if(linkQualifiers.length && linkQualifiers[0].length) {
+                        this.data.role.assignments[this.data.assignmentName].linkQualifiers = linkQualifiers;
+                    }
+                    
                     if(onAssignment) {
                         this.data.role.assignments[this.data.assignmentName].onAssignment = onAssignment;
                     }
@@ -337,6 +343,19 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
             e.preventDefault();
             
             this.mappingAction(mappingName);
+        },
+        setLinkQualifers: function() {
+            this.$el.find('#assignmentLinkQualifiers').selectize({
+                plugins: ['remove_button'],
+                delimiter: ',',
+                persist: false,
+                create: function(input) {
+                    return {
+                        value: input,
+                        text: input
+                    };
+                }
+            });
         }
     }); 
     
