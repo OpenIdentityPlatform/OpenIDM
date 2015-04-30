@@ -21,16 +21,16 @@
     color:#aaa;
   }
 
-  #scriptAccordions {
+  .script-accordions {
     .inline-code {
-      #codemirror {
+      .codemirror-holder {
         padding: 0;
       }
       .CodeMirror {
         border: 1px solid #ddd;
       }
 
-      #codeCollapse {
+      .code-collapse {
         display: none;
       }
     }
@@ -40,23 +40,18 @@
     }
   }
 
-  #scriptVariables {
+  .script-variables {
     .panel-body {
       padding: 0;
     }
 
-    #passedVariablesHolder {
-      border-top: 1px solid #ddd;
+    .passed-variable-block {
       border-bottom: 1px solid #ddd;
+      padding-bottom: 15px;
       margin-bottom: 15px;
 
-      .passed-variable-block {
-        margin-top: 10px;
-        margin-bottom: 10px;
-
-        .textContainer {
-          padding-right: 0;
-        }
+      .textContainer {
+        padding-right: 0;
       }
     }
   }
