@@ -73,7 +73,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
         
         if(showRoles) {
             _.each(eventScriptMap, function(val, key) {
-                if(!showRoles || !role[key] || !role[key].file || role[key].file !== val) {
+                if(!showRoles || !role || !role[key] || !role[key].file || role[key].file !== val) {
                     showRoles = false;
                 }
             });
