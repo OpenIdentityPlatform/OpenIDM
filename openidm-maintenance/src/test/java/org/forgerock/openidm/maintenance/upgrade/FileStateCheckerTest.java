@@ -28,16 +28,99 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
+import org.apache.commons.io.FileUtils;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 /**
  * Test the FileStateChecker.
  */
 public class FileStateCheckerTest {
+
+    private Path tempPath;
+    private Path tempFile;
+
+    @BeforeSuite
+    public void createTempDirPath() throws IOException {
+        tempPath = Files.createTempDirectory(this.getClass().getSimpleName());
+    }
+
+    @AfterSuite
+    public void destroyTempDirPath() throws IOException {
+        FileUtils.deleteDirectory(tempPath.toFile());
+    }
+
+    @BeforeMethod
+    public void createTempFile() throws IOException, URISyntaxException {
+        tempFile = Files.createTempFile(tempPath, null, null);
+        Files.copy(Paths.get(getClass().getResource("/checksums.csv").toURI()), tempFile,
+                StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    @AfterMethod
+    public void deleteTempFile() throws IOException {
+        Files.delete(tempFile);
+    }
+
+    @Test
+    public void testUpdateStateNoChange() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+        Files.copy(Paths.get(getClass().getResource("/checksums.csv").toURI()), tempFile,
+                StandardCopyOption.REPLACE_EXISTING);
+        FileStateChecker checker = new FileStateChecker(tempFile);
+        Path filepath = Paths.get(getClass().getResource("/file1").toURI());
+        byte[] original = checker.getOriginalDigest(filepath);
+        checker.updateState(filepath);
+        assertThat(original != null && Arrays.equals(original, checker.getOriginalDigest(filepath)));
+    }
+
+    @Test
+    public void testUpdateStateWithChange() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempFile,
+                StandardCopyOption.REPLACE_EXISTING);
+        FileStateChecker checker = new FileStateChecker(tempFile);
+        Path filepath = Paths.get(getClass().getResource("/file1").toURI());
+        byte[] original = checker.getOriginalDigest(filepath);
+        checker.updateState(filepath);
+        assertThat(original != null && !Arrays.equals(original, checker.getOriginalDigest(filepath)));
+    }
+
+    @Test
+    public void testUpdateStateRemoval() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempFile,
+                StandardCopyOption.REPLACE_EXISTING);
+        FileStateChecker checker = new FileStateChecker(tempFile);
+        Path filepath = Paths.get(getClass().getResource("/file3").toURI());
+
+        byte[] original = checker.getOriginalDigest(filepath);
+        assertThat(original == null);
+
+        checker.updateState(filepath);
+        assertThat(checker.getOriginalDigest(filepath) == null);
+    }
+
+    @Test
+    public void testUpdateStateAddition() throws IOException, URISyntaxException, NoSuchAlgorithmException {
+        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempFile,
+                StandardCopyOption.REPLACE_EXISTING);
+        FileStateChecker checker = new FileStateChecker(tempFile);
+        Path filepath = Paths.get(getClass().getResource("/badformat.csv").toURI());
+
+        byte[] original = checker.getOriginalDigest(filepath);
+        assertThat(original == null);
+
+        checker.updateState(filepath);
+        assertThat(checker.getOriginalDigest(filepath) != null);
+    }
 
     @Test(expectedExceptions = FileNotFoundException.class)
     public void testChecksumFileNotFound() throws IOException, NoSuchAlgorithmException {
