@@ -94,7 +94,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
 
                 this.linkQualifierScript = inlineScriptEditor.generateScriptEditor({
                         "element": this.$el.find("#scriptLinkQualifierBody"),
-                        "passedVariableBlur" : _.bind(this.showLinkQualifier, this),
+                        "onBlurPassedVariable" : _.bind(this.showLinkQualifier, this),
                         "onKeypress" : _.bind(function(){
                             this.$el.find(".linkQualifierSave").prop("disabled", true);
                         }, this),
@@ -102,6 +102,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                         "scriptData": scriptData,
                         "disablePassedVariable": false,
                         "onBlur" : _.bind(this.showLinkQualifier, this),
+                        "onDeletePassedVariable": _.bind(this.showLinkQualifier, this),
+                        "onAddPassedVariable": _.bind(this.showLinkQualifier, this),
+                        "disableValidation" : false,
                         "placeHolder" : "['test', 'default']"
                     },
                     _.bind(function(){}, this));
@@ -113,28 +116,36 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
         },
 
         showLinkQualifier: function(event) {
-            var scriptDetails = this.linkQualifierScript.generateScript();
+            var scriptDetails,
+                validationResults =  this.linkQualifierScript.getValidation();
 
-            if(scriptDetails !== null) {
-                ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
-                        this.model.scriptError = false;
+            if(validationResults) {
+                scriptDetails = this.linkQualifierScript.generateScript();
 
-                        this.$el.find("#scriptLinkQualifierList").empty();
+                if(scriptDetails !== null) {
+                    ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
+                            this.model.scriptError = false;
 
-                        this.model.scriptResult = result;
+                            this.$el.find("#scriptLinkQualifierList").empty();
 
-                        this.$el.find(".linkQualifierSave").prop("disabled", false);
+                            this.model.scriptResult = result;
 
-                        this.populateScriptLinkQualifier(result);
-                    }, this),
-                    _.bind(function(result){
-                        this.model.scriptError = true;
-                        this.$el.find(".linkQualifierSave").prop("disabled", true);
-                        this.$el.find("#badLinkQualifierScript .message").html(result.responseJSON.message);
-                        this.$el.find("#badLinkQualifierScript").show();
-                    }, this));
+                            this.$el.find(".linkQualifierSave").prop("disabled", false);
+
+                            this.populateScriptLinkQualifier(result);
+                        }, this),
+                        _.bind(function (result) {
+                            this.model.scriptError = true;
+                            this.$el.find(".linkQualifierSave").prop("disabled", true);
+                            this.$el.find("#badLinkQualifierScript .message").html(result.responseJSON.message);
+                            this.$el.find("#badLinkQualifierScript").show();
+                        }, this));
+                }
             } else {
                 this.$el.find("#scriptLinkQualifierList").empty();
+                this.$el.find("#badLinkQualifierScript .message").html($.t("templates.mapping.validLinkQualifierScript"));
+                this.$el.find("#badLinkQualifierScript").show();
+                this.$el.find(".linkQualifierSave").prop("disabled", true);
             }
         },
 
