@@ -43,51 +43,50 @@
    <holder>ForgeRock AS</holder>
   </copyright>
 
-  <!-- Add a space after the first name so that it appears on the PDF cover -->
   <authorgroup>
    <author>
     <personname>
-     <firstname>Anders </firstname><surname>Askåsen</surname>
+     <firstname>Anders</firstname> <surname>Askåsen</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Paul </firstname><surname>Bryan</surname>
+     <firstname>Paul</firstname> <surname>Bryan</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Mark </firstname><surname>Craig</surname>
+     <firstname>Mark</firstname> <surname>Craig</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Andi </firstname><surname>Egloff</surname>
+     <firstname>Andi</firstname> <surname>Egloff</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Laszlo </firstname><surname>Hordos</surname>
+     <firstname>Laszlo</firstname> <surname>Hordos</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Matthias </firstname><surname>Tristl</surname>
+     <firstname>Matthias</firstname> <surname>Tristl</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Lana </firstname><surname>Frost</surname>
+     <firstname>Lana</firstname> <surname>Frost</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Mike </firstname><surname>Jang</surname>
+     <firstname>Mike</firstname> <surname>Jang</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Daly </firstname><surname>Chikhaoui</surname>
+     <firstname>Daly</firstname> <surname>Chikhaoui</surname>
     </personname>
     <xinclude:include href="../shared/affiliation-fr.xml"/>
    </author>
