@@ -32,11 +32,7 @@
                                 <ul></ul>
                             </div>
                         </div>
-                        <!-- <span class="error">x</span> -->
                     </div>
-
-
-
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="Transformation_Script">
@@ -44,29 +40,17 @@
                     <div class="col-sm-11">
                         <label>{{t "templates.mapping.propertyEdit.transformationSciptLabel"}}</label>
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-sm-6">
                         <label for="currentSourceDisplay">{{t "templates.mapping.propertyEdit.currentSourceValue"}}: </label>
                         <span class="text-muted"><i>{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}</i></span>
+                        {{#if sampleSourceTooltip}}
+                        <i class="fa fa-eye details-tooltip"><pre style="display:none;" class="tooltip-details">{{sampleSourceTooltip}}</pre></i>
+                        {{/if}}
                     </div>
                     <div class="col-sm-12">
                         <div id="transformationScriptHolder"></div>
                     </div>
-
-
-                    <!--
-                    <div id="script_output" class="script_output offset10">
-                        <label style="display:inline" for="exampleResult">{{t "templates.mapping.propertyEdit.exampleResult"}}:</label>
-                        <input type="text" id="exampleResult" readonly value="" style="width:350px">
-                    </div>
-                    <div class="validation-message script_output"></div>
-                    -->
                 </div>
-                <!--
-                <br clear="both">
-                <p>
-                    {{t "templates.mapping.propertyEdit.transformScriptNote"}}
-                </p>
-                -->
             </div>
 
             <div role="tabpanel" class="tab-pane" id="Condition_Script">
@@ -96,17 +80,6 @@
                     </div>
                     <div  style="display:none;" id="conditionScriptTab" class="conditionalScript">
                         <div id="conditionScriptHolder"></div>
-
-                        <!--
-                        <div id="condition_script_output" class="script_output">
-                            <label style="display:inline" for="conditionResult">{{t "templates.mapping.propertyEdit.conditionScriptAction"}} {{sampleUserFullName}}:</label>
-                            <span id="conditionResult"></span>
-                        </div>
-                        -->
-
-                        <!-- <div class="validation-message script_output"></div>
-
-                        <p>{{t "templates.mapping.propertyEdit.conditionScriptNote"}}</p> -->
                     </div>
                 </div>
             </div>

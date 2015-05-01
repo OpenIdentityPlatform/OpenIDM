@@ -192,9 +192,7 @@
   clear: both;
   margin-top: -25px;
 }
-.popover-info {
-  width: 400px;
-}
+
 .mapping .panel {
   overflow: auto;
   display: table;
@@ -480,13 +478,13 @@ h4.connector-role {
 }
 
 #roleEntitlementsPanel .panel-heading .panel-title .help-text {
-    color: #888;
-    margin-left: 10px;
-    margin-top: 1px;
-    margin-bottom: 0;
-    font-weight: 400;
-    font-size: 14px;
-  }
+  color: #888;
+  margin-left: 10px;
+  margin-top: 1px;
+  margin-bottom: 0;
+  font-weight: 400;
+  font-size: 14px;
+}
 
 .mapping .panel-heading .mapping-action .btn-link,
 .mapping .panel-footer .mapping-action .btn-link {
@@ -648,23 +646,23 @@ h4.connector-role {
       }
     }
   }
-  
+
   .mapped-entitlement {
     margin-bottom: 50px;
     .mapped-entitlement-heading {
-        border-top: 2px solid @base-theme-color;
-        padding: 0 12px;
+      border-top: 2px solid @base-theme-color;
+      padding: 0 12px;
     }
-    
+
     .entitlement-meta {
-        margin-bottom: 10px;
-        padding: 8px 15px;
-        background-color: @background-color;
+      margin-bottom: 10px;
+      padding: 8px 15px;
+      background-color: @background-color;
     }
-    
+
     pre {
-        background-color: transparent;
-        border-color: transparent;
+      background-color: transparent;
+      border-color: transparent;
     }
   }
 }
@@ -685,9 +683,29 @@ h4.connector-role {
   Properties styles
 */
 
+.popover .popover-header {
+  margin-left:15px;
+  margin-top:10px;
+  margin-bottom:0px;
+}
+
 .popover-content .code-tooltip {
   max-height:200px;
   white-space:pre;
+}
+
+.popover-info {
+  max-width:250px;
+  width:250px;
+}
+
+.popover-info.popover-large {
+  max-width:550px;
+  width:550px;
+}
+
+.selectize-holder .selectize-control {
+  margin-top:4px;
 }
 
 /*
@@ -768,7 +786,18 @@ h4.connector-role {
   }
 
   .properties-badge {
-    margin-right:5px;
+    margin-right:6px;
+    position:relative;
+    top:19px;
+  }
+
+  .properties-icon-container {
+    background-color:#f3f3f3;
+    height:60px;
+  }
+
+  td[aria-describedby="mappingTable_iconDisplay"] {
+    padding:0px;
   }
 
   .jqgrid-container {
@@ -778,6 +807,15 @@ h4.connector-role {
   .removePropertyBtn {
     cursor:pointer;
     color: #777;
+  }
+
+  .property-container {
+    margin-left:15px;
+
+    .title {
+      margin-bottom:5px;
+    }
+
   }
 
   .removePropertyBtn:hover {

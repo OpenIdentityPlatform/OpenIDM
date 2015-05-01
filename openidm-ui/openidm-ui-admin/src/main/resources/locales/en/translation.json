@@ -254,7 +254,7 @@
                 "role": "Role",
                 "newRole": "New Role"
             },
-            "RoleEntitlementsTemplate": 
+            "RoleEntitlementsTemplate":
             {
                 "entitlements": "Entitlements",
                 "description": "Define provisioning for users with this role.",
@@ -838,6 +838,7 @@
         },
         "mapping": {
             "conditionalUpon" : "Conditional Upon:",
+            "validLinkQualifierScript" : "Requires a valid Link Qualifier script.",
             "transformationScriptApplied" : "Transformation script applied",
             "attributes": "Attributes",
             "badScript" : "Invalid; a Link Qualifier script must return an array of strings",

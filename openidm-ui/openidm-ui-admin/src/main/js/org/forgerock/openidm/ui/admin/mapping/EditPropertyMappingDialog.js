@@ -196,6 +196,12 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
 
             this.data.property = currentProperties[this.property - 1];
 
+            if(conf.globalData.sampleSource && _.isUndefined(this.data.property.source)) {
+                this.data.sampleSourceTooltip = JSON.stringify(conf.globalData.sampleSource, null, 2);
+            } else {
+                this.data.sampleSourceTooltip = null;
+            }
+
             settings = {
                 "title": $.t("templates.mapping.propertyEdit.title", {"property": this.data.property.target}),
                 "template": this.template,
@@ -241,6 +247,15 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                                 if(callback){
                                     callback();
                                 }
+
+                                _this.$el.find(".details-tooltip").popover({
+                                    content: function () { return $(this).find(".tooltip-details").clone().show();},
+                                    trigger:'hover',
+                                    placement:'right',
+                                    container: 'body',
+                                    html: 'true',
+                                    template: '<div class="popover popover-info popover-large" role="tooltip"><div class="popover-header">Raw Source Data:</div><div class="popover-content"></div></div>'
+                                });
                             }, "replace");
                     },
                     buttons: [{
