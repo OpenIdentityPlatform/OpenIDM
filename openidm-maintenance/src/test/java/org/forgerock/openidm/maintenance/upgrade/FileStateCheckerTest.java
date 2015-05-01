@@ -60,10 +60,8 @@ public class FileStateCheckerTest {
     }
 
     @BeforeMethod
-    public void copyChecksumsFile() throws IOException, URISyntaxException {
+    public void setupTempFile() throws IOException, URISyntaxException {
         tempChecksumFile = Files.createTempFile(tempPath, null, null);
-        Files.copy(Paths.get(getClass().getResource("/checksums.csv").toURI()), tempChecksumFile,
-                StandardCopyOption.REPLACE_EXISTING);
     }
 
     @AfterMethod
