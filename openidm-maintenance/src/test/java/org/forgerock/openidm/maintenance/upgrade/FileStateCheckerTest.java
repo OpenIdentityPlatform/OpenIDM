@@ -33,7 +33,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterMethod;
@@ -48,7 +47,7 @@ import org.testng.annotations.Test;
 public class FileStateCheckerTest {
 
     private Path tempPath;
-    private Path tempFile;
+    private Path tempChecksumFile;
 
     @BeforeSuite
     public void createTempDirPath() throws IOException {
@@ -61,59 +60,59 @@ public class FileStateCheckerTest {
     }
 
     @BeforeMethod
-    public void createTempFile() throws IOException, URISyntaxException {
-        tempFile = Files.createTempFile(tempPath, null, null);
-        Files.copy(Paths.get(getClass().getResource("/checksums.csv").toURI()), tempFile,
+    public void copyChecksumsFile() throws IOException, URISyntaxException {
+        tempChecksumFile = Files.createTempFile(tempPath, null, null);
+        Files.copy(Paths.get(getClass().getResource("/checksums.csv").toURI()), tempChecksumFile,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
     @AfterMethod
-    public void deleteTempFile() throws IOException {
-        Files.delete(tempFile);
+    public void deleteCheckSumsCopy() throws IOException {
+        Files.delete(tempChecksumFile);
     }
 
     @Test
     public void testUpdateStateNoChange() throws IOException, URISyntaxException, NoSuchAlgorithmException {
-        Files.copy(Paths.get(getClass().getResource("/checksums.csv").toURI()), tempFile,
+        Files.copy(Paths.get(getClass().getResource("/checksums.csv").toURI()), tempChecksumFile,
                 StandardCopyOption.REPLACE_EXISTING);
-        FileStateChecker checker = new FileStateChecker(tempFile);
+        FileStateChecker checker = new FileStateChecker(tempChecksumFile);
         Path filepath = Paths.get(getClass().getResource("/file1").toURI());
         checker.updateState(filepath);
-        checker = new FileStateChecker(tempFile);
+        checker = new FileStateChecker(tempChecksumFile);
         assertThat(checker.getCurrentFileState(filepath).equals(FileState.UNCHANGED));
     }
 
     @Test
     public void testUpdateStateWithChange() throws IOException, URISyntaxException, NoSuchAlgorithmException {
-        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempFile,
+        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempChecksumFile,
                 StandardCopyOption.REPLACE_EXISTING);
-        FileStateChecker checker = new FileStateChecker(tempFile);
+        FileStateChecker checker = new FileStateChecker(tempChecksumFile);
         Path filepath = Paths.get(getClass().getResource("/file1").toURI());
         checker.updateState(filepath);
-        checker = new FileStateChecker(tempFile);
+        checker = new FileStateChecker(tempChecksumFile);
         assertThat(checker.getCurrentFileState(filepath).equals(FileState.DIFFERS));
     }
 
     @Test
     public void testUpdateStateRemoval() throws IOException, URISyntaxException, NoSuchAlgorithmException {
-        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempFile,
+        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempChecksumFile,
                 StandardCopyOption.REPLACE_EXISTING);
-        FileStateChecker checker = new FileStateChecker(tempFile);
+        FileStateChecker checker = new FileStateChecker(tempChecksumFile);
         Path filepath = Paths.get(getClass().getResource("/file3").toURI());
         checker.updateState(filepath);
-        checker = new FileStateChecker(tempFile);
+        checker = new FileStateChecker(tempChecksumFile);
         assertThat(checker.getCurrentFileState(filepath).equals(FileState.DELETED));
     }
 
     @Test
     public void testUpdateStateAddition() throws IOException, URISyntaxException, NoSuchAlgorithmException {
-        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempFile,
+        Files.copy(Paths.get(getClass().getResource("/checksums2.csv").toURI()), tempChecksumFile,
                 StandardCopyOption.REPLACE_EXISTING);
-        FileStateChecker checker = new FileStateChecker(tempFile);
+        FileStateChecker checker = new FileStateChecker(tempChecksumFile);
         Path filepath = Paths.get(getClass().getResource("/badformat.csv").toURI());
         assertThat(checker.getCurrentFileState(filepath).equals(FileState.NONEXISTENT));
         checker.updateState(filepath);
-        checker = new FileStateChecker(tempFile);
+        checker = new FileStateChecker(tempChecksumFile);
         assertThat(checker.getCurrentFileState(filepath).equals(FileState.UNCHANGED));
     }
 
