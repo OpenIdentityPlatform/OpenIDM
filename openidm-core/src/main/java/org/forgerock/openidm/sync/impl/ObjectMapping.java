@@ -460,7 +460,7 @@ class ObjectMapping {
 
     /**
      * Convenience function with deleted defaulted to false and oldValue defaulted to null
-     * @see ObjectMapping#doSourceSync(String, JsonValue, boolean, JsonValue)
+     * @see ObjectMapping#doSourceSync(Context, String, JsonValue, boolean, JsonValue)
      */
     private JsonValue doSourceSync(Context context, String resourceId, JsonValue value) throws SynchronizationException {
         return doSourceSync(context, resourceId, value, false, null);
@@ -684,7 +684,7 @@ class ObjectMapping {
             }
             queryScope.put("target", target.asMap());
             queryScope.put("config", config.asMap());
-            queryScope.put("existingTarget", existingTarget.asMap());
+            queryScope.put("existingTarget", existingTarget.copy().asMap());
             queryScope.put("linkQualifier", linkQualifier);
             try {
                 result = json(defaultMapping.exec(queryScope));

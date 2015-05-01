@@ -34,7 +34,7 @@
 function mergeValues(target, name, value) {
     if (target[name] != null && target[name] instanceof Array) {
         for (var x = 0; x < value.length; x++) {
-            if (target[name].indexOf(value) == -1) {
+            if (target[name].indexOf(value[x]) == -1) {
                 target[name].push(value[x]);
             }
         }
