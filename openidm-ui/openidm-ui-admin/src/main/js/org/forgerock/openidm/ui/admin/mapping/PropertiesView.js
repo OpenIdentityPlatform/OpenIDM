@@ -259,17 +259,37 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         _.chain(props)
                             .map(function (prop) {
                                 var sampleData = null,
-                                    sourceProp = "",
+                                    sourceProp = " ",
                                     hasConditionScript = false,
                                     conditionScript = null,
                                     hasTransformScript = false,
-                                    transformScript = null;
+                                    transformScript = null,
+                                    cleanData = "";
 
+                                //Sets has condition icon and tooltip
                                 if(_.has(prop, "condition")) {
                                     hasConditionScript = true;
                                     conditionScript = prop.condition;
                                 }
 
+                                //Logic to find and display source sample
+                                if(!_.isEmpty(sampleSource)) {
+                                    if(sampleSource[prop.source]){
+                                        cleanData = sampleSource[prop.source];
+                                    } else if (_.isUndefined(prop.source)){
+                                        cleanData = "Object";
+                                    } else {
+                                        if(prop.source.length === 0) {
+                                            cleanData = "Object";
+                                        } else {
+                                            cleanData = "Null";
+                                        }
+                                    }
+                                } else {
+                                    cleanData ="";
+                                }
+
+                                //Sets transform icon and tooltip
                                 if(_.has(prop, "transform")) {
                                     hasTransformScript = true;
 
@@ -284,6 +304,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                     sourceProp = prop.source;
                                 }
 
+                                //Display eval results for transform and conditional
                                 if(evalResults !== null && evalResults[propCounter] !== null) {
                                     if(_.isObject(evalResults[propCounter].conditionResults)) {
                                         if(evalResults[propCounter].conditionResults.result === true) {
@@ -303,24 +324,35 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                         }
                                     }
                                 } else if (typeof(prop.source) !== "undefined" && prop.source.length) {
-                                    if(sampleData === null){
-                                        sampleData = sampleSource[prop.source];
+                                    if(_.isEmpty(sampleSource)){
+                                        sampleData = "";
+                                    } else {
+                                        if(sampleSource[prop.source] === null || sampleSource[prop.source] === undefined) {
+                                            sampleData = "Null";
+                                        } else {
+                                            sampleData = sampleSource[prop.source];
+                                        }
                                     }
                                 }
 
                                 if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
 
                                     if (sampleData === null || sampleData === undefined) {
-                                        sampleData = prop["default"];
+                                        sampleData = "Null";
                                     }
                                 }
 
                                 propCounter++;
 
                                 return {
-                                    "target": Handlebars.Utils.escapeExpression(prop.target),
-                                    "source": Handlebars.Utils.escapeExpression(sourceProp),
-                                    "preview": Handlebars.Utils.escapeExpression(decodeURIComponent((sampleData || ""))),
+                                    "target": {
+                                        "property" : Handlebars.Utils.escapeExpression(prop.target),
+                                        "sample" : Handlebars.Utils.escapeExpression(decodeURIComponent((sampleData || "")))
+                                    },
+                                    "source": {
+                                        "property" : Handlebars.Utils.escapeExpression(sourceProp),
+                                        "sample" : Handlebars.Utils.escapeExpression(decodeURIComponent((cleanData)))
+                                    },
                                     "iconDisplay": {
                                         "hasCondition": hasConditionScript,
                                         "conditionScript" : conditionScript,
@@ -410,21 +442,27 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                     {
                         "name": "source",
                         "label": $.t("templates.mapping.source"),
-                        "width": "150px"
-                    },
-                    {
-                        "name": "target",
-                        "label": $.t("templates.mapping.target"),
-                        "width": "175px"
+                        "width": "125px",
+                        "formatter" : function(data, opt, row) {
+                            var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
+
+                            previewElement.find(".property-container").append('<div class="title">' +data.property +'</div>');
+
+                            if(data.sample.length > 0) {
+                                previewElement.find(".property-container").append('<div class="text-muted">(' +data.sample +')</div>');
+                            }
+
+                            return previewElement.html();
+                        }
                     },
                     {
                         "name": "iconDisplay",
                         "label": "&nbsp;",
-                        "width": "50px",
+                        "width": "30px",
                         "align": "center",
                         "title": false,
                         "formatter": function(iconDisplay,opt,row){
-                            var iconElement = "";
+                            var iconElement = $('<div class="properties-icon-container-parent"><div class="properties-icon-container"></div></div>');
 
                             if(iconDisplay !== undefined && iconDisplay.hasCondition) {
 
@@ -436,26 +474,33 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                     }
                                 }
 
-                                iconElement = iconElement + '<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-filter"></i>'
-                                    +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +iconDisplay.conditionScript +'</pre></div></span>';
+                                iconElement.find(".properties-icon-container").append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-filter"></i>'
+                                    +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +iconDisplay.conditionScript +'</pre></div></span>');
                             }
 
                             if(iconDisplay !== undefined && iconDisplay.hasTransform) {
-                                iconElement = iconElement + '<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
-                                    +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +iconDisplay.transformScript +'</pre></div></span>';
+                                iconElement.find(".properties-icon-container").append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
+                                    +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +iconDisplay.transformScript +'</pre></div></span>');
                             }
 
-                            return iconElement;
+                            return iconElement.html();
                         }
                     },
                     {
-                        "name": "preview",
-                        "label": '<div id="previewHolder" class="btn-group"><button id="previewDropdownButton" role="button" type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
-                            +'<span id="previewTitle">Preview </span><span id="previewDropdownType" class="text-muted"></span> <span class="caret"></span>'
-                            +'</button>'
-                            +'<ul id="previewDropDown" class="dropdown-menu" role="menu"></ul></div>',
-                        "classes": "preview-information",
-                        "width": "175px"
+                        "name": "target",
+                        "label": $.t("templates.mapping.target"),
+                        "width": "125px",
+                        "formatter" : function(data, opt, row) {
+                            var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
+
+                            previewElement.find(".property-container").append('<div class="title">' +data.property +'</div>');
+
+                            if(data.sample.length > 0) {
+                                previewElement.find(".property-container").append('<div class="text-muted">(' +data.sample +')</div>');
+                            }
+
+                            return previewElement.html();
+                        }
                     },
                     {
                         "name": "required",
@@ -516,7 +561,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
                         _this.setNumRepresentativePropsLine();
 
-                        $(".properties-badge").popover({
+                        _this.$el.find(".properties-badge").popover({
                             content: function () { return $(this).find(".tooltip-details").clone().show();},
                             trigger:'hover',
                             placement:'top',
@@ -525,32 +570,26 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                             template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
                         });
 
-                        $("#previewDropDown").empty();
+                        _this.$el.find("#linkQualifierSelect").change(function(event){
+                            var element = event.target;
+                            event.preventDefault();
 
-                        $("#previewDropdownType").html("(" + _this.currentLinkQualifier + ")");
+                            if($(element).val().length > 0) {
+                                _this.currentLinkQualifier = $(element).val();
+                            }
 
-                        $('#previewDropdownButton').dropdown();
-
-                        _.each(_this.linkQualifiers, function (value) {
-                            appendElement = $('<li><span data-linkQualifier="' + value + '" class="select-preview-item">' + value + '</span></li>');
-
-                            $("#previewDropDown").append(appendElement);
-
-                            appendElement.bind("click", function (event) {
-                                var element = event.target;
-                                event.preventDefault();
-
-                                _this.currentLinkQualifier = $(element).attr("data-linkQualifier");
-
-                                $('#previewDropdownButton').dropdown("toggle");
-
-                                gridFromMapProps(mapProps).then(function(gridResults) {
-                                    $('#mappingTable',this.$el).jqGrid('setGridParam', {
-                                        datatype: 'local',
-                                        data: gridResults
-                                    }).trigger('reloadGrid');
-                                });
+                            gridFromMapProps(mapProps).then(function(gridResults) {
+                                this.$el.find('#mappingTable').jqGrid('setGridParam', {
+                                    datatype: 'local',
+                                    data: gridResults
+                                }).trigger('reloadGrid');
                             });
+                        });
+
+                        _this.$el.find("#linkQualifierSelect").selectize({
+                            placeholder: $.t("templates.mapping.linkQualifier"),
+                            create: true,
+                            sortField: 'text'
                         });
                     }
                 }).jqGrid('sortableRows', {
@@ -605,8 +644,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             this.data.requiredProperties = [];
             this.data.missingRequiredProperties = [];
 
-            this.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
-            this.currentLinkQualifier = this.linkQualifiers[0];
+            this.data.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
+            this.currentLinkQualifier = this.data.linkQualifiers[0];
 
             if(conf.globalData.sampleSource && this.mapping.properties.length){
                 this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
