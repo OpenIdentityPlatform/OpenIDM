@@ -104,23 +104,33 @@
   <para>
    The default managed object model includes a managed <literal>role</literal>
    object that can be manipulated in the same way as any other managed object.
+   You can assign a managed role to one or more users.
+  </para>
+  <para>
+   For more information on terms such as roles, assignments, and entitlements,
+   see the <link xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#openidm-glossary" xlink:show="new">
+   <citetitle>OpenIDM Glossary</citetitle></link>.
   </para>
   <para>
    This section refers to two distinct types of roles - direct (static) and
-   indirect (dynamic) roles. Direct roles refer to roles that are specifically
-   added to the user's <literal>"roles"</literal> attribute by an administrator
-   operation. Indirect roles might be added to the user entry as a result of a
-   script or rule that assigns the role. For example, a user might acquire a
-   <literal>"sales-role"</literal> as a result of being in the
+   indirect (dynamic) roles. Direct roles are specifically added to a user's
+   <literal>"roles"</literal> attribute in a persistent fashion, within the
+   OpenIDM <literal>managed/user</literal> record. Indirect roles can be added
+   to the user entry from a script or a rule that assigns the role.
+  </para>
+  <para>
+   For example, a user might acquire an indirect role such as
+   <literal>"sales-role"</literal>, if that user is in the
    <literal>"sales"</literal> organization.
   </para>
   <para>
-   A managed user's <literal>"roles"</literal> attribute takes an array as a
-   value. Currently, only flat strings are supported in this array.
+   A managed user's <literal>"roles"</literal> attribute takes an array as
+   a value. Currently, only flat strings are supported in this array.
   </para>
   <para>
    The <literal>"roles"</literal> attribute includes any specifically assigned
-   roles, and any roles assigned internally by OpenIDM. So, the
+   managed roles, along with all roles assigned internally by OpenIDM. So, the
    <literal>"roles"</literal> attribute of a particular user entry might
    appear as follows:
   </para>
@@ -132,387 +142,463 @@
   </programlisting>
   <para>
    A role value that includes a <literal>/</literal> character is considered to
-   be a URL that points to the role details on the router, for example,
-   <literal>managed/role/sample-role</literal>.
+   be a URI that points to the role details on the router. One example of such
+   a role value is <literal>managed/role/sample-role</literal>.
   </para>
   <para>
-   The following sections describe basic role manipulation - how roles are
-   defined, assigned to users, and deleted. The entitlements or assignments
-   supplied by roles are described in the subsequent section.
+   The following sections describe basic CRUD operations on roles. The
+   entitlements or assignments supplied by roles are described in the subsequent
+   section.
   </para>
 
   <section xml:id="roles-creating-assigning-deleting">
-   <title>Creating, Assigning, and Deleting Roles</title>
+   <title>Creating, Listing, Assigning, and Deleting Roles</title>
    <para>
     Role definitions are stored in the repository and are accessible at the
     <literal>/openidm/managed/role</literal> context path. This section
     describes how to manipulate roles over the REST interface.
    </para>
+
    <para>
-    The examples in this section assume that OpenIDM has been started with the
-    configuration of Sample 2b, and refers to the managed user objects created
-    in that sample. For more information, see <link xlink:show="new"
-                                                    xlink:href="install-guide#more-sample2b"
-                                                    xlink:role="http://docbook.org/xlink/role/olink"
-    ><citetitle>Sample 2b - LDAP Two Way</citetitle></link> in the
-    <citetitle>Installation Guide</citetitle>.
+    In this section, you will create two roles: Contractor and Employee, and
+    assign them to different users.
    </para>
 
-   <section xml:id="create-role-definition">
-    <title>To Create a Role Definition</title>
+   <!-- It's now sort of independent of any sample (though I still use
+   Sample 2b for users) -->
+
+   <section xml:id="create-new-role">
+    <title>Creating a New Role</title>
+
     <para>
-     To create a managed role definition, use a PUT request on the
-     <literal>openidm/managed/role</literal> context path, specifying the role
-     ID in the URL. The following request creates a role definition named
-     <literal>newrole</literal>. The role effectively assigns the value
-     <literal>"CN=employees,O=corp"</literal> to the
-     <literal>ldapGroups</literal> attribute on the <literal>ldap</literal>
-     system.
+     You can create a new managed role in the Admin UI. You can also create a
+     new managed role with either a <literal>PUT</literal> or a
+     <literal>POST</literal> REST call.
     </para>
-    <screen>$ <userinput>curl \
+
+    <para>
+     While this section assumes that you are running OpenIDM with
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="install-guide#more-sample2b"><citetitle>Sample 2b -
+     LDAP Two Way</citetitle></link>, you can also just create new users as
+     needed, either in the Data Management UI or with an appropriate REST call.
+    </para>
+
+    <section xml:id="create-role-adminui">
+     <title>Creating a New Role in the Admin UI</title>
+     <para>
+      To create a new managed role in the Admin UI, start OpenIDM. Now take the
+      following steps:
+     </para>
+
+     <procedure>
+      <step>
+       <para>
+        Start OpenIDM, navigate to <literal>https://localhost:8443/admin</literal>,
+        and log in with default administrative credentials:
+        user <literal>openidm-admin</literal> and password
+        <literal>openidm-admin</literal>.
+       </para>
+      </step>
+      <step>
+       <para>
+        From the top navigation bar, select Roles. In the New Role window that
+        appears, enter a <literal>Role Name</literal>, a
+        <literal>Description</literal>, and select <literal>Create</literal>.
+       </para>
+      </step>
+     </procedure>
+
+     <para>
+      When you select <literal>Create</literal>, the Admin UI changes the
+      name of the window to your chosen <literal>Role Name</literal>.
+     </para>
+
+     <mediaobject>
+      <alt>Create a New Role from the UI</alt>
+      <imageobject>
+       <imagedata fileref="images/create-role-ui.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+
+     <para>
+      You can now add <literal>entitlements</literal>, and assign the role to
+      the users of your choice.
+     </para>
+
+    </section>
+
+    <section xml:id="create-role-cli">
+     <title>Creating a New Role with a REST Call</title>
+
+     <para>
+      You can use a REST call to create a new role, as an object, using either
+      the PUT or POST methods. For additional discussion on the differences
+      between PUT and POST, see the following Appendix:
+      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+            xlink:href="integrators-guide#rest-supported-methods"><citetitle>
+       Supported Methods</citetitle></link>.
+     </para>
+
+     <para>
+      The following PUT request allows you to specify a human-readable resource
+      ID for the object that you create, in this case, <literal>"Employee"</literal>.
+     </para>
+
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --header "If-None-Match: *" \
  --request PUT \
- --data '{
-   "properties": {
-     "description": "an example role"
-   },
-   "assignments": {
-     "ldap": {
-       "attributes": [
-         {
-           "name": "ldapGroups",
-           "assignmentOperation": "mergeWithTarget",
-           "unassignmentOperation": "removeFromTarget",
-           "value": [
-             "CN=employees,O=corp"
-           ]
-         }
-       ],
-       "onAssignment": {
-         "file": "roles\/onAssignment_ldap.js",
-         "type": "text\/javascript"
-       },
-       "onUnassignment": {
-         "file": "roles\/onUnassignment_ldap.js",
-         "type": "text\/javascript"
-       }
-     }
-   }
- }' \
- "https://localhost:8443/openidm/managed/role/newrole"</userinput>
-     <computeroutput>
-{
-  "assignments": {
-    "ldap": {
-      "attributes": [
-        {
-          "name": "ldapGroups",
-          "unassignmentOperation": "removeFromTarget",
-          "assignmentOperation": "mergeWithTarget",
-          "value": [
-            "CN=employees,O=corp"
-          ]
-        }
-      ],
-      "onAssignment": {
-        "file": "roles/onAssignment_ldap.js",
-        "type": "text/javascript"
-      },
-      "onUnassignment": {
-        "file": "roles/onUnassignment_ldap.js",
-        "type": "text/javascript"
-      }
-    }
-  },
-  "_id": "newrole",
-  "properties": {
-    "description": "an example role"
-  },
-  "_rev": "1"
-}</computeroutput>
-    </screen>
-
-    <para>
-     For information about each of the properties in the role definition, see
-     <xref linkend="sample-role-definition" />.
-    </para>
-
-    <para>
-     Most of the examples in this guide use PUT to create client-assigned IDs
-     for resources, as it makes the examples easier to read. Your deployment
-     might require you to use server-assigned UUIDs, in which case you should
-     use a POST request. For more information, see
-     <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
-           xlink:href="integrators-guide#put-post-managed-objects">
-      <citetitle>Should You Use PUT or POST to Create A Managed Object?
-      </citetitle></link>
-    </para>
-   </section>
-
-   <section xml:id="listing-defined-roles">
-    <title>To List the Defined Roles</title>
-    <para>
-     To obtain a list of all defined managed roles, query the
-     <literal>/openidm/managed/role</literal> context path, as follows.
-    </para>
-    <screen>$ <userinput>curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET \
- "https://localhost:8443/openidm/managed/role/?_queryId=query-all-ids"</userinput>
-     <computeroutput>
-{
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 1,
-  "result": [
-    {
-      "_rev": "0",
-      "_id": "newrole"
-    }
-  ]
-}     </computeroutput>
-    </screen>
-   </section>
-
-   <section xml:id="assign-role-to-user">
-    <title>To Assign a Role to a User</title>
-    <para>
-     To assign a direct role to a user, update the user's entry over REST,
-     adding <literal>managed/role/<replaceable>role ID</replaceable></literal>
-     to the user's <literal>"roles"</literal> attribute. The following example
-     adds the <literal>ldap</literal> role, created previously, to user
-     <literal>bjensen</literal>.
-    </para>
-    <screen>$ <userinput>curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Password: openidm-admin" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "Content-Type: application/json" \
- --header "If-Match: *" \
- --request PATCH \
- --data '[
-     {
-       "operation": "add",
-       "field": "/roles/-",
-       "value": "managed/role/newrole"
-     }
- ]' \
- "https://localhost:8443/openidm/managed/user/bjensen"
- </userinput>
- <computeroutput>{
- "displayName": "Barbara Jensen",
- "stateProvince": "",
- "userName": "bjensen",
- "postalAddress": "",
- "effectiveAssignments": {
-   "ldap": {
-     "attributes": [
-       {
-         "name": "ldapGroups",
-         "unassignmentOperation": "removeFromTarget",
-         "assignmentOperation": "mergeWithTarget",
-         "assignedThrough": "managed/role/newrole",
-         "value": [
-           "CN=employees,O=corp"
-         ]
-       }
-     ],
-     "onAssignment": {
-       "file": "roles/onAssignment_ldap.js",
-       "type": "text/javascript"
-     },
-     "onUnassignment": {
-       "file": "roles/onUnassignment_ldap.js",
-       "type": "text/javascript"
-     }
-   }
- },
- "roles": [
-   "openidm-authorized",
-   "managed/role/newrole"
- ],
- "city": "",
- "effectiveRoles": [
-   "openidm-authorized",
-   "managed/role/newrole"
- ],
- "givenName": "Barbara",
- "lastPasswordAttempt": "Tue Oct 21 2014 16:01:22 GMT+0200 (SAST)",
- "address2": "",
- "passwordAttempts": "0",
- "sn": "Jensen",
- "mail": "bjensen@example.com",
- "country": "",
- "_rev": "2",
- "lastPasswordSet": "",
- "postalCode": "",
- "_id": "bjensen",
- "description": "Created for OpenIDM",
- "accountStatus": "active",
- "telephoneNumber": "1-360-229-7105"
-}</computeroutput>
-    </screen>
-    <para>
-     Note the dash (<literal>-</literal>) character that is appended to the
-     field name in the <literal>data</literal> that is being sent. This
-     character specifies that the role should be added to the existing roles for
-     that user. If you do not include the dash character, the request overwrites
-     all current values of the user's <literal>"roles"</literal> attribute.
-    </para>
-   </section>
-
-   <section xml:id="query-role-membership">
-    <title>To Query Role Membership</title>
-    <para>
-     To return a list of all users who have a specific directly assigned role,
-     use the <literal>get-users-of-direct-role</literal> query, specifying the
-     role ID. You cannot query role membership for indirect roles.
-    </para>
-    <para>
-     The following query returns all members of the <literal>"newrole"</literal>
-     role created previously. Currently that role has only one member,
-     <literal>bjensen</literal>. The query returns the complete user object.
-    </para>
-
-    <screen>$ <userinput>curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=get-users-of-direct-role&amp;role=managed/role/newrole"
-    </userinput>
+ https://localhost:8443/openidm/managed/role/Employee
+     </userinput>
      <computeroutput>{
- "remainingPagedResults": -1,
- "pagedResultsCookie": null,
- "resultCount": 1,
- "result": [
-   {
-     "effectiveAssignments": {
-       "ldap": {
-         "attributes": [
-           {
-             "name": "ldapGroups",
-...
-      "_id": "bjensen",
-      "_rev": "2",
-      "description": "Created for OpenIDM",
-      "accountStatus": "active"
-    }
-  ]
-}</computeroutput>
-    </screen>
-   </section>
+   "properties" : "Employee",
+      "name" : "Employee",
+      "description" : "Role assigned to workers on the payroll."
+   },
+   "_id" : "Employee",
+   "_rev" : "1"
+}</computeroutput></screen>
 
-   <section xml:id="remove-role-assignment">
-    <title>To Remove a Role Assignment</title>
-    <para>
-     To remove a role assignment from a user, simply replace that user's
-     <literal>"roles"</literal> attribute with the array of roles that the user
-     should have. The following example removes the <literal>newrole</literal>
-     role from user <literal>bjensen</literal> by replacing the current value of
-     her <literal>"roles"</literal> attribute with its previous value
-     (<literal>"openidm-authorized"</literal>).
-    </para>
-    <screen>$ <userinput>curl \
+     <para>
+      Alternatively, the following POST request prompts OpenIDM to generate
+      a server-assigned Universally Unique Identifier (UUID) for the new role
+      object, in this case for <literal>"Contractor"</literal>
+     </para>
+
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+ "properties" : {
+      "name" : "Contractor",
+      "description" : "Role assigned to contract workers."
+      }
+ }' \
+ https://localhost:8443/openidm/managed/role?_action=create
+     </userinput>
+      <computeroutput>{
+    "properties" : {
+       "name" : "Contractor",
+       "description" : "Role assigned to contract workers."
+    },
+    "_id" : "9adba05b-89b4-4ed2-946f-0b1c2149cfa7",
+    "_rev" : "1"
+ }</computeroutput></screen>
+   </section>
+
+   <section xml:id="list-existing-roles">
+    <title>Listing Existing Roles</title>
+
+    <para>
+      You can review the full list of roles with a REST call or via the Admin UI.
+     </para>
+
+     <para>
+      The following REST call lists the roles that you just created in the
+      previous section:
+     </para>
+
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/role?_queryFilter=true' </userinput>
+      <computeroutput>{
+    "result" : [ {
+       "properties" : {
+          "name" : "Employee",
+          "description" : "Role assigned to workers on the payroll."
+       },
+       "_id" : "Employee",
+       "_rev" : "1"
+    }, {
+       "properties" : {
+          "name" : "Contractor",
+          "description" : "Role assigned to contract workers."
+       },
+       "_id" : "9adba05b-89b4-4ed2-946f-0b1c2149cfa7",
+       "_rev" : "1"
+    } ],
+    "resultCount" : 2,
+    "pagedResultsCookie" : null,
+    "remainingPagedResults" : -1
+ }</computeroutput></screen>
+
+     <para>
+      Alternatively, you can get the same information from the Admin UI, except
+      for the UUID and revision. Log into
+      <literal>https://localhost:8443/admin</literal>. From the top navigation
+      bar, select Roles.
+     </para>
+
+     <para>
+      You should see the Role List window, with the roles that you just created.
+     </para>
+
+     <mediaobject>
+      <alt>List existing Roles in the UI</alt>
+      <imageobject>
+       <imagedata fileref="images/list-role.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+
+    </section>
+
+    <section xml:id="assign-role-user">
+     <title>Assigning a Managed Role to a User</title>
+
+     <para>
+      Now that we have two roles, you can assign them to users. The process
+      in the Admin UI is straightforward. When you select a role such as
+      <literal>"Employee"</literal>, that opens a window with a list of users
+      that you can assign to the role.
+     </para>
+
+     <mediaobject>
+      <alt>Assign Roles to a User</alt>
+      <imageobject>
+       <imagedata fileref="images/assign-role-users.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+
+     <para>
+      If you do not see users in the Role screen, you may need to reconcile
+      users from a remote connected repository. For more information, see the
+      following section:
+      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+            xlink:href="integrators-guide#admin-ui-sync"><citetitle>Configuring
+      Reconciliation from the UI</citetitle></link>.
+     </para>
+
+     <para>
+      It is easy to assign users to specific roles in the UI. But you may also
+      want to automate the process with REST calls.
+     </para>
+
+     <para>
+      For that purpose, you could get the desired <literal>_id</literal> of
+      target users with a RESTful GET.
+     </para>
+
+     <para>
+      To get the value of <literal>_id</literal> for all users, you could use a
+      RESTful GET. If you made the call against the following endpoint, you
+      would get all information related to all managed users:
+     </para>
+
+     <screen>https://localhost:8443/openidm/managed/user?_queryId=query-all</screen>
+
+     <para>
+      Based on the information discussed in the this section:
+      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+            xlink:href="integrators-guide#constructing-queries">
+       <citetitle>Constructing Queries</citetitle></link>, you can make a more
+      fine grained RESTful call against to list just the
+      <literal>userName</literal> and <literal>_id</literal> of each user:
+     </para>
+
+     <screen>$ <userinput>curl \
+      --cacert self-signed.crt \
+      --header "X-OpenIDM-Username: openidm-admin" \
+      --header "X-OpenIDM-Password: openidm-admin" \
+      --request GET \
+      'https://localhost:8443/openidm/managed/user?_queryFilter=true&amp;_fields=userName,_id'
+     </userinput>
+     <computeroutput>{
+   "result" : [ {
+      "userName" : "jdoe",
+      "_id" : "3c7e4b21-6e1c-4983-9517-35d90e2569a9"
+   }, {
+      "userName" : "bjensen",
+      "_id" : "616f4aed-f674-4670-a875-a3cd2d512e1e"
+   } ],
+   "resultCount" : 2,
+   "pagedResultsCookie" : null,
+   "remainingPagedResults" : -1
+}</computeroutput></screen>
+
+     <para>
+      With that information in hand, you can run the following command to add
+      the <literal>managed/role/Employee</literal> role to user
+      <literal>jdoe</literal>:
+     </para>
+
+     <screen width="100">$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-type: application/json" \
  --header "If-Match: *" \
  --request PATCH \
  --data '[
-     {
-         "operation": "replace",
-         "field": "/roles",
-         "value": [
-             "openidm-authorized"
-         ]
-     }
+    {
+      "operation" : "add",
+      "field" : "/roles/-",
+      "value" : "managed/role/Employee"
+    }
  ]' \
- "https://localhost:8443/openidm/managed/user/bjensen"</userinput></screen>
-    <para>
-     In the role definition, you can specify what should happen when an
-     assignment of that role is removed. For more information, see
-     <xref linkend="effective-roles-and-assignments" />.
-    </para>
-   </section>
+ 'https://localhost:8443/openidm/managed/user/3c7e4b21-6e1c-4983-9517-35d90e2569a9?_fields=roles,effectiveRoles'
+     </userinput>
+     <computeroutput>{
+   "roles" : [ "openidm-authorized", "managed/role/Employee" ],
+   "effectiveRoles" : [ "openidm-authorized", "managed/role/Employee" ],
+ }</computeroutput></screen>
 
-   <section xml:id="delete-role-definition">
-    <title>To Delete a Managed Role Definition</title>
-    <para>
-     To delete a role definition, send a DELETE request, specifying the role ID
-     in the URL. The following sample command deletes the
-     <literal>newrole</literal> role, created previously.
-    </para>
-    <screen>$ <userinput>curl \
+     <para>
+      Note the value of <literal>"roles"</literal>. It includes the default
+      <literal>openidm-authorized</literal> role along with the
+      <literal>managed/role/Employee</literal> role that you just assigned to
+      that user with a <literal>PATCH</literal> call.
+     </para>
+
+    </section>
+
+    <section xml:id="delete-role-user">
+     <title>Deleting a Managed Role</title>
+
+     <para>
+      You can delete a managed role if users have not been assigned to it yet.
+      Now that you have assigned user <literal>jdoe</literal> to the
+      <literal>managed/role/Employee</literal> role, observe what happens
+      when we try to delete that role:
+     </para>
+
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request DELETE \
- "https://localhost:8443/openidm/managed/role/newrole"</userinput>
+ 'https://localhost:8443/openidm/managed/role/Employee'</userinput>
      <computeroutput>{
- "properties": {
-   "description": "an example role"
- },
- "assignments": {
-   "ldap": {
-     "attributes": [
-       {
-         "name": "ldapGroups",
-         "unassignmentOperation": "removeFromTarget",
-         "assignmentOperation": "mergeWithTarget",
-         "value": [
-           "CN=employees,O=corp"
-         ]
-       }
-     ],
-     "onAssignment": {
-       "file": "roles/onAssignment_ldap.js",
-       "type": "text/javascript"
-     },
-     "onUnassignment": {
-       "file": "roles/onUnassignment_ldap.js",
-       "type": "text/javascript"
-     }
-   }
- },
- "_rev": "1",
- "_id": "newrole"
-}</computeroutput>
-    </screen>
-    <note>
+    "code":409,
+    "reason":"Conflict",
+    "message":"Cannot delete a role that is currently assigned"
+ }</computeroutput></screen>
+
      <para>
-      You cannot delete a role definition if that role is currently assigned to
-      a user. Attempting to delete an assigned role results in the following
-      error:
+      In the same fashion, if you try to delete a non-empty Role in the Admin
+      UI, OpenIDM will return an error message.
      </para>
-     <screen>{
-      "message": "Cannot delete a role that is currently assigned",
-      "reason": "Conflict",
-      "code": 409
-      }</screen>
-    </note>
+
+     <para>
+      As you can see, OpenIDM has a safeguard to prevent you from accidentally
+      deleting a Role that has been assigned to one or more users.
+     </para>
+
+     <para>
+      To demonstrate the process, first unassign that
+      <literal>managed/role/Employee</literal> role from user
+      <literal>jdoe</literal>.
+     </para>
+
+     <screen width="100">$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PATCH \
+ --data '[
+   {
+      "operation" : "remove",
+      "field" : "/roles/1",
+      "value" : "managed/role/Employee"
+   }
+ ]' \
+ 'https://localhost:8443/openidm/managed/user/3c7e4b21-6e1c-4983-9517-35d90e2569a9?_fields=roles,effectiveRoles'
+     </userinput></screen>
+
+     <para>
+      To confirm that the Employee role no longer exists, run the following
+      command on the <literal>openidm/managed/role</literal> endpoint:
+     </para>
+
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/role?_queryFilter=true</userinput>
+     <computeroutput>{
+   "result" : [ {
+      "properties" : {
+         "name" : "Contractor",
+         "description" : "Role assigned to contract workers."
+      },
+      "_id" : "9adba05b-89b4-4ed2-946f-0b1c2149cfa7",
+      "_rev" : "3"
+   } ],
+   "resultCount" : 1,
+   "pagedResultsCookie" : null,
+   "remainingPagedResults" : -1
+ }</computeroutput></screen>
+
+     <para>
+      Since the only remaining role is <literal>"Contractor"</literal>, you know
+      the <literal>DELETE</literal> command successfully removed the
+      <literal>"Employee"</literal> role.
+     </para>
+
+     <para>
+      Alternatively, from the Admin UI, you can select the Roles option from the
+      top navigation bar. In the Role List window that appears, you can select
+      a role, and then select the Users tab.
+     </para>
+
+     <para>
+      You should see a check mark under the <literal>Has Role</literal> column
+      for any users who have been assigned to a specific role. As shown here,
+      you can highlight such users and then select <literal>Remove Users</literal>.
+     </para>
+
+     <mediaobject>
+      <alt>Delete Users from a Role Before Deleting the Role</alt>
+      <imageobject>
+       <imagedata fileref="images/delete-user-role-ui.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+
+     <para>
+      You can then return to the Details tab, and select Delete to delete the
+      role, in this case, Contractor. After you provide confirmation,
+      the Contractor role should no longer appear.
+     </para>
+
+     <mediaobject>
+      <alt>Delete a Role</alt>
+      <imageobject>
+       <imagedata fileref="images/delete-role-ui.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+
+    </section>
+
    </section>
+
   </section>
 
   <section xml:id="effective-roles-and-assignments">
    <title>Understanding Effective Roles and Effective Assignments</title>
    <para>
-    The primary purpose of roles is the management of user access to system
-    resources. User access is controlled by the
-    <firstterm>assignments</firstterm> or entitlements provided by the role.
+    OpenIDM supports the use of roles to help manage user membership in various
+    groups, through attribute assignments. Some groups may have more
+    entitlements than others. However, the configuration of associated access
+    rights is the province of access management tools such as OpenAM.
    </para>
    <para>
-    The previous section described how to create a basic role definition and to
-    assign that role to a user. This section describes how the assignments that
-    are specified for that role are applied.
+    The previous sections described how you can create a role, as well as how you
+    can assign that role to a user. This section describes how OpenIDM applies
+    the assignments that are specified for that role.
    </para>
 
    <section xml:id="sample-role-definition">
@@ -585,8 +671,8 @@
      </listitem>
      <listitem>
       <para>
-       <literal>"assignments"</literal> specifies the list of assignments
-       (or entitlements) that this role will create on the remote systems.
+       <literal>assignments</literal> specifies the list of attribute
+       assignments that this role creates on remote systems.
       </para>
       <para>
        Each assignment includes the name of the external system, such as
@@ -605,9 +691,20 @@
        <literal>"unassignmentOperation"</literal>
       </para>
       <para>
-       When you update a role definition by adding, updating, or removing an
-       attribute, the update triggers an <literal>"assignmentOperation"</literal>
-       or an <literal>"unassignmentOperation"</literal>.
+       When you update the definition of a role by adding, updating, or removing an
+       attribute, the update could trigger one of the following two operations:
+       <simplelist>
+        <member>
+         <literal>assignmentOperation</literal>: For accounts that have the
+         assignment, an assignmentOperation is triggered every time that account
+         is processed as part of a synchronization.
+        </member>
+        <member>
+         <literal>unassignmentOperation</literal>: When an assignment is
+         updated or removed from an account, the next synchronization triggers
+         an unassignmentOperation.
+        </member>
+       </simplelist>
       </para>
       <para>
        When you assign or unassign a role to a user, that action also triggers
@@ -625,21 +722,26 @@
         <para>
          The <literal>"replaceTarget"</literal> operation replaces the entire
          target attribute value with whatever is specified in the role
-         definition. When this operation is specified, the value from the role
-         assignments becomes the only authoritative source for the attribute.
+         definition. The value from the role assignments becomes the only
+         authoritative source for the attribute.
         </para>
         <para>
          The <literal>"mergeWithTarget"</literal> operation first merges the
-         source value with the existing target value, then adds the value or
-         values from the role assignment. In the event that duplicate values are
-         found (for attributes that take a list as a value), each value is
-         included only once in the resulting target value.
+         source value with the existing target value, then adds the value(s)
+         from the role assignment. If duplicate values are found (for attributes
+         that take a list as a value), each value is included only once in the
+         resulting target.
+        </para>
+        <para>
+         The <literal>"mergeWithTarget"</literal> operation is used only with
+         complex attribute values like arrays and objects. This operation does
+         not work with strings or numbers.
         </para>
        </listitem>
        <listitem>
         <para>
-         The <literal>"unassignmentOperation"</literal> specifies the way in
-         which the attribute value is removed, and can only be set to
+         The <literal>"unassignmentOperation"</literal> specifies how the
+         attribute value is removed, and can only be set to
          <literal>"removeFromTarget"</literal>.
         </para>
        </listitem>
@@ -667,22 +769,27 @@
       <para>
        By default, OpenIDM addresses any change in role assignments with the
        assignment operations defined in the
-       <filename>defaultMapping.js</filename> file. You can modify this behavior
-       by writing custom <literal>onAssignment</literal> and
-       <literal>onUnassignment</literal> scripts. If these custom scripts are
-       specified, OpenIDM triggers the <literal>"onAssignment"</literal> or
+       <filename>defaultMapping.js</filename> file.
+      </para>
+      <para>
+       You can modify this behavior with custom <literal>onAssignment</literal>
+       and <literal>onUnassignment</literal> scripts. OpenIDM can trigger
+       the <literal>"onAssignment"</literal> or
        <literal>"onUnassignment"</literal> script whenever you create, assign,
-       or delete a role from a user entry. In addition, every synchronization
-       operation triggers the <literal>"onAssignment"</literal> script. The
-       <literal>"onUnassignment"</literal> script is triggered when an
-       assignment is removed from a role, or when a role is unassigned from a
-       user.
+       or delete a role from a user entry.
       </para>
       <para>
        If you create a custom <literal>"onAssignment"</literal> or
        <literal>"onUnassignment"</literal> script, the script must return a
        <literal>"targetObject"</literal>, otherwise, the script operation might
        fail.
+      </para>
+      <para>
+       Every synchronization operation triggers the
+       <literal>"onAssignment"</literal> script. In contrast, the
+       <literal>"onUnassignment"</literal> script is triggered only when an
+       assignment is removed from a role, or when a role is unassigned from a
+       user.
       </para>
      </listitem>
     </itemizedlist>
@@ -701,16 +808,20 @@
      <literal>effectiveAssignments</literal>.
     </para>
     <para>
-     The logic that calculates the <literal>effectiveRoles</literal> and
-     <literal>effectiveAssignments</literal> attribute values is located in two
-     scripts:
+     To review the logic that calculates the <literal>effectiveRoles</literal>
+     and <literal>effectiveAssignments</literal> attribute values, examine the
+     following scripts:
      <filename>openidm/bin/defaults/script/roles/effectiveRoles.js</filename>
      and
      <filename>openidm/bin/defaults/script/roles/effectiveAssignments.js</filename>.
-     Do not alter these scripts. If you need to modify how roles and assignments
-     are handled, create your own custom script and reference it in the
-     <filename>conf/managed.json</filename> file. For information about using
-     custom scripts, see the
+     <emphasis>Do not change these scripts.</emphasis>
+    </para>
+    <para>
+     If you need to change the logic that calculates
+     <literal>effectiveRoles</literal> and
+     <literal>effectiveAssignments</literal>, create your own custom script
+     and include a reference to it in the <filename>conf/managed.json</filename>
+     file. For more information about using custom scripts, see the
      <link xlink:href="integrators-guide#appendix-scripting"
            xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
       Reference</citetitle></link>.
@@ -718,8 +829,10 @@
     <para>
      The <literal>effectiveRoles</literal> attribute lists the specific role
      definitions that are applied to a user entry. By default, the effective
-     roles script supports direct role assignments only. Dynamic role assignment
-     is not provided out of the box, but can be added with a custom script that
+     roles script supports <emphasis>only</emphasis> direct role assignments.
+    </para>
+    <para>
+     To set up a dynamic role assignment, you need a custom script that
      overrides the default <filename>effectiveRoles.js</filename> script. For
      more information, see <xref linkend="dynamic-role-assignments" />.
     </para>
@@ -729,20 +842,20 @@
      amalgamated set of entitlements for a specific user.
     </para>
     <para>
-     The value of the <literal>effectiveAssignments</literal> attribute provides
-     the information required for the provisioner to apply the effective
-     assignments, and provides a reference to the source of the assignment. In
-     reading this attribute, it is therefore possible to find and change the
-     root source of an assignment.
+     The value of <literal>effectiveAssignments</literal> supplies the
+     information needed by the provisioner to apply the effective assignments.
+     That value also refers to the source of the assignment. When you read this
+     attribute, you can find and change the root source of an assignment.
     </para>
     <para>
      Effective assignments can merge attribute operations on the same system from
      multiple roles. For example, role A might add group A to a user's group
-     membership list, and role B might add group B to the same group membership
-     property on the same assigned system.
+     membership list, and role B might add group B to the same group
+     membership property on the same assigned system.
     </para>
     <para>
-     The effective roles and effective assignments attributes are configured in
+     To see how effective roles and effective assignments attributes are
+     configured, examine the following
      <filename>openidm/conf/managed.json</filename> as follows:
     </para>
     <programlisting language="java">
@@ -768,28 +881,30 @@
 
     <para>
      By default, the <filename>effectiveRoles.js</filename> script uses the
-     <literal>"roles"</literal> attribute of a user entry to determine the
+     <literal>"roles"</literal> attribute of a user entry to derive the
      direct roles assigned to the user. The
      <filename>effectiveAssignments.js</filename> script uses the virtual
-     <literal>"effectiveRoles"</literal> attribute of the user entry to calculate
-     the user's effective assignments. If your deployment uses different
-     attributes to store this information, change the
-     <literal>"rolesPropName"</literal> and the
+     <literal>"effectiveRoles"</literal> attribute for a user to calculate
+     the user's effective assignments.
+    </para>
+    <para>
+     If your deployment uses different attributes to store this information,
+     change the <literal>"rolesPropName"</literal> and the
      <literal>"effectiveRolesPropName"</literal> properties of the virtual
      attribute definitions accordingly.
     </para>
 
     <para>
-     When a user entry is assigned a role, the <literal>effectiveRoles</literal>
-     and <literal>effectiveAssignments</literal> of that entry are calculated
-     according to the role definition. A managed user entry, whose roles have
-     been generated based on the role definition illustrated previously, might
-     appear as follows:
+     When a role is assigned to a user entry, OpenIDM calculates the
+     <literal>effectiveRoles</literal> and <literal>effectiveAssignments</literal>
+     for that user from the definition of the role. A managed user entry, whose
+     roles have been generated based on the previously noted role definition,
+     might appear as follows:
     </para>
 
     <programlisting language="javascript">
 {
-  "_id":"i",
+  "_id":"1",
   "_rev":"1",
   "roles":[
      "openidm-authorized",
@@ -858,7 +973,7 @@
     based on the effective assignments.
    </para>
    <para>
-    This section describes these two steps.
+    This section describes both options.
    </para>
 
    <section xml:id="roles-default-mapping">
@@ -970,7 +1085,8 @@
     <para>
      The following sample procedure creates a new role that includes an
      assignment, adds that role to the user entry <literal>bjensen</literal> and
-     then shows how bjensen's effective assignments have been generated.
+     then shows how OpenIDM generates effective assignments for user
+     <literal>bjensen</literal>.
     </para>
     <step>
      <para>
@@ -1144,8 +1260,8 @@
   <section xml:id="dynamic-role-assignments">
    <title>Adding Support for Dynamic Assignments</title>
    <para>
-    Although support for dynamic role assignments is not provided by default,
-    it can easily be added with a custom script, as follows.
+    While support for dynamic role assignments is included in the default
+    configuration, you can add such support with a custom script, as follows.
    </para>
    <procedure>
     <step>
@@ -1191,26 +1307,39 @@ if (object.org === 'example') {
     </step>
    </procedure>
    <para>
-    Note that changes to dynamic role assignments for existing users require a
-    manual reconciliation of the affected group of users for those changes to
-    take effect. So, if a new dynamic role definition is created, if an
-    existing dynamic role definition is changed, or if changes are made to the
-    dynamic assignment rule, the group of users affected by that assignment
-    rule must be reconciled manually.
+    If you make any of the following changes to dynamic role assignments, you
+    must perform a manual reconciliation of all affected users before the
+    changes take effect:
    </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      If you create a new dynamic role definition.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      If you change the definition of an existing dynamic role.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      If you change a dynamic assignment rule.
+     </para>
+    </listitem>
+   </itemizedlist>
    <para>
-    When a user entry is changed or synchronized, however, all dynamic role
-    assignments are reassessed automatically.
+    Alternatively, you could change or synchronize a user entry. In that case,
+    all dynamic role assignments are reassessed automatically.
    </para>
   </section>
 
   <section xml:id="managed-role-script-hooks">
    <title>Managed Role Object Script Hooks</title>
    <para>
-    In addition to the functionality provided by the assignments, a managed
-    role object has script hooks that enable you to configure role behavior.
-    The managed role object has the following structure in the managed objects
-    configuration file (<filename>managed.json</filename>):
+    A managed role object has script hooks that enable you to configure role
+    behavior. The managed role object has the following structure in the managed
+    objects configuration file (<filename>managed.json</filename>):
    </para>
    <programlisting language="javascript">{
     "name" : "role",
@@ -1242,16 +1371,18 @@ if (object.org === 'example') {
     synchronization operation on these attributes.
    </para>
    <para>
-    This script iterates over all managed users, locates the users who have
+    This script examines all managed users, locates the users who have
     been assigned this role, and regenerates their effective assignments on the
-    target resource. So, for example, if the role <literal>"ldap"</literal>
-    gives a user an assignment on the resource "Active Directory", when that
-    role definition is changed, a reconciliation operation runs to update the
-    assignment for that user on the "Active Directory" resource.
+    target resource. So, for example, assume the <literal>"ldap"</literal> role
+    provides an entitlement on the resource "Active Directory".
+   </para>
+   <para>
+    When that role definition is changed, OpenIDM runs a reconciliation
+    to update the entitlement for that user on the "Active Directory" resource.
    </para>
   </section>
 
- </section>
+  </section>
 
  <section xml:id="sync-encrypted-values">
   <title>Using Encrypted Values</title>
