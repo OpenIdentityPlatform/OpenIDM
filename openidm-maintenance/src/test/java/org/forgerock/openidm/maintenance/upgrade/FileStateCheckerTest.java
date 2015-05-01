@@ -78,9 +78,9 @@ public class FileStateCheckerTest {
                 StandardCopyOption.REPLACE_EXISTING);
         FileStateChecker checker = new FileStateChecker(tempFile);
         Path filepath = Paths.get(getClass().getResource("/file1").toURI());
-        byte[] original = checker.getOriginalDigest(filepath);
         checker.updateState(filepath);
-        assertThat(original != null && Arrays.equals(original, checker.getOriginalDigest(filepath)));
+        checker = new FileStateChecker(tempFile);
+        assertThat(checker.getCurrentFileState(filepath).equals(FileState.UNCHANGED));
     }
 
     @Test
@@ -89,9 +89,9 @@ public class FileStateCheckerTest {
                 StandardCopyOption.REPLACE_EXISTING);
         FileStateChecker checker = new FileStateChecker(tempFile);
         Path filepath = Paths.get(getClass().getResource("/file1").toURI());
-        byte[] original = checker.getOriginalDigest(filepath);
         checker.updateState(filepath);
-        assertThat(original != null && !Arrays.equals(original, checker.getOriginalDigest(filepath)));
+        checker = new FileStateChecker(tempFile);
+        assertThat(checker.getCurrentFileState(filepath).equals(FileState.DIFFERS));
     }
 
     @Test
@@ -100,12 +100,9 @@ public class FileStateCheckerTest {
                 StandardCopyOption.REPLACE_EXISTING);
         FileStateChecker checker = new FileStateChecker(tempFile);
         Path filepath = Paths.get(getClass().getResource("/file3").toURI());
-
-        byte[] original = checker.getOriginalDigest(filepath);
-        assertThat(original == null);
-
         checker.updateState(filepath);
-        assertThat(checker.getOriginalDigest(filepath) == null);
+        checker = new FileStateChecker(tempFile);
+        assertThat(checker.getCurrentFileState(filepath).equals(FileState.DELETED));
     }
 
     @Test
@@ -114,12 +111,10 @@ public class FileStateCheckerTest {
                 StandardCopyOption.REPLACE_EXISTING);
         FileStateChecker checker = new FileStateChecker(tempFile);
         Path filepath = Paths.get(getClass().getResource("/badformat.csv").toURI());
-
-        byte[] original = checker.getOriginalDigest(filepath);
-        assertThat(original == null);
-
+        assertThat(checker.getCurrentFileState(filepath).equals(FileState.NONEXISTENT));
         checker.updateState(filepath);
-        assertThat(checker.getOriginalDigest(filepath) != null);
+        checker = new FileStateChecker(tempFile);
+        assertThat(checker.getCurrentFileState(filepath).equals(FileState.UNCHANGED));
     }
 
     @Test(expectedExceptions = FileNotFoundException.class)
@@ -147,7 +142,7 @@ public class FileStateCheckerTest {
         Path checksumFile = Paths.get(getClass().getResource("/checksums.csv").toURI());
         FileStateChecker checker = new FileStateChecker(checksumFile);
         assertThat(checker.getCurrentFileState(checksumFile.resolveSibling("file0")))
-                .isEqualTo(FileState.MISSING);
+                .isEqualTo(FileState.NONEXISTENT);
     }
 
     @Test

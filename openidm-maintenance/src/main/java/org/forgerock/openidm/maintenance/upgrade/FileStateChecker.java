@@ -97,14 +97,19 @@ public class FileStateChecker {
     /**
      * Return the current state of a shipped file.
      *
-     * @param shippedFile a path to the original, shipped file.
+     * @param originalDeployFile a path to the original, shipped file.
      * @return the current file state
      */
-    public FileState getCurrentFileState(Path shippedFile) throws IOException {
-        if (!Files.exists(shippedFile)) {
-            return FileState.MISSING;
+    public FileState getCurrentFileState(Path originalDeployFile) throws IOException {
+        if (!digestCache.containsKey(getRelativizedPath(originalDeployFile).toString())) {
+            return Files.exists(originalDeployFile)
+                    ? FileState.UNEXPECTED
+                    : FileState.NONEXISTENT;
         }
-        return Arrays.equals(getCurrentDigest(shippedFile), getOriginalDigest(shippedFile))
+        if (!Files.exists(originalDeployFile)) {
+            return FileState.DELETED;
+        }
+        return Arrays.equals(getCurrentDigest(originalDeployFile), getOriginalDigest(originalDeployFile))
             ? FileState.UNCHANGED
             : FileState.DIFFERS;
     }
@@ -143,7 +148,7 @@ public class FileStateChecker {
      * @param shippedFile the original, shipped file.
      * @return the digestCache
      */
-    protected byte[] getOriginalDigest(Path shippedFile) {
+    private byte[] getOriginalDigest(Path shippedFile) {
         return hexAdapter.unmarshal(digestCache.get(getRelativizedPath(shippedFile).toString()));
     }
 
@@ -153,7 +158,7 @@ public class FileStateChecker {
      * @param currentFile the current file
      * @return the digestCache
      */
-    protected byte[] getCurrentDigest(Path currentFile) throws IOException {
+    private byte[] getCurrentDigest(Path currentFile) throws IOException {
         return digest.digest(Files.readAllBytes(currentFile));
     }
 
