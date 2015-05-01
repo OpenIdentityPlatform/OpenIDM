@@ -24,8 +24,6 @@
 
 package org.forgerock.openidm.maintenance.upgrade;
 
-import org.apache.maven.artifact.versioning.ComparableVersion;
-
 /**
  * Wrapper around the product version tag (3.2.0-SNAPSHOT) and the SCM revision.
  */
