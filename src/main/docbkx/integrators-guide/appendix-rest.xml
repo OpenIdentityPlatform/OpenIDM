@@ -1006,8 +1006,7 @@ Content-Length: 89
        <row>
         <entry>/openidm/managed/user?_queryFilter=<replaceable>filter</replaceable></entry>
         <entry>GET</entry>
-        <entry>Query the managed user object with the defined filter. The value
-         of the query filter must be URL encoded.</entry>
+        <entry>Query the managed user object with the defined filter.</entry>
        </row>
       <row>
        <entry>/openidm/managed/user/<replaceable>id</replaceable></entry>
@@ -1063,8 +1062,8 @@ Content-Length: 89
    </userinput></screen>
 
    <para>
-    The following example queries the repository for managed users whose user
-    name is Smith.
+    The following two examples perform a query on the repository for managed
+    users for a user named <literal>smith</literal>.
    </para>
 
    <screen>$ <userinput>curl \
@@ -1074,6 +1073,22 @@ Content-Length: 89
 --request GET \
  "https://localhost:8443/openidm/managed/user?_queryFilter=userName%20eq%20%22smith%22"
    </userinput></screen>
+
+    <para>
+     For this second example, note the use of single quotes around the URL, to
+     avoid conflicts with the double quotes around the user named
+     <literal>smith</literal>. Be aware, the <literal>_queryFilter</literal>
+     requires double quotes (or the URL encoded equivalent, <literal>%22</literal>,)
+     around the search term.
+    </para>
+
+    <screen>$ <userinput>curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"smith"'
+    </userinput></screen>
 
    <para>
     The following example retrieves the JSON representation of a specified user.
