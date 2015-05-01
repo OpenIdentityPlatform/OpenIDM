@@ -24,10 +24,17 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 /**
- * FileState reports the state of files on the filesystem as they compare to an original distribution.
+ * FileState reports the state of files in an original distribution as the compare to a new distribution.
  */
 public enum FileState {
-    MISSING,
+    /** The file exists on disk but not in the list of known files for the original distribution. */
+    UNEXPECTED,
+    /** The file does not exist on disk nor in the list of known files for the original distribution. */
+    NONEXISTENT,
+    /** The file should exist but does not. */
+    DELETED,
+    /** The file on disk has been changed since the original deployment. */
     DIFFERS,
+    /** The file is unchanged from the original distribution. */
     UNCHANGED
 }
