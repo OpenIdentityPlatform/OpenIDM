@@ -38,8 +38,7 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     obj.getSchema = function(args){
         var objectType = args[0],
             objectName = args[1],
-            objectName2 = args[2],
-            provisionerProm;
+            objectName2 = args[2];
 
         if(objectType === "managed") {
             return configDelegate.readEntity("managed").then(function(managed){
@@ -56,27 +55,21 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
                 }
             });
         } else {
-            provisionerProm = configDelegate.readEntity("provisioner.openicf/" + objectName);
-            obj.serviceUrl += "/" + objectName2;
-            if (provisionerProm) {
-                return $.when(provisionerProm).then(function(prov){
-                    var schema;
+            return obj.getProvisioner(objectType, objectName).then(function(prov){
+                var schema;
 
-                    if(prov.objectTypes){
-                        schema = prov.objectTypes[objectName2];
-                        if(schema){
-                            schema.title = objectName;
-                            return schema;
-                        } else {
-                            return false;
-                        }
+                if(prov.objectTypes){
+                    schema = prov.objectTypes[objectName2];
+                    if(schema){
+                        schema.title = objectName;
+                        return schema;
                     } else {
-                        return "invalidObject";
+                        return false;
                     }
-                });
-            } else {
-                return "invalidObject";
-            }
+                } else {
+                    return "invalidObject";
+                }
+            });
         }
     };
 
@@ -109,6 +102,18 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     obj.searchResource = function(filter, serviceUrl) {
         return obj.serviceCall({
             url: serviceUrl +"?_queryFilter="+filter
+        });
+    };
+    
+    obj.getProvisioner = function(objectType, objectName) {
+        return obj.serviceCall({
+            serviceUrl: obj.serviceUrl + objectType + "/" + objectName,
+            url: "?_action=test",
+            type: "POST"
+        }).then(function(connector) {
+            var config = connector.config.replace("config/","");
+            
+            return configDelegate.readEntity(config);
         });
     };
 
