@@ -60,7 +60,7 @@ public class FileStateCheckerTest {
     }
 
     @BeforeMethod
-    public void setupTempFile() throws IOException, URISyntaxException {
+    public void setupTempChecksumFile() throws IOException, URISyntaxException {
         tempChecksumFile = Files.createTempFile(tempPath, null, null);
     }
 
