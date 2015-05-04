@@ -610,10 +610,11 @@ $ ./startup.sh -p samples/sample1
 
   <para>
    If you created user <literal>joe</literal>, as described in the procedure
-   entitled <link xlink:href="integrators-guide#first-steps-with-rest"
-   xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To
-   Get Started With the OpenIDM REST Interface</citetitle></link>, you should
-   see the ID for that user somewhere in this list. If you did not include
+   entitled
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="integrators-guide#first-steps-with-rest">
+   <citetitle>Getting Started With the OpenIDM REST Interface</citetitle></link>,
+   you should see the ID for that user somewhere in this list. If you did not include
    <literal>"_id:joe"</literal> in the command to create user
    <literal>joe</literal>, you would see a system-generated UUID in the list
    instead of the specified ID.
