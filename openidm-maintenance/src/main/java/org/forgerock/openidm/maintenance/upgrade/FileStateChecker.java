@@ -131,39 +131,6 @@ public class FileStateChecker {
     }
 
     /**
-     * Record a new/updated checksum in the digest cache and persist it to disk.  This method
-     * records the checksum for one file using the path of another.  This is to support cases
-     * where a new file is placed on the filesystem but the old file is retained due to user
-     * customizations.  The new file is typically stored with a modified filename, such as a
-     * versioned suffix, but the checksum must be recorded for the "install" path.
-     *
-     * @param installPath the path of the user-customized file
-     * @param actualPath the path of the file whose checksum should be recorded
-     * @throws IOException
-     */
-    public void updateState(Path installPath, Path actualPath) throws IOException {
-        String cacheKey = getRelativizedPath(installPath).toString();
-        if (!Files.exists(installPath) || !Files.exists(actualPath)) {
-            digestCache.remove(cacheKey);
-        } else {
-            digestCache.put(cacheKey, hexAdapter.marshal(getCurrentDigest(actualPath)));
-        }
-        persistChecksums();
-    }
-
-    /**
-     * Get the path of the provided file relative to the checksum file's path.  We assume the checksum
-     * file is at the root of the project, so all files in the digestCache (sourced from the checksums
-     * file) are relative to this root.
-     *
-     * @param file a file in the distribution
-     * @return the path of the file relative to the checksum file (root path)
-     */
-    private Path getRelativizedPath(Path file) {
-        return checksums.getParent().relativize(file);
-    }
-
-    /**
      * Resolve the full path of the provided file relative to the checksum file's path.
      *
      * @param file a file in the distribution
