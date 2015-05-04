@@ -1,17 +1,22 @@
 <div class="container">
     <div id="users" class="content-bg managedObjectsContainer">
         <div class="page-header">
-            <div style="border-bottom:none;" class='btn-toolbar pull-right'>
-                <div>
-                    <a href="#users/add/"><button class="btn btn-primary" type="button">{{t "common.form.addUser"}}</button></a>
-                    <button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button>
-                    <button type="button"  class="btn btn-primary"  id="clearFiltersBtn" disabled>{{t 'common.form.clearFilters'}}</button>
-                </div>
-            </div>
-            <h3>{{t "common.user.usersList"}}</h3>
+            <h1>{{t "common.user.usersList"}}</h1>
         </div>
 
-        <div class="managedObjectsContainer">
+        <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+            <div class="btn-group" role="group" aria-label="add resource">
+                <a href="#users/add/"><button class="btn btn-primary" type="button">{{t "common.form.addUser"}}</button></a>
+            </div>
+            <div class="btn-group" role="group" aria-label="reload grid">
+                <button type="button"  class="btn btn-primary"  id="reloadGridBtn">{{t 'common.form.reloadGrid'}}</button>
+            </div>
+            <div class="btn-group" role="group" aria-label="clear filters">
+                <button type="button"  class="btn btn-primary"  id="clearFiltersBtn" disabled>{{t 'common.form.clearFilters'}}</button>
+            </div>
+        </div>
+
+        <div  class="resourcesContainer">
             <table id="usersTable"></table>
         </div>
     </div>
