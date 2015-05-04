@@ -37,12 +37,12 @@
                             <div class="card-heading">
                                 <!-- Single button -->
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-link fa-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <button type="button" id="{{name}}ConnectorToggle" class="btn btn-link fa-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                         <i class="fa fa-ellipsis-v"></i>
                                     </button>
                                     <ul class="dropdown-menu pull-right" role="menu">
                                         {{#each objectTypes}}
-                                            <li><a href="#resource/system/{{../name}}/{{this}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{this}})</a></li>
+                                        <li><a href="#resource/system/{{../name}}/{{this}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{this}})</a></li>
                                         {{/each}}
                                         <li><a href="#connectors/edit/{{cleanUrlName}}/"><i class="fa fa-pencil"></i>{{t "common.form.edit"}}</a></li>
                                         <li class="connector-delete"><span><i class="fa fa-times"></i>{{t "common.form.delete"}}</span></li>
@@ -116,7 +116,7 @@
                                 <div class="card-heading">
                                     <!-- Single button -->
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-link fa-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <button type="button" id="{{name}}ManagedToggle" class="btn btn-link fa-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                             <i class="fa fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu pull-right" role="menu">
