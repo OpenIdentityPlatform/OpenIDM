@@ -60,7 +60,9 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         },
         
         reloadGrid: function(event){
-            event.preventDefault();
+            if(event) {
+                event.preventDefault();
+            }
             $(this.grid_id_selector).trigger('reloadGrid');
         },
         
@@ -249,7 +251,9 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDeleteSelected",{ objectTitle: this.data.objectName }), _.bind(function(){
                 var promArr = [];
                 _.each(this.selectedRows(), _.bind(function(objectId) {
-                    promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId));
+                    promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId, null, _.bind(function() {
+                        this.reloadGrid();
+                    }, this)));
                 }, this));
                 $.when.apply($,promArr).then(_.bind(function(proms){
                     this.render(this.data.args, _.bind(function() {
