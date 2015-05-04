@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.maintenance.upgrade;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
@@ -39,5 +40,5 @@ public interface Archive {
      * @param path The Path for which to retrieve an InputStream
      * @return the InputStream
      */
-    InputStream getInputStream(Path path);
+    InputStream getInputStream(Path path) throws IOException;
 }
