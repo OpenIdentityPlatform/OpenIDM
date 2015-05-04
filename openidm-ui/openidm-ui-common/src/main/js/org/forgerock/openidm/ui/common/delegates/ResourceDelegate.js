@@ -30,8 +30,9 @@
 define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(constants, AbstractDelegate, configDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/commons/ui/common/components/Messages"
+], function(constants, AbstractDelegate, configDelegate, messagesManager) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/");
 
@@ -82,8 +83,28 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     obj.updateResource = function (serviceUrl) {
         return AbstractDelegate.prototype.updateEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
     };
-    obj.deleteResource = function (serviceUrl) {
-        return AbstractDelegate.prototype.deleteEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
+    obj.deleteResource = function (serviceUrl, id, successCallback, errorCallback) {
+        var callParams = {
+                serviceUrl: serviceUrl, url: "/" + id, 
+                type: "DELETE", 
+                success: successCallback, 
+                error: errorCallback,
+                errorsHandlers: {
+                    "Conflict": {
+                        status: 409
+                    }
+                },
+                headers: {
+                    "If-Match": "*"
+                }
+            };
+        
+        return obj.serviceCall(callParams).fail(function(err){
+            var response = err.responseJSON;
+            if(response.code === 409) {
+                messagesManager.messages.addMessage({"type": "error", "message": response.message});
+            }
+        });
     };
     obj.patchResourceDifferences = function (serviceUrl) {
         return AbstractDelegate.prototype.patchEntityDifferences.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
