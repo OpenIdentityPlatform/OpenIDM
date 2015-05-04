@@ -54,28 +54,16 @@ public class StaticFileUpdate {
     }
 
     /**
-     * @return whether the static file exists
-     */
-    boolean exists(Path path) {
-        return Files.exists(path);
-    }
-
-    /**
-     * @return whether the static file has been changed
-     */
-    boolean isChanged(Path path) throws IOException {
-        return exists(path)
-                && FileState.DIFFERS.equals(fileStateChecker.getCurrentFileState(path));
-    }
-
-    /*              replace           keep
-                    old    / new       old / new
-
-     UNEXPECTED     rename / copy          / rename
-     NONEXISTENT             copy          / copy
-     DELETED                 copy          / copy
-     DIFFERS        rename / copy          / rename
-     UNCHANGED               copy          / copy
+     * Table of what to do under what FileState circumstances
+     *
+     *                   replace           keep
+     *                old    / new       old / new
+     *
+     * UNEXPECTED     rename / copy          / rename
+     * NONEXISTENT             copy          / copy
+     * DELETED                 copy          / copy
+     * DIFFERS        rename / copy          / rename
+     * UNCHANGED               copy          / copy
      */
 
     /**

@@ -95,49 +95,6 @@ public class StaticFileUpdateTest {
     }
 
     /**
-     * Test that a path does not exist.
-     *
-     * @throws IOException
-     */
-    @Test
-    public void testDoesNotExist() throws IOException {
-        Path file = tempPath.resolve("test");
-        StaticFileUpdate update = getStaticFileUpdate(mock(FileStateChecker.class));
-        assertFalse(update.exists(file));
-    }
-
-    /**
-     * Test that a path exists.
-     */
-    @Test
-    public void testExists() throws IOException {
-        StaticFileUpdate update = getStaticFileUpdate(mock(FileStateChecker.class));
-        assertTrue(update.exists(tempFile));
-    }
-
-    /**
-     * Test that a path is unchanged.
-     */
-    @Test
-    public void testUnchanged() throws IOException {
-        FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.UNCHANGED);
-        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
-        assertFalse(update.isChanged(tempFile));
-    }
-
-    /**
-     * Test that a path differs.
-     */
-    @Test
-    public void testDiffers() throws IOException {
-        FileStateChecker fileStateChecker = mock(FileStateChecker.class);
-        when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.DIFFERS);
-        StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
-        assertTrue(update.isChanged(tempFile));
-    }
-
-    /**
      * Test a replacement on an unchanged path.
      */
     @Test
