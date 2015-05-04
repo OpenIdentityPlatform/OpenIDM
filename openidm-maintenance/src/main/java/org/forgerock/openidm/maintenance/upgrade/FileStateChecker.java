@@ -121,11 +121,32 @@ public class FileStateChecker {
      * @throws IOException
      */
     public void updateState(Path newFile) throws IOException {
-        try {
-            digestCache.put(newFile.toString(), Arrays.toString(getCurrentDigest(newFile)));
-        } catch (IOException e) {
-            // File does not exist, remove entry.
-            digestCache.remove(newFile.toString());
+        String cacheKey = getRelativizedPath(newFile).toString();
+        if (!Files.exists(newFile)) {
+            digestCache.remove(cacheKey);
+        } else {
+            digestCache.put(cacheKey, Arrays.toString(getCurrentDigest(newFile)));
+        }
+        persistChecksums();
+    }
+
+    /**
+     * Record a new/updated checksum in the digest cache and persist it to disk.  This method
+     * records the checksum for one file using the path of another.  This is to support cases
+     * where a new file is placed on the filesystem but the old file is retained due to user
+     * customizations.  The new file is typically stored with a modified filename, such as a
+     * versioned suffix, but the checksum must be recorded for the "install" path.
+     *
+     * @param installPath the path of the user-customized file
+     * @param actualPath the path of the file whose checksum should be recorded
+     * @throws IOException
+     */
+    public void updateState(Path installPath, Path actualPath) throws IOException {
+        String cacheKey = getRelativizedPath(installPath).toString();
+        if (!Files.exists(installPath) || !Files.exists(actualPath)) {
+            digestCache.remove(cacheKey);
+        } else {
+            digestCache.put(cacheKey, Arrays.toString(getCurrentDigest(actualPath)));
         }
         persistChecksums();
     }
