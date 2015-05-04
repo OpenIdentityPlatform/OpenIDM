@@ -87,7 +87,7 @@ public class StaticFileUpdateTest {
         Files.delete(tempFile);
     }
 
-    private StaticFileUpdate getStaticFileUpdate(FileStateChecker fileStateChecker) {
+    private StaticFileUpdate getStaticFileUpdate(FileStateChecker fileStateChecker) throws IOException {
         Archive archive = mock(Archive.class);
         when(archive.getInputStream(tempFile)).thenReturn(new ByteArrayInputStream(newBytes));
         StaticFileUpdate update = new StaticFileUpdate(fileStateChecker, archive, oldVersion, newVersion);
