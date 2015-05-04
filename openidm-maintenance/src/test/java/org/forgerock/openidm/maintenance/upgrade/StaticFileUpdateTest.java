@@ -90,7 +90,7 @@ public class StaticFileUpdateTest {
     private StaticFileUpdate getStaticFileUpdate(FileStateChecker fileStateChecker) throws IOException {
         Archive archive = mock(Archive.class);
         when(archive.getInputStream(tempFile)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(fileStateChecker, archive, oldVersion, newVersion);
+        StaticFileUpdate update = new StaticFileUpdate(fileStateChecker, tempPath, archive, oldVersion, newVersion);
         return update;
     }
 
@@ -138,7 +138,7 @@ public class StaticFileUpdateTest {
     }
 
     /**
-     * Test a replacement on an unchangaed path.
+     * Test a replacement on an unchanged path.
      */
     @Test
     public void testReplaceIsUnchanged() throws IOException {

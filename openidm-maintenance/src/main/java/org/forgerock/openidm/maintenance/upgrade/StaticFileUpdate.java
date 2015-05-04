@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.EnumSet;
 
 /**
  * Updates / replaces / adds a new static file in the distribution.
@@ -38,13 +39,15 @@ public class StaticFileUpdate {
     static final String IDM_SUFFIX = ".idm-";
 
     private final FileStateChecker fileStateChecker;
+    private final Path root;
     private final Archive archive;
     private final ProductVersion currentVersion;
     private final ProductVersion upgradedVersion;
 
-    StaticFileUpdate(FileStateChecker fileStateChecker, Archive archive,
+    StaticFileUpdate(FileStateChecker fileStateChecker, Path openidmRoot, Archive archive,
             ProductVersion currentVersion, ProductVersion upgradedVersion) {
         this.fileStateChecker = fileStateChecker;
+        this.root = openidmRoot;
         this.archive = archive;
         this.currentVersion = currentVersion;
         this.upgradedVersion = upgradedVersion;
@@ -65,6 +68,16 @@ public class StaticFileUpdate {
                 && FileState.DIFFERS.equals(fileStateChecker.getCurrentFileState(path));
     }
 
+    /*              replace           keep
+                    old    / new       old / new
+
+     UNEXPECTED     rename / copy          / rename
+     NONEXISTENT             copy          / copy
+     DELETED                 copy          / copy
+     DIFFERS        rename / copy          / rename
+     UNCHANGED               copy          / copy
+     */
+
     /**
      * Replaces this static file with the new one from the archive.  If the file has been changed, copy it to
      * <em>&lt;filepath&gt;-.idm-old</em>.  Supports copying fresh file for one that is missing.
@@ -72,10 +85,10 @@ public class StaticFileUpdate {
      * @throws IOException
      */
     void replace(Path path) throws IOException {
-        if (isChanged(path)) {
-            Files.move(path, Paths.get(path.toString() + IDM_SUFFIX + currentVersion.toString()));
+        if (EnumSet.of(FileState.UNEXPECTED, FileState.DIFFERS).contains(fileStateChecker.getCurrentFileState(path))) {
+            Files.move(root.resolve(path), root.resolve(path.toString() + IDM_SUFFIX + currentVersion.toString()));
         }
-        Files.copy(archive.getInputStream(path), path, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(archive.getInputStream(path), root.resolve(path), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
@@ -84,9 +97,10 @@ public class StaticFileUpdate {
      * @throws IOException
      */
     void keep(Path path) throws IOException {
-        if (!isChanged(path)) {
-            throw new IOException("The file " + path.toString() + " does not exist - cannot \"keep\" it");
+        if (EnumSet.of(FileState.UNEXPECTED, FileState.DIFFERS).contains(fileStateChecker.getCurrentFileState(path))) {
+            Files.copy(archive.getInputStream(path), root.resolve(path.toString() + IDM_SUFFIX + upgradedVersion.toString()));
+        } else {
+            throw new IOException("No such file " + path.toString() + " to keep!");
         }
-        Files.copy(archive.getInputStream(path), Paths.get(path.toString() + IDM_SUFFIX + upgradedVersion.toString()));
     }
 }
