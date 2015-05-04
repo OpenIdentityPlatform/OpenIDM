@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingRoleEntitlementsView", [
                 this.data.rolesForAssignmentsToMap = (assignments.length) ? assignments : false;
                 this.parentRender(_.bind(function () {
                     if(assignments.length) {
-                        this.$el.parent().addClass("in");
+                        this.$el.parent().parent().find("#roleEntitlementsHeading a").click();
                     }
                     if (callback) {
                         callback();
@@ -69,6 +69,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingRoleEntitlementsView", [
                                             return {
                                                 roleId: role._id,
                                                 roleName: role.properties.name,
+                                                linkQualifiers: '"' + role.assignments[assignmentName].linkQualifiers.join('", "') + '"',
                                                 attributes: _.map(role.assignments[assignmentName].attributes, function(attr) {
                                                     attr.value = JSON.stringify(attr.value, null, 2);
                                                     return attr;
