@@ -112,9 +112,10 @@
    xlink:href="integrators-guide#openidm-glossary" xlink:show="new">
    <citetitle>OpenIDM Glossary</citetitle></link>.
   </para>
+  <!-- The &#x2014; works as an em dash -->
   <para>
-   This section refers to two distinct types of roles - direct (static) and
-   indirect (dynamic) roles. Direct roles are specifically added to a user's
+   This section refers to two distinct types of roles &#x2014; direct (static)
+   and indirect (dynamic) roles. Direct roles are specifically added to a user's
    <literal>"roles"</literal> attribute in a persistent fashion, within the
    OpenIDM <literal>managed/user</literal> record. Indirect roles can be added
    to the user entry from a script or a rule that assigns the role.
@@ -187,24 +188,25 @@
     <section xml:id="create-role-adminui">
      <title>Creating a New Role in the Admin UI</title>
      <para>
-      To create a new managed role in the Admin UI, start OpenIDM. Now take the
-      following steps:
+      To create a new managed role in the Admin UI, start OpenIDM and follow
+      these steps.
      </para>
 
      <procedure>
       <step>
        <para>
-        Start OpenIDM, navigate to <literal>https://localhost:8443/admin</literal>,
-        and log in with default administrative credentials:
-        user <literal>openidm-admin</literal> and password
-        <literal>openidm-admin</literal>.
+        In your browser, navigate to
+        <literal>https://localhost:8443/admin</literal>, and log in with default
+        administrative credentials: user <literal>openidm-admin</literal>
+        and password <literal>openidm-admin</literal>.
        </para>
       </step>
       <step>
        <para>
-        From the top navigation bar, select Roles. In the New Role window that
-        appears, enter a <literal>Role Name</literal>, a
-        <literal>Description</literal>, and select <literal>Create</literal>.
+        From the top navigation bar, select Roles. If you have an existing role,
+        select Add Roles. In the New Role window that appears, enter a
+        <literal>Role Name</literal>, a <literal>Description</literal>, and
+        select <literal>Create</literal>.
        </para>
       </step>
      </procedure>
@@ -232,7 +234,7 @@
      <title>Creating a New Role with a REST Call</title>
 
      <para>
-      You can use a REST call to create a new role, as an object, using either
+      You can use a REST call to create a new role object, using either
       the PUT or POST methods. For additional discussion on the differences
       between PUT and POST, see the following Appendix:
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
@@ -297,7 +299,7 @@
     <title>Listing Existing Roles</title>
 
     <para>
-      You can review the full list of roles with a REST call or via the Admin UI.
+      You can review the full list of roles with a REST call or with the Admin UI.
      </para>
 
      <para>
@@ -358,12 +360,12 @@
      <para>
       Now that we have two roles, you can assign them to users. The process
       in the Admin UI is straightforward. When you select a role such as
-      <literal>"Employee"</literal>, that opens a window with a list of users
+      <literal>"Employee"</literal>, a window opens with a list of users
       that you can assign to the role.
      </para>
 
      <mediaobject>
-      <alt>Assign Roles to a User</alt>
+      <alt>Assigning Roles</alt>
       <imageobject>
        <imagedata fileref="images/assign-role-users.png" format="PNG" />
       </imageobject>
@@ -377,6 +379,32 @@
             xlink:href="integrators-guide#admin-ui-sync"><citetitle>Configuring
       Reconciliation from the UI</citetitle></link>.
      </para>
+
+     <para>
+      When you assign a user to a specific role, OpenIDM synchronizes that
+      information to the user account. For example, after user
+      <literal>bjensen</literal> is assigned as an Employee, review the
+      result in the Data Management View for that account:
+     </para>
+
+     <mediaobject>
+      <alt>Barbara Jensen now has an Employee Role</alt>
+      <imageobject>
+       <imagedata fileref="images/bjensen-role.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+
+     <para>
+      To confirm, scroll down and review the account information for the
+      Linked Resource on the LDAP system (OpenDJ).
+     </para>
+
+     <mediaobject>
+      <alt>Barbara Jensen's Employee Role is shown with the Linked Resource</alt>
+      <imageobject>
+       <imagedata fileref="images/bjensen-ldap-role.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
 
      <para>
       It is easy to assign users to specific roles in the UI. But you may also
@@ -401,7 +429,7 @@
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
             xlink:href="integrators-guide#constructing-queries">
        <citetitle>Constructing Queries</citetitle></link>, you can make a more
-      fine grained RESTful call against to list just the
+      fine-grained RESTful call against to list just the
       <literal>userName</literal> and <literal>_id</literal> of each user:
      </para>
 
@@ -465,10 +493,10 @@
      <title>Deleting a Managed Role</title>
 
      <para>
-      You can delete a managed role if users have not been assigned to it yet.
-      Now that you have assigned user <literal>jdoe</literal> to the
-      <literal>managed/role/Employee</literal> role, observe what happens
-      when we try to delete that role:
+      You can delete a managed role that does not have accounts assigned to it.
+      Otherwise, if you try to delete a non-empty role, an error message appears.
+      Observe what happens when you try to delete the non-empty
+      <literal>managed/role/Employee</literal> role:
      </para>
 
      <screen>$ <userinput>curl \
@@ -485,13 +513,13 @@
  }</computeroutput></screen>
 
      <para>
-      In the same fashion, if you try to delete a non-empty Role in the Admin
-      UI, OpenIDM will return an error message.
+      If you delete a non-empty role in the Admin UI, OpenIDM returns an error
+      message.
      </para>
 
      <para>
       As you can see, OpenIDM has a safeguard to prevent you from accidentally
-      deleting a Role that has been assigned to one or more users.
+      deleting a role that has been assigned to one or more users.
      </para>
 
      <para>
@@ -605,8 +633,8 @@
     <title>A Sample Role Definition for Two Remote Systems</title>
     <para>
      The following sample role definition shows how assignments are configured
-     for two remote systems - an LDAP server (<literal>ldap</literal>), and an
-     Active Directory Server (<literal>ad</literal>).
+     for two remote systems &#x2014; an LDAP server (<literal>ldap</literal>),
+     and an Active Directory Server (<literal>ad</literal>).
     </para>
     <programlisting language="java">{
   "name": "samplerole",
@@ -677,7 +705,7 @@
       <para>
        Each assignment includes the name of the external system, such as
        <literal>ad</literal> and <literal>ldap</literal>, the
-       attribute or attributes whose values will be generated, on the external
+       attribute or attributes whose values will be generated on the external
        system, and the value or values that will be applied to each attribute.
       </para>
       <para>
@@ -715,7 +743,7 @@
        <listitem>
         <para>
          The <literal>"assignmentOperation"</literal> specifies the way in which
-         the attribute value is applied, and can be one of
+         the attribute value is applied, and can be either
          <literal>"replaceTarget"</literal> (the default) or
          <literal>"mergeWithTarget"</literal>.
         </para>
@@ -752,7 +780,7 @@
        attribute value in the target object.
       </para>
       <para>
-       The <literal>"mergeWithTarget"</literal>, <literal>"replaceTarget"</literal>
+       The <literal>"mergeWithTarget"</literal>, <literal>"replaceTarget"</literal>,
        <literal>"removeFromTarget"</literal>, and <literal>"noOp"</literal>
        operations are aliases, and are defined in the file
        <filename>openidm/bin/defaults/script/roles/defaultMapping.js</filename>.
@@ -763,7 +791,7 @@
        <literal>"onAssignment"</literal> and <literal>"onUnassignment"</literal>
       </para>
       <para>
-       These properties refer to customizable scripts, that are specific to each
+       These properties refer to customizable scripts specific to each
        assignment.
       </para>
       <para>
@@ -803,8 +831,8 @@
     <title>Virtual Role Attributes</title>
     <para>
      Based on the set of role definitions that are assigned to a specific user,
-     the roles mechanism generates two virtual attributes on the user entry -
-     <literal>effectiveRoles</literal> and
+     the roles mechanism generates two virtual attributes on the user entry
+     &#x2014; <literal>effectiveRoles</literal> and
      <literal>effectiveAssignments</literal>.
     </para>
     <para>
@@ -837,15 +865,14 @@
      more information, see <xref linkend="dynamic-role-assignments" />.
     </para>
     <para>
-     Based on the effective roles, the <literal>effectiveAssignments</literal>
-     attribute provides the calculated resource assignments, that is the
-     amalgamated set of entitlements for a specific user.
-    </para>
-    <para>
-     The value of <literal>effectiveAssignments</literal> supplies the
-     information needed by the provisioner to apply the effective assignments.
-     That value also refers to the source of the assignment. When you read this
-     attribute, you can find and change the root source of an assignment.
+     The synchronization engine reads the calculated value of the
+     <literal>effectiveAssignments</literal> attribute, while it processes the
+     account. The target system is updated with role-specific attributes, per
+     the configured <literal>assignmentOperation</literal>. For more information,
+     see the previous section on
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#sample-role-definition"><citetitle>A
+     Sample Role Definition for Two Remote Systems</citetitle></link>.
     </para>
     <para>
      Effective assignments can merge attribute operations on the same system from
@@ -956,7 +983,7 @@
      how each assignment has been generated.
     </para>
     <para>
-     After you have defined a role, and assigned it to a user, verify that the
+     After you have defined a role and assigned it to a user, verify that the
      expected effective roles and effective assignments have been generated for
      that user. To apply the effective assignments to the target resource, add a
      default mapping to your synchronization configuration, as described in the
@@ -1081,10 +1108,10 @@
 
   <section xml:id="test-effective-roles">
    <title>Testing the Roles Mechanism</title>
-   <procedure >
+   <procedure>
     <para>
      The following sample procedure creates a new role that includes an
-     assignment, adds that role to the user entry <literal>bjensen</literal> and
+     assignment, adds that role to the user entry <literal>bjensen</literal>, and
      then shows how OpenIDM generates effective assignments for user
      <literal>bjensen</literal>.
     </para>
@@ -1144,7 +1171,7 @@
     </step>
     <step>
      <para>
-      The <literal>ldap-role</literal> includes one assignment, named
+      The <literal>ldap-role</literal> includes one assignment named
       <literal>ldap</literal>. Add a mapping for the assignment, by adding the
       <literal>"assignmentsToMap"</literal> property to your mapping
       (<literal>sync.json</literal>) file. For example:
@@ -1260,7 +1287,7 @@
   <section xml:id="dynamic-role-assignments">
    <title>Adding Support for Dynamic Assignments</title>
    <para>
-    While support for dynamic role assignments is included in the default
+    While support for dynamic role assignments is not included in the default
     configuration, you can add such support with a custom script, as follows.
    </para>
    <procedure>
@@ -1367,14 +1394,14 @@ if (object.org === 'example') {
     The <filename>update-users-of-role.js</filename> script includes a
     <literal>triggerSyncCheck</literal> attribute, which reviews the
     <literal>effectiveRoles</literal> and <literal>effectiveAssignments</literal>
-    virtual attributes, to determine whether OpenIDM should run a
+    virtual attributes. That review determines whether OpenIDM should run a
     synchronization operation on these attributes.
    </para>
    <para>
     This script examines all managed users, locates the users who have
     been assigned this role, and regenerates their effective assignments on the
     target resource. So, for example, assume the <literal>"ldap"</literal> role
-    provides an entitlement on the resource "Active Directory".
+    provides an entitlement on the resource named Active Directory.
    </para>
    <para>
     When that role definition is changed, OpenIDM runs a reconciliation
