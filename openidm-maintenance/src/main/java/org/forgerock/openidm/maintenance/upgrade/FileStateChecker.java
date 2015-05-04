@@ -101,12 +101,12 @@ public class FileStateChecker {
      * @return the current file state
      */
     public FileState getCurrentFileState(Path originalDeployFile) throws IOException {
-        if (!digestCache.containsKey(getRelativizedPath(originalDeployFile).toString())) {
+        if (!digestCache.containsKey(originalDeployFile.toString())) {
             return Files.exists(originalDeployFile)
                     ? FileState.UNEXPECTED
                     : FileState.NONEXISTENT;
         }
-        if (!Files.exists(originalDeployFile)) {
+        if (!Files.exists(resolvePath(originalDeployFile))) {
             return FileState.DELETED;
         }
         return Arrays.equals(getCurrentDigest(originalDeployFile), getOriginalDigest(originalDeployFile))
@@ -121,7 +121,7 @@ public class FileStateChecker {
      * @throws IOException
      */
     public void updateState(Path newFile) throws IOException {
-        String cacheKey = getRelativizedPath(newFile).toString();
+        String cacheKey = newFile.toString();
         if (!Files.exists(newFile)) {
             digestCache.remove(cacheKey);
         } else {
@@ -164,13 +164,23 @@ public class FileStateChecker {
     }
 
     /**
+     * Resolve the full path of the provided file relative to the checksum file's path.
+     *
+     * @param file a file in the distribution
+     * @return the path of the file relative to the checksum file (root path)
+     */
+    private Path resolvePath(Path file) {
+        return checksums.getParent().resolve(file);
+    }
+
+    /**
      * Returns the digestCache of the original, shipped file.
      *
      * @param shippedFile the original, shipped file.
      * @return the digestCache
      */
     private byte[] getOriginalDigest(Path shippedFile) {
-        return hexAdapter.unmarshal(digestCache.get(getRelativizedPath(shippedFile).toString()));
+        return hexAdapter.unmarshal(digestCache.get(shippedFile.toString()));
     }
 
     /**
@@ -180,7 +190,7 @@ public class FileStateChecker {
      * @return the digestCache
      */
     private byte[] getCurrentDigest(Path currentFile) throws IOException {
-        return digest.digest(Files.readAllBytes(currentFile));
+        return digest.digest(Files.readAllBytes(resolvePath(currentFile)));
     }
 
     /**
