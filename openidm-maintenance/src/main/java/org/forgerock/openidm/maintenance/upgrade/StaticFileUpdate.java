@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Updates / replaces / adds a new static file in the distribution.
@@ -53,17 +54,19 @@ public class StaticFileUpdate {
     }
 
     /**
-     * Table of what to do under what FileState circumstances
+     * Table of what to do under what FileState circumstances.
      *
-     *                   replace           keep
-     *                old    / new       old / new
+     *                     replace                 keep
+     *                       old    / new       old / new
      *
-     * UNEXPECTED     rename / copy          / rename
-     * NONEXISTENT             copy          / copy
-     * DELETED                 copy          / copy
-     * DIFFERS        rename / copy          / rename
-     * UNCHANGED               copy          / copy
+     * UNEXPECTED     rename-as-old / copy          / rename-as-new
+     * NONEXISTENT                    copy          / copy
+     * DELETED                        copy          / copy
+     * DIFFERS        rename-as-old / copy          / rename-as-new
+     * UNCHANGED                      copy          / copy
      */
+
+    private static final Set<FileState> CHANGED_STATES = EnumSet.of(FileState.UNEXPECTED, FileState.DIFFERS);
 
     /**
      * Replaces this static file with the new one from the archive.  If the file has been changed, copy it to
@@ -72,7 +75,7 @@ public class StaticFileUpdate {
      * @throws IOException
      */
     void replace(Path path) throws IOException {
-        if (EnumSet.of(FileState.UNEXPECTED, FileState.DIFFERS).contains(fileStateChecker.getCurrentFileState(path))) {
+        if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
             Files.move(root.resolve(path), root.resolve(path.toString() + IDM_SUFFIX + currentVersion.toString()));
         }
         Files.copy(archive.getInputStream(path), root.resolve(path), StandardCopyOption.REPLACE_EXISTING);
@@ -84,7 +87,7 @@ public class StaticFileUpdate {
      * @throws IOException
      */
     void keep(Path path) throws IOException {
-        if (EnumSet.of(FileState.UNEXPECTED, FileState.DIFFERS).contains(fileStateChecker.getCurrentFileState(path))) {
+        if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
             Files.copy(archive.getInputStream(path), root.resolve(path.toString() + IDM_SUFFIX + upgradedVersion.toString()));
         } else {
             throw new IOException("No such file " + path.toString() + " to keep!");
