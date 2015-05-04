@@ -125,7 +125,7 @@ public class FileStateChecker {
         if (!Files.exists(newFile)) {
             digestCache.remove(cacheKey);
         } else {
-            digestCache.put(cacheKey, Arrays.toString(getCurrentDigest(newFile)));
+            digestCache.put(cacheKey, hexAdapter.marshal(getCurrentDigest(newFile)));
         }
         persistChecksums();
     }
@@ -146,7 +146,7 @@ public class FileStateChecker {
         if (!Files.exists(installPath) || !Files.exists(actualPath)) {
             digestCache.remove(cacheKey);
         } else {
-            digestCache.put(cacheKey, Arrays.toString(getCurrentDigest(actualPath)));
+            digestCache.put(cacheKey, hexAdapter.marshal(getCurrentDigest(actualPath)));
         }
         persistChecksums();
     }
