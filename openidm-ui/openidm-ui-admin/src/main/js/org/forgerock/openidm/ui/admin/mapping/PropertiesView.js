@@ -446,10 +446,12 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         "formatter" : function(data, opt, row) {
                             var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
 
-                            previewElement.find(".property-container").append('<div class="title">' +data.property +'</div>');
+                            if(data !== undefined) {
+                                previewElement.find(".property-container").append('<div class="title">' + data.property + '</div>');
 
-                            if(data.sample.length > 0) {
-                                previewElement.find(".property-container").append('<div class="text-muted">(' +data.sample +')</div>');
+                                if (data.sample.length > 0) {
+                                    previewElement.find(".property-container").append('<div class="text-muted">(' + data.sample + ')</div>');
+                                }
                             }
 
                             return previewElement.html();
@@ -495,8 +497,10 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
                             previewElement.find(".property-container").append('<div class="title">' +data.property +'</div>');
 
-                            if(data.sample.length > 0) {
+                            if(_.isString(data) !== true && data.sample.length > 0) {
                                 previewElement.find(".property-container").append('<div class="text-muted">(' +data.sample +')</div>');
+                            } else {
+                                previewElement.find(".property-container").html(data);
                             }
 
                             return previewElement.html();
@@ -588,7 +592,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
                         _this.$el.find("#linkQualifierSelect").selectize({
                             placeholder: $.t("templates.mapping.linkQualifier"),
-                            create: true,
+                            create: false,
                             sortField: 'text'
                         });
                     }

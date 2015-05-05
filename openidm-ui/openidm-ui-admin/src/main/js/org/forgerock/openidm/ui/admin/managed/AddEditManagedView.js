@@ -31,10 +31,9 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/util/ScriptEditor",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/ScriptList"
-], function(AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, ScriptEditor, uiUtils, ScriptList) {
+], function(AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, uiUtils, ScriptList) {
 
     var AddEditManagedView = AdminAbstractView.extend({
         template: "templates/admin/managed/AddEditManagedTemplate.html",

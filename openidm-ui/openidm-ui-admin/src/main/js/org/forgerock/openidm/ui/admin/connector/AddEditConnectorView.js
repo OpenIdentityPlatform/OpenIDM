@@ -38,7 +38,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
     "org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/openidm/ui/admin/util/Scheduler",
-    "org/forgerock/openidm/ui/admin/util/ScriptEditor",
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/commons/ui/common/util/UIUtils"
 
 ], function(AdminAbstractView,
@@ -54,7 +54,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             objectTypesDialog,
             SchedulerDelegate,
             Scheduler,
-            ScriptEditor,
+            InlineScriptEditor,
             uiUtils) {
 
     var AddEditConnectorView = AdminAbstractView.extend({
@@ -211,7 +211,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                                 if (data.syncFailureHandler && _.has(data.syncFailureHandler.postRetryAction, "script")) {
                                     this.$el.find(".postRetryAction").val("script");
-                                    this.postActionBlockScript = ScriptEditor.generateScriptEditor({
+                                    this.postActionBlockScript = InlineScriptEditor.generateScriptEditor({
                                         "element": this.$el.find(".postActionBlock .script"),
                                         "eventName": "",
                                         "deleteElement": false,
@@ -406,7 +406,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             }, this));
 
             if (!this.postActionBlockScript) {
-                this.postActionBlockScript = ScriptEditor.generateScriptEditor({
+                this.postActionBlockScript = InlineScriptEditor.generateScriptEditor({
                     "element": this.$el.find(".postActionBlock .script"),
                     "eventName": "",
                     "deleteElement": false
@@ -689,7 +689,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             connectorData.syncFailureHandler.maxRetries = parseInt(connectorData.syncFailureHandler.maxRetries, 10);
 
             if (connectorData.syncFailureHandler.postRetryAction === "script") {
-                connectorData.syncFailureHandler.postRetryAction = {"script": this.postActionBlockScript.getScriptHook().script};
+                connectorData.syncFailureHandler.postRetryAction = {"script": this.postActionBlockScript.generateScript()};
             }
 
             connectorData.configurationProperties.readSchema = false;

@@ -122,23 +122,35 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
 
                     this.editedUser = user;
                     this.schema = schema;
-                    this.resourcePath =  this.schema.properties.manager.resourceCollection.path;
-                    this.searchableManagerFields = schema.properties.manager.resourceCollection.query.fields;
+
                     this.data.user = user;
                     this.data.roles = _.extend({}, conf.globalData.userRoles, managedRoleMap);
                     this.data.profileName = user.givenName + ' ' + user.sn;
 
-                    ResourceDelegate.searchResource('manager sw "' +this.resourcePath +"/" +this.editedUser._id +'"', this.resourcePath).then(_.bind(function(reports) {
-                        this.data.reports = reports.result;
+                    if(schema.properties.manager) {
+                        this.resourcePath =  schema.properties.manager.resourceCollection.path;
+                        this.searchableManagerFields = schema.properties.manager.resourceCollection.query.fields;
 
-                        if (this.editedUser.manager) {
-                            ResourceDelegate.readResource("/openidm/" + this.resourcePath, this.editedUser.manager.replace(this.resourcePath + "/", "")).then(_.bind(function (manager) {
-                                this.completeRender(user, roles, schema, userName, callback, manager);
-                            }, this));
-                        } else {
-                            this.completeRender(user, roles, schema, userName, callback, null);
-                        }
-                    }, this));
+
+                        ResourceDelegate.searchResource('manager sw "' +this.resourcePath +"/" +this.editedUser._id +'"', this.resourcePath).then(_.bind(function(reports) {
+                            this.data.reports = reports.result;
+
+                            if (this.editedUser.manager) {
+                                ResourceDelegate.readResource("/openidm/" + this.resourcePath, this.editedUser.manager.replace(this.resourcePath + "/", "")).then(_.bind(function (manager) {
+                                    this.completeRender(user, roles, schema, userName, callback, manager);
+                                }, this));
+                            } else {
+                                this.completeRender(user, roles, schema, userName, callback, null);
+                            }
+                        }, this));
+                    } else {
+                        this.resourcePath = "";
+                        this.searchableManagerFields = [];
+
+                        this.completeRender(user, roles, schema, userName, callback, "");
+                    }
+
+
                 }, this),
 
                 function() {
@@ -217,7 +229,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                     });
 
 
-                    if(this.data.reports.length > 0){
+                    if(this.data.reports !== undefined && this.data.reports.length > 0){
                         this.loadTree();
                     }
 
