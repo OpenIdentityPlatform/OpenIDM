@@ -118,7 +118,7 @@
    and indirect (dynamic) roles. Direct roles are specifically added to a user's
    <literal>"roles"</literal> attribute in a persistent fashion, within the
    OpenIDM <literal>managed/user</literal> record. Indirect roles can be added
-   to the user entry from a script or a rule that assigns the role.
+   to the account entry from a script or a rule that assigns the role.
   </para>
   <para>
    For example, a user might acquire an indirect role such as
@@ -293,6 +293,7 @@
     "_id" : "9adba05b-89b4-4ed2-946f-0b1c2149cfa7",
     "_rev" : "1"
  }</computeroutput></screen>
+     </section>
    </section>
 
    <section xml:id="list-existing-roles">
@@ -493,10 +494,11 @@
      <title>Deleting a Managed Role</title>
 
      <para>
-      You can delete a managed role that does not have accounts assigned to it.
-      Otherwise, if you try to delete a non-empty role, an error message appears.
-      Observe what happens when you try to delete the non-empty
-      <literal>managed/role/Employee</literal> role:
+      You can delete a managed role if it is not currently assigned to any
+      accounts. Otherwise, if you try to delete a role that has been assigned,
+      an error  message appears. Observe what happens when you try to delete
+      the a <literal>managed/role/Employee</literal> role that has been
+      assigned to user <literal>bjensen</literal>:
      </para>
 
      <screen>$ <userinput>curl \
@@ -608,8 +610,6 @@
        <imagedata fileref="images/delete-role-ui.png" format="PNG" />
       </imageobject>
      </mediaobject>
-
-    </section>
 
    </section>
 
