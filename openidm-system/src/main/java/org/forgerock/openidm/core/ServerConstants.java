@@ -23,7 +23,7 @@
  *
  *
  *      Copyright 2006-2010 Sun Microsystems, Inc.
- *      Portions Copyright 2010-2013 ForgeRock AS
+ *      Portions Copyright 2010-2015 ForgeRock AS
  */
 package org.forgerock.openidm.core;
 
@@ -46,8 +46,15 @@ public final class ServerConstants {
         return VERSION;
     }
 
-    public static String getRevision() {
+    static String getInjectedRevision() {
         return SCM_REVISION;
+    }
+
+    public static String getRevision() {
+        final String injectedRevision = getInjectedRevision();
+        return null == injectedRevision || "0".equals(injectedRevision)
+                ? "unknown"
+                : injectedRevision;
     }
 
     public static String getBuild() {
@@ -61,13 +68,9 @@ public final class ServerConstants {
     public static String getDisplayVersion() {
         StringBuilder sb = new StringBuilder("OpenIDM version \"")
                 .append(getVersion())
-                .append("\" (revision: ");
-
-        if (null != getRevision() && !getRevision().isEmpty() && !"0".equals(getRevision())) {
-            sb.append(getRevision()).append(")");
-        } else {
-            sb.append("unknown)");
-        }
+                .append("\" (revision: ")
+                .append(getRevision())
+                .append(")");
 
         if (null != getBuild() && !getBuild().isEmpty() && !"null".equals(getBuild())) {
             sb.append(' ').append(getBuild());

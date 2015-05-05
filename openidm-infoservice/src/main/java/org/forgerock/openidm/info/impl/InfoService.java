@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,6 +22,9 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 package org.forgerock.openidm.info.impl;
+
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -129,6 +132,9 @@ public class InfoService extends AbstractScriptedService {
             final Bindings handler) {
         super.handleRequest(context, request, handler);
         handler.put("healthinfo", healthInfoSvc.getHealthInfo().asMap());
-
+        handler.put("version", 
+                object(
+                    field("productVersion", ServerConstants.getVersion()),
+                    field("productRevision", ServerConstants.getRevision())));
     }
 }
