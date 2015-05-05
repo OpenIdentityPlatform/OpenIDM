@@ -579,7 +579,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                             }
 
                             gridFromMapProps(mapProps).then(function(gridResults) {
-                                this.$el.find('#mappingTable').jqGrid('setGridParam', {
+                                _this.$el.find('#mappingTable').jqGrid('setGridParam', {
                                     datatype: 'local',
                                     data: gridResults
                                 }).trigger('reloadGrid');
