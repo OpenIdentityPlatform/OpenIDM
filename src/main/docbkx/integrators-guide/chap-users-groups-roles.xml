@@ -1401,11 +1401,9 @@ if (object.org === 'example') {
     This script examines all managed users, locates the users who have
     been assigned this role, and regenerates their effective assignments on the
     target resource. So, for example, assume the <literal>"ldap"</literal> role
-    provides an entitlement on the resource named Active Directory.
-   </para>
-   <para>
-    When that role definition is changed, OpenIDM runs a reconciliation
-    to update the entitlement for that user on the "Active Directory" resource.
+    provides an entitlement on the resource named Active Directory. When that
+    role definition is changed, OpenIDM runs a reconciliation to update the
+    entitlement for that user on the "Active Directory" resource.
    </para>
   </section>
 
