@@ -29,7 +29,6 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/util/ScriptEditor",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptList"
@@ -37,7 +36,6 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
             eventManager,
             constants,
             ConfigDelegate,
-            ScriptEditor,
             InlineScriptEditor,
             BrowserStorageDelegate,
             ScriptList) {
