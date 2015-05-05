@@ -131,12 +131,12 @@
             <artifactId>openidm-servlet</artifactId>
             <version>${project.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-authnfilter</artifactId>
             <version>${project.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet-registrator</artifactId>
             <version>${project.version}</version>
@@ -326,7 +326,7 @@
             <artifactId>ops4j-base-lang</artifactId>
             <version>1.4.0</version>
         </dependency>
-        
+
         <!--
                 <dependency>
                     <groupId>org.apache.felix</groupId>
@@ -591,7 +591,7 @@
         <dependency>
             <groupId>org.apache.olingo</groupId>
             <artifactId>odata-client-core</artifactId>
-            <version>4.0.0-beta-01</version>            
+            <version>4.0.0-beta-01</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml</groupId>
@@ -653,7 +653,7 @@
                 <executions>
                     <execution>
                         <id>unpack-studio-ui</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <tasks>
                                 <unzip dest="${project.build.directory}/orientdb-community-${orientdb.studio.version}">
@@ -677,34 +677,34 @@
                 <executions>
                     <execution>
                         <id>zip-workflow-files</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
 
                         <configuration>
                             <tasks>
-                                <zip 
-                                    basedir="${basedir}/src/main/resources/samples/usecase/workflow" 
-                                    destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationRoles.bar" 
-                                    includes="certificationRoles*"/>
+                                <zip
+                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
+                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationRoles.bar"
+                                        includes="certificationRoles*"/>
 
-                                <zip 
-                                    basedir="${basedir}/src/main/resources/samples/usecase/workflow" 
-                                    destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationEntitlements.bar" 
-                                    includes="certificationEntitlements*"/>
+                                <zip
+                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
+                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationEntitlements.bar"
+                                        includes="certificationEntitlements*"/>
 
-                                <zip 
-                                    basedir="${basedir}/src/main/resources/samples/usecase/workflow" 
-                                    destfile="${project.build.directory}/bar-files/samples/usecase/workflow/manualMatch.bar" 
-                                    includes="manualMatch*"/>
+                                <zip
+                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
+                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/manualMatch.bar"
+                                        includes="manualMatch*"/>
 
-                                <zip 
-                                    basedir="${basedir}/src/main/resources/samples/usecase/workflow" 
-                                    destfile="${project.build.directory}/bar-files/samples/usecase/workflow/newUserCreate.bar" 
-                                    includes="newUserCreate.bpmn20.xml,nUC*.xhtml"/>
+                                <zip
+                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
+                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/newUserCreate.bar"
+                                        includes="newUserCreate.bpmn20.xml,nUC*.xhtml"/>
 
-                                <zip 
-                                    basedir="${basedir}/src/main/resources/samples/workflow/workflow" 
-                                    destfile="${project.build.directory}/bar-files/samples/workflow/workflow/chess.bar" 
-                                    includes="chess*"/>
+                                <zip
+                                        basedir="${basedir}/src/main/resources/samples/workflow/workflow"
+                                        destfile="${project.build.directory}/bar-files/samples/workflow/workflow/chess.bar"
+                                        includes="chess*"/>
 
                             </tasks>
                         </configuration>
@@ -729,13 +729,83 @@
                 <executions>
                     <execution>
                         <id>zip-assembly</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>truezip-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>explode-archive</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <fileset>
+                                <directory>${project.build.directory}/openidm-${project.version}.zip</directory>
+                                <outputDirectory>${project.build.directory}/tmp</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-checksums-to-archive</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <fileset>
+                                <directory>${project.build.directory}</directory>
+                                <includes>
+                                    <include>.checksums.csv</include>
+                                </includes>
+                                <outputDirectory>${project.build.directory}/openidm-${project.version}.zip/openidm</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.forgerock.maven.plugins</groupId>
+                <artifactId>checksum-maven-plugin</artifactId>
+                <version>1.3-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>generate-checksums</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <fileSets>
+                        <fileSet>
+                            <directory>${project.build.directory}/tmp/openidm</directory>
+                        </fileSet>
+                    </fileSets>
+                    <algorithms>
+                        <algorithm>MD5</algorithm>
+                    </algorithms>
+                    <individualFiles>false</individualFiles>
+                    <quiet>true</quiet>
+                    <summaryRoot>${project.build.directory}/tmp/openidm/</summaryRoot>
+                    <xmlSummary>true</xmlSummary>
+                    <xmlSummaryFile>.checksums.xml</xmlSummaryFile>
+                    <csvSummary>true</csvSummary>
+                    <csvSummaryFile>.checksums.csv</csvSummaryFile>
+                </configuration>
+            </plugin>
+
             <!--plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jslint-maven-plugin</artifactId>
@@ -801,31 +871,31 @@
             </dependencies>
         </profile>
         <profile>
-           <id>commercial-build</id>
-           <dependencies>
-              <dependency>
-                 <groupId>org.forgerock.openidm</groupId>
-                 <artifactId>openidm-salesforce</artifactId>
-                 <version>${provisioner.salesforcemodule.version}</version>
-              </dependency>
-              <dependency>
-                 <groupId>org.forgerock.openicf.connectors</groupId>
-                 <artifactId>googleapps-connector</artifactId>
-                 <version>${openicf.googleconnector.version}</version>
-              </dependency>
-           </dependencies>
-           <properties>
-               <!-- We reset these properties to include the SaaS connectors samples in the commercial build -->
-               <exclude.google.samples/>
-               <exclude.salesforce.samples/>
-               <exclude.google.provisioner/>
-               <exclude.salesforce.provisioner/>
-               <!-- Properties to include the SaaS connectors in the commercial build -->
-               <google.provisioner>provisioner.openicf-google.json</google.provisioner>
-               <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
-               <saas.connectors.conf>conf/**</saas.connectors.conf>
-               <saas.connectors.script>script/**</saas.connectors.script>
-           </properties>
+            <id>commercial-build</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.forgerock.openidm</groupId>
+                    <artifactId>openidm-salesforce</artifactId>
+                    <version>${provisioner.salesforcemodule.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.forgerock.openicf.connectors</groupId>
+                    <artifactId>googleapps-connector</artifactId>
+                    <version>${openicf.googleconnector.version}</version>
+                </dependency>
+            </dependencies>
+            <properties>
+                <!-- We reset these properties to include the SaaS connectors samples in the commercial build -->
+                <exclude.google.samples/>
+                <exclude.salesforce.samples/>
+                <exclude.google.provisioner/>
+                <exclude.salesforce.provisioner/>
+                <!-- Properties to include the SaaS connectors in the commercial build -->
+                <google.provisioner>provisioner.openicf-google.json</google.provisioner>
+                <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
+                <saas.connectors.conf>conf/**</saas.connectors.conf>
+                <saas.connectors.script>script/**</saas.connectors.script>
+            </properties>
         </profile>
     </profiles>
 </project>
