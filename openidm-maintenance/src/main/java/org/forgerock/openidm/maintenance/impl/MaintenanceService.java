@@ -59,8 +59,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.maintenance.upgrade.UpgradeException;
-import org.forgerock.openidm.maintenance.upgrade.UpgradeManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -195,23 +193,6 @@ public class MaintenanceService implements RequestHandler {
                 case disable:
                     disableMaintenanceMode();
                     handleMaintenanceStatus(handler);
-                    break;
-                case upgrade:
-                    enableMaintenanceMode();
-                    // attempt to perform an upgrade via REST
-                    try {
-                        new UpgradeManager()
-                                .execute(request.getAdditionalParameter("url"),
-                                        IdentityServer.getFileForWorkingPath(""),
-                                        IdentityServer.getFileForInstallPath(""),
-                                        request.getAdditionalParameters());
-                    } catch (InvalidArgsException ex) {
-                        handler.handleError(new BadRequestException(ex.getMessage(), ex));
-                    } catch (UpgradeException ex) {
-                        handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
-                    } finally {
-                        disableMaintenanceMode();
-                    }
                     break;
                 default:
                     handler.handleError(new NotSupportedException(request.getAction() + " is not supported"));
