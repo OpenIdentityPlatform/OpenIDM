@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -215,8 +215,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
 
         <!-- version management -->
         <slf4j.version>1.7.5</slf4j.version>
@@ -326,6 +326,7 @@
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-patch-base</module>
+        <module>openidm-maintenance</module>
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
         <module>custom-scripted-connector-bundler</module>
