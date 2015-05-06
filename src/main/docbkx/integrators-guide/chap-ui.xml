@@ -762,8 +762,7 @@
 
    <para>
     You can also configure authentication modules from the Admin UI. To access
-    those modules, click the <literal>openidm-admin</literal> user menu in the
-    upper right, and then click Settings from the pop-up menu that appears.
+    those modules, select the Settings option in the top navigation bar.
    </para>
 
    <para>
