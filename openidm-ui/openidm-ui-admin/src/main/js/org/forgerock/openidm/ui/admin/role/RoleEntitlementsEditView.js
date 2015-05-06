@@ -310,7 +310,9 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
                         if(!mapping.assignmentsToMap) {
                             mapping.assignmentsToMap = [];
                         }
-                        mapping.assignmentsToMap.push(this.data.assignmentName);
+                        if(!_.contains(mapping.assignmentsToMap, this.data.assignmentName)) {
+                            mapping.assignmentsToMap.push(this.data.assignmentName);
+                        }
                     } else {
                         mapping.assignmentsToMap = _.reject(mapping.assignmentsToMap, function(a) { 
                                                         return a === this.data.assignmentName; 
