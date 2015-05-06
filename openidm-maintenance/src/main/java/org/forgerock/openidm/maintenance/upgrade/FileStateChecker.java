@@ -43,7 +43,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
  * the digest of the original, shipped files with the digest of the files as they presently exist on the
  * filesystem.
  */
-public class FileStateChecker {
+class FileStateChecker {
 
     /** Hex adapter for converting hex sums in checksum file to byte arrays */
     private static final HexBinaryAdapter hexAdapter = new HexBinaryAdapter();
