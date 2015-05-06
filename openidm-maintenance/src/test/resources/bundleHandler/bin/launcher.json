@@ -1,0 +1,18 @@
+{
+  "bundle":{
+    "containers":[
+      {
+        "location":"bundle",
+        "includes":["**/*.jar"],
+        "action":"install.start"
+      }
+    ],
+    "default":{
+      "start-level":10,
+      "action":"install.start"
+    }
+  },
+  "config.properties":"conf/config.properties",
+  "boot.properties":{
+  }
+}
