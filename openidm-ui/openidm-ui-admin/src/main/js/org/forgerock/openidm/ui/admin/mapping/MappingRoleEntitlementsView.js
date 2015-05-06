@@ -47,9 +47,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingRoleEntitlementsView", [
             this.data.assignmentsToMap = _.sortBy(this.model.mapping.assignmentsToMap) || [];
 
             this.getRolesForAssignmentsToMap().then(_.bind(function(assignments) {
-                this.data.rolesForAssignmentsToMap = (assignments.length) ? assignments : false;
+                this.data.rolesForAssignmentsToMap = (assignments.length) ? _.reject(assignments,function(assignment) { return !assignment.roles.length; }) : false;
                 this.parentRender(_.bind(function () {
-                    if(assignments.length) {
+                    if(this.data.rolesForAssignmentsToMap.length) {
                         this.$el.parent().parent().find("#roleEntitlementsHeading a").click();
                     }
                     if (callback) {
@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingRoleEntitlementsView", [
                                             return {
                                                 roleId: role._id,
                                                 roleName: role.properties.name,
-                                                linkQualifiers: '"' + role.assignments[assignmentName].linkQualifiers.join('", "') + '"',
+                                                linkQualifiers: (role.assignments[assignmentName].linkQualifiers) ? '"' + role.assignments[assignmentName].linkQualifiers.join('", "') + '"' : false,
                                                 attributes: _.map(role.assignments[assignmentName].attributes, function(attr) {
                                                     attr.value = JSON.stringify(attr.value, null, 2);
                                                     return attr;

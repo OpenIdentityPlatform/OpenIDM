@@ -282,7 +282,7 @@
                 "mappings": "Mappings",
                 "mapping": "Mapping",
                 "addToMapping": "Add to a Mapping",
-                "noEntitlements": "No entitlements attached to this role",
+                "noEntitlements": "No entitlements attached to this mappping",
                 "selectMapping": "Select a mapping...",
                 "noMappings": "No mappings attached to this entitlement",
                 "addMappingSuccess": "Successfully added &quot;__assignmentName__&quot; entitlement to &quot;__mappingName__&quot;.",
