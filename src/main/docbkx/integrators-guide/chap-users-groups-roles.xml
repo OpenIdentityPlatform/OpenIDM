@@ -84,8 +84,7 @@
   </para>
   <programlisting>{
    "name" : "group"
-   },
-  </programlisting>
+},  </programlisting>
   <para>
    With this addition, OpenIDM provides RESTful access to managed groups, at the
    context path <literal>/openidm/managed/group</literal>.
@@ -135,12 +134,10 @@
    <literal>"roles"</literal> attribute of a particular user entry might
    appear as follows:
   </para>
-  <programlisting language="java">
-   "roles" : [
+  <programlisting language="java">"roles" : [
    "managed/role/sample-role",
    "openidm-authorized"
-   ]
-  </programlisting>
+]  </programlisting>
   <para>
    A role value that includes a <literal>/</literal> character is considered to
    be a URI that points to the role details on the router. One example of such
@@ -238,8 +235,8 @@
       the PUT or POST methods. For additional discussion on the differences
       between PUT and POST, see the following Appendix:
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-            xlink:href="integrators-guide#rest-supported-methods"><citetitle>
-       Supported Methods</citetitle></link>.
+      xlink:href="integrators-guide#rest-supported-methods"><citetitle>Supported
+       Methods</citetitle></link>.
      </para>
 
      <para>
@@ -256,7 +253,7 @@
  --request PUT \
  https://localhost:8443/openidm/managed/role/Employee
      </userinput>
-     <computeroutput>{
+<computeroutput>{
    "properties" : "Employee",
       "name" : "Employee",
       "description" : "Role assigned to workers on the payroll."
@@ -285,14 +282,14 @@
  }' \
  https://localhost:8443/openidm/managed/role?_action=create
      </userinput>
-      <computeroutput>{
+<computeroutput>{
     "properties" : {
        "name" : "Contractor",
        "description" : "Role assigned to contract workers."
     },
     "_id" : "9adba05b-89b4-4ed2-946f-0b1c2149cfa7",
     "_rev" : "1"
- }</computeroutput></screen>
+}</computeroutput></screen>
      </section>
    </section>
 
@@ -314,7 +311,7 @@
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  'https://localhost:8443/openidm/managed/role?_queryFilter=true' </userinput>
-      <computeroutput>{
+<computeroutput>{
     "result" : [ {
        "properties" : {
           "name" : "Employee",
@@ -333,7 +330,7 @@
     "resultCount" : 2,
     "pagedResultsCookie" : null,
     "remainingPagedResults" : -1
- }</computeroutput></screen>
+}</computeroutput></screen>
 
      <para>
       Alternatively, you can get the same information from the Admin UI, except
@@ -441,17 +438,20 @@
       --request GET \
       'https://localhost:8443/openidm/managed/user?_queryFilter=true&amp;_fields=userName,_id'
      </userinput>
-     <computeroutput>{
-   "result" : [ {
-      "userName" : "jdoe",
-      "_id" : "3c7e4b21-6e1c-4983-9517-35d90e2569a9"
-   }, {
-      "userName" : "bjensen",
-      "_id" : "616f4aed-f674-4670-a875-a3cd2d512e1e"
-   } ],
-   "resultCount" : 2,
-   "pagedResultsCookie" : null,
-   "remainingPagedResults" : -1
+<computeroutput>{
+  "result": [
+    {
+      "userName": "jdoe",
+      "_id": "3c7e4b21-6e1c-4983-9517-35d90e2569a9"
+    },
+    {
+      "userName": "bjensen",
+      "_id": "616f4aed-f674-4670-a875-a3cd2d512e1e"
+    }
+  ],
+  "resultCount": 2,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
 }</computeroutput></screen>
 
      <para>
@@ -508,7 +508,7 @@
  --header "Content-Type: application/json" \
  --request DELETE \
  'https://localhost:8443/openidm/managed/role/Employee'</userinput>
-     <computeroutput>{
+<computeroutput>{
     "code":409,
     "reason":"Conflict",
     "message":"Cannot delete a role that is currently assigned"
@@ -544,8 +544,7 @@
       "value" : "managed/role/Employee"
    }
  ]' \
- 'https://localhost:8443/openidm/managed/user/3c7e4b21-6e1c-4983-9517-35d90e2569a9?_fields=roles,effectiveRoles'
-     </userinput></screen>
+ 'https://localhost:8443/openidm/managed/user/3c7e4b21-6e1c-4983-9517-35d90e2569a9?_fields=roles,effectiveRoles'</userinput></screen>
 
      <para>
       To confirm that the Employee role no longer exists, run the following
@@ -559,7 +558,7 @@
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  'https://localhost:8443/openidm/managed/role?_queryFilter=true</userinput>
-     <computeroutput>{
+<computeroutput>{
    "result" : [ {
       "properties" : {
          "name" : "Contractor",
@@ -571,11 +570,11 @@
    "resultCount" : 1,
    "pagedResultsCookie" : null,
    "remainingPagedResults" : -1
- }</computeroutput></screen>
+}</computeroutput></screen>
 
      <para>
-      Since the only remaining role is <literal>"Contractor"</literal>, you know
-      the <literal>DELETE</literal> command successfully removed the
+      Because the only remaining role is <literal>"Contractor"</literal>, you
+      know the <literal>DELETE</literal> command successfully removed the
       <literal>"Employee"</literal> role.
      </para>
 
@@ -869,10 +868,10 @@
      <literal>effectiveAssignments</literal> attribute, while it processes the
      account. The target system is updated with role-specific attributes, per
      the configured <literal>assignmentOperation</literal>. For more information,
-     see the previous section on
-     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-           xlink:href="integrators-guide#sample-role-definition"><citetitle>A
-     Sample Role Definition for Two Remote Systems</citetitle></link>.
+     see the previous section on <link xlink:show="new"
+     xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#sample-role-definition"><citetitle>A Sample
+     Role Definition for Two Remote Systems</citetitle></link>.
     </para>
     <para>
      Effective assignments can merge attribute operations on the same system from
@@ -929,8 +928,7 @@
      might appear as follows:
     </para>
 
-    <programlisting language="javascript">
-{
+    <programlisting language="javascript">{
   "_id":"1",
   "_rev":"1",
   "roles":[
@@ -1016,8 +1014,7 @@
      all entries that have <literal>"effectiveAssignments" : "ldap"</literal> in
      the source.
     </para>
-    <programlisting language="javascript">
-{
+    <programlisting language="javascript">{
      "name" : "managedUser_systemLdapAccounts",
      "source" : "managed/user",
      "target" : "system/ldap/account",
@@ -1049,7 +1046,7 @@
        Create a role definition that gives the user the Active Directory
        assignment, for example:
       </para>
-      <programlisting language="javascript">
+      <programlisting language="javascript">{
 "_id": "ad-role",
    "assignments": {
       "ad": {
@@ -1066,17 +1063,16 @@
             }
          ]
       }
-      </programlisting>
+   }
+}  </programlisting>
      </listitem>
      <listitem>
       <para>Add the role directly as a value of the user's
        <literal>"roles"</literal> attribute.</para>
-      <programlisting>
-"roles" : [
+      <programlisting>"roles" : [
    "name" : "managed/role/ad-role",
    "name" : "openidm-authorized"
-]
-      </programlisting>
+]     </programlisting>
      </listitem>
      <listitem>
       <para>
@@ -1085,8 +1081,7 @@
        The effective assignments are calculated from the values in the user's
        <literal>"roles"</literal> attribute.
       </para>
-      <programlisting language="java">
-{
+      <programlisting language="java">{
    "mappings": [
        {
           "name": "managedUser_systemAdAccounts",
@@ -1098,8 +1093,7 @@
           ...
        }
    ]
-}
-      </programlisting>
+}     </programlisting>
      </listitem>
     </orderedlist>
    </section>
@@ -1149,7 +1143,7 @@
   }
 }' \
 "https://localhost:8443/openidm/managed/role/ldap-role"</userinput>
-      <computeroutput>{
+<computeroutput>{
   "assignments": {
     "ldap": {
       "attributes": [
@@ -1219,7 +1213,7 @@
    }
 ]' \
 "https://localhost:8443/openidm/managed/user/bjensen"</userinput>
-      <computeroutput>{
+<computeroutput>{
   "mail": "bjensen@example.com",
   "sn": "Jensen",
   "passwordAttempts": "0",
@@ -1257,7 +1251,7 @@
 --header "X-OpenIDM-Password: openidm-admin" \
 --request GET \
 "https://localhost:8443/openidm/managed/user/bjensen"</userinput>
-      <computeroutput>...
+<computeroutput>...
 {
   "effectiveAssignments": {
     "ldap": {
@@ -1317,14 +1311,12 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
      <programlisting language="java">
 // This is the location to expand to dynamic roles,
 // project role script return values can then be added via
-// effectiveRoles = effectiveRoles.concat(dynamicRolesArray);
-     </programlisting>
+// effectiveRoles = effectiveRoles.concat(dynamicRolesArray);</programlisting>
 
      <programlisting language="java">
 if (object.org === 'example') {
       effectiveRoles = effectiveRoles.concat(['dynamic-role1', 'dynamic-role2']);
-}
-     </programlisting>
+}    </programlisting>
     </step>
     <step performance="optional">
      <para>
@@ -1433,8 +1425,7 @@ if (object.org === 'example') {
    <literal>password</literal> attributes using the default symmetric
    key, and additional scripts for extra passwords.
   </para>
-  <programlisting language="javascript">
-{
+  <programlisting language="javascript">{
    "objects": [
       {
          "name": "user",
@@ -1467,7 +1458,7 @@ if (object.org === 'example') {
    Do not use the default symmetric key, <literal>openidm-sym-default</literal>,
    in production. See the chapter on
    <link xlink:href="integrators-guide#chap-security"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
    and Hardening OpenIDM</citetitle></link> for instructions on adding your
    own symmetric key.
   </para>
