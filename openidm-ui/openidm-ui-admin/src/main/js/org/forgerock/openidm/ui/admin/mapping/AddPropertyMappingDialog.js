@@ -28,11 +28,14 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
             "click input[type=submit]": "formSubmit",
             "change :input": "validateMapping"
         },
+        model: {
+            closeCallback: null
+        },
 
         formSubmit: function (event) {
             var property = $(":input[name=propertyList]",this.$el).val(),
                 mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties");
-            
+
             if(event){
                 event.preventDefault();
             }
@@ -44,9 +47,10 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
 
                 browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
 
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
                 this.close();
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, mappingProperties.length.toString()]});
+                this.model.closeCallback = _.bind(function(){
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, mappingProperties.length.toString()]});
+                }, this);
             }
         },
 
@@ -112,7 +116,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
 
             $('#dialogs').append(this.currentDialog);
             this.setElement(this.currentDialog);
-            
+
             BootstrapDialog.show({
                 title: settings.title,
                 type: BootstrapDialog.TYPE_DEFAULT,
@@ -120,17 +124,21 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 size: BootstrapDialog.SIZE_WIDE,
                 onhide: function(dialogRef){
                     eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
+
+                    if(_this.model.closeCallback) {
+                        _this.model.closeCallback();
+                    }
                 },
                 onshown : function (dialogRef) {
                     uiUtils.renderTemplate(settings.template, _this.$el,
-                            _.extend(conf.globalData, _this.data),
-                            function () {
-                                settings.postRender();
-                                $(':input:first', _this.currentDialog).focus();
-                                if(callback){
-                                    callback();
-                                }
-                            }, "replace");
+                        _.extend(conf.globalData, _this.data),
+                        function () {
+                            settings.postRender();
+                            $(':input:first', _this.currentDialog).focus();
+                            if(callback){
+                                callback();
+                            }
+                        }, "replace");
                 },
                 buttons: [{
                     label: $.t("common.form.cancel"),
@@ -139,15 +147,15 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                         dialogRef.close();
                     }
                 },
-                {
-                    label: $.t("common.form.update"),
-                    id:"scriptDialogUpdate",
-                    cssClass: 'btn-primary',
-                    action: _.bind(function(dialogRef) {
-                        this.formSubmit();
-                        dialogRef.close();
-                    },_this)
-                }]
+                    {
+                        label: $.t("common.form.update"),
+                        id:"scriptDialogUpdate",
+                        cssClass: 'btn-primary',
+                        action: _.bind(function(dialogRef) {
+                            this.formSubmit();
+                            dialogRef.close();
+                        },_this)
+                    }]
             });
         }
     });
