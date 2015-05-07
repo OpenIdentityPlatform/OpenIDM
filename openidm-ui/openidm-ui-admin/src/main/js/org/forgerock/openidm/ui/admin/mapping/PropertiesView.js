@@ -499,7 +499,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
                             if(_.isString(data) !== true && data.sample.length > 0) {
                                 previewElement.find(".property-container").append('<div class="text-muted">(' +data.sample +')</div>');
-                            } else {
+                            } else if (_.isString(data) === true ) {
                                 previewElement.find(".property-container").html(data);
                             }
 
@@ -513,7 +513,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         "align": "center",
                         "title": false,
                         "formatter": function(required,opt,row){
-                            return (!required) ? '<i target="' + row.target + '" title="' + $.t("common.form.removeAttribute") + ': ' + row.target + '" class="fa fa-times removePropertyBtn" style="margin-top:4px;"></i>' : '';
+                            return (!required) ? '<i target="' + row.target.property + '" title="' + $.t("common.form.removeAttribute") + ': ' + row.target.property + '" class="fa fa-times removePropertyBtn" style="margin-top:4px;"></i>' : '';
                         }
                     }
                 ];
