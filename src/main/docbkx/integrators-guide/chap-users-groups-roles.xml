@@ -497,7 +497,7 @@
       You can delete a managed role if it is not currently assigned to any
       accounts. Otherwise, if you try to delete a role that has been assigned,
       an error  message appears. Observe what happens when you try to delete
-      the a <literal>managed/role/Employee</literal> role that has been
+      the <literal>managed/role/Employee</literal> role that has been
       assigned to user <literal>bjensen</literal>:
      </para>
 
