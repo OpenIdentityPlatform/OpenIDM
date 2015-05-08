@@ -70,7 +70,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             roleDelegate.getAllRoles().then(_.bind(function (roles) {
 
                 var managedRoleMap = _.chain(roles.result)
-                                      .map(function (r) { return [r._id, r.name || r._id]; })
+                                      .map(function (r) { return [r._id, r.properties.name || r._id]; })
                                       .object()
                                       .value();
 
