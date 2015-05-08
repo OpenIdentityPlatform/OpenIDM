@@ -318,7 +318,7 @@ $ ./startup.sh -p samples/sample2</screen>
     section provides instructions for both methods.
    </para>
    <procedure>
-    <title>To Run the Sample Using the Command Line</title>
+    <title>Run the Sample Using the Command Line</title>
     <step>
      <para>
       Reconcile the repository by running the following command:
@@ -409,7 +409,7 @@ $ ./startup.sh -p samples/sample2</screen>
    </procedure>
 
    <procedure>
-    <title>To Run the Sample Using the Admin UI</title>
+    <title>Run the Sample Using the Admin UI</title>
     <step>
      <para>
       Log in to the Admin UI at the URL
@@ -515,7 +515,7 @@ $ ./startup.sh -p samples/sample2</screen>
     <xref linkend="external-ldap-config-2" />. The LDAP user must have write
     access to create users from OpenIDM on the LDAP server. When you configure
     the LDAP server, import the appropriate LDIF file
-    (<filename>openidm/samples/sample2b/data/Example.ldif).</filename>
+    (<filename>openidm/sampes/sample2b/data/Example.ldif).</filename>
    </para>
   </section>
 
@@ -546,7 +546,7 @@ $ ./startup.sh -p samples/sample2b</screen>
    </para>
 
    <procedure>
-    <title>To Run the Sample Using the Command Line</title>
+    <title>Run the Sample Using the Command Line</title>
     <step>
      <para>
       Reconcile the repository over the REST interface by running the following
@@ -756,7 +756,7 @@ $ ./startup.sh -p samples/sample2b</screen>
    </procedure>
 
    <procedure>
-    <title>To Run the Sample Using the Admin UI</title>
+    <title>Run the Sample Using the Admin UI</title>
     <step>
      <para>
       Log in to the Admin UI at the URL
@@ -977,7 +977,7 @@ $ ./startup.sh -p samples/sample2c</screen>
    </para>
 
    <procedure>
-    <title>To Run the Sample Using the Command Line</title>
+    <title>Run the Sample Using the Command Line</title>
     <step>
      <para>
       Reconcile the repository over the REST interface by running the following
@@ -1165,7 +1165,7 @@ $ ./startup.sh -p samples/sample2c</screen>
    </procedure>
 
    <procedure>
-    <title>To Run the Sample Using the Admin UI</title>
+    <title>Run the Sample Using the Admin UI</title>
     <step>
      <para>
       Log in to the Admin UI at the URL
@@ -1461,7 +1461,7 @@ $ ./startup.sh -p samples/sample2d</screen>
    </para>
 
    <procedure>
-    <title>To Run the Sample Using the Command Line</title>
+    <title>Run the Sample Using the Command Line</title>
 
     <step>
      <para>
@@ -1524,7 +1524,7 @@ $ ./startup.sh -p samples/sample2d</screen>
    </procedure>
 
    <procedure>
-    <title>To Run the Sample Using the Admin UI</title>
+    <title>Run the Sample Using the Admin UI</title>
     <step>
      <para>
       Log in to the Admin UI at the URL
@@ -8123,7 +8123,7 @@ https://localhost:8443/admin/index.html#connectors/edit//&amp;code=aPrxJZTK7Rs03
    </procedure>
 
    <procedure>
-    <title>To Run Reconciliation by Using the Command Line</title>
+    <title>Run Reconciliation by Using the Command Line</title>
     <para>
      The mapping configuration file (<filename>sync.json</filename>) for this
      sample includes two mappings, <literal>sourceSalesforceUser_managedUser</literal>,
