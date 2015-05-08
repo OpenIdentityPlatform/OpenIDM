@@ -1066,7 +1066,7 @@ return request.content.entryType == 'summary' &amp;&amp;
    OpenIDM includes a preconfigured purge script,
    <filename>autoPurgeRecon.js</filename> in the
    <filename>bin/defaults/script/audit</filename> directory.
-   This script purges audit log entries from the repositoyr only, not from the
+   This script purges audit log entries from the repository only, not from the
    corresponding CSV files.
   </para>
 
