@@ -1959,6 +1959,7 @@ class ObjectMapping {
                     
                     Map<String, Object> scope = new HashMap<String, Object>();
                     scope.put("source", sourceObject.asMap());
+                    scope.put("linkQualifier", getLinkQualifier());
                     try {
                         Object o = validSource.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
@@ -1993,6 +1994,7 @@ class ObjectMapping {
                 if (validTarget != null && getTargetObject() != null) { // forces pulling object into memory
                     Map<String, Object> scope = new HashMap<String, Object>();
                     scope.put("target", getTargetObject().asMap());
+                    scope.put("linkQualifier", getLinkQualifier());
                     try {
                         Object o = validTarget.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
@@ -2034,6 +2036,7 @@ class ObjectMapping {
         private void execScript(String type, Script script, JsonValue oldTarget) throws SynchronizationException {
             if (script != null) {
                 Map<String, Object> scope = new HashMap<String, Object>();
+                scope.put("linkQualifier", getLinkQualifier());
                 // TODO: Once script engine can do on-demand get replace these forced loads
                 if (getSourceObjectId() != null) {
                     JsonValue source = getSourceObject();
