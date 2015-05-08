@@ -681,8 +681,7 @@ openidm.create('workflow/processinstance', null, params);
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids"</userinput>
-    <computeroutput>
-{
+<computeroutput>{
   "result" : [ {
     "tenantId" : "",
     "candidateStarterGroupIdExpressions" : [ ],
@@ -716,7 +715,7 @@ openidm.create('workflow/processinstance', null, params);
   "resultCount" : 1,
   "pagedResultsCookie" : null,
   "remainingPagedResults" : -1
-}     </computeroutput>
+}</computeroutput>
     </screen>
    </listitem>
    <listitem>
@@ -730,8 +729,7 @@ openidm.create('workflow/processinstance', null, params);
  --request GET \
  "https://localhost:8443/openidm/workflow/processdefinition?_queryId=filtered-query&amp;category=Examples"
       </userinput>
-      <computeroutput>
-{
+<computeroutput>{
   "result": [
     {
       ...
@@ -762,8 +760,7 @@ openidm.create('workflow/processinstance', null, params);
  --request GET \
  "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3"
      </userinput>
-     <computeroutput>
-{
+<computeroutput>{
   "tenantId" : "",
   "candidateStarterGroupIdExpressions" : [ ],
   "candidateStarterUserIdExpressions" : [ ],
@@ -855,7 +852,7 @@ openidm.create('workflow/processinstance', null, params);
   "category" : "Examples",
   "eventSupport" : { },
   "graphicalNotationDefined" : false
-}       </computeroutput>
+}</computeroutput>
     </screen>
    </listitem>
    <listitem>
@@ -907,8 +904,7 @@ openidm.create('workflow/processinstance', null, params);
  --data '{"_key":"managedUserApproval"}' \
  --request POST \
  "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput>
-     <computeroutput>
-{
+<computeroutput>{
   "_id" : "4",
   "processInstanceId" : "4",
   "status" : "suspended",
@@ -929,7 +925,7 @@ openidm.create('workflow/processinstance', null, params);
  --request GET \
  "https://localhost:8443/openidm/workflow/processinstance?_queryId=query-all-ids"
       </userinput>
-      <computeroutput>
+<computeroutput>
 {
   "result" : [ {
     "tenantId" : "",
@@ -981,7 +977,7 @@ openidm.create('workflow/processinstance', null, params);
  --request GET \
  "https://localhost:8443/openidm/workflow/processinstance/4"
      </userinput>
-     <computeroutput>{
+<computeroutput>{
   "tenantId" : "",
   "businessKey" : null,
   "queryVariables" : null,
@@ -1010,7 +1006,7 @@ openidm.create('workflow/processinstance', null, params);
  --header "X-OpenIDM-Password: openidm-admin" \
  --request DELETE \
  "https://localhost:8443/openidm/workflow/processinstance/4"</userinput>
-    <computeroutput>{
+<computeroutput>{
   "deleteReason": null,
   "processDefinitionId": "managedUserApproval:1:3",
   "processInstanceId": "4",
@@ -1046,8 +1042,7 @@ openidm.create('workflow/processinstance', null, params);
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition?_queryId=query-all-ids"</userinput>
-     <computeroutput>
-{
+<computeroutput>{
   "result" : [ {
     "taskCandidateGroup" : [ ],
     "ownerExpression" : null,
@@ -1105,7 +1100,7 @@ openidm.create('workflow/processinstance', null, params);
   "resultCount" : 1,
   "pagedResultsCookie" : null,
   "remainingPagedResults" : -1
-}      </computeroutput>
+}</computeroutput>
     </screen>
    </listitem>
    <listitem>
@@ -1120,7 +1115,7 @@ openidm.create('workflow/processinstance', null, params);
  --request GET \
  "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition/evaluateRequest"
       </userinput>
-      <computeroutput>{
+<computeroutput>{
   "taskCandidateGroup" : [ ],
   "ownerExpression" : null,
   "formProperties" : {
@@ -1190,7 +1185,7 @@ openidm.create('workflow/processinstance', null, params);
  --request GET \
  "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids"
       </userinput>
-      <computeroutput>{
+<computeroutput>{
   "result" : [ {
     "tenantId" : "",
     "createTime" : "2014-05-12T21:17:10.054+02:00",
@@ -1271,7 +1266,7 @@ openidm.create('workflow/processinstance', null, params);
  --request GET \
  "https://localhost:8443/openidm/workflow/taskinstance/15"
      </userinput>
-     <computeroutput>{
+<computeroutput>{
   "dueDate": null,
   "processDefinitionId": "managedUserApproval:1:3",
   "owner": null,
@@ -1590,7 +1585,7 @@ $ ./startup.sh -p samples/workflow</screen>
  --request GET \
  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
       </userinput>
-      <computeroutput>{
+<computeroutput>{
   "result" : [ {
     "_id" : "manager1",
     "_rev" : "0"
@@ -1710,7 +1705,7 @@ $ ./startup.sh -p samples/workflow</screen>
  --request GET \
  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
       </userinput>
-      <computeroutput>
+<computeroutput>
 {
   "result" : [ {
     "_id" : "manager1",
@@ -1737,7 +1732,7 @@ $ ./startup.sh -p samples/workflow</screen>
  --request GET \
  "https://localhost:8443/openidm/managed/user/96a9513b-7896-4d22-83cc-6b35a709f0a8"
       </userinput>
-      <computeroutput>
+<computeroutput>
 {
   "_id" : "96a9513b-7896-4d22-83cc-6b35a709f0a8",
   "_rev" : "1",
@@ -1780,7 +1775,7 @@ $ ./startup.sh -p samples/workflow</screen>
       </para>
       <screen><userinput>$ cd /path/to/openidm
 $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
-      <computeroutput>...
+<computeroutput>...
    &lt;ri:__ACCOUNT__&gt;
       &lt;icf:__DESCRIPTION__&gt;Accountant&lt;/icf:__DESCRIPTION__&gt;
       &lt;ri:roles&gt;openidm-authorized&lt;/ri:roles&gt;
@@ -2003,7 +1998,7 @@ $ ./startup.sh -p samples/usecase/usecase1
  --request GET \
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
       </userinput>
-      <computeroutput>{
+<computeroutput>{
   "result" : [ {
     "_id" : "user.5",
     "_rev" : "0"
@@ -2267,7 +2262,7 @@ $ ./startup.sh -p samples/usecase/usecase2
      <screen><userinput>$ cd /path/to/openidm
 $ more samples/usecase/usecase2/conf/external.email.json
      </userinput>
-     <computeroutput>{
+<computeroutput>{
         "host" : "smtp.gmail.com",
         "port" : "587",
         "username" : "my-username",
@@ -2532,7 +2527,7 @@ $ ./startup.sh -p samples/usecase/usecase3
      <para>
       Select either Cancel, to terminate the process, or Request, to start a
       user task, assigned to the manager of the user requesting access
-      (<literal>user.0</literal> in this example).
+      (<literal>user.0</literal> in this example), and select Complete.
      </para>
     </step>
     <step>
@@ -2544,7 +2539,7 @@ $ ./startup.sh -p samples/usecase/usecase3
     <step>
      <para>
       Under "Tasks that are in my group's queue" click "User Access Request
-      Approval" and select "Assign to me".
+      Approval" and under Actions, select "Assign to me".
      </para>
      <para>
       Note that the "User Access Request Approval" task has now moved under
@@ -2899,8 +2894,8 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
   },
   "name": "Human Resources"
 }' \
- "https://localhost:8443/openidm/managed/role/human-resources"</userinput>
-<userinput>$ curl \
+ "https://localhost:8443/openidm/managed/role/human-resources"</userinput></screen>
+<screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -2929,8 +2924,8 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
   },
   "name": "Production Planning"
 }' \
- "https://localhost:8443/openidm/managed/role/production-planning"</userinput>
-<userinput>$ curl \
+ "https://localhost:8443/openidm/managed/role/production-planning"</userinput></screen>
+<screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -2958,8 +2953,8 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
   },
   "name": "Sales and Distribution"
 }' \
- "https://localhost:8443/openidm/managed/role/sales-distribution"</userinput>
-<userinput>$ curl \
+ "https://localhost:8443/openidm/managed/role/sales-distribution"</userinput></screen>
+<screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -2986,8 +2981,7 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
   },
   "name": "Treasury and Payments"
 }' \
- "https://localhost:8443/openidm/managed/role/treasury-payments"</userinput>
-     </screen>
+ "https://localhost:8443/openidm/managed/role/treasury-payments"</userinput></screen>
     </step>
     <step>
      <para>
@@ -3015,7 +3009,7 @@ $ more schedule-certification.json</userinput>
     </step>
     <step>
      <para>
-      Under "Tasks that are in my group's queue" click "Role Status Check". A
+      Under "My Group's Tasks" click "Role Status Check". A
       scheduled task has been started for each managed user. Choose one of the
       users, for example, user.1, and select "Assign to me" under the Actions
       column.
@@ -3048,7 +3042,7 @@ $ more schedule-certification.json</userinput>
       function of the department to which this user belongs.
      </para>
      <mediaobject>
-      <alt>Workflow showing current role assignment</alt>
+      <alt>Workflow showing current role assignments</alt>
       <imageobject>
        <imagedata fileref="images/access-status-check.png" format="PNG"/>
       </imageobject>
@@ -3058,7 +3052,7 @@ $ more schedule-certification.json</userinput>
      <para>
       Select the appropriate roles that should be assigned to this user, then
       select one of the following options from the "Certification result" list:
-     </para>
+     </para>                `
      <itemizedlist>
       <listitem>
        <para>
@@ -3262,7 +3256,7 @@ $ more samples/usecase/usecase6/conf/external.email.json</userinput>
 {
         "host" : "smtp.gmail.com",
         "port" : "587",
-        "username" : "my-username"
+        "username" : "my-username",
         "password" : "my-password",
         "mail.smtp.auth" : "true",
         "mail.smtp.starttls.enable" : "true"
@@ -3308,11 +3302,10 @@ $ more samples/usecase/usecase6/script/passwordchange.js</userinput>
      </para>
      <screen><userinput>$ cd /path/to/openidm
 $ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</userinput>
-      <computeroutput>
-{
+<computeroutput>{
     "enabled" : true,
 ...
-      </computeroutput>
+</computeroutput>
      </screen>
     </step>
     <step>
