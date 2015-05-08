@@ -350,6 +350,12 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"Smith"'
    </userinput></screen>
    <para>
+    Note the use of double-quotes around the search term:
+    <literal>Smith</literal>. In <literal>_queryFilter</literal>
+    expressions, string values <emphasis>must</emphasis> use double-quotes.
+    Numeric and boolean expressions should not use quotes.
+   </para>
+   <para>
     When called over REST, you must URL encode the filter expression. The
     following examples show the filter expressions using the resource API and
     the REST API, but do not show the URL encoding, to make them easier to read.
