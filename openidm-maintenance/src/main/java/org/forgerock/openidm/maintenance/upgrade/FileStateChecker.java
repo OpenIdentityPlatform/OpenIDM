@@ -24,19 +24,10 @@
 
 package org.forgerock.openidm.maintenance.upgrade;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
  * Utility class to provide file state for files in the distribution.  Currently implemented by comparing
@@ -45,53 +36,18 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
  */
 class FileStateChecker {
 
-    /** Hex adapter for converting hex sums in checksum file to byte arrays */
-    private static final HexBinaryAdapter hexAdapter = new HexBinaryAdapter();
-
-    // Cache of the checksum file's contents.
-    private final Map<String, String> digestCache = new HashMap<String, String>();
-
-    // MessageDigest appropriate for algorithm used for checksum
-    private final MessageDigest digest;
-
-    // Path to checksums file
-    private final Path checksums;
+    // Path to checksum file
+    private final ChecksumFile checksum;
 
     /**
-     * Construct the FileStateChecker from a checksums file.
+     * Construct the FileStateChecker from a checksum file.
      *
-     * @param checksums the checksum file
+     * @param checksum the checksum file
      * @throws IOException on failure to read file, bad format, etc.
      * @throws NoSuchAlgorithmException if checksum algorithm in checksum file is unknown
      */
-    FileStateChecker(Path checksums) throws IOException, NoSuchAlgorithmException {
-        if (!Files.exists(checksums)) {
-            throw new FileNotFoundException(checksums.toString() + " does not exist");
-        }
-
-        this.checksums = checksums;
-
-        // Assumes csv of #File,algorithm.
-        // Supports MD5, SHA-1 and SHA-256 at a minimum.
-        try (final BufferedReader reader = Files.newBufferedReader(this.checksums, Charset.defaultCharset())) {
-            // read first line for algorithm header
-            String line = reader.readLine();
-            String[] parts = line.split(",");
-            if (!line.startsWith("#") || parts.length < 2) {
-                throw new IllegalArgumentException(checksums.toString() + " format is invalid.");
-            }
-            digest = MessageDigest.getInstance(parts[1]);
-
-            // read other lines
-            while ((line = reader.readLine()) != null) {
-                parts = line.split(",");
-                if (!line.startsWith("#") && parts.length > 1) {
-                    digestCache.put(parts[0], parts[1]);
-                } else {
-                    throw new IllegalArgumentException(checksums.toString() + " has incomplete line.");
-                }
-            }
-        }
+    FileStateChecker(ChecksumFile checksum) throws IOException, NoSuchAlgorithmException {
+        this.checksum = checksum;
     }
 
     /**
@@ -101,15 +57,16 @@ class FileStateChecker {
      * @return the current file state
      */
     public FileState getCurrentFileState(Path originalDeployFile) throws IOException {
-        if (!digestCache.containsKey(originalDeployFile.toString())) {
+        if (!checksum.containsKey(originalDeployFile)) {
             return Files.exists(originalDeployFile)
                     ? FileState.UNEXPECTED
                     : FileState.NONEXISTENT;
         }
-        if (!Files.exists(resolvePath(originalDeployFile))) {
+        if (!Files.exists(checksum.resolvePath(originalDeployFile))) {
             return FileState.DELETED;
         }
-        return Arrays.equals(getCurrentDigest(originalDeployFile), getOriginalDigest(originalDeployFile))
+        return checksum.getCurrentDigest(originalDeployFile).equalsIgnoreCase(
+                checksum.getOriginalDigest(originalDeployFile))
             ? FileState.UNCHANGED
             : FileState.DIFFERS;
     }
@@ -121,63 +78,12 @@ class FileStateChecker {
      * @throws IOException
      */
     public void updateState(Path newFile) throws IOException {
-        String cacheKey = newFile.toString();
-        if (!Files.exists(newFile)) {
-            digestCache.remove(cacheKey);
+        Path cacheKey = newFile;
+        if (!Files.exists(checksum.resolvePath(newFile))) {
+            checksum.remove(cacheKey);
         } else {
-            digestCache.put(cacheKey, hexAdapter.marshal(getCurrentDigest(newFile)));
+            checksum.put(cacheKey, checksum.getCurrentDigest(newFile));
         }
-        persistChecksums();
-    }
-
-    /**
-     * Resolve the full path of the provided file relative to the checksum file's path.
-     *
-     * @param file a file in the distribution
-     * @return the path of the file relative to the checksum file (root path)
-     */
-    private Path resolvePath(Path file) {
-        return checksums.getParent().resolve(file);
-    }
-
-    /**
-     * Returns the digestCache of the original, shipped file.
-     *
-     * @param shippedFile the original, shipped file.
-     * @return the digestCache
-     */
-    private byte[] getOriginalDigest(Path shippedFile) {
-        return hexAdapter.unmarshal(digestCache.get(shippedFile.toString()));
-    }
-
-    /**
-     * Computes and returns the digestCache of a current file on disk.
-     *
-     * @param currentFile the current file
-     * @return the digestCache
-     */
-    private byte[] getCurrentDigest(Path currentFile) throws IOException {
-        return digest.digest(Files.readAllBytes(resolvePath(currentFile)));
-    }
-
-    /**
-     * Persist the current digest cache to disk.
-     *
-     * @throws IOException
-     */
-    private void persistChecksums() throws IOException {
-        BufferedWriter writer = Files.newBufferedWriter(checksums, Charset.defaultCharset());
-
-        // Write the header line.
-        writer.write("#File," + digest.getAlgorithm());
-        writer.newLine();
-
-        // Write all of the checksums.
-        for (String path : digestCache.keySet()) {
-            writer.write(path + "," + digestCache.get(path));
-            writer.newLine();
-        }
-
-        writer.close();
+        checksum.persistChecksums();
     }
 }
