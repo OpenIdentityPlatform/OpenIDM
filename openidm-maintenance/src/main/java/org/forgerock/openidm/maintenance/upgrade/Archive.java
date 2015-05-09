@@ -27,6 +27,9 @@ package org.forgerock.openidm.maintenance.upgrade;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Set;
+
+import org.forgerock.util.Function;
 
 /**
  * Abstraction of an upgrade archive
@@ -35,10 +38,26 @@ import java.nio.file.Path;
  */
 public interface Archive {
     /**
-     * Get an InputStream for a path within the archive.
+     * Return the version of the archive.
+     *
+     * @return the product version in the archive
+     */
+    ProductVersion getVersion();
+
+    /**
+     * Return the set of files in the archive.
+     *
+     * @return a set of Path object corresponding to the relative file paths in the archive
+     */
+    Set<Path> getFiles();
+
+    /**
+     * Get an InputStream for a path within the archive and process it according to the provided Function.
      *
      * @param path The Path for which to retrieve an InputStream
-     * @return the InputStream
+     * @param function the function to apply to the InputStream
+     * @return the return value from the function
      */
-    InputStream getInputStream(Path path) throws IOException;
+    <R, E extends Exception> R withInputStreamForPath(Path path, Function<InputStream, R, E> function)
+            throws E, IOException;
 }

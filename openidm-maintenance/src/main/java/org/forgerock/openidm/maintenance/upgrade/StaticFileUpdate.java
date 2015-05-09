@@ -25,11 +25,14 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.EnumSet;
 import java.util.Set;
+
+import org.forgerock.util.Function;
 
 /**
  * Updates / replaces / adds a new static file in the distribution.
@@ -44,13 +47,13 @@ class StaticFileUpdate {
     private final ProductVersion currentVersion;
     private final ProductVersion upgradedVersion;
 
-    StaticFileUpdate(FileStateChecker fileStateChecker, Path openidmRoot, Archive archive,
-            ProductVersion currentVersion, ProductVersion upgradedVersion) {
+    StaticFileUpdate(final FileStateChecker fileStateChecker, final Path openidmRoot, final Archive archive,
+            final ProductVersion currentVersion) {
         this.fileStateChecker = fileStateChecker;
         this.root = openidmRoot;
         this.archive = archive;
         this.currentVersion = currentVersion;
-        this.upgradedVersion = upgradedVersion;
+        this.upgradedVersion = archive.getVersion();
     }
 
     /**
@@ -72,23 +75,41 @@ class StaticFileUpdate {
      * Replaces this static file with the new one from the archive.  If the file has been changed, copy it to
      * <em>&lt;filepath&gt;-.idm-old</em>.  Supports copying fresh file for one that is missing.
      *
+     * @param path the path to replace/copy
      * @throws IOException
      */
-    void replace(Path path) throws IOException {
+    void replace(final Path path) throws IOException {
         if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
-            Files.move(root.resolve(path), root.resolve(path.toString() + IDM_SUFFIX + currentVersion.toString()));
+            Files.move(root.resolve(path),
+                    root.resolve(path.toString() + IDM_SUFFIX + currentVersion.toString()),
+                    StandardCopyOption.REPLACE_EXISTING);
         }
-        Files.copy(archive.getInputStream(path), root.resolve(path), StandardCopyOption.REPLACE_EXISTING);
+        archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
+            @Override
+            public Void apply(InputStream inputStream) throws IOException {
+                Files.copy(inputStream, root.resolve(path), StandardCopyOption.REPLACE_EXISTING);
+                return null;
+            }
+        });
     }
 
     /**
      * Keep the static file that already exists.  Install the new file as <em>&lt;filepath&gt;-.idm-new</em>.
      *
+     * @param path the path to keep/copy
      * @throws IOException
      */
-    void keep(Path path) throws IOException {
+    void keep(final Path path) throws IOException {
         if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
-            Files.copy(archive.getInputStream(path), root.resolve(path.toString() + IDM_SUFFIX + upgradedVersion.toString()));
+            archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
+                @Override
+                public Void apply(InputStream inputStream) throws IOException {
+                    Files.copy(inputStream,
+                            root.resolve(path.toString() + IDM_SUFFIX + upgradedVersion.toString()),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    return null;
+                }
+            });
         } else {
             throw new IOException("No such file " + path.toString() + " to keep!");
         }

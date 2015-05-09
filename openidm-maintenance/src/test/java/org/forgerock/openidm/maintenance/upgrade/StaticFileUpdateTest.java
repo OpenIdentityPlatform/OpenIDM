@@ -26,11 +26,16 @@ package org.forgerock.openidm.maintenance.upgrade;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
+import org.forgerock.util.Function;
+import org.mockito.Matchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
@@ -88,8 +93,20 @@ public class StaticFileUpdateTest {
 
     private StaticFileUpdate getStaticFileUpdate(FileStateChecker fileStateChecker) throws IOException {
         Archive archive = mock(Archive.class);
-        when(archive.getInputStream(tempFile)).thenReturn(new ByteArrayInputStream(newBytes));
-        StaticFileUpdate update = new StaticFileUpdate(fileStateChecker, tempPath, archive, oldVersion, newVersion);
+        when(archive.getVersion()).thenReturn(newVersion);
+        when(archive.withInputStreamForPath(eq(tempFile), Matchers.<Function<InputStream, Void, IOException>>any()))
+                .then(
+                        new Answer<Void>() {
+                            @Override
+                            @SuppressWarnings("unchecked")
+                            public Void answer(InvocationOnMock invocation) throws Throwable {
+                                // first argument - (Path) invocation.getArguments()[0] - is the Path, unused
+                                Function<InputStream, Void, IOException> function =
+                                        (Function<InputStream, Void, IOException>) invocation.getArguments()[1];
+                                return function.apply(new ByteArrayInputStream(newBytes));
+                            }
+                        });
+        StaticFileUpdate update = new StaticFileUpdate(fileStateChecker, tempPath, archive, oldVersion);
         return update;
     }
 

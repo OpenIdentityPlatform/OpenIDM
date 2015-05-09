@@ -28,8 +28,12 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import org.apache.felix.scr.ScrService;
@@ -43,6 +47,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -56,8 +61,11 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.openidm.maintenance.upgrade.UpgradeException;
+import org.forgerock.openidm.maintenance.upgrade.UpgradeManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -126,7 +134,7 @@ public class MaintenanceService implements RequestHandler {
         "org.forgerock.openidm.ui.context",
         */
     };
-    
+
 
     /**
      * A boolean indicating if maintenance mode is currently enabled
@@ -147,6 +155,9 @@ public class MaintenanceService implements RequestHandler {
      * The SCR Service managed used to activate/deactivate components.
      */
     protected ScrService scrService;
+
+    private final UpgradeManager upgradeManager = new UpgradeManager();
+
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -169,12 +180,26 @@ public class MaintenanceService implements RequestHandler {
         status,
         enable,
         disable,
+        upgradereport,
+        diff,
         upgrade
     }
     
     protected void setMaintenanceModeComponents(String[] components) {
         this.maintenanceModeComponents = components;
     }
+
+
+    private final Runnable DISABLE_MAINTENANCE_MODE = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                disableMaintenanceMode();
+            } catch (ResourceException e) {
+                logger.error("Couldn't leave maintenance mode after upgrade report", e);
+            }
+        }
+    };
 
     /**
      * Maintenance action support
@@ -191,11 +216,69 @@ public class MaintenanceService implements RequestHandler {
                 case disable:
                     disableMaintenanceMode();
                     return handleMaintenanceStatus();
+                case upgradereport:
+                    // FIXME Q: Should we go into maintenance mode for the upgrade report?
+                    enableMaintenanceMode();
+                    return upgradereport(request.getAdditionalParameters())
+                            .thenFinally(DISABLE_MAINTENANCE_MODE);
+                case diff:
+                    // FIXME Q: Should we go into maintenance mode for the upgradereport?
+                    enableMaintenanceMode();
+                    return diff(request.getAdditionalParameters())
+                            .thenFinally(DISABLE_MAINTENANCE_MODE);
+                case upgrade:
+                    enableMaintenanceMode();
+                    return upgrade(request.getAdditionalParameters())
+                            .thenFinally(DISABLE_MAINTENANCE_MODE);
                 default:
                     return new NotSupportedException(request.getAction() + " is not supported").asPromise();
             }
         } catch (ResourceException e) {
             return new InternalServerErrorException("Error processing Action request", e).asPromise();
+        }
+    }
+
+    private Promise<ActionResponse, ResourceException> upgradereport(Map<String, String> parameters) {
+        try {
+            return newActionResponse(
+                    upgradeManager.report(
+                            new URL(parameters.get("url")),
+                            Paths.get(IdentityServer.getInstance().getServerRoot())))
+                    .asPromise();
+        } catch (MalformedURLException e) {
+            return new BadRequestException("Passed in url is invalid " + e.getMessage(), e).asPromise();
+        } catch (UpgradeException e) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        }
+    }
+
+    private Promise<ActionResponse, ResourceException> diff(Map<String, String> parameters) {
+        try {
+            return newActionResponse(
+                    upgradeManager.diff(
+                            new URL(parameters.get("url")),
+                                Paths.get(IdentityServer.getInstance().getServerRoot()),
+                                parameters.get("file")))
+                    .asPromise();
+        } catch (MalformedURLException e) {
+            return new BadRequestException("Passed in url is invalid " + e.getMessage(), e).asPromise();
+        } catch (UpgradeException e) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        }
+    }
+
+    private Promise<ActionResponse, ResourceException> upgrade(Map<String, String> parameters) {
+        try {
+            return newActionResponse(
+                    upgradeManager.upgrade(
+                            new URL(parameters.get("url")),
+                            Paths.get(IdentityServer.getInstance().getServerRoot()),
+                            Boolean.valueOf(parameters.get("keep"))))
+                    .asPromise();
+        } catch (MalformedURLException e) {
+            return new BadRequestException("Passed in url is invalid " + e.getMessage(), e).asPromise();
+        } catch (UpgradeException e) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
