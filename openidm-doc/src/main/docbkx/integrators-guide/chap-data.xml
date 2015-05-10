@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-data'
@@ -74,8 +74,7 @@
   <programlisting language="javascript">
 val = openidm.read("managed/organization/mysampleorg")
 val = openidm.read("config/custom/mylookuptable")
-val = openidm.read("repo/custom/mylookuptable")
-  </programlisting>
+val = openidm.read("repo/custom/mylookuptable")</programlisting>
 
   <para>
    For information about constructing an object ID, see <link
@@ -92,8 +91,7 @@ val = openidm.read("repo/custom/mylookuptable")
   <programlisting language="javascript">
 openidm.update("managed/organization/mysampleorg", mymap)
 openidm.update("config/custom/mylookuptable", mymap)
-openidm.update("repo/custom/mylookuptable", mymap)
-  </programlisting>
+openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
 
   <para>
    For managed objects, you can partially update an object with the
@@ -101,8 +99,7 @@ openidm.update("repo/custom/mylookuptable", mymap)
   </para>
 
   <programlisting language="javascript">
-openidm.patch("managed/organization/mysampleorg", rev, value)
-  </programlisting>
+openidm.patch("managed/organization/mysampleorg", rev, value)</programlisting>
 
   <para>
    The <literal>create()</literal>, <literal>delete()</literal>, and
@@ -251,14 +248,12 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
     A typical query definition is as follows:
    </para>
    <programlisting>
-"query-all-ids" : "select _openidm_id from ${unquoted:_resource}"
-   </programlisting>
+"query-all-ids" : "select _openidm_id from ${unquoted:_resource}"</programlisting>
    <para>
     To call this query, you would reference its ID, as follows:
    </para>
    <programlisting>
-?_queryId=query-all-ids
-   </programlisting>
+?_queryId=query-all-ids</programlisting>
    <para>
     The following example calls <literal>query-all-ids</literal> over the REST
     interface:
@@ -297,8 +292,7 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- "https://localhost:8443/openidm/managed/user?_queryExpression=select+from+managed_user"
-   </screen>
+ "https://localhost:8443/openidm/managed/user?_queryExpression=select+from+managed_user"</screen>
    <para>
     Unless you have specifically enabled native queries over REST, the previous
     command returns a 403 access denied error message. Native queries are not
@@ -334,8 +328,7 @@ var params = {
     '_queryFilter' : 'givenName co "' + sourceCriteria + '" or ' + 'sn co "'
                      + sourceCriteria + '"'
 };
-var results = openidm.query("system/ScriptedSQL/account", params)
-   </programlisting>
+var results = openidm.query("system/ScriptedSQL/account", params)</programlisting>
 
    <para>
     Over the REST interface, the query filter is specified as
@@ -347,8 +340,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET
- 'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"Smith"'
-   </userinput></screen>
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"Smith"'</userinput></screen>
    <para>
     Note the use of double-quotes around the search term:
     <literal>Smith</literal>. In <literal>_queryFilter</literal>
@@ -847,8 +839,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/system/ldap/account?_queryFilter=sn+sw+""'</userinput>
-      </screen>
+ 'https://localhost:8443/openidm/system/ldap/account?_queryFilter=sn+sw+""'</userinput></screen>
      </note>
     </listitem>
    </varlistentry>
