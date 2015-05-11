@@ -50,16 +50,17 @@
     <secondary>Requirements</secondary>
    </indexterm>
    <para>
-    This release of OpenIDM requires Java Development Kit 6 or Java Development
-    Kit 7. ForgeRock recommends the most recent update of Java 6 or 7 to ensure
-    that you have the latest security fixes.
+    For details of the supported Java Environment, see the <link
+    xlink:show="new" xlink:href="release-notes#java-environment"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Release
+    Notes</citetitle></link>.
    </para>
    <para>
-    In addition, on Windows systems, you must set the
-    <literal>JAVA_HOME</literal> environment variable to point to the root of a
-    valid Java installation. The following steps indicate how to set the
-    <literal>JAVA_HOME</literal> environment variable on Windows Server 2008 R2.
-    Adjust the steps for your specific environment.
+    On Windows systems, you must set the <literal>JAVA_HOME</literal>
+    environment variable to point to the root of a valid Java installation. The
+    following steps indicate how to set the <literal>JAVA_HOME</literal>
+    environment variable on Windows Server 2008 R2. Adjust the steps for your
+    specific environment.
    </para>
    <itemizedlist>
     <listitem>

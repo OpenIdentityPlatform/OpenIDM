@@ -244,7 +244,6 @@
     </itemizedlist>
    </listitem>
   </varlistentry>
-
   <varlistentry>
    <term>Operating Systems</term>
    <listitem>
@@ -254,27 +253,39 @@
     </para>
    </listitem>
   </varlistentry>
+  <varlistentry xml:id="java-environment">
+   <term>Java Environment</term>
+   <listitem>
+    <para>
+     OpenIDM requires Java 7, specifically at least the Java Standard Edition
+     runtime environment. ForgeRock has performed most testing with Oracle Java
+     Platform, Standard Edition.
+    </para>
+    <para>
+     ForgeRock recommends that you keep your Java installation up to date with
+     the latest security fixes.
+    </para>
+    <para>
+     When using the Oracle JDK, you also need the Java Cryptography Extension
+     (JCE) <link xlink:show="new"
+      xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">policy
+     files</link>.
+    </para>
+    <para>
+     On Windows systems, use Java SE JDK 7 update 6 or later, to take advantage
+     of a recent JVM fix relating to non-blocking sockets with the default Jetty
+     configuration.
+    </para>
+    <para>
+     OpenIDM ${docTargetVersion} also supports OpenJDK 1.7.
+    </para>
+   </listitem>
+  </varlistentry>
  </variablelist>
-
  <para>
   If you have a special request to support a component or combination not listed
   here, contact ForgeRock at <link
   xlink:href='mailto:info@forgerock.com'>info@forgerock.com</link>.
- </para>
- <para>
-  OpenIDM requires Java SE JDK 6 update 24 or later, or Java SE JDK 7. When
-  using the Oracle JDK, you also need Java Cryptography Extension (JCE)
-  <link xlink:show="new"
-  xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html"
-  >policy files</link>.
- </para>
- <para>
-  On Windows systems, use Java SE JDK 7 update 6 or later, to take advantage of
-  a recent JVM fix relating to non-blocking sockets with the default Jetty
-  configuration.
- </para>
- <para>
-  OpenIDM ${docTargetVersion} also supports OpenJDK 1.7.
  </para>
  <para>
   You need 150 MB disk space and 1 GB memory for an evaluation installation. For
