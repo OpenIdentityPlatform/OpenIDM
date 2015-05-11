@@ -46,30 +46,29 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
         element: "#processes",
 
         render: function(args) {
-            var i, processId;
+            var processId;
             if (args && args[0] && args[0] !== '') {
                 processId = args[0];
             }
-            this.parentRender(function() {
-                this.clearStartProcessView();
-                workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser._id, function(processDefinitions) {
-                    for (i = 0; i < processDefinitions.length; i++) {
-                        $("#processList").append("<div class='process-item'><a href='#' class='processName'>" + processDefinitions[i].name + "</a> "
-                            + "<input type='hidden' name='id' value='" + processDefinitions[i]._id +"' />"
-                            + "</div>");
-                    }
+            workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser._id, _.bind(function(processDefinitions) {
+                var i;
+                this.data.processDefinitions = processDefinitions;
 
+                this.parentRender(function() {
                     if(processDefinitions.length === 0) {
                         $("#processContentBody").html("<h5 class='text-center'>" +$.t("openidm.ui.admin.tasks.StartProcessDashboardView.noProcesses") +"</h5>");
                     } else {
                         $("#processBadge").html(processDefinitions.length);
                         $("#processBadge").show();
                     }
+
+                    if (processId) {
+                        this.renderStartProcessView(processId);
+                    }
                 });
-                if (processId) {
-                    this.renderStartProcessView(processId);
-                }
-            });
+
+
+            }, this));
         },
 
         showStartProcessView: function(event) {
@@ -92,10 +91,6 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
                     $("#processContent").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noDataRequired"));
                 }
             });
-        },
-
-        clearStartProcessView: function() {
-            $("#startProcessForm").html('');
         }
 
     });

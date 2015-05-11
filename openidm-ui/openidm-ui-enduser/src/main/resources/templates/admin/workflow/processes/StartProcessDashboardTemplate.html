@@ -1,1 +1,5 @@
-<div id="processList"></div>
+<div id="processList">
+{{#each processDefinitions}}
+    <div class='process-item'><a href='#' class='processName'>{{name}}</a><input type='hidden' name='id' value='{{_id}}' /></div>
+{{/each}}
+</div>
