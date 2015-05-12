@@ -748,7 +748,7 @@ isMemberOf: cn=openidm,ou=Groups,dc=example,dc=com</computeroutput>
      </para>
      <programlisting>"roles" : [ "openidm-authorized", "managed/role/Contractor" ]</programlisting>
      <para>
-      This is an array has two roles. Using "zero-based numbering,"
+      This array has two roles. Using "zero-based numbering,"
       <literal>"openidm-authorized"</literal> is role <literal>0</literal> and
       <literal>managed/role/Contractor</literal> is role <literal>1</literal>.
      </para>
