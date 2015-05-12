@@ -273,7 +273,7 @@
     </para>
     <para>
      On Windows systems, use Java SE JDK 7 update 6 or later, to take advantage
-     of a recent JVM fix relating to non-blocking sockets with the default Jetty
+     of the JVM fix relating to non-blocking sockets with the default Jetty
      configuration.
     </para>
     <para>
