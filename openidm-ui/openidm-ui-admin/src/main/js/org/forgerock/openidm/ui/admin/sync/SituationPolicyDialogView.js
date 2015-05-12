@@ -69,6 +69,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
             this.model.saveCallback = args.saveCallback;
             this.model.lookup = args.lookup;
             this.model.currentDialog = $('<div id="SituationPolicyDialog"></div>');
+            this.model.passedProperties = [];
 
             if (this.data.edit) {
                 title = "Edit Policy for Situation: " + this.model.lookup[this.data.situation];
@@ -178,9 +179,13 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                             // Load Query Filter Editor
                             this.model.conditionFilterEditor = new LinkQualifierFilterEditor();
 
+                            _.each(this.data.mappingProperties, _.bind(function(property){
+                                this.model.passedProperties.push(property.source);
+                            }, this));
+
                             this.model.conditionFilterEditor.render({
                                 "mappingName" : this.data.mappingName,
-                                "mapProps": this.data.mappingProperties,
+                                "mapProps": this.model.passedProperties,
                                 "queryFilter": conditionFilter || "",
                                 "element": "#conditionFilterPane",
                                 "resource" : ""
