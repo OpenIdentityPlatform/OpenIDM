@@ -71,9 +71,9 @@
   </para>
 
   <para>
-   In this sample, when you assign a user to the Employee role, she becomes a
+   In this sample, when you assign a user to the Employee role, the user becomes a
    member of two groups: Employees and Chat Users. In contrast, when you assign
-   a user to the Contractor role, he becomes is a member of only the Contractor
+   a user to the Contractor role, that user becomes a member of only the Contractor
    group.
   </para>
 
