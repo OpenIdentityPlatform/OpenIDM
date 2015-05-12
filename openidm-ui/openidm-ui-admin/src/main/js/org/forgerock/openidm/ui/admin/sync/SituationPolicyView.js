@@ -485,7 +485,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
 
         addPolicy: function() {
             SituationPolicyDialog.render({
-                "mappingName" : this.data.mappingName,
+                "mappingName" : this.model.mappingName,
                 "mapProps": this.model.mapping.properties,
                 "situation": $(".situation-list").val(),
                 "edit": false,
@@ -506,7 +506,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
             _(this.$el.find("#situationalPolicies table .event-hook .edit-policy")).each(_.bind(function(editButton, index) {
                 if (editButton === event.currentTarget) {
                     SituationPolicyDialog.render({
-                        "mappingName" : this.data.mappingName,
+                        "mappingName" : this.model.mappingName,
                         "mapProps": this.model.mapping.properties,
                         "situation": _.invert(this.model.lookup)[this.data.policies[index].situation],
                         "edit": true,

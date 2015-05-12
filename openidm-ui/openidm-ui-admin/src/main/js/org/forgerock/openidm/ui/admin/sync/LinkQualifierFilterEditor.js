@@ -111,10 +111,13 @@ define("org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor", [
 
             this.$el.find(".name").each(function(name, index){
                 var currentSelect = this,
-                    parentHolder = $(currentSelect).closest(".node");
+                    parentHolder = $(currentSelect).closest(".node"),
+                    tempValue;
 
                 if($(currentSelect).val() === "/linkQualifier") {
+                    tempValue = parentHolder.find(".value").val();
                     parentHolder.find(".value").replaceWith(_this.createLinkQualifierCombo());
+                    parentHolder.find(".value").val(tempValue);
                 }
 
                 $(currentSelect).selectize({
