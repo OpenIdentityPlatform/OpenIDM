@@ -140,7 +140,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
             // If there is a filter, use it's query string
             queryString = "SELECT * FROM ${unquoted:_resource} WHERE "
                     + filter.accept(new OrientQueryFilterVisitor(), params).toSQL()
-                    + params.get(QueryConstants.PAGE_CLAUSE);
+                    + " " + params.get(QueryConstants.PAGE_CLAUSE);
         }
         // treat the query created by the filter as a queryExpression
         return findQueryInfo(type, queryId, queryString);
