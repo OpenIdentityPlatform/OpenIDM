@@ -996,8 +996,8 @@ openidm.scheduler.execute.persistent.schedules=true
    the task is invoked by a script, whose details are defined in the 
    <literal>"script"</literal> property:</para>
     <simplelist>
-     <member><literal>"type"</literal> - the type of script. Currently, only 
-     JavaScript is supported.</member>
+     <member><literal>"type"</literal> - the type of script. Currently,
+     JavaScript and Groovy are supported.</member>
      <member><literal>"file"</literal> - the path to the script file. The script 
      file takes at least two objects (in addition to the default objects that 
      are provided to all OpenIDM scripts): <literal>"input"</literal> which is 
