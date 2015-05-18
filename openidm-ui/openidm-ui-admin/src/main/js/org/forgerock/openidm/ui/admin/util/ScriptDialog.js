@@ -57,9 +57,8 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 size: BootstrapDialog.SIZE_WIDE,
                 onshown : function (dialogRef) {
                     args.element = _this.$el;
-                    args.validationCallback = _.bind(function(){
-
-                        if(validatorsManager.formValidated(this.$el)) {
+                    args.validationCallback = _.bind(function(result){
+                        if(result) {
                             $("#scriptDialogOkay").prop("disabled", false);
                         } else {
                             $("#scriptDialogOkay").prop("disabled", true);

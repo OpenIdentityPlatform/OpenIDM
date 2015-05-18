@@ -39,14 +39,16 @@ define("org/forgerock/openidm/ui/admin/util/ScriptList", [
             render: function (args, callback) {
                 var tempEvent,
                     scriptOption;
-                
+
                 this.element = args.element;
                 this.data.label = args.label;
                 this.data.selectEvents = args.selectEvents;
                 this.data.addedEvents = args.addedEvents;
                 this.eventHooks = args.eventHooks;
                 this.currentObject = args.currentObject;
-                
+                this.hasWorkflow = args.hasWorkflow || false;
+                this.workflowContext = args.workflowContext || "";
+
                 this.parentRender(function() {
                     _.each(this.$el.find(".scripts-container .event-hook"), function(eventHook){
                         tempEvent = $(eventHook).attr("data-script-type");
@@ -57,11 +59,18 @@ define("org/forgerock/openidm/ui/admin/util/ScriptList", [
                             scriptOption = this.currentObject[tempEvent];
                         }
 
-                        this.eventHooks.push(ScriptEditor.generateScriptEditor({"element": $(eventHook), "scriptData": scriptOption, "eventName": tempEvent, "deleteCallback": _.bind(this.removeScript, this)}));
-                        
+                        this.eventHooks.push(ScriptEditor.generateScriptEditor({
+                            "element": $(eventHook),
+                            "scriptData": scriptOption,
+                            "eventName": tempEvent,
+                            "hasWorkflow": this.hasWorkflow,
+                            "workflowContext": this.workflowContext,
+                            "deleteCallback": _.bind(this.removeScript, this)
+                        }));
+
                         this.$el.find(".scripts-container").show();
                     }, this);
-                    
+
                     if(callback) {
                         callback();
                     }
@@ -75,21 +84,23 @@ define("org/forgerock/openidm/ui/admin/util/ScriptList", [
                 this.$el.find(".scripts-container table").append(createdElement);
 
                 this.eventHooks.push(ScriptEditor.generateScriptEditor({
-                        "element": this.$el.find(".scripts-container .group-field-block .event-hook:last"), 
-                        "eventName": selectedEvent, 
-                        "deleteCallback": _.bind(this.removeScript, this)
-                    },
-                    _.bind(function() { this.$el.find("tr[data-script-type=" +selectedEvent +"]").find(".edit-btn").click(); }, this)
+                            "element": this.$el.find(".scripts-container .group-field-block .event-hook:last"),
+                            "eventName": selectedEvent,
+                            "hasWorkflow": this.hasWorkflow,
+                            "workflowContext": this.workflowContext,
+                            "deleteCallback": _.bind(this.removeScript, this)
+                        },
+                        _.bind(function() { this.$el.find("tr[data-script-type=" +selectedEvent +"]").find(".edit-btn").click(); }, this)
                     )
-                 );
-                
+                );
+
                 this.$el.find(".scriptSelection option:selected").remove();
 
                 if(this.$el.find(".scriptSelection option").length === 0) {
                     this.$el.find(".scriptSelection").prop('disabled', true);
                     this.$el.find(".addScriptButton").prop('disabled', true);
                 }
-                
+
                 this.$el.find(".scripts-container").show();
             },
 
@@ -109,15 +120,17 @@ define("org/forgerock/openidm/ui/admin/util/ScriptList", [
                 }, this);
             }
         });
-    
+
     /*Params that need to be passed into this widget
-        element - the element that will recieve the scriptList
-        label - the label text that shows up above the events/hooks grid
-        selectEvents - events to display in the initial dropdown
-        addedEvents - events that are already in use
-        eventHooks - an empty array used to hold the currently used event objects
-        currentObject - the object containing the current eventHooks
-    */
+     element - the element that will recieve the scriptList
+     label - the label text that shows up above the events/hooks grid
+     selectEvents - events to display in the initial dropdown
+     addedEvents - events that are already in use
+     eventHooks - an empty array used to hold the currently used event objects
+     currentObject - the object containing the current eventHooks
+     hasWorkflow - if this instance of the editor supports workflows,
+     workflowContext - the context of the workflows if any
+     */
 
     scriptListInstance.generateScriptList = function(params) {
         var scriptList = {};

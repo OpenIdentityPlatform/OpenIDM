@@ -31,8 +31,18 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/sync/LinkQualifierFilterEditor",
+    "org/forgerock/openidm/ui/admin/util/WorkflowWidget",
     "bootstrap-dialog"
-], function(AbstractView, MappingBaseView, conf, uiUtils, InlineScriptEditor, LinkQualifierFilterEditor, BootstrapDialog) {
+
+], function(AbstractView,
+            MappingBaseView,
+            conf,
+            uiUtils,
+            InlineScriptEditor,
+            LinkQualifierFilterEditor,
+            WorkflowWidget,
+            BootstrapDialog) {
+
     var SituationPolicyDialogView = AbstractView.extend({
         template: "templates/admin/sync/SituationPolicyDialogTemplate.html",
         el: "#dialogs",
@@ -59,7 +69,6 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                 defaultConditionScript: false,
                 defaultConditionFilter: true,
                 note: args.basePolicy.note,
-                workflows: args.workflows,
                 mappingName: args.mappingName,
                 mappingProperties: args.mapProps
             };
@@ -112,8 +121,10 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                         _.bind(function() {
                             var tempSelector,
                                 actionScriptData = {},
+                                workflowName,
                                 conditionScriptData = {},
-                                conditionFilter = "";
+                                conditionFilter = "",
+                                params = {};
 
                             this.$el.find(".nav-tabs").tabdrop();
 
@@ -131,7 +142,11 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
 
                             // Set action value
                             if (this.data.defaultWorkflow) {
-                                this.$el.find("#workflowPane select").val(this.model.action.workflowName);
+                                if (this.model.action.globals){
+                                    workflowName = this.model.action.globals.workflowName;
+                                } else {
+                                    workflowName = $.t("templates.situationalPolicies.workflow");
+                                }
                             } else if (this.data.defaultScript) {
                                 actionScriptData = this.model.action;
                             } else if (this.data.edit) {
@@ -161,6 +176,26 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                                 }, this),
                                 "scriptData": actionScriptData
                             });
+
+                            if (_.has(this.model.action, "globals") && _.has(this.model.action.globals, "params")) {
+                                params = this.model.action.globals.params;
+                            }
+
+                            this.model.actionWorkflowEditor = WorkflowWidget.generateWorkflowWidget({
+                                "element": this.$el.find("#actionWorkflowPane"),
+                                "key": workflowName,
+                                "params": params,
+                                "sync": true,
+                                "changeCallback": _.noop()
+                            }, _.bind(function(valid) {
+                                if (this.model.currentActionTab === "workflowTab") {
+                                    if (valid) {
+                                        this.toggleActiveAlert(false);
+                                    } else {
+                                        this.toggleActiveAlert(true);
+                                    }
+                                }
+                            }, this));
 
                             this.model.conditionScriptPaneEditor = InlineScriptEditor.generateScriptEditor({
                                 "element": this.$el.find("#conditionScriptPane"),
@@ -231,11 +266,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
                             if (this.$el.find("#action .tabButtons .active").attr("id") === "defaultActionTab") {
                                 returnPolicy.action = this.$el.find("#defaultActionPane select").val();
                             } else if (this.$el.find("#action .tabButtons .active").attr("id") === "workflowTab") {
-                                returnPolicy.action = {
-                                    "workflowName": this.$el.find("#workflowPane select").val(),
-                                    "type": "text/javascript",
-                                    "file": "workflow/triggerWorkflowFromSync.js"
-                                };
+                                returnPolicy.action = this.model.actionWorkflowEditor.getConfiguration();
                             } else {
                                 returnPolicy.action = this.model.actionScriptPaneEditor.generateScript();
                             }
@@ -262,7 +293,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView", [
 
         actionValidation: function(id) {
             if (id === "workflowTab") {
-                if (this.$el.find("#workflowPane select").val() === "noWorkflows") {
+                if (!this.model.actionWorkflowEditor.getValid()) {
                     this.toggleActiveAlert(true);
                 } else {
                     this.toggleActiveAlert(false);

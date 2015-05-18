@@ -519,29 +519,33 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 this.propertiesCounter = this.$el.find(".add-remove-block").length;
 
                 this.loadSchema();
-                
+
                 ScriptList.generateScriptList({
                     element: this.$el.find("#managedScripts"),
                     label: $.t("templates.managed.addManagedScript"),
                     selectEvents: this.data.selectEvents,
                     addedEvents:this.data.addedEvents,
                     eventHooks: this.eventHooks,
-                    currentObject: this.data.currentManagedObject
-                });
+                    currentObject: this.data.currentManagedObject,
+                    hasWorkflow: true,
+                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")
 
+                });
 
                 _.each(this.$el.find("#managedPropertyWrapper .small-field-block:visible"), function(managedProperty, index) {
                     tempPropArr = [];
 
                     this.propertyHooks.push(tempPropArr);
-                    
+
                     ScriptList.generateScriptList({
                         element: $(managedProperty).find(".managedPropertyEvents"),
                         label: $.t("templates.managed.addPropertyScript"),
                         selectEvents: this.data.currentManagedObject.properties[index].selectEvents,
                         addedEvents:this.data.currentManagedObject.properties[index].addedEvents,
                         eventHooks: this.propertyHooks[index],
-                        currentObject: this.data.currentManagedObject.properties[index]
+                        currentObject: this.data.currentManagedObject.properties[index],
+                        hasWorkflow: true,
+                        workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")
                     });
 
                 }, this);
@@ -717,20 +721,21 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             field.show();
 
             this.propertyHooks.push([]);
-            
+
             propIndex = this.propertyHooks.length - 1;
-            
+
             if(!this.data.currentManagedObject.properties) {
                 this.data.currentManagedObject.properties = [];
             }
-            
+
             ScriptList.generateScriptList({
                 element: field.find(".managedPropertyEvents"),
                 label: $.t("templates.managed.addPropertyScript"),
                 selectEvents: this.data.propertiesEventList,
                 addedEvents:[],
                 eventHooks: this.propertyHooks[propIndex],
-                currentObject: this.data.currentManagedObject.properties[propIndex]
+                currentObject: this.data.currentManagedObject.properties[propIndex],
+                hasWorkflow: true
             });
 
             this.$el.find('#managedPropertyWrapper').append(field);

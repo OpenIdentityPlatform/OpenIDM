@@ -1,0 +1,66 @@
+<div class="col-md-12"{{#unless sync}} style="display:none;"{{/unless}}>
+<p>{{t "templates.workflows.sync"}}</p>
+<pre>
+    [
+        "_action"
+        "reconId",
+        "action",
+        "mapping",
+        "situation",
+        "sourceId",
+    ]
+    </pre>
+</div>
+
+<div class="col-md-12"{{#if sync}} style="display:none;"{{/if}}{{#unless context}} style="display:none;"{{/unless}}>
+<p>{{t "templates.workflows.nonSync"}}</p>
+<pre>{{context}}</pre>
+</div>
+
+
+<div class="col-md-12 form-group">
+    <select id="workflowList" class="form-control" {{#unless workflows.length}} disabled="true"{{/unless}}>
+    {{#each workflows}}
+    <option value="{{this._id}}">{{this.name}}</option>
+    {{else}}
+    <option value="noWorkflows" selected="selected">{{t "templates.workflows.noWorkflows"}}</option>
+    {{/each}}
+    </select>
+</div>
+
+<div class="col-md-12" id="workflowProperties" {{#if sync}}style="display:none;"{{/if}}>
+{{#each properties}}
+<div class="row form-group workflowProperty" id="{{this.id}}">
+    <div class="col-sm-4">
+        <label>{{#if this.name}}{{this.name}}{{else}}{{this.id}}{{/if}}</label>
+        <br/>
+            <span>
+                {{#if this.required}}
+                {{t "templates.workflows.dataType"}}{{this.type}}{{t "templates.workflows.dataRequired"}}
+                {{else}}
+                {{t "templates.workflows.dataType"}}{{this.type}}{{t "templates.workflows.dataExpected"}}
+                {{/if}}
+            </span>
+    </div>
+    <div class="col-sm-8">
+        <textarea row="3" class="form-control"{{#if this.required}} data-validator="required" data-validator-event="keyup blur"{{/if}}></textarea>
+    </div>
+</div>
+{{/each}}
+</div>
+
+<div class="col-md-12">
+    <div role="alert" class="alert alert-warning noProperties"
+         {{#if properties.length}}
+         style="display: none;"
+         {{else}}
+         {{#unless sync}}
+         style="display: block;"
+         {{else}}
+         style="display: none;"
+         {{/unless}}
+    {{/if}}>
+    <i class="fa fa-exclamation-circle"></i><strong>{{t "common.notification.types.info"}}: </strong>
+    <span class="message">{{t "templates.workflows.noProps"}}</span>
+</div>
+

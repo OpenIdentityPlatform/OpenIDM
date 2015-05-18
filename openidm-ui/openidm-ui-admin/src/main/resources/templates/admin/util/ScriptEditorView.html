@@ -1,4 +1,14 @@
 <div class="row event-hook-inline event-hook-window">
+
+    {{#if hasWorkflow}}
+    <div class="btn-group btn-group-tabs script-tabs col-md-12 form-group" data-toggle="btns">
+        <button role="presentation" class="btn btn-default scriptButton{{#if defaultToScript}} active{{/if}}" aria-controls="Script" data-toggle="tab">{{t "templates.correlation.script"}}</button>
+        <button role="presentation" class="btn btn-default workflowButton{{#unless defaultToScript}} active{{/unless}}" aria-controls="Workflow" data-toggle="tab">{{t "templates.situationalPolicies.workflow"}}</button>
+    </div>
+    {{/if}}
+
+
+    <div {{#unless defaultToScript}} style="display:none" {{/unless}} class="script-body">
     <div {{#if disablePassedVariable}} class="col-sm-12" {{else}} class="col-sm-6" {{/if}}>
     <div class="form-group event-hook-piece event-type">
         <label class="control-label">{{t "templates.scriptEditor.type"}}</label>
@@ -84,7 +94,7 @@
                             <div class="col-sm-5 textContainer">
                                 <input class="form-size-s form-control passed-value" autocomplete="off" type="text" placeholder="{{t "templates.scriptEditor.variableValue"}}" value="{{this.[1]}}" />
                             </div>
-                            <div class="col-sm-1 col-sm-offset-1">
+                            <div class="col-sm-2">
                                 <div class="btn-group pull-right">
                                     <button type="button" class="btn clean-btn remove-btn btn-link delete-script "><i class="fa fa-lg fa-times-circle"></i></button>
                                 </div>
@@ -118,4 +128,6 @@
     </div>
     {{/unless}}
 </div>
+</div>
+<div {{#if defaultToScript}} style="display:none" {{/if}} class="workflow-body">
 </div>

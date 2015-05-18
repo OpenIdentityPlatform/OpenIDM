@@ -70,11 +70,34 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
                     this.saveCallback = _.noop;
                 }
 
+                if (args.hasWorkflow) {
+                    if (this.data.scriptData && this.data.scriptData.globals) {
+                        this.data.workflow = this.data.scriptData.globals.workflowReadable;
+                    } else {
+                        this.data.workflow = null;
+                    }
+                    this.hasWorkflow = args.hasWorkflow || false;
+                }
+                this.workflowContext = args.workflowContext || "";
+
                 this.parentRender(callback);
             },
 
             editScriptHook: function() {
-                ScriptDialog.render({"element":this.element, "disableValidation" : false, "eventName":this.data.eventName, "scriptData":this.data.scriptData, setScript: _.bind(this.setScriptHook, this), saveCallback: this.saveCallback});
+                if (this.data.scriptData !== null && this.data.scriptData.file === "workflow/triggerWorkflowGeneric.js") {
+                    this.hasWorkflow = true;
+                }
+
+                ScriptDialog.render({
+                    "element":this.element,
+                    "disableValidation" : false,
+                    "eventName":this.data.eventName,
+                    "scriptData":this.data.scriptData,
+                    "setScript": _.bind(this.setScriptHook, this),
+                    "saveCallback": this.saveCallback,
+                    "hasWorkflow": this.hasWorkflow,
+                    "workflowContext": this.workflowContext
+                });
             },
 
             deleteScriptHook: function() {
@@ -91,11 +114,20 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
             },
 
             addScriptHook: function() {
-                ScriptDialog.render({"element":this.element, "disableValidation" : false, "eventName":this.data.eventName, "scriptData":null, setScript: _.bind(this.setScriptHook, this), saveCallback: _.bind(this.saveCallback, this)});
+                ScriptDialog.render({
+                    "element": this.element,
+                    "disableValidation" : false,
+                    "eventName": this.data.eventName,
+                    "scriptData": null,
+                    "setScript": _.bind(this.setScriptHook, this),
+                    "saveCallback": _.bind(this.saveCallback, this),
+                    "hasWorkflow": this.hasWorkflow,
+                    "workflowContext": this.workflowContext
+                });
             },
 
             setScriptHook: function(args) {
-                this.render({"element":this.element, "eventName":this.data.eventName, "scriptData":args.scriptObject});
+                this.render({"element":this.element, "eventName":this.data.eventName, "scriptData":args.scriptObject, "hasWorkflow": this.hasWorkflow, "workflowContext": this.workflowContext});
             },
 
             getScriptHook: function() {
@@ -103,7 +135,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
             },
 
             clearScriptHook: function() {
-                this.render({"element":this.element, "eventName":this.data.eventName});
+                this.render({"element":this.element, "eventName":this.data.eventName, "hasWorkflow": this.hasWorkflow, "workflowContext": this.workflowContext});
             },
 
             getEventName: function() {
