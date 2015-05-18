@@ -31,8 +31,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
     "libs/codemirror/mode/groovy/groovy",
     "libs/codemirror/mode/javascript/javascript",
     "libs/codemirror/addon/display/placeholder",
-    "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate"
-], function(AbstractView, validatorsManager, codeMirror, groovyMode, jsMode, placeHolder, ScriptDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
+    "org/forgerock/openidm/ui/admin/util/WorkflowWidget"
+], function(AbstractView, validatorsManager, codeMirror, groovyMode, jsMode, placeHolder, ScriptDelegate, WorkflowWidget) {
     var seInstance = {},
         InlineScriptEditor = AbstractView.extend({
             template: "templates/admin/util/ScriptEditorView.html",
@@ -44,6 +45,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 "click .passed-variables-holder .remove-btn" : "deletePassedVariable",
                 "blur .passed-variables-holder input" : "passedVariableBlur",
                 "onValidate": "onValidate",
+                "click .script-tabs button" : "changeScriptTab",
                 "customValidate": "customValidate"
             },
             model : {
@@ -57,44 +59,58 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 validationCallback: null,
                 placeHolder: null,
                 codeMirrorHeight: "240px",
-                disableValidation: true
+                disableValidation: true,
+                hasWorkflow: false,
+                workflowActive: false
             },
 
             /*
              Properties that can be set through args:
 
-                 scriptData - Set if you have script data from a previous save or want a default
-                 eventName - Name to display also needed as a unique ID when more then one editor is on the page
-                 disablePassedVariable - Flag to turn on and off passed variables
-                 disableValidation - turn off validation
-                 placeHolder - A placeholder for code mirror
-                 onBlur - Blur event for code mirror and file
-                 onChange - Change event for code mirror and file
-                 onFocus - focus event for code mirror and file
-                 onKeypress - keypress event for code mirror and file
-                 onLoadComplete - Load complete event
-                 onBlurPassedVariable - Event fired when blurring from a passed variable
-                 onDeletePassedVariable - Event fired when a passed variable is deleted
-                 onAddPassedVariable - Event fired when a passed variable is added
-                 showPreview - enable preview code pane
-                 extendedPassVariables - Passed variables to extend when saving.
+             scriptData - Set if you have script data from a previous save or want a default
+             eventName - Name to display also needed as a unique ID when more then one editor is on the page
+             disablePassedVariable - Flag to turn on and off passed variables
+             disableValidation - turn off validation
+             placeHolder - A placeholder for code mirror
+             onBlur - Blur event for code mirror and file
+             onChange - Change event for code mirror and file
+             onFocus - focus event for code mirror and file
+             onKeypress - keypress event for code mirror and file
+             onLoadComplete - Load complete event
+             onBlurPassedVariable - Event fired when blurring from a passed variable
+             onDeletePassedVariable - Event fired when a passed variable is deleted
+             onAddPassedVariable - Event fired when a passed variable is added
+             showPreview - enable preview code pane
+             extendedPassVariables - Passed variables to extend when saving.
+             hasWorkflow - boolean to turn on/off workflow piece
+             workflowContext - a JSON object depicting the context for the workflow scripts(optional)
              */
             render: function (args, callback) {
                 this.element = args.element;
 
                 this.model = _.extend(this.model, args);
 
-                this.data = _.pick(this.model, 'disableValidation', 'showPreview', 'scriptData', 'eventName', 'disablePassedVariable', 'placeHolder');
+                this.data = _.pick(this.model, 'hasWorkflow', 'disableValidation', 'showPreview', 'scriptData', 'eventName', 'disablePassedVariable', 'placeHolder');
+                this.data.defaultToScript = false;
+
+                if (this.model.hasWorkflow && this.data.scriptData && this.data.scriptData.file === "workflow/triggerWorkflowGeneric.js") {
+                    this.model.workflowActive = true;
+                } else {
+                    this.data.defaultToScript = true;
+                }
+
                 if (!this.model.disablePassedVariable && this.model.scriptData) {
                     if(args.scriptData.globals === null) {
                         args.scriptData.globals = {};
                     }
                     this.data.passedVariables = args.scriptData.globals ||
-                        _.omit(args.scriptData, "file", "source", "type");
+                    _.omit(args.scriptData, "file", "source", "type");
                 }
 
                 this.parentRender(_.bind(function() {
-                    var mode;
+                    var mode,
+                        workflowName,
+                        workflowParams;
 
                     mode = this.$el.find("select").val();
 
@@ -113,6 +129,23 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                         mode: mode
                     });
 
+
+                    if (this.data.scriptData && this.data.scriptData.file === "workflow/triggerWorkflowGeneric.js") {
+                        workflowName = this.data.scriptData.globals.workflowName;
+                        workflowParams = this.data.scriptData.globals.params;
+                    }
+                    if (this.model.hasWorkflow) {
+                        this.workflow = WorkflowWidget.generateWorkflowWidget({
+                            "element": this.$el.find(".workflow-body"),
+                            "key": workflowName,
+                            "params": workflowParams,
+                            "sync": false,
+                            "context": this.model.workflowContext,
+                            "changeCallback": _.noop
+                        }, _.bind(function() {
+                            this.customValidate();
+                        }, this));
+                    }
                     this.cmBox.setSize(this.model.codeMirrorWidth, this.model.codeMirrorHeight);
 
                     if (this.$el.find("input[name=scriptType]:checked").val() !== "inline-code") {
@@ -191,6 +224,28 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 }, this));
             },
 
+            changeScriptTab: function(event) {
+                var currentTab = $(event.currentTarget),
+                    tabType = currentTab.attr("aria-controls");
+
+                currentTab.parent().find("button").toggleClass("active", false);
+                currentTab.toggleClass("active", true);
+
+                if (tabType === "Workflow") {
+                    this.model.workflowActive = true;
+
+                    this.$el.find(".script-body").hide();
+                    this.$el.find(".workflow-body").show();
+                } else {
+                    this.model.workflowActive = false;
+
+                    this.$el.find(".script-body").show();
+                    this.$el.find(".workflow-body").hide();
+                }
+
+                this.customValidate();
+            },
+
             previewScript : function() {
                 var script = this.generateScript();
 
@@ -267,6 +322,13 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 if (currentSelection === "none") {
                     return null;
+                } else if (this.model.hasWorkflow && this.model.workflowActive) {
+
+                    if (this.model.setScript) {
+                        this.model.setScript({"scriptObject":this.workflow.getConfiguration(), "hookType":currentSelection});
+                    }
+
+                    return this.workflow.getConfiguration();
                 } else {
                     scriptObject.type = this.$el.find("select").val();
                     scriptObject.globals = {};
@@ -314,7 +376,11 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
             },
 
             customValidate: function() {
-                this.validationResult = validatorsManager.formValidated(this.$el);
+                this.validationResult = validatorsManager.formValidated(this.$el.find(".script-body"));
+
+                if (this.model.hasWorkflow && this.model.workflowActive) {
+                    this.validationResult = this.workflow.isValid();
+                }
 
                 if (this.model.validationCallback) {
                     this.model.validationCallback(this.validationResult);

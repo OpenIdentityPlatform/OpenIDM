@@ -423,15 +423,6 @@ $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variabl
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
 
-                def newRequesterNotification = [
-                "receiverId": startUserFromRepo.result[0]._id,
-                "requesterId" : "",
-                "requester" : "",
-                "createDate" : requestDate,
-                "notificationType" : "info",
-                "notificationSubtype" : "",
-                "message" : "OpenIDM created user " +userName
-                ];
                 def newContractorNotification = [
                 "receiverId": newUserFromRepo.result[0]._id,
                 "requesterId" : "",
@@ -441,7 +432,20 @@ $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variabl
                 "notificationSubtype" : "",
                 "message" : "Welcome! Your work days are from " + startDate + " to " + endDate
                 ];
+
+                if (startUserFromRepo.result[0] != null) {
+                def newRequesterNotification = [
+                "receiverId": startUserFromRepo.result[0]._id,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "OpenIDM created user " +userName
+                ];
+
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
+                }
                 openidm.create("repo/ui/notification/", null, newContractorNotification)
             </script>
         </scriptTask>
@@ -453,6 +457,7 @@ $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variabl
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
 
+                if (startUserFromRepo.result[0] != null) {
                 def newRequesterNotification = [
                 "receiverId": startUserFromRepo.result[0]._id,
                 "requesterId" : "",
@@ -463,7 +468,7 @@ $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variabl
                 "message" : "Your request to create user " + userName + " was denied."
                 ];
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
-
+                }
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendDenyNotification" targetRef="end"/>

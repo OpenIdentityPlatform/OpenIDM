@@ -29,7 +29,7 @@ define("org/forgerock/openidm/ui/admin/delegates/WorkflowDelegate", [
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/workflow/");
+    var obj = new AbstractDelegate(constants.host + "/openidm/workflow/processdefinition");
 
     obj.availableWorkflows = function() {
         var errorHandlers =  {
@@ -42,7 +42,21 @@ define("org/forgerock/openidm/ui/admin/delegates/WorkflowDelegate", [
         };
 
         return obj.serviceCall({
-            url: "processdefinition?_queryId=query-all-ids",
+            url: "?_queryId=query-all-ids",
+            type: "GET",
+            errorsHandlers: errorHandlers
+        });
+    };
+
+    obj.workflowFormProperties = function(id) {
+        var errorHandlers = {
+            "notFound": {
+                status: "404"
+            }
+        };
+
+        return obj.serviceCall({
+            url: "/" + id,
             type: "GET",
             errorsHandlers: errorHandlers
         });

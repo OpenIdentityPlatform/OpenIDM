@@ -32,7 +32,6 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/WorkflowDelegate",
     "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialogView",
     "bootstrap-dialog"
 ], function(
@@ -43,7 +42,6 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
     uiUtils,
     ConfigDelegate,
     BrowserStorageDelegate,
-    WorkflowDelegate,
     SituationPolicyDialog,
     BootstrapDialog) {
 
@@ -113,11 +111,12 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
             this.model.saveCallback = args.saveCallback;
             this.model.callback = callback;
             this.model.renderedPolicies = args.policies || _.clone(this.model.mapping.policies, true);
-            this.model.workflows = [];
 
-            var finishSetup = function() {
-                _.sortBy(this.model.workflows, function(workflow) { return workflow.name; });
+            if (args.changes) {
+                this.data.changes = true;
+            }
 
+            this.getPatterns().then(_.bind(function(pattern) {
                 this.setPolicies(this.model.renderedPolicies);
 
                 this.parentRender(function () {
@@ -138,22 +137,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                     this.$el.find("#policyPatterns").val(this.model.currentPattern);
                     this.$el.find("#patternDescription").text(this.model.allPatterns[this.model.currentPattern].description);
                 });
-            };
-
-            if (args.changes) {
-                this.data.changes = true;
-            }
-
-            $.when(this.getPatterns(), WorkflowDelegate.availableWorkflows()).then(_.bind(function(pattern, workflowData) {
-                _(workflowData[0].result).each(function(workflow) {
-                    this.model.workflows.push({
-                        name: workflow.name,
-                        key: workflow.key
-                    });
-                }, this);
-
-                _.bind(finishSetup, this)();
-            }, this), _.bind(finishSetup, this));
+            }, this));
         },
 
         /**
@@ -324,20 +308,29 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                     defaultActionHollow = false;
                     emphasize = false;
 
-                    _.each(this.model.lookup.situations, function(val, key ) {
+                    _.each(this.model.lookup.situations, function(val, key) {
                         if (val === policy.situation) {
                             policy.situation = key;
                         }
                     });
 
-                    if (_(policy.action).isObject() && _(policy.action).has("workflowName")) {
-                        action = $.t("templates.situationalPolicies.workflow");
+                    if (_(policy.action).isObject() && _(policy.action).has("file") && policy.action.file === "workflow/triggerWorkflowFromSync.js") {
+
+                        if (_.has(policy.action, "globals") && _.has(policy.action.globals, "workflowReadable")) {
+                            action = policy.action.globals.workflowReadable;
+                        } else {
+                            action = $.t("templates.situationalPolicies.workflow");
+                        }
+
                         defaultActionStar = false;
                         emphasize = true;
+
                     } else if (_(policy.action).isObject() && _(policy.action).has("type")) {
+
                         action = policy.action.type;
                         defaultActionStar = false;
                         emphasize = true;
+
                     } else if (_(policy.action).isString()) {
                         action = this.model.lookup[policy.action] || policy.action;
 
@@ -487,11 +480,10 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
             SituationPolicyDialog.render({
                 "mappingName" : this.model.mappingName,
                 "mapProps": this.model.mapping.properties,
-                "situation": $(".situation-list").val(),
+                "situation": this.$el.find(".situation-list").val(),
                 "edit": false,
                 "policy": null,
-                "workflows": this.model.workflows,
-                "basePolicy": this.model.baseSituations[$(".situation-list").val()],
+                "basePolicy": this.model.baseSituations[this.$el.find(".situation-list").val()],
                 "lookup": this.model.lookup,
                 "saveCallback": _.bind(function(policy) {
                     this.model.renderedPolicies.push(policy);
@@ -511,7 +503,6 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                         "situation": _.invert(this.model.lookup)[this.data.policies[index].situation],
                         "edit": true,
                         "policy": this.data.policies[index],
-                        "workflows": this.model.workflows,
                         "basePolicy": this.model.baseSituations[_.invert(this.model.lookup)[this.data.policies[index].situation]],
                         "lookup": this.model.lookup,
                         "saveCallback": _.bind(function(policy) {

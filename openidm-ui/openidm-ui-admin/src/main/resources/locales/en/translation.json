@@ -445,6 +445,15 @@
             "seconds": "second(s)",
             "addSchedule": "Add Schedule"
         },
+        "workflows": {
+            "sync": "These data properties are sent when the workflow is triggered",
+            "nonSync": "Workflow scripts can access these object/properties.",
+            "noWorkflows": "No Available Workflows",
+            "dataType": "A datatype of ",
+            "dataRequired": " is <strong>required</strong>",
+            "dataExpected": "is expected",
+            "noProps": "This workflow includes no definable properties."
+        },
         "situationalPolicies": {
             "currentPolicy": "Current Policy",
             "policies": "Policies",
@@ -473,7 +482,6 @@
             "conditionPhrase": "When these <strong>Conditions</strong> apply",
             "actionPhrase": "Perform this <strong>Action</strong>",
             "onCompletePhrase": "And <strong>On Complete</strong>",
-            "noWorkflows": "No Available Workflows",
             "actionAlert": "You must provide a value for the action."
         },
         "auth": {
