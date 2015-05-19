@@ -1461,7 +1461,7 @@ var params = {
  "toEmail" : "jdoe@example.com"
 };
 
-openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, params);
+openidm.create('workflow/processinstance', null, params);
    </programlisting>
    <para>
     You can also invoke the workflow over the REST interface with the following

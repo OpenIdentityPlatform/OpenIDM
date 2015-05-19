@@ -1022,18 +1022,16 @@ r = openidm.action("repo/audit/recon", "command", {}, command);</programlisting>
           </term>
           <listitem>
            <para>
-            claim, createProcessInstance
+            claim
            </para>
            <para>
             For example:
            </para>
            <informalexample><?dbfo pgwide="1"?>
 <programlisting language="javascript">var params = {
-"_key" : "EmailNotification",
-"fromSender" : "admin@example.com",
-"toEmail" : "bjensen@example.com"
+"userId":"manager1"
 };
-openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, params);</programlisting>
+openidm.action('workflow/processinstance/15', {"_action" : "claim"}, params);</programlisting>
            </informalexample>
           </listitem>
          </varlistentry>
