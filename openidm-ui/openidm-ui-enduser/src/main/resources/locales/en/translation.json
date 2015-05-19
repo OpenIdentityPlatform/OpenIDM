@@ -1,4 +1,16 @@
 {
+    "dashboard" : {
+        "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
+        "memoryUsageHeap" : "Memory Usage (Heap)",
+        "memoryUsageNonHeap" : "Memory Usage (NonHeap)",
+        "reconProcesses" : "Recon Processes",
+        "cpuUsage" : "CPU Usage",
+        "loading" : "Loading...",
+        "dashboard" : "Dashboard",
+        "pause" : "Pause",
+        "start" : "Start",
+        "refresh" : "Refresh"
+    },
     "config" : {
         "dates" : {
             "monthNames" : "January, February, March, April, May, June, July, August, September, October, November, December",
