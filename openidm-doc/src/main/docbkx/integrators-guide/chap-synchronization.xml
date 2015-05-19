@@ -995,10 +995,11 @@
 }</programlisting>
 
    <para>
-    In addition, OpenIDM supports the use of post-action scripts, including
-    after the creation of an object is complete (postCreate), after the update
-    of an object is complete (postUpdate), and after the deletion of an object
-    (postDelete).
+    In addition, OpenIDM supports the use of post-action scripts for managed
+    objects, including after the creation of an object is complete (postCreate),
+    after the update of an object is complete (postUpdate), and after the
+    deletion of an object (postDelete). These scripts are called in the managed
+    objects configuration file (<filename>managed.json</filename>).
    </para>
   </section>
 
