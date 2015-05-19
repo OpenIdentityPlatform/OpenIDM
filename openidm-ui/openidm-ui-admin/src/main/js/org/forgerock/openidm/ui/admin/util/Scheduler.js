@@ -265,11 +265,11 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                     SchedulerDelegate.deleteSchedule(this.scheduleId).then(_.bind(function () {
                         this.$el.find("#schedules").empty();
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "scheduleDeleted");
-                        this.onDelete(this.scheduleId, this.source);
+                        this.onDelete(this.scheduleId, this.source, this.$el);
                     }, this));
                 } else {
                     this.$el.find("#schedules").empty();
-                    this.onDelete(this.scheduleId, this.source);
+                    this.onDelete(this.scheduleId, this.source, this.$el);
                 }
             }
         });

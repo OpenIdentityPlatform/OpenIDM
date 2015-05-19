@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,38 +22,78 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global define $ */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/admin/Dashboard", [
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard"
-], function(_, AbstractView, eventManager, constants, conf, tasksDashboard) {
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard",
+    "org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader"
+], function(_, AbstractView, eventManager, constants, conf, tasksDashboard, DashboardWidgetLoader) {
     var Dashboard = AbstractView.extend({
-        
+        template: "templates/user/DashboardTemplate.html",
+        model: {
+            loadedWidgets: []
+        },
+        data: {
+
+        },
         render: function(args, callback) {
+            this.model = {
+                loadedWidgets: []
+            };
+
+            this.data = {};
+
             if (conf.loggedUser) {
-                var roles = conf.loggedUser.roles, data = {};
-                
-                if(_.indexOf(roles, 'openidm-admin') !== -1) {
-                    tasksDashboard.data.mode = "openidm-admin";
-                    tasksDashboard.render([], callback);
-                } else {
-                    tasksDashboard.data.mode = "user";
-                    tasksDashboard.render([], callback);
-                }
-                
+                var roles = conf.loggedUser.roles;
+
+                this.model.dashboard = conf.globalData.dashboard;
+
+                this.parentRender(_.bind(function(){
+                    var templElement;
+
+                    if (!_.isUndefined(this.model.dashboard.widgets) && this.model.dashboard.widgets.length > 0) {
+                        _.each(this.model.dashboard.widgets, _.bind(function (widget) {
+
+                            if (widget.type === "workflow") {
+                                this.loadWorkflow(roles, callback);
+                            } else {
+                                if(widget.size === "small") {
+                                    templElement = $('<div class="col-sm-6"></div>');
+                                } else {
+                                    templElement = $('<div class="col-sm-12"></div>');
+                                }
+
+                                this.$el.find("#dashboardWidgets").append(templElement);
+
+                                this.model.loadedWidgets = [DashboardWidgetLoader.generateWidget({
+                                    "element" : templElement,
+                                    "type" : widget.type
+                                })];
+                            }
+
+                        }, this));
+                    } else {
+                        this.loadWorkflow(roles, callback);
+                    }
+                }, this));
+            }
+        },
+
+        loadWorkflow: function(roles, callback) {
+            if(_.indexOf(roles, 'openidm-admin') !== -1) {
+                tasksDashboard.data.mode = "openidm-admin";
+                tasksDashboard.render([], callback);
+            } else {
+                tasksDashboard.data.mode = "user";
+                tasksDashboard.render([], callback);
             }
         }
     });
 
     return new Dashboard();
 });
-
-

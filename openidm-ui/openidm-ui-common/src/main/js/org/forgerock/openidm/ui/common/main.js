@@ -38,11 +38,17 @@ define("org/forgerock/openidm/ui/common/main", [
     "./delegates/SiteConfigurationDelegate",
     "./delegates/OpenAMProxyDelegate",
     "./delegates/ResourceDelegate",
+    "./delegates/SystemHealthDelegate",
 
     "./login/InternalLoginHelper",
     "./login/AuthenticationUnavailable",
     
     "./util/Constants",
     "./util/AMLoginUtils",
-    "./util/JSONEditorSetupUtils"
+    "./util/JSONEditorSetupUtils",
+
+    "./dashboard/DashboardWidgetLoader",
+    "./dashboard/widgets/MemoryUsageWidget",
+    "./dashboard/widgets/ReconProcessesWidget",
+    "./dashboard/widgets/CPUUsageWidget"
 ]);

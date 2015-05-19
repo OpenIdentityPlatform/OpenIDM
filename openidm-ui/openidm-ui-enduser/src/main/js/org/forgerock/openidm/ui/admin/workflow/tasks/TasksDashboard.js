@@ -38,106 +38,106 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
     "org/forgerock/openidm/ui/admin/notifications/NotificationDelegate",
     "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView",
     "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, 
-    NotificationsView, conf, notificationDelegate, taskDetailsView, startProcessView) {
-    
+], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView,
+            NotificationsView, conf, notificationDelegate, taskDetailsView, startProcessView) {
+
     var TasksDashboard = AbstractView.extend({
         template: "templates/admin/workflow/tasks/TasksDashboardTemplate.html",
+        element: "#dashboardWorkflow",
+        noBaseTemplate: true,
         data: {
             shouldDisplayNotifications: true,
             mode: "user"
         },
         render: function(args, callback) {
-            
+
             this.myTasks = new TasksMenuView();
             this.candidateTasks = new TasksMenuView();
             this.registerListeners();
-            
+
             this.parentRender(function() {
                 var notificationsView;
-                
+
                 this.candidateTasks.render("all", $("#candidateTasks"));
                 this.myTasks.render("assigned", $("#myTasks"));
                 startProcessView.render();
-                
-                    //notifications
-                    notificationDelegate.getNotificationsForUser(function(notifications) {
-                        
-                        notifications.sort(function(a, b) {
-                            if (a.requestDate < b.requestDate) {
-                                return 1;
-                            }
-                            if (a.requestDate > b.requestDate){
-                                return -1;
-                            }
-                            return 0;
-                        });
-                        
-                        notificationsView = new NotificationsView();
-                        notificationsView.render({el: $("#notifications"), items: notifications});
+
+                //notifications
+                notificationDelegate.getNotificationsForUser(function(notifications) {
+
+                    notifications.sort(function(a, b) {
+                        if (a.requestDate < b.requestDate) {
+                            return 1;
+                        }
+                        if (a.requestDate > b.requestDate){
+                            return -1;
+                        }
+                        return 0;
                     });
-                    
+
+                    notificationsView = new NotificationsView();
+                    notificationsView.render({el: $("#notifications"), items: notifications});
+                });
+
                 if (callback) {
                     callback();
                 }
             });
         },
-        
+
         getDetailsRow: function() {
             return '<tr class="input-full"><td colspan="5"><div id="taskDetails"></div></td></tr>';
         },
-        
+
         showDetails: function(event) {
             //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "completeTask", args: [event.id], trigger: false});
-            
+
             $("#taskDetails").closest("tr").remove();
-            
+
             var root, tr;
-            
+
             root = event.category === "assigned" ? $("#myTasks") : $("#candidateTasks");
             tr = root.find("[name=taskId][value="+event.id+"]").closest("tr");
-            
+
             tr.after(this.getDetailsRow());
 
-            taskDetailsView.render(event.task, event.definition, event.category, function() {                
+            taskDetailsView.render(event.task, event.definition, event.category, function() {
                 if(event.category === "all") {
                     $("#taskDetails input:enabled, #taskDetails select:enabled").filter(function(){return $(this).val() === "";}).parent().hide();
                     $("#taskDetails input, #taskDetails select").attr("disabled", "true");
                     $("#taskDetails span").hide();
                 }
-                
+
                 if(root.find("#taskContent").html() === "") {
                     root.find("#taskContent").css("text-align","left");
                     root.find("#taskContent").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noDataRequired"));
                 }
-            });   
+            });
         },
-        
+
         registerListeners: function() {
             eventManager.unregisterListener("showTaskDetailsRequest");
             eventManager.registerListener("showTaskDetailsRequest", _.bind(this.showDetails, this));
-            
+
             eventManager.unregisterListener("refreshTasksMenu");
             eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
                 this.refreshMenus();
                 startProcessView.render();
             }, this));
-            
+
             eventManager.unregisterListener("refreshMyTasksMenu");
             eventManager.registerListener("refreshMyTasksMenu", _.bind(function(event) {
                 this.refreshMenus();
                 startProcessView.render();
             }, this));
         },
-        
-        refreshMenus: function() {        
+
+        refreshMenus: function() {
             this.myTasks.render("assigned", $("#myTasks"));
-            
-            this.candidateTasks.render("all", $("#candidateTasks"));  
+
+            this.candidateTasks.render("all", $("#candidateTasks"));
         }
     });
 
     return new TasksDashboard();
 });
-
-

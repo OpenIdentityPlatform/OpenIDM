@@ -45,13 +45,15 @@ require.config({
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
-        bootstrap: "libs/bootstrap.min",
-        "bootstrap-dialog": "libs/bootstrap-dialog.min",
-        placeholder: "libs/jquery.placeholder",
+        bootstrap: "libs/bootstrap-3.3.4-custom",
+        "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
+        placeholder: "libs/jquery.placeholder-2.0.8",
         moment: "libs/moment-2.8.1-min",
         contentflow: "libs/contentflow",
         selectize : "libs/selectize-0.12.1-min",
         d3 : "libs/d3-3.5.5-min",
+        dimple : "libs/dimple-2.1.2-min",
+        crossfilter: "libs/crossfilter.min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         UserDelegate: "org/forgerock/openidm/ui/user/delegates/UserDelegate",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
@@ -107,6 +109,10 @@ require.config({
         },
         moment: {
             exports: "moment"
+        },
+        dimple: {
+            exports: "dimple",
+            deps: ["d3"]
         },
         d3: {
             exports: "d3"
