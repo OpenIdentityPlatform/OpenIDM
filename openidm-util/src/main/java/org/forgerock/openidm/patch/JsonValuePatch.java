@@ -25,9 +25,13 @@ package org.forgerock.openidm.patch;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
+
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
 
 import java.util.List;
 
@@ -40,7 +44,7 @@ public class JsonValuePatch {
         if (!operation.isAdd()) {
             throw new BadRequestException("Operation is an " + operation.getOperation() + ", not an add!");
         }
-        subject.putPermissive(operation.getField(), operation.getValue());
+        subject.putPermissive(operation.getField(), operation.getValue().getObject());
         return true;
     }
 
@@ -86,7 +90,7 @@ public class JsonValuePatch {
             subject.putPermissive(operation.getField(), operation.getValue().getObject());
         }
         return true;
-    };
+    }
 
     /** Apply a "increment" PatchOperation */
     private static boolean increment(JsonValue subject, PatchOperation operation) throws BadRequestException {
@@ -122,6 +126,70 @@ public class JsonValuePatch {
         }
     }
 
+    /** Apply a move patch operation */
+    private static boolean move(JsonValue subject, PatchOperation operation) throws BadRequestException {
+        if (!operation.isMove()) {
+            throw new BadRequestException("Operation is a " + operation.getOperation() + ", not a move!");
+        }
+
+        JsonValue value = subject.get(operation.getFrom());
+        if (value == null || value.isNull()) {
+            return false;
+        }
+        subject.remove(operation.getFrom());
+        subject.add(operation.getField(), value.getObject());
+
+        return true;
+    }
+
+    /** Apply a copy patch operation */
+    private static boolean copy(JsonValue subject, PatchOperation operation) throws BadRequestException {
+        if (!operation.isCopy()) {
+            throw new BadRequestException("Operation is a " + operation.getOperation() + ", not a copy!");
+        }
+
+        JsonValue value = subject.get(operation.getFrom());
+        if (value == null || value.isNull()) {
+            return false;
+        }
+        subject.add(operation.getField(), value.getObject());
+
+        return true;
+    }
+
+    /** Apply a transform patch operation */
+    private static boolean transform(JsonValue subject, PatchOperation operation) throws BadRequestException {
+        if (!operation.isTransform()) {
+            throw new BadRequestException("Operation is a " + operation.getOperation() + ", not a transform!");
+        }
+
+        JsonValue value = new JsonValue(evalScript(subject, operation.getValue()));
+        if (value.isNull()) {
+            subject.remove(operation.getField());
+        } else {
+            subject.put(operation.getField(), value.getObject());
+        }
+
+        return true;
+    }
+
+    private static String evalScript(JsonValue content, JsonValue script) {
+        if (script == null || script.getObject() == null || !script.isString()) {
+            return null;
+        }
+        Context cx = Context.enter();
+        try {
+            Scriptable scope = cx.initStandardObjects();
+            String finalScript = "var content = " + content.toString() + "; " + script.getObject();
+            Object result = cx.evaluateString(scope, finalScript, "script", 1, null);
+            return Context.toString(result);
+        } catch (Exception e) {
+            throw new JsonValueException(script, "failed to eval script", e);
+        } finally {
+            Context.exit();
+        }
+    }
+
     /** An "unknown", or bad operation, implementation of patch application */
     private static boolean unknown(JsonValue subject, PatchOperation operation) throws BadRequestException {
         throw new BadRequestException("Operation " + operation.getOperation() + " is not supported");
@@ -145,6 +213,9 @@ public class JsonValuePatch {
                                 : operation.isRemove() ? remove(subject, operation)
                                 : operation.isReplace() ? replace(subject, operation)
                                 : operation.isIncrement() ? increment(subject, operation)
+                                : operation.isMove() ? move(subject, operation)
+                                : operation.isCopy() ? copy(subject, operation)
+                                : operation.isTransform() ? transform(subject, operation)
                                 : unknown(subject, operation);
             }
         }
