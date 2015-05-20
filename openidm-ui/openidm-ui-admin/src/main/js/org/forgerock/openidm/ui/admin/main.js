@@ -40,8 +40,10 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./ResourcesView",
     "./MapResourceView",
-    
-    "./connector/AddEditConnectorView",
+
+    "./connector/AbstractConnectorView",
+    "./connector/EditConnectorView",
+    "./connector/AddConnectorView",
     "./connector/ConnectorTypeAbstractView",
     "./connector/ConnectorTypeView",
     "./connector/ConnectorRegistry",

@@ -39,104 +39,13 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
         el: "#dialogs",
         editor: null,
         objectTypes: {},
-        events: {
-            "click #newObjectType": "addNewObjectType",
-            "change #objectTypesList": "switchObjectType",
-            "change #selectObjectConfig" : "changeObjectTypeConfig",
-            "click #deleteMultiple": "deleteObjectType",
-            "click #debug": "loadObjectTypeData",
-            "click .deleteObject": "deleteObjectType",
-            "click .saveObject": "saveObjectType"
-        },
         currentObjectTypeLoaded: "savedConfig",
-        objectTypeConfigs: {
-            "org.forgerock.openicf.connectors.ldap-connector" : [
-                {
-                    "displayName" : "Saved Configuration",
-                    "fileName" : "savedConfig",
-                    "type": "ldap"
-                },
-                {
-                    "displayName" : "AD LDAP Configuration",
-                    "fileName" : "provisioner.openicf-adldap",
-                    "type": "ldap"
-                },
-                {
-                    "displayName" : "ADLDS LDAP Configuration",
-                    "fileName" : "provisioner.openicf-adldsldap",
-                    "type": "ldap"
-                },
-                {
-                    "displayName" : "DJ LDAP Configuration",
-                    "fileName" : "provisioner.openicf-ldap",
-                    "type": "ldap"
-                },
-                {
-                    "displayName" : "Full LDAP Configuration",
-                    "fileName" : "fullConfig",
-                    "type": "ldap"
-                },
-                {
-                    "displayName" : "IBM LDAP Configuration",
-                    "fileName" : "provisioner.openicf-racfldap",
-                    "type": "ldap"
-                }
-            ]
-        },
         data: {
 
         },
 
-        changeObjectTypeConfig: function(event) {
-            var value = $(event.target).val(),
-                type = $(event.target).attr("data-type");
-
-            $(event.target).val(this.currentObjectTypeLoaded);
-
-            uiUtils.jqConfirm($.t('templates.connector.objectTypes.changeConfiguration'), _.bind(function(){
-                if(this.editor) {
-                    this.editor.destroy();
-                }
-                this.editor = null;
-
-                this.$el.find("#objectTypeButtons").hide();
-                this.$el.find("#objectTypesList").empty();
-
-                if(value === "fullConfig") {
-                    this.connectorDetails.configurationProperties.readSchema = true;
-
-                    ConnectorDelegate.testConnector(this.connectorDetails).then(_.bind(function (result) {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeLoaded");
-
-                            this.loadObjectTypeData(result.objectTypes);
-                            this.$el.find("#objectTypeButtons").show();
-                        }, this), _.bind(function () {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeFailedToLoad");
-                        }, this)
-                    );
-                } else if(value === "savedConfig") {
-                    this.loadObjectTypeData(this.connectorDetails.objectTypes);
-                } else {
-                    ConnectorDelegate.connectorDefault(value, type).then(_.bind(function (result) {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeLoaded");
-
-                            this.loadObjectTypeData(result.objectTypes);
-                            this.$el.find("#objectTypeButtons").show();
-                        }, this), _.bind(function () {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeFailedToLoad");
-                        }, this)
-                    );
-                }
-
-                this.currentObjectTypeLoaded = value;
-                $(event.target).val(this.currentObjectTypeLoaded);
-
-            }, this), "330px");
-        },
-
-        render: function(defaultObjectType, connectorDetails, callback) {
-            var _this = this,
-                btns = {};
+        render: function(defaultObjectType, selectedObjectType, connectorDetails, callback) {
+            var _this = this;
 
             JSONEditor.defaults.options.disable_edit_json = true;
             JSONEditor.defaults.options.disable_array_reorder = true;
@@ -154,14 +63,18 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
             this.connectorDetails = connectorDetails;
             this.objectTypes = {};
             this.editor = null;
+            this.selectedObjectType = selectedObjectType;
+            this.title = "New Object Type";
 
             $('#dialogs').append(this.currentDialog);
 
-            this.data.defaultConfigs = this.objectTypeConfigs[connectorDetails.connectorRef.bundleName];
+            if(this.selectedObjectType !== null) {
+                this.title = this.selectedObjectType +" Object Type Edit";
+            }
 
             //change dialog
-            BootstrapDialog.show({
-                title: $.t('templates.connector.objectTypes.objectTypeGenerator'),
+            this.dialog = BootstrapDialog.show({
+                title: this.title,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
@@ -188,6 +101,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                     {
                         label: $.t('templates.connector.objectTypes.saveObjectType'),
                         cssClass: "btn-primary",
+                        id: "saveObjectTypeDialog",
                         action: function(dialogRef) {
                             if (callback) {
                                 _this.saveObjectType();
@@ -205,131 +119,19 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
         },
 
         /**
-         * When the option in the object type selector changes, if multiple items are
-         * selected show the delete multiple items form, otherwise convert that key to JE format and display it.
-         */
-        switchObjectType: function() {
-            var selected = this.$el.find("#objectTypesList :selected"),
-                JE_format;
-
-            if (selected.length > 1) {
-                this.$el.find("#objectType").hide();
-                this.$el.find("#multiSelectOptions").show();
-
-            } else if (selected.length === 1) {
-                this.$el.find("#objectType").show();
-                this.$el.find("#multiSelectOptions").hide();
-
-                JE_format = this.get_JE_format(selected[0].value);
-
-                this.addNewObjectType(false);
-
-                if (JE_format) {
-                    this.editor.setValue(JE_format);
-                }
-            }
-        },
-
-        /**
-         *  Saves the existing objectType if there is one, destroys and recreates the editor.
-         *
-         *  Adds buttons and binds functions for deleting and saving the object
-         */
-        addNewObjectType: function(removeSelection) {
-            if (removeSelection) {
-                this.$el.find("#objectTypesList option:selected").removeAttr("selected");
-            }
-
-            if (this.editor && !this.editor.destroyed) {
-                this.saveObjectType(false);
-                this.editor.destroy();
-            }
-
-            this.newObjectType();
-            this.$el.find("#objectType h3 .json-editor-btn-edit:contains('Object Properties')").after($("#objectTypeButtons").html());
-        },
-
-        /**
-         *  Remove the current object
-         */
-        deleteObjectType: function() {
-            if (this.editor) {
-                var toRemove = _.chain(this.$el.find("#objectTypesList :selected"))
-                    .map(function(el) {
-                        return el.value;
-                    })
-                    .sortBy(function(key) {
-                        return key.toLowerCase();
-                    })
-                    .value();
-
-                this.objectTypes = _.omit(this.objectTypes, toRemove);
-                this.editor.destroy();
-                this.updateObjectTypeSelector();
-
-                this.$el.find("#objectTypesList").val(this.$el.find("#objectTypesList option:first").val()).change();
-                this.$el.find("#objectType").show();
-                this.$el.find("#multiSelectOptions").hide();
-            }
-        },
-
-        /**
          * Saves the current object type
          * @param select {boolean}  Used after saving to determine is the object should be 'selected'
          */
-        saveObjectType: function(select) {
+        saveObjectType: function() {
             var objectType = this.editor.getValue();
 
             if (this.editor && !_(objectType.objectName).isEmpty()) {
+
+                if(this.selectedObjectType !== null) {
+                    delete this.objectTypes[this.selectedObjectType];
+                }
+
                 this.objectTypes[objectType.objectName] = this.get_OT_format(objectType);
-                this.updateObjectTypeSelector();
-
-                if (select) {
-                    this.$el.find("#objectTypesList").val(objectType.objectName);
-                }
-            }
-        },
-
-        /**
-         *  Updates the values in the select after one has been added or removed
-         */
-        updateObjectTypeSelector: function(replaceAll) {
-            var keys = _.sortBy(_.keys(this.objectTypes), function(key){ return key.toLowerCase(); }),
-                select = this.$el.find("#objectTypesList"),
-                existingOptions =  select.find("option"),
-                prev = null,
-                current,
-                _this = this;
-
-            // Remove from the select any options that were deleted from the objectType
-            _(existingOptions).each(function(option) {
-                if (!_.contains(keys, option.value)) {
-                    $(option).remove();
-
-                }
-            });
-
-            if (replaceAll === true) {
-                select.empty();
-                _(keys).each(function(key) {
-                    select.append("<option value="+key+">"+key+"</option>");
-                });
-
-                select.val(select.find("option:first").val()).change();
-
-            } else {
-                // Add an option to the select if it is not there
-                _(keys).each(function(key) {
-                    current = select.find("option[value='"+ key+"']");
-                    if (current.length === 0) {
-                        if (prev === null) {
-                            select.prepend("<option value="+key+">"+key+"</option>");
-                        } else {
-                            prev.after("<option value="+key+">"+key+"</option>");
-                        }
-                    }
-                    prev = current;
-                });
             }
         },
 
@@ -512,8 +314,17 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
         },
 
         loadObjectTypeData: function(objectTypes) {
+            var JE_format;
+
             this.objectTypes = objectTypes;
-            this.updateObjectTypeSelector(true);
+
+            JE_format = this.get_JE_format(this.selectedObjectType);
+
+            this.newObjectType();
+
+            if (JE_format && this.selectedObjectType !== null) {
+                this.editor.setValue(JE_format);
+            }
         }
     });
 

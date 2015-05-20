@@ -36,6 +36,14 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.ConnectorMessages.connectorSaved",
             type: "info"
         },
+        "objectTypeSaved": {
+            msg: "config.messages.ConnectorMessages.objectTypeSaved",
+            type: "info"
+        },
+        "liveSyncSaved": {
+            msg: "config.messages.ConnectorMessages.liveSyncSaved",
+            type: "info"
+        },
         "connectorSaveFail": {
             msg: "config.messages.ConnectorMessages.connectorSaveFail",
             type: "error"

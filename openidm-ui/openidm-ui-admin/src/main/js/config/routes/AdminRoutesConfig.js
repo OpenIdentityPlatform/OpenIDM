@@ -34,7 +34,7 @@ define("config/routes/AdminRoutesConfig", [
             url: "resources/"
         },
         "editConnectorView" : {
-            view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
+            view: "org/forgerock/openidm/ui/admin/connector/EditConnectorView",
             role: "ui-admin",
             defaults : ["", ""],
             url: /^connectors\/edit\/(.+?)\/(.*)$/,
@@ -42,7 +42,7 @@ define("config/routes/AdminRoutesConfig", [
             forceUpdate: true
         },
         "addConnectorView" : {
-            view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
+            view: "org/forgerock/openidm/ui/admin/connector/AddConnectorView",
             role: "ui-admin",
             url: "connectors/add/",
             forceUpdate: true
