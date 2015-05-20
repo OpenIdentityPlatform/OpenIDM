@@ -47,7 +47,9 @@
                 "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__"
             },
             "ConnectorMessages" : {
-                "connectorSaved" : "Connector has been saved, now testing connector.",
+                "connectorSaved" : "Connector has been validated and successfully saved.",
+                "objectTypeSaved" : "Object Types successfully saved.",
+                "liveSyncSaved" : "Live Sync details successfully saved.",
                 "connectorTestFailed" : "Your validation failed. See details below.",
                 "connectorSaveFail" : "Failed to save connector. Please try again.",
                 "connectorTestPass" : "Validation passed.",
@@ -565,6 +567,10 @@
             "select": "Make a Selection"
         },
         "connector" : {
+            "addObjectType" : "Add Object Type",
+            "saveConnector" : "Save Connector Changes",
+            "saveObjectType" : "Save Object Type Changes",
+            "saveSync" : "Save Sync Changes",
             "groovy_ScriptedConnector":"Groovy Connector",
             "groovy_ScriptedPoolableConnector":"Groovy Poolable Connector",
             "scriptedsql_ScriptedSQLConnector":"Scripted SQL Connector",
@@ -604,7 +610,9 @@
             "addMapping" : "New Mapping",
             "help" : "Help",
             "managedObjectType" : "Managed Object",
-            "pendingObjectTypes" : "Click Save/Update to save your changes.",
+            "pendingSync" : "Click Save Sync Changes to save your pending sync changes.",
+            "pendingObjectTypes" : "Click Save Object Types to save your pending object type changes.",
+            "pendingConnectorChanges" : "Click Save Connector changes to save your pending connector changes.",
             "liveSync": {
                 "title": "LiveSync Options",
                 "liveSyncFailure": "LiveSync Failure Options",

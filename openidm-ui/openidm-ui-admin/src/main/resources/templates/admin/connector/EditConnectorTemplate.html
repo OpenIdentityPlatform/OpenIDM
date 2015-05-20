@@ -1,0 +1,263 @@
+<section>
+    <div class="back-bar">
+        <div class="container">
+            <a href="">Back to Resources</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="page-header no-border">
+            <div class="media">
+                <div class="media-left media-top">
+                    <div class="header-icon"><i class="fa {{connectorIcon.iconClass}}"></i></div>
+                </div>
+                <div class="media-body media-top">
+                    <h4 class="page-type">{{displayConnectorType}} - {{fullversion}}</h4>
+                    <h1>{{connectorName}}</h1>
+                    <!--
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-ellipsis-v fa-lg"></i>
+                        </button>
+                        <ul class="dropdown-menu pull-rightAd" role="menu">
+                            <li class="hidden"><a href="#"><i class="fa fa-copy"></i>Duplicate</a></li>
+                            <li><a href="#"><i class="fa fa-ban"></i>Disable</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#"><i class="fa fa-times"></i>Delete</a></li>
+                        </ul>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="tab-menu">
+    <div class="container">
+        <ul class="nav nav-tabs" role="tablist"><li class="dropdown pull-right tabdrop hide"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <i class="fa fa-ellipsis-v"></i></a><ul class="dropdown-menu"></ul></li>
+            <li role="presentation" class="active">
+                <a href="#connectorDetailsTab" aria-controls="attributes" role="tab" data-toggle="tab">
+                    <span class="glyph-icon glyph-icon-active fa fa-list"></span>
+                    <span class="glyph-title hidden-xs">Details</span>
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#objectTypesTab" aria-controls="object types" role="tab" data-toggle="tab">
+                    <span class="glyph-icon glyph-icon-active fa fa-cube"></span>
+                    <span class="glyph-title hidden-xs">Object Types</span>
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#syncTab" aria-controls="sync" role="tab" data-toggle="tab">
+                    <span class="glyph-icon glyph-icon-active fa fa-clock-o"></span>
+                    <span class="glyph-title hidden-xs">Sync</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="container connector-container">
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="connectorDetailsTab">
+        <div class="tab-pane-body">
+            <section>
+                <form class="form-horizontal" role="form" id="connectorForm">
+                    <div class="panel panel-connector panel-default panel-content panel-collapse-group">
+                        <div class="panel panel-default panel-collapse">
+                            <div class="panel-heading" role="tab" id="connectorGeneralHeading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#connectorGeneralDetails" aria-expanded="true" aria-controls="connectorGeneralDetails" class="">{{t "common.form.generalDetails"}}</a>
+                                </h4>
+                            </div>
+                            <div id="connectorGeneralDetails" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorGeneralDetails" aria-expanded="true">
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorEnabled"}}</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-control" data-validator="required" data-validator-event="changed" id="connectorEnabled" name="enabled">
+                                                {{#staticSelect enabled}}
+                                                <option value="true">{{t "common.form.true"}}</option>
+                                                <option value="false">{{t "common.form.false"}}</option>
+                                                {{/staticSelect}}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorType"}}</label>
+                                        <div class="col-sm-8">
+                                            <select name="connectorType" class="form-control" id="connectorType">
+                                                {{#each versionDisplay}}
+                                                <optgroup label="{{groupName}}">
+                                                    {{#each versions}}
+                                                    <option connectorTypeName="{{connectorName}}" bundleVersion="{{bundleVersion}}" systemType="{{systemType}}" {{#if selected}} selected{{/if}}>{{displayName}} - {{bundleVersion}}</option>
+                                                    {{/each}}
+                                                </optgroup>
+                                                {{/each}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="connectorDetails" class="edit-connector-details"></div>
+                    </div>
+                </form>
+            </section>
+        </div>
+        <div class="tab-pane-footer tab-pane-button-footer">
+            <div class="pull-right tab-button-bar">
+                <a href="#resources/"><button class="btn btn-default" type="button">{{t 'common.form.cancel'}}</button></a>
+                <button  id="submitConnector" name="submitConnector" class="btn btn-primary" type="button">{{t "templates.connector.saveConnector"}}</button>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="syncTab">
+        <div class="tab-pane-body">
+            <section>
+                <form class="form-horizontal" role="form" id="syncForm">
+                    <div class="panel panel-connector panel-default panel-content panel-collapse-group">
+                        <div class="panel panel-default panel-collapse">
+                            <div class="panel-heading" role="tab" id="liveSyncScheduleHeading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#liveSyncSchedule" aria-expanded="true" aria-controls="liveSyncScheduleHeading" class="">{{t "templates.connector.liveSync.schedules"}}</a>
+                                </h4>
+                            </div>
+                            <div id="liveSyncSchedule" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="liveSyncSchedule" aria-expanded="true">
+                                <div class="panel-body">
+                                    <p class="nameFieldMessage">{{t "templates.connector.liveSync.noName"}}</p>
+                                    <p class="objectTypeFieldMessage">{{t "templates.connector.liveSync.noObjects"}}</p>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label">{{t "templates.connector.liveSync.addLiveSync"}}</label>
+                                        <div class="col-sm-8 input-group">
+                                            <select class="form-control sources"></select>
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default addLiveSync" type="button">{{t "templates.scheduler.addSchedule"}} <i class="fa fa-plus"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div id="schedules" class="no-validation-block"></div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default panel-collapse">
+                            <div class="panel-heading" role="tab" id="liveSyncHeading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#liveSyncPanel" aria-expanded="true" aria-controls="liveSyncPanel" class="">{{t "templates.connector.liveSync.title"}}</a>
+                                </h4>
+                            </div>
+                            <div id="liveSyncPanel" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="liveSyncHeading" aria-expanded="true">
+                                <div id="liveSync" class="panel-body">
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="retryOptions">{{t "templates.connector.liveSync.retryAttempts"}}</label>
+                                        <div class="col-sm-8">
+                                            <select id="retryOptions" class="form-control retryOptions">
+                                                <option value="0">{{t "templates.connector.liveSync.doNotReattempt"}}</option>
+                                                <option value="-1">{{t "templates.connector.liveSync.retryIndefinitely"}}</option>
+                                                <option value="*" selected>{{t "templates.connector.liveSync.specificAmount"}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group retryBlock">
+                                        <label class="col-sm-3 control-label" for="syncFailureHandler.postRetryAction">{{t "templates.connector.liveSync.action"}}</label>
+                                        <div class="col-sm-8">
+                                            <input class="form-control maxRetries" type="text" name="syncFailureHandler.maxRetries" value="5" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group postActionBlock">
+                                        <label class="col-sm-3 control-label" for="retryOptions">{{t "templates.connector.liveSync.liveSyncFailure"}}</label>
+                                        <div class="col-sm-8">
+                                            <select name="syncFailureHandler.postRetryAction" class="form-control postRetryAction">
+                                                <option value="logged-ignore">logged-ignore</option>
+                                                <option value="dead-letter-queue">dead-letter-queue</option>
+                                                <option value="script">script</option>
+                                            </select>
+                                        </div>
+
+                                        <div style="display:none;" class="col-sm-12 script"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+        <div class="tab-pane-footer tab-pane-button-footer">
+            <div class="pull-right tab-button-bar">
+                <a href="#resources/"><button class="btn btn-default" type="button">{{t 'common.form.cancel'}}</button></a>
+                <button id="updateSync" name="updateSync" class="btn btn-primary" type="button">{{t "templates.connector.saveSync"}}</button>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="objectTypesTab">
+        <div class="tab-pane-body">
+            <div class="panel">
+                <div class="table-responsive panel-body">
+                    {{#if objectTypeDefaultConfigs}}
+                    <form class="form-inline" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label for="selectObjectConfig" class="light">{{t "templates.connector.objectTypes.objectTypeConfigs"}}:</label>
+                            <select class="form-control" data-type="{{objectTypeDefaultConfigs.0.type}}" id="selectObjectConfig" required>
+                                {{#each objectTypeDefaultConfigs}}
+                                <option value="{{fileName}}">{{displayName}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                    </form>
+                    {{/if}}
+                    <table class="group-field-block table">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-11">Object Types</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each objectTypes}}
+                        <tr data-objectType="{{@key}}">
+                            <td>
+                                {{@key}}
+                            </td>
+                            <td>
+                                <button class="btn btn-link edit-objectType"><i class="fa fa-pencil"></i></button>
+                                <button class="btn btn-link delete-objectType"><i class="fa fa-times"></i></button>
+                            </td>
+
+                        </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+
+                    <div class="btn-group">
+                        <button id="addObjectType" name="addObjectType" class="btn btn-default"><i class="fa fa-plus"></i>{{t "templates.connector.addObjectType"}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane-footer tab-pane-button-footer">
+            <div class="pull-right tab-button-bar">
+                <a href="#resources/"><button class="btn btn-default" type="button">{{t 'common.form.cancel'}}</button></a>
+                <button id="updateObjectTypes" name="updateObjectTypes" class="btn btn-primary" type="button">{{t "templates.connector.saveObjectType"}}</button>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div role="alert" id="connectorErrorMessage" class="alert alert-danger" style="display:none;">
+    <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.error" }}</strong>
+    <span class='message'></span>
+</div>
+
+<div role="alert" id="connectorWarningMessage" class="alert alert-warning" style="display:none;">
+    <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.warning" }}</strong>
+    <span class='message'></span>
+</div>
+</div>

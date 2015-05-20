@@ -85,6 +85,13 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
                     callback();
                 }
             }, this));
+        },
+        //This function returns false for all OAuth
+        //For now all OAuth will not function with a generic JSON Editor
+        //This may change in the future, but to prevent any issues with Google and Salesforce
+        //This check is needed to match the existing functionality in other connectors
+        getGenericState: function() {
+            return false;
         }
     });
 

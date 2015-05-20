@@ -67,7 +67,9 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog", [
                 size: BootstrapDialog.SIZE_WIDE,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.dialogContent,
-                onshown : _.bind(this.renderExpressionTree, this)
+                onshown : _.bind(function() {
+                    this.renderExpressionTree();
+                }, this)
             });
 
             this.currentDialog.realize();
