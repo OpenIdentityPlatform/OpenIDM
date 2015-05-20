@@ -81,6 +81,11 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
+            <version>1.7R4_1</version>
+        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>

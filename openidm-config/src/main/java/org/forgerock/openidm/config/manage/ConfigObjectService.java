@@ -89,6 +89,7 @@ import org.forgerock.util.promise.Promises;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
+import org.forgerock.openidm.patch.JsonValuePatch;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -552,8 +553,48 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return notSupported(request).asPromise();
+    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        ResourceName resourceName = request.getResourceNameObject();
+        ParsedId parsedId;
+        try {
+            parsedId = new ParsedId(resourceName);
+        } catch (BadRequestException e) {
+            handler.handleError(e);
+            return;
+        }
+
+        try {
+            parsedId = new ParsedId(resourceName);
+            Configuration config = findExistingConfiguration(parsedId);
+
+            Dictionary existingConfig = (config == null ? null : config.getProperties());
+            if (existingConfig == null) {
+                throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not patch the configuration.");
+            }
+
+            JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+            JsonValue subject = enhancedConfig.getConfiguration(existingConfig, request.getResourceName(), false);
+            JsonValuePatch.apply(subject, request.getPatchOperations());
+
+            existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, subject);
+            config.update(existingConfig);
+
+            logger.debug("Patched existing configuration for {} with {}", resourceName.toString(), existingConfig);
+            Resource result = new Resource(request.getResourceName(), null, subject);
+            handler.handleResult(result);
+        } catch (ResourceException ex) {
+            handler.handleError(ex);
+        } catch (JsonValueException ex) {
+            logger.warn("Invalid configuration provided for {}:" + ex.getMessage(), resourceName.toString(), ex);
+            handler.handleError(new BadRequestException("Invalid configuration provided for " + resourceName.toString() + ": " + ex.getMessage(), ex));
+        } catch (WaitForMetaData ex) {
+            logger.info("No meta-data provider available yet to patch and encrypt configuration for {}, retry later.", parsedId.toString(), ex);
+            handler.handleError(new InternalServerErrorException("No meta-data provider available yet to patch and encrypt configuration for "
+                    + parsedId.toString() + ", retry later.", ex));
+        } catch (Exception ex) {
+            logger.warn("Failure to patch configuration for {}", resourceName.toString(), ex);
+            handler.handleError(new InternalServerErrorException("Failure to patch configuration for " + resourceName.toString() + ": " + ex.getMessage(), ex));
+        }
     }
 
     @Override
