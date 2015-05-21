@@ -3321,28 +3321,15 @@ $ ./startup.sh -p samples/usecase/usecase6</screen>
       <literal>Passw0rd</literal>).
      </para>
      <para>
-      The user sees the following notification upon login:
+      You will see a password expiration notice.
      </para>
-     <mediaobject>
-      <alt>Password expiry notification</alt>
-      <imageobject>
-       <imagedata fileref="images/pwd-expiry.png" format="PNG" />
-      </imageobject>
-     </mediaobject>
      <para>
-      If the password has not been changed after five minutes, a second
-      notification is sent to the user.
+      If you ignore the change for five minutes, you will see a second
+      warning, that the password is about to expire.
      </para>
-     <mediaobject>
-      <alt>Second password expiry notification</alt>
-      <imageobject>
-       <imagedata fileref="images/pwd-expiry2.png" format="PNG" />
-      </imageobject>
-     </mediaobject>
      <para>
-      If the password has not been changed two minutes after this second
-      notification, the user's account is deactivated and that user is no longer
-      able to log into the UI.
+      If you ignore that second warning for another two minutes, the user's
+      account is deactivated.
      </para>
     </step>
     <step performance="optional">
