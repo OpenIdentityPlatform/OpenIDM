@@ -98,7 +98,7 @@
          ECMAScript language.
         </para>
        </listitem>
-      </varlistentry>
+      </varlistentry><!-- Removing this reference until OPENIDM-3351 is resolved
       <varlistentry>
        <term>javascript.debug</term>
        <listitem>
@@ -106,7 +106,7 @@
          See <xref linkend="debugging-scripts" />.
         </para>
        </listitem>
-      </varlistentry>
+      </varlistentry> -->
       <varlistentry>
        <term>javascript.recompile.minimumInterval</term>
        <listitem>
@@ -1783,6 +1783,7 @@ logger = LoggerFactory.getLogger('logger');
      </variablelist>
     </section>
 
+    <!--TODO Uncomment this section when OPENIDM-3351 is resolved
     <section xml:id="debugging-scripts">
      <title>Debugging OpenIDM JavaScripts</title>
 
@@ -1908,7 +1909,7 @@ logger = LoggerFactory.getLogger('logger');
        </para>
       </step>
      </procedure>
-    </section>
+    </section> -->
 
  <section xml:id="script-endpoint">
   <title>Validating Scripts Over REST</title>
