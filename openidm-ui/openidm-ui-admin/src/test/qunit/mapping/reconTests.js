@@ -58,7 +58,7 @@ define([
                         _.size(SituationPolicyView.model.allPatterns["Default Actions"].policies),
                         "All situations are present");
 
-                    QUnit.ok(SituationPolicyView.$el.find(".situationRow .action")[0].length >= 1,
+                    QUnit.ok(SituationPolicyView.$el.find("table tbody tr").length >= 1,
                         "All actions are present");
 
                     QUnit.equal(_.size(SituationPolicyView.model.allPatterns),
