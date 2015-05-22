@@ -52,7 +52,7 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
 
             if (this.model.scripts.length > 1) {
 
-                ScriptList.generateScriptList({
+                this.model.scriptList = ScriptList.generateScriptList({
                     element: this.$el.find(".scriptContainer"),
                     label: "",
                     selectEvents: _.difference(this.model.availableScripts, addedEvents),
