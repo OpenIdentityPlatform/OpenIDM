@@ -1,13 +1,17 @@
-<div class="back-bar">
-    <div class="container">
-        <a href="#mapping/"><span class="header-link-text"><i class="fa fa-lg fa-angle-left"></i> Back to Mappings</span></a>
+<section>
+    <div class="back-bar">
+        <div class="container">
+            <a href="#mapping/"><span class="header-link-text">Back to Mappings</span></a>
+        </div>
     </div>
-</div>
+</section>
 <div class="container">
     <div id="mappingConfigHolder">
         <div class="page-header no-border">
-            <h4 class="page-type">{{t "templates.mapping.mappingDetailTitle"}}</h4>
-            <h1>{{mapping.name}}</h1>
+            <div class="media-body">
+                <h4 class="page-type">{{t "templates.mapping.mappingDetailTitle"}}</h4>
+                <h1>{{mapping.name}}</h1>
+            </div>
         </div>
         <div class="mapping mapping-config-body" mapping="{{name}}">
             <div class="panel panel-default">
@@ -18,9 +22,9 @@
                                 <div class="panel-body">
                                     <div class="media">
                                         <span class="media-left"">
-                                            <div class="image circle">
-                                                <i class="mapping-icon left-icon {{mapping.sourceIcon}}"></i>
-                                            </div>
+                                        <div class="image circle">
+                                            <i class="mapping-icon left-icon {{mapping.sourceIcon}}"></i>
+                                        </div>
                                         </span>
                                         <div class="media-body">
                                             <h4 class="connector-role">{{t "templates.mapping.source"}}</h4>
