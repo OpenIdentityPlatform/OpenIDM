@@ -25,14 +25,13 @@
 /*global require, define, QUnit, $ */
 
 define([
-    "./mocks/adminInit",
     "./managedobjects/managedObjectsTest",
     "./resources/resourceTest",
     "./mapping/addMappingTest",
     "./mapping/reconTests",
     "./mapping/propertyMappingTest",
     "./mapping/correlationTest"
-], function (adminInit, moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest, correlationTest) {
+], function (moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest, correlationTest) {
 
     return {
         executeAll: function (server) {
@@ -40,7 +39,6 @@ define([
                 $(".bootstrap-dialog").remove();
             });
 
-            adminInit(server);
             addMappingTest.executeAll(server);
             resourceTest.executeAll(server);
             reconTests.executeAll(server);

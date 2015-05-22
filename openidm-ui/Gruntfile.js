@@ -109,17 +109,17 @@ module.exports = function(grunt) {
                         dest    : 'openidm-ui-admin/target/www'
                     },
                     {
-                        cwd     : 'openidm-ui-common/main/js',
+                        cwd     : 'openidm-ui-common/src/main/js',
                         src     : ['**'],
                         dest    : 'openidm-ui-admin/target/www'
                     },
                     {
-                        cwd     : 'openidm-ui-common/main/resources',
+                        cwd     : 'openidm-ui-common/src/main/resources',
                         src     : ['**'],
                         dest    : 'openidm-ui-enduser/target/www'
                     },
                     {
-                        cwd     : 'openidm-ui-common/main/js',
+                        cwd     : 'openidm-ui-common/src/main/js',
                         src     : ['**'],
                         dest    : 'openidm-ui-enduser/target/www'
                     },
@@ -227,14 +227,13 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-qunit');
-
     grunt.loadNpmTasks('grunt-contrib-watch');
-    
+
     grunt.loadNpmTasks('grunt-notify');
 
     grunt.loadNpmTasks('grunt-sync');
 
     grunt.task.run('notify_hooks');
-    grunt.registerTask('default', ['sync:target', 'sync:zip', 'qunit:admin', 'qunit:enduser', 'watch']);
+    grunt.registerTask('default', ['sync:target', 'sync:zip', 'watch']);
 
 };

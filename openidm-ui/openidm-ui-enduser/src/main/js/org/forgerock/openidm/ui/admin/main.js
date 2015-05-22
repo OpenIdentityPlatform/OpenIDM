@@ -31,16 +31,16 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./users/AdminUserProfileView",
     "./users/ChangeUserPasswordDialog",
     "./users/UsersView",
-	
+    
     "./workflow/FormManager",
-	
+    
     "./workflow/tasks/TaskDetailsView",
     "./workflow/tasks/AbstractTaskForm",
     "./workflow/tasks/customview/ApplicationAcceptanceTask",
     "./workflow/tasks/TasksMenuView",
     "./workflow/tasks/TasksDashboard",
     "./workflow/tasks/TemplateTaskForm",
-	
+    
     "./workflow/processes/AbstractProcessForm",
     "./workflow/processes/StartProcessDashboardView",
 
@@ -51,9 +51,9 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./Dashboard",
     
     "./ManagedObjectNavigation",
-	
+    
     "./notifications/NotificationDelegate",
     "./notifications/NotificationsView",
     "./notifications/NotificationViewHelper"
-	
+    
 ]);

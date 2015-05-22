@@ -30,9 +30,8 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
-    "../mocks/adminInit",
     "../mocks/resourceDetails"
-], function (constants, router, eventManager, addEditManagedView, resourcesView, adminInit, resourceDetails) {
+], function (constants, router, eventManager, addEditManagedView, resourcesView, resourceDetails) {
 
     return {
         executeAll: function (server, callback) {

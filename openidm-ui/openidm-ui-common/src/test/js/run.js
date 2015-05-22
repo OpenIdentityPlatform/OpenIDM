@@ -24,55 +24,44 @@
 
 /*global $, require, QUnit */
 
-require.config({
-    paths: {
-        sinon: "../test/libs/sinon-1.12.2",
-        text: "../test/text"
-    },
-    shim: {
-        sinon: {
-            exports: "sinon"
-        }
-    }
-});
 
-require([
+define([
+    "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "sinon",
-    "../test/tests/mocks/systemInit",
     "../test/tests/common",
     "../test/tests/specific"
-], function (constants, eventManager, sinon, systemInit, commonTests, specificTests) {
+], function ($, constants, eventManager, sinon, commonTests, specificTests) {
 
-    var server = sinon.fakeServer.create();
-    server.autoRespond = true;
-    systemInit(server);
+    $.doTimeout = function (name, time, func) {
+        func(); // run the function immediately rather than delayed.
+    };
 
-    sinon.stub(eventManager, "sendEvent", function (eventId, event) {
+    return function (server) {
+        eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
+            QUnit.testStart(function () {
+                var vm = require("org/forgerock/commons/ui/common/main/ViewManager");
 
-        // the normal behavior for sendEvent:
-        $(document).trigger(eventId, event);
+                vm.currentView = null;
+                vm.currentDialog = null;
+                vm.currentViewArgs = null;
+                vm.currentDialogArgs = null;
 
-        // special extended behavior for our stub:
-        if (eventId === constants.EVENT_APP_INTIALIZED) {
-            eventManager.sendEvent.restore();
-            // delayed testing start gives the app time to stablize during startup
-            _.delay(function () {
+                require("org/forgerock/commons/ui/common/main/Configuration").baseTemplate = null;
+            });
+            QUnit.start();
 
-                QUnit.start();
+            commonTests.executeAll(server);
+            specificTests.executeAll(server);
 
-                commonTests.executeAll(server);
-                specificTests.executeAll(server);
+            QUnit.done(function () {
+                localStorage.clear();
+                Backbone.history.stop();
+                window.location.hash = "";
+            });
 
-                QUnit.done(function () {
-                    Backbone.history.stop();
-                    window.location.hash = "";
-                });
-
-            }, 100);
-        }
-
-    });
+        });
+    };
 
 });

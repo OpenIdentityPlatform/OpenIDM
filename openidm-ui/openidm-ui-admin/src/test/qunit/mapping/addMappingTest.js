@@ -30,14 +30,11 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
-    "../mocks/adminInit",
     "../mocks/addMapping"
-], function (constants, router, eventManager, addMappingView, resourcesView, adminInit, addMapping) {
+], function (constants, router, eventManager, addMappingView, resourcesView, addMapping) {
 
     return {
         executeAll: function (server) {
-
-            adminInit(server);
 
             module('Add Mapping UI Functions');
 
