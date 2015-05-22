@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-resource-conf'
@@ -3268,6 +3268,13 @@ Properties:
     initial provisioning or for ongoing updates. When used continuously in
     production, a CSV file serves as a change log, often containing only user
     records that changed.
+   </para>
+   <!--TODO Revise this note if the new CSV connector version resolves this issue -->
+   <para>
+    Note that the CSV file connector reads the entire CSV file into memory when
+    processing it. As such, the connector can be a performance bottleneck,
+    depending on the size of the input file. If your input files are large, you
+    must tune your JVM heap accordingly.
    </para>
    <para>
     A sample CSV file connector configuration is provided in
