@@ -264,7 +264,7 @@
         <!-- START Documentation properties -->
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
         <docTargetVersion>${project.version}</docTargetVersion>
-        <frDocPluginVersion>3.0.0-SNAPSHOT</frDocPluginVersion>
+        <frDocPluginVersion>3.0.0</frDocPluginVersion>
         <opendjPasswordPluginVersion>1.0.3</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>1.0.3</adPasswordPluginVersion>
         <openicfBundleVersion>${openicf.framework.version}</openicfBundleVersion>
@@ -285,7 +285,7 @@
 	       <!-- Doc Branding -->
 	       <brandingGroupId>org.forgerock.commons</brandingGroupId>
         <brandingArtifactId>forgerock-doc-default-branding</brandingArtifactId>
-        <brandingVersion>3.0.0-SNAPSHOT</brandingVersion>
+        <brandingVersion>3.1.0-SNAPSHOT</brandingVersion>
 
     </properties>
 
