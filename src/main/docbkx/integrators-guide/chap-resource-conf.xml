@@ -1273,7 +1273,7 @@ JAVA_TYPE_STRING</screen>
       example sets the secret key to <literal>Passw0rd</literal>.
      </para>
      <screen><userinput>ConnectorServer /setkey Passw0rd</userinput>
-<computeroutput>Key Updated.</computeroutput></screen>
+<computeroutput>Key has been successfully updated.</computeroutput></screen>
      <para>
       This key is used by clients connecting to the Connector Server. The key
       that you set here must also be set in the OpenIDM connector info provider
