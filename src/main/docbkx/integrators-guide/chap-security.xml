@@ -876,7 +876,8 @@ Server: Jetty(8.y.z-SNAPSHOT)
     production deployment, but especially in cluster deployments. In a cluster
     deployment, the keystore is distributed through the repository. The strength
     of the keystore password is therefore the only thing that protects your
-    deployment against exposure of the keystore.
+    deployment against exposure of the keystore and of any values encrypted by
+    that keystore (such as user passwords).
    </para>
    <para>
     To set an obfuscated version of the keystore password in the
