@@ -5291,11 +5291,13 @@ $ ./startup.sh -p samples/sample6</screen>
    <section xml:id="run-sample6-live-sync">
     <title>Using LiveSync</title>
 
-    <para>You can start reconciliation by using a scheduled configuration or
-     by using the REST interface directly. However, to use LiveSync, you must
-     configure a schedule. When LiveSync is active, the default schedule in the
-     <filename>schedule-activeSynchroniser_systemAdAccount.json</filename>
-     configuration file runs LiveSync every 15 seconds.
+    <para>
+     You can trigger a reconciliation operation by configuring a schedule, or by
+     launching the operation directly over the REST interface. You can also
+     launch a LiveSync operation over REST, but LiveSync requires a configured
+     schedule to poll for changes. When this sample's default LiveSync schedule
+     (<filename>schedule-activeSynchroniser_systemAdAccount.json</filename>) is
+     enabled, a LiveSync operation is launched every 15 seconds.
     </para>
 
     <para>
@@ -5304,9 +5306,9 @@ $ ./startup.sh -p samples/sample6</screen>
     </para>
 
     <para>
-     LiveSync is disabled by default. To activate LiveSync, change the
-     value of the <literal>"enabled"</literal> property
-     from <literal>false</literal> to <literal>true</literal>.
+     The LiveSync schedule is disabled by default. To activate LiveSync, change
+     the value of the <literal>"enabled"</literal> property from
+     <literal>false</literal> to <literal>true</literal>.
     </para>
 
     <programlisting language="javascript">{
