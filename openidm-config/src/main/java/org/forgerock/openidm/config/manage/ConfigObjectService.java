@@ -564,7 +564,6 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         }
 
         try {
-            parsedId = new ParsedId(resourceName);
             Configuration config = findExistingConfiguration(parsedId);
 
             Dictionary existingConfig = (config == null ? null : config.getProperties());

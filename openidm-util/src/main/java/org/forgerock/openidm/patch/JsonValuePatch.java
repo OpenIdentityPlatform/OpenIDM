@@ -158,36 +158,19 @@ public class JsonValuePatch {
     }
 
     /** Apply a transform patch operation */
-    private static boolean transform(JsonValue subject, PatchOperation operation) throws BadRequestException {
+    private static boolean transform(JsonValue subject, PatchOperation operation, PatchValueTransformer transformer) throws BadRequestException {
         if (!operation.isTransform()) {
             throw new BadRequestException("Operation is a " + operation.getOperation() + ", not a transform!");
         }
 
-        JsonValue value = new JsonValue(evalScript(subject, operation.getValue()));
-        if (value.isNull()) {
+        Object value = transformer.getTransformedValue(operation, subject);
+        if (value == null) {
             subject.remove(operation.getField());
         } else {
-            subject.put(operation.getField(), value.getObject());
+            subject.put(operation.getField(), value);
         }
 
         return true;
-    }
-
-    private static String evalScript(JsonValue content, JsonValue script) {
-        if (script == null || script.getObject() == null || !script.isString()) {
-            return null;
-        }
-        Context cx = Context.enter();
-        try {
-            Scriptable scope = cx.initStandardObjects();
-            String finalScript = "var content = " + content.toString() + "; " + script.getObject();
-            Object result = cx.evaluateString(scope, finalScript, "script", 1, null);
-            return Context.toString(result);
-        } catch (Exception e) {
-            throw new JsonValueException(script, "failed to eval script", e);
-        } finally {
-            Context.exit();
-        }
     }
 
     /** An "unknown", or bad operation, implementation of patch application */
@@ -195,14 +178,54 @@ public class JsonValuePatch {
         throw new BadRequestException("Operation " + operation.getOperation() + " is not supported");
     }
 
+    private static final PatchValueTransformer DEFAULT_TRANSFORMER = new PatchValueTransformer() {
+        @Override
+        public Object getTransformedValue(PatchOperation patch, JsonValue subject) throws JsonValueException {
+            if (patch.getValue() != null) {
+                return evalScript(subject, patch.getValue());
+            }
+            throw new JsonValueException(patch.toJsonValue(), "expecting a value member");
+        }
+
+        private String evalScript(JsonValue content, JsonValue script) {
+            if (script == null || script.getObject() == null || !script.isString()) {
+                return null;
+            }
+            Context cx = Context.enter();
+            try {
+                Scriptable scope = cx.initStandardObjects();
+                String finalScript = "var content = " + content.toString() + "; " + script.getObject();
+                Object result = cx.evaluateString(scope, finalScript, "script", 1, null);
+                return Context.toString(result);
+            } catch (Exception e) {
+                throw new JsonValueException(script, "failed to eval script", e);
+            } finally {
+                Context.exit();
+            }
+        }
+    };
+
     /**
      * Apply a list of PatchOperations.
      *
-     * @param subject the JsonValue to which to apply the patch operation(s)
-     * @return whether the subject was modified:w
-     * @throws ResourceException on failure to apply PatchOperation
+     * @param subject the JsonValue to which to apply the patch operation(s).
+     * @return whether the subject was modified.
+     * @throws ResourceException on failure to apply PatchOperation.
      */
     public static boolean apply(JsonValue subject, List<PatchOperation> operations) throws BadRequestException {
+        return apply(subject, operations, DEFAULT_TRANSFORMER);
+    }
+
+    /**
+     * Apply a list of PatchOperations.
+     *
+     * @param subject the JsonValue to which to apply the patch operation(s).
+     * @param transformer the value transformer used to compute the value to use for the operation.
+     * @return whether the subject was modified.
+     * @throws ResourceException on failure to apply PatchOperation.
+     */
+    public static boolean apply(JsonValue subject, List<PatchOperation> operations, PatchValueTransformer transformer)
+            throws BadRequestException {
 
         boolean isModified = false;
 
@@ -215,7 +238,7 @@ public class JsonValuePatch {
                                 : operation.isIncrement() ? increment(subject, operation)
                                 : operation.isMove() ? move(subject, operation)
                                 : operation.isCopy() ? copy(subject, operation)
-                                : operation.isTransform() ? transform(subject, operation)
+                                : operation.isTransform() ? transform(subject, operation, transformer)
                                 : unknown(subject, operation);
             }
         }
