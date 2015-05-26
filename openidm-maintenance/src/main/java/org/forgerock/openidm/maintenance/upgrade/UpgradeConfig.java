@@ -27,7 +27,6 @@ package org.forgerock.openidm.maintenance.upgrade;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.patch.JsonPatchValueTransformer;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
@@ -44,24 +43,22 @@ public class UpgradeConfig {
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
-    /** Upgrade supports javascript value transforms for config objects */
-    protected JsonPatchValueTransformer transform = new JsonPatchJavascriptValueTransformer();
-
     /**
      * Apply a JsonPatch to a config object on the router.
      *
+     * @param context the context for the patch request.
      * @param resourceName the name of the resource to be patched.
      * @param patch a JsonPatch to be applied to the named config resource.
      * @throws UpgradeException
      */
-    public void patchConfig(String resourceName, JsonValue patch) throws UpgradeException {
+    public void patchConfig(ServerContext context, String resourceName, JsonValue patch) throws UpgradeException {
         Resource configObject;
         try {
             PatchRequest request = Requests.newPatchRequest(resourceName);
             for (PatchOperation op : PatchOperation.valueOfList(patch)) {
                 request.addPatchOperation(op);
             }
-            connectionFactory.getConnection().patch(new ServerContext(null), request);
+            connectionFactory.getConnection().patch(context, request);
         } catch (ResourceException e) {
             throw new UpgradeException("Patch request failed", e);
         }
