@@ -800,47 +800,130 @@ Server: Jetty(8.y.z-SNAPSHOT)
    <primary>Passwords</primary>
    <secondary>Replacing defaults</secondary>
   </indexterm>
-  <para>
-   The default security settings are adequate for evaluation purposes. In
-   production environments, change at least the password of the default
-   administrative user (<literal>openidm-admin</literal>).
-  </para>
-  <para>
-   To change the password of the default administrative user, send a PUT
-   request to the user object. The following example changes the password of
-   the <literal>openidm-admin</literal> user to <literal>Passw0rd</literal>:
-  </para>
-  <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "Content-Type: application/json" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request PUT \
- --data '{
-    "password": "Passw0rd",
-    "userName": "openidm-admin",
-    "roles": "openidm-admin,openidm-authorized",
-    "_id": "openidm-admin"
- }' \
- "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
-<computeroutput>{
-  "roles": "openidm-admin,openidm-authorized",
-  "password": {
-    "$crypto": {
+  <itemizedlist>
+   <para>
+    The default security settings are adequate for evaluation purposes. In
+    production environments, change at least the following settings:
+   </para>
+   <listitem>
+    <para>
+     The password of the default administrative user
+     (<literal>openidm-admin</literal>)
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The default keystore password
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <procedure xml:id="change-default-admin-pwd">
+   <title>Change the Default Administrator Password</title>
+   <step>
+    <para>
+     To change the password of the default administrative user, send a PUT
+     request to the user object.
+    </para>
+    <para>
+     The following example changes the password of the
+     <literal>openidm-admin</literal> user to <literal>Passw0rd</literal>:
+    </para>
+    <screen>$<userinput> curl \
+     --cacert self-signed.crt \
+     --header "Content-Type: application/json" \
+     --header "X-OpenIDM-Username: openidm-admin" \
+     --header "X-OpenIDM-Password: openidm-admin" \
+     --request PUT \
+     --data '{
+     "password": "Passw0rd",
+     "userName": "openidm-admin",
+     "roles": "openidm-admin,openidm-authorized",
+     "_id": "openidm-admin"
+     }' \
+     "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+     <computeroutput>{
+      "roles": "openidm-admin,openidm-authorized",
+      "password": {
+      "$crypto": {
       "value": {
-        "key": "openidm-sym-default",
-        "iv": "USfN9kARk4QjoyjGa/r8WA==",
-        "cipher": "AES/CBC/PKCS5Padding",
-        "data": "27tDQg49z8nWqvIOEh7VAg=="
+      "key": "openidm-sym-default",
+      "iv": "USfN9kARk4QjoyjGa/r8WA==",
+      "cipher": "AES/CBC/PKCS5Padding",
+      "data": "27tDQg49z8nWqvIOEh7VAg=="
       },
       "type": "x-simple-encryption"
-    }
-  },
-  "_id": "openidm-admin",
-  "userName": "openidm-admin",
-  "_rev": "2"
-}</computeroutput>
-  </screen>
+      }
+      },
+      "_id": "openidm-admin",
+      "userName": "openidm-admin",
+      "_rev": "2"
+      }</computeroutput>
+    </screen>
+   </step>
+  </procedure>
+
+  <procedure xml:id="security-keystore-password">
+   <title>Change the Default Keystore Password</title>
+   <para>
+    OpenIDM uses the information in <filename>conf/boot/boot.properties</filename>,
+    including the keystore password, to start up. The keystore password is
+    <literal>changeit</literal> by default, and is stored in clear text in the
+    <filename>boot.properties</filename> file.
+   </para>
+   <para>
+    You <emphasis>must</emphasis> set a strong keystore password in any
+    production deployment, but especially in cluster deployments. In a cluster
+    deployment, the keystore is distributed through the repository. The strength
+    of the keystore password is therefore the only thing that protects your
+    deployment against exposure of the keystore.
+   </para>
+   <para>
+    To set an obfuscated version of the keystore password in the
+    <filename>boot.properties</filename> file, follow these steps.
+   </para>
+   <step>
+    <para>
+     Generate an obfuscated version of the password, by using the crypto bundle
+     provided with OpenIDM:
+    </para>
+    <screen>$ <userinput>$ java -jar /path/to/openidm/bundle/openidm-crypto-${project.version}.jar</userinput>
+<computeroutput>This utility helps obfuscate passwords to prevent casual observation.
+It is not securely encrypted and needs further measures to prevent disclosure.
+Please enter the password:
+OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
+CRYPT:a8b5a01ba48a306f300b62a1541734c7
+</computeroutput></screen>
+   </step>
+   <step>
+    <para>
+     Paste either the obfuscated password (<literal>OBF:xxxxxxx</literal>) or
+     the encrypted password (<literal>CRYPT:xxxxxxx</literal>) into the
+     <filename>conf/boot/boot.properties</filename> file.
+    </para>
+    <para>
+     Comment out the regular keystore password and remove the comment tag,
+     either from the line that contains the obfuscated password or from the line
+     that contains the encrypted password:
+    </para>
+    <screen>$ <userinput>more conf/boot/boot.properties</userinput>
+<computeroutput>...
+# Keystore password, adjust to match your keystore and protect this file
+# openidm.keystore.password=changeit
+openidm.truststore.password=changeit
+
+# Optionally use the crypto bundle to obfuscate the password and set one of these:
+openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
+# openidm.keystore.password=CRYPT:a8b5a01ba48a306f300b62a1541734c7
+...  </computeroutput></screen>
+   </step>
+   <step>
+    <para>
+     Restart OpenIDM.
+    </para>
+    <screen>$ <userinput>./startup.sh</userinput></screen>
+   </step>
+  </procedure>
  </section>
 
  <section xml:id="security-jetty">
@@ -1029,68 +1112,6 @@ $ <userinput>curl \
   </procedure>
  </section>
 
- <section xml:id="security-bootstrap">
-  <title>Obfuscate Bootstrap Information</title>
-
-  <para>
-   OpenIDM uses the information in <filename>conf/boot/boot.properties</filename>,
-   including the keystore password, to start up. The keystore password is
-   <literal>changeit</literal> by default, and is stored in clear text in the
-   <filename>boot.properties</filename> file. To set an obfuscated version of
-   the keystore password in the <filename>boot.properties</filename> file,
-   follow these steps.
-  </para>
-
-  <orderedlist>
-   <listitem>
-    <para>
-     Generate an obfuscated version of the password, by using the crypto bundle
-     provided with OpenIDM:
-    </para>
-    <screen>$ <userinput>$ java -jar /path/to/openidm/bundle/openidm-crypto-<?eval ${project.version}?>.jar
-     </userinput>
-     <computeroutput>
-This utility helps obfuscate passwords to prevent casual observation.
-It is not securely encrypted and needs further measures to prevent disclosure.
-Please enter the password:
-OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
-CRYPT:a8b5a01ba48a306f300b62a1541734c7
-     </computeroutput>
-    </screen>
-   </listitem>
-   <listitem>
-    <para>
-     Paste either the obfuscated password (<literal>OBF:xxxxxxx</literal>) or
-     the encrypted password (<literal>CRYPT:xxxxxxx</literal>) into the
-     <filename>conf/boot/boot.properties</filename> file. Comment out the
-     regular keystore password and remove the comment tag, either from the line
-     that contains the obfuscated password or from the line that contains the
-     encrypted password:
-    </para>
-    <screen>
-$ <userinput>more conf/boot/boot.properties</userinput>
-     <computeroutput>
-...
-# Keystore password, adjust to match your keystore and protect this file
-# openidm.keystore.password=changeit
-openidm.truststore.password=changeit
-
-# Optionally use the crypto bundle to obfuscate the password and set one of these:
-openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
-# openidm.keystore.password=CRYPT:a8b5a01ba48a306f300b62a1541734c7
-...  </computeroutput>
-    </screen>
-   </listitem>
-   <listitem>
-    <para>
-     Restart OpenIDM.
-    </para>
-    <screen>$ ./startup.sh</screen>
-   </listitem>
-  </orderedlist>
-
-  </section>
- 
  <section xml:id="security-remove-dev-tools">
   <title>Remove or Protect Development &amp; Debug Tools</title>
   <para>

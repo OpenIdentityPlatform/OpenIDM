@@ -540,8 +540,15 @@ Please enter the password:
 AES:606d80ae316be58e94439f91ad8ce1c0  </computeroutput>
   </screen>
   
-  <para>The default keystore password is <literal>changeit</literal>. You 
-  should change this password after installation.</para>
+  <para>
+   The default keystore password is <literal>changeit</literal>. For security
+   reasons, you <emphasis>must</emphasis> change this password in a production
+   environment. For information about changing the keystore password, see <link
+   xlink:show="new"
+   xlink:href="integrators-guide#security-keystore-password"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Change the
+   Default Keystore Password</citetitle></link>.
+  </para>
   
   <para>To import a new secret key named <replaceable>my-new-key</replaceable>, 
   run the following command:</para>
