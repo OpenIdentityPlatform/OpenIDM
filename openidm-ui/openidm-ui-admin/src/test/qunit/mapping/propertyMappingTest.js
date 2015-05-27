@@ -61,7 +61,7 @@ define([
                     QUnit.equal(PropertiesView.$el.find(".ui-jqgrid").length, 1, "Properties grid loaded");
                     QUnit.equal(PropertiesView.$el.find(".ui-jqgrid tr:gt(1)").length, PropertiesView.currentMapping().properties.length, "Correct number of properties displayed in grid");
                     //row click test
-                    PropertiesView.$el.find(".ui-jqgrid tr")[2].click();
+                    PropertiesView.$el.find(".ui-jqgrid tr.jqgrow:first").click();
 
                     QUnit.equal(window.location.hash,"#property/systemLdapAccounts_managedUser/1","Clicking grid row changes address to proper route");
 
@@ -72,11 +72,10 @@ define([
                     QUnit.equal(setNumRepresentativePropsLineSpy.called, true, "setNumRepresentativePropsLine successfully called after change to Number of representative properties");
                     browserStorageDelegate.set(mappingName + "_numRepresentativeProps", 4,true);
                     setNumRepresentativePropsLineSpy.restore();
-
                     //remove property tests
-                    $("body").one("shown.bs.modal", function () {
+                    $("body").one("shown.bs.modal", function (e) {
 
-                        $(".bootstrap-dialog").one("hidden.bs.modal", function () {
+                        $(e.target).one("hidden.bs.modal", function () {
                             //clear changes button test
                             QUnit.equal(PropertiesView.$el.find("div.changesPending:visible").length, 1,"Changes Pending message displayed");
 
@@ -90,9 +89,8 @@ define([
                         });
 
                         // confirm the removal of the displayName property
-                        $(".bootstrap-dialog .btn-primary").click();
+                        $(".btn-primary", e.target).click();
                     });
-
                     PropertiesView.$el.find(".removePropertyBtn[target=displayName]").click();
 
                 });
