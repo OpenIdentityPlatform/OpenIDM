@@ -22,17 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, require, QUnit */
+/*global define, QUnit */
 
 
 define([
     "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "sinon",
     "../test/tests/common",
     "../test/tests/specific"
-], function ($, constants, eventManager, sinon, commonTests, specificTests) {
+], function ($, _, constants, eventManager, sinon, commonTests, specificTests) {
 
     $.doTimeout = function (name, time, func) {
         func(); // run the function immediately rather than delayed.
@@ -40,26 +41,61 @@ define([
 
     return function (server) {
         eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
-            QUnit.testStart(function () {
-                var vm = require("org/forgerock/commons/ui/common/main/ViewManager");
+            QUnit.testStart(function (testDetails) {
+
+                console.log("Starting " + testDetails.module + ":" + testDetails.name + "("+ testDetails.testNumber +")");
+
+                // every state needs to be reset at the starat of each test
+                var vm = require("org/forgerock/commons/ui/common/main/ViewManager"),
+                    lqu = require("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"),
+                    connectorDelegate = require("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate");
+
+                connectorDelegate.deleteCurrentConnectorsCache();
+                lqu.model.linkQualifier = [];
+
+                server.responses = _.filter(server.responses, function (resp) {
+                    return  typeof resp.url === "object" && (
+                                resp.url.test('locales/en/translation.json') ||
+                                resp.url.test('libs/less-1.5.1-min.js')
+                            ) ||
+                            typeof resp.url === "string" && (
+                                resp.url === '/openidm/config/ui/themeconfig'
+                            );
+                });
 
                 vm.currentView = null;
                 vm.currentDialog = null;
                 vm.currentViewArgs = null;
                 vm.currentDialogArgs = null;
 
+                localStorage.clear();
+                sessionStorage.clear();
+
                 require("org/forgerock/commons/ui/common/main/Configuration").baseTemplate = null;
             });
-            QUnit.start();
 
-            commonTests.executeAll(server);
-            specificTests.executeAll(server);
+            QUnit.testDone(function () {
+                // various widgets which get added outside of the fixture and need to be cleaned up
+                $(".modal-backdrop").remove();
+                //$(".modal").remove();
+                $(".ui-autocomplete").remove();
+                $(".ui-helper-hidden-accessible").remove();
+                $("body").removeClass("modal-open");
+            });
 
             QUnit.done(function () {
                 localStorage.clear();
+                sessionStorage.clear();
                 Backbone.history.stop();
                 window.location.hash = "";
             });
+
+            _.delay(function () {
+                QUnit.start();
+
+                commonTests.executeAll(server);
+                specificTests.executeAll(server);
+            }, 500);
 
         });
     };

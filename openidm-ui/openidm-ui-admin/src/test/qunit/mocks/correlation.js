@@ -1,40 +1,6 @@
 /*global require, define*/
-define([
-    "text!templates/admin/mapping/MappingTemplate.html",
-    "text!templates/admin/sync/CorrelationTemplate.html",
-    "text!templates/admin/sync/AnalysisTemplate.html",
-    "text!templates/admin/sync/CorrelationQueryTemplate.html",
-    "text!templates/admin/sync/MappingScriptsTemplate.html",
-    "text!templates/admin/sync/ReconQueriesTemplate.html",
-    "text!templates/admin/util/AbstractScriptView.html",
-    "text!templates/admin/util/SetupFilter.html",
-    "text!templates/admin/sync/ChangeAssociationDialogTemplate.html"
-],function () {
-    var staticFiles = [
-            "templates/admin/mapping/MappingTemplate.html",
-            "templates/admin/sync/CorrelationTemplate.html",
-            "templates/admin/sync/AnalysisTemplate.html",
-            "templates/admin/sync/CorrelationQueryTemplate.html",
-            "templates/admin/sync/MappingScriptsTemplate.html",
-            "templates/admin/sync/ReconQueriesTemplate.html",
-            "templates/admin/util/AbstractScriptView.html",
-            "templates/admin/util/SetupFilter.html",
-            "templates/admin/sync/ChangeAssociationDialogTemplate.html"
-        ],
-        deps = arguments;
+define([ ],function () {
     return function (server) {
-
-        _.each(staticFiles, function (file, i) {
-            server.respondWith(
-                "GET",
-                new RegExp(file.replace(/([\/\.\-])/g, "\\$1") + "$"),
-                [
-                    200,
-                    { },
-                    deps[i]
-                ]
-            );
-        });
 
         server.respondWith(
             "GET",

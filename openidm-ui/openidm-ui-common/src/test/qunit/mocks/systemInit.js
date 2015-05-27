@@ -36,7 +36,7 @@ define([
         ],
         deps = arguments;
 
-         return function (server) {
+    return function (server) {
 
         _.each(staticFiles, function (file, i) {
             server.respondWith(

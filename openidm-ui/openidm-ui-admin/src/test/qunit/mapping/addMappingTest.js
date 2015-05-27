@@ -29,9 +29,10 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
+    "org/forgerock/openidm/ui/admin/MapResourceView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
     "../mocks/addMapping"
-], function (constants, router, eventManager, addMappingView, resourcesView, addMapping) {
+], function (constants, router, eventManager, addMappingView, MapResourceView, resourcesView, addMapping) {
 
     return {
         executeAll: function (server) {
@@ -39,9 +40,13 @@ define([
             module('Add Mapping UI Functions');
 
             QUnit.asyncTest("Add Mapping View", function () {
-
+                /*
+                 * Mocks include:
+                 * config/sync (mappings: systemLdapAccounts_managedUser and managedUser_systemLdapAccounts)
+                 * config/managed (objects: role, apple, user, test)
+                 * system?_action=test (resources: ldap - account, group;)
+                 */
                 addMapping(server);
-
                 addMappingView.render([], function () {
                     QUnit.equal(addMappingView.$el.find(".help").length, 1, "Help successfully detected");
 
@@ -52,44 +57,38 @@ define([
                     addMappingView.$el.find("#resourceConnectorContainer .resource-body:first .add-resource-button").trigger("click");
                     addMappingView.$el.find("#resourceManagedContainer .resource-body:first .add-resource-button").trigger("click");
 
-                    setTimeout(function(){
-                        QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource:visible").length, 1, "Add mapping source successful");
-                        QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource:visible").length, 1, "Add target source successful");
+                    QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource:visible .resource-given-name").text(), 'ldap', "Source system successfully selected");
+                    QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource:visible .resource-given-name").text(), 'apple', "Target system successfully selected");
 
-                        QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource:visible").length, 1, "Add target source successful");
+                    addMappingView.$el.find(".mapping-swap").trigger("click");
 
-                        addMappingView.$el.find(".mapping-swap").trigger("click");
+                    QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource:visible .resource-given-name").text(), 'ldap', "Swap successful");
 
-                        setTimeout(function(){
-                            QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource select").length, 1, "Swap successful");
+                    $("body").one("shown.bs.modal", function () {
 
-                            addMappingView.$el.find(".add-mapping").trigger("click");
+                        QUnit.equal($(".bootstrap-dialog:visible .bootstrap-dialog-title").text(), "Create mapping.", "Create mapping dialog successfully shown");
 
-                            setTimeout(function(){
-                                QUnit.equal($(".bootstrap-dialog").length, 1, "Create mapping dialog successfully shown");
+                        QUnit.equal($(".bootstrap-dialog .mappingName").val(), "managedApple_sourceLdapAccount", "Mapping name auto generated successfully");
 
-                                QUnit.ok($(".bootstrap-dialog .mappingName").length > 0, "Mapping name auto generated successfully");
+                        $(".bootstrap-dialog").one("hidden.bs.modal", function () {
+                            QUnit.equal($(".bootstrap-dialog").length, 0, "Create mapping dialog closed");
 
-                                $(".bootstrap-dialog .btn-default").click();
+                            MapResourceView.$el.find("#mappingSource .select-resource").trigger("click");
+                            MapResourceView.$el.find("#mappingTarget .select-resource").trigger("click");
 
-                                _.delay(function(){
-                                    QUnit.equal($(".bootstrap-dialog").length, 0, "Create mapping dialog closed");
+                            QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource-empty:visible").length, 1, "Removal of source successful");
+                            QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource-empty:visible").length, 1, "Removal of target successful");
 
-                                    addMappingView.$el.find("#mappingSource .select-resource").trigger("click");
-                                    addMappingView.$el.find("#mappingTarget .select-resource").trigger("click");
+                            QUnit.start();
 
-                                    QUnit.equal(addMappingView.$el.find("#mappingSource .mapping-resource-empty:visible").length, 1, "Removal of source successful");
-                                    QUnit.equal(addMappingView.$el.find("#mappingTarget .mapping-resource-empty:visible").length, 1, "Removal of target successful");
+                        });
 
-                                    QUnit.start();
+                        $(".bootstrap-dialog #mappingSaveCancel").click();
 
-                                }, 800);
+                    });
 
-                            }, 400);
+                    MapResourceView.$el.find("#createMapping").trigger("click");
 
-                        }, 100);
-
-                    }, 100);
                 });
 
             });

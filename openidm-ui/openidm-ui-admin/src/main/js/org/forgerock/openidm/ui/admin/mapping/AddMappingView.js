@@ -117,11 +117,11 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                         _.bind(function(){
                             this.scrollCheck();
                             $(document).scroll(_.bind(this.scrollCheck, this));
-                        }, this));
 
-                    if (callback) {
-                        callback();
-                    }
+                            if (callback) {
+                                callback();
+                            }
+                        }, this));
 
                 }, this));
             }, this));

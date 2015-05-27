@@ -74,6 +74,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
             }
 
             this.parentRender(function () {
+                if (this.$el.find("#scriptLinkQualifierBody").length === 0) {
+                    return;
+                }
                 var scriptData = "",
                     linkQualifiers;
 

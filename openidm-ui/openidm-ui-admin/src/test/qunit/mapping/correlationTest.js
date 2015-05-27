@@ -31,9 +31,10 @@ define([
     "org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
+    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/openidm/ui/admin/sync/AnalysisView",
     "../mocks/correlation"
-], function (constants, router, eventManager, ChangeAssociationDialog, ConnectorDelegate, MappingBaseView, analysisView, correlation) {
+], function (constants, router, eventManager, ChangeAssociationDialog, ConnectorDelegate, MappingBaseView, LinkQualifierUtils, analysisView, correlation) {
 
     return {
         executeAll: function (server) {
@@ -67,17 +68,7 @@ define([
 
                     QUnit.ok(analysisView.$el.find("#singleRecordSync").is(":disabled") === false, "Single record sync button properly enabled");
 
-                        analysisView.$el.find("#changeAssociation").trigger("click");
-
-                    _.delay(function(){
-                        QUnit.ok($("#changeAssociationDialog").length > 0, "Change association window successfully opened from button");
-
-                        $("#changeAssociationDialog").remove();
-
-                        $("body #analysisView").remove();
-
-                        QUnit.start();
-                    }, 200);
+                    QUnit.start();
                 });
             });
 
@@ -87,8 +78,8 @@ define([
                     dialogData = {"sourceObj":{"firstname":"Barbara","description":"Created By XML1","_id":"bjensen","mobileTelephoneNumber":"1234567","password":"TestPassw0rd#","lastname":"Jensen","roles":"openidm-authorized","email":"bjensen@example.com","name":"bjensen@example.com"},"sourceObjRep":"<span title=\"mail\" class=\"objectRepresentationHeader\">bjensen@example.com</span><br/><span title=\"givenName\" class=\"objectRepresentation\">Barbara</span><br/><span title=\"sn\" class=\"objectRepresentation\">Jensen</span><br/><span title=\"description\" class=\"objectRepresentation\">Created By XML1</span>","targetObj":{"_id":"bjensen","_rev":"1","mail":"bjensen@example.com","sn":"Jensen","description":"Created By XML1","roles":["openidm-authorized"],"telephoneNumber":"1234567","userName":"bjensen@example.com","givenName":"Barbara","password":{"$crypto":{"value":{"iv":"/4RSRnPywXegeBVcBtuvJQ==","data":"b7WowHq6jnePEXj+6D1ptg==","cipher":"AES/CBC/PKCS5Padding","key":"openidm-sym-default"},"type":"x-simple-encryption"}},"accountStatus":"active","lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Tue Jan 20 2015 14:51:43 GMT-0800 (PST)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"effectiveAssignments":null},"targetObjRep":"<span title=\"mail\" class=\"objectRepresentationHeader\">bjensen@example.com</span><br/><span title=\"givenName\" class=\"objectRepresentation\">Barbara</span><br/><span title=\"sn\" class=\"objectRepresentation\">Jensen</span><br/><span title=\"description\" class=\"objectRepresentation\">Created By XML1</span>","targetProps":{"0":"mail","1":"givenName","2":"sn","3":"description"},"ambiguousTargetObjectIds":"","recon":{"_id":"8afcffb2-d17d-490c-9782-487b36be3f7d","mapping":"systemXmlfileAccounts_managedUser","state":"SUCCESS","stage":"COMPLETED_SUCCESS","stageDescription":"reconciliation completed.","progress":{"source":{"existing":{"processed":2,"total":"2"}},"target":{"existing":{"processed":0,"total":"0"},"created":2},"links":{"existing":{"processed":0,"total":"0"},"created":2}},"situationSummary":{"SOURCE_IGNORED":0,"MISSING":0,"FOUND":0,"AMBIGUOUS":0,"UNQUALIFIED":0,"CONFIRMED":0,"SOURCE_MISSING":0,"ABSENT":2,"TARGET_IGNORED":0,"UNASSIGNED":0,"FOUND_ALREADY_LINKED":0},"statusSummary":{"FAILURE":0,"SUCCESS":2},"parameters":{"object":{"sourceQuery":{"resourceName":"system/xmlfile/account","_queryId":"query-all-ids"},"targetQuery":{"resourceName":"managed/user","_queryId":"query-all-ids"}},"pointer":{"empty":true},"transformers":[],"set":false,"map":true,"string":false,"collection":false,"wrappedObject":{"sourceQuery":{"resourceName":"system/xmlfile/account","_queryId":"query-all-ids"},"targetQuery":{"resourceName":"managed/user","_queryId":"query-all-ids"}},"list":false,"number":false,"boolean":false,"null":false},"started":"2015-01-20T22:51:43.001Z","ended":"2015-01-20T22:51:43.295Z","duration":294},"linkTypes":[]};
 
                 correlation(server);
-
-                ConnectorDelegate.connectorDelegateCache = {};
+                MappingBaseView.setCurrentMapping({"name": "test"});
+                LinkQualifierUtils.setLinkQualifier(["default"], "test");
 
                 stubbedLink = sinon.stub(ChangeAssociationDialog, "linkObject", function(){
                     linkCheck = true;
@@ -97,16 +88,15 @@ define([
                 ChangeAssociationDialog.render(dialogData, function () {
                     QUnit.ok($("#changeAssociationDialog").length > 0, "Change association window displayed");
 
-                    QUnit.ok($("#linkTypeSelect").is(":disabled") === true, "Link Qualifier select disabled");
+                    QUnit.ok($("#linkTypeSelect").is(":disabled") === false, "Link Qualifier select disabled");
 
-                    QUnit.ok($("#linkTypeSelect option").length === 1, "Link Qualifier displayed with no options");
+                    QUnit.ok($("#linkTypeSelect option[value=default]").length === 1, "Link Qualifier displayed with default option");
 
                     ChangeAssociationDialog.$el.find("#search_results li").trigger("click");
                     ChangeAssociationDialog.$el.find("#linkObjectBtn").trigger("click");
 
-                    QUnit.ok(linkCheck === true, "Item successfully linked");
+                    QUnit.ok(linkCheck === true, "LinkObject function called from DOM events");
 
-                    $("#changeAssociationDialog").remove();
                     stubbedLink.restore();
 
                     QUnit.start();

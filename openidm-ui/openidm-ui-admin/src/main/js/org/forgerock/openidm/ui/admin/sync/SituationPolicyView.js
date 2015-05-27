@@ -109,7 +109,6 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
             this.model.mapping = args.mapping;
             this.model.mappingName = args.mappingName;
             this.model.saveCallback = args.saveCallback;
-            this.model.callback = callback;
             this.model.renderedPolicies = args.policies || _.clone(this.model.mapping.policies, true);
 
             if (args.changes) {
@@ -218,7 +217,7 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                 "saveCallback": this.model.saveCallback,
                 "policies": newPolicies,
                 "changes": changes
-            }, this.model.callback);
+            });
             this.delegateEvents();
         },
 
