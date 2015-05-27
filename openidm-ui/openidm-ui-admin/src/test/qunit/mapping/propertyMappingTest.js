@@ -55,12 +55,7 @@ define([
 
                     //currentMapping() test
                     QUnit.equal(PropertiesView.currentMapping().name, mappingName, "currentMapping() returns proper value");
-
-                    //clear changes button test
-                    QUnit.equal($("div.changesPending:visible").length, 1,"Changes Pending message displayed");
-                    $("#clearChanges").click();
-                    QUnit.equal(browserStorageDelegate.get(mappingName + "_Properties"), null, "Clear Changes button clears changed mapping properties from session storage");
-                    QUnit.equal($("div.changesPending:visible").length, 0,"Changes Pending message successfully hidden");
+                    QUnit.equal(PropertiesView.$el.find("div.changesPending:visible").length, 0,"Changes Pending message not shown");
 
                     //PropertiesGrid tests
                     QUnit.equal(PropertiesView.$el.find(".ui-jqgrid").length, 1, "Properties grid loaded");
@@ -79,40 +74,27 @@ define([
                     setNumRepresentativePropsLineSpy.restore();
 
                     //remove property tests
-                    PropertiesView.$el.find("[target=displayName]").click();
+                    $("body").one("shown.bs.modal", function () {
 
-                    _.delay(function(){
-                        QUnit.equal($(".bootstrap-dialog").length, 1, "Remove property confirmation successfully opened");
+                        $(".bootstrap-dialog").one("hidden.bs.modal", function () {
+                            //clear changes button test
+                            QUnit.equal(PropertiesView.$el.find("div.changesPending:visible").length, 1,"Changes Pending message displayed");
 
-                        $(".bootstrap-dialog").find('.btn-default').click();
+                            QUnit.notEqual(browserStorageDelegate.get(mappingName + "_Properties").length, PropertiesView.currentMapping().properties.length, "Property successfully removed from current mapping properties");
 
-                        _.delay(function(){
-                            QUnit.equal($(".bootstrap-dialog").length, 0, "Remove property confirmation successfully cancelled");
+                            $("#clearChanges").click();
+                            QUnit.equal(browserStorageDelegate.get(mappingName + "_Properties"), null, "Clear Changes button clears changed mapping properties from session storage");
+                            QUnit.equal(PropertiesView.$el.find("div.changesPending:visible").length, 0,"Changes Pending message successfully hidden");
+                            $(".bootstrap-dialog").unbind("hidden.bs.modal");
+                            QUnit.start();
+                        });
 
-                            PropertiesView.$el.find("[target=displayName]").click();
+                        // confirm the removal of the displayName property
+                        $(".bootstrap-dialog .btn-primary").click();
+                    });
 
-                            _.delay(function() {
-                                $(".bootstrap-dialog").find('.btn-primary').click();
+                    PropertiesView.$el.find(".removePropertyBtn[target=displayName]").click();
 
-                                _.delay(function() {
-
-                                    QUnit.notEqual(browserStorageDelegate.get(mappingName + "_Properties").length, PropertiesView.currentMapping().properties.length, "Property successfully removed from current mapping properties");
-                                    browserStorageDelegate.remove(mappingName + "_Properties");
-
-                                    //add property button test
-                                    $(".addProperty").click();
-
-                                    QUnit.ok(_.contains(window.location.hash, "_new"), "Add Property button successfully changes address to appropriate route");
-
-                                    QUnit.start();
-
-                                }, 200);
-
-                            }, 200);
-
-                        }, 800);
-
-                    },200);
                 });
             });
 

@@ -23,36 +23,9 @@
  */
 
 /*global require, define*/
-define([
-    "text!templates/admin/connector/AddEditConnectorTemplate.html",
-    "text!templates/admin/util/ScriptEditor.html",
-    "text!templates/admin/connector/org.forgerock.openicf.csvfile.CSVFileConnector_1.1.html",
-    "text!templates/admin/connector/org.identityconnectors.databasetable.DatabaseTableConnector_1.1.html"
-], function () {
-
-    /* an unfortunate need to duplicate the file names here, but I haven't
-     yet found a way to fool requirejs into doing dynamic dependencies */
-    var staticFiles = [
-            "templates/admin/connector/AddEditConnectorTemplate.html",
-            "templates/admin/util/ScriptEditor.html",
-            "templates/admin/connector/org.forgerock.openicf.csvfile.CSVFileConnector_1.1.html",
-            "templates/admin/connector/org.identityconnectors.databasetable.DatabaseTableConnector_1.1.html"
-        ],
-        deps = arguments;
+define([ ], function () {
 
     return function (server) {
-
-        _.each(staticFiles, function (file, i) {
-            server.respondWith(
-                "GET",
-                new RegExp(file.replace(/([\/\.\-])/g, "\\$1") + "$"),
-                [
-                    200,
-                    { },
-                    deps[i]
-                ]
-            );
-        });
 
         server.respondWith(
             "POST",

@@ -31,24 +31,20 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog",
     "org/forgerock/commons/ui/common/LoginView",
-    "./mocks/systemInit",
     "./mocks/encryptedPW",
     "./mocks/cleartextPW"
-], function (sinon, constants, router, eventManager, mandatoryPasswordChangeDialog, loginView, systemInit, encryptedPW, cleartextPW) {
+], function (sinon, constants, router, eventManager, mandatoryPasswordChangeDialog, loginView, encryptedPW, cleartextPW) {
 
     return {
         executeAll: function (server) {
             module('Common IDM functionality');
 
             QUnit.asyncTest("Login Form", function () {
-                systemInit(server);
-
                 loginView.render([], function () {
                     QUnit.ok(loginView.$el.find("#login").length && loginView.$el.find("#password").length, "Username and Password displayed")
 
                     QUnit.start();
                 });
-                
             });
 
             QUnit.asyncTest("Initial Login Process", function () {
@@ -84,7 +80,7 @@ define([
                     landingPageView.render(args, function () {
                         var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
 
-                        QUnit.ok(viewManager.currentView === router.configuration.routes.landingPage.view && viewManager.currentDialog === "null", "Landing page shown after successful login with encrypted password");
+                        QUnit.ok(viewManager.currentView === router.configuration.routes.landingPage.view && viewManager.currentDialog === null, "Landing page shown after successful login with encrypted password");
 
                         if (callback) {
                             callback();
@@ -102,4 +98,4 @@ define([
         }
     };
 
-}); 
+});
