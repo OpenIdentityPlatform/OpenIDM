@@ -164,25 +164,25 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</computeroutp
       </para>
       <listitem>
        <para>
-        The <link xlink:show="new" xlink:href="http://www.forgerock.com/download-stack/">
-        Forgerock.com Download</link> page has the latest stable, supported
-        release of OpenIDM Enterprise, along with the other products in the
-        ForgeRock Identity Platform.
+        <link xlink:show="new" xlink:href="https://backstage.forgerock.com">
+        Forgerock Backstage</link> has the latest stable, supported release of
+        OpenIDM Enterprise, along with the other products in the ForgeRock
+        Identity Platform.
        </para>
       </listitem>
       <listitem>
        <para>
-        <link xlink:show="new" xlink:href="http://forgerock.org/openidm.html">
-        Builds</link> includes the nightly build and the OpenIDM agents. Note
-        that this is the working version of the trunk and should not be used in
-        a production environment.
+        The <link xlink:show="new" xlink:href="https://forgerock.org/downloads/openidm-builds/">
+        Nightly Builds</link> page includes the OpenIDM nightly build and the
+        OpenIDM agents. Note that this is the working version of the trunk and
+        should not be used in a production environment.
        </para>
       </listitem>
       <listitem>
        <para>
-        <link xlink:show="new" xlink:href="http://forgerock.org/openidm-archive.html">
-        Archives</link> includes the stable builds for all previous releases of
-        OpenIDM.
+        The <link xlink:show="new" xlink:href="http://forgerock.org/openidm-archive.html">
+        Download Archive</link> includes the stable builds for all previous
+        releases of OpenIDM.
        </para>
       </listitem>
      </itemizedlist>

@@ -134,11 +134,11 @@
       <emphasis>Integrator's Guide</emphasis>.
      </para>
      <para>
-      <link xlink:show="new"
-            xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-      Enterprise</link> bundles two new connectors, and corresponding
-      sample configurations - a Google Apps Connector and a Salesforce
-      connector. For more information, see <link xlink:show="new"
+      The <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/">Enterprise build</link> of
+      OpenIDM bundles two new connectors, and corresponding sample
+      configurations - a Google Apps Connector and a Salesforce connector. For
+      more information, see <link xlink:show="new"
       xlink:href="install-guide#sample-salesforce-connector"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
       Salesforce With the Salesforce Connector</citetitle></link> and

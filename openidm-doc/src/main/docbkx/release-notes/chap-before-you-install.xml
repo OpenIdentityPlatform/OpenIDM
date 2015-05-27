@@ -123,9 +123,9 @@
     </para>
     <itemizedlist>
      <para>
-      The following connectors are available only with <link xlink:show="new"
-      xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-      Enterprise</link>:
+      The following connectors are available only with the <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/">Enterprise build</link> of
+      OpenIDM:
      </para>
      <listitem>
       <para>

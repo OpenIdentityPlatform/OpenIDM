@@ -266,7 +266,7 @@ userPassword: password</programlisting>
      </para>
      <para>
       Find a link to the OpenDJ download page at <link xlink:show="new"
-      xlink:href="http://forgerock.com/download-stack/" />.
+      xlink:href="https://forgerock.org/downloads/" />.
       </para>
      </step>
      <step>
@@ -2334,11 +2334,8 @@ mysql &gt; <userinput>select * from users;</userinput>
    <procedure>
     <step>
      <para>
-      Download and extract the OpenDJ zip archive.
-     </para>
-     <para>
-      Find a link to the OpenDJ download page from the <link xlink:show="new"
-      xlink:href="http://forgerock.com/download-stack/" />.
+      Download and extract the OpenDJ zip archive from <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/" />.
      </para>
     </step>
     <step>
@@ -2811,11 +2808,8 @@ $ ./startup.sh -p samples/scriptedrest2dj/</userinput></screen>
    <procedure>
     <step>
      <para>
-      Download and extract the OpenDJ zip archive.
-     </para>
-     <para>
-      Find a link to the OpenDJ download page from the <link xlink:show="new"
-                                                             xlink:href="http://forgerock.com/download-stack/" />.
+      Download and extract the OpenDJ zip archive from <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/" />.
      </para>
     </step>
     <step>
@@ -4917,11 +4911,8 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
      <procedure>
      <step>
       <para>
-       Download and extract the OpenDJ zip archive.
-      </para>
-      <para>
-       Find a link to the OpenDJ download page from the <link xlink:show="new"
-       xlink:href="http://forgerock.com/download-stack/" />.
+       Download and extract the OpenDJ zip archive from <link xlink:show="new"
+       xlink:href="https://forgerock.org/downloads/" />.
       </para>
      </step>
      <step>
@@ -7135,9 +7126,9 @@ $ ./startup.sh -p samples/audit-sample</screen>
   <note>
    <para>
     The Google Apps Connector, and this corresponding sample, are provided only
-    with <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-    Enterprise</link>.
+    with the <link xlink:show="new"
+    xlink:href="https://backstage.forgerock.com">OpenIDM
+    Enterprise build</link>.
    </para>
   </note>
   <para>
@@ -7581,9 +7572,8 @@ OpenIDM version "3.1.0" (revision: 0) null null
   <note>
    <para>
     The Salesforce Connector, and this corresponding sample, are provided only
-    with <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-    Enterprise</link>.
+    with the <link xlink:show="new"
+    xlink:href="https://backstage.forgerock.com">OpenIDM Enterprise build</link>.
    </para>
   </note>
   <para>
