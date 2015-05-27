@@ -1198,9 +1198,9 @@ JAVA_TYPE_STRING</screen>
     <title>Installing the .NET Connector Server</title>
     <step>
      <para>
-      Download the OpenICF .NET Connector Server from the <link
-      xlink:href="http://forgerock.com/download-stack/"
-      xlink:show="new">Open Stack download page</link>.
+      Download the OpenICF .NET Connector Server from <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/">ForgeRock's download
+      page</link>.
      </para>
      <para>
       Click on the OpenIDM Download link on that page, and scroll down to
@@ -1592,9 +1592,8 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/</
     <title>Installing a Remote Java Connector Server for Unix/Linux</title>
     <step>
      <para>
-      Download the OpenICF Java Connector Server from the <link
-      xlink:href="http://forgerock.com/download-stack/"
-      xlink:show="new">Open Stack download page</link>.
+      Download the OpenICF Java Connector Server from <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/" />.
       </para>
       <para>
        Click on the OpenIDM Download link on that page, and scroll down to
@@ -1684,9 +1683,8 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     <title>Installing a Remote Java Connector Server for Windows</title>
     <step>
      <para>
-      Download the OpenICF Java Connector Server from the <link
-      xlink:href="http://forgerock.com/download-stack/"
-      xlink:show="new">Open Stack download page</link>.
+      Download the OpenICF Java Connector Server from <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/" />.
       </para>
       <para>
        Click on the OpenIDM Download link on that page, and scroll down to
@@ -1795,13 +1793,10 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
   <para>
    OpenIDM ${docTargetVersion} provides several connectors by default, in
    the <literal>path/to/openidm/connectors</literal> directory. The supported
-   connectors that are not bundled with OpenIDM can be downloaded from the <link
-   xlink:href="http://forgerock.com/download-stack/" xlink:show="new">Open Stack
-   download page</link>. The <link
+   connectors that are not bundled with OpenIDM, and a number of additional
+   connectors, can be downloaded from the <link
    xlink:href="http://openicf.forgerock.org/connectors/"
-   xlink:show="new">OpenICF community site</link> includes a number of
-   additional connectors, and indicates the level of support provided for each
-   of those.
+   xlink:show="new">OpenICF community site</link>.
   </para>
   <para>
    This section describes the connectors that are supported for use with OpenIDM
@@ -2786,9 +2781,9 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
     <title>Setting Up the Active Directory Connector</title>
     <step>
      <para>
-      Download the Active Directory Connector from the OpenIDM download
-      page under the ForgeRock <link xlink:href="http://forgerock.com/download-stack/"
-      xlink:show="new">Open Stack download page</link>.
+      Download the Active Directory Connector from <link xlink:show="new"
+      xlink:href="https://forgerock.org/downloads/">ForgeRock's download
+      page</link>.
       </para>
      </step>
      <step>
@@ -3578,20 +3573,19 @@ Properties:
     (<filename>mspowershell-connector-1.4.1.0.zip</filename>) and extract the
     <filename>MsPowerShell.Connector.dll</filename> to the same folder in which
     the Connector Server(<filename>connectorserver.exe</filename>) is located.
-    <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-    Enterprise</link> includes sample connectors for Active Directory, and
-    scripts that will enable you to get started with this toolkit.
+    The <link xlink:show="new"
+    xlink:href="https://forgerock.org/downloads/">Enterprise build</link> of
+    OpenIDM includes sample connectors for Active Directory, and scripts that
+    will enable you to get started with this toolkit.
    </para>
   </section>
 
   <section xml:id="salesforce-connector">
    <title>Salesforce Connector</title>
    <para>
-    <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-     Enterprise</link> includes a Salesforce connector, along with a
-    sample connector configuration. The Salesforce connector enables
+    The <link xlink:show="new" xlink:href="https://forgerock.org/downloads/"
+    >Enterprise build</link> of OpenIDM  includes a Salesforce connector, along
+    with a sample connector configuration. The Salesforce connector enables
     provisioning, reconciliation, and synchronization between Salesforce and the
     OpenIDM repository.
    </para>
@@ -3613,11 +3607,10 @@ Properties:
   <section xml:id="google-apps-connector">
    <title>Google Apps Connector</title>
    <para>
-    <link xlink:show="new"
-    xlink:href="http://www.forgerock.com/download-stack/">OpenIDM
-     Enterprise</link> includes a Google Apps connector, along with a
-    sample connector configuration. The Google Apps Connector enables you to
-    interact with Google's web applications.
+    The <link xlink:show="new" xlink:href="https://forgerock.org/downloads/"
+    >Enterprise build</link> of OpenIDM  includes a Google Apps connector, along
+    with a sample connector configuration. The Google Apps Connector enables you
+    to interact with Google's web applications.
    </para>
    <para>
     To use this connector, you need a Google Apps account.
