@@ -550,17 +550,14 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
         retryOptionChanged: function() {
             switch (this.$el.find(".retryOptions").val()) {
                 case "0":
-                    this.$el.find(".retryBlock").hide();
                     this.$el.find(".maxRetries").val("0");
                     this.$el.find(".postActionBlock").hide();
                     break;
                 case "-1":
-                    this.$el.find(".retryBlock").hide();
                     this.$el.find(".maxRetries").val("-1");
                     this.$el.find(".postActionBlock").show();
                     break;
                 case "*":
-                    this.$el.find(".retryBlock").show();
                     this.$el.find(".maxRetries").val("5");
                     this.$el.find(".postActionBlock").show();
                     break;

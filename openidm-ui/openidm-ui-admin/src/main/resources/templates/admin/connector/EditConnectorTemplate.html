@@ -151,8 +151,8 @@
                             </div>
                             <div id="liveSyncPanel" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="liveSyncHeading" aria-expanded="true">
                                 <div id="liveSync" class="panel-body">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="retryOptions">{{t "templates.connector.liveSync.retryAttempts"}}</label>
+                                    <div class="form-group retryBlock">
+                                        <label class="col-sm-3 control-label" for="retryOptions">{{t "templates.connector.liveSync.liveSyncFailure"}}</label>
                                         <div class="col-sm-8">
                                             <select id="retryOptions" class="form-control retryOptions">
                                                 <option value="0">{{t "templates.connector.liveSync.doNotReattempt"}}</option>
@@ -161,15 +161,14 @@
                                             </select>
                                         </div>
                                     </div>
-
-                                    <div class="form-group retryBlock">
-                                        <label class="col-sm-3 control-label" for="syncFailureHandler.postRetryAction">{{t "templates.connector.liveSync.action"}}</label>
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="syncFailureHandler.maxRetries">{{t "templates.connector.liveSync.retryAttempts"}}</label>
                                         <div class="col-sm-8">
                                             <input class="form-control maxRetries" type="text" name="syncFailureHandler.maxRetries" value="5" />
                                         </div>
                                     </div>
                                     <div class="form-group postActionBlock">
-                                        <label class="col-sm-3 control-label" for="retryOptions">{{t "templates.connector.liveSync.liveSyncFailure"}}</label>
+                                        <label class="col-sm-3 control-label" for="syncFailureHandler.postRetryAction">{{t "templates.connector.liveSync.action"}}</label>
                                         <div class="col-sm-8">
                                             <select name="syncFailureHandler.postRetryAction" class="form-control postRetryAction">
                                                 <option value="logged-ignore">logged-ignore</option>
