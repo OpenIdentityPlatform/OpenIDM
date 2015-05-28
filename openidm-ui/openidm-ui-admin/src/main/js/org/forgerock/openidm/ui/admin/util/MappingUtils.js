@@ -28,7 +28,7 @@
  * @author huck.elliott
  */
 define("org/forgerock/openidm/ui/admin/util/MappingUtils", [
-    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
+    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
 ],
   function(searchDelegate, browserStorageDelegate) {

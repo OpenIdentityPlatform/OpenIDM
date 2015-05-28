@@ -291,7 +291,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         
                         uiUtils.buildJQGrid(this, this.data.grid_id, {
                             url: this.getURL(),
-                            width: 920,
+                            width: this.$el.find(".resourcesContainer").width() - 40,
                             shrinkToFit: cols.length <= 6 || false,
                             rowList: [10,20,50],
                             rowNum: (rowNum) ? parseInt(rowNum, 10) : 10,

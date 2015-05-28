@@ -36,6 +36,12 @@ define("org/forgerock/openidm/ui/common/util/JSONEditorSetupUtils", [
             if (this.path && this.input && this.label && !this.input.id && !this.label.htmlFor) {
                 this.input.id = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
                 this.label.htmlFor = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
+                
+                if(this.jsoneditor.options.formHorizontal) {
+                    $(this.jsoneditor.element).addClass("form-horizontal");
+                    $(this.label).addClass("col-sm-2");
+                    $(this.input).wrap("<div class='col-sm-10'></div>");
+                }
             }
             return ret;
         };

@@ -1,0 +1,38 @@
+<input type="hidden" class="resourceCollectionArrayValue" propName="{{prop.propName}}" value="{{prop.value}}"/>
+<div class="list-table">
+   <ul class="list-group" id="assignments-list">
+      <li class="list-group-header">
+         <div class="row">
+            {{#each headerValues}}
+            <div class="col-xs-2">
+               {{this}}
+            </div>
+            {{/each}}
+            <div class="col-xs-1"> </div>
+         </div>
+      </li>
+      {{#each prop.value}}
+      <li class="list-group-item resourceListItem" resourcePath="{{this}}">
+         <div class="row">
+            <div class="col-xs-1  pull-right deleteArrayItem">
+               <div class="btn-group pull-right">
+                  <button class="btn btn-link remove-array-item"><i class="fa fa-times"></i></button>
+               </div>
+            </div>
+         </div>
+      </li>
+      {{/each}}
+   </ul>
+   <div class="add-item-inline">
+      <div class="row">
+         <div class="col-sm-5">
+            <div class="form-group">
+               <select class="form-control selectize" type="text" style="display:none !important;" id="autoCompleteResourceCollection_{{prop.propName}}"></select>
+            </div>
+         </div>
+         <div class="col-sm-5">
+               <button class="btn btn-primary add-array-item"><i class="fa fa-plus"></i> {{t "common.form.add"}} {{propTitle}} </button>
+         </div>
+      </div>
+   </div>
+</div>

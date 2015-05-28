@@ -137,6 +137,14 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             return configDelegate.readEntity(config);
         });
     };
+    
+    obj.linkedView = function(id, resourcePath) {
+        return obj.serviceCall({
+            serviceUrl: constants.host + "/openidm/endpoint/linkedView/" + resourcePath,
+            url: id,
+            type: "GET"
+        });
+    };
 
     return obj;
 });

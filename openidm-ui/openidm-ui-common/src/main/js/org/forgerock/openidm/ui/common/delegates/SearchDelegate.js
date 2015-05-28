@@ -1,12 +1,12 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  */
 
 /*global $, define, _ */
 
-define("org/forgerock/openidm/ui/admin/delegates/SearchDelegate", [
+define("org/forgerock/openidm/ui/common/delegates/SearchDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(constants, AbstractDelegate) {
@@ -35,13 +35,13 @@ define("org/forgerock/openidm/ui/admin/delegates/SearchDelegate", [
             
         return this.serviceCall({
             "type": "GET",
-            "url":  "/" + resource + "?_pageSize=" + maxPageSize + "&_queryFilter=" + conditions.join(" or (") + new Array(conditions.length).join(")")// [a,b] => "a or (b)"; [a,b,c] => "a or (b or (c))"
+            "url":  "/" + resource + "?_sortKeys=" + props[0] + "&_pageSize=" + maxPageSize + "&_queryFilter=" + conditions.join(" or (") + new Array(conditions.length).join(")")// [a,b] => "a or (b)"; [a,b,c] => "a or (b or (c))"
         }).then(
             function (qry) {
                 return _.first(qry.result,maxPageSize);//we never want more than 10 results from search in case _pageSize does not work
             },
             function (error){
-                console.log(error);
+                console.error(error);
             }
         );
     };

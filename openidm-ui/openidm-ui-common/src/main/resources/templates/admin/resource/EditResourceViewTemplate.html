@@ -1,22 +1,95 @@
-<div class="container">
-    <div class="page-header resourcesContainer">
-        <div class='btn-toolbar pull-right'>
-            <div class='btn-group'>
-                <a href="#"><button class="btn btn-primary" id="saveBtn">{{t "common.form.save"}}</button></a>
-                {{#unless newObject}}
-                    <a href="#"><button class="btn btn-primary" id="resetBtn">{{t "common.form.reset"}}</button></a>
-                    <a href="#"><button class="btn btn-primary" id="deleteBtn">{{t "common.form.delete"}}</button></a>
-                {{/unless}}
-                <a href="#"><button class="btn btn-primary" id="backBtn">{{t "templates.admin.ResourceEdit.backToList"}}</button></a>
-            </div>
+<div class="editResourceViewContainer">
+    <div class="back-bar">
+        <div class="container">
+            <a href="#" id="backBtn">{{backBtnText}}</a>
         </div>
-        <h3>
-        {{#if newObject}}
-            {{t "common.form.add"}}
-        {{else}}
-            {{t "common.form.edit"}}
-        {{/if}}
-        </h3>
     </div>
-    <div id="resource" class="jsonEditor"></div>
+    <div class="container">
+        <div class="page-header no-border profile-header">
+           <div class="media ">
+              <div class="media-left media-top">
+                 <span class="resource-avatar"><i class="fa {{#if newObject}}fa-plus{{else}}fa-cube{{/if}}"></i></span>
+              </div>
+              <div class="media-body  media-top">
+                 <h4 class="page-type">{{objectTitle}}</h4>
+                 <h1 class="media-heading">
+                    {{#if newObject}}{{t "templates.admin.ResourceEdit.new"}} {{objectTitle}}{{else}}{{objectDisplayText}}{{/if}}
+                 </h1>
+              </div>
+           </div>
+        </div>
+    </div>
+	<div class="container">
+        <div class=" tab-menu">
+           <ul class="nav nav-tabs" role="tablist">
+              <li class="dropdown pull-right tabdrop hide">
+                 <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <i class="fa fa-ellipsis-v"></i></a>
+                 <ul class="dropdown-menu"></ul>
+              </li>
+              <li class="active"><a href="#resource-details" role="tab" data-toggle="tab" aria-expanded="true"><span class="fa fa-list"></span> {{t "templates.admin.ResourceEdit.details"}}</a></li>
+              <li id="linkedSystemsTabHeader" style="display:none;" {{#if newObject}}style="display:none;"{{/if}}><a href="#resource-linkedSystems" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.admin.ResourceEdit.linkedSystems"}}</a></li>
+              <li id="tabHeaderTemplate"><a href="" role="tab" data-toggle="tab" aria-expanded="false"></a></li>
+           </ul>
+        </div>
+        <!-- Tab panes -->
+        <div class="tab-content">
+           <div role="tabpanel" class="tab-pane active" id="resource-details">
+              <div class="tab-pane-body">
+                 <div class="panel-body">
+                    <div class="panel panel-default panel-collapse">
+                       <div class="panel-body">
+                          <div id="resource" class="jsonEditor"></div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+           <div role="tabpanel" class="tab-pane" id="tabContentTemplate">
+              <div class="tab-pane-body">
+                 <div class="panel-body">
+                    <div class="panel panel-default panel-collapse">
+                       <div class="panel-body">
+                          <div class="resourceCollectionArray"></div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+           <div role="tabpanel" class="tab-pane" id="relationshipsTemplate">
+              <div class="tab-pane-body">
+                 <div class="panel-body">
+                    <div class="panel panel-default panel-collapse">
+                       <div class="panel-body">
+                          <div class="resourceCollectionRelationships"></div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+           <div role="tabpanel" class="tab-pane" id="resource-linkedSystems">
+              <div class="tab-pane-body">
+                 <div class="panel-body">
+                    <div class="panel panel-default panel-collapse">
+                       <div class="panel-body">
+                          <div id="linkedView"></div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+           <div class="panel-footer">
+              <div id="resourceChangesPending" class="alert alert-warning" style="display: none;">
+                  <i class="fa fa-exclamation-circle"></i><strong> {{t "templates.mapping.changesPending"}}</strong>
+                  <span id="changedFields"></span>
+              </div>
+              <div class="pull-right">
+                 {{#unless newObject}}
+	               <a href="#" class="btn btn-default" id="deleteBtn">{{t "common.form.delete"}}</a>
+	               <a href="#" class="btn btn-default" id="resetBtn" disabled>{{t "common.form.reset"}}</a>
+	            {{/unless}}
+	            <a href="#" class="btn btn-primary" id="saveBtn" disabled>{{t "common.form.save"}}</a>
+              </div>
+           </div>
+        </div>
+    </div>
 </div>

@@ -224,17 +224,28 @@
             "UsersTemplate" : {
                 "remainingUsers" : "Remaining users"
             },
+            "LinkedTemplate" : {
+                "linkedResource" : "Linked Resource",
+                "linkedSystems" : "Linked Systems",
+                "noLinkedSystems" : "No Linked Systems Available.",
+                "recordMissing" : "Linked record missing."
+            },
             "ResourceEdit":
             {
                 "confirmDelete": "Are you sure you want to delete this __objectTitle__?",
                 "confirmDeleteSelected": "Are you sure you want to delete the selected __objectTitle__s?",
-                "backToList": "Back to List",
+                "backToList": "Back to __objectTitle__ List",
                 "addSuccess": "Successfully added __objectTitle__",
                 "editSuccess": "Successfully updated __objectTitle__",
                 "deleteSuccess": "Successfully deleted __objectTitle__",
                 "deleteSelectedSuccess": "Successfully deleted selected __objectTitle__s",
+                "details": "Details",
                 "noData": "No Data",
-                "data": "Data"
+                "data": "Data",
+                "search": "Enter search terms to find __objectTitle__ ...",
+                "noPendingChanges": "No pending changes",
+                "new": "New",
+                "linkedSystems": "Linked Systems"
             },
             "ResourceList":
             {
@@ -309,7 +320,8 @@
             "duplicateNameError" : "Duplicate name detected. Please provide a unique name.",
             "managedSchema": "Schema",
             "addPropertyScript": "Add script for property events.",
-            "addManagedScript": "Add script for managed events."
+            "addManagedScript": "Add script for managed events.",
+            "resourceCollectionRelationshipDescription": "The Label setting defines how the UI refers to this relationship. *Note: It is only used when the path to this resourceCollection is the same a the parent object's path."
         },
         "scriptEditor": {
             "scriptDelete" : "Are you sure you want to delete this script?",

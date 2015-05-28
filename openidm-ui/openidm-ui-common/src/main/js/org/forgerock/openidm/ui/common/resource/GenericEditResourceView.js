@@ -33,8 +33,27 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
-    "org/forgerock/commons/ui/common/components/Messages"
-], function(AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager) {
+    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
+    "org/forgerock/commons/ui/common/components/Messages",
+    "org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView",
+    "org/forgerock/openidm/ui/common/resource/ResourceCollectionRelationshipsView",
+    "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
+    "org/forgerock/openidm/ui/common/linkedView/LinkedView",
+    "org/forgerock/commons/ui/common/main/Router"
+], function(
+        AbstractView, 
+        eventManager, 
+        constants, 
+        uiUtils, 
+        resourceDelegate, 
+        searchDelegate, 
+        messagesManager, 
+        ResourceCollectionArrayView, 
+        ResourceCollectionRelationshipsView, 
+        resourceCollectionUtils, 
+        LinkedView, 
+        router
+    ) {
     var EditResourceView = AbstractView.extend({
         template: "templates/admin/resource/EditResourceViewTemplate.html",
         
@@ -47,7 +66,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
         render: function(args, callback) {
             var resourceReadPromise,
                 schemaPromise = resourceDelegate.getSchema(args),
-                objectId = (args[0] === "managed") ? args[2] : args[3];
+                objectId = (args[0] === "managed") ? args[2] : args[3],
+                displayField;
             
             this.data.args = args;
             
@@ -73,12 +93,46 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             $.when(resourceReadPromise, schemaPromise).then(_.bind(function(resource, schema){
                 this.data.objectTitle = schema.title || this.objectName;
                 
+                this.data.schema = schema;
+                
                 if(this.isSystemResource) {
                     this.data.objectTitle = this.objectName;
                 }
                 
+                if(!this.data.newObject) {
+                    if(this.isSystemResource) {
+                        displayField = _.chain(schema.properties)
+                                        .map(function(val, key) { val.name = key; return val; })
+                                        .where({ nativeName: "__NAME__" })
+                                        .value();
+                        
+                        if(displayField) {
+                            displayField = displayField[0].name;
+                        } else {
+                            displayField = _.keys(schema.properties)[0];
+                        }
+                    } else {
+                        displayField = schema.order[0];
+                    }
+                    
+                    this.data.objectDisplayText = resource[0][displayField];
+                }
+                
+                this.data.backBtnText = $.t("templates.admin.ResourceEdit.backToList",{ objectTitle: this.data.objectTitle });
+                
                 this.parentRender(function(){
                     this.setupEditor(resource, schema);
+                    
+                    if(!this.data.newObject) {
+                        this.linkedView = new LinkedView();
+                        this.linkedView.element = "#linkedView";
+
+                        this.linkedView.render({id: resource[0]._id, resourcePath: this.data.objectType + "/" + this.objectName + "/" });
+                    }
+                    
+                    if(callback) {
+                        callback();
+                    }
                 });
             },this));
         },
@@ -87,7 +141,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 filteredProperties,
                 filteredObject = resource[0];
             
-            this.oldObject = filteredObject;
+            this.oldObject = $.extend(true, {}, filteredObject);
             
             filteredProperties = _.omit(schema.properties,function(p) { return !p.viewable; });
             
@@ -102,7 +156,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                     disable_array_reorder: true,
                     disable_collapse: true,
                     disable_properties: true,
-                    show_errors: "never"
+                    show_errors: "never",
+                    formHorizontal: true
             };
             
             if(schema.order){
@@ -122,10 +177,52 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                     });
                 }
             }
-            
+
             this.editor = new JSONEditor(document.getElementById("resource"), { schema: schema });
             this.editor.setValue(filteredObject);
             this.addTooltips();
+            this.convertResourceCollectionFields(filteredObject,schema);
+            
+            this.editor.on('change', _.bind(function() {
+                this.showPendingChanges();
+            }, this));
+        },
+        showPendingChanges : function() {
+            var changedFields = [],
+                newValue = _.extend({},this.oldObject, this.getFormValue());
+            
+            if(_.isEqual(newValue, this.oldObject)) {
+                this.$el.find("#saveBtn").attr("disabled", true);
+                this.$el.find("#resetBtn").attr("disabled", true);
+                this.$el.find("#resourceChangesPending").hide();
+            } else {
+                if(!this.data.newObject) {
+                    _.each(newValue, _.bind(function(val,key) {
+                        if((!this.oldObject[key] && val.length) || (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) {
+                            if(this.data.schema.properties && this.data.schema.properties[key] && this.data.schema.properties[key].title && this.data.schema.properties[key].title.length) {
+                                changedFields.push(this.data.schema.properties[key].title);
+                            } else {
+                                changedFields.push(key);
+                            }
+                        }
+                    }, this));
+                    
+                    if(changedFields.length) {
+                        this.$el.find("#changedFields").html("<br/>- " + changedFields.join("<br/>- "));
+
+                        this.$el.find("#saveBtn").removeAttr("disabled");
+                        this.$el.find("#resetBtn").removeAttr("disabled");
+                        
+                        this.$el.find("#resourceChangesPending").show();
+                    } else {
+                        this.$el.find("#resourceChangesPending").hide();
+                    }
+                } else {
+                    this.$el.find("#saveBtn").removeAttr("disabled");
+                    this.$el.find("#resetBtn").removeAttr("disabled");
+                    
+                }
+            }
         },
         /* To accommodate a popover the addTooltips function transforms the following html:
          * 
@@ -168,19 +265,10 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
             });
         },
-        save: function(e){
-            var formVal = this.editor.getValue(),
-                successCallback = _.bind(function(){
-                    var msg = (this.data.newObject) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess";
-                    messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.objectTitle })});
-                    this.backToList();
-                }, this);
+        getFormValue : function() {
+            var formVal = this.editor.getValue();
             
-            e.preventDefault();
-            
-            if(this.data.newObject){
-                resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
-            } else {
+            if(!this.data.newObject){
                 /*
                 The following _.each() was placed here to account for JSONEditor.setValue() 
                 turning a property that exists but has a null value into an empty text field. 
@@ -189,11 +277,46 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 This loop filters out previously null values that have not been changed.
                 */
                 _.each(_.keys(formVal), function(key){
-                    if(!_.has(this.oldObject, key) && !formVal[key].length){
+                    if(!_.has(this.oldObject, key) && (!formVal[key] || !formVal[key].length)){
                         delete formVal[key];
                     }
                 }, this);
                 
+                _.each(this.$el.find(".resourceCollectionArrayValue"), function(element) {
+                    var propName = $(element).attr("propName"),
+                        propVal = $(element).val().split(",");
+                    
+                    if($(element).val().length) {
+                        formVal[propName] = propVal;
+                    } else {
+                        formVal[propName] = [];
+                    }
+                }); 
+            }
+            
+            return formVal;
+        },
+        save: function(e){
+            var formVal = this.getFormValue(),
+                successCallback = _.bind(function(newObj){
+                    var msg = (this.data.newObject) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess",
+                        editRouteName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+                    
+                    messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.objectTitle })});
+                    
+                    if(this.data.newObject) {
+                        this.data.args.push(newObj._id);
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes[editRouteName], args: this.data.args});
+                    } else {
+                        this.backToList();
+                    }
+                }, this);
+            
+            e.preventDefault();
+            
+            if(this.data.newObject){
+                resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
+            } else { 
                 if (!this.isSystemResource) {
                     resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
                 } else {
@@ -212,7 +335,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
         },
         reset: function(e){
             e.preventDefault();
-            
+
             this.render(this.data.args);
         },
         deleteObject: function(e){
@@ -224,6 +347,115 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                     this.backToList();
                 }, this));
             }, this));
+        },
+        convertResourceCollectionFields: function(filteredObject,schema){
+                var _this = this,
+                    getFields,
+                    convertField,
+                    convertArrayField,
+                    showRelationships,
+                    addTab;
+                
+                getFields = function(properties, parent){
+                    _.each(properties,function(prop,key){
+                        prop.propName = key;
+                        if(prop.type === "object"){
+                            if(parent){
+                                parent += "\\." + key;
+                            } else {
+                                parent = "\\." + key;
+                            }
+                            getFields(prop.properties, parent);
+                        }
+                        
+                        if(parent){
+                            prop.selector =  parent + "\\." + key;
+                        } else {
+                            prop.selector = "\\." + key;
+                        }
+                        
+                        if(prop.type === "array") {
+                            if(prop.items.resourceCollection && _.has(filteredObject,key)) {
+                                prop.value = filteredObject[key];
+                                convertArrayField(prop);
+                            }
+                        }
+                        if(prop.resourceCollection){
+                            convertField(prop);
+                            
+                            if(_this.data.objectType + "/" + _this.objectName === prop.resourceCollection.path && prop.resourceCollection.label && prop.resourceCollection.label.length) {
+                                prop.parentId = prop.resourceCollection.path + "/" + _this.objectId;
+                                prop.parentValue = _this.oldObject;
+                                showRelationships(prop);
+                            }
+                        }
+                    });
+                };
+                
+                convertField = function(field){
+                    var el = $("#0\\.root" + field.selector),
+                        autocompleteID = "JSONEditorAutocomplete_" + field.selector.replace("\\",""),
+                        autocompleteField = $('<select class="form-control selectize" type="text" style="display:none !important;" id="' + autocompleteID + '"></select>'),
+                        onChange = function (value) {
+                            var readPath = field.resourceCollection.path + "/" + value;
+                            _this.editor.getEditor("root" + field.selector.replace("\\","")).setValue(readPath);
+                        };
+                    
+                    el.attr("style","display: none !important").after(autocompleteField);
+                    
+                    resourceCollectionUtils.setupAutocompleteField(autocompleteField, field, { onChange: onChange });
+                    
+                    if(!_this.data.newObject && el.val().length){
+                        resourceDelegate.readResource("/" + constants.context,el.val()).then(function(result){
+                            autocompleteField[0].selectize.addOption(result);
+                            autocompleteField[0].selectize.setValue(result._id);
+                        });
+                    }
+                };
+                
+                convertArrayField = function(prop) {
+                    _this.editor.getEditor('root' + prop.selector.replace("\\","")).destroy();
+                    addTab(prop, {
+                        templateId : "tabContentTemplate",
+                        tabView: new ResourceCollectionArrayView(),
+                        viewId: "resourceCollectionArray-" + prop.propName,
+                        contentId: "resource-" + prop.propName,
+                        contentClass: "resourceCollectionArray",
+                        headerText: prop.title,
+                        onChange: _.bind(_this.showPendingChanges, _this)
+                    });
+                };
+                
+                showRelationships = function(prop) {
+                    addTab(prop, {
+                        templateId : "relationshipsTemplate",
+                        tabView: new ResourceCollectionRelationshipsView(),
+                        viewId: "resourceCollectionRelationship-" + prop.propName,
+                        contentId: "relationship-" + prop.propName,
+                        contentClass: "resourceCollectionRelationships",
+                        headerText: prop.resourceCollection.label
+                    });
+                };
+                
+                addTab = function(prop, opts) {
+                    var tabHeader = _this.$el.find("#tabHeaderTemplate").clone(),
+                        tabContent = _this.$el.find("#" + opts.templateId).clone();
+                    
+                    if(!_this.data.newObject) {
+                        tabHeader.attr("id", "tabHeader_" + opts.contentId);
+                        tabHeader.find("a").attr("href","#" + opts.contentId).text(opts.headerText);
+                        
+                        tabContent.attr("id",opts.contentId);
+                        tabContent.find("." + opts.contentClass).attr("id", opts.viewId);
+                        
+                        _this.$el.find("#linkedSystemsTabHeader").before(tabHeader);
+                        _this.$el.find("#resource-linkedSystems").before(tabContent);
+                        
+                        opts.tabView.render({ element: "#" + opts.viewId, prop: prop, schema: schema, onChange: opts.onChange });
+                    }
+                };
+                
+                getFields(schema.properties);
         }
     }); 
     

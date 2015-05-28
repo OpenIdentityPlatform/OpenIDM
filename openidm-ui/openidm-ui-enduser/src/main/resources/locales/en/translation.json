@@ -167,12 +167,18 @@
             {
                 "confirmDelete": "Are you sure you want to delete this __objectTitle__?",
                 "confirmDeleteSelected": "Are you sure you want to delete the selected __objectTitle__s?",
-                "backToList": "Back to List",
+                "backToList": "Back to __objectTitle__ List",
                 "addSuccess": "Successfully added __objectTitle__",
                 "editSuccess": "Successfully updated __objectTitle__",
                 "deleteSuccess": "Successfully deleted __objectTitle__",
                 "deleteSelectedSuccess": "Successfully deleted selected __objectTitle__s",
-                "noData": "No Data"
+                "details": "Details",
+                "noData": "No Data",
+                "data": "Data",
+                "search": "Enter search terms to find __objectTitle__ ...",
+                "noPendingChanges": "No pending changes",
+                "new": "New",
+                "linkedSystems": "Linked Systems"
             },
             "ResourceList":
             {

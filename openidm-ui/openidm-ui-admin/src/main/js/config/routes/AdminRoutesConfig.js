@@ -138,7 +138,8 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
             role: "ui-admin",
             url: /^resource\/(system)\/(.+)\/(.+)\/edit\/(.+)$/, 
-            pattern: "resource/?/?/?/edit/?"
+            pattern: "resource/?/?/?/edit/?",
+            forceUpdate: true
         },
         "adminNewSystemObjectView" : {
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
@@ -156,7 +157,8 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
             role: "ui-admin",
             url: /^resource\/(managed)\/(.+)\/edit\/(.+)$/, 
-            pattern: "resource/?/?/edit/?"
+            pattern: "resource/?/?/edit/?",
+            forceUpdate: true
         },
         "adminNewManagedObjectView" : {
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",

@@ -1,0 +1,24 @@
+{{#if linkedResources}}
+<form role="form" class="form-horizontal">
+    <div class="form-group">
+        <label style="margin-left:15px;" class="pull-left control-label" for="linkedViewSelect">{{t "templates.admin.LinkedTemplate.linkedResource"}}</label>
+        <div class="col-sm-6">
+            <select class="form-control" id="linkedViewSelect" name="linkedViewSelect">
+                {{#each_with_index linkedResources}}
+                <option value="{{index}}">{{value}}</option>
+                {{/each_with_index}}
+            </select>
+            <div class="validation-message"></div>
+        </div>
+        <div class="col-sm-1">
+            <a href="#" id="linkToResource" title="View Resource"><span class="fa fa-external-link"></span></a>
+        </div>
+    </div>
+</form>
+<div style="clear:both;"></div>
+<div id="linkedViewContent"></div>
+{{else}}
+<h4 class="no-details">
+    {{t "templates.admin.LinkedTemplate.noLinkedSystems"}}
+</h4>
+{{/if}}
