@@ -26,7 +26,7 @@
 
 define("org/forgerock/openidm/ui/admin/sync/TestSyncDialog", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
+    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/admin/sync/TestSyncGridView",
     "org/forgerock/commons/ui/common/util/UIUtils",

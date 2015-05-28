@@ -205,6 +205,11 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                                             "type": "string",
                                             "title": "Path"
                                         },
+                                        "label": {
+                                            "type": "string",
+                                            "title": "Label",
+                                            "description": $.t("templates.managed.resourceCollectionRelationshipDescription")
+                                        },
                                         "query": {
                                             "type": "object",
                                             "title": "Query",
@@ -268,7 +273,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                                         "title": "Searchable",
                                         "type": "boolean",
                                         "required": true,
-                                        "default": true
+                                        "default": false
                                     },
                                     "required": {
                                         "title": "Required",

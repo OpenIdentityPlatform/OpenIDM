@@ -29,7 +29,7 @@ define("org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog", [
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
+    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/util/MappingUtils",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "bootstrap-dialog",

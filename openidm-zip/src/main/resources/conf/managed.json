@@ -62,7 +62,8 @@
                     "postalCode",
                     "country",
                     "stateProvince",
-                    "roles"
+                    "roles",
+                    "manager"
                 ],
                 "properties" : {
                     "mail" : {
@@ -117,11 +118,11 @@
                         "items" : {
                             "type" : "string",
                             "resourceCollection" : {
-                                "path" : "managed/roles",
+                                "path" : "managed/role",
                                 "query" : {
-                                    "queryFilter" : "",
-                                    "fields" : [ ],
-                                    "sortKeys" : [ ]
+                                    "queryFilter" : "true",
+                                    "fields" : ["properties/name"],
+                                    "sortKeys" : ["properties/name"]
                                 }
                             }
                         }
@@ -154,11 +155,13 @@
                         "searchable" : false,
                         "resourceCollection" : {
                             "path" : "managed/user",
+                            "label" : "Reports",
                             "query" : {
                                 "queryFilter" : "true",
                                 "fields" : [
                                     "userName",
-                                    "mail"
+                                    "givenName",
+                                    "sn"
                                 ],
                                 "sortKeys" : [
                                     "userName"

@@ -1,0 +1,37 @@
+<div class="btn-group btn-group-tabs" data-toggle="buttons" role="tablist">
+    <label class="btn btn-default active">
+        <input value="graphTab" name="viewType" type="radio" role="tab" data-toggle="tab" aria-expanded="true"><span class="fa fa-line-chart"></span>
+    </label>
+    <label class="btn btn-default">
+        <input value="listTab" name="viewType" type="radio" role="tab" data-toggle="tab"><span class="fa fa-list"></span>
+    </label>
+</div>
+<div class="graphTab">
+    <div class="reportsGraphBody" id="reportsGraphBody-{{prop.propName}}"></div>
+</div>
+<div  style="display:none;" class="listTab">
+   <div class="list-table">
+       <ul class="list-group">
+          <li class="list-group-header">
+             <div class="row">
+                {{#each headerValues}}
+                <div class="col-xs-3">
+                   {{this}}
+                </div>
+                {{/each}}
+             </div>
+          </li>
+          {{#each relatedTo}}
+          <li class="list-group-item resourceListItem" resourcePath="{{../prop.resourceCollection.path}}/{{this._id}}">
+             <div class="row">
+                {{#each ../prop.resourceCollection.query.fields}}
+                <div class="col-xs-3">
+                       {{nestedLookup ../this this}}
+                </div>
+                {{/each}}
+             </div>
+          </li>
+          {{/each}}
+       </ul>
+    </div>
+</div>

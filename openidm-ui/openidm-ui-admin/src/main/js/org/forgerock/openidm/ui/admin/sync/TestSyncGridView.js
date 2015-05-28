@@ -27,7 +27,7 @@
 define("org/forgerock/openidm/ui/admin/sync/TestSyncGridView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
+    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/components/Messages"
 ], function (AbstractView, reconDelegate, searchDelegate, conf, messagesManager) {

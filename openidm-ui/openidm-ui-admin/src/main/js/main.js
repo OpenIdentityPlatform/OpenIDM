@@ -47,6 +47,7 @@ require.config({
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
         selectize : "libs/selectize-0.12.1-min",
+        d3 : "libs/d3-3.5.5-min",
         moment: "libs/moment-2.8.1-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
@@ -109,6 +110,9 @@ require.config({
         },
         selectize: {
             deps: ["jquery"]
+        },
+        d3: {
+            exports: "d3"
         },
         bootstrap: {
             deps: ["jquery"]

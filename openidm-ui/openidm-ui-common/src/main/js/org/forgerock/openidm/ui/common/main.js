@@ -31,6 +31,7 @@ define("org/forgerock/openidm/ui/common/main", [
     "./resource/EditResourceView",
     "./resource/GenericEditResourceView",
     "./resource/ResourceEditViewRegistry",
+    "./resource/ResourceCollectionArrayView",
     
     "./delegates/ConfigDelegate",
     "./delegates/InternalUserDelegate",
@@ -38,7 +39,6 @@ define("org/forgerock/openidm/ui/common/main", [
     "./delegates/SiteConfigurationDelegate",
     "./delegates/OpenAMProxyDelegate",
     "./delegates/ResourceDelegate",
-    "./delegates/SystemHealthDelegate",
 
     "./login/InternalLoginHelper",
     "./login/AuthenticationUnavailable",
@@ -46,9 +46,11 @@ define("org/forgerock/openidm/ui/common/main", [
     "./util/Constants",
     "./util/AMLoginUtils",
     "./util/JSONEditorSetupUtils",
-
+    
     "./dashboard/DashboardWidgetLoader",
     "./dashboard/widgets/MemoryUsageWidget",
     "./dashboard/widgets/ReconProcessesWidget",
-    "./dashboard/widgets/CPUUsageWidget"
+    "./dashboard/widgets/CPUUsageWidget",
+    
+    "./linkedView/LinkedView"
 ]);

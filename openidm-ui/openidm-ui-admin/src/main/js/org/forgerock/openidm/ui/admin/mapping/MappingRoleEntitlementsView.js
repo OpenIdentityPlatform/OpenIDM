@@ -27,7 +27,7 @@
 define("org/forgerock/openidm/ui/admin/mapping/MappingRoleEntitlementsView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
-    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate"
+    "org/forgerock/openidm/ui/common/delegates/SearchDelegate"
 ], function(AbstractView,
             MappingBaseView,
             searchDelegate) {
