@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-cluster'
@@ -198,31 +198,79 @@ openidm.node.id=instance1
       Specify the instance type in the cluster.
      </para>
      <para>
-      On the primary instance, revise the following line in the
-      <filename>boot.properties</filename> file as follows:
-     </para>
-     <programlisting>
-openidm.instance.type=clustered-first
-     </programlisting>
-     <para>
-      On subsequent instances, revise the following line in the
-      <filename>boot.properties</filename> file as follows:
-     </para>
-     <programlisting>
-openidm.instance.type=clustered-additional
-     </programlisting>
-     <para>
       The instance type is used during the setup process. When the primary node
       has been configured, additional nodes are bootstrapped with the security
       settings (keystore and truststore) of the primary node. After all nodes
       have been configured, they are all considered equal in the cluster, that
       is, there is no concept of a "master" node.
      </para>
-     <para>
-      If no instance type is specified, the default value for this property is
-      <literal>openidm.instance.type=standalone</literal>, which indicates that
-      the instance will not be part of a cluster.
-     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        On the primary instance, set the instance type in the
+        <filename>boot.properties</filename> file as follows:
+       </para>
+       <programlisting>openidm.instance.type=clustered-first</programlisting>
+       <para>
+        For a <literal>clustered-first</literal> instance, the Crypto Service
+        activates and generates a new secret key (if not present). The Security
+        Manager activates and generates a new private key (if not present),
+        reloads the keystore within the JVM, and stores the entire keystore in
+        the repository under the id <literal>security/keystore</literal>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        On subsequent instances, set the instance type in the
+        <filename>boot.properties</filename> file as follows:
+       </para>
+       <programlisting>openidm.instance.type=clustered-additional</programlisting>
+       <para>
+        For a <literal>clustered-additional</literal> instance, the Crypto
+        Service activates, but does not generate, a new secret key. The Crypto
+        Service does not add any <literal>decryptionTransformers</literal>. The
+        Security Manager does the following:
+       </para>
+       <itemizedlist>
+        <listitem>
+         <para>
+          Activates and reads in the keystore from the repository
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          Overwrites the local keystore
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          Reloads the keystore within the JVM
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          Calls back to the Crypto Service to update the
+          <literal>keySelector</literal> with the new keystore and to add a
+          <literal>decryptionTransformer</literal> so that the keys can be
+          decrypted.
+         </para>
+        </listitem>
+       </itemizedlist>
+      </listitem>
+      <listitem>
+       <para>
+        If no instance type is specified, the default value for this property
+        is <literal>openidm.instance.type=standalone</literal>, which indicates
+        that the instance will not be part of a cluster.
+       </para>
+       <para>
+        For a <literal>standalone</literal> instance, the Crypto Service
+        activates and generates a new secret key (if not present). The Security
+        Manager generates a new private key (if not present) and reloads the
+        keystore within the JVM.
+       </para>
+      </listitem>
+     </itemizedlist>
     </listitem>
    </itemizedlist>
   </section>
