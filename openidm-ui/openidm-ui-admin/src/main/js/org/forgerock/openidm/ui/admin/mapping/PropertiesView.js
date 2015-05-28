@@ -286,7 +286,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                         }
                                     }
                                 } else {
-                                    cleanData ="";
+                                    cleanData = "";
                                 }
 
                                 //Sets transform icon and tooltip
@@ -320,7 +320,11 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                         if(evalResults[propCounter].transformResults) {
                                             sampleData = evalResults[propCounter].transformResults;
                                         } else {
-                                            sampleData = sampleSource[prop.source];
+                                            if(prop["default"]) {
+                                                sampleData = prop["default"];
+                                            } else {
+                                                sampleData = sampleSource[prop.source];
+                                            }
                                         }
                                     }
                                 } else if (typeof(prop.source) !== "undefined" && prop.source.length) {
@@ -333,11 +337,16 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                             sampleData = sampleSource[prop.source];
                                         }
                                     }
-                                }
-
-                                if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
-
-                                    if (sampleData === null || sampleData === undefined) {
+                                } else if (!_.isEmpty(sampleSource)) {
+                                    if (!_.isUndefined(prop["default"])) {
+                                        sampleData = prop["default"];
+                                    } else {
+                                        sampleData = "Null";
+                                    }
+                                } else if (evalResults === null || evalResults === undefined) {
+                                    if (!_.isUndefined(prop["default"])) {
+                                        sampleData = prop["default"];
+                                    } else {
                                         sampleData = "Null";
                                     }
                                 }

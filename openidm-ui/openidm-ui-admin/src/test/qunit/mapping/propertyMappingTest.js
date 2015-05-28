@@ -33,8 +33,9 @@ define([
     "org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/mapping/PropertiesView",
-    "../mocks/mapping/propertiesViewLoad"
-], function (sinon, browserStorageDelegate, syncDelegate, mappingUtils, addPropertyMappingDialog, editPropertyMappingDialog, mappingBaseView, PropertiesView, propertiesViewLoadMock) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "../mocks/mapping/propertiesViewLoad",
+], function (sinon, browserStorageDelegate, syncDelegate, mappingUtils, addPropertyMappingDialog, editPropertyMappingDialog, mappingBaseView, PropertiesView, conf, propertiesViewLoadMock) {
     var mappingName = "systemLdapAccounts_managedUser";
 
     browserStorageDelegate.set(mappingName + "_Properties", "test");
@@ -46,6 +47,8 @@ define([
 
             QUnit.asyncTest("PropertiesView Tests", function () {
                 propertiesViewLoadMock(server);
+
+                conf.globalData.sampleSource = {"givenName":"Aaccf","employeeType":"employee","cn":"Aaccf Amar","dn":"uid=user.0,ou=People,dc=example,dc=com","telephoneNumber":"+1 685 622 6202","ldapGroups":["cn=Manager,ou=Groups,dc=example,dc=com"],"uid":"user.0","mail":"user.0@maildomain.net","sn":"Amar","description":"This is the description for Aaccf Amar.","_id":"uid=user.0,ou=People,dc=example,dc=com"};
 
                 PropertiesView.render([mappingName], function () {
                     var browserStorageDelegate = require("org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"),
@@ -60,6 +63,11 @@ define([
                     //PropertiesGrid tests
                     QUnit.equal(PropertiesView.$el.find(".ui-jqgrid").length, 1, "Properties grid loaded");
                     QUnit.equal(PropertiesView.$el.find(".ui-jqgrid tr:gt(1)").length, PropertiesView.currentMapping().properties.length, "Correct number of properties displayed in grid");
+
+                    QUnit.equal(PropertiesView.$el.find(".ui-jqgrid tr.jqgrow:eq(1)").find("td:eq(2) .text-muted").length, 1, "Sample successfully displayed");
+
+                    QUnit.equal(PropertiesView.$el.find(".ui-jqgrid tr.jqgrow:eq(1)").find("td:eq(2) .text-muted").html(), "(test)", "Default value successfully displayed");
+
                     //row click test
                     PropertiesView.$el.find(".ui-jqgrid tr.jqgrow:first").click();
 
@@ -71,6 +79,7 @@ define([
                     QUnit.equal(browserStorageDelegate.get(mappingName + "_numRepresentativeProps",true), 2, "Number of representative properties successfully changed");
                     QUnit.equal(setNumRepresentativePropsLineSpy.called, true, "setNumRepresentativePropsLine successfully called after change to Number of representative properties");
                     browserStorageDelegate.set(mappingName + "_numRepresentativeProps", 4,true);
+
                     setNumRepresentativePropsLineSpy.restore();
                     //remove property tests
                     $("body").one("shown.bs.modal", function (e) {
