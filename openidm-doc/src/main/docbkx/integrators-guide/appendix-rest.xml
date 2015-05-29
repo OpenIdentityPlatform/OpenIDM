@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-rest'
@@ -1717,6 +1717,16 @@ Content-Length: 89
         <replaceable>situation</replaceable>&amp;reconId=<replaceable>id</replaceable></entry>
         <entry>GET</entry>
         <entry>Queries the reconciliation audit log for a specific reconciliation situation</entry>
+       </row>
+       <row>
+        <entry>/openidm/audit/sync</entry>
+        <entry>GET</entry>
+        <entry>Displays the synchronization audit log</entry>
+       </row>
+       <row>
+        <entry>/openidm/audit/sync/<replaceable>id</replaceable></entry>
+        <entry>GET</entry>
+        <entry>Reads a specific synchronization audit log entry</entry>
        </row>
        <row>
         <entry>/openidm/audit/activity</entry>
