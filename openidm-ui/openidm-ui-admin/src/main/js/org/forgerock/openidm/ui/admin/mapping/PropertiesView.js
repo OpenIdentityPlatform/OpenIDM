@@ -332,7 +332,11 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                         sampleData = "";
                                     } else {
                                         if(sampleSource[prop.source] === null || sampleSource[prop.source] === undefined) {
-                                            sampleData = "Null";
+                                            if (!_.isUndefined(prop["default"])) {
+                                                sampleData = prop["default"];
+                                            } else {
+                                                sampleData = "Null";
+                                            }
                                         } else {
                                             sampleData = sampleSource[prop.source];
                                         }
