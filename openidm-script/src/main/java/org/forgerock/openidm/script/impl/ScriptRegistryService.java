@@ -88,6 +88,7 @@ import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.engine.ScriptEngineFactory;
+import org.forgerock.script.exception.ScriptCompilationException;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.Function;
@@ -616,6 +617,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             }
         } catch (ResourceException e) {
             handler.handleError(e);
+        } catch (ScriptCompilationException e) {
+            handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (IllegalArgumentException e) { // from getActionAsEnum
             handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (Exception e) {
