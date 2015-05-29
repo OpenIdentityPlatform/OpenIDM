@@ -55,20 +55,25 @@
   <title>Audit Log Types</title>
 
   <variablelist>
-   <para>This section describes the types of audit log OpenIDM provides.</para>
+   <para>
+    OpenIDM provides the following types of audit log:
+   </para>
    <varlistentry>
     <term>Access Log</term>
     <listitem>
-     <para>OpenIDM writes messages concerning access to the REST API in this
-     log.</para>
+     <para>
+      OpenIDM writes messages concerning access to the REST API in this log.
+     </para>
      <para>Default file: <filename>openidm/audit/access.csv</filename></para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>Activity Log</term>
     <listitem>
-     <para>OpenIDM logs operations on internal (managed) and external (system)
-     objects to this log type.</para>
+     <para>
+      OpenIDM logs operations on internal (managed) and external (system)
+      objects to this log.
+     </para>
      <para>
       Entries in the activity log contain identifiers, both for the action that
       triggered the activity, and also for the original caller and the
@@ -80,12 +85,25 @@
    <varlistentry>
     <term>Reconciliation Log</term>
     <listitem>
-     <para>OpenIDM logs the results of a reconciliation run, including
-     situations and the resulting actions taken to this log type. The activity
-     log contains details about the actions, where log entries display parent
-     activity identifiers,
-     <literal>recon/<replaceable>reconID</replaceable></literal>.</para>
+     <para>
+      OpenIDM logs the results of a reconciliation run to this log (including
+      situations and the resulting actions taken). The activity log contains
+      details about the actions, where log entries display parent activity
+      identifiers, <literal>recon/<replaceable>reconID</replaceable></literal>.
+     </para>
      <para>Default file: <filename>openidm/audit/recon.csv</filename></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Synchronization Log</term>
+    <listitem>
+     <para>
+      OpenIDM logs the results of automatic synchronization operations (LiveSync
+      and implicit synchronization) to this log, including situations and the
+      actions taken on each object. The activity log contains additional detail
+      about the actions.
+     </para>
+     <para>Default file: <filename>openidm/audit/sync.csv</filename></para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -313,7 +331,7 @@
 
   <variablelist xml:id="audit-recon-fields">
    <title>Reconciliation Log Fields</title>
-   <para>Reconciliation messages include the following information:</para>
+   <para>Reconciliation log messages include the following information:</para>
    <varlistentry>
     <term><literal>"_id"</literal></term>
     <listitem>
@@ -327,10 +345,11 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>
-      Synchronization action, such as <literal>"CREATE"</literal>. See the
-      section on <link xlink:href="integrators-guide#sync-actions"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Actions</citetitle></link>
-      for a list of possible actions.
+      Synchronization action, such as <literal>"CREATE"</literal>. For more
+      information, see the section that describes the <link
+      xlink:href="integrators-guide#sync-actions"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+      Actions</citetitle></link>.
      </para>
     </listitem>
    </varlistentry>
@@ -443,10 +462,11 @@
    <varlistentry>
     <term><literal>"situation"</literal></term>
     <listitem>
-     <para>The situation encountered. See
-     the section describing <link xlink:href="integrators-guide#sync-situations"
-     xlink:role="http://docbook.org/xlink/role/olink">synchronization
-     situations</link> for a list.</para>
+     <para>
+      The situation encountered. For more information, see the section that
+      describes <link xlink:href="integrators-guide#sync-situations"
+      xlink:role="http://docbook.org/xlink/role/olink">synchronization
+      situations</link>.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -482,6 +502,161 @@
     <listitem>
     <para>Time when OpenIDM logged the message, in UTC format, for example 
     <literal>"2012-11-18T08:48:00.160Z"</literal></para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="audit-sync-fields">
+   <title>Synchronization Log Fields</title>
+   <para>Synchronization log messages include the following information:</para>
+   <varlistentry>
+    <term><literal>"_id"</literal></term>
+    <listitem>
+     <para>
+      UUID for the message object, such as
+      <literal>"9349accd-b3ee-451c-8e87-0412efdac627"</literal>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"action"</literal></term>
+    <listitem>
+     <para>
+      Synchronization action, such as <literal>"CREATE"</literal>. For more
+      information, see the section that describes <link xlink:show="new"
+      xlink:href="integrators-guide#sync-actions"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+      Actions</citetitle></link>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"actionID"</literal></term>
+    <listitem>
+     <para>
+      The unique ID assigned to the action.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"exception"</literal></term>
+    <listitem>
+     <para>
+      The stack trace of the exception, if any.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"linkQualifier"</literal></term>
+    <listitem>
+     <para>
+      The link qualifier applied to the action. Link qualifiers enable you to
+      manage one to many relationships in mappings. For more information about
+      link qualifiers, see <link xlink:show="new"
+      xlink:href="integrators-guide#mapping-link-qualifiers"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using
+      Link Qualifiers in a Mapping</citetitle></link>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"mapping"</literal></term>
+    <listitem>
+     <para>
+      The name of the mapping used for the synchronization operation (defined in
+      <filename>conf/sync.json</filename>, for example
+      <literal>"systemLdapAccounts_managedUser"</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"message"</literal></term>
+    <listitem>
+     <para>
+      Human readable text about the synchronization action that was taken.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"messageDetail"</literal></term>
+    <listitem>
+     <para>
+      When script exceptions are encountered during a synchronization operation,
+      the error details can be stored in this property.
+     </para>
+     <para>
+      For script exception details to be pulled in, the script exception must
+      take the following format:
+     </para>
+     <programlisting>
+      "throw {
+      'openidmCode' : <replaceable>HTTP error code</replaceable>,
+      'message' : <replaceable>error message</replaceable>,
+      'detail' : {
+      <replaceable>details</replaceable>
+      }
+      };"
+     </programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"rootActionId"</literal></term>
+    <listitem>
+     <para>
+      UUID of the root cause for the activity. This matches a corresponding
+      <literal>"rootActionId"</literal> in an activity message.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"situation"</literal></term>
+    <listitem>
+     <para>
+      The situation encountered for each object. For more information, see the
+      section that describes the <link
+      xlink:href="integrators-guide#sync-situations"
+      xlink:role="http://docbook.org/xlink/role/olink">synchronization
+      situations</link>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"sourceObjectId"</literal></term>
+    <listitem>
+     <para>
+      The object identifier on the source system, such as
+      <literal>"system/ldap/account/uid=bjensen,ou=People,dc=example,dc=com"</literal>
+      or <literal>"managed/user/bjensen"</literal> (depending on the resource
+      that is configured as the source in the mapping).
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"status"</literal></term>
+    <listitem>
+     <para>
+      The result of the synchronization operation, such as
+      <literal>"SUCCESS"</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"targetObjectId"</literal></term>
+    <listitem>
+     <para>
+      The object identifier on the target system, such as
+      <literal>"uid=bjensen,ou=People,dc=example,dc=com"</literal> or
+      <literal>"managed/user/bjensen"</literal> (depending on the resource
+      configured as the target in the mapping).
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"timestamp"</literal></term>
+    <listitem>
+     <para>
+      The time that OpenIDM logged the message, in UTC format, for example
+      <literal>"2015-05-28T13:48:00.160Z"</literal>.
+     </para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -1022,10 +1197,10 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
    You can create a script for filtering. As it does for other scripts, OpenIDM
    makes the create request and the context objects available to the script.
    Before the audit record is written, it can be accessed as a
-   <literal>request.content</literal> object. For guidance, see the Integrator's
-   Guide appendix on <link xlink:role="http://docbook.org/xlink/role/olink/"
+   <literal>request.content</literal> object. For guidance, see the <link
+   xlink:role="http://docbook.org/xlink/role/olink/"
    xlink:show="new" xlink:href="integrators-guide#scripting-configuration">
-   <citetitle>Scripting Configuration</citetitle></link>.
+   <citetitle>Scripting Configuration</citetitle></link> appendix.
   </para>
 
   <para>
