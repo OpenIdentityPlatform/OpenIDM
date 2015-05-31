@@ -120,6 +120,10 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.SyncMessages.policySaveSuccessful",
             type: "info"
         },
+        "auditSaveSuccess" : {
+            msg: "config.messages.AuditMessages.auditSaveSuccessful",
+            type: "info"
+        },
         "scheduleCreated" : {
             msg: "config.messages.SyncMessages.scheduleCreated",
             type: "info"

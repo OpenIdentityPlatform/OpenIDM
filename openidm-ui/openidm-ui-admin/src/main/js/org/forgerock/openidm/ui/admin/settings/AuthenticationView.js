@@ -24,7 +24,7 @@
 
 /*global define, $, _, Handlebars, form2js, JSONEditor */
 
-define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
+define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 ], function(AdminAbstractView, eventManager, constants, router, ConfigDelegate, InlineScriptEditor, ConnectorDelegate, SiteConfigurationDelegate, conf, openamProxyDelegate, UIUtils) {
 
     var AuthenticationView = AdminAbstractView.extend({
-        template: "templates/admin/authentication/AuthenticationTemplate.html",
+        template: "templates/admin/settings/AuthenticationTemplate.html",
         element: "#authenticationContainer",
         noBaseTemplate: true,
         events: {
@@ -104,7 +104,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                 required_by_default: true
             });
 
-            this.data.docHelpUrl = constants.DOC_URL;
+            this.data.dochelpurl = constants.DOC_URL;
 
             var connectorPromise = ConnectorDelegate.currentConnectors(),
                 managedPromise = ConfigDelegate.readEntity("managed");
@@ -131,7 +131,7 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
                             this.$el.find("#group-copy .moduleType").append("<option value='" + moduleName + "'>" + moduleName +  "</option>");
 
                             $.ajax({
-                                url: "templates/admin/authentication/" + moduleName + ".json",
+                                url: "templates/admin/settings/authentication/" + moduleName + ".json",
                                 type: "GET",
                                 success: _.bind(function(jsonTemplate) {
                                     jsonTemplate = Handlebars.compile(jsonTemplate)();
