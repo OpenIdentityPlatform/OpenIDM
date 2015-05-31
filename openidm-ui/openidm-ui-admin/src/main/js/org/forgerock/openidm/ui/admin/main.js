@@ -65,8 +65,6 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./objectTypes/ObjectTypesDialog",
 
-    "./authentication/AuthenticationView",
-
     "./mapping/AddMappingView",
     "./mapping/MappingListView",
     "./mapping/MappingBaseView",
@@ -97,7 +95,9 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./login/LoginView",
     
     "./settings/SettingsView",
-    
+    "./settings/AuthenticationView",
+    "./settings/AuditView",
+
     "./role/EditRoleView",
     "./role/RoleUsersView",
     "./role/RoleEntitlementsListView",

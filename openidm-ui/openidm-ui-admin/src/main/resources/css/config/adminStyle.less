@@ -30,6 +30,10 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
+.no-border{
+  border: none;
+}
+
 .alert-warning .fa,
 .alert-danger .fa {
   margin-right: 5px;
@@ -309,6 +313,12 @@
 
 .list-table {
   .list-group {
+
+    .list-group-item:last-child {
+      border-bottom-right-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
     .list-group-item {
       border-color: #eee;
       background-color: transparent;
@@ -395,7 +405,7 @@
         line-height: 32px;
       }
     }
-    .list-group-header, .list-group-item {
+    .list-group-header {
       border-top: none;
       padding-top: 0;
     }
@@ -413,7 +423,7 @@
       border-bottom: 2px solid #ddd;
       background-color: transparent;
       font-weight: 600;
-      display: none;
+      display: block;
       .text-muted {
         text-transform: none;
         letter-spacing: 0;
@@ -576,6 +586,11 @@ Dialog Catch
 }
 
 @media (max-width: 767px) {
+  .blockButton {
+    margin-top: 15px;
+    width: 100%;
+  }
+
   .btn-toolbar {
 
     .pull-right {
@@ -605,7 +620,6 @@ Dialog Catch
     .list-group {
       .list-group-item {
         border-top: none;
-        border-color: red;
         background-color: transparent;
         -webkit-transition: background-color 0.1s linear;
         -moz-transition: background-color 0.1s linear;
@@ -623,9 +637,7 @@ Dialog Catch
       .list-group-header, .list-group-item {
         padding-top: 15px;
       }
-      .list-group-header {
-        display: block;
-      }
+
       .list-group-item {
         .list-table-label {
           display: none;
