@@ -1,15 +1,11 @@
 /*global source */
 
 (function (){
-    var managerId, managerMap = {};
+    var managerId, manager = "";
     if (source !== null) {
         managerId = source.substring(4, source.indexOf(','));
-
-        managerMap = {
-            "managerId" : managerId,
-            "$ref" : "/managed/user/"+managerId,
-            "displayName" : managerId
-        };
+        
+        manager = "managed/user/"+managerId;
     }
-    return managerMap;
+    return manager;
 }());

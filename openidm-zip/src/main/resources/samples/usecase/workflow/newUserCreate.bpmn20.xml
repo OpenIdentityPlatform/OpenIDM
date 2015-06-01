@@ -232,8 +232,7 @@
                 } else {
                     assignedManager = openidm.read('managed/user/' + candidateUsers.get(0))
                 }
-                managerMap = [displayName:assignedManager.displayName, managerId:assignedManager._id]
-                managerMap.put('$ref', "managed/user/"+assignedManager._id)
+                managerMap = "managed/user/"+assignedManager._id
                 user.put("manager", managerMap)
 
                 openidm.create('managed/user', null, user)
