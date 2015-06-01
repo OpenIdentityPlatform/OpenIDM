@@ -1,4 +1,16 @@
 {
+    "dashboard" : {
+        "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
+        "memoryUsageHeap" : "Memory Usage (Heap)",
+        "memoryUsageNonHeap" : "Memory Usage (NonHeap)",
+        "reconProcesses" : "Recon Processes",
+        "cpuUsage" : "CPU Usage",
+        "loading" : "Loading...",
+        "dashboard" : "Dashboard",
+        "pause" : "Pause",
+        "start" : "Start",
+        "refresh" : "Refresh"
+    },
     "config" : {
         "dates" : {
             "monthNames" : "January, February, March, April, May, June, July, August, September, October, November, December",
@@ -134,7 +146,9 @@
                     "and": "All of...",
                     "or": "Any of...",
                     "not": "None of...",
-                    "expr": "The value for "
+                    "expr": "The value for ",
+                    "true": "Everything",
+                    "false": "Nothing"
                 },
                 "delimiters": {
                     "and": "And",
@@ -185,12 +199,18 @@
             "DefaultBaseTemplate" : {
                 "orPhone" : ", or phone"
             },
+            "ChangeSecurityDataDialogTemplate" : {
+                "securityDataChange" : "Security data change.",
+                "enterNewPasswordToChange" : "Please enter a new password below.",
+                "selectQuestionAndAnserIfYouWant" : "Select a security question and enter your answer, if desired.",
+                "securityQuestionAndAnserExplanation" : "Select a Security Question. Enter an answer. If you forget your password, you'll be prompted with that question."
+            },
             "ChangeSiteIdentificationDialogTemplate" : {
                 "siteImageAndPhaseExplanation" : "When you log into the genuine website, you will see the site image and phrase that you selected."
             },
             "EnterOldPasswordDialog" : {
-                "passwordAndSecurityQuestionChange" : "Password and security question change",
-                "enterYourOldPassword" : "Please enter your old password"
+                "passwordAndSecurityQuestionChange" : "Password and security question change.",
+                "enterYourOldPassword" : "Please enter your old password."
             },
             "ForgottenPasswordTemplate" : {
                 "forgottenPasswordQuestion" : "Forgotten password?",
@@ -205,7 +225,7 @@
                 "changeSiteIdentification" : "Change Site Identification"
             },
             "UserRegistrationTemplate" : {
-                "registerYourAccount" : "Register your account",
+                "registerYourAccount" : "Register your account.",
                 "logIn" : "Log in",
                 "haveAccoutQuestion" : "Already have an account?",
                 "agreeToTerms" : "I agree to the "
@@ -223,6 +243,10 @@
                     "requestCount" : "__count__  request",
                     "requestCount_plural" : "__count__  requests"
                 }
+            },
+            "ChangeUserPasswordDialogTemplate" : {
+                "securityDataChange" : "Security data change",
+                "enterNewPasswordToChange" : "Please enter a new password below."
             },
             "UsersTemplate" : {
                 "remainingUsers" : "Remaining users"
@@ -500,53 +524,6 @@
             "actionPhrase": "Perform this <strong>Action</strong>",
             "onCompletePhrase": "And <strong>On Complete</strong>",
             "actionAlert": "You must provide a value for the action."
-        },
-        "audit": {
-            "audit": "Audit",
-            "events": "Events",
-            "eventTypes": "Event Types",
-            "addEvent": "Add Event",
-            "changesPending": "Changes Pending!",
-            "undo": "Undo Changes",
-            "warning": "Warning",
-            "notice": "Notice",
-            "eventTypesDesc": "The eventTypes configuration specifies what events OpenIDM writes to audit logs. OpenIDM supports the following event types: access, activity, synchronization, and reconciliation. The filter for actions under activity logging shows the actions on managed or system objects for which OpenIDM writes to the activity log.",
-            "noMoreEvents": "There are no more events to add.",
-            "dialog": {
-                "filterActions": "Filter Actions",
-                "filterActionsDesc": "The filter actions list enables you to configure the conditions that result in actions being written to the activity log.",
-                "noActions": "There are no actions for this type of event.",
-                "filterFields": "Filter Fields",
-                "filterFieldAdd": "Add",
-                "filterFieldAddField": "Add Field",
-                "filterFieldDelete": "Delete Field",
-                "filterFieldsDesc": "Filter Fields Desc",
-                "filterScript": "Filter Script",
-                "filterScriptDesc": "You can create a script for filtering. As it does for other scripts, OpenIDM makes the create request and the context objects available to the script. ",
-                "declarative": "Declarative",
-                "script": "Script",
-                "watchedFields": "Watched Fields",
-                "watchedFieldsDesc": "The Watched Fields parameter enables you to specify a list of fields that should be monitored for changes.",
-                "passwordFields": "Password Fields",
-                "passwordFieldsDesc": "The passwordFields parameter enables you to specify a list of fields that are considered passwords.",
-                "readMore": "Read More"
-            },
-            "logTo": "Log To",
-            "logToDesc": "The logTo parameter enables you to specify the format, location of where the file will be written, and various properties for each log type specified.",
-            "logType": "Log Type",
-            "logDetails": "Details",
-            "logDelimiter": "Delimiter",
-            "logLocation": "Location",
-            "logBuffer": "Buffer Size",
-            "logMaxFlushDelay": "Max Flush Delay",
-            "logUsedForQueries": "Used for Queries",
-            "logIgnoreLoggingFailures": "Ignore Logging Failures",
-            "router": "Router",
-            "csv": "CSV",
-            "repository": "Repository",
-            "addLog": "Add Log",
-            "exceptionFormatter": "Exception Formatter",
-            "exceptionFormatterDesc": "Specify how exceptions are to be formatted and display by the audit logger."
         },
         "auth": {
             "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
@@ -1108,7 +1085,12 @@
             "actions" : "Actions",
             "complete" : "Complete",
             "reset" : "Reset",
-            "copyright" : "Copyright (c) 2010-15 ForgeRock AS, all rights reserved.",
+            "confirm": "Confirm",
+            "ok": "Ok",
+            "list" : "List",
+            "add" : "Add",
+            "edit" : "Edit",
+            "copyright" : "Copyright 2010-15 ForgeRock AS.",
             "sessionExpired" : "Session Expired",
             "enableCookies" : "Cookies must be enabled to login",
             "reloadGrid" : "Reload Grid",
@@ -1152,6 +1134,7 @@
             }
         },
         "user" : {
+            "manager" : "Manager",
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",
@@ -1240,6 +1223,9 @@
         }
     },
     "openidm" : {
+        "admin": {
+            "label": "Admin View"
+        },
         "ui" : {
             "common" : {
                 "components" : {
@@ -1254,7 +1240,7 @@
                     "TasksMenuView" : {
                         "noTasksAssigned" : "No tasks assigned.",
                         "noTasksInGroupQueue" : "Your group has no tasks at this time.",
-                        "denyDefaultReason" : "Enter a reason for denying this request",
+                        "denyDefaultReason" : "Enter a reason for denying this request.",
                         "acceptanceForm" : {
                             "for" : "For",
                             "application" : "Application",
@@ -1273,7 +1259,7 @@
                         "chooseTask" : "Choose a task"
                     },
                     "StartProcessDashboardView" : {
-                        "chooseProcess" : "Please choose a process to start",
+                        "chooseProcess" : "Please choose a process to start.",
                         "noProcesses": "No processes in your queue.",
                         "noDataRequired": "No data required"
                     }
