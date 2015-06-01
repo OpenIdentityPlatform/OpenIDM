@@ -315,11 +315,7 @@
    },
    "department":"Human Resources",
    "userType":"employee",
-   "manager":{
-      "managerId":"ddoe",
-      "$ref":"/managed/user/ddoe",
-      "displayName":"John Smith"
-   },
+   "manager":"managed/user/ddoe",
    "title":"manager",
    "employeeNumber":"1",
    "accounts":[
