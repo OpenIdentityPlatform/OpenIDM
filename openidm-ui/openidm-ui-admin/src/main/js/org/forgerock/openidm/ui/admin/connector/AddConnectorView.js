@@ -70,7 +70,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
             this.connectorTypeRef = null;
             this.connectorList = null;
             this.name = null;
-            this.connectorTypeRef = null;
 
             ConnectorDelegate.availableConnectors().then(_.bind(function(connectors){
                 this.data.connectors = connectors.connectorRef;

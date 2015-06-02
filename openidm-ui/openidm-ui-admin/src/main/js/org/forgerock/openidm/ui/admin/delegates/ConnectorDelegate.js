@@ -93,14 +93,14 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
         return $.ajax({
             dataType: "json",
             type: "GET",
-            url: "/admin/templates/admin/connector/configs/" +type +"/" +name +".json"
+            url: "templates/admin/connector/configs/" +type +"/" +name +".json"
         });
     };
 
     obj.templateCheck = function(name) {
         return $.ajax({
             type: "GET",
-            url: "/admin/templates/admin/connector/" +name +".html"
+            url: "templates/admin/connector/" +name +".html"
         });
     };
 

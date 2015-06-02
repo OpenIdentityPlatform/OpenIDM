@@ -653,6 +653,7 @@
             "select": "Make a Selection"
         },
         "connector" : {
+            "backToResources" : "Back to Resources",
             "addObjectType" : "Add Object Type",
             "saveConnector" : "Save Connector Changes",
             "saveObjectType" : "Save Object Type Changes",
@@ -939,6 +940,7 @@
             }
         },
         "mapping": {
+            "backToMapping" : "Back to Mappings",
             "conditionalUpon" : "Conditional Upon:",
             "validLinkQualifierScript" : "Requires a valid Link Qualifier script.",
             "transformationScriptApplied" : "Transformation script applied",
@@ -946,7 +948,6 @@
             "badScript" : "Invalid; a Link Qualifier script must return an array of strings",
             "linkQualifiers": "Link Qualifiers",
             "uniqueLinkQualifiers": "The link qualifier must be unique.",
-            "backToMapping" : "Back to Mappings",
             "linkQualifier" : "Link Qualifier",
             "mappings": "Mappings",
             "source": "Source",
