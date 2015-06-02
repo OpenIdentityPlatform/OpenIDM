@@ -159,7 +159,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                     .value();
 
                 var splitDetails = args[0].match(/(.*?)_(.*)/).splice(1),
-                    urlArgs = uiUtils.convertCurrentUrlToJSON();
+                    urlArgs = router.convertCurrentUrlToJSON();
 
                 this.data.editState = true;
                 this.data.systemType = splitDetails[0];

@@ -29,7 +29,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/commons/ui/common/components/Navigation",
@@ -40,7 +40,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/openidm/ui/admin/util/ReconDetailsView",
     "bootstrap-tabdrop",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
-], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView, tabdrop, LinkQualifierUtil) {
+], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, router, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView, tabdrop, LinkQualifierUtil) {
 
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
@@ -145,7 +145,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 cleanName;
 
             if(args === "null"){
-                args = UIUtils.getCurrentHash().split("/").slice(1);
+                args = router.getCurrentHash().split("/").slice(1);
             }
 
             this.route = { url: window.location.hash.replace(/^#/, '') };
