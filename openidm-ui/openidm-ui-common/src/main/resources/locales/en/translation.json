@@ -1213,6 +1213,7 @@
             "SMS" : "SMS",
             "OAuth" : "OAuth",
             "createNewAccount" : "Create new account",
+            "createNewUser" : "Create New User",            
             "password" : "Password",
             "confirmPassword" : "Confirm Password",
             "newPassword" : "New password",
