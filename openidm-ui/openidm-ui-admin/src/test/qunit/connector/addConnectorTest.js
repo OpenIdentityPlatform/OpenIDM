@@ -44,8 +44,6 @@ define([
 
                 addConnector.render([], function () {
                     //Base connector tests
-                    QUnit.equal(addConnector.$el.find(".back-bar a").length, 1, "Return link loaded");
-
                     QUnit.equal(addConnector.$el.find("#connectorName").length, 1, "Connector base loaded");
 
                     QUnit.equal(addConnector.$el.find("#csvFilePath").length, 1, "Connector details loaded");
