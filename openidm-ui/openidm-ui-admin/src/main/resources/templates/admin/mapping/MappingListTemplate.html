@@ -1,8 +1,15 @@
-<div class="container">
-    <div class="page-header clearfix title-bar">
-        <h1>{{t "templates.mapping.mappingListingTitle"}}</h1>
+<section>
+    <div class="container">
+        <div class="page-header no-border">
+            <h1>{{t "templates.mapping.mappingListingTitle"}}
+                <div  class="pull-right help-link">
+                    <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                </div>
+            </h1>
+        </div>
     </div>
-
+</section>
+<div class="container">
     <div class="button-bar btn-toolbar" role="toolbar" aria-label="...">
         <div class="btn-group" role="group" aria-label="...">
             <a href="#mapping/add/">
@@ -13,14 +20,6 @@
             </a>
         </div>
     </div>
-
-    <div class="section-header">
-        <div class="subtitle-bar">
-            <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
-        </div>
-    </div>
-
-
     {{#if mappingConfig.length}}
     <div id="mappingConfigHolder" class="mapping-listing mappings-list">
         {{#each mappingConfig}}

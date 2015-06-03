@@ -46,6 +46,8 @@ define([
 
                 addEditManagedView.render([], function () {
 
+                    QUnit.equal(addEditManagedView.$el.find(".back-bar a").length, 1, "Return link loaded");
+
                     addEditManagedView.$el.find("#addManagedProperties").trigger("click");
 
                     QUnit.equal(addEditManagedView.$el.find(".managed-property:visible").length, 1, "Add object type property successful");

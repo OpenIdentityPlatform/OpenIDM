@@ -1,4 +1,9 @@
 <section>
+    <div class="back-bar">
+        <div class="container">
+            <a href="#resources/">{{t "templates.connector.backToResources"}}</a>
+        </div>
+    </div>
     <div class="container">
         <div class="page-header no-border">
             <h1>{{t "templates.connector.addConnectorTitle"}}</h1>
@@ -49,7 +54,7 @@
                                             {{#each versionDisplay}}
                                             <optgroup label="{{groupName}}">
                                                 {{#each versions}}
-                                                <option connectorTypeName="{{connectorName}}" bundleVersion="{{bundleVersion}}" systemType="{{systemType}}" {{#if selected}} selected{{/if}}>{{displayName}} - {{bundleVersion}}</option>
+                                                <option value="{{connectorName}}_{{bundleVersion}}" connectorTypeName="{{connectorName}}" bundleVersion="{{bundleVersion}}" systemType="{{systemType}}" {{#if selected}} selected{{/if}}>{{displayName}} - {{bundleVersion}}</option>
                                                 {{/each}}
                                             </optgroup>
                                             {{/each}}

@@ -48,7 +48,9 @@ define([
                  */
                 addMapping(server);
                 addMappingView.render([], function () {
-                    QUnit.equal(addMappingView.$el.find(".help").length, 1, "Help successfully detected");
+                    QUnit.equal(addMappingView.$el.find(".help-link").length, 1, "Help successfully detected");
+
+                    QUnit.equal(addMappingView.$el.find(".back-bar a").length, 1, "Return link loaded");
 
                     QUnit.equal(addMappingView.$el.find("#resourceConnectorContainer .resource-body").length, 1, "Resources successfully loaded");
 
