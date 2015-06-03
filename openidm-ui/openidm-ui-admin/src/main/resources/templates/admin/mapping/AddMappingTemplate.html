@@ -1,15 +1,21 @@
 <section>
-    <div class="container addMapping">
-
-        <div class="page-header">
-            <h1>{{t "templates.mapping.newMapping"}}</h1>
+    <div class="back-bar">
+        <div class="container">
+            <a href="#mapping/">{{t "templates.mapping.backToMapping"}}</a>
         </div>
-
-        <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank" class="pull-right help">
-            {{t "templates.connector.help"}}
-            <i class="fa fa-question-circle"></i>
-        </a>
-
+    </div>
+    <div class="container">
+        <div class="page-header no-border">
+            <h1>{{t "templates.mapping.newMapping"}}
+                <div  class="pull-right help-link">
+                    <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                </div>
+            </h1>
+        </div>
+    </div>
+</section>
+<section>
+    <div class="container addMapping">
         <div id="resourceMappingBody">
 
         </div>
