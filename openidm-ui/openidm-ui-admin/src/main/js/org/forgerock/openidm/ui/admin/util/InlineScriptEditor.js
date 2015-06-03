@@ -104,7 +104,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                         args.scriptData.globals = {};
                     }
                     this.data.passedVariables = args.scriptData.globals ||
-                    _.omit(args.scriptData, "file", "source", "type");
+                        _.omit(args.scriptData, "file", "source", "type");
                 }
 
                 this.parentRender(_.bind(function() {
@@ -290,6 +290,12 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                     if (currentSelection === "file-code") {
                         this.$el.find(".scriptFilePath").attr("data-validator-event", "keyup blur focus check").attr("data-validator", "required");
+
+                        if (this.model.onBlur) {
+                            this.$el.find(".scriptFilePath").bind("blur", _.bind(function () {
+                                this.model.onBlur();
+                            }, this));
+                        }
 
                         this.$el.find(".scriptSourceCode").removeAttr("data-validation-status").removeAttr("data-validator-event").removeAttr("data-validator").unbind("blur").unbind("check");
                     } else {
