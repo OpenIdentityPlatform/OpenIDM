@@ -110,7 +110,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                         "disableValidation" : false,
                         "placeHolder" : "['test', 'default']"
                     },
-                    _.bind(function(){}, this));
+                    _.bind(function(){
+
+                    }, this));
 
                 $("#linkQualifierPanel").on('shown.bs.collapse', _.bind(function () {
                     this.linkQualifierScript.refresh();
@@ -122,34 +124,31 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
             var scriptDetails,
                 validationResults =  this.linkQualifierScript.getValidation();
 
-            if(validationResults) {
-                scriptDetails = this.linkQualifierScript.generateScript();
 
-                if(scriptDetails !== null) {
-                    ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
-                            this.model.scriptError = false;
+            scriptDetails = this.linkQualifierScript.generateScript();
 
-                            this.$el.find("#scriptLinkQualifierList").empty();
+            if(scriptDetails !== null) {
+                ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
+                        this.model.scriptError = false;
 
-                            this.model.scriptResult = result;
+                        this.$el.find("#scriptLinkQualifierList").empty();
 
-                            this.$el.find(".linkQualifierSave").prop("disabled", false);
+                        this.model.scriptResult = result;
 
-                            this.populateScriptLinkQualifier(result);
-                        }, this),
-                        _.bind(function (result) {
-                            this.model.scriptError = true;
-                            this.$el.find(".linkQualifierSave").prop("disabled", true);
-                            this.$el.find("#badLinkQualifierScript .message").html(result.responseJSON.message);
-                            this.$el.find("#badLinkQualifierScript").show();
-                        }, this));
-                }
+                        this.$el.find(".linkQualifierSave").prop("disabled", false);
+
+                        this.populateScriptLinkQualifier(result);
+                    }, this),
+                    _.bind(function (result) {
+                        this.model.scriptError = true;
+                        this.$el.find(".linkQualifierSave").prop("disabled", true);
+                        this.$el.find("#badLinkQualifierScript .message").html(result.responseJSON.message);
+                        this.$el.find("#badLinkQualifierScript").show();
+                    }, this));
             } else {
-                this.$el.find("#scriptLinkQualifierList").empty();
-                this.$el.find("#badLinkQualifierScript .message").html($.t("templates.mapping.validLinkQualifierScript"));
-                this.$el.find("#badLinkQualifierScript").show();
                 this.$el.find(".linkQualifierSave").prop("disabled", true);
             }
+
         },
 
         populateScriptLinkQualifier : function (data) {
@@ -181,7 +180,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
             if(currentTab === "staticQualifierTab") {
                 this.$el.find(".linkQualifierSave").prop("disabled", false);
             } else {
-                if(this.model.scriptError === true) {
+                if(this.linkQualifierScript.generateScript() === null || this.model.scriptError === true) {
                     this.$el.find(".linkQualifierSave").prop("disabled", true);
                 }
             }
