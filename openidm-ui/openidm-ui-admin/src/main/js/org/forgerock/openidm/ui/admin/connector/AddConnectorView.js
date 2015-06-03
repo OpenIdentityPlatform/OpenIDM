@@ -159,12 +159,10 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
                 mergedResult = this.connectorTypeRef.connectorSaved(mergedResult);
             }
 
-            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
-
             ConnectorDelegate.deleteCurrentConnectorsCache();
 
             ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (testResult) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
                     mergedResult.objectTypes = testResult.objectTypes;
 
@@ -176,7 +174,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
                 _.bind(function(result) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
 
-                    this.$el.find("#submitConnector").prop('disabled', true);
                     this.showError(result);
                 }, this)
             );
