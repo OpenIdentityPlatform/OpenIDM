@@ -902,7 +902,7 @@ openidm.US.ldap.port=1389</programlisting>
      (<filename>/path/to/openidm/samples/customendpoint/conf/endpoint-echo.json</filename>)
      depicts a typical endpoint, configured to use a Groovy script that is
      specified in the <filename>script/echo.groovy</filename> file. The
-     structure of the sample configuration is as follows:
+     contents of the sample configuration file is shown here:
     </para>
     
      <programlisting language="javascript">{
@@ -968,8 +968,8 @@ openidm.US.ldap.port=1389</programlisting>
             The actual script, inline, or a path to the file that
             contains the script. The script files associated with this sample,
             <filename>echo.js</filename> and <filename>echo.groovy</filename>,
-            support requests using all ForgeRock RESTful CRUD operations
-            (including PATCH, ACTION, and QUERY).
+            support requests using all ForgeRock RESTful CRUD operations,
+            including PATCH, ACTION, and QUERY.
            </para>
          </listitem>
        </varlistentry>
@@ -1035,11 +1035,11 @@ openidm.US.ldap.port=1389</programlisting>
        <term><literal>context.current</literal></term>
        <listitem>
         <para>
-         In Groovy, known simply as <literal>context</literal>
+         In Groovy, known as <literal>context</literal>
         </para>
         <para>
-         The current context in which the request is handled by a script or a
-         script-hook.
+         The current context in which a script or a script-hook handles the
+         request.
         </para>
        </listitem>
       </varlistentry>
@@ -1097,6 +1097,10 @@ openidm.US.ldap.port=1389</programlisting>
     <section xml:id="adding-custom-endpoints-request">
      <title>Custom Endpoints and <literal>request</literal> Objects</title>
      <para>
+      With a custom endpoint, you can configure OpenIDM to accept different REST
+      requests.
+     </para>
+     <para>
       The endpoint configuration file specifies a script (either inline with the
       <literal>"source"</literal> property, or in a referenced file with the
       <literal>"file"</literal> property). The script is invoked with a global
@@ -1112,7 +1116,7 @@ openidm.US.ldap.port=1389</programlisting>
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#appendix-router"><citetitle>Router Service
       Reference</citetitle></link>.
-      Regardless of how the process is initiated, the details of the request are
+      Regardless of what initiates the process, the details of the request are
       represented in the same way - within an object named <literal>request</literal>.
      </para>
      <para>
@@ -1141,79 +1145,154 @@ openidm.US.ldap.port=1389</programlisting>
       deserialize it into an object. The object is accessed using
       <literal>request.content</literal>.
      </para>
-     <para>
-      Depending on the type of <literal>request</literal>,
-      the associated content may include the following
-      properties:
-     </para>
-     <variablelist>
-      <varlistentry>
-       <term><literal>method</literal></term>
-       <listitem>
-        <para>The requested operation, which may be <literal>create</literal>,
-         <literal>read</literal>, <literal>update</literal>,
-         <literal>delete</literal>, <literal>patch</literal>,
-         <literal>query</literal> or <literal>action</literal>.</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>resourceName</literal></term>
-       <listitem>
+
+     <section xml:id="custom-endpoint-files">
+      <title>Custom Endpoint Script Files</title>
+
+      <para>
+       The custom endpoint script files in the
+       <filename>samples/customendpoint/script</filename> directory can
+       provide insight into ForgeRock RESTful CRUD operations, including PATCH,
+       ACTION, and QUERY.
+      </para>
+
+      <para>
+       Examine the <literal>request</literal> options in each of these files.
+       The <literal>request</literal> object represents the framework-level
+       CREST request, as described in the
+       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+             xlink:href="integrators-guide#appendix-rest"><citetitle>REST API
+       Reference</citetitle></link>.
+      </para>
+
+      <para>
+       Each CREST request is associated with a <literal>method</literal>, which
+       may be <literal>create</literal>, <literal>read</literal>,
+       <literal>update</literal>, <literal>delete</literal>,
+       <literal>patch</literal>, <literal>action</literal> or
+       <literal>query</literal>.
+      </para>
+
+      <para>
+       Each <literal>method</literal> is associated with different sets of
+       properties. Details for each property are included after the
+       excerpts from the <filename>echo.js</filename> and
+       <filename>echo.groovy</filename> files.
+      </para>
+
+      <para>
+       As an example, look at the following <literal>create</literal> excerpt
+       from the <filename>echo.js</filename> file:
+      </para>
+      <programlisting language="javascript"> if (request.method === "create") {
+   return {
+       method: "create",
+       resourceName: request.resourceName,
+       newResourceId: request.newResourceId,
+       parameters: request.additionalParameters,
+       content: request.content,
+       context: context.current
+       };
+      </programlisting>
+      <para>
+       For contrast, examine the following <literal>query</literal> excerpt from
+       the <filename>echo.groovy</filename> file:
+      </para>
+      <programlisting language="groovy">} else if (request instanceof QueryRequest) {
+   // query results must be returned as a list of maps
+   return [
+       [
+           method: "query",
+           resourceName: request.resourceName,
+           pagedResultsCookie: request.pagedResultsCookie,
+           pagedResultsOffset: request.pagedResultsOffset,
+           pageSize: request.pageSize,
+           queryExpression: request.queryExpression,
+           queryId: request.queryId,
+           queryFilter: request.queryFilter.toString(),
+           parameters: request.additionalParameters,
+           context: context
+       ]
+      </programlisting>
+      <para>
+       Depending on the request <literal>method</literal>, the associated request
+       may include the following properties:
+      </para>
+      <variablelist>
+       <varlistentry>
+        <term><literal>resourceName</literal></term>
+        <listitem>
          <para>The local identifier, without the <literal>endpoint/</literal>
-         prefix, such as <literal>echo</literal>.</para>
-       </listitem>
-      </varlistentry>
+          prefix, such as <literal>echo</literal>.</para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>newResourceId</literal></term>
+        <listitem>
+         <para>
+          An identifier associated with a new resource, associated with
+          the <literal>create</literal> method.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>revision</literal></term>
+        <listitem>
+         <para>
+          The revision level associated with the method used, relative to
+          a <literal>newResourceId</literal>.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>parameters</literal></term>
+        <listitem>
+         <para>The sample code returns request parameters from an HTTP GET
+          with <literal>?param=x</literal>, as
+          <literal>"params":{"param":"x"}</literal>.</para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>content</literal></term>
+        <listitem>
+         <para>
+          Content based on the latest version of the object, using
+          <literal>getObject</literal>.
+         </para>
+        </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>context</literal></term>
+        <listitem>
+         <para>
+          Based on a JSON object that contains nested attributes. The object
+          with the attributes, defines the request, based on ForgeRock REST
+          <link xlink:show="new"
+                xlink:href="integrators-guide#rest-supported-operations"
+                xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
+           Supported Operations</citetitle></link>. For more information, see
+          <xref linkend="adding-custom-endpoints-context-components" />.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
 
-      <varlistentry>
-       <term><literal>newResourceId</literal></term>
-       <listitem>
-        <para>
-         An identifier associated with a new resource, associated with
-         the <literal>create</literal> method.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>additionalParameters</literal></term>
-       <listitem>
-        <para>The sample code returns request parameters from an HTTP GET
-         with <literal>?param=x</literal>, as
-         <literal>"params":{"param":"x"}</literal>.</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>revision</literal></term>
-       <listitem>
-        <para>
-         The revision level associated with the method used, relative to
-         a <literal>newResourceId</literal>.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>content</literal></term>
-       <listitem>
-        <para>
-         Content based on the latest version of the object, using
-         <literal>getObject</literal>.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>context</literal></term>
-       <listitem>
-        <para>
-         Based on a JSON object that contains nested attributes. The object
-         with the attributes, defines the request, based on ForgeRock REST
-         <link xlink:show="new"
-         xlink:href="integrators-guide#rest-supported-operations"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
-         Supported Operations</citetitle></link>.
-        </para>
-       </listitem>
-      </varlistentry>
-
-     </variablelist>
+      <para>
+       A <literal>query</literal> request in both files includes additional
+       parameters. For more information on the following parameters:
+       <literal>queryId</literal>, <literal>queryFilter</literal>, and
+       <literal>queryExpression</literal>, see the Appendix on
+       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+             xlink:href="integrators-guide#rest-supported-query">
+        <citetitle>Querying Resources</citetitle></link>. For more information
+       on these paging parameters, <literal>pagedResultsCookie</literal>,
+       <literal>pagedResultsOffset</literal>, and <literal>pageSize</literal>,
+       see the following section on
+       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+             xlink:href="integrators-guide#paging-query-results">
+        <citetitle>Paging Query Results</citetitle></link>.
+      </para>
+     </section>
 
     </section>
 
@@ -1221,7 +1300,7 @@ openidm.US.ldap.port=1389</programlisting>
     <title>Custom Endpoints, Contexts, and Chains</title>
 
     <para>
-     Custom endpoints include contexts that may be wrapped in various layers,
+     Custom endpoints include contexts that may be wrapped in different layers,
      analogous to the way network packets can be wrapped at ascending network
      levels.
     </para>
@@ -1269,9 +1348,9 @@ openidm.US.ldap.port=1389</programlisting>
      <title>Additional Custom Endpoint Parameters</title>
 
      <para>
-      A couple of additional parameters are shown with the
-      <literal>query</literal> request method. You can review how this works
-      in the following section of the OpenIDM Installation Guide:
+      The <literal>query</literal> request method includes two additional
+      parameters. You can review how this works in the following section of the
+      OpenIDM Installation Guide:
       <link xlink:show="new"
       xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="install-guide#more-sample2c"><citetitle>Sample 2c -
