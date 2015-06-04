@@ -898,11 +898,11 @@ openidm.US.ldap.port=1389</programlisting>
     <title>The Components of an Endpoint Configuration File</title>
 
     <para>
-     The sample custom endpoint configuration
+     The sample custom endpoint configuration file
      (<filename>/path/to/openidm/samples/customendpoint/conf/endpoint-echo.json</filename>)
      depicts a typical endpoint, configured to use a Groovy script that is
      specified in the <filename>script/echo.groovy</filename> file. The
-     contents of the sample configuration file is shown here:
+     contents file are shown here:
     </para>
     
      <programlisting language="javascript">{
@@ -912,86 +912,60 @@ openidm.US.ldap.port=1389</programlisting>
   "_type" : "text/javascript"
 }    </programlisting>
 
-     <para>
-      The <literal>"_file"</literal> and <literal>"_type"</literal> properties
-      are comments, which you can change to accommodate an endpoint written in
-      JavaScript.
-     </para>
+    <para>
+     The following list describes each property in the custom endpoint
+     configuration file:
+    </para>
 
-     <para>
-      If appropriate, you can also include a <literal>context</literal> property
-      in this file. The following example shows how the
-      <literal>context</literal> is used to display routing to an endpoint.
-     </para>
-
-     <programlisting language="javascript">
-  "context" : "endpoint/echo",
-     </programlisting>
-
-     <para>
-      The endpoint configuration can specify the route on which the endpoint is
-      available. For an example, look at the
-      <filename>conf/endpoint-linkedView.json</filename> file. The code shown
-      declares the route on which the endpoint is available.
-     </para>
-
-     <programlisting language="javascript">
-{
-  "context": "endpoint/linkedView/*",
-  "type" : "text/javascript",
-  "source" : "require('linkedView').fetch(request.resourceName);"
-}
-     </programlisting>
-
-     <para>
-      The following list describes each property in the custom endpoint
-      configuration file:
-     </para>
-
-     <variablelist>
-       <varlistentry>
-         <term><literal>"type"</literal></term>
-         <listitem>
-           <para>
-            string, required
-           </para>
-           <para>
-            Specifies the type of script to be executed. Supported types include
-            <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
-           </para>
-         </listitem>
-       </varlistentry>
-       <varlistentry>
-         <term><literal>"file"</literal> or <literal>"source"</literal></term>
-         <listitem>
-           <para>
-            The actual script, inline, or a path to the file that
-            contains the script. The script files associated with this sample,
-            <filename>echo.js</filename> and <filename>echo.groovy</filename>,
-            support requests using all ForgeRock RESTful CRUD operations,
-            including PATCH, ACTION, and QUERY.
-           </para>
-         </listitem>
-       </varlistentry>
-       <varlistentry>
-        <term><literal>context</literal></term>
-        <listitem>
-         <para>
-          Requests are dispatched, routed, handled, processed, and more, in a
-          <literal>context</literal>.
-         </para>
-        </listitem>
-       </varlistentry>
-     </variablelist>
-
-    </section>
+    <variablelist>
+     <varlistentry>
+      <term><literal>"type"</literal></term>
+      <listitem>
+       <para>
+        string, required
+       </para>
+       <para>
+        A comment that specifies the type of script to be executed. The following
+        types are supported: <literal>"text/javascript"</literal> and
+        <literal>"groovy"</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>"file"</literal> or <literal>"source"</literal></term>
+      <listitem>
+       <para>
+        Either a a path to a script file, or an actual script, inline.
+       </para>
+       <para>
+        The script files associated with this sample,
+        <filename>echo.js</filename> and <filename>echo.groovy</filename>,
+        support requests using all ForgeRock RESTful CRUD operations: CREATE,
+        READ, UPDATE, DELETE, PATCH, ACTION, and QUERY.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>context</literal></term>
+      <listitem>
+       <para>
+        Requests are dispatched, routed, handled, processed, and more, in a
+        <literal>context</literal>.
+       </para>
+       <para>
+        You can also include a <literal>context</literal> property in an
+        endpoint configuration file. For more information, see
+        <xref linkend="adding-custom-endpoints-context-components" />.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
 
     <section xml:id="adding-custom-endpoints-context-components">
-     <title>Context Component Access Methods</title>
+     <title>More on the <literal>context</literal> Property</title>
 
      <para>
-      For both JavaScript and Groovy, the context consists of a chain of
-      structures that provide different levels of detail. The detail varies
+      The <literal>context</literal> property includes detail that varies
       depending on the context type:
      </para>
 
@@ -1092,7 +1066,32 @@ openidm.US.ldap.port=1389</programlisting>
        </listitem>
       </varlistentry>
      </variablelist>
+
+     <para>
+      The endpoint configuration file can include the route to the endpoint.
+      For an example, see the <filename>endpoint-linkedView.json</filename>
+      file in the <filename>/path/to/openidm/conf/</filename> directory.
+      The code shown here identifies the route as
+      <literal>endpoint/linkedView/*</literal>.
+     </para>
+
+     <programlisting language="javascript">{
+      "context": "endpoint/linkedView/*",
+      "type" : "text/javascript",
+      "source" : "require('linkedView').fetch(request.resourceName);"
+}</programlisting>
+
+     <para>
+      Alternatively, the following line identifies the route as
+      <literal>endpoint/echo</literal>:
+     </para>
+
+     <programlisting language="javascript">
+      "context" : "endpoint/echo",
+     </programlisting>
+
     </section>
+   </section>
 
     <section xml:id="adding-custom-endpoints-request">
      <title>Custom Endpoints and <literal>request</literal> Objects</title>
@@ -1102,9 +1101,9 @@ openidm.US.ldap.port=1389</programlisting>
      </para>
      <para>
       The endpoint configuration file specifies a script (either inline with the
-      <literal>"source"</literal> property, or in a referenced file with the
-      <literal>"file"</literal> property). The script is invoked with a global
-      <literal>request</literal> variable in its scope.
+      <literal>"source"</literal> property, or in a separate file identified
+      with the <literal>"file"</literal> property). The script is invoked with
+      a global <literal>request</literal> variable in its scope.
      </para>
      <para>
       All processes within OpenIDM are initiated with a request. Requests can
@@ -1112,7 +1111,7 @@ openidm.US.ldap.port=1389</programlisting>
       xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#appendix-rest"><citetitle>REST API
       Reference</citetitle></link>) or internally, from a script, using the
-      <literal>openidm</literal> router object, as defined in the
+      <literal>router</literal> object, as defined in the
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#appendix-router"><citetitle>Router Service
       Reference</citetitle></link>.
@@ -1249,7 +1248,7 @@ openidm.US.ldap.port=1389</programlisting>
         <listitem>
          <para>The sample code returns request parameters from an HTTP GET
           with <literal>?param=x</literal>, as
-          <literal>"params":{"param":"x"}</literal>.</para>
+          <literal>"parameters":{"param":"x"}</literal>.</para>
         </listitem>
        </varlistentry>
        <varlistentry>
