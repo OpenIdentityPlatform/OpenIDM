@@ -786,7 +786,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 Resource patchedResource = update(context, request, resource.getId(), _rev, resource, newValue);
 
                 activityLogger.log(context, request.getRequestType(), "Patch " + patchOperations.toString(),
-                        managedId(patchedResource.getId()).toString(), patchedResource.getContent(), patchedResource.getContent(),
+                        managedId(patchedResource.getId()).toString(), resource.getContent(), patchedResource.getContent(),
                         Status.SUCCESS);
                 retry = false;
                 logger.debug("Patch successful!");
