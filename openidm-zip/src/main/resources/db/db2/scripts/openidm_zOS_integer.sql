@@ -639,7 +639,7 @@ CREATE TABLE SOPENIDM.AUDITACTIVITY
        ,ACTIVITY                   VARCHAR(24)
        ,MESSAGE                    VARCHAR(30000)
        ,SUBJECTID                  VARCHAR(511)
-       ,SUBJECTREV                 VARCHAR(38)
+       ,SUBJECTREV                 VARCHAR(255)
        ,ROOTACTIONID               VARCHAR(512)
        ,PARENTACTIONID             VARCHAR(512)
        ,REQUESTER                  VARCHAR(255)

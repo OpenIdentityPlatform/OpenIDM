@@ -107,7 +107,7 @@ CREATE TABLE auditactivity (
   activity VARCHAR2(24 CHAR),
   message CLOB,
   subjectid VARCHAR2(511 CHAR),
-  subjectrev VARCHAR2(38 CHAR),
+  subjectrev VARCHAR2(255 CHAR),
   requester CLOB,
   approver CLOB,
   subjectbefore CLOB,

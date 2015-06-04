@@ -187,7 +187,7 @@ CREATE TABLE openidm.auditactivity (
   activity VARCHAR(24) DEFAULT NULL,
   message TEXT,
   subjectid VARCHAR(511) DEFAULT NULL,
-  subjectrev VARCHAR(38) DEFAULT NULL,
+  subjectrev VARCHAR(255) DEFAULT NULL,
   requester TEXT,
   approver TEXT,
   subjectbefore TEXT,
