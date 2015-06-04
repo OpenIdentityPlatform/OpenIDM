@@ -315,7 +315,7 @@ CREATE  TABLE [openidm].[auditactivity]
   activity NVARCHAR(24) NULL ,
   message NTEXT NULL ,
   subjectid NVARCHAR(511) NULL ,
-  subjectrev NVARCHAR(38) NULL ,
+  subjectrev NVARCHAR(255) NULL ,
   requester NTEXT NULL ,
   approver NTEXT NULL ,
   subjectbefore NTEXT NULL ,

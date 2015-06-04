@@ -192,7 +192,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `activity` VARCHAR(24) NULL ,
   `message` TEXT NULL ,
   `subjectid` VARCHAR(511) NULL ,
-  `subjectrev` VARCHAR(38) NULL ,
+  `subjectrev` VARCHAR(255) NULL ,
   `requester` TEXT NULL ,
   `approver` TEXT NULL ,
   `subjectbefore` MEDIUMTEXT NULL ,
