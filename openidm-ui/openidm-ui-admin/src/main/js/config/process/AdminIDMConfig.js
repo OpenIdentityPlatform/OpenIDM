@@ -40,6 +40,24 @@ define("config/process/AdminIDMConfig", [
                 processDescription: function(event, router, conf, PropertiesView) {
                     PropertiesView.render([event]);
                 }
+            },
+            {
+                startEvent: constants.EVENT_CHANGE_BASE_VIEW,
+                description: "",
+                override: true,
+                dependencies: [
+                    "org/forgerock/commons/ui/common/components/Navigation",
+                    "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
+                    "org/forgerock/commons/ui/common/main/Configuration",
+                    "org/forgerock/openidm/ui/admin/components/Footer"
+                ],
+                processDescription: function(event, navigation, popupCtrl, conf,footer) {
+                    navigation.init();
+                    popupCtrl.init();
+
+                    breadcrumbs.buildByUrl();
+                    footer.render();
+                }
             }
         ];
 
