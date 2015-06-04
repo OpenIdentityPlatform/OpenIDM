@@ -48,10 +48,11 @@ define("config/process/AdminIDMConfig", [
                 dependencies: [
                     "org/forgerock/commons/ui/common/components/Navigation",
                     "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
+                    "org/forgerock/commons/ui/common/components/Breadcrumbs",
                     "org/forgerock/commons/ui/common/main/Configuration",
                     "org/forgerock/openidm/ui/admin/components/Footer"
                 ],
-                processDescription: function(event, navigation, popupCtrl, conf,footer) {
+                processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf,footer) {
                     navigation.init();
                     popupCtrl.init();
 
