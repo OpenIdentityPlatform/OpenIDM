@@ -1,0 +1,12 @@
+<div class="container">
+    <p>
+        <a href="mailto: {{theme.settings.footer.mailto}}">{{theme.settings.footer.mailto}}</a>
+        {{#if theme.settings.footer.phone}}{{t 'templates.user.DefaultBaseTemplate.orPhone'}} {{theme.settings.footer.phone}}.{{/if}}
+        {{#if version}}
+        <br />
+        {{version}} ({{t "openidm.admin.revision"}}: {{revision}})
+        {{/if}}
+        <br />
+        {{t "common.form.copyright"}}
+    </p>
+</div>
