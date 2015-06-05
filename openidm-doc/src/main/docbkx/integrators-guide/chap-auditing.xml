@@ -35,12 +35,14 @@
   <primary>Audit logs</primary>
  </indexterm>
 
- <para>OpenIDM auditing can publish and log all relevant system activity to
- the targets you specify. Auditing can include data from reconciliation as
- a basis for reporting, access details, and activity logs that capture
- operations on internal (managed) objects and external (system) objects.
- Auditing provides the data for all the relevant reports, including orphan
- account reports.</para>
+ <para>
+  The OpenIDM auditing service can publish and log all relevant system activity
+  to one or more specified targets. Auditing can include data from
+  reconciliation operations as a basis for reporting, access details, and
+  activity logs that capture operations on internal (managed) objects and
+  external (system) objects. Auditing provides the data for all the relevant
+  reports, including orphan account reports.
+ </para>
  <!--
  For instructions on setting up an external reporting engine with OpenIDM,
  see the chapter on <link xlink:href="integrators-guide#chap-reporting"
@@ -48,15 +50,23 @@
  Reports</citetitle></link>.
   -->
 
- <para>The auditing interface allows you to push auditing data to local files,
-  to the OpenIDM repository, and to a remote system.</para>
+ <para>
+  The auditing service enables you to push auditing data to local files,  to
+  the OpenIDM repository, and to a remote system.
+ </para>
+ <para>
+  Audit files can also be queried over the REST interface. For information, see
+  the section on
+  <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="integrators-guide#querying-recon-logs"><citetitle>Querying the
+  Reconciliation Audit Log</citetitle></link>.
+ </para>
 
  <section xml:id="audit-log-types">
-  <title>Audit Log Types</title>
-
+  <title>Audit Log Event Types</title>
   <variablelist>
    <para>
-    OpenIDM provides the following types of audit log:
+    OpenIDM logs the following audit events:
    </para>
    <varlistentry>
     <term>Access Log</term>
@@ -108,20 +118,22 @@
    </varlistentry>
   </variablelist>
 
-  <para>Where an action happens related to a higher level business
-  function, the log entry points to a parent activity for that function.
-  The relationships are hierarchical. For example, a synchronization operation
-  could result from scheduled reconciliation for an object type. OpenIDM also
-  logs the top level root activity with each entry, making it possible to
-  query related activities.</para>
+  <para>
+   When an action happens related to a higher level business function, the log
+   entry points to the parent activity for that function. The relationships are
+   hierarchical. For example, a synchronization operation might result from a
+   scheduled reconciliation operation for an object type. OpenIDM also logs the
+   top level root activity with each log entry, making it possible to query
+   related activities.
+  </para>
  </section>
 
  <section xml:id="audit-log-format">
   <title>Audit Log Formats</title>
-
-  <para>This section describes the audit log formats to help you map
-  these to the reports you generate.</para>
-
+  <para>
+   This section describes the format of each audit event type, to assist you
+   with mapping audit logs to the reports you generate.
+  </para>
   <variablelist xml:id="audit-access-fields">
    <title>Access Log Fields</title>
    <para>
@@ -166,7 +178,7 @@
     <term><literal>"roles"</literal></term>
     <listitem>
      <para>
-      Roles associated with the principal, such as
+      Any roles associated with the principal, such as
       <literal>"[openidm-admin, openidm-authorized]"</literal>
      </para>
     </listitem>
@@ -184,7 +196,7 @@
     <listitem>
      <para>
       The time that OpenIDM logged the message, in UTC format, for example
-      <literal>"2012-11-18T08:48:00.160Z"</literal>
+      <literal>"2015-05-18T08:48:00.160Z"</literal>
      </para>
     </listitem>
    </varlistentry>
@@ -219,7 +231,7 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>
-      Action performed on that entry, such as <literal>"create"</literal>.
+      Action performed on that entry, such as <literal>"create"</literal>
      </para>
     </listitem>
    </varlistentry>
@@ -227,7 +239,7 @@
     <term><literal>"activityId"</literal></term>
     <listitem>
      <para>
-      UUID for the activity corresponding to the UUID of the resource context
+      UUID of the activity corresponding to the UUID of the resource context
      </para>
     </listitem>
    </varlistentry>
@@ -235,7 +247,7 @@
     <term><literal>"after"</literal></term>
     <listitem>
      <para>
-      JSON representation of the object resulting from the activity
+      JSON representation of the object that results from the activity
      </para>
     </listitem>
    </varlistentry>
@@ -251,9 +263,11 @@
     <term><literal>"changedFields"</literal></term>
     <listitem>
      <para>
-      List of the fields that were changed as a result of the activity. This
-      list takes into consideration only those fields that have been configured
-      as <literal>"watchedFields"</literal> in the
+      List of the fields that were changed as a result of the activity
+     </para>
+     <para>
+      This list takes into consideration only those fields that have been
+      configured as <literal>"watchedFields"</literal> in the
       <filename>conf/audit.json</filename> file.
      </para>
     </listitem>
@@ -288,7 +302,7 @@
     <listitem>
      <para>
       Boolean (<literal>true</literal> or <literal>false</literal>) indicating
-      whether the action resulted in a password change.
+      whether the action resulted in a password change
      </para>
     </listitem>
    </varlistentry>
@@ -309,9 +323,10 @@
    <varlistentry>
     <term><literal>"rootActionId"</literal></term>
     <listitem>
-     <para>UUID of the root cause for the activity. This matches a
-     corresponding <literal>"rootActionId"</literal> in a reconciliation
-     message.</para>
+     <para>
+      UUID of the root cause for the activity. This matches a corresponding
+      <literal>"rootActionId"</literal> in a reconciliation message.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -323,8 +338,10 @@
    <varlistentry>
     <term><literal>"timestamp"</literal></term>
     <listitem>
-     <para>Time when OpenIDM logged the message, in UTC format, for example 
-     <literal>"2012-11-18T08:48:00.160Z"</literal></para>
+     <para>
+      Time that OpenIDM logged the message, in UTC format, for example
+      <literal>"2015-05-18T08:48:00.160Z"</literal>
+     </para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -345,8 +362,10 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>
-      Synchronization action, such as <literal>"CREATE"</literal>. For more
-      information, see the section that describes the <link
+      Synchronization action, such as <literal>"CREATE"</literal>.
+     </para>
+     <para>
+      For more information, see the section that describes the <link
       xlink:href="integrators-guide#sync-actions"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
       Actions</citetitle></link>.
@@ -357,7 +376,7 @@
     <term><literal>"actionID"</literal></term>
     <listitem>
      <para>
-      The unique ID assigned to the action.
+      The unique ID assigned to the action
      </para>
     </listitem>
    </varlistentry>
@@ -367,8 +386,8 @@
      <para>
       When the situation is AMBIGUOUS or UNQUALIFIED and OpenIDM cannot
       distinguish between more than one target object, OpenIDM logs the
-      identifiers of the objects in this field in comma-separated format. This
-      makes it possible to figure out what was ambiguous afterwards.
+      identifiers of the objects in this field, in comma-separated format. This
+      makes it possible to figure out what was ambiguous.
      </para>
     </listitem>
    </varlistentry>
@@ -377,7 +396,7 @@
     <listitem>
      <para>
       The type of reconciliation log entry, such as <literal>"start"</literal>,
-      or <literal>"summary"</literal>.
+      or <literal>"summary"</literal>
      </para>
     </listitem>
    </varlistentry>
@@ -385,7 +404,7 @@
     <term><literal>"exception"</literal></term>
     <listitem>
      <para>
-      The stack trace of the exception, if any.
+      The stack trace of the exception, if any
      </para>
     </listitem>
    </varlistentry>
@@ -393,9 +412,9 @@
     <term><literal>"mapping"</literal></term>
     <listitem>
      <para>
-      The name of the mapping used for the reconciliation (defined in
-      <filename>conf/sync.json</filename>, for example
-      <literal>"systemLdapAccounts_managedUser"</literal>.
+      The name of the mapping that was used for the reconciliation (defined in
+      <filename>conf/sync.json</filename>), for example
+      <literal>"systemLdapAccounts_managedUser"</literal>
      </para>
     </listitem>
    </varlistentry>
@@ -403,7 +422,7 @@
     <term><literal>"message"</literal></term>
     <listitem>
      <para>
-      Human readable text about the reconciliation action that was taken.
+      Human readable text about the reconciliation action that was taken
      </para>
     </listitem>
    </varlistentry>
@@ -438,35 +457,46 @@
     <term><literal>"reconId"</literal></term>
     <listitem>
      <para>
-      UUID for the reconciliation operation, which is the same for all entries
-      pertaining to the reconciliation run.
+      UUID for the reconciliation operation
+     </para>
+     <para>
+      This is the same for all entries that pertain to the reconciliation run.
      </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>"reconciling"</literal></term>
     <listitem>
-     <para>What OpenIDM is reconciling, 
-     <literal>"source"</literal> for the first phase, 
-     <literal>"target"</literal> for the second phase</para>
+     <para>
+      What OpenIDM is reconciling, <literal>"source"</literal> for the first
+      phase, <literal>"target"</literal> for the second phase
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>"rootActionId"</literal></term>
     <listitem>
-     <para>UUID of the root cause for the activity. This matches a
-     corresponding <literal>"rootActionId"</literal> in an activity
-     message.</para>
+     <para>
+      The UUID of the root cause for the activity
+     </para>
+     <para>
+      This matches a corresponding <literal>"rootActionId"</literal> in an
+      activity message.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>"situation"</literal></term>
     <listitem>
      <para>
-      The situation encountered. For more information, see the section that
-      describes <link xlink:href="integrators-guide#sync-situations"
+      The situation encountered.
+     </para>
+     <para>
+      For more information, see the section that describes the
+      <link xlink:href="integrators-guide#sync-situations"
       xlink:role="http://docbook.org/xlink/role/olink">synchronization
-      situations</link>.</para>
+      situations</link>.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -476,14 +506,16 @@
       The object identifier on the source system, such as
       <literal>"system/xmlfile/account/bjensen"</literal> or
       <literal>"managed/user/bjensen"</literal> (depending on the resource
-      configured as the source in the mapping).
+      that is configured as the source in the mapping).
      </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>"status"</literal></term>
     <listitem>
-     <para>Result of the operation, such as <literal>"SUCCESS"</literal></para>
+     <para>
+      Result of the operation, such as <literal>"SUCCESS"</literal>
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -493,15 +525,17 @@
       The object identifier on the target system, such as
       <literal>"system/xmlfile/account/bjensen"</literal> or
       <literal>"managed/user/bjensen"</literal> (depending on the resource
-      configured as the target in the mapping).
+      that is configured as the target in the mapping).
      </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>"timestamp"</literal></term>
     <listitem>
-    <para>Time when OpenIDM logged the message, in UTC format, for example 
-    <literal>"2012-11-18T08:48:00.160Z"</literal></para>
+    <para>
+     The time that OpenIDM logged the message, in UTC format, for example
+     <literal>"2015-05-18T08:48:00.160Z"</literal>
+    </para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -663,16 +697,16 @@
  </section>
 
  <section xml:id="audit-configuration">
-  <title>Audit Configuration</title>
-
+  <title>Configuring the Audit Service</title>
   <para>
    OpenIDM exposes the audit logging configuration under
    <literal>https://localhost:8443/openidm/config/audit</literal> for the REST
-   API, and in the file <filename>conf/audit.json</filename> where you installed
-   OpenIDM. A sample <filename>conf/audit.json</filename> configuration file
-   follows:
+   API, and in the file
+   <filename><replaceable>project-dir</replaceable>/conf/audit.json</filename>.
   </para>
-
+  <para>
+   A sample <filename>conf/audit.json</filename> configuration file follows:
+  </para>
   <programlisting language="javascript">{
     "eventTypes" : {
         "activity" : {
@@ -708,149 +742,368 @@
     }
 }</programlisting>
 
-  <section xml:id="audit-eventtypes">
-   <title>Event Types</title>
-
+  <variablelist>
    <para>
-    The <literal>eventTypes</literal> configuration specifies what events
-    OpenIDM writes to audit logs. OpenIDM supports the following event types:
-    access, activity, synchronization, and reconciliation. The filter for
-    actions under activity logging shows the actions on managed or system
-    objects for which OpenIDM writes to the activity log.
+    The <filename>audit.json</filename> file includes the following configurable
+    parameters:
+   </para>
+   <varlistentry>
+    <term><literal>eventTypes</literal></term>
+    <listitem>
+     <para>
+      By default, OpenIDM writes all event types to the audit log. The
+      <literal>eventTypes</literal> parameter enables you to customize the level
+      of information that is logged, per event type. For more information, see
+      <xref linkend="filtering-audit-events" />.
+     </para>
+     <para>
+      The following event types are logged:
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        <literal>access</literal>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>activity</literal>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>recon</literal>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>sync</literal>
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>logTo</literal></term>
+    <listitem>
+     <para>
+      The <literal>logTo</literal> parameter enables you to specify the format
+      of the log, where it is written, and various parameters for each event
+      type.
+     </para>
+     <para>
+      For more information, see <xref linkend="directing-log-output" />.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry xml:id="audit-exception-formatter">
+    <term><literal>exceptionFormatter</literal></term>
+    <listitem>
+     <para>
+      The <literal>exceptionFormatter</literal> parameter enables you to specify
+      the name and type of script file that handles the formatting and display
+      of exceptions that are thrown by the audit logger.
+     </para>
+     <para>
+      <literal>"type"</literal> specifies the script type. Supported types
+      include <literal>"text/javascript"</literal> and
+      <literal>"groovy"</literal>.
+     </para>
+     <para>
+      <literal>"file"</literal> provides the path to the script file that
+      performs the formatting. The default exception formatter is
+      <literal>"bin/defaults/script/audit/stacktraceFormatter.js"</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <section xml:id="filtering-audit-events">
+   <title>Filtering Audit Logs Per Event Type</title>
+   <para>
+    The audit configuration, defined in the <filename>audit.json</filename>
+    file, includes a <literal>filter</literal> parameter that enables you to
+    specify what should be logged, per event type. The information that is
+    logged can be filtered in various ways. The following sections describe the
+    filters that can be applied to each event type.
    </para>
 
-   <variablelist>
-    <para>The <literal>filter</literal> <literal>actions</literal> list enables 
-    you to configure the conditions that result in actions being written to the 
-    activity log.</para>
-    <varlistentry>
-     <term><literal>read</literal></term>
-     <listitem>
-      <para>
-       When an object is read by using its identifier. By default, read
-       actions are not logged. Add the <literal>"read"</literal> action to the
-       list of actions to log all read actions.
-      </para>
-      <para>
-       Note that, due to the potential result size in the case of read
-       operations on <literal>system/</literal> endpoints, only the read is
-       logged, and not the resource detail. If you really need to log the
-       complete resource detail, add the following line to your
-       <filename>conf/boot/boot.properties</filename> file:
-      </para>
-      <programlisting>openidm.audit.logFullObjects=true</programlisting>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>create</literal></term>
-     <listitem>
-      <para>When an object is created.</para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>update</literal></term>
-     <listitem>
-      <para>When an object is updated.</para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>delete</literal></term>
-     <listitem>
-      <para>When an object is deleted.</para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>patch</literal></term>
-     <listitem>
-      <para>When an object is partially modified.</para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>query</literal></term>
-     <listitem>
-      <para>
-       When a query is performed on an object. By default, query
-       actions are not logged. Add the <literal>"query"</literal> action to the
-       list of actions to log all query actions.
-      </para>
-      <para>
-       Note that, due to the potential result size in the case of query
-       operations on <literal>system/</literal> endpoints, only the query is
-       logged, and not the resource detail. If you really need to log the
-       complete resource detail, add the following line to your
-       <filename>conf/boot/boot.properties</filename> file:
-      </para>
-      <programlisting>openidm.audit.logFullObjects=true</programlisting>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>action</literal></term>
-     <listitem>
-      <para>When an action is performed on an object.</para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-   
-   <para>You can optionally add a <literal>filter</literal> 
-   <literal>triggers</literal> list that specifies the actions that are logged 
-   for a particular trigger. For example, the following addition to the 
-   <filename>audit.json</filename> file specifies that only 
-   <literal>create</literal> and <literal>update</literal> actions are logged 
-   for an activity that was triggered by a <literal>recon</literal>.</para>
-   
-   <programlisting language="javascript">
-   ...
-            "filter" : {
-                "actions" : [
-                    "create",
-                    "update",
-                    "delete",
-                    "patch",
-                    "action"
-                ],
-                "triggers" : {
-                    "recon" : [
-                        "create",
-                        "update"
-                    ]
-                }
-            },
-            "watchedFields" : [ ],   
-   ...
-   </programlisting>
-   
-   <para>If a trigger is provided, but no actions are specified, nothing is 
-   logged for that trigger. If a trigger is omitted, all actions are logged 
-   for that trigger. In the current OpenIDM release, only the 
-   <literal>recon</literal> trigger is implemented. For a list of reconciliation 
-   actions that can be logged, see <link xlink:href="integrators-guide#sync-actions" 
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization 
-   Actions</citetitle></link>.</para>
-   
-   <para>The <literal>watchedFields</literal> parameter enables you to specify 
-   a list of fields that should be monitored for changes. When the value of one
-   of the fields in this list changes, the change is logged in the audit log, 
-   under the column <literal>"changedFields"</literal>. Fields are listed in 
-   comma-separated format, for example:</para>
-   <screen>"watchedFields" : [ "email", "address" ]</screen>
-   <para>The <literal>passwordFields</literal> parameter enables you to specify 
-   a list of fields that are considered passwords. This parameter functions much 
-   like the <literal>watchedFields</literal> parameter in that changes to these 
-   field values are logged in the audit log, under the column 
-   <literal>"changedFields"</literal>. In addition, when a password field is 
-   changed, the boolean <literal>"passwordChanged"</literal> flag is set to 
-   <literal>true</literal> in the audit log. Fields are listed in 
-   comma-separated format, for example:</para>
-   <screen>"passwordFields" : [ "password", "username" ]</screen>
+   <section xml:id="filtering-by-action">
+    <title>Filtering Audit Entries by Action</title>
+    <para>
+     The <literal>filter</literal> <literal>actions</literal> list enables you
+     to specify the actions that are logged, per event type. For example, the
+     following configuration specifies that only create, update, delete, patch,
+     and action operations are logged in the activity log:
+    </para>
+    <programlisting>"eventTypes" : {
+    "activity" : {
+        "filter" : {
+            "actions" : [
+            "create",
+            "update",
+            "delete",
+            "patch",
+            "action"
+        ]
+    },
+    ...</programlisting>
+    <para>
+     If an event type is not included in the list of
+     <literal>eventTypes</literal>, or if no <literal>filter</literal> is
+     specified for an event type (for example <literal>"recon" : { }</literal>),
+     all actions for that event type are logged.
+    </para>
+    <variablelist>
+     <para>
+      The following <literal>actions</literal> can be filtered into the log.
+     </para>
+     <varlistentry>
+      <term><literal>read</literal></term>
+      <listitem>
+       <para>
+        When an object is read by using its identifier. By default, read
+        actions are not logged. Add the <literal>"read"</literal> action to the
+        list of actions to log all read actions.
+       </para>
+       <para>
+        Note that, due to the potential result size in the case of read
+        operations on <literal>system/</literal> endpoints, only the read is
+        logged, and not the resource detail. If you really need to log the
+        complete resource detail, add the following line to your
+        <filename>conf/boot/boot.properties</filename> file:
+       </para>
+       <programlisting>openidm.audit.logFullObjects=true</programlisting>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>create</literal></term>
+      <listitem>
+       <para>When an object is created.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>update</literal></term>
+      <listitem>
+       <para>When an object is updated.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>delete</literal></term>
+      <listitem>
+       <para>When an object is deleted.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>patch</literal></term>
+      <listitem>
+       <para>When an object is partially modified.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>query</literal></term>
+      <listitem>
+       <para>
+        When a query is performed on an object. By default, query
+        actions are not logged. Add the <literal>"query"</literal> action to the
+        list of actions to log all query actions.
+       </para>
+       <para>
+        Note that, due to the potential result size in the case of query
+        operations on <literal>system/</literal> endpoints, only the query is
+        logged, and not the resource detail. If you really need to log the
+        complete resource detail, add the following line to your
+        <filename>conf/boot/boot.properties</filename> file:
+       </para>
+       <programlisting>openidm.audit.logFullObjects=true</programlisting>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>action</literal></term>
+      <listitem>
+       <para>When an action is performed on an object.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
 
+   <section xml:id="filtering-by-trigger">
+    <title>Filtering Audit Entries by Trigger</title>
+    <para>
+     You can add a <literal>filter</literal> <literal>triggers</literal> list
+     to the audit configuration, that specifies the actions that will be logged
+     for a specific trigger. For example, the following addition to the
+     <filename>audit.json</filename> file specifies that only
+     <literal>create</literal> and <literal>update</literal> actions are logged
+     for in the activity log, for an activity that was triggered by a
+     <literal>recon</literal>.
+    </para>
+    <programlisting language="javascript">"eventTypes" : {
+    "activity" : {
+        "filter" : {
+            "actions" : [
+            ...
+            ],
+            "triggers" : {
+                "recon" : [
+                    "create",
+                    "update"
+                ]
+            }
+    ...</programlisting>
+    <para>
+     If a trigger is provided, but no actions are specified, nothing is logged
+     for that trigger. If a trigger is omitted, all actions are logged for that
+     trigger. In the current OpenIDM release, only the <literal>recon</literal>
+     trigger is implemented. For a list of reconciliation actions that can be
+     logged, see <link xlink:href="integrators-guide#sync-actions"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+     Actions</citetitle></link>.
+    </para>
+   </section>
+
+   <section xml:id="filtering-by-field">
+    <title>Filtering Audit Entries by Field</title>
+    <para>
+     You can add a <literal>filter</literal> <literal>fields</literal> list
+     to the audit configuration, that enables you to filter log entries by
+     specific fields. For example, you might want to restrict the reconciliation
+     audit log so that only summary information is logged for each
+     reconciliation operation. The following addition to the
+     <filename>audit.json</filename> file specifies that entries are logged in
+     the reconciliation log only if their <literal>entryType</literal> is
+     <literal>start</literal> or <literal>summary</literal>.
+    </para>
+    <programlisting language="javascript">"eventTypes" : {
+    "recon" : {
+        "filter" : {
+            "fields" : [
+                {
+                    "name" : "entryType",
+                    "values" : [ "start", "summary" ]
+                }
+            ]
+        }
+    },
+    ...</programlisting>
+   </section>
+
+   <section xml:id="audit-watched-fields">
+    <title>Defining Specific Fields to Monitor</title>
+    <para>
+     <emphasis>For the activity log only</emphasis>, you can specify fields
+     whose values are considered particularly important in terms of logging.
+    </para>
+    <para>
+     The <literal>watchedFields</literal> parameter, configured in the
+     <literal>audit.json</literal> file, is not really a filtering mechanism,
+     but enables you to define a list of properties that should be monitored for
+     changes. When the value of one of the properties in this list changes, the
+     change is logged in the activity log, under the column
+     <literal>"changedFields"</literal>. This parameter enables you to have
+     quick access to important changes in the log.
+    </para>
+    <para>
+     Properties to monitor are listed as values of the
+     <literal>watchedFields</literal> parameter, separated by commas, for
+     example:
+    </para>
+    <screen>"watchedFields" : [ "email", "address" ]</screen>
+    <para>
+     You can monitor changes to any field in this way. In addition, the
+     <literal>passwordFields</literal> parameter enables you to specify a list
+     of properties that are considered to be passwords. This parameter functions
+     much like the <literal>watchedFields</literal> parameter in that changes to
+     these property values are logged in the activity log, under the column
+     <literal>"changedFields"</literal>. In addition, when a password property
+     is changed, the boolean <literal>"passwordChanged"</literal> flag is set to
+     <literal>true</literal> in the activity log. Properties that should be
+     considered as passwords are listed as values of the
+     <literal>passwordFields</literal> parameter, separated by commas. For
+     example:
+    </para>
+    <screen>"passwordFields" : [ "password", "username" ]</screen>
+   </section>
+
+   <section xml:id="audit-filter-scripts">
+    <title>Using a Script to Filter Audit Data</title>
+    <para>
+     Apart from the audit filtering options described in the previous sections,
+     you can use a Groovy or Javascript script to specify what is logged in your
+     audit logs. Audit filter scripts are referenced in the audit configuration
+     file (<filename>conf/audit.json</filename>), and can be configured per
+     event type. The following sample configuration references a script named
+     <filename>auditfilter.js</filename>, which is used to limit what is logged
+     in the reconciliation audit log:
+    </para>
+    <programlisting language="javascript">{
+    "eventTypes" : {
+        ...
+        "recon" : {
+            "filter" : {
+                "script" : {
+                    "type" : "text/javascript",
+                    "file" : "auditfilter.js"
+                }
+            }
+        }
+    },
+...
+}</programlisting>
+    <para>
+     OpenIDM makes the <literal>request</literal> and <literal>context</literal>
+     objects available to the script. Before the audit record is written, it can
+     be accessed as a <literal>request.content</literal> object. For more
+     information, see <link xlink:show="new"
+     xlink:href="integrators-guide#scripting-configuration"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
+     Configuration</citetitle></link> in the <citetitle>Scripting
+     Appendix</citetitle>.
+    </para>
+    <para>
+     For example, to set up a script to log just the summary records for mapping
+     managed users in an LDAP data store, you could include the following in the
+     <filename>auditfilter.js</filename> script:
+    </para>
+    <programlisting language="javascript">(function() {
+     return request.content.entryType == 'summary' &amp;&amp;
+     request.content.mapping == 'systemLdapAccounts_managedUser'
+     }());
+    </programlisting>
+    <para>
+     The script must return <literal>true</literal> to include the log entry;
+     <literal>false</literal> to exclude it.
+    </para>
+   </section>
   </section>
 
-  <section xml:id="audit-logto">
-   <title>Log To List</title>
+  <section xml:id="directing-log-output">
+   <title>Directing Log Output</title>
+   <para>
+    The <literal>logTo</literal> parameter, defined in the
+    <literal>audit.json</literal> file, enables you to specify the format of the
+    audit logs, where they are written, and various parameters for each log
+    output type.
+   </para>
+   <para>
+    A basic <literal>logTo</literal> configuration follows:
+   </para>
+   <programlisting language="javascript">"logTo" : [
+    {
+        "logType" : "csv",
+        "location" : "audit",
+        "ignoreLoggingFailures" : true
+    },
+    {
+        "logType" : "repository",
+        "useForQueries" : true,
+        "ignoreLoggingFailures" : true
+    }
+],</programlisting>
    <variablelist>
     <para>
-     The <literal>logTo</literal> list enables you to specify the format of the
-     log, where it is written, and various parameters for each log type.
+     You can configure the following elements in the <literal>logTo</literal>
+     parameter:
     </para>
     <varlistentry>
      <term><literal>logType</literal></term>
@@ -870,11 +1123,20 @@
           directory in which you installed OpenIDM.
          </para>
          <para>
-          Audit file names are fixed, <filename>access.csv</filename>,
-          <filename>activity.csv</filename>, and <filename>recon.csv</filename>.
+          You can use property value substitution to direct logs to another
+          location on the file system. The example shown in <link xlink:show="new"
+          xlink:role="http://docbook.org/xlink/role/olink"
+          xlink:href="integrators-guide#custom-audit-log-location"><citetitle>Custom
+          Audit Log Locations</citetitle></link> shows how to direct audit logs
+          to a user home directory.
          </para>
          <para>
-          The <literal>"recordDelimiter"</literal> property allows you to
+          Audit file names are fixed, <filename>access.csv</filename>,
+          <filename>activity.csv</filename>, <filename>recon.csv</filename>, and
+          <filename>sync.csv</filename>.
+         </para>
+         <para>
+          The <literal>"recordDelimiter"</literal> property enables you to
           specify the character that represents a new line for the system that
           hosts the CSV file.
          </para>
@@ -889,27 +1151,30 @@
           <literal>repository</literal> - write to the OpenIDM repository.
          </para>
          <para>
-          OpenIDM stores entries under the
+          OpenIDM stores log entries under the
           <literal>/openidm/repo/audit/</literal> context. Such entries appear
           as <literal>audit/access/<replaceable>_id</replaceable></literal>,
-          <literal>audit/activity/<replaceable>_id</replaceable></literal>, and
-          <literal>audit/recon/<replaceable>_id</replaceable></literal>, where
+          <literal>audit/activity/<replaceable>_id</replaceable></literal>,
+          <literal>audit/recon/<replaceable>_id</replaceable></literal>, and
+          <literal>audit/sync/<replaceable>_id</replaceable></literal>, where
           the <replaceable>_id</replaceable> is the UUID of the entry, such as
           <literal>0419d364-1b3d-4e4f-b769-555c3ca098b0</literal>.
          </para>
          <para>
-          In the OrientDB repository, OpenIDM stores log records in the
+          In the OrientDB repository, OpenIDM stores log entries in the
           <literal>audit_access</literal>, <literal>audit_activity</literal>,
-          and <literal>audit_recon</literal> tables.
+          <literal>audit_recon</literal>, and <literal>audit_sync</literal>
+          tables.
          </para>
          <para>
-          In a JDBC repository, OpenIDM stores records in the
-          <literal>auditaccess</literal>, <literal>auditactivity</literal>, and
-          <literal>auditrecon</literal> tables.
+          In a JDBC repository, OpenIDM stores log entries in the
+          <literal>auditaccess</literal>, <literal>auditactivity</literal>,
+          <literal>auditrecon</literal>, and <literal>auditsync</literal>
+          tables.
          </para>
          <para>
           The <literal>"useForQueries"</literal> boolean property indicates
-          whether the repository logger should be used to service reads and
+          whether the repository logger should be used to service read and
           query requests. The value is <literal>true</literal> by default. If
           <literal>"useForQueries"</literal> is set to <literal>false</literal>,
           the CSV file is used to service read and query requests.
@@ -920,11 +1185,13 @@
           <literal>router</literal> - enables log events to be
           directed to any endpoint in the system, such as
           <literal>system/scriptedsql</literal> or
-          <literal>endpoint/myhandler</literal>.
+          <literal>custom-endpoint/myhandler</literal>.
          </para>
          <para>
-          As noted with previous instances of <literal>logType</literal>, the
-          <literal>location</literal> specifies the relative directory, and
+          For more information, see <xref linkend="audit-remote-logging" />.
+         </para>
+         <para>
+          The <literal>location</literal> specifies the relative directory, and
           <literal>useForQueries</literal> defines whether the logger is used
           to service read and query requests.
          </para>
@@ -957,71 +1224,54 @@
     </varlistentry>
    </variablelist>
 
-   <para>
-    You can specify a <literal>logTo</literal> location to the directory of your
-    choice. The example shown in <link xlink:show="new"
-    xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:href="integrators-guide#custom-audit-log-location"><citetitle>Custom
-    Audit Log Locations</citetitle></link> shows how you can configure
-    <literal>logTo</literal> to direct audit logs to a user home directory.
-   </para>
-
-   <para>
-    If you want to review the audit log, read the section on <link xlink:show="new"
-    xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:href="integrators-guide#querying-recon-logs"><citetitle>Querying the
-    Reconciliation Audit Log</citetitle></link>. You can review several
-    different ways to run a RESTful GET on audit endpoints in that section.
-   </para>
-
    <section xml:id="audit-remote-logging">
     <title>Logging to a Remote System</title>
-
     <para>
-     You can configure logging to a remote system. OpenIDM exposes a useful
-     logging configuration in the <filename>openidm/samples/audit-sample</filename>
-     directory, in the <filename>conf/audit.json</filename> configuration file.
-     The <literal>logTo</literal> location stanza differs slightly from other
-     versions of that file, in that it includes the following excerpt:
+     The audit service enables you to log to a variety of locations, including
+     an external system. To log to a remote system, set the
+     <literal>logType</literal> parameter in the <filename>audit.json</filename>
+     file to <literal>"router"</literal> and specify the endpoint, either a
+     system endpoint or a custom endpoint, with the <literal>location</literal>
+     parameter.
     </para>
-
-    <!-- TODO: watch for updates to audit-sample, rev to this section may be coming -->
-
-    <programlisting language="javascript">...
-        "logTo" : [
-    ...
-            },
-            {
-                 "logType" : "router",
-                 "location" : "system/auditdb",
-                 "useForQueries" : true
-            }
-     ...
-    </programlisting>
-
     <para>
-     To connect to an external JDBC database, you can use the
-     <literal>location</literal> property, which is configured with the
-     <literal>auditdb</literal> system.
+     A sample configuration for remote logging is provided in the
+     <filename>openidm/samples/audit-sample</filename> directory, and described
+     in the <citetitle>Installation Guide</citetitle> in the section
+     <link xlink:show="new" xlink:href="install-guide#audit-config-files"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Demonstrate
+     Extended Audit Capabilities</citetitle></link>. This sample directs log
+     output to a JDBC repository. The audit configuration file
+     (<filename>conf/audit.json</filename>) for the sample shows the following
+     <literal>logTo</literal> configuration:
     </para>
-
+    <programlisting language="javascript">"logTo" : [
+    {
+        "logType" : "csv",
+        "location" : "audit"
+    },
+    {
+        "logType" : "router",
+        "location" : "system/auditdb",
+        "useForQueries" : true
+    }
+],  </programlisting>
     <para>
-     You can then set up that connection
-     in the <filename>conf/provisioner.openicf-scriptedsql.json</filename> file.
-     In this particular example, that file starts with:
+     The <literal>"location"</literal> property, of the
+     <literal>"router"</literal> log type indicates that logs should be directed
+     to the <literal>auditdb</literal> system endpoint. This endpoint is defined
+     in the connector configuration file,
+     <filename>conf/provisioner.openicf-scriptedsql.json</filename> with the
+     following parameter:
     </para>
-
     <programlisting language="javascript">{
-     "name" : "auditdb",</programlisting>
-
+     "name" : "auditdb",
+    ...</programlisting>
     <para>
-     You can configure remote access in that file, in the
-     <literal>configurationProperties</literal> stanza, in the
-     <literal>host</literal> and <literal>jdbcConnectionUrl</literal> properties.
-     Substitute the URL or IP address of the running remote MySQL server for
-     <literal>localhost</literal>:
+     The connection to the JDBC repository is configured in the
+     <literal>configurationProperties</literal> in that file. The sample
+     configuration is as follows:
     </para>
-
     <programlisting language="javascript">...
  },
      "configurationProperties" : {
@@ -1039,57 +1289,32 @@
      "testScriptFileName" : "&amp;{launcher.project.location}/tools/TestScript.groovy",
      "searchScriptFileName" : "&amp;{launcher.project.location}/tools/SearchScript.groovy"
  },
-    ...</programlisting>
-
+     ...</programlisting>
     <para>
-     After you change the <literal>localhost</literal> entries, start OpenIDM
-     with the configuration associated with your audit configuration. The
-     following command is based on the
-     <filename>openidm/samples/audit-sample</filename> that comes with OpenIDM.
+     Substitute the correct URL or IP address of your remote JDBC repository,
+     and the corresponding connection details (such as <literal>port</literal>,
+     <literal>user</literal> and <literal>password</literal>.
     </para>
-
-    <screen>$ ./setup.sh -p samples/audit-sample</screen>
-
    </section>
-
-  </section>
-
-  <section xml:id="audit-exception-formatter">
-   <title>Exception Formatter</title>
-   <para>
-    The <literal>exceptionFormatter</literal> property specifies the name and
-    type of file that handles the formatting and display of exceptions thrown by
-    the audit logger. Supported types include <literal>"text/javascript"</literal> and
-    <literal>"groovy"</literal>.
-   </para>
-   <para>
-    The <literal>"file"</literal> property provides the path to the script file
-    that performs the formatting. The default exception formatter is
-    <literal>"bin/defaults/script/audit/stacktraceFormatter.js"</literal>.
-   </para>
   </section>
 
   <section xml:id="audit-write-adjustments">
-   <title>Adjust Audit Write Behavior</title>
-
+   <title>Adjusting Audit Write Behavior</title>
    <para>
     You can change the way information is written to audit logs with the
     <literal>bufferSize</literal>. The default is 1024 bytes.
    </para>
-
    <para>
     To make use of an audit buffer, set the <literal>maxFlushDelay</literal>
     to a value greater than the default of 0. If you leave the
     <literal>maxFlushDelay</literal> at 0, audit entries are
     written to disk immediately, regardless of buffer size.
    </para>
-
    <para>
     When you set a non-zero <literal>maxFlushDelay</literal>, you are setting
     the maximum amount of time audit entries remain in the cache without being
     written to disk, unless the buffer fills up first.
    </para>
-
    <para>
     If you have configured OpenIDM logging with higher throughput, you may want
     to try a higher <literal>bufferSize</literal>. In that case, you may also
@@ -1097,7 +1322,6 @@
     <literal>maxFlushDelay</literal> to make sure logs are actually written
     before they are flushed from memory.
    </para>
-
    <note>
     <para>
      If you set a non-zero value for <literal>maxFlushDelay</literal>, you risk
@@ -1106,13 +1330,11 @@
      data in buffers to disk.
     </para>
    </note>
-
    <para>
     The following sample code reflects the defaults, and illustrate where you
     would configure these properties in the <filename>audit.json</filename>
     file.
    </para>
-
    <programlisting language="javascript">...
     "logTo" : [
     ...
@@ -1124,9 +1346,7 @@
         }
     ...
    </programlisting>
-
   </section>
-
  </section>
 
  <section xml:id="audit-reports">
@@ -1155,109 +1375,36 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
 3 rows in set (0.00 sec)</screen>
  </section>
 
- <section xml:id="audit-filtering">
-  <title>Filtering Data for Audits</title>
-
-  <para>
-   With OpenIDM, you can collect large amounts of data on each transaction,
-   subdivided in several different <literal>eventTypes</literal>: access,
-   activity, reconciliation, and synchronization.
-  </para>
-
-  <para>
-   In some cases, you may want to minimize the amount of data collected with
-   one or more filters. As with other <xref linkend="audit-configuration" />
-   options, you can do so in the <filename>conf/audit.json</filename> file,
-   based on the event type.
-  </para>
-
-  <para>
-   For example, the following entry under <literal>eventTypes</literal> refers
-   to the <filename>auditfilter.js</filename> file to script limits to
-   reconciliation information:
-  </para>
-
-  <programlisting language="javascript">
-{
-   "eventTypes" : {
-       ...
-       "recon" : {
-           "filter" : {
-               "script" : {
-                   "type" : "text/javascript",
-                   "file" : "auditfilter.js"
-               }
-           }
-       }
-   },
-   ...
-}</programlisting>
-
-  <para>
-   You can create a script for filtering. As it does for other scripts, OpenIDM
-   makes the create request and the context objects available to the script.
-   Before the audit record is written, it can be accessed as a
-   <literal>request.content</literal> object. For guidance, see the <link
-   xlink:role="http://docbook.org/xlink/role/olink/"
-   xlink:show="new" xlink:href="integrators-guide#scripting-configuration">
-   <citetitle>Scripting Configuration</citetitle></link> appendix.
-  </para>
-
-  <para>
-   For example, if you want to set up a script to log just the summary records
-   for mapping managed users in an LDAP data store, you could include the
-   following entry in the <filename>auditfilter.js</filename> script:
-  </para>
-
-  <programlisting language="javascript">
-return request.content.entryType == 'summary' &amp;&amp;
-   request.content.mapping == 'systemLdapAccounts_managedUser'
-  </programlisting>
-
-  <para>
-   The script must return <literal>true</literal> to include the log entry;
-   <literal>false</literal> to exclude it.
-  </para>
-
- </section>
-
  <section xml:id="audit-purging">
   <title>Purging Obsolete Audit Information</title>
-
   <para>
    If audit records grow "excessively" large, any subsequent reconciliations
-   and queries to audit tables may become "sluggish". In a deployment with
-   limited resources, a lack of disk space may affect system performance.
+   and queries to audit tables can become "sluggish". In a deployment with
+   limited resources, a lack of disk space can affect system performance.
   </para>
-
   <para>
-   You may have already run through the process of
-   <xref linkend="audit-filtering" />. If desired, you can also purge audit
-   records with specific queries. Alternatively, you can also purge audit
+   You might already have restricted what is logged in your audit logs by
+   setting up filters, as described in <xref linkend="filtering-audit-events" />.
+   You can also use specific queries to purge audit logs, or you can purge audit
    records older than a specific date, using timestamps.
   </para>
-
   <para>
-   OpenIDM includes a preconfigured purge script,
-   <filename>autoPurgeRecon.js</filename> in the
-   <filename>bin/defaults/script/audit</filename> directory.
-   This script purges audit log entries from the repository only, not from the
-   corresponding CSV files.
+   OpenIDM includes a sample purge script, <filename>autoPurgeRecon.js</filename>
+   in the <filename>bin/defaults/script/audit</filename> directory. This script
+   purges audit log entries from the repository only, not from the corresponding
+   CSV files.
   </para>
-
   <para>
-   You will also want to set up a schedule. For that purpose, you can find a
-   pre-configured <filename>schedule-autoPurgeAuditRecon.json</filename> file in
-   the <filename>samples/schedules</filename> subdirectory. You can configure
-   that file as desired and then copy it to the <filename>conf/</filename>
-   subdirectory for your deployment.
+   To purge audit logs on a regular basis, you must set up a schedule. A sample
+   schedule is provided in the <filename>schedule-autoPurgeAuditRecon.json</filename>
+   file (in the <filename>openidm/samples/schedules</filename> subdirectory).
+   You can change that schedule as required, and copy the file to the
+   <filename>conf/</filename> directory of your project, in order for it to take
+   effect.
   </para>
-
   <para>
-   Examine the contents of the
-   <filename>schedule-autoPurgeAuditRecon.json</filename> file:
+   The sample purge schedule file is as follows:
   </para>
-
   <screen>{
    "enabled" : false,
    "type" : "cron",
@@ -1281,15 +1428,15 @@ return request.content.entryType == 'summary' &amp;&amp;
 }</screen>
 
   <para>
-   For more information on the schedule-related directives in this file, see
+   For information about the schedule-related properties in this file, see
    <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
-         xlink:href="integrators-guide#scheduling-synchronization">
-    <citetitle>Scheduling Synchronization</citetitle></link>.
+   xlink:href="integrators-guide#scheduling-synchronization"><citetitle>Scheduling
+    Synchronization</citetitle></link>.
   </para>
-
   <variablelist>
    <para>
-    Beyond scheduling, you may also be interested in the following parameters:
+    Beyond scheduling, the following parameters are of interest for purging the
+    audit logs:
    </para>
    <varlistentry>
     <term>input</term>
@@ -1324,7 +1471,7 @@ return request.content.entryType == 'summary' &amp;&amp;
     <term>purgeType</term>
     <listitem>
      <para>
-      The type of purge to perform, Can be set to one of two values:
+      The type of purge to perform. Can be set to one of the following values:
      </para>
      <variablelist>
       <varlistentry>
@@ -1378,15 +1525,12 @@ return request.content.entryType == 'summary' &amp;&amp;
     </listitem>
    </varlistentry>
   </variablelist>
-
   <para>
-   Once you have filtered and purged unneeded log information from the database,
-   you can use log rotation services to limit the size of individual log files,
-   and archive them as needed. Some log rotation services also support
-   archiving to remote log servers. Details vary by the service
-   and the operating system.
+   When you have filtered and purged unneeded log information, you can use log
+   rotation services to limit the size of individual log files, and archive them
+   as needed. Some log rotation services also support archiving to remote log
+   servers. Details vary by the service and the operating system.
   </para>
-  
   </section>
 
 </chapter>
