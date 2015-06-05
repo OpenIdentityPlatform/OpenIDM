@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-troubleshooting'
@@ -60,31 +60,6 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
   <filename>openidm/bundle/org.apache.felix.shell.tui-1.4.1.jar</filename>
   before starting OpenIDM, and also remove Felix cache files in
   <filename>openidm/felix-cache/</filename>.</para>
- </section>
-
- <section xml:id="internal-recon-sync-errors">
-  <title>Internal Server Error During Reconciliation or Synchronization</title>
-
-  <para>You might see an error message such as the following returned from
-  reconciliation or synchronization.</para>
-
-  <programlisting language="javascript">
-{
-    "error": "Conflict",
-    "description": "Internal Server Error:
-        org.forgerock.openidm.sync.SynchronizationException:
-        Cowardly refusing to perform reconciliation with an
-        empty source object set: Cowardly refusing to perform
-        reconciliation with an empty source object set"
-}</programlisting>
-
-  <para>This error can be misleading. This usually means the connector is
-  not able to communicate with the target source.</para>
- 
-  <para>Check the settings for your connector. For example, with the XML
-  connector you get this error if the filename for the source is invalid. With
-  the LDAP connector, you can get this error if your connector cannot contact
-  the target LDAP server.</para> 
  </section>
  
  <section xml:id="sync-service-unsatisfied">
