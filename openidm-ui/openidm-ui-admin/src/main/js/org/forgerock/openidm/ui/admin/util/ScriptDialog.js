@@ -94,6 +94,10 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
             });
         },
 
+        getInlineEditor: function() {
+            return this.scriptEditor.getInlineEditor();
+        },
+
         generateScript: function() {
             return this.scriptEditor.generateScript();
         }
