@@ -224,6 +224,10 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 }, this));
             },
 
+            getInlineEditor: function() {
+                return this.cmBox;
+            },
+
             changeScriptTab: function(event) {
                 var currentTab = $(event.currentTarget),
                     tabType = currentTab.attr("aria-controls");
