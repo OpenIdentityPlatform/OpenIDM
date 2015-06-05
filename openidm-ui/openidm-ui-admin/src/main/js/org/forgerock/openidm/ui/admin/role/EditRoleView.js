@@ -79,11 +79,15 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                     }
                     
                     this.$el.find(":input.form-control:first").focus();
+                    
+                    if(callback) {
+                        callback();
+                    }
                 },this));
             },this));
         },
-        saveRole: function(e){
-            var formVal = form2js('addEditRoleForm', '.', true),
+        saveRole: function(e, callback){
+            var formVal = form2js(this.$el.find('form#addEditRoleForm')[0], '.', true),
                 successCallback = _.bind(function(role){
                     var msg = (this.data.newRole) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess";
                     messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.args[1] })});
@@ -93,10 +97,12 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                     } else {
                         this.data.role._rev++;
                     }
-                    this.render(this.data.args);
+                    this.render(this.data.args, callback);
                 }, this);
             
-            e.preventDefault();
+            if(e) {
+                e.preventDefault();
+            }
             
             if(this.data.newRole){
                 resourceDelegate.createResource(this.data.serviceUrl, null, formVal.role, successCallback);
@@ -111,13 +117,18 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
             
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminListManagedObjectView", args: this.data.args});
         },
-        deleteRole: function(e){
-            e.preventDefault();
+        deleteRole: function(e, callback){
+            if(e) {
+                e.preventDefault();
+            }
             
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }), _.bind(function(){
                 resourceDelegate.deleteResource(this.data.serviceUrl, this.data.role._id, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role.properties.name })});
                     this.backToList();
+                    if(callback) {
+                        callback();
+                    }
                 }, this));
             }, this));
         }

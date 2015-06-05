@@ -48,10 +48,12 @@ define([
                 // every state needs to be reset at the starat of each test
                 var vm = require("org/forgerock/commons/ui/common/main/ViewManager"),
                     lqu = require("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"),
-                    connectorDelegate = require("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate");
+                    connectorDelegate = require("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"),
+                    configDelegate = require("org/forgerock/openidm/ui/common/delegates/ConfigDelegate");
 
                 connectorDelegate.deleteCurrentConnectorsCache();
                 lqu.model.linkQualifier = [];
+                configDelegate.clearDelegateCache();
 
                 server.responses = _.filter(server.responses, function (resp) {
                     return  typeof resp.url === "object" && (
