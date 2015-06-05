@@ -912,8 +912,8 @@
     following:
    </para>
    <screen>
-2014-03-20 10:41:18:918 WARN Cannot perform reconciliation with an empty source
-    object set, unless explicitly configured to allow it.
+2015-06-05 10:41:18:918 WARN Cannot reconcile from an empty data source, unless
+    allowEmptySourceSet is true.
    </screen>
    <para>
     The reconciliation summary is also logged in the reconciliation audit log.
