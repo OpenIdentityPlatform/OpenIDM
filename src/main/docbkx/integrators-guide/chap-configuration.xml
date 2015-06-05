@@ -902,7 +902,7 @@ openidm.US.ldap.port=1389</programlisting>
      (<filename>/path/to/openidm/samples/customendpoint/conf/endpoint-echo.json</filename>)
      depicts a typical endpoint, configured to use a Groovy script that is
      specified in the <filename>script/echo.groovy</filename> file. The
-     contents file are shown here:
+     contents of the sample file are shown here:
     </para>
     
      <programlisting language="javascript">{
@@ -935,7 +935,7 @@ openidm.US.ldap.port=1389</programlisting>
       <term><literal>"file"</literal> or <literal>"source"</literal></term>
       <listitem>
        <para>
-        Either a a path to a script file, or an actual script, inline.
+        Either a path to a script file, or an actual script, inline.
        </para>
        <para>
         The script files associated with this sample,
