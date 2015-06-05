@@ -261,7 +261,7 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                         }
                     });
                 } else {
-                    this.parentRender();
+                    this.parentRender(callback);
                 }
                 
             },this));

@@ -32,8 +32,9 @@ define([
     "./mapping/propertyMappingTest",
     "./mapping/correlationTest",
     "./connector/editConnectorTest",
-    "./connector/addConnectorTest"
-], function (moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest, correlationTest, editConnectorTest, addConnectorTest) {
+    "./connector/addConnectorTest",
+    "./resourceData/editResourceViewTest"
+], function (moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest, correlationTest, editConnectorTest, addConnectorTest, editResourceViewTest) {
 
     return {
         executeAll: function (server) {
@@ -49,6 +50,7 @@ define([
             propertyMappingTest.executeAll(server);
             editConnectorTest.executeAll(server);
             addConnectorTest.executeAll(server);
+            editResourceViewTest.executeAll(server);
         }
     };
 });

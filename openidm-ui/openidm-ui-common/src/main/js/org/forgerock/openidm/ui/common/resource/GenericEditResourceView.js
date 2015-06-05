@@ -296,23 +296,26 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             
             return formVal;
         },
-        save: function(e){
+        save: function(e, callback){
             var formVal = this.getFormValue(),
-                successCallback = _.bind(function(newObj){
+                successCallback = _.bind(function(editedObject){
                     var msg = (this.data.newObject) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess",
                         editRouteName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
                     
                     messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.objectTitle })});
+                    this.data.editedObject = editedObject;
                     
                     if(this.data.newObject) {
-                        this.data.args.push(newObj._id);
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes[editRouteName], args: this.data.args});
+                        this.data.args.push(editedObject._id);
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes[editRouteName], args: this.data.args, callback: callback});
                     } else {
-                        this.backToList();
+                        this.render(this.data.args,callback);
                     }
                 }, this);
             
-            e.preventDefault();
+            if(e) {
+                e.preventDefault();
+            }
             
             if(this.data.newObject){
                 resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
@@ -338,13 +341,18 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
             this.render(this.data.args);
         },
-        deleteObject: function(e){
-            e.preventDefault();
+        deleteObject: function(e, callback){
+            if (e) {
+                e.preventDefault();
+            }
             
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.objectTitle }), _.bind(function(){
                 resourceDelegate.deleteResource(this.data.serviceUrl, this.objectId, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.objectTitle })});
                     this.backToList();
+                    if (callback) {
+                        callback();
+                    }
                 }, this));
             }, this));
         },

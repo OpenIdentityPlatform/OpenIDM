@@ -123,8 +123,8 @@ define([
                     QUnit.ok(callback.called, "The policy successfully saves");
                     stubbedRead.restore();
                     stubbedWrite.restore();
-                    $("#policyPattern").remove();
                     */
+                    $("#policyPattern").remove();
                     QUnit.start();
 
                 });

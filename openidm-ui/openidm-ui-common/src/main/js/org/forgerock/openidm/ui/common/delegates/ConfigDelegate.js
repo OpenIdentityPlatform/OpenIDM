@@ -98,7 +98,11 @@ define("org/forgerock/openidm/ui/common/delegates/ConfigDelegate", [
     };
 
     obj.clearDelegateCache = function(id){
-        delete conf.delegateCache.config[id];
+        if (id) {
+            delete conf.delegateCache.config[id];
+        } else {
+            conf.delegateCache.config = {};
+        }
     };
 
     return obj;

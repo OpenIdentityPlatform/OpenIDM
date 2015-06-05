@@ -127,13 +127,9 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
                                 this.setJSONEditors();
                                 this.data.newAssignment = false;
                             }
-                            this.setScripts();
                             this.setAttributeOperationsPopovers();
                             this.setLinkQualifers();
-                            
-                            if(callback){
-                                callback();
-                            }
+                            this.setScripts(callback);
                         }, this), "replace");
             }, this));
         },
@@ -159,26 +155,34 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView", [
                 return this.convertAttibuteValueToJSONEditor(attr.name, attr.value);
             }, this);
         }, 
-        setScripts: function() {
+        setScripts: function(callback) {
             var emptyScript = {
-                type: "text/javascript",
-                globals: {},
-                file: ""
-            };
+                    type: "text/javascript",
+                    globals: {},
+                    file: ""
+                }, 
+                onAssignmentScriptProm = $.Deferred(),
+                onUnassignmentScriptProm = $.Deferred();
             
             this.data.onAssignmentScript = InlineScriptEditor.generateScriptEditor({
                 "element": this.$el.find(".event-onAssignment"),
                 "eventName": "onAssignment",
                 "noValidation": true,
                 "scriptData": (this.data.assignment) ? this.data.assignment.onAssignment : emptyScript
+            }, function() {
+                onAssignmentScriptProm.resolve();
             });
-            
+
             this.data.onUnassignmentScript = InlineScriptEditor.generateScriptEditor({
                 "element": this.$el.find(".event-onUnassignment"),
                 "eventName": "onUnassignment",
                 "noValidation": true,
                 "scriptData": (this.data.assignment) ? this.data.assignment.onUnassignment : emptyScript
+            }, function() {
+                onUnassignmentScriptProm.resolve();
             });
+            
+            $.when(onAssignmentScriptProm, onUnassignmentScriptProm).then(callback);
         },
         addAttribute: function(e) {
             var newAttr = this.$el.find("#attributeTemplate").find(".list-group-item").clone();

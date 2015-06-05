@@ -46,7 +46,7 @@ define([
 
                 correlation(server);
 
-                $("body").append("<div id='analysisView'></div>")
+                $("#qunit-fixture").append("<div id='analysisView'></div>")
 
                 MappingBaseView.data.recon = reconDetails;
                 MappingBaseView.data.syncCanceled = false;
