@@ -957,7 +957,7 @@ class ObjectMapping {
             reconContext.getStatistics().sourceQueryEnd();
             if (!sourceIter.hasNext()) {
                 if (!reconContext.getReconHandler().allowEmptySourceSet()) {
-                    LOGGER.warn("Cannot perform reconciliation with an empty source object set, unless explicitly configured to allow it.");
+                    LOGGER.warn("Cannot reconcile from an empty data source, unless allowEmptySourceSet is true.");
                     reconContext.setStage(ReconStage.COMPLETED_FAILED);
                     reconContext.getStatistics().reconEnd();
                     logReconEndFailure(reconContext, rootContext, context);
