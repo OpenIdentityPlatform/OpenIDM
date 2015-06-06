@@ -664,6 +664,12 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             this.data.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
             this.currentLinkQualifier = this.data.linkQualifiers[0];
 
+            if(this.mapping.linkQualifiers) {
+                this.data.hasLinkQualifiers = true;
+            } else {
+                this.data.hasLinkQualifiers = false;
+            }
+
             if(conf.globalData.sampleSource && this.mapping.properties.length){
                 this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
             }

@@ -97,16 +97,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
 
                 this.linkQualifierScript = inlineScriptEditor.generateScriptEditor({
                         "element": this.$el.find("#scriptLinkQualifierBody"),
-                        "onBlurPassedVariable" : _.bind(this.showLinkQualifier, this),
-                        "onKeypress" : _.bind(function(){
-                            this.$el.find(".linkQualifierSave").prop("disabled", true);
-                        }, this),
                         "eventName": "linkQualifierScript",
                         "scriptData": scriptData,
                         "disablePassedVariable": false,
-                        "onBlur" : _.bind(this.showLinkQualifier, this),
-                        "onDeletePassedVariable": _.bind(this.showLinkQualifier, this),
-                        "onAddPassedVariable": _.bind(this.showLinkQualifier, this),
                         "disableValidation" : false,
                         "placeHolder" : "['test', 'default']"
                     },
@@ -118,37 +111,6 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                     this.linkQualifierScript.refresh();
                 }, this));
             });
-        },
-
-        showLinkQualifier: function(event) {
-            var scriptDetails,
-                validationResults =  this.linkQualifierScript.getValidation();
-
-
-            scriptDetails = this.linkQualifierScript.generateScript();
-
-            if(scriptDetails !== null) {
-                ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
-                        this.model.scriptError = false;
-
-                        this.$el.find("#scriptLinkQualifierList").empty();
-
-                        this.model.scriptResult = result;
-
-                        this.$el.find(".linkQualifierSave").prop("disabled", false);
-
-                        this.populateScriptLinkQualifier(result);
-                    }, this),
-                    _.bind(function (result) {
-                        this.model.scriptError = true;
-                        this.$el.find(".linkQualifierSave").prop("disabled", true);
-                        this.$el.find("#badLinkQualifierScript .message").html(result.responseJSON.message);
-                        this.$el.find("#badLinkQualifierScript").show();
-                    }, this));
-            } else {
-                this.$el.find(".linkQualifierSave").prop("disabled", true);
-            }
-
         },
 
         populateScriptLinkQualifier : function (data) {
@@ -176,14 +138,6 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
             selected.parent().find('.active').removeClass('active');
 
             selected.toggleClass('active', true);
-
-            if(currentTab === "staticQualifierTab") {
-                this.$el.find(".linkQualifierSave").prop("disabled", false);
-            } else {
-                if(this.linkQualifierScript.generateScript() === null || this.model.scriptError === true) {
-                    this.$el.find(".linkQualifierSave").prop("disabled", true);
-                }
-            }
         },
 
         removeLinkQualifier: function(e) {
@@ -232,26 +186,26 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
         },
 
         save: function() {
-            var sync = MappingBaseView.data.syncConfig,
-                mapping,
-                currentTab = this.$el.find("#linkQualifierTabs .active").prop("id");
+            var currentTab = this.$el.find("#linkQualifierTabs .active").prop("id"),
+                sync = MappingBaseView.data.syncConfig;
 
             _.each(sync.mappings, function (map, key) {
                 if (map.name === this.model.mappingName) {
-
                     if(currentTab === "staticQualifierTab") {
-                        sync.mappings[key].linkQualifiers = this.data.linkQualifiers;
-                        mapping = sync.mappings[key];
-                        LinkQualifierUtils.setLinkQualifier(this.data.linkQualifiers, this.model.mappingName);
-
+                        this.saveDeclarative(key, sync);
                     } else {
-                        sync.mappings[key].linkQualifiers = this.linkQualifierScript.generateScript();
-                        mapping = sync.mappings[key];
-                        LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
+                        this.saveScript(key, sync);
                     }
                 }
             }, this);
+        },
 
+        saveDeclarative: function(key, sync) {
+            var mapping;
+
+            sync.mappings[key].linkQualifiers = this.data.linkQualifiers;
+            mapping = sync.mappings[key];
+            LinkQualifierUtils.setLinkQualifier(this.data.linkQualifiers, this.model.mappingName);
 
             ConfigDelegate.updateEntity("sync", sync).then(_.bind(function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
@@ -259,6 +213,41 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
 
                 EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
             }, this));
+        },
+
+        saveScript: function(key, sync) {
+            var scriptDetails,
+                mapping;
+
+            scriptDetails = this.linkQualifierScript.generateScript();
+
+            if(scriptDetails !== null) {
+                ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
+                        this.model.scriptError = false;
+
+                        this.model.scriptResult = result;
+
+                        sync.mappings[key].linkQualifiers = this.linkQualifierScript.generateScript();
+                        mapping = sync.mappings[key];
+                        LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
+
+                        ConfigDelegate.updateEntity("sync", sync).then(_.bind(function() {
+                            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
+                            BrowserStorageDelegate.set("currentMapping", mapping);
+
+                            EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
+                        }, this));
+
+                    }, this),
+                    _.bind(function (result) {
+                        this.model.scriptError = true;
+                        this.$el.find("#badLinkQualifierScript .message").html(result.responseJSON.message);
+                        this.$el.find("#badLinkQualifierScript").show();
+                    }, this));
+            } else {
+                this.$el.find("#badLinkQualifierScript .message").html($.t("templates.mapping.validLinkQualifierScript"));
+                this.$el.find("#badLinkQualifierScript").show();
+            }
         }
     });
 
