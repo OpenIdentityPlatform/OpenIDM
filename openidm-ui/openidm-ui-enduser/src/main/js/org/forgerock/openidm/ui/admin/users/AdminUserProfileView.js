@@ -81,7 +81,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                     data.manager = this.resourcePath +"/" +data.manager;
                 }
 
-                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
+                data.roles = this.$el.find("input[name='roles[]']:checked").map(function(){return $(this).val();}).get();
 
                 userDelegate.patchUserDifferences(this.editedUser, data, _.bind(function() {
                     if(oldUserName === conf.loggedUser.userName && data.userName !== conf.loggedUser.userName) {
@@ -372,7 +372,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
 
             _.each(this.editedUser.roles, _.bind(function(v) {
-                this.$el.find("input[name=roles][value='"+v+"']").prop('checked', true);
+                this.$el.find("input[name='roles[]'][value='"+v+"']").prop('checked', true);
             }, this));
 
             validatorsManager.validateAllFields(this.$el.find("form"));

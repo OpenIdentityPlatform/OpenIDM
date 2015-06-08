@@ -223,6 +223,14 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name" : "roles",
+                    "policies" : [
+                        {
+                            "policyId" : "cannot-contain-duplicates"
+                        }
+                    ]
                 }
             ]
         },
