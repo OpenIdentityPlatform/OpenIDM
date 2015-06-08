@@ -57,7 +57,6 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
                     label: "",
                     selectEvents: _.difference(this.model.availableScripts, addedEvents),
                     addedEvents: addedEvents,
-                    eventHooks: this.model.scriptEditors,
                     currentObject: this.model.mapping,
                     hasWorkflow: true
                 });
@@ -113,15 +112,10 @@ define("org/forgerock/openidm/ui/admin/sync/MappingScriptsView", [
                 eventName = tmpEditor.model.eventName;
                 addRemoveFromMapping();
             } else {
-                currentScripts = _.map(this.model.scriptEditors,function(editor) { return editor.getScriptHook().eventName; });
-                scriptsToDelete = _.difference(this.model.availableScripts,currentScripts);
+                currentScripts = this.model.scriptList.getScripts();
+                scriptsToDelete = _.difference(this.model.availableScripts, _.keys(currentScripts));
 
-                // Update the mapping with the script editors, remove any instances of uncompleted editors.
-                _.each(this.model.scriptEditors, function(scriptEditor) {
-                    eventName = scriptEditor.getScriptHook().eventName;
-                    scriptHook = scriptEditor.getScriptHook().script;
-                    addRemoveFromMapping();
-                }, this);
+                _.extend(this.model.mapping, currentScripts);
 
                 // Remove any mapping instances of scripts that are not added
                 _.each(scriptsToDelete, function(script) {

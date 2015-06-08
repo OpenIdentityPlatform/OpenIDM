@@ -363,7 +363,8 @@
             "variableName" : "Variable Name",
             "variableValue" : "Variable Value",
             "javascript" : "Javascript",
-            "groovy" : "Groovy"
+            "groovy" : "Groovy",
+            "deleteMsg": "Are you sure you want to delete this script?"
         },
         "mappingScripts": {
             "allAdded": "All script events have been added",

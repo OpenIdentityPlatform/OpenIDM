@@ -10,8 +10,25 @@
                 </th>
                 <th></th>
             </tr>
-            {{#each addedEvents}}
-            <tr data-script-type="{{this}}" class="event-hook"></tr>
+            {{#each eventHooks}}
+            <tr data-script-type="{{@key}}" class="event-hook">
+            <td>
+                {{@key}}
+            </td>
+            <td>
+                {{#if workflow}}
+                {{workflow}}
+                {{/if}}
+
+                {{#unless workflow}}
+                {{#if scriptData.file}} {{scriptData.file}} {{else}} {{t "templates.scriptEditor.inline"}} {{/if}} <span class="lightenColor">({{scriptData.type}})</span>
+                {{/unless}}
+            </td>
+            <td class="text-right event-hook-body">
+                <span class="icon-button edit-btn"><i class="fa fa-pencil"></i></span>
+                <span class="icon-button remove-btn script-remove"><i class="fa fa-times-circle"></i></span></label>
+            </td>
+            </tr>
             {{/each}}
         </table>
     </div>
