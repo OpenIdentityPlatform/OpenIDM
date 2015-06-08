@@ -13,6 +13,16 @@ ou: people
 description: people
 objectclass: organizationalunit
 
+dn: ou=Customers,dc=example,dc=com
+ou: people
+description: people
+objectclass: organizationalunit
+
+dn: ou=Contractors,dc=example,dc=com
+ou: people
+description: people
+objectclass: organizationalunit
+
 dn: uid=jdoe,ou=People,dc=example,dc=com
 objectClass: person
 objectClass: organizationalPerson

@@ -1,0 +1,220 @@
+{
+  "mappings" : [
+    {
+      "name" : "managedUser_systemLdapAccounts",
+      "source" : "managed/user",
+      "target" : "system/ldap/account",
+      "linkQualifiers" : [
+        "insured",
+        "agent"
+      ],
+      "correlationQuery" : [
+        {
+          "linkQualifier" : "insured",
+          "expressionTree" : {
+            "all" : [
+              "dn"
+            ]
+          },
+          "mapping" : "managedUser_systemLdapAccounts",
+          "type" : "text/javascript",
+          "file" : "ui/correlateTreeToQueryFilter.js"
+        },
+        {
+          "linkQualifier" : "agent",
+          "expressionTree" : {
+            "all" : [
+              "dn"
+            ]
+          },
+          "mapping" : "managedUser_systemLdapAccounts",
+          "type" : "text/javascript",
+          "file" : "ui/correlateTreeToQueryFilter.js"
+        }
+      ],
+      "validSource" : {
+        "type" : "text/javascript",
+        "globals" : { },
+        "source" : "var res = false;\nvar i=0;\n\nwhile (!res && i < source.effectiveRoles.length) {\n    var roleId = source.effectiveRoles[i];\n    if (roleId != null && roleId.indexOf(\"/\") != -1) {\n        var roleInfo = openidm.read(roleId);\n        res = (((roleInfo.properties.name === 'Agent')\n                &&(linkQualifier ==='agent'))\n              || ((roleInfo.properties.name === 'Insured')\n                &&(linkQualifier ==='insured')));\n    }\n    i++;\n}\n\nres"
+      },
+      "assignmentsToMap" : [
+        "ldap-agent",
+        "ldap-insured"
+      ],
+      "properties" : [
+        {
+          "source" : "givenName",
+          "target" : "givenName"
+        },
+        {
+          "source" : "sn",
+          "target" : "sn"
+        },
+        {
+          "source" : "",
+          "transform" : {
+            "type" : "text/javascript",
+            "source" : "source.displayName || (source.givenName + ' ' + source.sn);"
+          },
+          "target" : "cn"
+        },
+        {
+          "source" : "userName",
+          "target" : "uid"
+        },
+        {
+          "source" : "description",
+          "target" : "description",
+          "condition" : {
+            "type" : "text/javascript",
+            "source" : "!!object.description"
+          }
+        },
+        {
+          "source" : "mail",
+          "target" : "mail"
+        },
+        {
+          "source" : "password",
+          "condition" : {
+            "type" : "text/javascript",
+            "source" : "object.password != null"
+          },
+          "transform" : {
+            "type" : "text/javascript",
+            "source" : "openidm.decrypt(source);"
+          },
+          "target" : "userPassword"
+        },
+        {
+          "source" : "telephoneNumber",
+          "target" : "telephoneNumber",
+          "condition" : {
+            "type" : "text/javascript",
+            "source" : "!!object.telephoneNumber"
+          }
+        },
+        {
+          "target" : "dn",
+          "transform" : {
+            "type" : "text/javascript",
+            "globals" : { },
+            "source" : "if (linkQualifier === 'agent') { 'uid=' + source.userName + ',ou=Contractors,dc=example,dc=com'; } else if (linkQualifier === 'insured') { 'uid=' + source.userName + ',ou=Customers,dc=example,dc=com'; }"
+          },
+          "source" : ""
+        }
+      ],
+      "policies" : [
+        {
+          "action" : "IGNORE",
+          "situation" : "AMBIGUOUS"
+        },
+        {
+          "action" : "DELETE",
+          "situation" : "SOURCE_MISSING"
+        },
+        {
+          "action" : "IGNORE",
+          "situation" : "MISSING"
+        },
+        {
+          "action" : "EXCEPTION",
+          "situation" : "FOUND_ALREADY_LINKED"
+        },
+        {
+          "action" : "DELETE",
+          "situation" : "UNQUALIFIED"
+        },
+        {
+          "action" : "IGNORE",
+          "situation" : "UNASSIGNED"
+        },
+        {
+          "action" : "EXCEPTION",
+          "situation" : "LINK_ONLY"
+        },
+        {
+          "action" : "IGNORE",
+          "situation" : "TARGET_IGNORED"
+        },
+        {
+          "action" : "IGNORE",
+          "situation" : "SOURCE_IGNORED"
+        },
+        {
+          "action" : "IGNORE",
+          "situation" : "ALL_GONE"
+        },
+        {
+          "action" : "UPDATE",
+          "situation" : "CONFIRMED"
+        },
+        {
+          "action" : "LINK",
+          "situation" : "FOUND"
+        },
+        {
+          "action" : "CREATE",
+          "situation" : "ABSENT"
+        }
+      ]
+    },
+    {
+      "name" : "systemLdapGroups_managedGroup",
+      "source" : "system/ldap/group",
+      "target" : "managed/group",
+      "properties" : [
+        {
+          "source" : "dn",
+          "target" : "dn"
+        },
+        {
+          "source" : "description",
+          "target" : "description"
+        },
+        {
+          "source" : "uniqueMember",
+          "target" : "uniqueMember"
+        },
+        {
+          "source" : "cn",
+          "target" : "name"
+        }
+      ],
+      "policies" : [
+        {
+          "situation" : "CONFIRMED",
+          "action" : "UPDATE"
+        },
+        {
+          "situation" : "FOUND",
+          "action" : "UPDATE"
+        },
+        {
+          "situation" : "ABSENT",
+          "action" : "CREATE"
+        },
+        {
+          "situation" : "AMBIGUOUS",
+          "action" : "EXCEPTION"
+        },
+        {
+          "situation" : "MISSING",
+          "action" : "UNLINK"
+        },
+        {
+          "situation" : "SOURCE_MISSING",
+          "action" : "EXCEPTION"
+        },
+        {
+          "situation" : "UNQUALIFIED",
+          "action" : "IGNORE"
+        },
+        {
+          "situation" : "UNASSIGNED",
+          "action" : "IGNORE"
+        }
+      ]
+    }
+  ]
+}
