@@ -296,11 +296,11 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   PRIMARY KEY (`objectid`) );
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) 
-SELECT 'openidm-admin', '0', 'openidm-admin', 'openidm-admin,openidm-authorized'
+SELECT 'openidm-admin', '0', 'openidm-admin', '["openidm-admin","openidm-authorized"]' 
 WHERE NOT EXISTS (SELECT * FROM `openidm`.`internaluser` WHERE `objectid` = 'openidm-admin');
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) 
-SELECT 'anonymous', '0', 'anonymous', 'openidm-reg'
+SELECT 'anonymous', '0', 'anonymous', '["openidm-reg"]'
 WHERE NOT EXISTS (SELECT * FROM `openidm`.`internaluser` WHERE `objectid` = 'anonymous');
 
     

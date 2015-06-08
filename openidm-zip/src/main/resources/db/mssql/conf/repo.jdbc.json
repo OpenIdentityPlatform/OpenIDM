@@ -149,7 +149,7 @@
                     "_id" : "objectid",
                     "_rev" : "rev",
                     "password" : "pwd",
-                    "roles" : "roles"
+                    "roles" : { "column" : "roles", "type" : "JSON_LIST" }
                 }
             },
             "audit/activity" : {
