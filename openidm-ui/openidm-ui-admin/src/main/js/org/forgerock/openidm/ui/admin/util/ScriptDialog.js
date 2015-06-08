@@ -84,8 +84,8 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                     action: _.bind(function(dialogRef) {
                         this.generateScript();
 
-                        if (this.saveCallback) {
-                            this.saveCallback();
+                        if (args.saveCallback) {
+                            args.saveCallback();
                         }
 
                         dialogRef.close();
