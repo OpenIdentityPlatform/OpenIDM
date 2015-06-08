@@ -442,8 +442,7 @@
       For script exception details to be pulled in, the script exception must
       take the following format:
      </para>
-     <programlisting>
-"throw {
+     <programlisting language="javascript">"throw {
     'openidmCode' : <replaceable>HTTP error code</replaceable>,
     'message' : <replaceable>error message</replaceable>,
     'detail' : {
@@ -828,103 +827,204 @@
     filters that can be applied to each event type.
    </para>
 
+   <section xml:id="filtering-by-field">
+    <title>Filtering Audit Entries by Field</title>
+    <para>
+     You can add a <literal>filter</literal> <literal>fields</literal> list
+     to the audit configuration, that enables you to filter log entries by
+     specific fields. For example, you might want to restrict the reconciliation
+     audit log so that only summary information is logged for each
+     reconciliation operation. The following addition to the
+     <filename>audit.json</filename> file specifies that entries are logged in
+     the reconciliation log only if their <literal>entryType</literal> is
+     <literal>start</literal> or <literal>summary</literal>.
+    </para>
+    <programlisting language="javascript">"eventTypes" : {
+    "recon" : {
+        "filter" : {
+            "fields" : [
+                {
+                    "name" : "entryType",
+                    "values" : [ "start", "summary" ]
+                }
+            ]
+        }
+    },
+...</programlisting>
+   </section>
+
    <section xml:id="filtering-by-action">
     <title>Filtering Audit Entries by Action</title>
     <para>
      The <literal>filter</literal> <literal>actions</literal> list enables you
-     to specify the actions that are logged, per event type. For example, the
-     following configuration specifies that only create, update, delete, patch,
-     and action operations are logged in the activity log:
+     to specify the actions that are logged, per event type. This filter is
+     essentially a <literal>fields</literal> filter (as described in <xref
+     linkend="filtering-by-field" />) that filters log entries by the value of
+     their <literal>action</literal> field.
+    </para>
+    <para>
+     The following configuration specifies that only create, update, delete,
+     patch, and action operations are logged in the activity log:
     </para>
     <programlisting>"eventTypes" : {
     "activity" : {
         "filter" : {
             "actions" : [
-            "create",
-            "update",
-            "delete",
-            "patch",
-            "action"
-        ]
-    },
+                "create",
+                "update",
+                "delete",
+                "patch",
+                "action"
+            ]
+        },
     ...</programlisting>
     <para>
      If an event type is not included in the list of
-     <literal>eventTypes</literal>, or if no <literal>filter</literal> is
-     specified for an event type (for example <literal>"recon" : { }</literal>),
-     all actions for that event type are logged.
+     <literal>eventTypes</literal>, or if no <literal>actions</literal> filter
+     is specified for an event type (for example
+     <literal>"recon" : { }</literal>), all actions for that event type are
+     logged.
     </para>
-    <variablelist>
-     <para>
-      The following <literal>actions</literal> can be filtered into the log.
-     </para>
-     <varlistentry>
-      <term><literal>read</literal></term>
-      <listitem>
-       <para>
-        When an object is read by using its identifier. By default, read
-        actions are not logged. Add the <literal>"read"</literal> action to the
-        list of actions to log all read actions.
-       </para>
-       <para>
-        Note that, due to the potential result size in the case of read
-        operations on <literal>system/</literal> endpoints, only the read is
-        logged, and not the resource detail. If you really need to log the
-        complete resource detail, add the following line to your
-        <filename>conf/boot/boot.properties</filename> file:
-       </para>
-       <programlisting>openidm.audit.logFullObjects=true</programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>create</literal></term>
-      <listitem>
-       <para>When an object is created.</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>update</literal></term>
-      <listitem>
-       <para>When an object is updated.</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>delete</literal></term>
-      <listitem>
-       <para>When an object is deleted.</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>patch</literal></term>
-      <listitem>
-       <para>When an object is partially modified.</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>query</literal></term>
-      <listitem>
-       <para>
-        When a query is performed on an object. By default, query
-        actions are not logged. Add the <literal>"query"</literal> action to the
-        list of actions to log all query actions.
-       </para>
-       <para>
-        Note that, due to the potential result size in the case of query
-        operations on <literal>system/</literal> endpoints, only the query is
-        logged, and not the resource detail. If you really need to log the
-        complete resource detail, add the following line to your
-        <filename>conf/boot/boot.properties</filename> file:
-       </para>
-       <programlisting>openidm.audit.logFullObjects=true</programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>action</literal></term>
-      <listitem>
-       <para>When an action is performed on an object.</para>
-      </listitem>
-     </varlistentry>
-    </variablelist>
+    <para>
+     The list of actions that can be filtered into the log depend on the event
+     type. The following table lists the actions that can be filtered, per
+     event type.
+    </para>
+    <table>
+     <title>Actions that can be Logged Per Event Type</title>
+     <tgroup cols="3">
+      <colspec colnum="1" colname="col1" colwidth="1*"/>
+      <colspec colnum="2" colname="col2" colwidth="1*"/>
+      <colspec colnum="3" colname="col3" colwidth="4*"/>
+      <thead>
+       <row>
+        <entry>Event Type</entry>
+        <entry>Actions</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry morerows="6">Activity</entry>
+        <entry><literal>read</literal></entry>
+        <entry>
+         <para>
+         When an object is read by using its identifier. By default, read
+         actions are not logged. Add the <literal>"read"</literal> action to the
+         list of actions to log all read actions.
+         </para>
+         <para>
+          Note that due to the potential result size in the case of read
+          operations on <literal>system/</literal> endpoints, only the read is
+          logged, and not the resource detail. If you really need to log the
+          complete resource detail, add the following line to your
+          <filename>conf/boot/boot.properties</filename> file:
+         </para>
+         <programlisting>openidm.audit.logFullObjects=true</programlisting>
+        </entry>
+       </row>
+       <row>
+        <entry><literal>create</literal></entry>
+        <entry>
+         <para>
+          When an object is created.
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry><literal>update</literal></entry>
+        <entry>
+         <para>
+          When an object is updated.
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry><literal>delete</literal></entry>
+        <entry>
+         <para>
+          When an object is deleted.
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry><literal>patch</literal></entry>
+        <entry>
+         <para>
+          When an object is partially modified.
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry><literal>query</literal></entry>
+        <entry>
+         <para>
+          When a query is performed on an object. By default, query actions are
+          not logged. Add the <literal>"query"</literal> action to the list of
+          actions to log all query actions.
+         </para>
+         <para>
+          Note that, due to the potential result size in the case of query
+          operations on <literal>system/</literal> endpoints, only the query is
+          logged, and not the resource detail. If you really need to log the
+          complete resource detail, add the following line to your
+          <filename>conf/boot/boot.properties</filename> file:
+         </para>
+         <programlisting>openidm.audit.logFullObjects=true</programlisting>
+        </entry>
+       </row>
+       <row>
+        <entry><literal>action</literal></entry>
+        <entry>
+         <para>
+          When an action is performed on an object.
+         </para>
+        </entry>
+       </row>
+       <row>
+        <entry morerows="6">Recon and Sync</entry>
+        <entry><literal>create</literal></entry>
+        <entry>When a target object is created.</entry>
+       </row>
+       <row>
+        <entry><literal>delete</literal></entry>
+        <entry>When a target object is deleted.</entry>
+       </row>
+       <row>
+        <entry><literal>update</literal></entry>
+        <entry>When a target object is updated.</entry>
+       </row>
+       <row>
+        <entry><literal>link</literal></entry>
+        <entry>When a link is created between a source object and an existing
+         target object.</entry>
+       </row>
+       <row>
+        <entry><literal>unlink</literal></entry>
+        <entry>When a link is removed between a source object and a target
+         object.</entry>
+       </row>
+       <row>
+        <entry><literal>exception</literal></entry>
+        <entry>When the synchronization situation results in an exception. For
+        more information, see <link xlink:show="new"
+        xlink:href="integrators-guide#handling-sync"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+        Situations and Actions</citetitle></link>.</entry>
+       </row>
+       <row>
+        <entry><literal>ignore</literal></entry>
+        <entry>When the target object is ignored, that is, no action is taken.
+        </entry>
+       </row>
+       <row>
+        <entry>Access</entry>
+        <entry><literal>-</literal></entry>
+        <entry>No actions can be specified for the access log.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
    </section>
 
    <section xml:id="filtering-by-trigger">
@@ -962,31 +1062,7 @@
     </para>
    </section>
 
-   <section xml:id="filtering-by-field">
-    <title>Filtering Audit Entries by Field</title>
-    <para>
-     You can add a <literal>filter</literal> <literal>fields</literal> list
-     to the audit configuration, that enables you to filter log entries by
-     specific fields. For example, you might want to restrict the reconciliation
-     audit log so that only summary information is logged for each
-     reconciliation operation. The following addition to the
-     <filename>audit.json</filename> file specifies that entries are logged in
-     the reconciliation log only if their <literal>entryType</literal> is
-     <literal>start</literal> or <literal>summary</literal>.
-    </para>
-    <programlisting language="javascript">"eventTypes" : {
-    "recon" : {
-        "filter" : {
-            "fields" : [
-                {
-                    "name" : "entryType",
-                    "values" : [ "start", "summary" ]
-                }
-            ]
-        }
-    },
-    ...</programlisting>
-   </section>
+
 
    <section xml:id="audit-watched-fields">
     <title>Defining Specific Fields to Monitor</title>
