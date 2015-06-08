@@ -1914,9 +1914,9 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
      <literal>openicf/bundles</literal> directory on the remote host.
     </para>
     <screen><userinput>$ cd path/to/openidm
- $ scp connectors/xml-connector-1.4.0.0.jar testuser@remote-host:/path/to/openicf/bundles</userinput>
- <computeroutput>testuser@172.16.203.97's password:
- xml-connector-1.4.0.0.jar                100% 4379KB   4.3MB/s   00:00</computeroutput></screen>
+ $ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/bundles</userinput>
+ <computeroutput>testuser@remote-host's password:
+ xml-connector-${openicf.xmlconnector.version}.jar                100% 4379KB   4.3MB/s   00:00</computeroutput></screen>
 
     <procedure>
     <title>Configuring OpenIDM for the XML Connector Example</title>
