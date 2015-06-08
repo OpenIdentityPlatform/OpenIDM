@@ -714,7 +714,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                         logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
                     }
                     retryCount = maxRetry;
-                } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
+                } catch (com.orientechnologies.common.concur.lock.OLockException ex) {
                     // TODO: remove work-around once OrientDB resolves this condition
                     if (retryCount == maxRetry) {
                         logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);

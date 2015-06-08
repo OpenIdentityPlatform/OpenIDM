@@ -220,8 +220,8 @@
 
         <!-- version management -->
         <slf4j.version>1.7.5</slf4j.version>
-        <orientdb.version>1.7.8</orientdb.version>
-        <orientdb.studio.version>1.7.8</orientdb.studio.version>
+        <orientdb.version>1.7.10</orientdb.version>
+        <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <jackson.version>1.9.12</jackson.version>
         <fasterxml.jackson.version>2.4.3</fasterxml.jackson.version>
         <!--fasterxml.jackson.version>2.2.1</fasterxml.jackson.version-->
