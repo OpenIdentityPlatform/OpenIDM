@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-scheduler-conf'
@@ -506,8 +506,24 @@ openidm.scheduler.execute.persistent.schedules=true
    OpenIDM exposes the scheduler service under the
    <literal>/openidm/scheduler</literal> context path. The following examples
    show how schedules can be created, read, updated, and deleted, over REST,
-   like any other object.
+   by using the scheduler service.
   </para>
+  <note>
+   <para>
+    When you configure schedules in this way, changes made to the schedules are
+    not pushed back into the configuration service. Managing schedules by
+    using the <literal>/openidm/scheduler</literal> context path essentially
+    bypasses the configuration service and sends the request directly to the
+    scheduler.
+   </para>
+   <para>
+    If you need to perform an operation on a schedule that was created by using
+    the configuration service (by placing a schedule file in the
+    <literal>conf/</literal> directory), you must direct your request to the
+    <literal>/openidm/config</literal> endpoint, and not to the
+    <literal>/openidm/scheduler</literal> endpoint.
+   </para>
+  </note>
 
   <section xml:id="creating-schedules">
    <title>Creating a Schedule</title>
