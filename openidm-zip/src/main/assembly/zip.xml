@@ -917,7 +917,42 @@
             </includes>
             <outputDirectory>/openidm/samples/roles/linkqualrole/</outputDirectory>
         </fileSet>
-    </fileSets>
+    <!-- Setup link qualifier samples  -->
+    <fileSet>
+        <directory>${basedir}/src/main/resources/samples/multiaccountlinking</directory>
+        <includes>
+            <include>README.md</include>
+            <include>conf/sync.json</include>
+        </includes>
+        <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
+    </fileSet>
+    <fileSet>
+        <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+        <includes>
+            <include>**</include>
+        </includes>
+        <excludes>
+            <exclude>data/*.xsd</exclude>
+            <exclude>data/*.xml</exclude>
+        </excludes>
+        <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
+    </fileSet>
+    <fileSet>
+        <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+        <includes>
+            <include>provisioner.openicf-ldap.json</include>
+        </includes>
+        <outputDirectory>/openidm/samples/multiaccountlinking/conf</outputDirectory>
+    </fileSet>
+    <fileSet>
+        <directory>${basedir}/src/main/resources</directory>
+        <includes>
+            <include>conf/**</include>
+            <include>script/**</include>
+        </includes>
+        <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
+    </fileSet>
+  </fileSets>
     <!-- sample6 -->
     <files>
         <file>
