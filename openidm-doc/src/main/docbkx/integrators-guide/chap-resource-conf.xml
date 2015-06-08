@@ -1974,7 +1974,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
      "name" : "xmlfile",
      "connectorRef" : {
          "connectorHostRef" : "xml",
-         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+         "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
          "bundleVersion" : "${openicf.xmlconnector.version}",
          "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
      },
