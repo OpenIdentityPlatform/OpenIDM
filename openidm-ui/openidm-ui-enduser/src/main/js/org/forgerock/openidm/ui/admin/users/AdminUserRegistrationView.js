@@ -53,7 +53,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
                 
-                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
+                data.roles = this.$el.find("input[name='roles[]']:checked").map(function(){return $(this).val();}).get();
                 delete data.terms;
                 delete data.passwordConfirm;
                 
@@ -78,7 +78,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                 
                 this.parentRender(function() {
                     validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/*", _.bind(function () {
-                        this.$el.find(':input[name=roles][value=openidm-authorized]').prop("checked", true);
+                        this.$el.find(":input[name='roles[]'][value='openidm-authorized']").prop("checked", true);
                         validatorsManager.validateAllFields(this.$el);
                         this.unlock();
                     }, this));

@@ -115,6 +115,12 @@ var _ = require('lib/lodash'),
             "validateOnlyIfPresent": true,
             "policyRequirements" : ["CANNOT_CONTAIN_CHARACTERS"]
         },
+        {   "policyId" : "cannot-contain-duplicates",
+            "policyExec" : "cannotContainDuplicates", 
+            "clientValidation": true,
+            "validateOnlyIfPresent": true,
+            "policyRequirements" : ["CANNOT_CONTAIN_DUPLICATES"]
+        },
         {
             "policyId" : "required-if-configured",
             "policyExec": "requiredIfConfigured",
@@ -396,6 +402,19 @@ policyImpl = (function (){
                 if (typeof(fullObject[fieldArray[i]]) === "string" && value.match(fullObject[fieldArray[i]])) {
                     return [{"policyRequirement": "CANNOT_CONTAIN_OTHERS", params: {"disallowedFields": fieldArray[i]}}];
                 }
+            }
+        }
+        return [];
+    };
+    
+    policyFunctions.cannotContainDuplicates = function(fullObject, value, params, property) {
+        var checkedValues = {};
+        if (value && value.length) {
+            for (i = 0; i < value.length; i++) {
+                if (Object.prototype.hasOwnProperty.call(checkedValues, value[i])) {
+                    return [{"policyRequirement": "CANNOT_CONTAIN_DUPLICATES", params: {"duplicateValue": value[i]}}];
+                }
+                checkedValues[value[i]] = true;
             }
         }
         return [];
