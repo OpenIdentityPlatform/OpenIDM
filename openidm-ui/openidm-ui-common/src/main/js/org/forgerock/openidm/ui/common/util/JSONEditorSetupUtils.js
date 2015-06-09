@@ -30,20 +30,25 @@
 define("org/forgerock/openidm/ui/common/util/JSONEditorSetupUtils", [
     "jsonEditor"
 ], function (JSONEditor) {
-        var JSONEditorPostBuild = JSONEditor.AbstractEditor.prototype.postBuild;
-        JSONEditor.AbstractEditor.prototype.postBuild = function () {
-            var ret = JSONEditorPostBuild.apply(this, arguments);
-            if (this.path && this.input && this.label && !this.input.id && !this.label.htmlFor) {
-                this.input.id = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
-                this.label.htmlFor = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
-                
-                if(this.jsoneditor.options.formHorizontal) {
-                    $(this.jsoneditor.element).addClass("form-horizontal");
-                    $(this.label).addClass("col-sm-2");
-                    $(this.input).wrap("<div class='col-sm-10'></div>");
-                }
+    var JSONEditorPostBuild = JSONEditor.AbstractEditor.prototype.postBuild;
+    JSONEditor.AbstractEditor.prototype.postBuild = function () {
+        var ret = JSONEditorPostBuild.apply(this, arguments);
+        if (this.path && this.input && this.label && !this.input.id && !this.label.htmlFor) {
+            this.input.id = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
+            this.label.htmlFor = (this.jsoneditor.options.uuid || this.jsoneditor.uuid) + "." + this.path;
+
+            if(this.jsoneditor.options.formHorizontal) {
+                $(this.jsoneditor.element).addClass("form-horizontal");
+                $(this.label).addClass("col-sm-2");
+                $(this.input).wrap("<div class='col-sm-10'></div>");
             }
-            return ret;
-        };
-        
+        }
+
+        if (this.jsoneditor.options.disable_array_delete_all) {
+            $(this.jsoneditor.element).find('.json-editor-btn-delete[title="Delete All"]').addClass("hidden");
+        }
+
+        return ret;
+    };
+
 });

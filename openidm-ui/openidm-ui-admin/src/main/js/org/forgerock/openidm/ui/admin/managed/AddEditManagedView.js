@@ -135,6 +135,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             // Set JSONEditor defaults
             _(JSONEditor.defaults.options).extend({
                 disable_edit_json: true,
+                disable_array_delete_all: true,
                 disable_array_reorder: false,
                 disable_collapse: true,
                 disable_properties: true,
@@ -282,7 +283,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                                         "title": "Required",
                                         "type": "boolean",
                                         "required": true,
-                                        "default": true
+                                        "default": false
                                     },
                                     "type": {
                                         "title": "Type",
