@@ -58,7 +58,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
         model: {},
         data: {},
 
-        render: function (args) {
+        render: function (args, callback) {
             this.model.mappingName = args;
             this.model.mapping = MappingBaseView.currentMapping();
 
@@ -104,7 +104,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                         "placeHolder" : "['test', 'default']"
                     },
                     _.bind(function(){
-
+                        if(callback) {
+                            callback();
+                        }
                     }, this));
 
                 $("#linkQualifierPanel").on('shown.bs.collapse', _.bind(function () {
@@ -121,11 +123,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
                         + '</button>');
                 }, this);
 
-
-                this.$el.find(".linkQualifierSave").prop("disabled", false);
                 this.$el.find("#badLinkQualifierScript").hide();
             } else {
-                this.$el.find(".linkQualifierSave").prop("disabled", true);
                 this.$el.find("#badLinkQualifierScript .message").html($.t("templates.mapping.badScript"));
                 this.$el.find("#badLinkQualifierScript").show();
             }
@@ -189,6 +188,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
             var currentTab = this.$el.find("#linkQualifierTabs .active").prop("id"),
                 sync = MappingBaseView.data.syncConfig;
 
+            this.model.scriptError = false;
+
             _.each(sync.mappings, function (map, key) {
                 if (map.name === this.model.mappingName) {
                     if(currentTab === "staticQualifierTab") {
@@ -223,31 +224,45 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView", [
 
             if(scriptDetails !== null) {
                 ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
-                        this.model.scriptError = false;
+                        if(_.isArray(result)) {
+                            _.each(result, function(item) {
+                                if(!_.isString(item)) {
+                                    this.model.scriptError = true;
+                                }
+                            }, this);
+                        } else {
+                            this.model.scriptError = true;
+                        }
 
-                        this.model.scriptResult = result;
+                        if(!this.model.scriptError) {
+                            this.model.scriptResult = result;
 
-                        sync.mappings[key].linkQualifiers = this.linkQualifierScript.generateScript();
-                        mapping = sync.mappings[key];
-                        LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
+                            sync.mappings[key].linkQualifiers = this.linkQualifierScript.generateScript();
+                            mapping = sync.mappings[key];
+                            LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
 
-                        ConfigDelegate.updateEntity("sync", sync).then(_.bind(function() {
-                            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
-                            BrowserStorageDelegate.set("currentMapping", mapping);
+                            ConfigDelegate.updateEntity("sync", sync).then(_.bind(function () {
+                                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
+                                BrowserStorageDelegate.set("currentMapping", mapping);
 
-                            EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
-                        }, this));
-
+                                EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
+                            }, this));
+                        } else {
+                            this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
+                        }
                     }, this),
                     _.bind(function (result) {
                         this.model.scriptError = true;
-                        this.$el.find("#badLinkQualifierScript .message").html(result.responseJSON.message);
-                        this.$el.find("#badLinkQualifierScript").show();
+                        this.showErrorMessage(result.responseJSON.message);
                     }, this));
             } else {
-                this.$el.find("#badLinkQualifierScript .message").html($.t("templates.mapping.validLinkQualifierScript"));
-                this.$el.find("#badLinkQualifierScript").show();
+                this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
             }
+        },
+
+        showErrorMessage: function(message) {
+            this.$el.find("#badLinkQualifierScript .message").html(message);
+            this.$el.find("#badLinkQualifierScript").show();
         }
     });
 
