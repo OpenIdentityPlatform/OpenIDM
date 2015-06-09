@@ -58,16 +58,17 @@
                     <table class="table" id="mappingTable"></table>
                 </div>
             </div>
-        </div>
-        <div class="panel-footer clearfix">
-            <div class="pull-right">
-                {{#if missingRequiredProperties}}
-                <button type="button" id="missingRequiredPropertiesButton" class="btn btn-primary">{{t "common.form.add"}} {{t "templates.mapping.missingRequiredProperties"}} ({{missingRequiredProperties.length}})</button>
-                {{/if}}
-                <button type="button" id="clearChanges" class="btn btn-default">{{t "templates.mapping.undoAllChanges"}}</button>
-                <button type="button" id="updateMappingButton" class="btn btn-primary">{{t "templates.mapping.saveProperties"}}</button>
+            <div class="panel-footer clearfix">
+                <div class="pull-right">
+                    {{#if missingRequiredProperties}}
+                    <button type="button" id="missingRequiredPropertiesButton" class="btn btn-primary">{{t "common.form.add"}} {{t "templates.mapping.missingRequiredProperties"}} ({{missingRequiredProperties.length}})</button>
+                    {{/if}}
+                    <button type="button" id="clearChanges" class="btn btn-default">{{t "templates.mapping.undoAllChanges"}}</button>
+                    <button type="button" id="updateMappingButton" class="btn btn-primary">{{t "templates.mapping.saveProperties"}}</button>
+                </div>
             </div>
         </div>
+
     </div>
     <div id="roleEntitlementsPanel" class="panel panel-default panel-collapse">
         <div class="panel-heading" role="tab" id="roleEntitlementsHeading">

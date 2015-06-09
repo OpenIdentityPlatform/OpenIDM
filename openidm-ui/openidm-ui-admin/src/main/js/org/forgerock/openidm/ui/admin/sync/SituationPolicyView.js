@@ -542,20 +542,20 @@ define("org/forgerock/openidm/ui/admin/sync/SituationPolicyView", [
                 policies.push(policy);
             });
 
-            ConfigDelegate.readEntity("sync").then(_.bind(function(data) {
-                _(data.mappings).each(function(map, index) {
-                    if (map.name === this.model.mapping.name) {
-                        data.mappings[index].policies = policies;
-                        mapping = map;
-                    }
-                }, this);
+            _(this.model.sync.mappings).each(function(map, index) {
+                if (map.name === this.model.mapping.name) {
+                    this.model.sync.mappings[index].policies = policies;
+                    mapping = map;
+                }
+            }, this);
 
-                ConfigDelegate.updateEntity("sync", data).then(function() {
-                    BrowserStorageDelegate.set("currentMapping", _.extend(mapping, this.recon));
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncPolicySaveSuccess");
-                    _this.model.saveCallback();
-                });
-            }, this));
+            ConfigDelegate.updateEntity("sync", this.model.sync).then(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncPolicySaveSuccess");
+                BrowserStorageDelegate.set("currentMapping", mapping);
+
+                _this.model.saveCallback();
+            });
+
         }
     });
 
