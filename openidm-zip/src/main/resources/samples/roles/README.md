@@ -38,9 +38,6 @@ UI. The following use cases are covered:
   an external system (OpenDJ, based on sample 2b)
 * Delete a role
 
-We will also address the following scenario, specific to multi-account linking:
-* using linkQualifiers to derive role membership
-
 
 CRUD operations for Roles
 -------------------------
@@ -68,11 +65,3 @@ the _Chat Users_ groups in the corporate directory (OpenDJ). In turn,
 contractors must also have their employee type set but they will only be part
 of the _Contractors_ group (no chatting for contractors!). Roles will be used
 to set the required properties on the external resource (OpenDJ).
-
-Multi-account linking and Roles
--------------------------------
-
-Available as part of the "linkqualroles" sample. Provides configuration details
-and operations necessary for the provisioning of a set of attributes based on
-link qualifiers
-
