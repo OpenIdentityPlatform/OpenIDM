@@ -76,10 +76,10 @@
   you can craft the actual artifacts defining business processes and workflow
   in a text editor, or using a special Eclipse plugin. The Eclipse plugin 
   provides visual design capabilities, simplifying packaging and deployment of 
-  the artifact to OpenIDM. See the <link
-  xlink:href="http://docs.codehaus.org/display/ACT/Activiti+BPMN+2.0+Eclipse+Plugin"
-  xlink:show="new">Activiti BPMN 2.0 Eclipse Plugin</link> documentation for
-  instructions on installing Activiti Eclipse BPMN 2.0 Designer.</para>
+  the artifact to OpenIDM. For instructions on installing Activiti Eclipse BPMN
+  2.0 Designer, see the corresponding <link
+  xlink:href="http://docs.alfresco.com/4.1/tasks/wf-install-activiti-designer.html"
+  xlink:show="new">Alfresco documentation</link>.</para>
   
   <para>Also, read the Activiti <citetitle>User Guide</citetitle> section
   covering <link xlink:href="http://www.activiti.org/userguide/#bpmnConstructs"
