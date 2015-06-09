@@ -679,7 +679,7 @@ $ ./startup.sh -p samples/sample1
    --header "X-OpenIDM-Username: openidm-admin" \
    --header "X-OpenIDM-Password: openidm-admin" \
    --request GET \
-   "https://localhost:8443/openidm/managed/user?_queryFilter=sn%20%pr&amp;_fields=sn"
+   "https://localhost:8443/openidm/managed/user?_queryFilter=sn+pr&amp;_fields=sn"
   </userinput>
    <computeroutput>{
  "result" : [ {
@@ -701,7 +701,7 @@ $ ./startup.sh -p samples/sample1
    --header "X-OpenIDM-Username: openidm-admin" \
    --header "X-OpenIDM-Password: openidm-admin" \
    --request GET \
-   "https://localhost:8443/openidm/managed/user?_queryFilter=sn%20%pr&amp;_fields=sn,mail,description"
+   "https://localhost:8443/openidm/managed/user?_queryFilter=sn+pr&amp;_fields=sn,mail,description"
   </userinput>
    <computeroutput>{
  "result" : [ {

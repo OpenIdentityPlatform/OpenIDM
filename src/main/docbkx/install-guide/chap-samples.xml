@@ -2169,7 +2169,7 @@ mysql &gt; <userinput>select * from users;</userinput>
     run a similar query, to retrieve the following set of records in the
     database. You must URL-encode the space character between the date and time
     in the <literal>"pagedResultsCookie"</literal> value, with
-    <literal>%20</literal>, as shown in the following example:
+    <literal>+</literal>, as shown in the following example:
    </para>
    <informalexample><?dbfo pgwide="1"?>
    <screen><userinput>$ curl \
@@ -2177,7 +2177,7 @@ mysql &gt; <userinput>select * from users;</userinput>
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&amp;_pageSize=2&amp;_sortKeys=timestamp,id&amp;_pagedResultsCookie2014-09-10%2012:18:46.0,2"</userinput>
+ "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&amp;_pageSize=2&amp;_sortKeys=timestamp,id&amp;_pagedResultsCookie2014-09-10+12:18:46.0,2"</userinput>
 <computeroutput>{
   "remainingPagedResults": -1,
   "pagedResultsCookie": "2014-09-10 12:18:46.0,4",
@@ -7978,7 +7978,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
      </para>
      <para>
 <link xlink:show="new"
-      xlink:href="https://login.salesforce.com/services/oauth2/authorize?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=https://localhost:8443/admin/oauth.html&amp;scope=id%20api%20refresh_token" />
+      xlink:href="https://login.salesforce.com/services/oauth2/authorize?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=https://localhost:8443/admin/oauth.html&amp;scope=id+api+refresh_token" />
      </para>
     </step>
     <step>
