@@ -180,7 +180,7 @@
         },
         "user" : {
             "LoginDialog" : {
-                "refreshOnLogin" : "Should refresh on login"
+                "refreshOnLogin" : "Reload"
             },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
@@ -422,6 +422,7 @@
             "targetQuery": "Target Query",
             "associationRules": "Association Rules",
             "dataAssociationManagment": "Data Association Management",
+            "dataAssociationManagmentInfo": "Data displayed may be affected by recent/ongoing reconciliation or synchronization. Please run reconciliation to see the latest information",
             "correlationScript" : "Correlation Script",
             "correlationScriptHelp" : "Provide a correlation script to list IDs for specific source records.",
             "correlationQueryHelp" : "Build a correlation query for each link qualifier.",
