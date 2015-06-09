@@ -445,11 +445,7 @@ orientdb&gt; </screen>
   <title>Install the Sample</title>
 
   <para>
-   Now that OpenDJ is configured, prepare OpenIDM as described in
-   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:href="install-guide#preparing-openidm" ><citetitle>Preparing
-   OpenIDM</citetitle></link> You can then start OpenIDM with the configuration
-   for sample 1.
+   Start OpenIDM with the configuration for sample 1.
   </para>
 
   <screen>$ cd /path/to/openidm
