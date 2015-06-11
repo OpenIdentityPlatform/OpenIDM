@@ -284,14 +284,14 @@ function Create-NewUser ($attributes)
 	$hasOther = $FALSE
 	foreach($h in $dic.GetEnumerator())
 	{
-		if ($h.Value -ne $null)
+		if ($h.value.Value -ne $null)
 		{
 			$vals = @()
-			foreach($val in $h.Value.Value)
+			foreach($val in $h.value.Value)
 			{
 				$vals += $val
 			}
-			$otherAttrs.Add($h.Key,$vals)
+			$otherAttrs.Add($h.key,$vals)
 			$hasOther = $TRUE
 		}
 	}
