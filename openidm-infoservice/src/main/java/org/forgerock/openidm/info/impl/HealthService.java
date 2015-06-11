@@ -623,7 +623,7 @@ public class HealthService
         case Bundle.STOPPING:
             return "STOPPING";
         case Bundle.UNINSTALLED:
-            return "UNINSTALLED ";
+            return "UNINSTALLED";
         }
         return "UNKNOWN";
     }
