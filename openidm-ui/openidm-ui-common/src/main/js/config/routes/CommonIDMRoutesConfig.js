@@ -36,6 +36,16 @@ define("config/routes/CommonIDMRoutesConfig", [
         "authenticationUnavailable" : {
             view: "org/forgerock/openidm/ui/common/login/AuthenticationUnavailable",
             url: "authenticationUnavailable/"
+        },
+        /*
+         * this is an override of the UserRoutesConfig definition because the openidm 
+         * implementation of change security dialog is not yet using bootstrap-dialog
+         */
+        "changeSecurityData": {
+            base: "profile",
+            dialog: "ChangeSecurityDataDialog",
+            role: "ui-user,ui-admin",
+            url: "profile/change_security_data/"
         }
     };
 
