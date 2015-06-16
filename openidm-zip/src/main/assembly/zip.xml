@@ -890,33 +890,6 @@
             </includes>
             <outputDirectory>/openidm/samples/roles/provrole/</outputDirectory>
         </fileSet>
-        <!-- Roles and Multi-account linking (linkqualifiers) -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/roles/linkqualrole/</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/roles/linkqualrole/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/roles/linkqualrole/</outputDirectory>
-        </fileSet>
     <!-- Setup link qualifier samples  -->
     <fileSet>
         <directory>${basedir}/src/main/resources/samples/multiaccountlinking</directory>
