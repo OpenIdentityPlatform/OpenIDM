@@ -595,9 +595,9 @@
        <citetitle>OpenAM Access Management</citetitle></link> product. For an
        example of how you might use the <literal>OPENAM_SESSION</literal>
        module, see <link xlink:role="http://docbook.org/xlink/role/olink"
-       xlink:show="new" xlink:href="install-guide#more-sample-openam">
-       <citetitle>Sample - Configuring Authentication Management With OpenAM
-       </citetitle></link> in the <citetitle>Install Guide</citetitle>.
+       xlink:show="new" xlink:href="install-guide#full-stack-sample">
+       <citetitle>The Full Stack Sample</citetitle></link> in the
+       <citetitle>Installation Guide</citetitle>.
       </para>
       <para>
        For detailed options, see the
