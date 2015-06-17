@@ -86,6 +86,23 @@ define("config/validators/AdminValidators", [
 
                 callback();
             }
+        }, "spaceCheck": {
+            "name": "Whitespace validator",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                var v = input.val();
+                if (!v || v === "") {
+                    callback([$.t("common.form.validation.required")]);
+                    return;
+                }
+                else if (v.indexOf(' ') !== -1) {
+                    callback([$.t("common.form.validation.spaceNotAllowed")]);
+                    return;
+                }
+
+                callback();
+            }
         }
     };
 
