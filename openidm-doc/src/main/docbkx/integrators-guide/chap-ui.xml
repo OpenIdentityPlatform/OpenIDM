@@ -1580,6 +1580,20 @@
     <citetitle>Font Awesome</citetitle> CSS toolkit</link>.
   </para>
 
+  <note>
+   <para>
+    If you use <link xlink:show="new"
+    xlink:href="http://fortawesome.github.io/Font-Awesome/icons/">
+    <citetitle>Brand Icons from the Font Awesome CSS Toolkit</citetitle></link>,
+    be aware of the following statement:
+   </para>
+   <para>
+    All brand icons are trademarks of their respective owners. The use of these
+    trademarks does not indicate endorsement of the trademark holder by
+    ForgeRock, nor vice versa.
+   </para>
+  </note>
+
   <section xml:id="ui-bootstrap">
    <title>OpenIDM UI Themes and Bootstrap</title>
 
