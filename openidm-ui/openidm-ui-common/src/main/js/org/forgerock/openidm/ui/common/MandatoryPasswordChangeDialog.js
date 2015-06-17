@@ -26,82 +26,105 @@
 
 define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
     "org/forgerock/openidm/ui/common/delegates/InternalUserDelegate",
-    "org/forgerock/commons/ui/common/components/Dialog",
+    "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
-    "AuthnDelegate"
-], function(InternalUserDelegate, Dialog, validatorsManager, conf, eventManager, constants, router, authnDelegate) {
-    var MandatoryPasswordChangeDialog = Dialog.extend({
+    "AuthnDelegate",
+    "bootstrap-dialog",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function(InternalUserDelegate, AbstractView, validatorsManager, conf, eventManager, constants, router, authnDelegate, BootstrapDialog, uiUtils) {
+    var MandatoryPasswordChangeDialog = AbstractView.extend({
         contentTemplate: "templates/admin/MandatoryPasswordChangeDialogTemplate.html",
         delegate: InternalUserDelegate,
         events: {
-            "click .dialogCloseCross a": "close",
-            "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
-            "click .modal-content": "stop",
             "customValidate": "customValidate"
         },
+        model: {
 
-        formSubmit: function(event) {
-            event.preventDefault();
-
-            var patchDefinitionObject = [], element;
-            if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
-                patchDefinitionObject.push({operation: "replace", field: "/password", value: this.$el.find("input[name=password]").val()});
-            }
-
-            this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
-                delete conf.passwords;
-                this.close();
-
-                return authnDelegate.getProfile()
-                    .then(function(user) {
-                        conf.loggedUser = user;
-                        return user;
-                    });
-
-            }, this));
         },
 
         render: function(args, callback) {
-            var landingView = require(router.configuration.routes.landingPage.view);
+            var landingView = require(router.configuration.routes.landingPage.view),
+                _this = this,
+                currentDialog = $('<div id="mandatoryPasswordChangeDialog"></div>');
 
             if (landingView.baseTemplate) {
                 this.baseTemplate = landingView.baseTemplate;
             }
 
-            this.actions = [];
-            this.addAction($.t("common.form.update"), "submit");
+            this.setElement(currentDialog);
 
-            $("#dialogs").hide();
+            uiUtils.renderTemplate(
+                _this.contentTemplate,
+                _this.$el,
+                _.extend({}, conf.globalData, _this.data),
+                _.bind(function() {
+                    this.model.dialog = BootstrapDialog.show({
+                        title: $.t("templates.MandatoryChangePassword.title"),
+                        type: BootstrapDialog.TYPE_DEFAULT,
+                        message: currentDialog,
+                        onshown : _.bind(function (dialogRef) {
+                            validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
+                                this.$el.find("[name=password]").focus();
 
-            this.addTitle($.t("templates.MandatoryChangePassword.title"));
+                                this.model.dialog.$modalFooter.find("#submitPasswordChange").prop('disabled', true);
 
-            this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
-                    $("#dialogs").show();
-                    this.$el.find("input[type=submit]").prop('disabled', true);
-                    this.$el.find("[name=password]").focus();
+                                if (callback) {
+                                    callback();
+                                }
+                            }, this));
+                        }, _this),
+                        onhide: _.bind(function(){
+                            eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
+                        }, this),
+                        buttons:
+                            [{
+                                label: $.t("common.form.submit"),
+                                id: "submitPasswordChange",
+                                cssClass: "btn-primary",
+                                action: _.bind(function(dialogRef) {
+                                    event.preventDefault();
 
-                    if (callback) {
-                        callback();
-                    }
-                }, this));
-            }, this));
+                                    var patchDefinitionObject = [], element;
+                                    if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
+                                        patchDefinitionObject.push({operation: "replace", field: "/password", value: this.$el.find("input[name=password]").val()});
+                                    }
 
-            this.$el.find("input[type=submit]").prop('disabled', true);
+                                    this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
+                                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
+                                        delete conf.passwords;
+
+                                        dialogRef.close();
+
+                                        return authnDelegate.getProfile()
+                                            .then(function(user) {
+                                                conf.loggedUser = user;
+                                                return user;
+                                            });
+
+                                    }, this));
+
+                                }, this)
+                            }]
+                    });
+                }, _this),
+                "append");
+        },
+
+        close: function() {
+            this.model.dialog.close();
         },
 
         customValidate: function () {
             if(validatorsManager.formValidated(this.$el.find("#passwordChange")) || validatorsManager.formValidated(this.$el.find("#securityDataChange"))) {
-                this.$el.find("input[type=submit]").prop('disabled', false);
+                this.model.dialog.$modalFooter.find("#submitPasswordChange").prop('disabled', false);
             }
             else {
-                this.$el.find("input[type=submit]").prop('disabled', true);
+                this.model.dialog.$modalFooter.find("#submitPasswordChange").prop('disabled', true);
             }
 
         }
@@ -109,4 +132,3 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
 
     return new MandatoryPasswordChangeDialog();
 });
-

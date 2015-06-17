@@ -83,7 +83,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
     private static final String[] DEFAULT_SERVLET_NAME = new String[] { "OpenIDM REST" };
 
-    private static final String[] DEFAULT_SERVLET_URL_PATTERNS = new String[] { "/openidm/*", "/openidmui/*" };
+    private static final String[] DEFAULT_SERVLET_URL_PATTERNS = new String[] { "/openidm/*", "/selfservice/*" };
 
     // Context of this scr component
     private BundleContext bundleContext;

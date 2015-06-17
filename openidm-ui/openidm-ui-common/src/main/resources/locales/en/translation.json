@@ -338,6 +338,7 @@
             "propertyDelete": "Are you sure you want to delete this property?",
             "editTitle" : "Edit Managed Object",
             "managedObjectName" : "Managed Object Name",
+            "managedObjectIcon" : "Managed Object Icon",
             "managedProperties" : "Managed Properties",
             "managedPropertyMessage" : "If you have specific managed object properties add them below. Not all properties need to be added, only those with special functionality.",
             "addProperty" : "Add Property",

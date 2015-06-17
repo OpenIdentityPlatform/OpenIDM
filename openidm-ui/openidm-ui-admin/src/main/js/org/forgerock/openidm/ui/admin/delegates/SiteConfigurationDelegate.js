@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
 ], function(conf, commonSiteConfigurationDelegate, nav, configDelegate) {
 
     var obj = commonSiteConfigurationDelegate;
-    
+
     obj.checkForDifferences = function(){
         if(_.contains(conf.loggedUser && conf.loggedUser.roles,"ui-admin")){
             return obj.setDynamicNavItems();
@@ -43,48 +43,32 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
             return $.Deferred().resolve();
         }
     };
-    
+
     obj.setDynamicNavItems = function() {
         return configDelegate.readEntity("managed").then(function(managedConfig){
-            if(!obj.showRoles(managedConfig)) {
-                delete nav.configuration.links.admin.urls.roles;
-                nav.reload();
-            }
+            nav.configuration.links.admin.urls.managed.urls = [];
+
+            _.each(managedConfig.objects, function(managed) {
+                if(!managed.schema.icon) {
+                    managed.schema.icon = "fa-cube";
+                }
+
+                nav.configuration.links.admin.urls.managed.urls.push({
+                    "url" : "#resource/managed/" +managed.name +"/list/",
+                    "name" : managed.name,
+                    "icon" : "fa " +managed.schema.icon
+                });
+            });
+
+            nav.configuration.links.admin.urls.managed.urls.push({
+                "url" : "#managed/add/",
+                "name" : "New Managed Object",
+                "icon" : "fa fa-plus"
+            });
+
+            nav.reload();
         });
     };
-    
-    obj.showRoles = function(managedConfig) {
-        var role = _.findWhere(managedConfig.objects, {name: "role"}),
-            user = _.findWhere(managedConfig.objects, {name: "user"}),
-            showRoles = true,
-            postScript = "roles/update-users-of-role.js",
-            eventScriptMap = {
-                "onDelete": "roles/onDelete-roles.js",
-                "postCreate": postScript,
-                "postDelete": postScript,
-                "postUpdate": postScript
-            };
-        
-        if(!user) {
-            showRoles = false;
-        } else {
-            showRoles = _.findWhere(user.properties, { name: "effectiveRoles" }) && _.findWhere(user.properties, { name: "effectiveAssignments" });
-        }
-        
-        if(showRoles) {
-            _.each(eventScriptMap, function(val, key) {
-                if(!showRoles || !role || !role[key] || !role[key].file || role[key].file !== val) {
-                    showRoles = false;
-                }
-            });
-        }
-        
-        return showRoles;
-    };
 
-    
     return obj;
 });
-
-
-

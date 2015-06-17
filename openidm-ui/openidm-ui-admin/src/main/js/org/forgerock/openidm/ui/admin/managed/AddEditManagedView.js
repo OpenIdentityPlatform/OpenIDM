@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/admin/util/ScriptList"
-], function(AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, uiUtils, ScriptList) {
+    "org/forgerock/openidm/ui/admin/util/ScriptList",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function(AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, uiUtils, ScriptList, ModuleLoader) {
 
     var AddEditManagedView = AdminAbstractView.extend({
         template: "templates/admin/managed/AddEditManagedTemplate.html",
@@ -72,7 +73,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             managedPromise = ConfigDelegate.readEntity("managed");
             repoCheckPromise = ConfigDelegate.getConfigList();
 
-            $.when(managedPromise, repoCheckPromise).then(_.bind(function(managedObjects, configFiles){
+            $.when(managedPromise, repoCheckPromise, ModuleLoader.load("faiconpicker")).then(_.bind(function(managedObjects, configFiles, faiconpicker){
                 this.data.managedObjects = managedObjects;
 
                 if(args.length === 0 || args[0] === null) {
@@ -525,6 +526,10 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
                 this.loadSchema();
 
+                this.$el.find('#managedObjectIcon').iconpicker({
+                    hideOnSelect: true
+                });
+
                 this.model.managedScripts = ScriptList.generateScriptList({
                     element: this.$el.find("#managedScripts"),
                     label: $.t("templates.managed.addManagedScript"),
@@ -532,8 +537,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     addedEvents:this.data.addedEvents,
                     currentObject: this.data.currentManagedObject,
                     hasWorkflow: true,
-                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")
-                });
+                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")                });
 
                 _.each(this.$el.find("#managedPropertyWrapper .small-field-block:visible"), function(managedProperty, index) {
                     this.propertyHooks.push([]);
@@ -564,6 +568,8 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 nameCheck;
 
             managedObject.schema = this.getManagedSchema();
+
+            managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
 
             if(this.data.addState) {
                 nameCheck = this.checkManagedName(managedObject.name);

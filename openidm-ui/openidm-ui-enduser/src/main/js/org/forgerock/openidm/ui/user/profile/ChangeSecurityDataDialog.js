@@ -46,7 +46,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
             "customValidate": "customValidate",
-            "click .dialogCloseCross img": "close",
+            "click .dialogCloseCross": "close",
             "click input[name='close']": "close",
             "click .modal-content": "stop",
             "check_reauth": "reauth"
@@ -100,7 +100,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             if (
                 (passwordValid && (securityAnswerSet === false || securityValid)) ||
                 (securityValid  && (passwordSet === false || passwordValid))
-            ) {
+                ) {
                 this.$el.find("input[type=submit]").prop('disabled', false);
             } else {
                 this.$el.find("input[type=submit]").prop('disabled', true);
@@ -138,8 +138,8 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
                         false, _.bind(function() {
                             this.$el.find("select[name='securityQuestion']").val(user.securityQuestion);
                             this.$el.find("input[name=oldSecurityQuestion]").val(user.securityQuestion);
-                        validatorsManager.validateAllFields(this.$el);
-                    }, self));
+                            validatorsManager.validateAllFields(this.$el);
+                        }, self));
                 });
             }
 
