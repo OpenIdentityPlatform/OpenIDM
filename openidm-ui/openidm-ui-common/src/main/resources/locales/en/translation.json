@@ -1181,7 +1181,8 @@
                 "emailNotValid" : "Not a valid email address.",
                 "emailExists" : "Email address already exists.",
                 "shouldBeLong" : "Should be long value",
-                "wrongDateFormat" : "Wrong format"
+                "wrongDateFormat" : "Wrong format",
+                "spaceNotAllowed" : "Cannot contain a space"
             }
         },
         "user" : {
