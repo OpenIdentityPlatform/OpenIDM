@@ -52,7 +52,8 @@ require.config({
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
-        "ldapjs-filter": "libs/ldapjs-filter-2253-min"
+        "ldapjs-filter": "libs/ldapjs-filter-2253-min",
+        faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min"
     },
 
     shim: {

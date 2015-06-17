@@ -142,122 +142,155 @@ Dialog Catch
     margin-bottom: 0px;
     margin-top: 0px;
   }
-  
-        
+
+
   td.noData {
-      padding: 10px;
+    padding: 10px;
   }
-  
+
   .ui-widget-content {
-      border-color:transparent !important;
+    border-color:transparent !important;
   }
 
   .ui-jqgrid {
     margin: auto;
     margin-top: 10px;
     border: 1px solid #eee;
-    
+
     .ui-state-default {
-        border-color:transparent;
+      border-color:transparent;
     }
     tr.ui-row-ltr td {
-        padding: 14px;
+      padding: 14px;
     }
     tr.ui-row-ltr :first-child {
-        padding: 12px;
+      padding: 12px;
     }
     .ui-jqgrid-sortable {
-        text-transform: uppercase;
+      text-transform: uppercase;
     }
     .ui-jqgrid-pager {
-        background-color: #fff;
+      background-color: #fff;
     }
     thead {
-        border-bottom: 2px solid #ddd;
-        tr td {
-            padding-bottom: 10px;
-        }
+      border-bottom: 2px solid #ddd;
+      tr td {
+        padding-bottom: 10px;
+      }
     }
   }
 }
 
 .editResourceViewContainer {
-        .resource-avatar {
-          display: table;
-          background: @base-theme-color;
-          color: #fff;
-          text-align: center;
-        }
-    
-        .profile-header .resource-avatar {
-          width: 70px;
-          height: 70px;
-          border-radius: 70px;
-          line-height: 70px;
-          font-size: 36px;
-        }
-    
-        .panel-footer {
-          padding: 10px 15px;
-          border-radius: 0;
-          background-color: transparent;
-          overflow: auto;
-        }
-    
-        .page-header h4.page-type {
-          text-transform: uppercase;
-          font-size: 14px;
-          letter-spacing: 1px;
-          margin-bottom: 10px;
-          color: #666;
-          font-weight: 600;
-          margin-top: 0;
-        }
-    
-        .page-header .meta {
-          margin: -10px 0 10px;
-          color: #777;
-          text-transform: none;
-          letter-spacing: 0;
-          border-left: 1px solid #ddd;
-          padding-left: 5px;
-          margin-left: 4px;
-          font-weight: 400;
-          display: inline-block;
-          margin-bottom: 0;
-        }
-    
-        .tab-content {
-          background-color: #fff;
-          margin-bottom: 50px;
-        }
-        
-        .fa-search {
-           margin-top: 10px;
-        }
-        
-        .resourceCollectionTab {
-           padding-top: 10px;
-        }
-        
-        #resource>div>h3, .tabHeaderTemplate, .tabContentTemplate  {
-            display: none !important;
-        }
-        
-        .back-bar a {
-            color: #777;
-        }
-        
-        #linkToResource span{
-            margin-top: 10px;
-        }
-        
-        .well {
-            background-color: transparent;
-            border-color: transparent;
-        }
-        
-        li.resourceListItem:hover {
-            background-color: #ededed;
-        }
+  .resource-avatar {
+    display: table;
+    background: @base-theme-color;
+    color: #fff;
+    text-align: center;
+  }
+
+  .profile-header .resource-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 70px;
+    line-height: 70px;
+    font-size: 36px;
+  }
+
+  .panel-footer {
+    padding: 10px 15px;
+    border-radius: 0;
+    background-color: transparent;
+    overflow: auto;
+  }
+
+  .page-header h4.page-type {
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: #666;
+    font-weight: 600;
+    margin-top: 0;
+  }
+
+  .page-header .meta {
+    margin: -10px 0 10px;
+    color: #777;
+    text-transform: none;
+    letter-spacing: 0;
+    border-left: 1px solid #ddd;
+    padding-left: 5px;
+    margin-left: 4px;
+    font-weight: 400;
+    display: inline-block;
+    margin-bottom: 0;
+  }
+
+  .tab-content {
+    background-color: #fff;
+    margin-bottom: 50px;
+  }
+
+  .fa-search {
+    margin-top: 10px;
+  }
+
+  .resourceCollectionTab {
+    padding-top: 10px;
+  }
+
+  #resource>div>h3, .tabHeaderTemplate, .tabContentTemplate  {
+    display: none !important;
+  }
+
+  .back-bar a {
+    color: #777;
+  }
+
+  #linkToResource span{
+    margin-top: 10px;
+  }
+
+  .well {
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  li.resourceListItem:hover {
+    background-color: #ededed;
+  }
+}
+
+/*
+  Password Change
+*/
+#dialogs .modal-header {
+  height: 50px;
+  margin-bottom: 15px;
+  border:none;
+}
+
+#dialogs .modal-title {
+  float:left;
+  font-weight: 600;
+  font-size:16px;
+}
+
+#dialogs .modal-content .dialogCloseCross {
+  float:right;
+}
+
+#dialogs .modal-content .dialogCloseCross a {
+  color: rgb(42, 47, 50);
+  opacity: .4;
+}
+
+#dialogs .modal-content .dialogCloseCross a:hover {
+  opacity: .8;
+}
+
+#changeSecuirtyDataDialog .well,
+#mandatoryPasswordChangeDialog .well {
+  margin-left:45px;
 }

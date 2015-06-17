@@ -240,7 +240,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             var treeData = {
                     "name" : this.editedUser.givenName + " " +this.editedUser.sn,
                     "parent" : "null",
-                    "url" : constants.host +"/openidmui/index.html#users/show/" +this.editedUser.userName +"/",
+                    "url" : constants.host +"/selfservice/index.html#users/show/" +this.editedUser.userName +"/",
                     "children" : [
 
                     ]
@@ -324,7 +324,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 treeData.children.push({
                     "name" : item.givenName + " " +item.sn,
                     "parent" : "null",
-                    "url" : constants.host +"/openidmui/index.html#users/show/" +item.userName +"/"
+                    "url" : constants.host +"/selfservice/index.html#users/show/" +item.userName +"/"
                 });
             });
 

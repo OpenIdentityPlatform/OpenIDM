@@ -107,11 +107,6 @@ define("config/AppConfiguration", [
                 configuration: {
                     userBar: [
                         {
-                            "id": "profile_link",
-                            "href": "#profile/",
-                            "i18nKey": "common.user.profile"
-                        },
-                        {
                             "id": "security_link",
                             "href": "#profile/change_security_data/",
                             "i18nKey": "templates.user.UserProfileTemplate.changeSecurityData"
@@ -132,9 +127,9 @@ define("config/AppConfiguration", [
                                     "icon": "fa fa-dashboard",
                                     "inactive": false
                                 },
-                                "users": {
-                                    "url": "#users/",
-                                    "name": "config.AppConfiguration.Navigation.links.users",
+                                "profile": {
+                                    "url": "#profile/",
+                                    "name": "common.user.profile",
                                     "icon": "fa fa-user",
                                     "inactive": false
                                 }
