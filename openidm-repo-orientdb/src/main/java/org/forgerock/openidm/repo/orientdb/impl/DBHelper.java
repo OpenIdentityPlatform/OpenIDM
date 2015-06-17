@@ -387,7 +387,9 @@ public class DBHelper {
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
         String defaultAdminPwd = "openidm-admin";
-        String defaultAdminRoles = "openidm-admin,openidm-authorized";
+        ArrayList defaultAdminRoles = new ArrayList();
+        defaultAdminRoles.add("openidm-admin");
+        defaultAdminRoles.add("openidm-authorized");
         populateDefaultUser(defaultTableName, db, defaultAdminUser,
                 defaultAdminPwd, defaultAdminRoles);
         logger.trace("Created default user {}. Please change the assigned default password.", 
@@ -395,13 +397,14 @@ public class DBHelper {
         
         String anonymousUser = "anonymous";
         String anonymousPwd = "anonymous";
-        String anonymousRoles = "openidm-reg";
+        ArrayList anonymousRoles = new ArrayList();
+        anonymousRoles.add("openidm-reg");
         populateDefaultUser(defaultTableName, db, anonymousUser, anonymousPwd, anonymousRoles);
         logger.trace("Created default user {} for registration purposes.", anonymousUser);
     }    
     
     private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db,
-            String user, String pwd, String roles) throws InvalidException {
+            String user, String pwd, List roles) throws InvalidException {
         
         JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
         defaultAdmin.put("_openidm_id", user);
