@@ -4055,6 +4055,13 @@ Properties:
    You might therefore want to reduce the schema to a minimum on the external
    resource before you run the <literal>createFullConfig</literal> command.
   </para>
+  <para>
+   When you have the complete connector configuration, save that configuration
+   in a file named <filename>provisioner.openicf-<replaceable>name</replaceable>.json</filename>
+   (where name corresponds to the name of the connector) and place it in the
+   <literal>conf</literal> folder of your project. For more information, see
+   <xref linkend="openicf-provisioner-conf" />.
+  </para>
  </section>
 
  <section xml:id="systems-over-rest">
