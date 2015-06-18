@@ -4459,7 +4459,7 @@ $ cp samples/misc/external.email.json samples/sample5/conf
       addresses of your choice:
      </para>
      <programlisting language="javascript">
-var params = {
+var email = {
       //UPDATE THESE VALUES
       from : "openidm@example.com",
       to : "youremail@example.com",
@@ -4468,7 +4468,7 @@ var params = {
       type : "text/html"
 },
 template,
-     </programlisting>
+...  </programlisting>
     </step>
    </procedure>
   </section>
