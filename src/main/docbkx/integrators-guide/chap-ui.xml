@@ -546,10 +546,10 @@
     <para>
      To limit the list of records displayed here, select the synchronization
      situation from the View list. For more information on the situations in
-     this list, see <link xlink:show="new"
+     this list, see the corresponding section on <link xlink:show="new"
      xlink:href="integrators-guide#sync-situations"
-     xlink:role="http://docboook.org/xlink/role/olink">
-     <citetitle>Synchronization Situations</citetitle></link>.
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+     Situations</citetitle></link>.
     </para>
     <para>
      In the case of multiple target objects, if the source object has been
