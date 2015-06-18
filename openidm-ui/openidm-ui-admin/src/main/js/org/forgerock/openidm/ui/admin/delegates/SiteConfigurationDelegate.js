@@ -61,6 +61,10 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
             });
 
             nav.configuration.links.admin.urls.managed.urls.push({
+                divider: true
+            });
+            
+            nav.configuration.links.admin.urls.managed.urls.push({
                 "url" : "#managed/add/",
                 "name" : "New Managed Object",
                 "icon" : "fa fa-plus"
