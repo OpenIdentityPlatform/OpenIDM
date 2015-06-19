@@ -532,7 +532,7 @@ $ ./startup.sh -p samples/fullStack</screen>
 
    <para>
     After you complete the steps described in Sample 2b, do one more thing.
-    Navigate to the Data Management UI at
+    Navigate to the Self-Service UI at
     <literal>https://openidm.example.com:8443/selfservice</literal>, and select
     Users. Select a specific user, such as <literal>bjensen</literal>. Click
     Change Password and change that password.
@@ -559,7 +559,7 @@ $ ./startup.sh -p samples/fullStack</screen>
     <literal>https://openam.example.com:8443/openam</literal>. Log in with the
     administrative account, which by default is <literal>amadmin</literal>.
     Navigate to Access Control &gt; Realm &gt; Subjects &gt; User. You should
-    see the same users as you see in the OpenIDM Data Management UI.
+    see the same users as you see in the OpenIDM Self-Service UI.
    </para>
 
    <mediaobject xml:id="openam-user-list">
@@ -590,7 +590,7 @@ $ ./startup.sh -p samples/fullStack</screen>
    <para>
     Login as user <literal>bjensen</literal>, with the password that you just
     changed in OpenIDM. If successful, you should now be logged into the
-    <emphasis>OpenIDM</emphasis> Data Management View screen, as user
+    <emphasis>OpenIDM</emphasis> Self-Service UI screen, as user
     <literal>bjensen</literal>.
    </para>
  </section>

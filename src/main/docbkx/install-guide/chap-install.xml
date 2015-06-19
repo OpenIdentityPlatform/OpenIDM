@@ -839,42 +839,30 @@ C:\openidm\bin</computeroutput>     </screen>
    <para>
     OpenIDM includes UIs at two different endpoints,
     <literal>/selfservice</literal> and <literal>/admin</literal>. We refer to the
-    administrative tools available at each endpoint as the Data Management
-    UI and the Administrative UI (Admin UI), respectively.
+    administrative tools available at each endpoint as the Self-Service UI and
+    the Administrative UI (Admin UI), respectively.
    </para>
 
    <para>
-    The Data Management UI allows regular users to update parts of their
+    The Self-Service UI allows regular users to update parts of their
     own profiles, such as password updates and user data such as addresses. When
     enabled, anonymous users can self-register and reset their passwords, as
     described in the following section:
     <link xlink:role="http://docbook.org/xlink/role/olink"
     xlink:show="new" xlink:href="integrators-guide#ui-configuring"><citetitle>
-    Configuring the Data Management UI</citetitle></link>.
-   </para>
-
-   <para>
-    Administrative users can do more in the Data Management UI. They can
-    create and delete user accounts. They can also modify profiles for existing
-    users. To rephrase, in the Data Management UI, administrative users can
-    configure managed object data that conforms to the core schema of OpenIDM,
-    including default policies set up in the <filename>policy.json</filename>
-    configuration file. For more information, see the following chapter:
-    <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
-    xlink:href="integrators-guide#chap-policies"><citetitle>Using Policies to
-    Validate Data</citetitle></link>.
+    Configuring the Self-Service UI</citetitle></link>.
    </para>
 
    <para>
     In addition, administrative users can configure and manage workflows in the
-    Data Management UI. For more information, see the following section:
+    Self-Service UI. For more information, see the following section:
     <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
     xlink:href="integrators-guide#ui-managing-workflows"><citetitle>Managing
     Workflows from the User Interface</citetitle></link>.
    </para>
 
    <para>
-    In essence, the Data Management UI supports day-to-day administrative tasks.
+    In essence, the Self-Service UI supports day-to-day administrative tasks.
    </para>
 
    <para>
@@ -885,7 +873,7 @@ C:\openidm\bin</computeroutput>     </screen>
    </para>
 
    <para>
-    Unlike the Data Management UI, the Admin UI allows you to configure
+    Unlike the Self-Service UI, the Admin UI allows you to configure
     connections to external data stores, as well as the way OpenIDM reconciles
     information between internal and external data stores.
    </para>
