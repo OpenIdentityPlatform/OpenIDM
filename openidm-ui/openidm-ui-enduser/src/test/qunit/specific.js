@@ -26,15 +26,12 @@
 define([
     "sinon",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/user/LoginView",
-    "org/forgerock/openidm/ui/admin/linkedView/LinkedView",
-    "org/forgerock/openidm/ui/admin/users/UsersView",
-    "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
-    "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate",
+    "org/forgerock/openidm/ui/LoginView",
+    "org/forgerock/openidm/ui/util/delegates/SiteIdentificationDelegate",
     "./mocks/siteIdentification",
     "./mocks/adminUserView",
     "./mocks/oldPassword"
-], function (sinon, conf, LoginView, LinkedView, usersView, adminUserProfileView, siteIdentificationDelegate, siteIdentificationMocks, adminUserViewMock, oldPasswordMock) {
+], function (sinon, conf, LoginView, siteIdentificationDelegate, siteIdentificationMocks, adminUserViewMock, oldPasswordMock) {
 
     return {
         executeAll: function (server) {
@@ -70,28 +67,8 @@ define([
                 });
             });
 
-
-            QUnit.asyncTest("Admin user page", function () {
-                adminUserViewMock(server);
-
-                adminUserProfileView.render(["FakeTest"], function () {
-
-                    QUnit.equal(adminUserProfileView.$el.find("#userName").val(), "FakeTest", "userName properly loaded into form");
-
-                    QUnit.equal(adminUserProfileView.$el.find("#linkedViewSelect option").length, 1, "Linked Resource properly loaded");
-
-                    adminUserProfileView.reloadData();
-
-                    QUnit.equal($("[name=roles]:checked").val(), "openidm-authorized", "Role remains checked after form reloaded");
-
-                    QUnit.start();
-
-                });
-
-            });
-
             QUnit.asyncTest("Change password dialog", function () {
-                var oldPasswordDialog = require("org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog");
+                var oldPasswordDialog = require("org/forgerock/openidm/ui/profile/EnterOldPasswordDialog");
                 oldPasswordMock(server);
 
                 oldPasswordDialog.render([], function () {

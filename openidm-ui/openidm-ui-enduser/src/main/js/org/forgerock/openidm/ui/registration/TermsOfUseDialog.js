@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,26 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/* css basic configuration */
+/*global define, $, _*/
 
-
-/* css basic configuration */
-@import "common/forgerock-variables.less";
-@import "common/common.less";
-
-/*
-  Library css
-*/
-@import "jqueryUI/jquery-ui-1.10.3.custom.css";
-@import "bootstrap-3.3.4-custom.css";
-@import "bootstrap-dialog-1.34.4-min.css";
-@import "selectize-0.12.1-bootstrap3.css";
-@import "dashboard.less";
-@import "fontawesome/css/font-awesome.min.css";
-@import "fontawesome/less/variables.less";
-
-/*
-  Specific libraries
-*/
-@import "user.less";
-@import "jqgrid-override.less";
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/registration/TermsOfUseDialog", [
+    "org/forgerock/commons/ui/common/components/Dialog"
+], function(Dialog) {
+    var TermsOfUseDialog = Dialog.extend({    
+        contentTemplate: "templates/registration/TermsOfUseTemplate.html",
+        baseTemplate: "templates/common/MediumBaseTemplate.html"        
+    }); 
+    
+    return new TermsOfUseDialog();
+});

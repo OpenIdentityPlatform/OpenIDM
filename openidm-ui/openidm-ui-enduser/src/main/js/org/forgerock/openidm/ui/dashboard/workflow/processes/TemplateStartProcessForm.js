@@ -22,26 +22,34 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/* css basic configuration */
+/*global define, $, form2js, _, js2form, Handlebars */
+
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/dashboard/workflow/processes/TemplateStartProcessForm", [
+    "org/forgerock/openidm/ui/dashboard/workflow/processes/AbstractProcessForm",
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function(AbstractProcessForm, DateUtil, conf, uiUtils) {
+    
+    var TemplateStartProcessForm = AbstractProcessForm.extend({
+        
+        template: "templates/common/EmptyTemplate.html",
+        
+        postRender: function(callback) {
+            var t = Handlebars.compile(this.args)(this.processDefinition);
+            
+            this.$el.html(t);
+            
+            if (callback) {
+                callback();
+            }
+        }
+        
+    }); 
+    
+    return new TemplateStartProcessForm();
+});
 
 
-/* css basic configuration */
-@import "common/forgerock-variables.less";
-@import "common/common.less";
-
-/*
-  Library css
-*/
-@import "jqueryUI/jquery-ui-1.10.3.custom.css";
-@import "bootstrap-3.3.4-custom.css";
-@import "bootstrap-dialog-1.34.4-min.css";
-@import "selectize-0.12.1-bootstrap3.css";
-@import "dashboard.less";
-@import "fontawesome/css/font-awesome.min.css";
-@import "fontawesome/less/variables.less";
-
-/*
-  Specific libraries
-*/
-@import "user.less";
-@import "jqgrid-override.less";

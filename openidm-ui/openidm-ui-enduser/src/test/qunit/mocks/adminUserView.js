@@ -1,16 +1,12 @@
 /*global require, define*/
 define([
-    "text!templates/common/MediumBaseTemplate.html",
-    "text!templates/admin/linkedView/LinkedView.html",
-    "text!templates/admin/AdminUserProfileTemplate.html"
+    "text!templates/common/MediumBaseTemplate.html"
 ], function () {
 
     /* an unfortunate need to duplicate the file names here, but I haven't
      yet found a way to fool requirejs into doing dynamic dependencies */
     var staticFiles = [
-            "templates/common/MediumBaseTemplate.html",
-            "templates/admin/linkedView/LinkedView.html",
-            "templates/admin/AdminUserProfileTemplate.html"
+            "templates/common/MediumBaseTemplate.html"
         ],
         deps = arguments;
 

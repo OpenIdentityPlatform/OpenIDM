@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,26 +22,25 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/* css basic configuration */
+/*global $, define, _ */
+
+/**
+ * @author huck.elliott
+ */
+define("org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegate", [
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
+], function(conf, commonSiteConfigurationDelegate) {
+
+    var obj = commonSiteConfigurationDelegate;
+    
+    obj.checkForDifferences = function(){
+        return $.Deferred().resolve();
+    };
+
+    
+    return obj;
+});
 
 
-/* css basic configuration */
-@import "common/forgerock-variables.less";
-@import "common/common.less";
 
-/*
-  Library css
-*/
-@import "jqueryUI/jquery-ui-1.10.3.custom.css";
-@import "bootstrap-3.3.4-custom.css";
-@import "bootstrap-dialog-1.34.4-min.css";
-@import "selectize-0.12.1-bootstrap3.css";
-@import "dashboard.less";
-@import "fontawesome/css/font-awesome.min.css";
-@import "fontawesome/less/variables.less";
-
-/*
-  Specific libraries
-*/
-@import "user.less";
-@import "jqgrid-override.less";

@@ -42,11 +42,11 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
                 configuration: {
-                    LoginView : "org/forgerock/openidm/ui/user/LoginView",
-                    UserProfileView : "org/forgerock/openidm/ui/user/profile/UserProfileView",
+                    LoginView : "org/forgerock/openidm/ui/LoginView",
+                    UserProfileView : "org/forgerock/openidm/ui/profile/UserProfileView",
                     LoginDialog : "org/forgerock/commons/ui/common/LoginDialog",
-                    RegisterView : "org/forgerock/openidm/ui/user/UserRegistrationView",
-                    ChangeSecurityDataDialog : "org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog"
+                    RegisterView : "org/forgerock/openidm/ui/registration/UserRegistrationView",
+                    ChangeSecurityDataDialog : "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
                 }
             },
             {
@@ -57,7 +57,7 @@ define("config/AppConfiguration", [
                 moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                 configuration: {
                     remoteConfig: true,
-                    delegate: "org/forgerock/openidm/ui/user/delegates/SiteConfigurationDelegate"
+                    delegate: "org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegate"
                 }
             },
             {
@@ -79,7 +79,7 @@ define("config/AppConfiguration", [
                     loader: [
                         {"routes":"config/routes/CommonRoutesConfig"},
                         {"routes":"config/routes/CommonIDMRoutesConfig"},
-                        {"routes":"config/routes/AdminRoutesConfig"},
+                        {"routes":"config/routes/SelfServiceRoutesConfig"},
                         {"routes":"config/routes/UserRoutesConfig"},
                         {"routes":"config/routes/IDMRoutesConfig"}
                     ]
@@ -118,8 +118,7 @@ define("config/AppConfiguration", [
                         }
                     ],
                     links: {
-                        "admin" : {
-                            "role": "ui-admin",
+                        "user" : {
                             "urls": {
                                 "dashboard": {
                                     "url": "#dashboard/",
@@ -134,26 +133,16 @@ define("config/AppConfiguration", [
                                     "inactive": false
                                 }
                             }
-                        },
-                        "user" : {
-                            "urls": {
-                                "dashboard": {
-                                    "url": "#dashboard/",
-                                    "name": "config.AppConfiguration.Navigation.links.dashboard",
-                                    "icon": "fa fa-dashboard",
-                                    "inactive": false
-                                }
-                            }
                         }
                     }
                 }
             },
             {
-                moduleClass: "org/forgerock/openidm/ui/admin/workflow/FormManager",
+                moduleClass: "org/forgerock/openidm/ui/dashboard/workflow/FormManager",
                 configuration: {
                     forms: { // Workflow User Task to View mapping
-                        "org.forgerock.applicationAcceptance": "org/forgerock/openidm/ui/admin/workflow/tasks/customview/ApplicationAcceptanceTask",
-                        "org.forgerock.sendNotificationInit": "org/forgerock/openidm/ui/admin/workflow/processes/customview/SendNotificationProcess"
+                        "org.forgerock.applicationAcceptance": "org/forgerock/openidm/ui/dashboard/workflow/tasks/customview/ApplicationAcceptanceTask",
+                        "org.forgerock.sendNotificationInit": "org/forgerock/openidm/ui/dashboard/workflow/processes/customview/SendNotificationProcess"
                     }
                 }
             },
@@ -162,8 +151,8 @@ define("config/AppConfiguration", [
                 configuration: {
                     templateUrls: [ //preloaded templates
                         //"templates/apps/application.html",
-                        "templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html",
-                        "templates/admin/workflow/tasks/ShowUserProfile.html"
+                        "templates/dashboard/workflow/tasks/ProcessUserTaskTableTemplate.html",
+                        "templates/dashboard/workflow/tasks/ShowUserProfile.html"
                     ]
                 }
             },
@@ -174,7 +163,7 @@ define("config/AppConfiguration", [
                     },
                     loader: [
                         {"messages":"config/messages/CommonMessages"},
-                        {"messages":"config/messages/AdminMessages"},
+                        {"messages":"config/messages/SelfServiceMessages"},
                         {"messages":"config/messages/UserMessages"}
                     ]
                 }
@@ -185,7 +174,7 @@ define("config/AppConfiguration", [
                     policyDelegate: "org/forgerock/openidm/ui/common/delegates/PolicyDelegate",
                     validators: { },
                     loader: [
-                        {"validators":"config/validators/AdminValidators"},
+                        {"validators":"config/validators/SelfServiceValidators"},
                         {"validators":"config/validators/UserValidators"},
                         {"validators":"config/validators/CommonValidators"}
                     ]

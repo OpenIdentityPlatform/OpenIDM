@@ -34,24 +34,24 @@ define("config/routes/IDMRoutesConfig", [
     var obj = {
         "siteIdentification": {
             base: "profile",
-            dialog: "org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog",
+            dialog: "org/forgerock/openidm/ui/profile/ChangeSiteIdentificationDialog",
             url: "profile/site_identification/",
             role: "ui-user,ui-admin",
             excludedRole: "ui-admin"
         },
         "termsOfUse": {
             base: "selfRegistration",
-            dialog: "org/forgerock/openidm/ui/user/TermsOfUseDialog",
+            dialog: "org/forgerock/openidm/ui/registration/TermsOfUseDialog",
             url: "register/terms_of_use/"
         },
         "forgottenPassword" : {
             base: "login",
-            dialog: "org/forgerock/openidm/ui/user/ForgottenPasswordDialog",
+            dialog: "org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog",
             url: "profile/forgotten_password/"
         },
         "enterOldPassword": {
             base: "profile",
-            dialog: "org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog",
+            dialog: "org/forgerock/openidm/ui/profile/EnterOldPasswordDialog",
             role: "ui-user,ui-admin",
             url: "profile/old_password/"
         }

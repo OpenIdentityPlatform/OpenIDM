@@ -49,6 +49,10 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
             nav.configuration.links.admin.urls.managed.urls = [];
 
             _.each(managedConfig.objects, function(managed) {
+                if(!managed.schema) {
+                    managed.schema = {};
+                }
+
                 if(!managed.schema.icon) {
                     managed.schema.icon = "fa-cube";
                 }
