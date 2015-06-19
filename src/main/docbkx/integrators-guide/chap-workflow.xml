@@ -1603,7 +1603,7 @@ $ ./startup.sh -p samples/workflow</screen>
       <para>
        Open a browser and navigate to the URL of your deployed OpenIDM system.
        If it is on the local system, navigate to
-       <literal>https://localhost:8443/openidmui</literal>. Log into the user
+       <literal>https://localhost:8443/selfservice</literal>. Log into the user
        interface as <literal>user1</literal>, with password
        <literal>Welcome1</literal>.
       </para>
@@ -2065,7 +2065,7 @@ $ ./shutdown.sh
    <para>
     The use case works with the OpenIDM Data Management UI. If you deploy OpenIDM
     on the local system, you can access it at the following URL:
-    <literal>https://localhost:8443/openidmui/</literal>.
+    <literal>https://localhost:8443/selfservice/</literal>.
    </para>
 
    <procedure xml:id="initiate-onboarding">

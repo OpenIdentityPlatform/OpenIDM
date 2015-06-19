@@ -51,7 +51,7 @@
   tasks based on BPMN2 workflows, and allows users to manage certain aspects of
   their own accounts, including configurable self-service registration. When
   OpenIDM starts, you can access the Data Management UI at
-  <literal>https://localhost:8443/openidmui</literal>.
+  <literal>https://localhost:8443/selfservice</literal>.
  </para>
 
  <para>
@@ -803,7 +803,7 @@
   </para>
   <para>
    To access the Data Management UI, start OpenIDM, then navigate to
-   <link xlink:href="https://localhost:8443/openidmui" />. If you
+   <link xlink:href="https://localhost:8443/selfservice" />. If you
    have not installed a certificate that is trusted by a certificate authority,
    you are prompted with an "Untrusted Connection" warning the first time you
    log in to the UI.
@@ -882,7 +882,7 @@
     </programlisting>
     <para>
      When self-registration is enabled, OpenIDM includes a "Register your
-     account" link on the <literal>https://localhost:8443/openidmui</literal>
+     account" link on the <literal>https://localhost:8443/selfservice</literal>
      login page. When the account registration page is used to create an account,
      OpenIDM creates a managed object in the OpenIDM repository, and applies
      default policies for managed objects.
@@ -1129,7 +1129,7 @@
    <step>
     <para>
      Log into the Data Management UI at
-     <literal>https://localhost:8443/openidmui</literal> as an administrative
+     <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
    </step>
@@ -1278,7 +1278,7 @@
    <step>
     <para>
      Log into the Data Management UI at
-     <literal>https://localhost:8443/openidmui</literal> as an administrative
+     <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
    </step>
@@ -1374,7 +1374,7 @@
    <step>
     <para>
      Log into the Data Management UI at
-     <literal>https://localhost:8443/openidmui</literal> as an administrative
+     <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
    </step>
@@ -1428,7 +1428,7 @@
    <step>
     <para>
      Log into the Data Management UI at
-     <literal>https://localhost:8443/openidmui</literal> as an administrative
+     <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
    </step>
@@ -1869,7 +1869,7 @@ $ ./startup.sh</screen>
 
   <para>
    Start OpenIDM in the Data Management UI by navigating to
-   <literal>https://localhost:8443/openidmui</literal>. Select Users and click
+   <literal>https://localhost:8443/selfservice</literal>. Select Users and click
    Add User.
   </para>
 
@@ -1942,7 +1942,7 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
    <step>
     <para>
      Open a browser free of any cached information. Navigate to the Data
-     Management UI at <literal>https://localhost:8443/openidmui</literal>.
+     Management UI at <literal>https://localhost:8443/selfservice</literal>.
      Select Users and then click Add User.
     </para>
    </step>
@@ -2014,7 +2014,7 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
   </para>
   <para>
    The logout URL is <literal>#logout</literal>, appended to the UI URL, for
-   example, <literal>https://localhost:8443/openidmui/index.html#logout/</literal>.
+   example, <literal>https://localhost:8443/selfservice/index.html#logout/</literal>.
   </para>
   <para>
    The logout URL effectively performs the same action as clicking on the Log
@@ -2026,7 +2026,7 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
   <title>Changing the UI Path</title>
   <para>
    By default, the UI is registered at a specific URL
-   (<literal><replaceable>context-root</replaceable>/openidmui</literal>). To
+   (<literal><replaceable>context-root</replaceable>/selfservice</literal>). To
    override the default URL and specify your own path, edit the
    <filename>openidm/conf/ui.context-enduser.json</filename> file, setting the
    <literal>urlContextRoot</literal> property to the new URL. For example, to
