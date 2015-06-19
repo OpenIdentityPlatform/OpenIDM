@@ -1,167 +1,170 @@
-.editRoleViewContainer {
-
- .user-avatar {
-   display: table;
-   background: @base-theme-color;
-   color: #fff;
-   text-align: center;
- }
-
- .profile-header .user-avatar {
-   width: 70px;
-   height: 70px;
-   border-radius: 70px;
-   line-height: 70px;
-   font-size: 36px;
- }
-
- .panel-footer {
-   padding: 10px 15px;
-   border-radius: 0;
-   background-color: transparent;
-   overflow: auto;
- }
-
- .page-header h4.page-type {
-   text-transform: uppercase;
-   font-size: 14px;
-   letter-spacing: 1px;
-   margin-bottom: 10px;
-   color: #666;
-   font-weight: 600;
-   margin-top: 0;
- }
-
- .page-header .meta {
-   margin: -10px 0 10px;
-   color: #777;
-   text-transform: none;
-   letter-spacing: 0;
-   border-left: 1px solid #ddd;
-   padding-left: 5px;
-   margin-left: 4px;
-   font-weight: 400;
-   display: inline-block;
-   margin-bottom: 0;
- }
-
- .roleCreatedBy {
-    color: @base-theme-color;
- }
-
- .tab-content {
-   background-color: #fff;
-   margin-bottom: 50px;
- }
- 
- .fa-search {
-    margin-top: 10px;
- }
- 
- #role-users {
-    padding-top: 10px;
- }
+#role-settings,
+#role-entitlements,
+#role-users {
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
-a.backToList {
+.editRoleViewContainer {
+
+  .user-avatar {
+    display: table;
+    background: @base-theme-color;
+    color: #fff;
+    text-align: center;
+  }
+
+  .profile-header .user-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 70px;
+    line-height: 70px;
+    font-size: 36px;
+  }
+
+  .panel-footer {
+    padding: 10px 15px;
+    border-radius: 0;
+    background-color: transparent;
+    overflow: auto;
+  }
+
+  .page-header h4.page-type {
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: #666;
+    font-weight: 600;
+    margin-top: 0;
+  }
+
+  .page-header .meta {
+    margin: -10px 0 10px;
     color: #777;
+    text-transform: none;
+    letter-spacing: 0;
+    border-left: 1px solid #ddd;
+    padding-left: 5px;
+    margin-left: 4px;
+    font-weight: 400;
+    display: inline-block;
+    margin-bottom: 0;
+  }
+
+  .roleCreatedBy {
+    color: @base-theme-color;
+  }
+
+  .tab-content {
+    background-color: #fff;
+    margin-bottom: 50px;
+  }
+
+  .fa-search {
+    margin-top: 10px;
+  }
+
+  #role-users {
+    padding-top: 10px;
+  }
 }
 
 #roleEntitlementsEditContainer {
-    .tab-content {
-        border:none;
-        padding: 10px;
-    }
-    
-    .compactJSON .form-control>label, .attribute-value div[data-schemaid="root"]>label {
-        display: none !important;
-    }
-    
-    .compactJSON, .compactJSON div {
-        display: inline;
-    }
-    
-    .compactJSON {
-        div[data-schemapath] {
-            margin-left: 5px;
-        }
-        
-        .form-control {
-            display: inline;
-            width: auto;
-        }
-        
-        select {
-            height: 35px !important;
-        }
-        
-        .btn-group {
-            float: right;
-        }
-        
-        .well {
-            background-color: transparent;
-        }
-        
-        h3 {
-            display: none;   
-        }
-        
-        div[data-schematype="object"]>h3 {
-            display: block;   
-            margin: 0;
-        }
-        
-        div[data-schematype="object"]>h3>div>div {
-            top: 20px !important;
-        }
-        
-        div[data-schematype="object"] {
-            div.checkbox {
-                display: block;
-            }
-        }
-        
-        div[data-schematype="object"]>div, 
-        div[data-schematype="array"]>div {
-            border: none !important;
-        }
-        
-        div[data-schematype="object"]>div>div, 
-        div[data-schematype="array"]>div>div>div {
-            display: block; 
-        }
-        
-        div[data-schemapath="root"]>select {
-            margin-bottom: 5px !important;
-        }
-    }
-    
-    .operations-popover-group {
-        width: 250px;
-    }
-    
-    #role-edit-events {
-        .event-hook-inline {
-            margin-left: 0px;
-        }
-    }
-    
-    .list-group-header {
-       .col-sm-3, .col-sm-8 {
-           padding-left: 30px;
-       }
-       .col-sm-1 {
-         margin-left: -10px;
-       }
-    }
-    
-    .btn-toggle-attribute-operations {
-        border-radius: 4px !important;
-    }
-    
-    .attribute-operations .btn {
-        margin-bottom: 5px;
-    }
-}
+  .tab-content {
+    border:none;
+    padding: 10px;
+  }
 
+  .compactJSON .form-control>label, .attribute-value div[data-schemaid="root"]>label {
+    display: none !important;
+  }
+
+  .compactJSON, .compactJSON div {
+    display: inline;
+  }
+
+  .compactJSON {
+    div[data-schemapath] {
+      margin-left: 5px;
+    }
+
+    .form-control {
+      display: inline;
+      width: auto;
+    }
+
+    select {
+      height: 35px !important;
+    }
+
+    .btn-group {
+      float: right;
+    }
+
+    .well {
+      background-color: transparent;
+    }
+
+    h3 {
+      display: none;
+    }
+
+    div[data-schematype="object"]>h3 {
+      display: block;
+      margin: 0;
+    }
+
+    div[data-schematype="object"]>h3>div>div {
+      top: 20px !important;
+    }
+
+    div[data-schematype="object"] {
+      div.checkbox {
+        display: block;
+      }
+    }
+
+    div[data-schematype="object"]>div,
+    div[data-schematype="array"]>div {
+      border: none !important;
+    }
+
+    div[data-schematype="object"]>div>div,
+    div[data-schematype="array"]>div>div>div {
+      display: block;
+    }
+
+    div[data-schemapath="root"]>select {
+      margin-bottom: 5px !important;
+    }
+  }
+
+  .operations-popover-group {
+    width: 250px;
+  }
+
+  #role-edit-events {
+    .event-hook-inline {
+      margin-left: 0px;
+    }
+  }
+
+  .list-group-header {
+    .col-sm-3, .col-sm-8 {
+      padding-left: 30px;
+    }
+    .col-sm-1 {
+      margin-left: -10px;
+    }
+  }
+
+  .btn-toggle-attribute-operations {
+    border-radius: 4px !important;
+  }
+
+  .attribute-operations .btn {
+    margin-bottom: 5px;
+  }
+}

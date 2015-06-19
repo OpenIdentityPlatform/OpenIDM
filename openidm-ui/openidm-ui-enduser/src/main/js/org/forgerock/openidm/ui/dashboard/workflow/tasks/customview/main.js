@@ -22,26 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/* css basic configuration */
+/*global define*/
 
-
-/* css basic configuration */
-@import "common/forgerock-variables.less";
-@import "common/common.less";
-
-/*
-  Library css
-*/
-@import "jqueryUI/jquery-ui-1.10.3.custom.css";
-@import "bootstrap-3.3.4-custom.css";
-@import "bootstrap-dialog-1.34.4-min.css";
-@import "selectize-0.12.1-bootstrap3.css";
-@import "dashboard.less";
-@import "fontawesome/css/font-awesome.min.css";
-@import "fontawesome/less/variables.less";
-
-/*
-  Specific libraries
-*/
-@import "user.less";
-@import "jqgrid-override.less";
+define("org/forgerock/openidm/ui/dashboard/workflow/tasks/customview/main", [
+    "./ApplicationAcceptanceTask"
+]);

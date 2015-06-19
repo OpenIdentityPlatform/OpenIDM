@@ -25,14 +25,14 @@
 /*global require, define*/
 define([
     "text!templates/user/UserProfileTemplate.html",
-    "text!templates/user/EnterOldPasswordDialog.html"
+    "text!templates/profile/EnterOldPasswordDialog.html"
 ], function () {
 
     /* an unfortunate need to duplicate the file names here, but I haven't
      yet found a way to fool requirejs into doing dynamic dependencies */
     var staticFiles = [
             "templates/user/UserProfileTemplate.html",
-            "templates/user/EnterOldPasswordDialog.html"
+            "templates/profile/EnterOldPasswordDialog.html"
         ],
         deps = arguments;
 
