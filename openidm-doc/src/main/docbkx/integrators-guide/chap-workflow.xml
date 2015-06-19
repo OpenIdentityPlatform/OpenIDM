@@ -559,7 +559,7 @@ openidm.create('workflow/processinstance', null, params);
    <filename>conf/process-access.json</filename>. For more information, see
    <link xlink:show="new" xlink:href="integrators-guide#ui-managing-workflows"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
-   Workflows From the Data Management UI</citetitle></link>.
+   Workflows From the Self-Service UI</citetitle></link>.
   </para>
  </section>
 
@@ -2063,7 +2063,7 @@ $ ./shutdown.sh
     workflow.
    </para>
    <para>
-    The use case works with the OpenIDM Data Management UI. If you deploy OpenIDM
+    The use case works with the OpenIDM Self-Service UI. If you deploy OpenIDM
     on the local system, you can access it at the following URL:
     <literal>https://localhost:8443/selfservice/</literal>.
    </para>

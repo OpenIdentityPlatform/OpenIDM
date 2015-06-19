@@ -179,7 +179,7 @@
      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
            xlink:href="install-guide#more-sample2b"><citetitle>Sample 2b -
      LDAP Two Way</citetitle></link>, you can also just create new users as
-     needed, either in the Data Management UI or with an appropriate REST call.
+     needed, either in the Self-Service UI or with an appropriate REST call.
     </para>
 
     <section xml:id="create-role-adminui">
@@ -382,7 +382,7 @@
       When you assign a user to a specific role, OpenIDM synchronizes that
       information to the user account. For example, after user
       <literal>bjensen</literal> is assigned as an Employee, review the
-      result in the Data Management View for that account:
+      result in the Self-Service UI for that account:
      </para>
 
      <mediaobject>
