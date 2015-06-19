@@ -34,7 +34,7 @@
 
  <para>
   OpenIDM provides a customizable, browser-based user interface, known as the
-  Data Management UI. The Data Management UI provides a graphical view of the
+  Self-Service UI. The Self-Service UI provides a graphical view of the
   OpenIDM <link xlink:show="new"
   xlink:href="integrators-guide#managed-objects"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
@@ -46,11 +46,11 @@
  </para>
 
  <para>
-  The Data Management UI enables administrative users to create, modify, and
+  The Self-Service UI enables administrative users to create, modify, and
   delete user and other accounts. It also provides role-based access to
   tasks based on BPMN2 workflows, and allows users to manage certain aspects of
   their own accounts, including configurable self-service registration. When
-  OpenIDM starts, you can access the Data Management UI at
+  OpenIDM starts, you can access the Self-Service UI at
   <literal>https://localhost:8443/selfservice</literal>.
  </para>
 
@@ -290,14 +290,14 @@
     <listitem>
      <para><literal>Viewable</literal></para>
      <para>Determines whether this property is viewable in the
-      Data Management UI, in the profile for the Managed Object. May be
+      Self-Service UI, in the profile for the Managed Object. May be
       true or false.</para>
     </listitem>
     <listitem>
      <para><literal>Searchable</literal></para>
      <para>Determines whether this property is searchable from the
      OpenIDM repository. A searchable property should be visible within
-     the Managed Object data grid in the Data Management UI. May be true
+     the Managed Object data grid in the Self-Service UI. May be true
      or false.</para>
     </listitem>
     <listitem>
@@ -317,7 +317,7 @@
 
    <para>
     After you create a new Managed Object, you can review and manage associated
-    information in the Data Management UI. For more information, see
+    information in the Self-Service UI. For more information, see
     <xref linkend="ui-managing-users" />.
    </para>
 
@@ -787,22 +787,22 @@
  </section>
 
  <section xml:id="ui-overview">
-  <title>Overview of the Data Management UI</title>
+  <title>Overview of the Self-Service UI</title>
   <para>
-   For all users, the Data Management UI includes a Dashboard tab, which
+   For all users, the Self-Service UI includes a Dashboard tab, which
    lists any tasks assigned to the user who as logged in, processes available
    to be invoked, and any notifications for that user.
   </para>
   <para>
    For the administrative user, (role <literal>openidm-admin</literal>), the
-   Data Management UI also includes a Users option in the top menu bar,
+   Self-Service UI also includes a Users option in the top menu bar,
    which provides an interface for user entries, if you have configured managed
    users in the OpenIDM repository. If you have created additional Managed
    Objects as defined in <xref linkend="ui-admin-managedobjects" />, you can
    also see and select those Managed Objects in the top menu bar.
   </para>
   <para>
-   To access the Data Management UI, start OpenIDM, then navigate to
+   To access the Self-Service UI, start OpenIDM, then navigate to
    <link xlink:href="https://localhost:8443/selfservice" />. If you
    have not installed a certificate that is trusted by a certificate authority,
    you are prompted with an "Untrusted Connection" warning the first time you
@@ -813,7 +813,7 @@
    no tasks, processes, or notifications are available.
   </para>
   <mediaobject>
-   <alt>OpenIDM Data Management UI Administrator View - Dashboard</alt>
+   <alt>OpenIDM Self-Service UI Administrator View - Dashboard</alt>
    <imageobject>
    <imagedata fileref="images/ui-admin-view.png" format="PNG" />
    </imageobject>
@@ -823,7 +823,7 @@
    after a reconciliation associated with Sample 2b.
   </para>
   <mediaobject>
-   <alt>OpenIDM Data Management UI Administrator View - Users</alt>
+   <alt>OpenIDM Self-Service UI Administrator View - Users</alt>
    <imageobject>
    <imagedata fileref="images/ui-users-tab.png" format="PNG" />
    </imageobject>
@@ -857,7 +857,7 @@
   </para>
 
  <section xml:id="ui-configuring">
-  <title>Configuring the Data Management UI</title>
+  <title>Configuring the Self-Service UI</title>
     
   <para>
    The following sections outline the configurable aspects of the Data
@@ -932,7 +932,7 @@
     self registration page.
    </para>
    <mediaobject>
-    <alt>OpenIDM Data Management UI - Security Questions</alt>
+    <alt>OpenIDM Self-Service UI - Security Questions</alt>
     <imageobject>
     <imagedata fileref="images/ui-security-questions.png" format="PNG" />
     </imageobject>
@@ -944,7 +944,7 @@
     response to the security question that she set up during registration.
    </para>
    <mediaobject>
-    <alt>OpenIDM Data Management UI - Reset Password</alt>
+    <alt>OpenIDM Self-Service UI - Reset Password</alt>
     <imageobject>
     <imagedata fileref="images/ui-reset-password.png" format="PNG" />
     </imageobject>
@@ -1104,7 +1104,7 @@
  </section>
 
  <section xml:id="ui-managing-users">
-  <title>Managing Data Accounts With the Data Management UI</title>
+  <title>Managing Data Accounts With the Self-Service UI</title>
 
   <para>
    Only administrative users (with the role <literal>openidm-admin</literal>)
@@ -1128,7 +1128,7 @@
    <title>To Add a User Account</title>
    <step>
     <para>
-     Log into the Data Management UI at
+     Log into the Self-Service UI at
      <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
@@ -1177,7 +1177,7 @@
   </procedure>
 
   <mediaobject>
-   <alt>OpenIDM Data Management UI - Create User Account</alt>
+   <alt>OpenIDM Self-Service UI - Create User Account</alt>
    <imageobject>
     <imagedata fileref="images/ui-create-account.png" format="PNG" />
    </imageobject>
@@ -1187,11 +1187,11 @@
    In a similar fashion, you can create accounts for other managed objects. If
    you followed the instructions discussed in section
    <xref linkend="ui-admin-mo-schema" />, you should now see a Wearable Device
-   managed object in the Data Management UI.
+   managed object in the Self-Service UI.
   </para>
 
   <mediaobject>
-   <alt>OpenIDM Data Management UI - With Another Managed Object</alt>
+   <alt>OpenIDM Self-Service UI - With Another Managed Object</alt>
    <imageobject>
     <imagedata fileref="images/ui-wearable-device-mo.png" format="PNG" />
    </imageobject>
@@ -1212,7 +1212,7 @@
    </para>
 
    <mediaobject>
-    <alt>OpenIDM Data Management UI - New Managed Object</alt>
+    <alt>OpenIDM Self-Service UI - New Managed Object</alt>
     <imageobject>
      <imagedata fileref="images/ui-initial-mo.png" format="PNG" />
     </imageobject>
@@ -1238,7 +1238,7 @@
      the <literal>Property</literal>.
     </para>
     <mediaobject>
-     <alt>OpenIDM Data Management UI - Required Properties</alt>
+     <alt>OpenIDM Self-Service UI - Required Properties</alt>
      <imageobject>
       <imagedata fileref="images/ui-mo-allprop.png" format="PNG" />
      </imageobject>
@@ -1251,7 +1251,7 @@
      entries as needed.
     </para>
     <mediaobject>
-     <alt>OpenIDM Data Management UI - All Properties</alt>
+     <alt>OpenIDM Self-Service UI - All Properties</alt>
      <imageobject>
       <imagedata fileref="images/ui-mo-wearable.png" format="PNG" />
      </imageobject>
@@ -1277,7 +1277,7 @@
    <title>To Update a User Account</title>  
    <step>
     <para>
-     Log into the Data Management UI at
+     Log into the Self-Service UI at
      <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
@@ -1373,7 +1373,7 @@
    <title>To Delete a User Account</title>  
    <step>
     <para>
-     Log into the Data Management UI at
+     Log into the Self-Service UI at
      <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
@@ -1406,12 +1406,12 @@
   <procedure xml:id="user-linked-view">
    <title>To View an Account in External Resources</title>
    <para>
-    The Data Management UI displays the details of the account in the
+    The Self-Service UI displays the details of the account in the
     OpenIDM repository (managed/user). When a mapping has been configured
     between the repository and one or more external resources, you can view what
     that user account looks like in any of the systems to which it is linked.
     Note that this view is read-only - you cannot update a user record in a
-    linked system from within the Data Management UI.
+    linked system from within the Self-Service UI.
    </para>
    <para>
     By default, <emphasis>implicit synchronization</emphasis> is enabled for
@@ -1427,7 +1427,7 @@
    </para>
    <step>
     <para>
-     Log into the Data Management UI at
+     Log into the Self-Service UI at
      <literal>https://localhost:8443/selfservice</literal> as an administrative
      user.
     </para>
@@ -1472,16 +1472,16 @@
  </section>
 
  <section xml:id="ui-managing-workflows">
-  <title>Managing Workflows From the Data Management UI</title>
+  <title>Managing Workflows From the Self-Service UI</title>
   <para>
-   The Data Management UI is integrated with the embedded Activiti worfklow
+   The Self-Service UI is integrated with the embedded Activiti worfklow
    engine, enabling users to interact with workflows. Available workflows are
    displayed under the Processes item on the Dashboard. In order for a workflow
    to be displayed here, the workflow definition file must be present in the
    <filename>openidm/workflow</filename> directory.
   </para>
   <para>
-   A sample workflow integration with the Data Management UI is provided in
+   A sample workflow integration with the Self-Service UI is provided in
    <filename>openidm/samples/workflow</filename>, and documented in <link
    xlink:href="integrators-guide#example-provisioning-workflow"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample Workflow -
@@ -1633,7 +1633,7 @@
       <filename>openidm/ui/default/enduser/public/css/common</filename>
      </para>
      <para>
-      Contains Bootstrap theme files for the Data Management UI.
+      Contains Bootstrap theme files for the Self-Service UI.
      </para>
     </listitem>
     <listitem>
@@ -1641,13 +1641,13 @@
       <filename>openidm/ui/default/enduser/public/css/fontawesome</filename>
      </para>
      <para>
-      Contains Font Awesome CSS toolkit files for the Data Management UI.
+      Contains Font Awesome CSS toolkit files for the Self-Service UI.
      </para>
     </listitem>
   </itemizedlist>
 
    <para>
-    The default configuration files for the Admin and Data Management UIs are
+    The default configuration files for the Admin and Self-Service UIs are
     identical for theme configuration.
    </para>
 
@@ -1683,7 +1683,7 @@
    <para>
     You can then make changes to the <filename>forgerock-variables.less</filename>
     file that you just copied. Any changes that you make affects both the Admin
-    and Data Management UIs.
+    and Self-Service UIs.
    </para>
 
   </section>
@@ -1856,19 +1856,19 @@ $ ./startup.sh</screen>
    </listitem>
    <listitem>
     <para>
-     For the Data Management UI, find HTML template files in the
+     For the Self-Service UI, find HTML template files in the
      <filename>enduser/public/templates</filename> subdirectory.
     </para>
    </listitem>
   </itemizedlist>
 
   <para>
-   In this section, you will see how to add another entry to the Data Management
+   In this section, you will see how to add another entry to the Self-Service
    UI Add User page.
   </para>
 
   <para>
-   Start OpenIDM in the Data Management UI by navigating to
+   Start OpenIDM in the Self-Service UI by navigating to
    <literal>https://localhost:8443/selfservice</literal>. Select Users and click
    Add User.
   </para>
@@ -1941,15 +1941,15 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
    </step>
    <step>
     <para>
-     Open a browser free of any cached information. Navigate to the Data
-     Management UI at <literal>https://localhost:8443/selfservice</literal>.
+     Open a browser free of any cached information. Navigate to the
+     Self-Service UI at <literal>https://localhost:8443/selfservice</literal>.
      Select Users and then click Add User.
     </para>
    </step>
    <step>
     <para>
      Observe the Create New Account screen with the Employee Title entry. You
-     can now use the Data Management View UI to add new users with employee
+     can now use the Self-Service UI to add new users with employee
      titles.
     </para>
 
