@@ -1454,29 +1454,31 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  <section xml:id="audit-purging">
   <title>Purging Obsolete Audit Information</title>
   <para>
-   If audit records grow "excessively" large, any subsequent reconciliations
-   and queries to audit tables can become "sluggish". In a deployment with
-   limited resources, a lack of disk space can affect system performance.
+   If reconciliation audit records grow "excessively" large, any subsequent
+   reconciliations and queries to audit tables can become "sluggish". In a
+   deployment with limited resources, a lack of disk space can affect system
+   performance.
   </para>
   <para>
    You might already have restricted what is logged in your audit logs by
    setting up filters, as described in <xref linkend="filtering-audit-events" />.
-   You can also use specific queries to purge audit logs, or you can purge audit
-   records older than a specific date, using timestamps.
+   You can also use specific queries to purge reconciliation audit logs, or you
+   can purge reconciliation audit records older than a specific date, using
+   timestamps.
   </para>
   <para>
    OpenIDM includes a sample purge script, <filename>autoPurgeRecon.js</filename>
    in the <filename>bin/defaults/script/audit</filename> directory. This script
-   purges audit log entries from the repository only, not from the corresponding
-   CSV files.
+   purges reconciliation audit log entries from the repository only, not from
+   the corresponding CSV files.
   </para>
   <para>
-   To purge audit logs on a regular basis, you must set up a schedule. A sample
-   schedule is provided in the <filename>schedule-autoPurgeAuditRecon.json</filename>
-   file (in the <filename>openidm/samples/schedules</filename> subdirectory).
-   You can change that schedule as required, and copy the file to the
-   <filename>conf/</filename> directory of your project, in order for it to take
-   effect.
+   To purge reconciliation audit logs on a regular basis, you must set up a
+   schedule. A sample schedule is provided in the
+   <filename>schedule-autoPurgeAuditRecon.json</filename> file (in the
+   <filename>openidm/samples/schedules</filename> subdirectory). You can change
+   that schedule as required, and copy the file to the <filename>conf/</filename>
+   directory of your project, in order for it to take effect.
   </para>
   <para>
    The sample purge schedule file is as follows:
@@ -1512,12 +1514,12 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
   <variablelist>
    <para>
     Beyond scheduling, the following parameters are of interest for purging the
-    audit logs:
+    reconciliation audit logs:
    </para>
    <varlistentry>
     <term>input</term>
     <listitem>
-     <para>Input information; the parameters below specify different kinds of
+     <para>Input information. The parameters below specify different kinds of
       input.
      </para>
     </listitem>
@@ -1608,5 +1610,4 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
    servers. Details vary by the service and the operating system.
   </para>
   </section>
-
 </chapter>
