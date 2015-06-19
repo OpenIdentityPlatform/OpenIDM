@@ -37,6 +37,7 @@
  </indexterm>
 
  <para>
+We used various methods to isolate four samples.
   This sample demonstrates the integration of three ForgeRock products: OpenIDM,
   OpenDJ, and OpenAM. With this sample, you can see how you can use OpenAM for
   authentication, for users maintained with OpenIDM, based on a data store of
@@ -532,7 +533,7 @@ $ ./startup.sh -p samples/fullStack</screen>
    <para>
     After you complete the steps described in Sample 2b, do one more thing.
     Navigate to the Data Management UI at
-    <literal>https://openidm.example.com:8443/openidmui</literal>, and select
+    <literal>https://openidm.example.com:8443/selfservice</literal>, and select
     Users. Select a specific user, such as <literal>bjensen</literal>. Click
     Change Password and change that password.
    </para>
