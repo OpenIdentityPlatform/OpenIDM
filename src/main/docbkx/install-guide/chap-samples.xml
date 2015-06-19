@@ -2215,7 +2215,7 @@ mysql &gt; <userinput>select * from users;</userinput>
     </para>
     <step>
      <para>
-      Log in to the OpenIDM UI (https://localhost:8443/openidmui) as any one of
+      Log in to the OpenIDM UI (https://localhost:8443/selfservice) as any one of
       the users that was created in the repository by the previous
       reconciliation operation.
      </para>
@@ -4723,7 +4723,7 @@ $ ./startup.sh -p samples/sample5b</screen>
    </para>
    <para>
     Log into the OpenIDM UI as the administrative user. On a local system,
-    navigate to <literal>https://localhost:8443/openidmui</literal>. The default
+    navigate to <literal>https://localhost:8443/selfservice</literal>. The default
     administrative account and password are both <literal>openidm-admin</literal>.
    </para>
    <para>
@@ -6163,7 +6163,7 @@ $ ./ldapmodify \
    <para>
     You should still be able to access the OpenIDM UI
     in the "normal" way. In this case, you would point a browser to
-    <literal>https://openidm.example.com:8443/openidmui</literal>.
+    <literal>https://openidm.example.com:8443/selfservice</literal>.
    </para>
 
    <para>
@@ -6796,7 +6796,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
    <para>
     After you complete the steps described in Sample 2b, do one more thing.
     Navigate to the Data Management UI at
-    <literal>https://openidm.example.com:8443/openidmui</literal>, and select
+    <literal>https://openidm.example.com:8443/selfservice</literal>, and select
     Users. Select a specific user, such as <literal>bjensen</literal>. Click
     Change Password and change that password.
    </para>
