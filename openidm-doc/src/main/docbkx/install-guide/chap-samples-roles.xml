@@ -1050,7 +1050,7 @@ isMemberOf: cn=openidm,ou=Groups,dc=example,dc=com</computeroutput>
       entries for both users <literal>bjensen</literal> and <literal>jdoe</literal>.
      </para>
      <para>
-      To review these entries, navigate to the Data Management UI. From the Admin
+      To review these entries, navigate to the Self-Service UI. From the Admin
       UI, select the <literal>openidm-admin</literal> link in the upper-right
       corner of the page, and select Data Management View. When you see the
       Dashboard window, select Users in the top navigation bar, and select one

@@ -454,7 +454,7 @@ $ ./startup.sh -p samples/sample2</screen>
       the Data Management View link.
      </para>
      <para>
-      This link opens the Data Management UI. If you did not change your
+      This link opens the Self-Service UI. If you did not change your
       password in the first step, you are prompted to change your password
       again. You can bypass this by clicking X to close the password
       prompt window.
@@ -803,7 +803,7 @@ $ ./startup.sh -p samples/sample2b</screen>
       Data Management View in the pop-up menu that appears.
      </para>
      <para>
-      This link opens the Data Management UI. If you did not change your
+      This link opens the Self-Service UI. If you did not change your
       password in the first step, you are prompted to change your password
       again. You can bypass this by clicking X to close the password prompt
       window.
@@ -873,7 +873,7 @@ $ ./startup.sh -p samples/sample2b</screen>
      </para>
      <para>
       To test that the implicit reconciliation has been successful, look at
-      <literal>fdoe</literal>'s record in the Data Management UI. At the
+      <literal>fdoe</literal>'s record in the Self-Service UI. At the
       bottom of the user profile, the Linked Systems panel indicates the
       external resource to which this user entry is mapped.
      </para>
@@ -1212,7 +1212,7 @@ $ ./startup.sh -p samples/sample2c</screen>
       click the Data Management View link.
      </para>
      <para>
-      This link opens the Data Management UI. If you did not change your
+      This link opens the Self-Service UI. If you did not change your
       password in the first step, you are prompted to change your password
       again. You can bypass this by clicking X to close the password prompt
       window.
@@ -1271,7 +1271,7 @@ $ ./startup.sh -p samples/sample2c</screen>
       group to the <literal>openidm2</literal> group.
      </para>
      <para>
-      In the current default version of the Data Management UI, only specific
+      In the current default version of the Self-Service UI, only specific
       properties of a managed object can be edited. It is therefore not possible
       to update John Doe's <literal>ldapGroups</literal> property using the UI.
      </para>
@@ -1336,7 +1336,7 @@ $ ./startup.sh -p samples/sample2c</screen>
     <step>
      <para>
       You can verify this change by reloading John Doe's user profile in the
-      Data Management UI, and looking at the value of his
+      Self-Service UI, and looking at the value of his
       <literal>ldapGroups</literal> property in the Linked Systems panel.
      </para>
      <para>
@@ -1958,7 +1958,7 @@ mysql &gt; <userinput>select * from users;</userinput>
           appears.
          </para>
          <para>
-          This opens the Data Management UI. If you did not change your password
+          This opens the Self-Service UI. If you did not change your password
           in the first step, you are prompted to change your password again.
           You can bypass this by simply clicking X to close the password prompt
           window.
@@ -6795,7 +6795,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
 
    <para>
     After you complete the steps described in Sample 2b, do one more thing.
-    Navigate to the Data Management UI at
+    Navigate to the Self-Service UI at
     <literal>https://openidm.example.com:8443/selfservice</literal>, and select
     Users. Select a specific user, such as <literal>bjensen</literal>. Click
     Change Password and change that password.
@@ -6822,7 +6822,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
     <literal>https://openam.example.com:8443/openam</literal>. Log in with the
     administrative account, which by default is <literal>amadmin</literal>.
     Navigate to Access Control &gt; Realm &gt; Subjects &gt; User. You should
-    see the same users as you see in the OpenIDM Data Management UI.
+    see the same users as you see in the OpenIDM Self-Service UI.
    </para>
 
    <mediaobject xml:id="openam-user-list">
@@ -6853,7 +6853,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
    <para>
     Login as user <literal>bjensen</literal>, with the password that you just
     changed in OpenIDM. If successful, you should now be logged into the
-    <emphasis>OpenIDM</emphasis> Data Management View screen, as user
+    <emphasis>OpenIDM</emphasis> Self-Service UI screen, as user
     <literal>bjensen</literal>.
    </para>
   </section>
@@ -7882,7 +7882,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
       appears, click the Data Management View link.
      </para>
      <para>
-      This link opens the Data Management UI. If you did not change your
+      This link opens the Self-Service UI. If you did not change your
       password in the first step, you are prompted to change your password
       again. You can bypass this by clicking X to close the password prompt
       window.
@@ -7943,7 +7943,7 @@ $ ./startup.sh -p samples/salesforce-connector</screen>
      </para>
      <para>
       To test that the implicit synchronization has been successful, look at
-      Babs Jensen's record in the Data Management UI. At the bottom of the
+      Babs Jensen's record in the Self-Service UI. At the bottom of the
       user profile, the Linked Systems panel indicates Babs Jensen's record in
       the Salesforce data store. Note the changed Username.
      </para>
