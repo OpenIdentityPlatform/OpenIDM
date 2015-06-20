@@ -29,9 +29,14 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
-    "org/forgerock/openidm/ui/admin/mapping/PropertiesLinkQualifierView",
+    "org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView",
     "../mocks/mapping/linkQualifierProperties"
-], function (constants, router, eventManager, MappingBaseView, PropertiesLinkQualifier, linkQualifierProperties) {
+], function (constants,
+             router,
+             eventManager,
+             MappingBaseView,
+             PropertiesLinkQualifier,
+             linkQualifierProperties) {
 
     return {
         executeAll: function (server) {

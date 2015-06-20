@@ -27,7 +27,7 @@
 define([
     "sinon",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/admin/sync/SituationPolicyView",
+    "org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 ], function (sinon, eventManager, SituationPolicyView, ConfigDelegate) {
 

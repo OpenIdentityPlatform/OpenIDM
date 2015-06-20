@@ -41,7 +41,7 @@ define([
 
             QUnit.asyncTest("Login Form", function () {
                 loginView.render([], function () {
-                    QUnit.ok(loginView.$el.find("#login").length && loginView.$el.find("#password").length, "Username and Password displayed")
+                    QUnit.ok(loginView.$el.find("#login").length && loginView.$el.find("#password").length, "Username and Password displayed");
 
                     QUnit.start();
                 });

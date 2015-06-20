@@ -34,7 +34,17 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/MapResourceView"
-], function(AdminAbstractView, eventManager, constants, router, ConnectorDelegate, uiUtils, connectorUtils, ConfigDelegate, MapResourceView) {
+
+], function(AdminAbstractView,
+            eventManager,
+            constants,
+            router,
+            ConnectorDelegate,
+            uiUtils,
+            connectorUtils,
+            ConfigDelegate,
+            MapResourceView) {
+
     var MappingAddView = AdminAbstractView.extend({
         template: "templates/admin/mapping/AddMappingTemplate.html",
         events: {

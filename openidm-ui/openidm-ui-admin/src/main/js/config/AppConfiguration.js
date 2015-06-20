@@ -151,14 +151,14 @@ define("config/AppConfiguration", [
                                             "icon": "fa fa-list",
                                             "inactive": false
                                         },
-                                        "correlation": {
-                                            "url": "#correlation/",
+                                        "association": {
+                                            "url": "#association/",
                                             "name": "templates.correlation.correlation",
                                             "icon": "fa fa-random",
                                             "inactive": false
                                         },
                                         "sync": {
-                                            "url": "#sync/",
+                                            "url": "#behaviors/",
                                             "name": "templates.sync.sync",
                                             "icon": "fa fa-clock-o",
                                             "inactive": false
