@@ -32,7 +32,13 @@ define([
     "org/forgerock/openidm/ui/admin/MapResourceView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
     "../mocks/addMapping"
-], function (constants, router, eventManager, addMappingView, MapResourceView, resourcesView, addMapping) {
+], function (constants,
+             router,
+             eventManager,
+             addMappingView,
+             MapResourceView,
+             resourcesView,
+             addMapping) {
 
     return {
         executeAll: function (server) {

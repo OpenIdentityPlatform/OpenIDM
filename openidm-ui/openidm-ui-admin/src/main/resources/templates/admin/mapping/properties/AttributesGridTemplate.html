@@ -1,0 +1,50 @@
+<div class="panel-body">
+    <div role="alert" class="changesPending alert alert-warning" style="display:none;">
+        <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.warning" }}</strong>
+        <span class='message'>{{t "templates.mapping.changesPending"}}</span>
+    </div>
+
+    <div class="toolbar clearfix">
+        <div class="btn-group pull-left">
+            <form action="#" method="get">
+                <button type="submit" class="btn btn-primary addProperty"><i class="fa fa-plus"></i>{{t "templates.mapping.addProperty"}}</button>
+            </form>
+        </div>
+        <div class="tool-group-right">
+            <form class="form-inline" role="form">
+                <div class="form-group">
+                    <label for="numRepresentativeProps" class="inline">{{t "templates.mapping.numRepresentativeProps"}}:</label>
+                    <input type="text" class="form-control" id="numRepresentativeProps" value="{{numRepresentativeProps}}">
+                </div>
+
+                <div class="form-group">
+                    <label for="findSampleSource" class="inline">{{t "templates.mapping.sampleSource"}}:</label>
+                    <input type="text" placeholder="Search to see preview" id="findSampleSource" class="form-control" value="{{sampleSource_txt}}">
+                </div>
+
+                <div class="form-group selectize-holder">
+                    <select style="width:200px;" type="select" id="linkQualifierSelect" class="form-control">
+                        <option selected value=""></option>
+                        {{#each linkQualifiers}}
+                        <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <div class="jqgrid-container">
+        <span id="allPropertiesMapped" style="display:none;">{{t "templates.mapping.allPropertiesMapped"}}</span>
+        <table class="table" id="mappingTable"></table>
+    </div>
+</div>
+<div class="panel-footer clearfix">
+    <div class="pull-right">
+        {{#if missingRequiredProperties}}
+        <button type="button" id="missingRequiredPropertiesButton" class="btn btn-primary">{{t "common.form.add"}} {{t "templates.mapping.missingRequiredProperties"}} ({{missingRequiredProperties.length}})</button>
+        {{/if}}
+        <button type="button" id="clearChanges" class="btn btn-default">{{t "templates.mapping.undoAllChanges"}}</button>
+        <button type="button" id="updateMappingButton" class="btn btn-primary">{{t "templates.mapping.saveProperties"}}</button>
+    </div>
+</div>

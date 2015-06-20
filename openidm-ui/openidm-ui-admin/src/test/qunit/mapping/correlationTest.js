@@ -28,13 +28,21 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/admin/sync/ChangeAssociationDialog",
+    "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/ChangeAssociationDialog",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
-    "org/forgerock/openidm/ui/admin/sync/AnalysisView",
+    "org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManagementView",
     "../mocks/correlation"
-], function (constants, router, eventManager, ChangeAssociationDialog, ConnectorDelegate, MappingBaseView, LinkQualifierUtils, analysisView, correlation) {
+], function (constants,
+             router,
+             eventManager,
+             ChangeAssociationDialog,
+             ConnectorDelegate,
+             MappingBaseView,
+             LinkQualifierUtils,
+             analysisView,
+             correlation) {
 
     return {
         executeAll: function (server) {

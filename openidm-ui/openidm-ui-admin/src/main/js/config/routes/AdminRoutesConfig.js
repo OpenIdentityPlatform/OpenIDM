@@ -93,36 +93,36 @@ define("config/routes/AdminRoutesConfig", [
         },
         "editMappingProperty" : {
             base: "propertiesView",
-            dialog: "org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog",
+            dialog: "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
             role: "ui-admin",
-            url: /property\/(.+?)\/(.+?)$/,
-            pattern: "property/?/?",
+            url: /properties\/(.+?)\/(.+?)$/,
+            pattern: "properties/?/?",
             forceUpdate: true
         },
         "addMappingProperty" : {
             base: "propertiesView",
-            dialog: "org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog",
+            dialog: "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
             role: "ui-admin",
-            url: /property\/(.+?)\/_new$/,
-            pattern: "property/?/_new",
+            url: /properties\/(.+?)\/_new$/,
+            pattern: "properties/?/_new",
             forceUpdate: true
         },
-        "syncView" : {
-            view: "org/forgerock/openidm/ui/admin/sync/SyncView",
+        "behaviorsView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/BehaviorsView",
             role: "ui-admin",
-            url: /^sync\/(.+)\/$/,
-            pattern: "sync/?/",
+            url: /^behaviors\/(.+)\/$/,
+            pattern: "behaviors/?/",
             forceUpdate: true
         },
-        "correlationView" : {
-            view: "org/forgerock/openidm/ui/admin/sync/CorrelationView",
+        "associationView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/AssociationView",
             role: "ui-admin",
-            url: /^correlation\/(.+)\/$/,
-            pattern: "correlation/?/",
+            url: /^association\/(.+)\/$/,
+            pattern: "association/?/",
             forceUpdate: true
         },
         "scheduleView" : {
-            view: "org/forgerock/openidm/ui/admin/sync/ScheduleView",
+            view: "org/forgerock/openidm/ui/admin/mapping/ScheduleView",
             role: "ui-admin",
             url: /^schedule\/(.+)\/$/,
             pattern: "schedule/?/",

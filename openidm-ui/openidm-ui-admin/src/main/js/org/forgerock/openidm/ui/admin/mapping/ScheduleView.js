@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2015 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,23 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
-/*jslint evil: true */
+/*global define, $, _, Handlebars */
 
-define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
+define("org/forgerock/openidm/ui/admin/mapping/ScheduleView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView"
+    "org/forgerock/openidm/ui/admin/mapping/scheduling/SchedulerView",
+    "org/forgerock/openidm/ui/admin/mapping/scheduling/LiveSyncView",
+    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate"
+
 ], function(MappingAdminAbstractView,
             MappingBaseView,
-            LinkQualifiersView,
-            RoleEntitlementsView,
-            AttributesGridView) {
+            SchedulerView,
+            LiveSyncView,
+            SchedulerDelegate) {
 
-    var PropertiesView = MappingAdminAbstractView.extend({
-        template: "templates/admin/mapping/PropertiesTemplate.html",
+    var ScheduleView = MappingAdminAbstractView.extend({
+        template: "templates/admin/mapping/ScheduleTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
         events: {
@@ -48,36 +48,24 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
         render: function (args, callback) {
             MappingBaseView.child = this;
-
-            MappingBaseView.render(args, _.bind(function(){
-                var mapping = this.getCurrentMapping();
-
-                if (mapping.linkQualifiers) {
-                    this.data.hasLinkQualifiers = true;
-                } else {
-                    this.data.hasLinkQualifiers = false;
-                }
-
+            MappingBaseView.render(args,_.bind(function(){
                 this.parentRender(_.bind(function () {
 
-                    LinkQualifiersView.render(mapping.name);
-                    AttributesGridView.render({}, _.bind(function() {
+                    SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
+                        SchedulerView.render({"schedules": schedules});
+                        LiveSyncView.render({"schedules": schedules});
+
+                        MappingBaseView.moveSubmenu();
+
                         if (callback) {
                             callback();
                         }
                     }, this));
-                    RoleEntitlementsView.render(mapping.name);
-
-                    MappingBaseView.moveSubmenu();
-
 
                 }, this));
-
             }, this));
-
-
         }
     });
 
-    return new PropertiesView();
+    return new ScheduleView();
 });

@@ -22,20 +22,35 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, QUnit, $ */
+/*global require, define, QUnit, window, $ */
 
 define([
     "sinon",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/util/MappingUtils",
-    "org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog",
-    "org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog",
+    "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
+    "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
+    "org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView",
+    "org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView",
+    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/mapping/PropertiesView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "../mocks/mapping/propertiesViewLoad",
-], function (sinon, browserStorageDelegate, syncDelegate, mappingUtils, addPropertyMappingDialog, editPropertyMappingDialog, mappingBaseView, PropertiesView, conf, propertiesViewLoadMock) {
+    "../mocks/mapping/propertiesViewLoad"
+], function (sinon,
+             browserStorageDelegate,
+             syncDelegate,
+             mappingUtils,
+             addPropertyMappingDialog,
+             editPropertyMappingDialog,
+             LinkQualifiersView,
+             RoleEntitlementsView,
+             AttributesGridView,
+             mappingBaseView,
+             PropertiesView,
+             conf,
+             propertiesViewLoadMock) {
     var mappingName = "systemLdapAccounts_managedUser";
 
     browserStorageDelegate.set(mappingName + "_Properties", "test");
@@ -56,13 +71,13 @@ define([
 
                     QUnit.equal($('#mappingContent').length, 1, "Page Successfully Loads");
 
-                    //currentMapping() test
-                    QUnit.equal(PropertiesView.currentMapping().name, mappingName, "currentMapping() returns proper value");
+                    //getCurrentMapping() test
+                    QUnit.equal(PropertiesView.getCurrentMapping().name, mappingName, "getCurrentMapping() returns proper value");
                     QUnit.equal(PropertiesView.$el.find("div.changesPending:visible").length, 0,"Changes Pending message not shown");
 
                     //PropertiesGrid tests
                     QUnit.equal(PropertiesView.$el.find(".ui-jqgrid").length, 1, "Properties grid loaded");
-                    QUnit.equal(PropertiesView.$el.find(".ui-jqgrid tr:gt(1)").length, PropertiesView.currentMapping().properties.length, "Correct number of properties displayed in grid");
+                    QUnit.equal(PropertiesView.$el.find(".ui-jqgrid tr:gt(1)").length, PropertiesView.getCurrentMapping().properties.length, "Correct number of properties displayed in grid");
 
                     QUnit.equal(PropertiesView.$el.find(".ui-jqgrid tr.jqgrow:eq(1)").find("td:eq(2) .text-muted").length, 1, "Sample successfully displayed");
 
@@ -71,10 +86,10 @@ define([
                     //row click test
                     PropertiesView.$el.find(".ui-jqgrid tr.jqgrow:first").click();
 
-                    QUnit.equal(window.location.hash,"#property/systemLdapAccounts_managedUser/1","Clicking grid row changes address to proper route");
+                    QUnit.equal(window.location.hash,"#properties/systemLdapAccounts_managedUser/1","Clicking grid row changes address to proper route");
 
                     //numRepresentativeProperties tests
-                    setNumRepresentativePropsLineSpy = sinon.spy(PropertiesView,"setNumRepresentativePropsLine");
+                    setNumRepresentativePropsLineSpy = sinon.spy(AttributesGridView, "setNumRepresentativePropsLine");
                     $("#numRepresentativeProps").val(2).keyup();
                     QUnit.equal(browserStorageDelegate.get(mappingName + "_numRepresentativeProps",true), 2, "Number of representative properties successfully changed");
                     QUnit.equal(setNumRepresentativePropsLineSpy.called, true, "setNumRepresentativePropsLine successfully called after change to Number of representative properties");
@@ -88,7 +103,7 @@ define([
                             //clear changes button test
                             QUnit.equal(PropertiesView.$el.find("div.changesPending:visible").length, 1,"Changes Pending message displayed");
 
-                            QUnit.notEqual(browserStorageDelegate.get(mappingName + "_Properties").length, PropertiesView.currentMapping().properties.length, "Property successfully removed from current mapping properties");
+                            QUnit.notEqual(browserStorageDelegate.get(mappingName + "_Properties").length, PropertiesView.getCurrentMapping().properties.length, "Property successfully removed from current mapping properties");
 
                             $("#clearChanges").click();
                             QUnit.equal(browserStorageDelegate.get(mappingName + "_Properties"), null, "Clear Changes button clears changed mapping properties from session storage");

@@ -34,7 +34,15 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils"
-], function(AdminAbstractView, eventManager, configDelegate, constants, uiUtils, reconDelegate, dateUtil, syncDelegate, connectorUtils) {
+], function(AdminAbstractView,
+            eventManager,
+            configDelegate,
+            constants,
+            uiUtils,
+            reconDelegate,
+            dateUtil,
+            syncDelegate,
+            connectorUtils) {
 
     var MappingListView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingListTemplate.html",
