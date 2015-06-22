@@ -168,6 +168,8 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
                 $.when.apply($, promises).then(function(){
                         selectedItems.parent().parent().remove();
+
+                        eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
                     },
                     function(){
