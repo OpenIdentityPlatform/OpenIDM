@@ -1,0 +1,24 @@
+<div class="list-grid">
+    <div class="row">
+        {{#each cards}}
+        <div class="col-sm-6 col-md-3">
+            <div class="card-container card-container-sm">
+                <div class="card">
+                    <div class="card-body">
+                        <a href="{{href}}">
+                            <div class="image circle circle-sm">
+                                <i class="fa {{icon}}"></i>
+                            </div>
+                            <div class="content">
+                                <div class="main">
+                                    <h3 class="name">{{name}}</h3>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+       {{/each}}
+    </div>
+</div>

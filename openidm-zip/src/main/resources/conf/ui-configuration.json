@@ -35,6 +35,22 @@
             "widgets" : [
                 {
                     "type" : "workflow"
+                },
+                {
+                    "type" : "quickStart",
+                    "size" : "medium",
+                    "cards" : [
+                        {
+                            "name" : "dashboard.viewProfile",
+                            "icon" : "fa-user",
+                            "href" : "index.html#profile/"
+                        },
+                        {
+                            "name" : "dashboard.changePassword",
+                            "icon" : "fa-lock",
+                            "href" : "index.html#profile/change_security_data/"
+                        }
+                    ]
                 }
             ]
         }
