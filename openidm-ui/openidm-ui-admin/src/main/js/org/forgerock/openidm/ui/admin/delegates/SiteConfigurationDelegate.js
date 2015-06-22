@@ -30,52 +30,17 @@
 define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
-    "org/forgerock/commons/ui/common/components/Navigation",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(conf, commonSiteConfigurationDelegate, nav, configDelegate) {
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(conf, commonSiteConfigurationDelegate, eventManager, constants) {
 
     var obj = commonSiteConfigurationDelegate;
 
     obj.checkForDifferences = function(){
         if(_.contains(conf.loggedUser && conf.loggedUser.roles,"ui-admin")){
-            return obj.setDynamicNavItems();
-        } else {
-            return $.Deferred().resolve();
+            eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
         }
-    };
-
-    obj.setDynamicNavItems = function() {
-        return configDelegate.readEntity("managed").then(function(managedConfig){
-            nav.configuration.links.admin.urls.managed.urls = [];
-
-            _.each(managedConfig.objects, function(managed) {
-                if(!managed.schema) {
-                    managed.schema = {};
-                }
-
-                if(!managed.schema.icon) {
-                    managed.schema.icon = "fa-cube";
-                }
-
-                nav.configuration.links.admin.urls.managed.urls.push({
-                    "url" : "#resource/managed/" +managed.name +"/list/",
-                    "name" : managed.name,
-                    "icon" : "fa " +managed.schema.icon
-                });
-            });
-
-            nav.configuration.links.admin.urls.managed.urls.push({
-                divider: true
-            });
-            
-            nav.configuration.links.admin.urls.managed.urls.push({
-                "url" : "#managed/add/",
-                "name" : "New Managed Object",
-                "icon" : "fa fa-plus"
-            });
-
-            nav.reload();
-        });
+        return $.Deferred().resolve();
     };
 
     return obj;

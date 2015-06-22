@@ -62,8 +62,12 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
                             if (widget.type === "workflow") {
                                 this.loadWorkflow(roles, callback);
                             } else {
-                                if(widget.size === "small") {
+                                if(widget.size === "x-small") {
+                                    templElement = $('<div class="col-sm-4"></div>');
+                                } else if (widget.size === "small"){
                                     templElement = $('<div class="col-sm-6"></div>');
+                                } else if (widget.size === "medium") {
+                                    templElement = $('<div class="col-sm-8"></div>');
                                 } else {
                                     templElement = $('<div class="col-sm-12"></div>');
                                 }
@@ -72,7 +76,7 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
 
                                 this.model.loadedWidgets = [DashboardWidgetLoader.generateWidget({
                                     "element" : templElement,
-                                    "type" : widget.type
+                                    "widget" : widget
                                 })];
                             }
 

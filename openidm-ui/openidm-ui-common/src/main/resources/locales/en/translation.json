@@ -9,7 +9,9 @@
         "dashboard" : "Dashboard",
         "pause" : "Pause",
         "start" : "Start",
-        "refresh" : "Refresh"
+        "refresh" : "Refresh",
+        "viewProfile" : "View Profile",
+        "changePassword" : "Change Password"
     },
     "config" : {
         "dates" : {

@@ -32,7 +32,8 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
     "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate",
     "org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
-    "org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget"
+    "org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget"
 ], function(AbstractView,
             eventManager,
             constants,
@@ -40,7 +41,8 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
             SystemHealthDelegate,
             MemoryUsageWidget,
             ReconProcessesWidget,
-            CPUUsageWidget) {
+            CPUUsageWidget,
+            QuickStartWidget) {
     var dwlInstance = {},
         DashboardWidgetLoader = AbstractView.extend({
             template: "templates/dashboard/DashboardWidgetLoaderTemplate.html",
@@ -54,6 +56,16 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
             events: {
 
             },
+            /*
+             Availavble Widgets:
+
+             lifeCycleMemoryHeap - Current heap memory
+             lifeCycleMemoryNonHeap - Current none heap memory
+             lifeCycleMemoryBoth - Displays both heap and none heap memory charts
+             reconUsage - Displays current recons in process. Polls every few seconds with updated information.
+             cpuUsage - Shows current CPU usage of the system
+             quickStart - Widget displaying quick start cards to help users get start with core functionality
+             */
             render: function(args, callback) {
                 this.element = args.element;
 
@@ -77,17 +89,21 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
                     cpuUsage: {
                         name: $.t("dashboard.cpuUsage"),
                         icon : "fa-pie-chart"
+                    },
+                    quickStart: {
+                        name: "Quick Start",
+                        icon: "fa-key"
                     }
                 };
 
-                this.data.widgetType = args.type;
-                this.data.widget = this.model.widgetList[args.type];
+                this.data.widgetType = args.widget.type;
+                this.data.widget = this.model.widgetList[args.widget.type];
 
                 this.parentRender(_.bind(function(){
                     args.menu = this.$el.find(".dropdown-menu");
-                    args.element = this.$el.find(".chart-body");
+                    args.element = this.$el.find(".widget-body");
 
-                    switch(args.type) {
+                    switch(args.widget.type) {
                         case "lifeCycleMemoryHeap":
                         case "lifeCycleMemoryBoth":
                         case "lifeCycleMemoryNonHeap":
@@ -96,8 +112,15 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
                         case "reconUsage":
                             this.model.widget = ReconProcessesWidget.generateWidget(args, callback);
                             break;
-                        case "cpuUsage" :
+                        case "cpuUsage":
                             this.model.widget = CPUUsageWidget.generateWidget(args, callback);
+                            break;
+                        case "quickStart":
+                            this.$el.find(".dropdown-toggle").hide();
+
+                            args.icons = args.widget.icons;
+
+                            this.model.widget = QuickStartWidget.generateWidget(args, callback);
                             break;
                     }
                 }, this));

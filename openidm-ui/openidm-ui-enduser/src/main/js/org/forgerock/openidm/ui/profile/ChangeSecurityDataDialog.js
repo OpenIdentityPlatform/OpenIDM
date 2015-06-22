@@ -121,11 +121,10 @@ define("org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog", [
                     if (!this.reauth_required) {
                         this.reloadData();
                     }
+
+                    this.$el.find("input[type=submit]").prop('disabled', true);
                 }, this));
-
             }, this));
-
-            this.$el.find("input[type=submit]").prop('disabled', true);
         },
 
         reloadData: function() {
