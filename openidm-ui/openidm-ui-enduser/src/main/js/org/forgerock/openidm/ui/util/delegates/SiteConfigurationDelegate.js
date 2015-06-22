@@ -29,18 +29,29 @@
  */
 define("org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
-], function(conf, commonSiteConfigurationDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
+    "org/forgerock/commons/ui/common/components/Navigation"
+], function(conf, commonSiteConfigurationDelegate, nav) {
 
     var obj = commonSiteConfigurationDelegate;
-    
+
+    obj.adminCheck = false;
+
     obj.checkForDifferences = function(){
+        if(_.contains(conf.loggedUser && conf.loggedUser.roles,"ui-admin") && !obj.adminCheck){
+            nav.configuration.userBar.unshift({
+                "id": "admin_link",
+                "href": "/admin",
+                "i18nKey": "openidm.admin.label"
+            });
+
+            obj.adminCheck = true;
+        }
+
+        nav.reload();
         return $.Deferred().resolve();
     };
 
-    
+
     return obj;
 });
-
-
-

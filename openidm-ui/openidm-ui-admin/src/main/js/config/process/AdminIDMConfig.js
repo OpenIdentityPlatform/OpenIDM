@@ -42,6 +42,47 @@ define("config/process/AdminIDMConfig", [
                 }
             },
             {
+                startEvent: constants.EVENT_UPDATE_NAVIGATION,
+                description: "Update Navigation Bar",
+                dependencies: [
+                    "org/forgerock/commons/ui/common/components/Navigation",
+                    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+                ],
+                processDescription: function(event, Navigation, ConfigDelegate) {
+                    ConfigDelegate.readEntity("managed").then(function(managedConfig){
+                        Navigation.configuration.links.admin.urls.managed.urls = [];
+
+                        _.each(managedConfig.objects, function(managed) {
+                            if(!managed.schema) {
+                                managed.schema = {};
+                            }
+
+                            if(!managed.schema.icon) {
+                                managed.schema.icon = "fa-cube";
+                            }
+
+                            Navigation.configuration.links.admin.urls.managed.urls.push({
+                                "url" : "#resource/managed/" +managed.name +"/list/",
+                                "name" : managed.name,
+                                "icon" : "fa " +managed.schema.icon
+                            });
+                        });
+
+                        Navigation.configuration.links.admin.urls.managed.urls.push({
+                            divider: true
+                        });
+
+                        Navigation.configuration.links.admin.urls.managed.urls.push({
+                            "url" : "#managed/add/",
+                            "name" : "New Managed Object",
+                            "icon" : "fa fa-plus"
+                        });
+
+                        Navigation.reload();
+                    });
+                }
+            },
+            {
                 startEvent: constants.EVENT_CHANGE_BASE_VIEW,
                 description: "",
                 override: true,
