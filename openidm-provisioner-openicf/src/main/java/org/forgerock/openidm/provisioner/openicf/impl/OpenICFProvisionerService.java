@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1390,7 +1391,68 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         @Override
         public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
                 ResultHandler<Resource> handler) {
-            handler.handleError(new NotSupportedException("Patch operations are not supported"));
+            JsonValue beforeValue = null;
+            try {
+                final ConnectorFacade facade = getConnectorFacade0(handler, UpdateApiOp.class);
+                if (null == facade) {
+                    // getConnectorFacade0 already handles error when returning null
+                    return;
+                }
+
+                final Uid _uid = request.getRevision() != null
+                        ? new Uid(resourceId, request.getRevision())
+                        : new Uid(resourceId);
+
+                // read resource before update for logging
+                Resource before = getCurrentResource(facade, _uid, null);
+                beforeValue = before.getContent();
+                
+                final Set<Attribute> patchedAttributes =
+                        objectClassInfoHelper.getPatchAttributes(request, beforeValue, cryptoService);
+                
+                Set<String> patchedAttributeNames = new HashSet<String>(patchedAttributes.size());
+                for (Attribute attribute : patchedAttributes) {
+                    patchedAttributeNames.add(attribute.getName());
+                }
+
+                OperationOptions operationOptions;
+                OperationOptionsBuilder operationOptionsBuilder = operations.get(UpdateApiOp.class)
+                        .build(jsonConfiguration, objectClassInfoHelper);
+
+                final String reauthPassword = getReauthPassword(context);
+
+                // if reauth and updating attribute requiring user credentials
+                if (runAsUser(patchedAttributeNames, reauthPassword)) {
+                    // get username attribute
+                    final List<String> usernameAttrs =
+                            jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
+                                    .get(ACCOUNT_USERNAME_ATTRIBUTES)
+                                    .asList(String.class);
+                    final String username = beforeValue.get(usernameAttrs.get(0)).asString();
+
+                    if (StringUtils.isNotBlank(username)) {
+                        operationOptionsBuilder.setRunAsUser(username)
+                                .setRunWithPassword(new GuardedString(reauthPassword.toCharArray()));
+                    }
+                }
+
+                operationOptions = operationOptionsBuilder.build();
+
+                Uid uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid,
+                        AttributeUtil.filterUid(patchedAttributes), operationOptions);
+
+                Resource resource = getCurrentResource(facade, uid, null);
+                activityLogger.log(context, RequestType.PATCH, "message", getSource(objectClass, uid.getUidValue()), beforeValue, resource.getContent(), Status.SUCCESS);
+                handler.handleResult(resource);
+            } catch (ResourceException e) {
+                handler.handleError(e);
+            } catch (ConnectorException e) {
+                handleConnectorException(context, request, e, getSource(objectClass), resourceId, beforeValue, null, handler, activityLogger);
+            } catch (JsonValueException e) {
+                handler.handleError(new BadRequestException(e.getMessage(), e));
+            } catch (Exception e) {
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            }
         }
 
         @Override
@@ -1531,6 +1593,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         @Override
         public void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
                 ResultHandler<Resource> handler) {
+            JsonValue content = request.getContent();
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, UpdateApiOp.class);
                 if (null == facade) {
@@ -1557,14 +1620,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
                 final String reauthPassword = getReauthPassword(context);
 
-                // if reauth and updating attribute requiring user credentials
-                if (runAsUser(request, reauthPassword)) {
+                // if reauth and updating attributes requiring user credentials
+                if (runAsUser(content.asMap().keySet(), reauthPassword)) {
                     // get username attribute
                     final List<String> usernameAttrs =
                             jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
                                     .get(ACCOUNT_USERNAME_ATTRIBUTES)
                                     .asList(String.class);
-                    final String username = request.getContent().get(usernameAttrs.get(0)).asString();
+                    final String username = content.get(usernameAttrs.get(0)).asString();
 
                     if (StringUtils.isNotBlank(username)) {
                         operationOptionsBuilder.setRunAsUser(username)
@@ -1583,7 +1646,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, getSource(objectClass), resourceId, request.getContent(), null, handler, activityLogger);
+                handleConnectorException(context, request, e, getSource(objectClass), resourceId, content, null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1603,8 +1666,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             }
         }
 
-        // check if updating an attribute that requires user credentials
-        private boolean runAsUser(UpdateRequest request, String reauthPassword) {
+        /**
+         * Checks if any of the supplied attributes require re-authentication to update.
+         * 
+         * @param attributes the attributes being updated
+         * @param reauthPassword the re-authentication password
+         * @return true if a password is re-authentication is required, false otherwise.
+         */
+        private boolean runAsUser(Set<String> attributes, String reauthPassword) {
             final JsonValue properties = objectClassInfoHelper.getProperties();
             final Predicate<String> attributesToRunAsUser = new Predicate<String>() {
                 @Override
@@ -1615,7 +1684,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             };
 
             return StringUtils.isNotEmpty(reauthPassword)
-                    && FluentIterable.from(request.getContent().asMap().keySet()).filter(attributesToRunAsUser).iterator().hasNext();
+                    && FluentIterable.from(attributes).filter(attributesToRunAsUser).iterator().hasNext();
         }
 
         private Resource getCurrentResource(final ConnectorFacade facade, final Uid uid, final List<JsonPointer> fields)

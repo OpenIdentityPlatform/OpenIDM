@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,33 +24,47 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.Id;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
-import org.identityconnectors.framework.common.objects.*;
+import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.ConnectorObject;
+import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
+import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.OperationOptions;
+import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
+import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 public class ObjectClassInfoHelper {
 
@@ -217,6 +231,15 @@ public class ObjectClassInfoHelper {
         return new HashSet<Attribute>(result.values());
     }
 
+    /**
+     * Get the attributes are that are writable on an update.
+     * 
+     * @param request UpdateRequest
+     * @param newName a new name
+     * @param cryptoService encryption and decryption service
+     * @return Set of attributes to that are writable on update
+     * @throws ResourceException if and error is encountered
+     */
     public Set<Attribute> getUpdateAttributes(final UpdateRequest request, final Name newName,
             final CryptoService cryptoService) throws ResourceException {
         JsonValue content = request.getContent().required().expect(Map.class);
@@ -253,6 +276,75 @@ public class ObjectClassInfoHelper {
             logger.trace("Update ConnectorObject: {}", SerializerUtil.serializeXmlObject(builder
                     .build(), false));
         }
+        return new HashSet<Attribute>(result.values());
+    }
+
+    /**
+     * Get the attributes are that are writable on a patch.
+     * 
+     * @param request PatchRequest
+     * @param before the before value
+     * @param cryptoService encryption and decryption service
+     * @return Set of attributes to that are writable on update
+     * @throws ResourceException if and error is encountered
+     */
+    public Set<Attribute> getPatchAttributes(final PatchRequest request, final JsonValue before, 
+            final CryptoService cryptoService) throws ResourceException {
+        
+        // A Map to hold the attributes being patched
+        JsonValue attributesToPatch = json(object());
+        
+        // A Set of attributes that will be removed
+        Set<JsonPointer> attributesToRemove = new HashSet<JsonPointer>();
+        
+        // Loop through the patch operations building up the map of attributes to map with their existing values
+        for (PatchOperation patchOperation : request.getPatchOperations()) {
+            JsonPointer field = patchOperation.getField();
+            JsonValue beforeValue = before.get(field);
+            if (patchOperation.isRemove()) {
+                // Keep track of the attributes that will be removed so we can set to null below
+                attributesToRemove.add(field);
+            }
+            
+            if (beforeValue != null && !beforeValue.isNull()) {
+                attributesToPatch.put(field, before.get(field).getObject());
+            }
+        }
+        
+        // Apply the patch operations to an object which contains only the attributes being patched
+        ResourceUtil.applyPatchOperations(request.getPatchOperations(), attributesToPatch);
+
+        // Set any removed values to null
+        for (JsonPointer removedAttribute : attributesToRemove) {
+            attributesToPatch.put(removedAttribute, null);
+        }
+        
+        Set<String> attributeKeys = attributesToPatch.keys();
+        Map<String, Attribute> result = new HashMap<String, Attribute>(attributeKeys.size());
+        
+        // Build up the map of patched Attributes
+        for (AttributeInfoHelper attributeInfo : attributes) {
+            // Get the attribute's nativeName and check if it is on of the attributes to patch
+            String attributeName = attributeInfo.getAttributeInfo().getName();
+            if (attributesToPatch.keys().contains(attributeName)) {
+                Object value = attributesToPatch.get(attributeName).getObject();
+                Attribute attribute = attributeInfo.build(value, cryptoService);
+                if (null != attribute) {
+                    result.put(attributeName, attribute);
+                }
+            }
+        }
+
+        // Check if any of the attributes to patch are invalid/unsupported
+        checkForInvalidAttributes(attributeKeys);
+
+        if (logger.isTraceEnabled()) {
+            ConnectorObjectBuilder builder = new ConnectorObjectBuilder().addAttributes(result.values());
+            builder.setName("***");
+            builder.setUid("***");
+            logger.trace("Patch ConnectorObject: {}", SerializerUtil.serializeXmlObject(builder.build(), false));
+        }
+        
         return new HashSet<Attribute>(result.values());
     }
 
