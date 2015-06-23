@@ -1598,189 +1598,200 @@ logger = LoggerFactory.getLogger('logger');
      <para>
       The variables that are available to scripts depend on the triggers that
       launch the script, and on the locations in which those triggers are
-      defined. The following section outlines the available variables, per
-      trigger.
+      defined. The following table lists triggers, with associated variables.
      </para>
+
+     <table pgwide="1" xml:id="table-openam-basic">
+      <title>Script Triggers and Associated Variables</title>
+
+      <tgroup cols="3">
+       <colspec colnum="1" colwidth="2*" />
+       <colspec colnum="2" colwidth="3*" />
+       <colspec colnum="3" colwidth="2*"/>
+
+       <thead>
+        <row>
+         <entry>Trigger</entry>
+         <entry>Variables</entry>
+         <entry>Configuration File</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>condition</entry>
+         <entry>object</entry>
+        </row>
+        <row>
+         <entry>correlationQuery</entry>
+         <entry>source</entry>
+        </row>
+        <row>
+         <entry>correlationScript</entry>
+         <entry>source</entry>
+        </row>
+        <row>
+         <entry>linkQualifier</entry>
+         <entry>source</entry>
+         <entry><filename>sync.json</filename></entry>
+        </row>
+        <row>
+         <entry>onCreate</entry>
+         <entry><para>object, source, target</para></entry>
+         <entry><filename>sync.json</filename></entry>
+        </row>
+        <row>
+         <entry>onCreate</entry>
+         <entry>object</entry>
+         <entry><filename>managed.json</filename></entry>
+        </row>
+        <row>
+         <entry>onDelete</entry>
+         <entry>object, source, target</entry>
+         <entry><filename>managed.json</filename></entry>
+        </row>
+        <row>
+         <entry>onDelete</entry>
+         <entry>object</entry>
+         <entry><filename>managed.json</filename></entry>
+        </row>
+        <row>
+         <entry>onLink</entry>
+         <entry>source, target</entry>
+        </row>
+        <row>
+         <entry>onRead</entry>
+         <entry><para>object, when called from either an object or a property storage trigger</para>
+          <para>property, only when called from a property storage trigger</para>
+         </entry>
+        </row>
+        <row>
+         <entry>onStore</entry>
+         <entry>object, property</entry>
+        </row>
+        <row>
+         <entry>onUnlink</entry>
+         <entry>source, target</entry>
+        </row>
+        <row>
+         <entry>onUpdate</entry>
+         <entry>object, source, target</entry>
+         <entry><filename>sync.json</filename></entry>
+        </row>
+        <row>
+         <entry>onUpdate</entry>
+         <entry>object</entry>
+         <entry><filename>managed.json</filename></entry>
+        </row>
+        <row>
+         <entry>onValidate</entry>
+         <entry>object, property</entry>
+        </row>
+        <row>
+         <entry>postCreate</entry>
+         <entry>object</entry>
+         <entry><filename>managed.json</filename></entry>
+        </row>
+        <row>
+         <entry>postDelete</entry>
+         <entry>object</entry>
+         <entry><filename>managed.json</filename></entry>
+        </row>
+        <row>
+         <entry>Custom endpoint scripts</entry>
+         <entry>request</entry>
+        </row>
+        <row>
+         <entry>result</entry>
+         <entry>source, target</entry>
+        </row>
+        <row>
+         <entry>taskScanner</entry>
+         <entry>input, objectID</entry>
+        </row>
+        <row>
+         <entry>transform</entry>
+         <entry>source</entry>
+        </row>
+        <row>
+         <entry>validSource</entry>
+         <entry>source</entry>
+        </row>
+        <row>
+         <entry>validTarget</entry>
+         <entry>target</entry>
+        </row>
+       </tbody>
+
+      </tgroup>
+
+     </table>
+
      <variablelist>
+      <para>
+       OpenIDM includes one additional variable used in scripts:
+      </para>
+
       <varlistentry>
-       <term>condition</term>
-       <listitem>
-        <para>object</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>correlationQuery</term>
-       <listitem>
-        <para>source</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>correlationScript</term>
-       <listitem>
-        <para>source</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>Custom endpoint scripts</term>
-       <listitem>
-        <para>request</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>linkQualifier</term>
-       <listitem>
-        <para>target</para>
-        <para>
-         Often used to qualify objects for a <literal>correlationQuery</literal>,
-         a <literal>correlationScript</literal>, or a policy.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onCreate</term>
-       <listitem>
-        <para>
-         Triggered in <filename>sync.json</filename> : object, source, target
-        </para>
-        <para>
-         Triggered in <filename>managed.json</filename> : object
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onDelete</term>
-       <listitem>
-        <para>
-         Triggered in <filename>sync.json</filename> : object, source, target
-        </para>
-        <para>
-         Triggered in <filename>managed.json</filename> : object
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onLink</term>
-       <listitem>
-        <para>source, target</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onRead</term>
-       <listitem>
-        <para>object</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onRetrieve</term>
-       <listitem>
-        <para>
-         object (when called from either an object or a property storage
-         trigger)
-        </para>
-        <para>
-         property (only when called from a property storage trigger)
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onStore</term>
-       <listitem>
-        <para>object, property</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onUnlink</term>
-       <listitem>
-        <para>source, target</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onUpdate</term>
-       <listitem>
-        <para>
-         Triggered in <filename>sync.json</filename> : source, target
-        </para>
-        <para>
-         Triggered in <filename>managed.json</filename> : oldObject, newObject
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>onValidate</term>
-       <listitem>
-        <para>object, property</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>postCreate, postDelete</term>
-       <listitem>
-        <para>
-         Triggered in <filename>managed.json</filename> : object
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>postUpdate</term>
-       <listitem>
-        <para>
-         Triggered in <filename>managed.json</filename> : oldObject, newObject
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>result</term>
-       <listitem>
-        <para>source, target</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>synchronization situation scripts</term>
-       <listitem>
-        <para>
-         <literal>recon.actionParam</literal> - the details of the
-         synchronization operation in progress. This variable can be used for
-         asynchronous callbacks to execute the action at a later stage.
-        </para>
-        <para>
-         <literal>sourceAction</literal> - a boolean that indicates whether the
-         situation was assessed during the source phase
-        </para>
-        <para>
-         <literal>source</literal> (if found)
-        </para>
-        <para>
-         <literal>target</literal> (if found)
-        </para>
-        <para>
-         The properties from the configured script object.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>taskScanner</term>
-       <listitem>
-        <para>input, objectID</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>transform</term>
-       <listitem>
-        <para>source</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>validSource</term>
-       <listitem>
-        <para>source</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>validTarget</term>
-       <listitem>
-        <para>target</para>
-       </listitem>
+        <term>identityServer</term>
+        <listitem>
+         <itemizedlist>
+          <para>
+           The <literal>identityServer</literal> variable can be used in
+           several ways. The <literal>ScriptRegistryService</literal> described
+           in <xref linkend="script-endpoint" /> binds this variable to:
+          </para>
+          <listitem>
+           <para><literal>getProperty</literal></para>
+           <para>
+            Retrieves property information from configuration files.
+            Creates a new identity environment configuration.
+           </para>
+           <para>
+            For example, you can retrieve the value of the
+            <literal>openidm.config.crypto.alias</literal> property from that
+            file with the following code:
+            <literal>alias = identityServer.getProperty("openidm.config.crypto.alias", "true", true);</literal>
+           </para>
+          </listitem>
+          <listitem>
+           <para><literal>getInstallLocation</literal></para>
+           <para>
+            Retrieves the installation path for OpenIDM, such as
+            <filename>/path/to/openidm</filename>. May be superseded by an
+            absolute path.
+           </para>
+          </listitem>
+          <listitem>
+           <para><literal>getProjectLocation</literal></para>
+           <para>Retrieves the directory used when you started OpenIDM. That
+            directory includes configuration and script files for your
+            project.</para>
+           <para>
+            For more information on the project location, see
+            <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+                  xlink:href="integrators-guide#startup-configuration">
+             <citetitle>Specifying the OpenIDM Startup
+              Configuration</citetitle></link>
+           </para>
+          </listitem>
+          <listitem>
+           <para><literal>getWorkingLocation</literal></para>
+           <para>Retrieves the directory associated with database cache and
+           audit logs. You can find <filename>db/</filename> and
+           <filename>audit/</filename> subdirectories there.</para>
+           <para>
+            For more information on the working location, see
+            <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+                  xlink:href="integrators-guide#startup-configuration">
+             <citetitle>Specifying the OpenIDM Startup
+              Configuration</citetitle></link>
+           </para>
+          </listitem>
+         </itemizedlist>
+        </listitem>
       </varlistentry>
      </variablelist>
+
     </section>
 
     <!--TODO Uncomment this section when OPENIDM-3351 is resolved
@@ -1921,7 +1932,7 @@ logger = LoggerFactory.getLogger('logger');
    scripts in this way can be useful in debugging.
   </para>
   <para>
-   In addition, the script service enables you to call out to other scripts
+   In addition, the script registry service supports calls to other scripts
    (even scripts written in a different language, such as from JavaScript to
    Groovy). For example, you might have logic written in Javascript, but also
    some code available in Groovy. Ordinarily, it would be challenging to
