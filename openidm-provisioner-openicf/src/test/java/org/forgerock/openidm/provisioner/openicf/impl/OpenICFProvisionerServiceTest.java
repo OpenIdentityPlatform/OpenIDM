@@ -1,4 +1,34 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
 package org.forgerock.openidm.provisioner.openicf.impl;
+
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -33,6 +63,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PermanentException;
 import org.forgerock.json.resource.PreconditionFailedException;
@@ -102,10 +133,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * A NAME does ...
@@ -434,9 +461,44 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
     }
 
-    @Test(dataProvider = "dp")
-    public void testPatchInstance(String systemName) throws Exception {
+    @Test
+    public void testPatchInstance() throws Exception {
+        String name = "john";
+        String resourceContainer = "/system/XML/account/";
+        JsonValue object  = json(object(
+                field("name", name),
+                field("__PASSWORD__", "password"),
+                field("lastname", "Doe"),
+                field("email", name + "@example.com"),
+                field("age", 30)));
 
+        CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
+        JsonValue createdObject = connection.create(new SecurityContext(new RootContext(), "system", null ), createRequest).getContent();
+        String resourceName = resourceContainer + createdObject.get("_id").asString();
+
+        // Test replace operation
+        PatchOperation operation = PatchOperation.replace("lastname", "Doe2");
+        PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+        JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get("lastname").asString()).isEqualTo("Doe2");
+
+        // Test increment operation
+        operation = PatchOperation.increment("age", 10);
+        patchRequest = Requests.newPatchRequest(resourceName, operation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get("age").asInteger()).isEqualTo(40);
+
+        // Test remove operation
+        operation = PatchOperation.remove("age");
+        patchRequest = Requests.newPatchRequest(resourceName, operation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get("age").isNull()).isEqualTo(true);
+
+        // Test add operation
+        operation = PatchOperation.add("gender", "m");
+        patchRequest = Requests.newPatchRequest(resourceName, operation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get("gender").asString()).isEqualTo("m");
     }
 
     @Test(dataProvider = "dp")
