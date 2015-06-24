@@ -997,10 +997,10 @@ org.osgi.service.http.secure.enabled=true</programlisting>
    expose anything that is not used in production.
   </para>
   <para>
-   For an example that shows how to protect sensitive URLs see the section that
-   describes the (<link xlink:href="integrators-guide#chap-auth" xlink:show="new"
+   For an example that shows how to protect sensitive URLs, see the section that
+   describes the <link xlink:href="integrators-guide#chap-auth" xlink:show="new"
    xlink:role="http://docbook.org/xlink/role/olink"><literal>access.js</literal></link>
-   file for an example that shows how to protect sensitive URLs.
+   file.
   </para>
   <para>
    OpenIDM supports native query expressions on the repository, and you can
