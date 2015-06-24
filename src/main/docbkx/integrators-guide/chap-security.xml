@@ -994,28 +994,29 @@ org.osgi.service.http.secure.enabled=true</programlisting>
   <para>
    In addition, you can deny direct HTTP access to system objects in production,
    particularly access to <literal>action</literal>. As a rule of thumb, do not
-   expose anything that is not used in production. The main public interfaces
-   over HTTP are <literal>/openidm/managed/</literal> and
-   <literal>/openidm/config/</literal>. Other URIs are triggered indirectly,
-   or are used for internal consumption.
+   expose anything that is not used in production.
   </para>
-  
-  <para>OpenIDM supports native query expressions on the repository, and it is
-   possible to enable these over HTTP, for example, the following query should
-   identify managed users in an OrientDB repository:</para>
-
+  <para>
+   For an example that shows how to protect sensitive URLs see the section that
+   describes the (<link xlink:href="integrators-guide#chap-auth" xlink:show="new"
+   xlink:role="http://docbook.org/xlink/role/olink"><literal>access.js</literal></link>
+   file for an example that shows how to protect sensitive URLs.
+  </para>
+  <para>
+   OpenIDM supports native query expressions on the repository, and you can
+   enable these over HTTP. For example, the following query returns all
+   managed users in an OrientDB repository:
+  </para>
   <screen>
 $ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  "https://localhost:8443/openidm/managed/user?_queryExpression=select+*+from+managed_user"</userinput></screen>
-  
   <para>
    By default, direct HTTP access to native queries is disallowed, and should
    remain so in production systems.
   </para>
-
   <para>
    For testing or development purposes, it can be helpful to enable native
    queries on the repository over HTTP. To do so, edit the access
@@ -1023,7 +1024,6 @@ $ <userinput>curl \
    remove any instances of <literal>"disallowQueryExpression()"</literal>
    such as the following:
   </para>
-  
   <programlisting language="javascript">
 {
     "pattern"   : "*",
@@ -1048,11 +1048,6 @@ $ <userinput>curl \
 
 
   </programlisting>
-
-  <para>See the chapter on <link xlink:href="integrators-guide#chap-auth"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
-  Authentication, Authorization &amp; RBAC</citetitle></link> for an example
-  showing how to protect sensitive URLs.</para>
  </section>
 
  <section xml:id="security-files">
