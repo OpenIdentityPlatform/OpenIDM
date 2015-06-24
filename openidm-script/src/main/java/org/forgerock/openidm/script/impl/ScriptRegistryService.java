@@ -28,6 +28,7 @@ import java.io.File;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -230,7 +231,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         try {
             JsonValue sources = configuration.get("sources");
             if (!sources.isNull()) {
-                for (String key : sources.keys()) {
+                // Must reverse default-first config since ScriptRegistryImpl loads scripts from the first dir it hits.
+                List<String> keys = new ArrayList(sources.keys());
+                Collections.reverse(keys);
+
+                for (String key : keys) {
                     JsonValue source = sources.get(key);
                     String directory = source.get(SOURCE_DIRECTORY).asString();
                     URL directoryURL = (new File(directory)).toURI().toURL();
