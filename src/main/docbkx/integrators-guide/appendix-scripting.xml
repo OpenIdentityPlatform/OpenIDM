@@ -1601,7 +1601,7 @@ logger = LoggerFactory.getLogger('logger');
       defined. The following table lists triggers, with associated variables.
      </para>
 
-     <table pgwide="1" xml:id="table-openam-basic">
+     <table pgwide="1" xml:id="table-script-triggers">
       <title>Script Triggers and Associated Variables</title>
 
       <tgroup cols="3">
