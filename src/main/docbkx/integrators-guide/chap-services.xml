@@ -759,10 +759,9 @@ OpenIDM ready
    </para>
    <step>
     <para>
-     If you have not already done so, install and set up OpenIDM, as
-     described in the following chapter: <link xlink:show="new"
-     xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:href="integrators-guide#chap-install"><citetitle>Installing OpenIDM
+     If you have not yet installed OpenIDM, follow the procedure described in
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="install-guide#chap-install"><citetitle>Installing OpenIDM
      Services</citetitle></link>.
     </para>
    </step>
