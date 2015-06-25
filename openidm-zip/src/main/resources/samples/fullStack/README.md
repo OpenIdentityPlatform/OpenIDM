@@ -97,7 +97,7 @@ At this point you may also wish to enable scheduled reconcilation and livesync, 
 
 ### Logging In
 
-Once you have followed the above steps, you can access the OpenIDM UI as normal (https://domain:port/openidmui). The UI has been modified slightly for this sample; instead of the regular login process, we use a proxy service to communicate with OpenAM's REST-based Authentication service. This proxy service is implemented as a custom endpoint - read more details in the source at bin//defaults/script/ui/openamProxy.js. 
+Once you have followed the above steps, you can access the OpenIDM UI as normal (https://domain:port/selfservice). The UI has been modified slightly for this sample; instead of the regular login process, we use a proxy service to communicate with OpenAM's REST-based Authentication service. This proxy service is implemented as a custom endpoint - read more details in the source at bin//defaults/script/ui/openamProxy.js.
 
 If everything is setup properly, when the OpenIDM UI loads you will see one of two things happen: 
 
