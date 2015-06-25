@@ -347,7 +347,7 @@ Run the Sample
     }
 
 
-You can log in to the OpenIDM UI (https://localhost:8443/openidmui) with any of
+You can log in to the OpenIDM UI (https://localhost:8443/selfservice) with any of
 the users that were created in the repository by the reconciliation operation.
 Consult the values from the sample3/tools/ResetDatabaseScript.groovy script to
 retrieve the clear text passwords of each of these users. Users can update their
