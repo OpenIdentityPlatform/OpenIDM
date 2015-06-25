@@ -82,7 +82,7 @@
                     <div data-resource-type="managed" data-managed-title="{{name}}" class="resource-body card">
                         <div class="card-body resource-type-body managed-type">
                             <div class="image circle">
-                                <i class="{{iconClass}}"></i>
+                                <i class="{{#if schema.icon}} fa {{schema.icon}} {{else}} {{iconClass}} {{/if}}"></i>
                             </div>
                             <div class="content">
                                 <div class="main resource-info">
