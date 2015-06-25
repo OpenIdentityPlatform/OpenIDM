@@ -38,8 +38,7 @@
         "source" : "var res = false;\nvar i=0;\n\nwhile (!res && i < source.effectiveRoles.length) {\n    var roleId = source.effectiveRoles[i];\n    if (roleId != null && roleId.indexOf(\"/\") != -1) {\n        var roleInfo = openidm.read(roleId);\n        res = (((roleInfo.properties.name === 'Agent')\n                &&(linkQualifier ==='agent'))\n              || ((roleInfo.properties.name === 'Insured')\n                &&(linkQualifier ==='insured')));\n    }\n    i++;\n}\n\nres"
       },
       "assignmentsToMap" : [
-        "ldap-agent",
-        "ldap-insured"
+        "ldap"
       ],
       "properties" : [
         {
