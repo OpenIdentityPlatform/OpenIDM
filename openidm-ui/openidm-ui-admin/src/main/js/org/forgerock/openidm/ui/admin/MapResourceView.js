@@ -358,7 +358,8 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
         },
         displayDetails: function(id, details) {
             if(details.resourceType === "connector") {
-                this.$el.find("#"+id +" .resource-small-icon").addClass(details.iconClass);
+                this.$el.find("#"+id +" .resource-small-icon").attr('class', "resource-small-icon " +details.iconClass);
+
                 this.$el.find("#"+id +" .resource-type-name").html(details.displayName);
                 this.$el.find("#"+id +" .resource-given-name").html(details.name);
                 this.$el.find("#"+id +" .edit-objecttype").show();
@@ -372,7 +373,12 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                 }, this);
 
             } else {
-                this.$el.find("#"+id +" .resource-small-icon").addClass(details.iconClass);
+                if(!details.schema.icon) {
+                    this.$el.find("#" + id + " .resource-small-icon").attr('class', "resource-small-icon " +details.iconClass);
+                } else {
+                    this.$el.find("#" + id + " .resource-small-icon").attr('class','resource-small-icon fa ' +details.schema.icon);
+                }
+
                 this.$el.find("#"+id +" .resource-type-name").html($.t("templates.connector.managedObjectType"));
                 this.$el.find("#"+id +" .resource-given-name").html(details.name);
                 this.$el.find("#"+id +" .edit-objecttype").hide();
