@@ -36,7 +36,7 @@ if (effectiveRolesPropName === undefined) {
 }
 logger.trace("Configured effectiveRolesPropName: {}", effectiveRolesPropName);
 
-var effectiveAssignments = {};
+var effectiveAssignments = [];
 var effectiveRoles = object[effectiveRolesPropName];
 
 if (effectiveRoles != null)  {
@@ -51,33 +51,18 @@ if (effectiveRoles != null)  {
             if (roleInfo != null) {
                 for (var assignmentName in roleInfo.assignments) {
                     var assignment = roleInfo.assignments[assignmentName];
+                    var linkQualifers = assignment.linkQualifiers;
+                    var effectiveAssignment = {
+                        "name" : assignmentName,
+                        "attributes" : assignment.attributes
+                    };
+                    effectiveAssignment["assignedThrough"] = roleId;
+                    if (linkQualifers !== null) {
+                        effectiveAssignment["linkQualifiers"] = linkQualifers;
+                    }
                     logger.trace("assignmentName: {} value : {}", assignmentName, assignment);
-                    if (effectiveAssignments[assignmentName] == null) {
-                        effectiveAssignments[assignmentName] = {};
-                    }
-
-                    // Shallow merge of attributes operations if some already exist, e.g. "system":{"attributes":["x"]} 
-                    for (var assignmentPropName in assignment) {
-                        var assignmentProp = assignment[assignmentPropName];
-                        for (var propCount = 0; propCount < assignmentProp.length; propCount++) {
-                            // Include information on where the assignment comes from, to allow easier management and debugging
-                            assignmentProp[propCount]["assignedThrough"] = roleId;
-                        }
-
-                        var existingProp = effectiveAssignments[assignmentName][assignmentPropName];
-                        // Only merge "attributes"
-                        if (existingProp != null && assignmentPropName == "attributes") {
-                            logger.trace("Merge assignment {}: {}", assignmentPropName, assignmentProp);
-                            for (var j = 0; j < assignmentProp.length; j++) {
-                                effectiveAssignments[assignmentName][assignmentPropName] = 
-                                    effectiveAssignments[assignmentName][assignmentPropName].concat(assignmentProp[j]);
-                            }
-                        } else {
-                            logger.trace("Set assignment {}: {}", assignmentPropName, assignmentProp);
-                            effectiveAssignments[assignmentName][assignmentPropName] = assignmentProp;
-                        }
-                        logger.trace("Intermediate effectiveAssignments calculated: {}", effectiveAssignments);
-                    }
+                    effectiveAssignments.push(effectiveAssignment);
+                    logger.trace("effectiveAssignment: {}", effectiveAssignment);
                 }
             } else {
                 logger.debug("No role details could be read from: {}", roleId);

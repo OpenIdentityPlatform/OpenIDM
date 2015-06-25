@@ -431,7 +431,7 @@ assignments  :
                    "operation" : "add",
                    "field" : "/assignments",
                    "value" : {
-                     "ldap-agent": {
+                     "ldap": {
                        "attributes": [
                          {
                            "name": "ldapGroups",
@@ -448,7 +448,7 @@ assignments  :
                }]' \
                https://localhost:8443/openidm/managed/role/e26b6d30-121c-479c-b094-7b02e166447c
 
-    {"properties":{"name":"Agent","description":"Role assigned to insurance agents."},"_id":"e26b6d30-121c-479c-b094-7b02e166447c","_rev":"2","assignments":{"ldap-agent":{"attributes":[{"name":"ldapGroups","value":["cn=Contractors,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}],"linkQualifiers":["agent"]}}}
+    {"properties":{"name":"Agent","description":"Role assigned to insurance agents."},"_id":"e26b6d30-121c-479c-b094-7b02e166447c","_rev":"2","assignments":{"ldap":{"attributes":[{"name":"ldapGroups","value":["cn=Contractors,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}],"linkQualifiers":["agent"]}}}
 
 Notice the `linkQualifiers` element in the ldap assignment. This acts like
 a condition on the assignment of the _Contractors_ group. If the sync or recon
@@ -466,7 +466,7 @@ will be effective.
                    "operation" : "add",
                    "field" : "/assignments",
                    "value" : {
-                     "ldap-insured": {
+                     "ldap": {
                        "attributes": [
                          {
                            "name": "ldapGroups",
@@ -483,7 +483,7 @@ will be effective.
                }]' \
                https://localhost:8443/openidm/managed/role/2d11b41b-d77d-4cac-b6c2-9049c635d930
 
-     {"properties":{"name":"Insured","description":"Role assigned to insured customers."},"_id":"2d11b41b-d77d-4cac-b6c2-9049c635d930","_rev":"2","assignments":{"ldap-insured":{"attributes":[{"name":"ldapGroups","value":["cn=Chat Users,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}],"linkQualifiers":["insured"]}}}
+     {"properties":{"name":"Insured","description":"Role assigned to insured customers."},"_id":"2d11b41b-d77d-4cac-b6c2-9049c635d930","_rev":"2","assignments":{"ldap":{"attributes":[{"name":"ldapGroups","value":["cn=Chat Users,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}],"linkQualifiers":["insured"]}}}
         
         
 While the assignment now shows up in jdoe's and bjensen's entry, with the link
@@ -495,7 +495,7 @@ will add the following element as part of the `managedUser_systemLdapAccounts`
 mapping :
 
         "assignmentsToMap" : [
-           "ldap-agent","ldap-insured"
+           "ldap"
         ]
 
 You can now launch a reconciliation for this mapping :

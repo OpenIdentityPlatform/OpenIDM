@@ -120,19 +120,41 @@ function areAttributesEqual(attr1, attr2) {
     return JSON.stringify(attr1) === JSON.stringify(attr2);
 }
 
+/**
+ * Compares two assignments and returns true if their "name" and "assignedThrough" values are equal, otherwise returns false;
+ */
+function doAssignmentsMatch(assignment1, assignment2) {
+    return assignment1.name === assignment2.name 
+        && assignment1.assignedThrough === assignment2.assignedThrough;
+}
+
+/**
+ * Searches the given list for an assignment matching the given assignment.  
+ * Returns the found assignment or null if no matching assignment is found.
+ */
+function findAssignment(assignment, listOfAssignments) {
+    for (var i = 0; i < listOfAssignments.length; i++) {
+        if (doAssignmentsMatch(assignment, listOfAssignments[i])) {
+            return listOfAssignments[i];
+        }
+    }
+    return null;
+}
+
 // Check for any assignments that have been removed or modified
 if (typeof oldSource !== 'undefined' && oldSource !== null) {
     var oldAssignments = oldSource.effectiveAssignments; // Assignments from the old source value
     var currentAssignments = source.effectiveAssignments; // Assignments from the current source value
     var unassigned = [];
     // Loop through old assignments
-    for (var key in oldAssignments) {
-        // Check that this key is relevant to this mapping
-        if (assignments.indexOf(key) > -1) {
+    for (var x = 0; x < oldAssignments.length; x++) {
+        oldAssignment = oldAssignments[x];
+        // Check that this assignment is relevant to this mapping
+        if (assignments.indexOf(oldAssignment.name) > -1) {
             var assignmentRemoved = false;
-            var oldAssignment = oldAssignments[key];
-            // Check if this old assignment is in the currentAssignments
-            if (!currentAssignments.hasOwnProperty(key)) {
+            // Get the Current assignment, may be null if it has been removed/unassigned
+            var currentAssignment = findAssignment(oldAssignment, currentAssignments);
+            if (currentAssignment === null) {
                 // This assignment has been unassigned
                 var onUnassignment = oldAssignment.onUnassignment;
                 // Check if an onUnassignment script is configured
@@ -142,8 +164,6 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
                 }
                 assignmentRemoved = true;
             }
-            // Get the Current assignment, may be null if it has been removed
-            var currentAssignment = currentAssignments[key];
             // Get the Old assignment's attributes
             var oldAttributes = oldAssignment.attributes;
             // Loop through old attributes and execute the unassignmentOperation on any that were removed or updated
@@ -151,7 +171,7 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
                 var oldAttribute = oldAttributes[i];
                 var removedOrUpdated = true;
                 // If the assignment has not been removed, then we need to check if the attribute has been removed or updated.
-                if (!assignmentRemoved) {
+                if (!assignmentRemoved && currentAssignment !== null) {
                     var currentAttributes = currentAssignment.attributes;
                     // Loop through attributes to check if they have been removed/updated
                     for (var j = 0; j < currentAttributes.length; j++) {
@@ -195,9 +215,10 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
 if (assignments != null) {
     var effectiveAssignments = source.effectiveAssignments;
     if (effectiveAssignments != null) {
-        for (var key in effectiveAssignments) {
-            if (assignments.indexOf(key) != -1) {
-                var assignment = effectiveAssignments[key];
+        for (var x = 0; x < effectiveAssignments.length; x++) {
+            assignment = effectiveAssignments[x];
+            // Check that this assignment is relevant to this mapping
+            if (assignments.indexOf(assignment.name) !== -1) {
                 var attributes = assignment.attributes;
                 var onAssignment = assignment.onAssignment;
                 var linkQualifiers = assignment.linkQualifiers;
