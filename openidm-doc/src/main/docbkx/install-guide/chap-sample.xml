@@ -63,20 +63,21 @@
   with OpenIDM. OrientDB is not yet supported for production use, however,
   so use a supported JDBC database when moving to production.</para>
 
-  <para>If you want to query the internal noSQL database, you can download 
-  OrientDB (version <?eval ${orientdbVersion}?>) from <link 
-  xlink:href="http://www.orientechnologies.com/download/" />.
-  You will find the shell console in the <filename>bin</filename> directory. 
-  Start OrientDB console using either <command>console.sh</command> or 
-  <command>console.bat</command>, and then connect to the running OpenIDM with 
-  the <command>connect</command> command.</para>
+  <para>
+   To query the internal noSQL database, download and extract <link xlink:show="new"
+  xlink:href="https://search.maven.org/remotecontent?filepath=com/orientechnologies/orientdb-community/1.7.10/orientdb-community-1.7.10-distribution.zip">OrientDB
+  (version ${orientdbVersion})</link>. You will find the shell console in the
+   <filename>bin</filename> directory. Start OrientDB console, using
+   <command>console.sh</command> or <command>console.bat</command>, and connect
+   to the running OpenIDM instance, with the <command>connect</command> command.
+  </para>
 
-  <screen>$ cd /path/to/orientdb-community-<?eval ${orientdbVersion}?>/bin
+  <screen>$ cd /path/to/orientdb-community-${orientdbVersion}/bin
 $ ./console.sh
-OrientDB console v.<?eval ${orientdbVersion}?> (build @BUILD@) www.orientechnologies.com
+OrientDB console v.${orientdbVersion} (build @BUILD@) www.orientechnologies.com
 Type 'help' to display all the commands supported.
 
-Installing extensions for GREMLIN language v.2.5.0-SNAPSHOT
+Installing extensions for GREMLIN language v.2.5.0
 
 orientdb&gt; connect remote:localhost/openidm admin admin
 Connecting to database [remote:localhost/openidm] with user 'admin'...OK
