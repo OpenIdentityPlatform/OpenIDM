@@ -339,7 +339,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --request GET
+ --request GET \
  'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"Smith"'</userinput></screen>
    <para>
     Note the use of double-quotes around the search term:
