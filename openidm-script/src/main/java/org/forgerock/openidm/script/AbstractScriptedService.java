@@ -220,7 +220,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     // ----- Implementation of ScriptListener interface
 
-    public void scriptChanged(ScriptEvent event) {
+    public void scriptChanged(ScriptEvent event) throws ScriptException {
         if (ScriptEvent.REGISTERED == event.getType()) {
             if (null == selfRegistration) {
                 synchronized (selfRegistration) {
