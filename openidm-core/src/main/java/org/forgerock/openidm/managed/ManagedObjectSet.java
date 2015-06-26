@@ -941,7 +941,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     // -------- Implements the ScriptListener
 
     @Override
-    public void scriptChanged(ScriptEvent event) {
+    public void scriptChanged(ScriptEvent event) throws ScriptException {
         switch (event.getType()) {
         case ScriptEvent.UNREGISTERING:
             logger.error("Script {} became unavailable", event.getScriptLibraryEntry().getName());
