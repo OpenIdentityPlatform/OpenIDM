@@ -22,17 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define, $, _, Handlebars, form2js, JSON */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate"
-], function(AbstractView,
-            MappingBaseView,
+], function(MappingAdminAbstractView,
             searchDelegate) {
 
-    var RoleEntitlementsView = AbstractView.extend({
+    var RoleEntitlementsView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/RoleEntitlementsTemplate.html",
         element: "#mappingRoleEntitlements",
         noBaseTemplate: true,
@@ -41,8 +39,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView",
         data: {},
 
         render: function (args, callback) {
-            this.model.mappingName = args;
-            this.model.mapping = MappingBaseView.currentMapping();
+            this.model.mappingName = this.getMappingName();
+            this.model.mapping = this.getCurrentMapping();
 
             this.data.assignmentsToMap = _.sortBy(this.model.mapping.assignmentsToMap) || [];
 
@@ -58,30 +56,31 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView",
                 }, this));
             }, this));
         },
+
         getRolesForAssignmentsToMap: function() {
             var assignmentsArray = _.map(this.data.assignmentsToMap, function(assignmentName) {
-                    var rolesForAssignment = searchDelegate.searchResults("managed/role",["/assignments/" + assignmentName],null,"pr");
-                    
-                    return rolesForAssignment.then(function(roles) {
-                        return {
-                            assignment: assignmentName,
-                            roles: _.map(roles,function(role){
-                                            return {
-                                                roleId: role._id,
-                                                roleName: role.properties.name,
-                                                linkQualifiers: (role.assignments[assignmentName].linkQualifiers) ? '"' + role.assignments[assignmentName].linkQualifiers.join('", "') + '"' : false,
-                                                attributes: _.map(role.assignments[assignmentName].attributes, function(attr) {
-                                                    attr.value = JSON.stringify(attr.value, null, 2);
-                                                    return attr;
-                                                })
-                                            };
-                                        })
-                        };
-                    });
-                }, this);
-            
+                var rolesForAssignment = searchDelegate.searchResults("managed/role",["/assignments/" + assignmentName],null,"pr");
+
+                return rolesForAssignment.then(function(roles) {
+                    return {
+                        assignment: assignmentName,
+                        roles: _.map(roles,function(role){
+                            return {
+                                roleId: role._id,
+                                roleName: role.properties.name,
+                                linkQualifiers: (role.assignments[assignmentName].linkQualifiers) ? '"' + role.assignments[assignmentName].linkQualifiers.join('", "') + '"' : false,
+                                attributes: _.map(role.assignments[assignmentName].attributes, function(attr) {
+                                    attr.value = JSON.stringify(attr.value, null, 2);
+                                    return attr;
+                                })
+                            };
+                        })
+                    };
+                });
+            }, this);
+
             return $.when.apply($, assignmentsArray).then(function() {
-               return _.toArray(arguments);
+                return _.toArray(arguments);
             });
         }
     });

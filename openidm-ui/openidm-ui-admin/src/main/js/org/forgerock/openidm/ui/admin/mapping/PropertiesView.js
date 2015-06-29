@@ -50,9 +50,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             MappingBaseView.child = this;
 
             MappingBaseView.render(args, _.bind(function(){
-                var mapping = this.getCurrentMapping();
-
-                if (mapping.linkQualifiers) {
+                if (this.getCurrentMapping().linkQualifiers) {
                     this.data.hasLinkQualifiers = true;
                 } else {
                     this.data.hasLinkQualifiers = false;
@@ -60,21 +58,20 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
                 this.parentRender(_.bind(function () {
 
-                    LinkQualifiersView.render(mapping.name);
+                    LinkQualifiersView.render();
+
                     AttributesGridView.render({}, _.bind(function() {
                         if (callback) {
                             callback();
                         }
                     }, this));
-                    RoleEntitlementsView.render(mapping.name);
+
+                    RoleEntitlementsView.render();
 
                     MappingBaseView.moveSubmenu();
-
-
                 }, this));
 
             }, this));
-
 
         }
     });

@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,30 +25,30 @@
 /*global define, $, _, Handlebars, form2js */
 
 define("org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptList"
-], function(AdminAbstractView,
+], function(MappingAdminAbstractView,
             eventManager,
             constants,
-            ConfigDelegate,
             InlineScriptEditor,
-            BrowserStorageDelegate,
             ScriptList) {
-    var MappingScriptsView = AdminAbstractView.extend({
+
+    var MappingScriptsView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/util/MappingScriptsTemplate.html",
 
         init: function() {
-            var addedEvents = _.keys(_.pick(this.model.mapping,this.model.scripts)),
-                eventName,
-                defaultScript;
-
             this.model.availableScripts = _.clone(this.model.scripts);
             this.model.scriptEditors = [];
+            this.model.sync = this.getSyncConfig();
+            this.model.mapping = this.getCurrentMapping();
+            this.model.mappingName = this.getMappingName();
+
+            var addedEvents = _.keys(_.pick(this.model.mapping, this.model.scripts)),
+                eventName,
+                defaultScript;
 
             if (this.model.scripts.length > 1) {
 
@@ -86,7 +86,6 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView", [
                     "scriptData": defaultScript,
                     "hasWorkflow": true
                 });
-
             }
         },
 
@@ -106,11 +105,12 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView", [
                     }
                 },this);
 
-            if(this.model.singleScript){
+            if (this.model.singleScript) {
                 tmpEditor = this.model.scriptEditors.result;
                 scriptHook = tmpEditor.generateScript();
                 eventName = tmpEditor.model.eventName;
                 addRemoveFromMapping();
+
             } else {
                 currentScripts = this.model.scriptList.getScripts();
                 scriptsToDelete = _.difference(this.model.availableScripts, _.keys(currentScripts));
@@ -125,17 +125,8 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView", [
                 }, this);
             }
 
-            // Update the sync object
-            _.each(this.model.sync.mappings, function(map, key) {
-                if (map.name === this.model.mappingName) {
-                    this.model.sync.mappings[key] = this.model.mapping;
-                }
-            }, this);
-
-            // Save the Sync object
-            ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
+            this.AbstractMappingSave(this.model.mapping, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.successMessage);
-                BrowserStorageDelegate.set("currentMapping", _.extend(this.model.mapping, this.model.recon));
             }, this));
         }
     });

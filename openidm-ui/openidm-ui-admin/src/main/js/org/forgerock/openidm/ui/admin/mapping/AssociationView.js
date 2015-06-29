@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,26 +25,20 @@
 /*global define, $, _ */
 
 define("org/forgerock/openidm/ui/admin/mapping/AssociationView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManagementView",
     "org/forgerock/openidm/ui/admin/mapping/association/IndividualRecordValidationView",
     "org/forgerock/openidm/ui/admin/mapping/association/ReconciliationQueryFiltersView",
     "org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView"
-], function(AdminAbstractView,
-            eventManager,
-            constants,
-            ConfigDelegate,
+], function(MappingAdminAbstractView,
             MappingBaseView,
-            AnalysisView,
+            DataAssociationManagementView,
             IndividualRecordValidationView,
             ReconciliationQueryFiltersView,
-            CorrelationQueryView) {
+            AssociationRuleView) {
 
-    var AssociationView = AdminAbstractView.extend({
+    var AssociationView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/AssociationTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
@@ -52,42 +46,38 @@ define("org/forgerock/openidm/ui/admin/mapping/AssociationView", [
             "click .correlationBody fieldset legend" : "sectionHideShow"
         },
         data: {},
-        dataModel: {},
 
         render: function (args, callback) {
             MappingBaseView.child = this;
             MappingBaseView.render(args,_.bind(function(){
-                this.loadData(args, callback);
-            }, this));
-        },
+                var mapping = this.getCurrentMapping();
 
-        loadData: function(args, callback){
-            this.dataModel.sync = MappingBaseView.data.syncConfig;
-            this.dataModel.mapping = _.omit(MappingBaseView.currentMapping(),"recon");
-            this.dataModel.mappingName = this.mappingName = args[0];
-
-            this.data.hideObjectFilters = true;
-            _.each(IndividualRecordValidationView.model.scripts, function(script) {
-                if (_.has(IndividualRecordValidationView.model, "mapping")) {
-                    if (_.has(IndividualRecordValidationView.model.mapping, script)) {
+                this.data.hideObjectFilters = true;
+                _.each(IndividualRecordValidationView.model.scripts, function(script) {
+                    if (_.has(IndividualRecordValidationView.model, "mapping")) {
+                        if (_.has(IndividualRecordValidationView.model.mapping, script)) {
+                            this.data.hideObjectFilters = false;
+                        }
+                    } else if (_.has(mapping, script)) {
                         this.data.hideObjectFilters = false;
                     }
-                } else if (_.has(this.dataModel.mapping, script)) {
-                    this.data.hideObjectFilters = false;
-                }
-            }, this);
+                }, this);
 
-            this.data.hideReconQueries = !this.dataModel.mapping.sourceQuery && !this.dataModel.mapping.targetQuery;
+                this.data.hideReconQueries = !mapping.sourceQuery && !mapping.targetQuery;
 
-            this.parentRender(_.bind(function () {
-                AnalysisView.render(this.dataModel);
-                IndividualRecordValidationView.render(this.dataModel);
-                CorrelationQueryView.render(_.extend({startSync: this.sync}, this.dataModel));
-                ReconciliationQueryFiltersView.render(this.dataModel);
-                MappingBaseView.moveSubmenu();
-                if(callback){
-                    callback();
-                }
+                this.parentRender(_.bind(function () {
+                    DataAssociationManagementView.render();
+                    ReconciliationQueryFiltersView.render();
+                    IndividualRecordValidationView.render();
+                    AssociationRuleView.render({startSync: this.sync});
+
+                    MappingBaseView.moveSubmenu();
+
+                    if (callback) {
+                        callback();
+                    }
+                }, this));
+
             }, this));
         },
 

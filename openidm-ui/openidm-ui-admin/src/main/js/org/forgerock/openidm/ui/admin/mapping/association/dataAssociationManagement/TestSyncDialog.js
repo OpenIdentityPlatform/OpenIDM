@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,23 +25,32 @@
 /*global define, $, _, Handlebars, window*/
 
 define("org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/TestSyncDialog", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/admin/mapping/behaviors/SingleRecordReconciliationGridView",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "bootstrap-dialog"
-], function (AbstractView, searchDelegate, conf, SingleRecordReconciliationGridView, uiUtils, BootstrapDialog) {
-    var TestSyncDialog = AbstractView.extend({
+], function (MappingAdminAbstractView,
+             searchDelegate,
+             conf,
+             SingleRecordReconciliationGridView,
+             uiUtils,
+             BootstrapDialog) {
+
+    var TestSyncDialog = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/association/dataAssociationManagement/TestSyncDialogTemplate.html",
         data: {},
         element: "#dialogs",
         events: {},
-        render: function (args, callback) {
-            var btns = [],
-                _this = this;
 
-            this.data = _.extend(this.data,args);
+        render: function (args, callback) {
+            var _this = this;
+
+            this.data.recon = args.recon;
+            this.data.sync = this.getSyncConfig();
+            this.data.mapping = this.getCurrentMapping();
+            this.data.mappingName = this.getMappingName();
 
             this.dialogContent = $('<div id="testSyncDialog"></div>');
             this.setElement(this.dialogContent);
@@ -58,7 +67,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManage
                         this.$el,
                         _.extend({}, conf.globalData, this.data),
                         _.bind(function() {
-                            SingleRecordReconciliationGridView.render(this.data);
+                            SingleRecordReconciliationGridView.render(args);
                         }, this),
                         "replace"
                     );

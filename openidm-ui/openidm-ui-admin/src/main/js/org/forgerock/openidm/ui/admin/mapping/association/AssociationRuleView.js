@@ -25,28 +25,24 @@
 /*global define, $, _, Handlebars */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/CorrelationQueryDialog",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/SaveChangesView",
     "bootstrap-dialog",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
-], function(AdminAbstractView,
+], function(MappingAdminAbstractView,
             eventManager,
             constants,
-            ConfigDelegate,
             CorrelationQueryDialog,
-            BrowserStorageDelegate,
             SaveChangesView,
             BootstrapDialog,
             LinkQualifierUtils,
             InlineScriptEditor) {
 
-    var AssociationRuleView = AdminAbstractView.extend({
+    var AssociationRuleView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/association/AssociationRuleTemplate.html",
         element: "#correlationQueryView",
         noBaseTemplate: true,
@@ -69,21 +65,23 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
         },
 
         render: function(args) {
-            this.model.sync = args.sync;
-            this.model.mapping = args.mapping;
-            this.model.mappingName = args.mappingName;
+            this.model.sync = this.getSyncConfig();
+            this.model.mapping = this.getCurrentMapping();
+            this.model.mappingName = this.getMappingName();
+
             this.model.startSync = args.startSync;
+
             this.model.changes = args.changes || [];
             this.model.linkQualifiers = LinkQualifierUtils.getLinkQualifier(this.model.mappingName) || ["default"];
-            this.model.addedLinkQualifiers = _.union(_.pluck(args.mapping.correlationQuery, "linkQualifier"), _.pluck(this.model.changes, "linkQualifier"));
+            this.model.addedLinkQualifiers = _.union(_.pluck(this.model.mapping.correlationQuery, "linkQualifier"), _.pluck(this.model.changes, "linkQualifier"));
 
             // Legacy Support
             if(_.has(this.model.mapping, "correlationQuery") && !_.isArray(this.model.mapping.correlationQuery)) {
                 args.mapping.correlationQuery.linkQualifier = "default";
-                args.mapping.correlationQuery = [args.mapping.correlationQuery];
+                args.mapping.correlationQuery = [this.model.mapping.correlationQuery];
             }
 
-            this.data.correlationQueries = _.clone(args.mapping.correlationQuery, true);
+            this.data.correlationQueries = _.clone(this.model.mapping.correlationQuery, true);
 
             if (_.difference(this.model.linkQualifiers, this.model.addedLinkQualifiers).length === 0) {
                 this.data.noLinkQualifiers = true;
@@ -126,14 +124,14 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
             this.parentRender(function () {
                 var scriptData = "";
 
-                if((_.has(this.model.mapping, "correlationQuery") && this.model.mapping.correlationQuery.length > 0) || this.model.changes.length > 0) {
+                if ((_.has(this.model.mapping, "correlationQuery") && this.model.mapping.correlationQuery.length > 0) || this.model.changes.length > 0) {
                     this.$el.find(".correlationQueryType").val("queries");
 
                     if(this.model.mapping.correlationQuery === undefined) {
                         this.model.mapping.correlationQuery = [];
                     }
 
-                } else if(_.has(this.model.mapping, "correlationScript")) {
+                } else if (_.has(this.model.mapping, "correlationScript")) {
                     scriptData = this.model.mapping.correlationScript;
                     this.$el.find(".correlationQueryType").val("script");
                 } else {
@@ -189,9 +187,6 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
 
         reload: function() {
             this.render({
-                sync: this.model.sync,
-                mapping: this.model.mapping,
-                mappingName: this.model.mappingName,
                 startSync: this.model.startSync,
                 changes: this.model.changes
             });
@@ -304,41 +299,32 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
                 }, this);
 
             }
-            _.each(this.model.sync.mappings, function(map, key) {
-                if ($(".correlationQueryType").val() === "queries" && map.name === this.model.mappingName) {
-                    this.model.sync.mappings[key].correlationQuery = this.model.mapping.correlationQuery;
-                } else if ($(".correlationQueryType").val() === "none" && map.name === this.model.mappingName){
-                    if(_.has(this.model.sync.mappings[key], "correlationScript")) {
-                        delete this.model.sync.mappings[key].correlationQuery;
-                    }
 
-                    if(_.has(this.model.sync.mappings[key], "correlationScript")) {
-                        delete this.model.sync.mappings[key].correlationScript;
-                    }
-
-                } else if($(".correlationQueryType").val() === "script" && map.name === this.model.mappingName) {
-                    scriptDetails = this.correlationScript.generateScript();
-
-                    if(_.has(this.model.sync.mappings[key], "correlationQuery")) {
-                        delete this.model.sync.mappings[key].correlationQuery;
-                    }
-
-                    if(scriptDetails !== null) {
-                        this.model.sync.mappings[key].correlationScript = this.correlationScript.generateScript();
-                    } else if (this.model.sync.mappings[key].correlationScript !== undefined) {
-                        delete this.model.sync.mappings[key].correlationScript;
-                    }
+            if (this.$el.find(".correlationQueryType").val() === "none") {
+                if (_.has(this.model.mapping, "correlationQuery")) {
+                    delete this.model.mapping.correlationQuery;
                 }
 
-                if (map.name === this.model.mappingName) {
-                    this.model.mapping = this.model.sync.mappings[key];
+                if (_.has(this.model.mapping, "correlationScript")) {
+                    delete this.model.mapping.correlationScript;
                 }
 
-            }, this);
+            } else if($(".correlationQueryType").val() === "script") {
+                scriptDetails = this.correlationScript.generateScript();
 
-            ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
+                if (_.has(this.model.mapping, "correlationQuery")) {
+                    delete this.model.mapping.correlationQuery;
+                }
+
+                if (scriptDetails !== null) {
+                    this.model.mapping.correlationScript = this.correlationScript.generateScript();
+                } else if (this.model.mapping.correlationScript !== undefined) {
+                    delete this.model.mapping.correlationScript;
+                }
+            }
+
+            this.AbstractMappingSave(this.model.mapping, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "correlationQuerySaveSuccess");
-                BrowserStorageDelegate.set("currentMapping", _.extend(this.model.mapping, this.model.recon));
 
                 this.model.changes = [];
 

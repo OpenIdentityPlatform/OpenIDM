@@ -4,11 +4,12 @@
  * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define, $, _, Handlebars, form2js, window, JSON */
 /*jslint evil: true */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -16,13 +17,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor",
     "bootstrap-dialog",
     "bootstrap-tabdrop"
-], function(AbstractView,
+], function(MappingAdminAbstractView,
+            AttributesGridView,
             syncDelegate,
             validatorsManager,
             conf,
@@ -30,14 +31,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             eventManager,
             constants,
             spinner,
-            browserStorageDelegate,
             autoCompleteUtils,
             inlineScriptEditor,
             LinkQualifierFilterEditor,
             BootstrapDialog,
             tabdrop) {
 
-    var EditPropertyMappingDialog = AbstractView.extend({
+    var EditPropertyMappingDialog = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/EditPropertyMappingDialogTemplate.html",
         el: "#dialogs",
         events: {
@@ -47,6 +47,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             "onValidate": "onValidate",
             "change .conditionalUpdateType": "conditionalUpdateType"
         },
+
         updateProperty: function (e) {
             if ($(e.target).val().length || _.has(this.data.property, "source")) {
                 this.data.property.source = $(e.target).val();
@@ -78,14 +79,15 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
                 this.currentDialog.find(".conditionalFilter").show();
                 this.currentDialog.find(".conditionalScript").hide();
+
             } else if (type === "script") {
                 this.currentDialog.find(".conditionalFilter").hide();
                 this.currentDialog.find(".conditionalScript").show();
+
             } else if (type === "none") {
                 this.currentDialog.find(".conditionalFilter").hide();
                 this.currentDialog.find(".conditionalScript").hide();
             }
-
         },
 
         validateMapping: function () {
@@ -120,19 +122,19 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
         },
 
         formSubmit: function(event) {
-            if(event){
+            if (event) {
                 event.preventDefault();
             }
 
             var formContent = form2js(this.el),
-                mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties"),
+                mappingProperties = AttributesGridView.model.mappingProperties,
                 target = this.property,
                 propertyObj = mappingProperties[target - 1];
 
             // in the case when our property isn't currently found in the sync config...
             if (!propertyObj) {
                 propertyObj = {"target": this.property};
-                _.find(browserStorageDelegate.get("currentMapping"), function (o) { return o.name === this.data.mappingName; })
+                _.find(this.getCurrentMapping(), function (o) { return o.name === this.data.mappingName; })
                     .properties
                     .push(propertyObj);
             }
@@ -172,8 +174,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             if (_.has(formContent, "default")) {
                 if($('#default_desc', this.currentDialog).text().length > 0){
                     propertyObj["default"] = $('#default_desc', this.currentDialog).text();
-                }
-                else{
+                } else{
                     propertyObj["default"] = formContent["default"];
                 }
 
@@ -181,7 +182,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 delete propertyObj["default"];
             }
 
-            browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
+            AttributesGridView.model.propertyMapping = mappingProperties;
 
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
         },
@@ -193,8 +194,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
         render: function(params, callback) {
             var _this = this,
                 currentProperties,
-                settings,
-                syncConfig;
+                settings;
 
             this.data.mappingName = params[0];
             this.property = params[1];
@@ -202,15 +202,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             this.conditional_script_editor = undefined;
             this.conditionFilterEditor = null;
 
-            currentProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
+            this.data.currentProperties = currentProperties = AttributesGridView.model.mappingProperties || this.getCurrentMapping().properties;
 
-            this.data.currentProperties = currentProperties;
-
-            browserStorageDelegate.set(this.data.mappingName + "_Properties",currentProperties);
+            AttributesGridView.model.mappingProperties = currentProperties;
 
             this.data.property = currentProperties[this.property - 1];
 
-            if(conf.globalData.sampleSource && _.isUndefined(this.data.property.source)) {
+            if (conf.globalData.sampleSource && _.isUndefined(this.data.property.source)) {
                 this.data.sampleSourceTooltip = JSON.stringify(conf.globalData.sampleSource, null, 2);
             } else {
                 this.data.sampleSourceTooltip = null;
@@ -222,87 +220,77 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 "postRender": _.bind(this.loadData, this)
             };
 
-            syncConfig = syncDelegate.mappingDetails(this.data.mappingName);
+            this.data.currentMappingDetails = this.getCurrentMapping();
 
-            syncConfig.then(_.bind(function(details){
+            this.currentDialog = $('<form id="propertyMappingDialogForm"></form>');
 
-                this.data.currentMappingDetails = _.find(details.mappings, function(map) {
-                    return map.name === this.data.mappingName;
-                }, this);
+            $('#dialogs').append(this.currentDialog);
+            this.setElement(this.currentDialog);
 
-                this.currentDialog = $('<form id="propertyMappingDialogForm"></form>');
+            BootstrapDialog.show({
+                title: settings.title,
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: this.currentDialog,
+                size: BootstrapDialog.SIZE_WIDE,
+                onhide: function(dialogRef){
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
+                },
+                onshown : function (dialogRef) {
+                    uiUtils.renderTemplate(settings.template, _this.currentDialog,
+                        _.extend(conf.globalData, _this.data),
+                        function () {
+                            settings.postRender();
+                            _this.currentDialog.find(".nav-tabs").tabdrop();
 
-                $('#dialogs').append(this.currentDialog);
-                this.setElement(this.currentDialog);
-
-                BootstrapDialog.show({
-                    title: settings.title,
-                    type: BootstrapDialog.TYPE_DEFAULT,
-                    message: this.currentDialog,
-                    size: BootstrapDialog.SIZE_WIDE,
-                    onhide: function(dialogRef){
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
-                    },
-                    onshown : function (dialogRef) {
-                        uiUtils.renderTemplate(settings.template, _this.currentDialog,
-                            _.extend(conf.globalData, _this.data),
-                            function () {
-                                settings.postRender();
-                                _this.currentDialog.find(".nav-tabs").tabdrop();
-
-                                _this.currentDialog.find(".nav-tabs").on("shown.bs.tab", function (e) {
-                                    if($(e.target).attr("href") === "#Transformation_Script"){
-                                        _this.transform_script_editor.refresh();
-                                    } else if ($(e.target).attr("href") === "#Condition_Script") {
-                                        _this.conditional_script_editor.refresh();
-                                    }
-                                });
-
-                                if(callback){
-                                    callback();
+                            _this.currentDialog.find(".nav-tabs").on("shown.bs.tab", function (e) {
+                                if($(e.target).attr("href") === "#Transformation_Script"){
+                                    _this.transform_script_editor.refresh();
+                                } else if ($(e.target).attr("href") === "#Condition_Script") {
+                                    _this.conditional_script_editor.refresh();
                                 }
+                            });
 
-                                _this.$el.find(".details-tooltip").popover({
-                                    content: function () { return $(this).find(".tooltip-details").clone().show();},
-                                    trigger:'hover',
-                                    placement:'right',
-                                    container: 'body',
-                                    html: 'true',
-                                    template: '<div class="popover popover-info popover-large" role="tooltip"><div class="popover-header">Raw Source Data:</div><div class="popover-content"></div></div>'
-                                });
-                            }, "replace");
-                    },
-                    buttons: [{
-                        label: $.t("common.form.cancel"),
-                        id:"scriptDialogCancel",
-                        action: function(dialogRef) {
+                            if(callback){
+                                callback();
+                            }
+
+                            _this.$el.find(".details-tooltip").popover({
+                                content: function () { return $(this).find(".tooltip-details").clone().show();},
+                                trigger:'hover',
+                                placement:'right',
+                                container: 'body',
+                                html: 'true',
+                                template: '<div class="popover popover-info popover-large" role="tooltip"><div class="popover-header">Raw Source Data:</div><div class="popover-content"></div></div>'
+                            });
+                        }, "replace");
+                },
+                buttons: [{
+                    label: $.t("common.form.cancel"),
+                    id:"scriptDialogCancel",
+                    action: function(dialogRef) {
+                        dialogRef.close();
+                    }
+                },
+                    {
+                        label: $.t("common.form.update"),
+                        id:"scriptDialogUpdate",
+                        cssClass: 'btn-primary',
+                        action: _.bind(function(dialogRef) {
+                            this.formSubmit();
                             dialogRef.close();
-                        }
-                    },
-                        {
-                            label: $.t("common.form.update"),
-                            id:"scriptDialogUpdate",
-                            cssClass: 'btn-primary',
-                            action: _.bind(function(dialogRef) {
-                                this.formSubmit();
-                                dialogRef.close();
-                            },_this)
-                        }]
-                });
-            }, this));
+                        },_this)
+                    }]
+            });
         },
 
         loadData: function() {
-            var selectedTab = 0,
-                _this = this,
+            var _this = this,
                 prop = this.data.property;
 
-            this.data.availableSourceProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
+            this.data.availableSourceProps = AttributesGridView.model.availableObjects.source.properties || [];
 
             if (prop) {
-                if (typeof(prop.source) !== "undefined" && prop.source.length) {
-                    selectedTab = 0;
-                } else if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&
+                if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&
                     typeof (prop.transform.source) === "string") {
                     this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
                         "element": this.currentDialog.find("#transformationScriptHolder"),
@@ -310,12 +298,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                         "noValidation": true,
                         "scriptData": prop.transform,
                         "disablePassedVariable": false,
-                        "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
+                        "placeHolder": "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
                     });
-
-                    selectedTab = 1;
-                } else if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
-                    selectedTab = 3;
                 }
 
                 if (_.has(prop, "condition")) {
@@ -363,7 +347,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
             $('#mappingDialogTabs .active :input:first', this.currentDialog).focus();
 
-            if(this.data.availableSourceProps){
+            if (this.data.availableSourceProps) {
                 autoCompleteUtils.selectionSetup($("input[name='source']:last", this.currentDialog), _.sortBy(this.data.availableSourceProps,function(s){ return s; }));
             }
 

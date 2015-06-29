@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -40,18 +40,7 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/SituationalEventScripts
             successMessage: "triggeredBySituationSaveSuccess"
         },
 
-        /***
-         * @param args {object}
-         *      sync {object}
-         *      mapping {object}
-         *      mappingName {string}
-         *
-         */
-        render: function(args) {
-            this.model.sync = args.sync;
-            this.model.mapping = args.mapping;
-            this.model.mappingName = args.mappingName;
-
+        render: function() {
             this.parentRender(function () {
                 this.init();
             });
