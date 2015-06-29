@@ -30,7 +30,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.util.promise.Function;
+import org.forgerock.util.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
