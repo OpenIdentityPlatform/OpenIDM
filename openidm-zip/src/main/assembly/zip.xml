@@ -33,7 +33,7 @@
             <directory>${project.build.directory}/bar-files</directory>
             <outputDirectory>/openidm</outputDirectory>
         </fileSet>
-        
+
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
@@ -47,8 +47,8 @@
                 <exclude>${exclude.google.provisioner}</exclude>
                 <exclude>${exclude.salesforce.provisioner}</exclude>
 
-                <!-- 
-                    These particular workflow files are instead bundled as .bar files; 
+                <!--
+                    These particular workflow files are instead bundled as .bar files;
                     as raw files they are excluded. See zip-workflow-files in openidm-zip/pom.xml
                  -->
                 <exclude>**/usecase/workflow/certificationRoles*</exclude>
@@ -377,7 +377,7 @@
                 <include>provisioner.openicf-ldap.json</include>
             </includes>
             <outputDirectory>/openidm/samples/sample6/conf</outputDirectory>
-        </fileSet>        
+        </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -1019,7 +1019,7 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/ui/default/enduser</outputDirectory>
+            <outputDirectory>/openidm/ui/default/selfservice</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-enduser</include>
             </includes>
