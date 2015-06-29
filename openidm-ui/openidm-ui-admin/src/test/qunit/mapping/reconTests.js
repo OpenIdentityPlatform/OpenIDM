@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,73 +22,66 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, QUnit, $ */
+/*global require, define, QUnit, $, module */
 
 define([
     "sinon",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function (sinon, eventManager, SituationPolicyView, ConfigDelegate) {
+    "org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView"
+], function (sinon, eventManager, PoliciesView) {
 
     $("body").append("<div id='policyPattern'></div>");
 
     return {
         executeAll: function (server) {
-            // These three constants come from MappingBaseView and are the arguments passed into the SituationPolicyView render function.
-            // Should those arguments change than these need to be updated.
-            var sync = [{"target":"managed/user","properties":[{"target":"displayName","source":"cn"},{"target":"description","source":"description"},{"target":"givenName","source":"givenName"},{"target":"mail","source":"mail"},{"target":"telephoneNumber","source":"telephoneNumber"},{"target":"sn","source":"sn"},{"target":"userName","source":"uid"}],"source":"system/ldap/account","policies":[{"action":"UPDATE","situation":"CONFIRMED"},{"action":"UPDATE","situation":"FOUND"},{"action":"CREATE","situation":"ABSENT"},{"action":"EXCEPTION","situation":"AMBIGUOUS"},{"action":"CREATE","situation":"MISSING"},{"action":"DELETE","situation":"SOURCE_MISSING"},{"action":"IGNORE","situation":"UNQUALIFIED"},{"action":"IGNORE","situation":"UNASSIGNED"}],"name":"systemLdapAccounts_managedUser"},{"target":"system/ldap/account","links":"systemLdapAccounts_managedUser","properties":[{"target":"givenName","source":"givenName"},{"target":"sn","source":"sn"},{"target":"cn","source":"","transform":{"type":"text/javascript","source":"source.displayName || (source.givenName + ' ' + source.sn);"}},{"target":"uid","source":"userName"},{"target":"description","source":"description","condition":{"type":"text/javascript","source":"!!object.description"}},{"target":"mail","source":"mail"},{"target":"userPassword","transform":{"type":"text/javascript","source":"openidm.decrypt(source);"},"source":"password","condition":{"type":"text/javascript","source":"object.password != null"}},{"target":"telephoneNumber","source":"telephoneNumber","condition":{"type":"text/javascript","source":"!!object.telephoneNumber"}}],"source":"managed/user","onCreate":{"type":"text/javascript","source":"target.dn = 'uid=' + source.userName + ',ou=People,dc=example,dc=com';"},"policies":[{"action":"UPDATE","situation":"CONFIRMED"},{"action":"LINK","situation":"FOUND"},{"action":"CREATE","situation":"ABSENT"},{"action":"IGNORE","situation":"AMBIGUOUS"},{"action":"IGNORE","situation":"MISSING"},{"action":"DELETE","situation":"SOURCE_MISSING"},{"action":"IGNORE","situation":"UNQUALIFIED"},{"action":"IGNORE","situation":"UNASSIGNED"}],"name":"managedUser_systemLdapAccounts"}],
-                mapping = {"target":"managed/user","properties":[{"target":"displayName","source":"cn"},{"target":"description","source":"description"},{"target":"givenName","source":"givenName"},{"target":"mail","source":"mail"},{"target":"telephoneNumber","source":"telephoneNumber"},{"target":"sn","source":"sn"},{"target":"userName","source":"uid"}],"source":"system/ldap/account","policies":[{"action":"UPDATE","situation":"CONFIRMED"},{"action":"UPDATE","situation":"FOUND"},{"action":"CREATE","situation":"ABSENT"},{"action":"EXCEPTION","situation":"AMBIGUOUS"},{"action":"CREATE","situation":"MISSING"},{"action":"DELETE","situation":"SOURCE_MISSING"},{"action":"IGNORE","situation":"UNQUALIFIED"},{"action":"IGNORE","situation":"UNASSIGNED"}],"name":"systemLdapAccounts_managedUser"},
-                mappingName = "systemLdapAccounts_managedUser";
-
             module("Admin Mapping tab, Recon sub-tab tests");
 
             QUnit.asyncTest("Situational Policy Renders", function () {
-                QUnit.equal(SituationPolicyView.$el.children().length, 0, "There are no children in the container before render.");
+                QUnit.equal(PoliciesView.$el.children().length, 0, "There are no children in the container before render.");
 
-                SituationPolicyView.render({sync: sync, mapping: mapping, mappingName: mappingName}, function() {
-                    QUnit.ok(SituationPolicyView.$el.children().length > 0, "After rendering there are now child elements");
+                PoliciesView.render({}, function() {
+                    QUnit.ok(PoliciesView.$el.children().length > 0, "After rendering there are now child elements");
 
                     // -1 because of the source row used to create the others is still on the page but hidden
-                    QUnit.equal(SituationPolicyView.$el.find("#situationalPolicies table tbody tr.event-hook").length,
-                        _.size(SituationPolicyView.model.allPatterns["Default Actions"].policies),
+                    QUnit.equal(PoliciesView.$el.find("#situationalPolicies table tbody tr.event-hook").length,
+                        _.size(PoliciesView.model.allPatterns["Default Actions"].policies),
                         "All default situations are present");
 
-                    QUnit.equal(_.size(SituationPolicyView.model.allPatterns),
-                        SituationPolicyView.$el.find("#policyPatterns option").length,
+                    QUnit.equal(_.size(PoliciesView.model.allPatterns),
+                        PoliciesView.$el.find("#policyPatterns option").length,
                         "Patterns rendered are the same as the stored patterns");
 
                     var messages = true;
-                    _.each(SituationPolicyView.model.allPatterns["Default Actions"].policies, function(situation, index) {
-                        if ($.t(situation.note) !== SituationPolicyView.$el.find("#situationalPolicies table tbody tr.event-hook:eq("+index+") td:eq(1) [data-title]").attr("data-title")) {
+                    _.each(PoliciesView.model.allPatterns["Default Actions"].policies, function(situation, index) {
+                        if ($.t(situation.note) !== PoliciesView.$el.find("#situationalPolicies table tbody tr.event-hook:eq("+index+") td:eq(1) [data-title]").attr("data-title")) {
                             messages = false;
                         }
                     });
 
                     QUnit.ok(messages, "The help tooltips have been set");
 
-                    QUnit.equal(SituationPolicyView.$el.find("#situationalPolicies table tbody .failure-display").length, 7, "There are 7 situations with error classes");
-                    QUnit.equal(SituationPolicyView.$el.find("#situationalPolicies table tbody .warning-display").length, 3, "There are 3 situations with warning classes");
-                    QUnit.equal(SituationPolicyView.$el.find("#situationalPolicies table tbody .success-display").length, 3, "There are 3 situations with success classes");
+                    QUnit.equal(PoliciesView.$el.find("#situationalPolicies table tbody .failure-display").length, 7, "There are 7 situations with error classes");
+                    QUnit.equal(PoliciesView.$el.find("#situationalPolicies table tbody .warning-display").length, 3, "There are 3 situations with warning classes");
+                    QUnit.equal(PoliciesView.$el.find("#situationalPolicies table tbody .success-display").length, 3, "There are 3 situations with success classes");
 
                     var readOnly = true, defaultActions = true;
-                    SituationPolicyView.$el.find("#policyPatterns").val("Read-only").change();
-                    _.each(SituationPolicyView.$el.find(".situationRow"), function(row, index) {
-                        if ($(row).find(".action").val() !== "ASYNC"  && index < SituationPolicyView.model.allPatterns["Read-only"].policies.length) {
+                    PoliciesView.$el.find("#policyPatterns").val("Read-only").change();
+                    _.each(PoliciesView.$el.find(".situationRow"), function(row, index) {
+                        if ($(row).find(".action").val() !== "ASYNC"  && index < PoliciesView.model.allPatterns["Read-only"].policies.length) {
                             readOnly = false
                         }
                     });
                     QUnit.ok(readOnly, "When the pattern changes to Read-Only all actions are set to Async");
 
-                    SituationPolicyView.$el.find("#policyPatterns").val("Default Actions").change();
-                    _.each(SituationPolicyView.$el.find(".situationRow"), function(row, index) {
-                        if ($(row).find(".action :selected").text().indexOf("★") < 0  && index < SituationPolicyView.model.allPatterns["Read-only"].policies.length) {
+                    PoliciesView.$el.find("#policyPatterns").val("Default Actions").change();
+                    _.each(PoliciesView.$el.find(".situationRow"), function(row, index) {
+                        if ($(row).find(".action :selected").text().indexOf("★") < 0  && index < PoliciesView.model.allPatterns["Read-only"].policies.length) {
                             defaultActions = false
                         }
                     });
                     QUnit.ok(defaultActions, "When the pattern changes to Default-Actions all actions are set to the starred value");
 /*
-                    SituationPolicyView.$el.find(".ABSENT .action").val("LINK");
+                    PoliciesView.$el.find(".ABSENT .action").val("LINK");
 
                     var callback = sinon.spy(eventManager, "sendEvent"),
                         mappingUpdated = false,
@@ -117,7 +110,7 @@ define([
                         deferredWrite.resolve();
                     });
 
-                    SituationPolicyView.$el.find(".savePolicy").click();
+                    PoliciesView.$el.find(".savePolicy").click();
                     deferredRead.resolve({mappings: sync});
 
                     QUnit.ok(callback.called, "The policy successfully saves");

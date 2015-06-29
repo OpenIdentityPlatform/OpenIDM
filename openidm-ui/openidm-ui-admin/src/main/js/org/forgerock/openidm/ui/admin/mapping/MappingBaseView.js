@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,13 +25,12 @@
 /*global window,define, $, _, form2js */
 
 define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/commons/ui/common/components/Navigation",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
@@ -40,9 +39,22 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/openidm/ui/admin/util/ReconDetailsView",
     "bootstrap-tabdrop",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
-], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, router, constants, browserStorageDelegate, nav, reconDelegate, dateUtil, syncDelegate, connectorUtils, ReconDetailsView, tabdrop, LinkQualifierUtil) {
+], function(MappingAdminAbstractView,
+            eventManager,
+            validatorsManager,
+            configDelegate,
+            router,
+            constants,
+            nav,
+            reconDelegate,
+            dateUtil,
+            syncDelegate,
+            connectorUtils,
+            ReconDetailsView,
+            tabdrop,
+            LinkQualifierUtil) {
 
-    var MappingBaseView = AdminAbstractView.extend({
+    var MappingBaseView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
         events: {
             "click #syncNowButton": "syncNow",
@@ -76,7 +88,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             _.each(nav.configuration.links.admin.urls.mapping.urls, _.bind(function(val){
                 var url = val.url.split("/")[0];
 
-                val.url = url + "/" + this.currentMapping().name + "/";
+                val.url = url + "/" + this.getCurrentMapping().name + "/";
             },this));
             nav.reload();
         },
@@ -99,13 +111,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             submenuClone.insertBefore("#mappingContent", this.$el).show();
             this.$el.find(".nav-tabs").tabdrop();
         },
-        setCurrentMapping: function(mappingObj){
-            browserStorageDelegate.set('currentMapping',mappingObj);
-            return mappingObj;
-        },
-        currentMapping: function(){
-            return browserStorageDelegate.get('currentMapping');
-        },
         syncType: function(type) {
             var tempType = type.split("/");
 
@@ -113,7 +118,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         },
         runningReconProgress: function(onReady){
             reconDelegate.waitForAll([this.data.recon._id], true, _.bind(function (reconStatus) {
-                if(this.data.recon._id === reconStatus._id && this.data.recon.mapping === this.currentMapping().name){
+                if(this.data.recon._id === reconStatus._id && this.data.recon.mapping === this.getCurrentMapping().name){
                     if(reconStatus.state !== "CANCELED"){
                         this.setSyncInProgress();
                         this.$el.find("#stopSyncButton").prop("disabled",false);
@@ -144,7 +149,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             var syncConfig,
                 cleanName;
 
-            if(args === "null"){
+            if (args === "null"){
                 args = router.getCurrentHash().split("/").slice(1);
             }
 
@@ -167,14 +172,14 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                         this.parentRender(_.bind(function () {
                             this.setSubmenu();
 
-                            if(this.model.syncOpen) {
+                            if (this.model.syncOpen) {
                                 $("#syncStatus").trigger("click");
                             }
 
-                            if(runningRecon){
+                            if (runningRecon){
                                 this.runningReconProgress(onReady);
                             }
-                            if(callback){
+                            if (callback){
                                 callback();
                             }
                         }, this));
@@ -186,6 +191,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                         })
                         .value()
                     };
+                    this.setSyncConfig(this.data.syncConfig);
                     this.data.mapping = _.filter(sync.mappings,function(m){ return m.name === args[0];})[0];
                     this.setCurrentMapping($.extend({},true,this.data.mapping));
                     this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
@@ -280,9 +286,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             this.data.reconAvailable = false;
             this.setSyncInProgress();
 
-            reconDelegate.triggerRecon(this.currentMapping().name, true, _.bind(function (reconStatus) {
+            reconDelegate.triggerRecon(this.getCurrentMapping().name, true, _.bind(function (reconStatus) {
 
-                if(reconStatus.progress.source.existing.total !== "?"  && reconStatus.stage === "ACTIVE_RECONCILING_SOURCE") {
+                if (reconStatus.progress.source.existing.total !== "?"  && reconStatus.stage === "ACTIVE_RECONCILING_SOURCE") {
                     processed = parseInt(reconStatus.progress.source.existing.processed, 10);
                     total = parseInt(reconStatus.progress.source.existing.total, 10);
                 } else if(reconStatus.progress.target.existing.total !== "?" && reconStatus.stage === "ACTIVE_RECONCILING_TARGET") {
@@ -314,7 +320,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 this.data.recon = s;
 
                 delete this.data.mapping;
-                this.child.render([this.currentMapping().name]);
+                this.child.render([this.getCurrentMapping().name]);
             }, this));
         },
         stopSync: function(e){
@@ -328,7 +334,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
             reconDelegate.stopRecon(this.data.recon._id, true).then(_.bind(function(){
                 delete this.data.mapping;
-                this.child.render([this.currentMapping().name]);
+                this.child.render([this.getCurrentMapping().name]);
             }, this));
         }
     });

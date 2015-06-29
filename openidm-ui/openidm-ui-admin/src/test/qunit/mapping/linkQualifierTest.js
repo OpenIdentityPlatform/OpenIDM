@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, QUnit, $ */
+/*global require, define, QUnit, $, module */
 
 define([
     "org/forgerock/commons/ui/common/util/Constants",
@@ -49,9 +49,8 @@ define([
                 var editor,
                     errorMessageStub;
 
-                MappingBaseView.setCurrentMapping(syncDetails.sync.mappings[0]);
-
-                MappingBaseView.data.syncConfig = syncDetails.sync;
+                PropertiesLinkQualifier.setCurrentMapping(syncDetails.sync.mappings[0]);
+                PropertiesLinkQualifier.setSyncConfig(syncDetails);
 
                 linkQualifierProperties(server);
 

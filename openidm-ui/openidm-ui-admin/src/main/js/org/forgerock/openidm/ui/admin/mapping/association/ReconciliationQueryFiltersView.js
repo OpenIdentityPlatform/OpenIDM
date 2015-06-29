@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,116 +25,104 @@
 /*global define, _ */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/ReconciliationQueryFiltersView", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
-], function(AbstractView,
+    "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor"
+], function(MappingAdminAbstractView,
             eventManager,
             constants,
-            ConfigDelegate,
-            QueryFilterEditor,
-            BrowserStorageDelegate) {
+            QueryFilterEditor) {
 
-    var ReconciliationQueryFiltersView = AbstractView.extend({
-            element: "#reconQueriesView",
-            template: "templates/admin/mapping/association/ReconciliationQueryFiltersTemplate.html",
-            noBaseTemplate: true,
-            events: {
-                "click input[type=submit]": "saveQueryFilters"
-            },
-
-            model: {
-                queryEditors: [
-                    {
-                        "type": "source"
-                    },
-                    {
-                        "type": "target"
-                    }
-                ]
-            },
-            /**
-             * @param args {object}
-             *      sync {object}
-             *      mapping {object}
-             *      mappingName {string}
-             *
-             */
-            render: function(args) {
-                _.extend(this.model, args);
-                this.parentRender(_.bind(function () {
-                    this.model.queryEditors = _.map(this.model.queryEditors, function (qe) {
-                        qe.query = qe.type + "Query";
-                        qe.resource = args.mapping[qe.type];
-                        qe.editor = this.renderEditor(qe.query, args.mapping[qe.query], qe.resource);
-                        return qe;
-                    }, this);
-                }, this));
-            },
-            renderEditor: function (element, query, resource) {
-                var editor = new QueryFilterEditor(),
-                    filter;
-
-                if (query !== undefined) {
-                    filter = query._queryFilter || query.queryFilter;
-                } else {
-                    filter = "";
+    var ReconciliationQueryFiltersView = MappingAdminAbstractView.extend({
+        element: "#reconQueriesView",
+        template: "templates/admin/mapping/association/ReconciliationQueryFiltersTemplate.html",
+        noBaseTemplate: true,
+        events: {
+            "click input[type=submit]": "saveQueryFilters"
+        },
+        model: {
+            queryEditors: [
+                {
+                    "type": "source"
+                },
+                {
+                    "type": "target"
                 }
+            ]
+        },
 
-                editor.render({
-                    "queryFilter": filter,
-                    "element": "#" + element,
-                    "resource": resource
-                });
+        render: function() {
+            this.model.sync = this.getSyncConfig();
+            this.model.mapping = this.getCurrentMapping();
+            this.model.mappingName = this.getMappingName();
 
-                return editor;
-            },
-            saveQueryFilters: function (e) {
-                var queries,
-                    mapping = _.find(this.model.sync.mappings, function (m) {
-                        return m.name === this.model.mappingName;
-                    }, this);
+            this.parentRender(_.bind(function () {
+                this.model.queryEditors = _.map(this.model.queryEditors, function (qe) {
+                    qe.query = qe.type + "Query";
+                    qe.resource = this.model.mapping[qe.type];
+                    qe.editor = this.renderEditor(qe.query, this.model.mapping[qe.query], qe.resource);
+                    return qe;
+                }, this);
+            }, this));
+        },
 
-                e.preventDefault();
-                queries =  _.chain(this.model.queryEditors)
-                            .filter(function (qe) {
-                                return _.has(qe, "editor");
-                            })
-                            .map(function (qe) {
-                                var filterString = qe.editor.getFilterString();
-                                if (filterString.length) {
-                                    return [
-                                        qe.query,
-                                        {
-                                            "_queryFilter": filterString
-                                        }
-                                    ];
-                                } else {
-                                    return null;
-                                }
-                            })
-                            .filter(function (qe) {
-                                return qe !== null;
-                            })
-                            .object()
-                            .value();
+        renderEditor: function (element, query, resource) {
+            var editor = new QueryFilterEditor(),
+                filter;
 
-                _.each(this.model.queryEditors, function (qe) {
-                    mapping[qe.query] = queries[qe.query];
-                });
-
-                this.model.mapping = mapping;
-
-                ConfigDelegate.updateEntity("sync", this.model.sync).then(_.bind(function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "reconQueryFilterSaveSuccess");
-                    BrowserStorageDelegate.set("currentMapping", _.extend(this.model.mapping, this.model.recon));
-                }, this));
-                
+            if (query !== undefined) {
+                filter = query._queryFilter || query.queryFilter;
+            } else {
+                filter = "";
             }
-        });
+
+            editor.render({
+                "queryFilter": filter,
+                "element": "#" + element,
+                "resource": resource
+            });
+
+            return editor;
+        },
+
+        saveQueryFilters: function (e) {
+            var queries;
+
+            e.preventDefault();
+
+            queries =  _.chain(this.model.queryEditors)
+                .filter(function (qe) {
+                    return _.has(qe, "editor");
+                })
+                .map(function (qe) {
+                    var filterString = qe.editor.getFilterString();
+                    if (filterString.length) {
+                        return [
+                            qe.query,
+                            {
+                                "_queryFilter": filterString
+                            }
+                        ];
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(function (qe) {
+                    return qe !== null;
+                })
+                .object()
+                .value();
+
+            _.each(this.model.queryEditors, function (qe) {
+                this.model.mapping[qe.query] = queries[qe.query];
+            }, this);
+
+            this.AbstractMappingSave(this.model.mapping, _.bind(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "reconQueryFilterSaveSuccess");
+            }, this));
+        }
+    });
 
     return new ReconciliationQueryFiltersView();
 });

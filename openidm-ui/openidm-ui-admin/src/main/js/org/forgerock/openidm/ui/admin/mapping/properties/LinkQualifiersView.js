@@ -25,26 +25,24 @@
 /*global define, $, _, Handlebars, form2js */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
-], function(AbstractView,
+], function(MappingAdminAbstractView,
             ConfigDelegate,
             Constants,
             EventManager,
-            BrowserStorageDelegate,
             MappingBaseView,
             inlineScriptEditor,
             ScriptDelegate,
             LinkQualifierUtils) {
 
-    var LinkQualifiersView = AbstractView.extend({
+    var LinkQualifiersView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/LinkQualifiersTemplate.html",
         element: "#mappingLinkQualifiers",
         noBaseTemplate: true,
@@ -59,8 +57,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
         data: {},
 
         render: function (args, callback) {
-            this.model.mappingName = args;
-            this.model.mapping = MappingBaseView.currentMapping();
+            this.model.mappingName = this.getMappingName();
+            this.model.mapping = this.getCurrentMapping();
 
             this.data.linkQualifiers = this.model.mapping.linkQualifiers || [];
 
@@ -119,8 +117,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
             if(_.isArray(data) === true) {
                 _.each(data, function(linkQualifier){
                     this.$el.find("#scriptLinkQualifierList").append('<button disabled="true" type="button" class="removeLinkQualifier btn btn-primary">'
-                        + '<span class="linkQualifier">' +linkQualifier  +'</span>'
-                        + '</button>');
+                    + '<span class="linkQualifier">' +linkQualifier  +'</span>'
+                    + '</button>');
                 }, this);
 
                 this.$el.find("#badLinkQualifierScript").hide();
@@ -161,9 +159,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
                 this.data.linkQualifiers.push(toAdd);
 
                 this.$el.find("#staticLinkQualifierList").append('<button type="button" class="removeLinkQualifier btn btn-primary">'
-                    + '<span class="linkQualifier">' +toAdd  +'</span>'
-                    + '<i class="fa fa-times fa-lg"></i>'
-                    + '</button>');
+                + '<span class="linkQualifier">' +toAdd  +'</span>'
+                + '<i class="fa fa-times fa-lg"></i>'
+                + '</button>');
 
                 this.$el.find(".newLinkQualifier").val("");
 
@@ -185,76 +183,64 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
         },
 
         save: function() {
-            var currentTab = this.$el.find("#linkQualifierTabs .active").prop("id"),
-                sync = MappingBaseView.data.syncConfig;
+            var currentTab = this.$el.find("#linkQualifierTabs .active").prop("id");
 
             this.model.scriptError = false;
 
-            _.each(sync.mappings, function (map, key) {
-                if (map.name === this.model.mappingName) {
-                    if(currentTab === "staticQualifierTab") {
-                        this.saveDeclarative(key, sync);
-                    } else {
-                        this.saveScript(key, sync);
-                    }
-                }
-            }, this);
+            if(currentTab === "staticQualifierTab") {
+                this.saveDeclarative();
+            } else {
+                this.saveScript();
+            }
         },
 
-        saveDeclarative: function(key, sync) {
-            var mapping;
+        saveDeclarative: function() {
+            this.model.mapping.linkQualifiers = this.data.linkQualifiers;
 
-            sync.mappings[key].linkQualifiers = this.data.linkQualifiers;
-            mapping = sync.mappings[key];
             LinkQualifierUtils.setLinkQualifier(this.data.linkQualifiers, this.model.mappingName);
 
-            ConfigDelegate.updateEntity("sync", sync).then(_.bind(function() {
+            this.AbstractMappingSave(this.model.mapping, _.bind(function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
-                BrowserStorageDelegate.set("currentMapping", mapping);
-
                 EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
             }, this));
         },
 
-        saveScript: function(key, sync) {
-            var scriptDetails,
-                mapping;
+        saveScript: function() {
+            var scriptDetails;
 
             scriptDetails = this.linkQualifierScript.generateScript();
 
             if(scriptDetails !== null) {
                 ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
-                        if(_.isArray(result)) {
-                            _.each(result, function(item) {
-                                if(!_.isString(item)) {
-                                    this.model.scriptError = true;
-                                }
-                            }, this);
-                        } else {
-                            this.model.scriptError = true;
-                        }
-
-                        if(!this.model.scriptError) {
-                            this.model.scriptResult = result;
-
-                            sync.mappings[key].linkQualifiers = this.linkQualifierScript.generateScript();
-                            mapping = sync.mappings[key];
-                            LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
-
-                            ConfigDelegate.updateEntity("sync", sync).then(_.bind(function () {
-                                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
-                                BrowserStorageDelegate.set("currentMapping", mapping);
-
-                                EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
-                            }, this));
-                        } else {
-                            this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
-                        }
-                    }, this),
-                    _.bind(function (result) {
+                    if(_.isArray(result)) {
+                        _.each(result, function(item) {
+                            if(!_.isString(item)) {
+                                this.model.scriptError = true;
+                            }
+                        }, this);
+                    } else {
                         this.model.scriptError = true;
-                        this.showErrorMessage(result.responseJSON.message);
-                    }, this));
+                    }
+
+                    if(!this.model.scriptError) {
+                        this.model.scriptResult = result;
+
+                        this.model.mapping.linkQualifiers = this.linkQualifierScript.generateScript();
+                        LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
+
+                        this.AbstractMappingSave(this.model.mapping, _.bind(function() {
+                            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
+                            EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
+                        }, this));
+
+                    } else {
+                        this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
+                    }
+                }, this),
+                _.bind(function (result) {
+                    this.model.scriptError = true;
+                    this.showErrorMessage(result.responseJSON.message);
+                }, this));
             } else {
                 this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
             }

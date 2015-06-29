@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -30,18 +30,14 @@ define("org/forgerock/openidm/ui/admin/mapping/scheduling/LiveSyncView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
-    "org/forgerock/openidm/ui/admin/util/Scheduler",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
+    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate"
 
 ], function(MappingAdminAbstractView,
             MappingBaseView,
             eventManager,
             constants,
             ConfigDelegate,
-            SchedulerDelegate,
-            Scheduler,
-            BrowserStorageDelegate) {
+            SchedulerDelegate) {
 
     var ScheduleView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/scheduling/LiveSyncTemplate.html",
@@ -94,7 +90,7 @@ define("org/forgerock/openidm/ui/admin/mapping/scheduling/LiveSyncView", [
 
                                 foundLiveSync = true;
 
-                            // This is a recon schedule
+                                // This is a recon schedule
                             } else if (schedule.invokeService.indexOf("sync") >= 0) {
 
                                 // The mapping is of a managed object
@@ -142,16 +138,11 @@ define("org/forgerock/openidm/ui/admin/mapping/scheduling/LiveSyncView", [
         },
 
         saveLiveSync: function() {
-            _.each(this.model.sync.mappings, function(map, key) {
-                if (map.name === this.model.mapping.name) {
-                    this.model.sync.mappings[key].enableSync = this.$el.find(".liveSyncEnabled").prop("checked");
-                }
-            }, this);
+            this.model.mapping.enableSync = this.$el.find(".liveSyncEnabled").prop("checked");
 
-            ConfigDelegate.updateEntity("sync", this.model.sync).then(function() {
-                BrowserStorageDelegate.set("currentMapping", this.model.sync);
+            this.AbstractMappingSave(this.model.mapping, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncLiveSyncSaveSuccess");
-            });
+            }, this));
         }
     });
 

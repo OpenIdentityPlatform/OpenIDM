@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,22 +26,67 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView"
+    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 
 ], function(AdminAbstractView,
-            MappingBaseView) {
+            SyncDelegate,
+            ConfigDelegate) {
 
-    var MappingAdminAbstractView = AdminAbstractView.extend({
+    var currentMapping = {},
+        syncConfig = {},
+        numRepresentativeProps = 4,
 
-        getCurrentMapping: function() {
-            return MappingBaseView.currentMapping();
-        },
+        MappingAdminAbstractView = AdminAbstractView.extend({
+            getCurrentMapping: function() {
+                return _.clone(currentMapping, true);
+            },
 
-        getSyncConfig: function() {
-            return MappingBaseView.data.syncConfig;
-        }
+            getSyncConfig: function() {
+                return _.clone(syncConfig, true);
+            },
 
-    });
+            getMappingName: function() {
+                if (currentMapping) {
+                    return currentMapping.name;
+                } else {
+                    return undefined;
+                }
+            },
+
+            getNumRepresentativeProps: function() {
+                return numRepresentativeProps;
+            },
+
+            setNumRepresentativeProps: function(num) {
+                numRepresentativeProps = num;
+                return num;
+            },
+
+            setCurrentMapping: function(mapping) {
+                currentMapping = mapping;
+                return mapping;
+            },
+
+            setSyncConfig: function(sync) {
+                syncConfig = sync;
+                return sync;
+            },
+
+            AbstractMappingSave: function(mapping, callback) {
+                _.each(syncConfig.mappings, function(map, key) {
+                    syncConfig.mappings[key] = _.omit(mapping, "recon");
+
+                    if (map.name === this.getMappingName()) {
+                        currentMapping = syncConfig.mappings[key];
+                    }
+                }, this);
+
+                ConfigDelegate.updateEntity("sync", {"mappings" : syncConfig.mappings}).then(_.bind(callback, this));
+            }
+
+
+        });
 
     return MappingAdminAbstractView;
 });

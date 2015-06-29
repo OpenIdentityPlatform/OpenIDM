@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, QUnit, $ */
+/*global require, define, QUnit, $, module */
 
 define([
     "org/forgerock/commons/ui/common/util/Constants",
@@ -41,7 +41,7 @@ define([
              ConnectorDelegate,
              MappingBaseView,
              LinkQualifierUtils,
-             analysisView,
+             DataAssociationManagementView,
              correlation) {
 
     return {
@@ -58,23 +58,26 @@ define([
 
                 MappingBaseView.data.recon = reconDetails;
                 MappingBaseView.data.syncCanceled = false;
+                DataAssociationManagementView.setCurrentMapping(mappingDetails.sync.mappings[0]);
+                DataAssociationManagementView.setSyncConfig(mappingDetails);
+
 
                 ConnectorDelegate.connectorDelegateCache = {};
 
-                analysisView.render(mappingDetails, function () {
-                    QUnit.ok(analysisView.$el.children().length > 0, "Analysis View properly rendered.");
+                DataAssociationManagementView.render({}, function () {
+                    QUnit.ok(DataAssociationManagementView.$el.children().length > 0, "Analysis View properly rendered.");
 
-                    QUnit.ok(analysisView.$el.find("#changeAssociation").is(":disabled") === true, "Change association properly disabled");
+                    QUnit.ok(DataAssociationManagementView.$el.find("#changeAssociation").is(":disabled") === true, "Change association properly disabled");
 
-                    QUnit.ok(analysisView.$el.find("#singleRecordSync").is(":disabled") === true, "Single record sync button properly disabled");
+                    QUnit.ok(DataAssociationManagementView.$el.find("#singleRecordSync").is(":disabled") === true, "Single record sync button properly disabled");
 
-                    QUnit.ok(analysisView.$el.find("#situationSelection option").length === 12, "Twelve situations selectable");
+                    QUnit.ok(DataAssociationManagementView.$el.find("#situationSelection option").length === 12, "Twelve situations selectable");
 
                     $("#analysisGridContainer #1").trigger("click");
 
-                    QUnit.ok(analysisView.$el.find("#changeAssociation").is(":disabled") === false, "Change association properly enabled");
+                    QUnit.ok(DataAssociationManagementView.$el.find("#changeAssociation").is(":disabled") === false, "Change association properly enabled");
 
-                    QUnit.ok(analysisView.$el.find("#singleRecordSync").is(":disabled") === false, "Single record sync button properly enabled");
+                    QUnit.ok(DataAssociationManagementView.$el.find("#singleRecordSync").is(":disabled") === false, "Single record sync button properly enabled");
 
                     QUnit.start();
                 });

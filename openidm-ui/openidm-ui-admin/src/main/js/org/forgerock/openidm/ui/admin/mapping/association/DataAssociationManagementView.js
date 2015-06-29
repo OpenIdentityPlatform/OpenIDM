@@ -25,7 +25,7 @@
 /*global define, $, _, Handlebars, window */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManagementView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -34,10 +34,10 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/util/MappingUtils",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils",
     "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/ChangeAssociationDialog",
     "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/TestSyncDialog"
-], function(AdminAbstractView,
+], function(MappingAdminAbstractView,
             MappingBaseView,
             conf,
             eventManager,
@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
             changeAssociationDialog,
             TestSyncDialog) {
 
-    var DataAssociationManagementView = AdminAbstractView.extend({
+    var DataAssociationManagementView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/association/DataAssociationManagementTemplate.html",
         element: "#analysisView",
         noBaseTemplate: true,
@@ -61,25 +61,56 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
             "click #singleRecordSync": "singleRecordSync"
         },
         data: {},
-        syncNow: function(e){
+
+        render: function(args, callback) {
+            this.data.recon = MappingBaseView.data.recon;
+            this.mapping = this.getCurrentMapping();
+            this.data.numRepresentativeProps = this.getNumRepresentativeProps();
+            this.data.sourceProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps);
+            this.data.targetProps = _.pluck(this.mapping.properties,"target").slice(0,this.data.numRepresentativeProps);
+            this.data.hideSingleRecordReconButton = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
+
+            this.data.reconAvailable = false;
+            this.parentRender(_.bind(function() {
+                if(this.data.recon && !MappingBaseView.data.syncCanceled){
+                    this.renderReconResults(null, callback);
+
+                    $(window).resize(function () {
+                        if(this.$el) {
+                            this.$el.find("#analysisGridContainer .recon-grid").setGridWidth(this.$el.find("#analysisGridContainer").width());
+                        }
+                    });
+
+                } else if(callback) {
+                    callback();
+                }
+
+            }, this));
+        },
+
+        syncNow: function(e) {
             e.preventDefault();
             $(e.target).closest("button").prop('disabled',true);
             MappingBaseView.syncNow(e);
         },
-        singleRecordSync: function(e){
+
+        singleRecordSync: function(e) {
             conf.globalData.testSyncSource = this.getSelectedRow().sourceObject;
 
             e.preventDefault();
 
-            TestSyncDialog.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName, recon: MappingBaseView.data.recon});
+            TestSyncDialog.render({
+                recon: MappingBaseView.data.recon
+            });
         },
-        changeAssociation: function(e){
+
+        changeAssociation: function(e) {
             var args,
                 selectedRow = this.getSelectedRow(),
                 sourceObj = selectedRow.sourceObject,
                 targetObj = selectedRow.targetObject,
-                translateObj = _.bind(function(obj, isSource){
-                    if(isSource){
+                translateObj = _.bind(function(obj, isSource) {
+                    if (isSource) {
                         obj = syncDelegate.translateToTarget(obj, this.mapping);
                     }
                     return mappingUtils.buildObjectRepresentation(obj, this.data.targetProps);
@@ -95,7 +126,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                 targetObjRep: translateObj(_.pick(targetObj, this.data.targetProps)),
                 targetProps: $.extend({},this.data.targetProps),
                 ambiguousTargetObjectIds: selectedRow.ambiguousTargetObjectIds,
-                recon: $.extend({},this.data.recon),
+                recon: $.extend({}, this.data.recon),
                 linkQualifiers : this.mapping.linkQualifiers,
                 reloadAnalysisGrid: _.bind(function(){
                     this.renderReconResults(this.$el.find("#situationSelection").val().split(","), null);
@@ -104,26 +135,29 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
 
             changeAssociationDialog.render(args);
         },
+
         getSelectedRow: function () {
             var grid = this.$el.find(".recon-grid"),
                 selRow = grid.jqGrid("getGridParam", "selrow");
 
             return grid.data("rowData")[selRow -1];
         },
-        checkNewLinks: function(rows){
+
+        checkNewLinks: function(rows) {
             var count = this.data.newLinkIds.length,
                 warningText;
+
             _.chain(rows)
-                .map(_.bind(function(row){
-                    if(row.sourceObject){
+                .map(_.bind(function(row) {
+                    if(row.sourceObject) {
                         row._id = row.sourceObject._id;
                     } else {
                         row._id = "";
                     }
                 }, this));
 
-            if(count){
-                if(count === 1){
+            if (count) {
+                if (count === 1) {
                     warningText = $.t("templates.mapping.analysis.oneNewLinkWarning");
                 } else {
                     warningText = $.t("templates.mapping.analysis.newLinksWarning", { "count": count});
@@ -135,6 +169,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
 
             return rows;
         },
+
         renderReconResults:  function (selectedSituation, callback) {
             var _this = this,
                 recon = this.data.recon,
@@ -170,17 +205,17 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                             altRows:true,
                             altclass: "analysisGridRowAlt",
                             loadError : function(xhr,st,err) {
-                                if(xhr.status === 404){
+                                if (xhr.status === 404) {
                                     configDelegate.createEntity("endpoint/reconResults", {
                                         "context" : "endpoint/reconResults",
                                         "type" : "text/javascript",
                                         "file" : "ui/reconResults.js"
-                                    }).then(function(){
-                                        _.delay(function(){_this.render([_this.mapping.name]);}, 2000);
+                                    }).then(function() {
+                                        _.delay(function() {_this.render([_this.mapping.name]);}, 2000);
                                     });
                                 }
                             },
-                            loadComplete: function(data){
+                            loadComplete: function(data) {
                                 $(this).data("rowData",data.result[0].rows);
                                 _this.$el.find("td.ui-search-input input").attr("placeholder",$.t("templates.mapping.analysis.enterSearchTerms"));
 
@@ -195,23 +230,22 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
 
                                 _this.$el.find(".actionButton").prop('disabled',true);
 
-
-                                if(callback) {
+                                if (callback) {
                                     callback();
                                 }
                             },
-                            beforeRequest: function(){
+                            beforeRequest: function() {
                                 var params = $("table.recon-grid", container).jqGrid('getGridParam','postData');
                                 params.search = params._search;
                                 delete params._search;
                                 $("table.recon-grid", container).setGridParam({ postData: params });
-                                if(params.search){
+                                if (params.search) {
                                     $("div.recon-pager div", container).hide();
                                 } else {
                                     $("div.recon-pager div", container).show();
                                 }
                             },
-                            onSelectRow: function(id){
+                            onSelectRow: function(id) {
                                 var rowData = $("table.recon-grid", container).jqGrid("getRowData", id),
                                     disableButton = !rowData.sourceObject.length || _.contains(_this.data.newLinkIds,rowData._id);
 
@@ -243,7 +277,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                                 {"name":"linkQualifier", "label": $.t("templates.mapping.linkQualifier"), search: false, "sortable": false},
                                 {"name": "targetObjectDisplay", "jsonmap": "targetObject","label": $.t("templates.mapping.target"), "sortable": false,
                                     formatter : function (targetObject, opts, reconRecord) {
-                                        if(reconRecord.sourceObject && _.contains(_this.data.newLinkIds, reconRecord.sourceObject._id)){
+                                        if (reconRecord.sourceObject && _.contains(_this.data.newLinkIds, reconRecord.sourceObject._id)) {
                                             return mappingUtils.buildObjectRepresentation(_.filter(_this.data.newLinks, function(link){
                                                 return link.sourceObjectId.replace(_this.mapping.source + "/","") === reconRecord.sourceObject._id;
                                             })[0].targetObject, _this.data.targetProps);
@@ -267,7 +301,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                     }
                 }, this);
 
-            if(selectedSituation){
+            if (selectedSituation) {
                 totalRecords = recon.situationSummary[selectedSituation];
             }
 
@@ -279,11 +313,11 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                 this.data.last_started = dateUtil.formatDate(recon.started,"MMMM dd, yyyy HH:mm");
             }
 
-            reconDelegate.getNewLinksFromRecon(this.data.recon._id, this.data.recon.ended).then(_.bind(function(newLinks){
+            reconDelegate.getNewLinksFromRecon(this.data.recon._id, this.data.recon.ended).then(_.bind(function(newLinks) {
                 this.data.newLinks = newLinks;
                 this.data.newLinkIds = _.chain(newLinks)
                     .pluck("sourceObjectId")
-                    .map(_.bind(function(sObjId){
+                    .map(_.bind(function(sObjId) {
                         return sObjId.replace(this.mapping.source + "/","");
                     }, this))
                     .value();
@@ -295,34 +329,8 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                 }, this));
             }, this));
         },
-        render: function(args, callback) {
-            this.data.recon = MappingBaseView.data.recon;
-            this.mapping = args.mapping;
-            this.data.numRepresentativeProps = mappingUtils.numRepresentativeProps(this.mapping.name);
-            this.data.sourceProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps);
-            this.data.targetProps = _.pluck(this.mapping.properties,"target").slice(0,this.data.numRepresentativeProps);
-            this.data.hideSingleRecordReconButton = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
 
-            this.data.reconAvailable = false;
-            this.parentRender(_.bind(function() {
-                if(this.data.recon && !MappingBaseView.data.syncCanceled){
-                    this.renderReconResults(null, callback);
-
-                    $(window).resize(function () {
-                        if(this.$el) {
-                            this.$el.find("#analysisGridContainer .recon-grid").setGridWidth(this.$el.find("#analysisGridContainer").width());
-                        }
-                    });
-
-                } else {
-                    if(callback) {
-                        callback();
-                    }
-                }
-            }, this));
-
-        },
-        changeSituationView: function(e){
+        changeSituationView: function(e) {
             e.preventDefault();
             this.renderReconResults($(e.target).val().split(","));
         }

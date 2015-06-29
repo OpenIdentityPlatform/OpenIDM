@@ -31,7 +31,6 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./delegates/ConnectorDelegate",
     "./delegates/SyncDelegate",
-    "./delegates/BrowserStorageDelegate",
     "./delegates/ExternalAccessDelegate",
     "./delegates/ReconDelegate",
     "./delegates/SecurityDelegate",
@@ -57,7 +56,6 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/ScriptDialog",
     "./util/AutoCompleteUtils",
     "./util/Scheduler",
-    "./util/MappingUtils",
     "./util/ReconDetailsView",
     "./util/QueryFilterUtils",
     "./util/AutoCompleteUtils",
@@ -99,6 +97,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./mapping/AddMappingView",
     "./mapping/MappingListView",
 
+    "./mapping/util/MappingUtils",
     "./mapping/util/MappingScriptsView",
     "./mapping/util/QueryFilterEditor",
     "./mapping/util/LinkQualifierFilterEditor",

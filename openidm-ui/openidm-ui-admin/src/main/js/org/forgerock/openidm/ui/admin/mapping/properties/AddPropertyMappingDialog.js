@@ -8,16 +8,24 @@
 /*jslint evil: true */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "bootstrap-dialog"
-], function(AbstractView, conf, uiUtils, eventManager, constants, browserStorageDelegate, autoCompleteUtils, BootstrapDialog) {
-    var AddPropertyMappingDialog = AbstractView.extend({
+], function(MappingAdminAbstractView,
+            AttributesGridView,
+            conf,
+            uiUtils,
+            eventManager,
+            constants,
+            autoCompleteUtils,
+            BootstrapDialog) {
+
+    var AddPropertyMappingDialog = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/AddPropertyMappingDialogTemplate.html",
         data: {
             width: 600,
@@ -34,9 +42,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
 
         formSubmit: function (event) {
             var property = $(":input[name=propertyList]",this.$el).val(),
-                mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties");
+                mappingProperties = AttributesGridView.model.mappingProperties;
 
-            if(event){
+            if (event) {
                 event.preventDefault();
             }
 
@@ -45,7 +53,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
 
                 mappingProperties.push({target: property});
 
-                browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
+                AttributesGridView.model.mappingProperties = mappingProperties;
 
                 this.close();
                 this.model.closeCallback = _.bind(function(){
@@ -59,8 +67,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                 validationMessage = $("#Property_List .validation-message", this.$el),
                 hasAvailableProps = this.data.availableTargetProps  && this.data.availableTargetProps.length,
                 hasPropListValue = propList && propList.length,
-                invalidProp = hasAvailableProps && hasPropListValue && !_.contains(this.data.availableTargetProps,propList),
-                disableSave = function(message){
+                invalidProp = hasAvailableProps && hasPropListValue && !_.contains(this.data.availableTargetProps, propList),
+                disableSave = function(message) {
                     $("#scriptDialogUpdate").prop("disabled", true);
                     validationMessage.text(message);
                 };
@@ -68,12 +76,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
             if (invalidProp) {
                 disableSave($.t("templates.mapping.validPropertyRequired"));
                 return false;
+
             } else {
                 $("#scriptDialogUpdate").prop("disabled", false);
                 validationMessage.text("");
                 return true;
             }
-
         },
 
         close: function () {
@@ -83,11 +91,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
         getAvailableTargetProps: function(){
             var availableProps;
 
-            this.data.currentProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
+            this.data.currentProperties = AttributesGridView.model.mappingProperties || this.getCurrentMapping().properties;
 
-            browserStorageDelegate.set(this.data.mappingName + "_Properties", this.data.currentProperties);
+            AttributesGridView.model.mappingProperties = this.data.currentProperties;
 
-            availableProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").target.properties || [];
+            availableProps = AttributesGridView.model.availableObjects.target.properties || [];
 
             return availableProps;
         },
@@ -98,7 +106,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
 
             this.data.mappingName = params[0];
             this.property = "_new";
-
             this.data.availableTargetProps = this.getAvailableTargetProps();
 
             settings = {
@@ -110,7 +117,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                     }
                 },this)
             };
-
 
             this.currentDialog = $('<form id="propertyMappingDialogForm"></form>');
 
@@ -125,7 +131,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                 onhide: function(dialogRef){
                     eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
 
-                    if(_this.model.closeCallback) {
+                    if (_this.model.closeCallback) {
                         _this.model.closeCallback();
                     }
                 },
@@ -135,7 +141,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                         function () {
                             settings.postRender();
                             $(':input:first', _this.currentDialog).focus();
-                            if(callback){
+                            if (callback) {
                                 callback();
                             }
                         }, "replace");

@@ -31,11 +31,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/util/MappingUtils",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/FilterEvaluator",
@@ -47,7 +46,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             conf,
             UIUtils,
             constants,
-            browserStorageDelegate,
             searchDelegate,
             connectorDelegate,
             configDelegate,
@@ -71,7 +69,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             "click #clearChanges": "clearChanges",
             "click #missingRequiredPropertiesButton": "addRequiredProperties"
         },
-        model: {},
+        model: {
+            availableObjects: {},
+            mappingProperties: null
+        },
         data: {},
         sampleDisplay: [],
 
@@ -82,26 +83,25 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             });
 
             this.mapping = this.getCurrentMapping();
-            //on the line below the hard-coded "4" is there because it seemed like a generally safe default number of properties to use for the purpose of displaying/searching sample source
-            this.data.numRepresentativeProps = browserStorageDelegate.get(this.mapping.name + "_numRepresentativeProps",true) || 4;
+            this.data.numRepresentativeProps = this.getNumRepresentativeProps;
             this.data.requiredProperties = [];
             this.data.missingRequiredProperties = [];
 
             this.data.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
             this.currentLinkQualifier = this.data.linkQualifiers[0];
 
-            if(this.mapping.linkQualifiers) {
+            if (this.mapping.linkQualifiers) {
                 this.data.hasLinkQualifiers = true;
             } else {
                 this.data.hasLinkQualifiers = false;
             }
 
-            if(conf.globalData.sampleSource && this.mapping.properties.length){
+            if (conf.globalData.sampleSource && this.mapping.properties.length) {
                 this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
             }
 
-            this.buildAvailableObjectsMap().then(_.bind(function(availableObjects){
-                browserStorageDelegate.set(this.getCurrentMapping().name + "_AvailableObjects", availableObjects);
+            this.buildAvailableObjectsMap().then(_.bind(function(availableObjects) {
+                this.model.availableObjects = availableObjects;
                 this.checkMissingRequiredProperties();
                 this.parentRender(_.bind(function () {
                     this.loadMappingPropertiesGrid();
@@ -117,10 +117,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
         checkChanges: function () {
             var currentProperties = this.getCurrentMapping().properties,
-                changedProperties = browserStorageDelegate.get(this.getCurrentMapping().name + "_Properties") || currentProperties,
-                changesPending = !_.isEqual(currentProperties,changedProperties);
+                changedProperties = this.model.mappingProperties || currentProperties,
+                changesPending = !_.isEqual(currentProperties, changedProperties);
 
-            if(changesPending) {
+            if (changesPending) {
                 this.$el.find("#updateMappingButton").prop('disabled', false);
                 this.$el.find("#clearChanges").prop('disabled', false);
                 this.$el.find(".changesPending").show();
@@ -132,93 +132,99 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             }
 
         },
+
         addProperty: function (e) {
             e.preventDefault();
-
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "addMappingProperty", args: [this.mapping.name]});
         },
-        clearChanges: function(e){
+
+        clearChanges: function(e) {
             e.preventDefault();
-            browserStorageDelegate.remove(this.getCurrentMapping().name + "_Properties");
-            this.render([this.getCurrentMapping().name]);
+            this.model.mappingProperties = null;
+            this.render();
         },
+
         removeProperty: function (e) {
             e.preventDefault();
 
             UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: $(e.target).attr('target')}),_.bind(function(){
-                var mapProps = browserStorageDelegate.get(this.mapping.name + "_Properties") || this.data.mapProps;
+                var mapProps = this.model.mappingProperties || this.data.mapProps;
 
                 //This is removing the correct row from the stored array
                 mapProps.splice(($(e.target).parents("tr")[0].rowIndex - 1), 1);
 
-                browserStorageDelegate.set(this.mapping.name + "_Properties", mapProps);
+                this.model.mappingProperties = mapProps;
                 this.checkChanges();
 
-                this.render([this.mapping.name]);
-            },this));
+                this.render();
+            }, this));
         },
-        openPropertyEditTab: function(e){
+
+        openPropertyEditTab: function(e) {
             var id = $(e.target).attr('rowId'),
                 tab = $(e.target).attr('tab');
 
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.mapping.name, id]});
-            if(tab === 'condition'){
+
+            if (tab === 'condition'){
                 $("[href=#Condition_Script]").click();
-            }
-            else if(tab === 'transform'){
+            } else if (tab === 'transform'){
                 $("[href=#Transformation_Script]").click();
-            }
-            else if(tab === 'default'){
+            } else if (tab === 'default'){
                 $("[href=#Default_Values]").click();
             }
         },
-        resetNumRepresentativeProps: function(e){
+
+        resetNumRepresentativeProps: function(e) {
             var num = parseInt($(e.target).val(), 10);
 
             e.preventDefault();
 
-            if(num && num <= this.mapping.properties.length){
-                browserStorageDelegate.set(this.mapping.name + "_numRepresentativeProps", num,true);
-                this.render([this.mapping.name]);
+            if (num && num <= this.mapping.properties.length) {
+                this.setNumRepresentativeProps(num);
+                this.render();
             }
         },
-        checkMissingRequiredProperties: function(){
-            var props = browserStorageDelegate.get(this.mapping.name + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
-            _.each(this.data.requiredProperties, function(reqProp){
-                if(!_.filter(props, function(p){ return p.target === reqProp; }).length){
+
+        checkMissingRequiredProperties: function() {
+            var props = this.model.mappingProperties || this.getCurrentMapping().properties;
+            _.each(this.data.requiredProperties, function(reqProp) {
+                if (!_.filter(props, function(p) {return p.target === reqProp;}).length) {
                     this.data.missingRequiredProperties.push(reqProp);
                 }
             }, this);
         },
-        addRequiredProperties: function(e){
-            var props = browserStorageDelegate.get(this.mapping.name + "_Properties") || this.data.mapProps;
 
-            if(e){
+        addRequiredProperties: function(e) {
+            var props = this.model.mappingProperties || this.data.mapProps;
+
+            if (e) {
                 e.preventDefault();
             }
-            _.each(this.data.requiredProperties, function(reqProp){
-                if(!_.filter(props, function(p){ return p.target === reqProp; }).length){
-                    props.push({ target: reqProp });
+            _.each(this.data.requiredProperties, function(reqProp) {
+                if (!_.filter(props, function(p) {return p.target === reqProp;}).length){
+                    props.push({target: reqProp});
                 }
             });
 
-            browserStorageDelegate.set(this.mapping.name + "_Properties", props);
-            this.render([this.mapping.name]);
+            this.model.mappingProperties = props;
+            this.render();
         },
+
         //Returns a promise and determines if a transform and/or conditional needs to be eval
-        sampleEvalCheck: function(sampleDetails, globals, prop) {
-            var samplePromise =  $.Deferred(),
+        sampleEvalCheck: function(sampleDetails, globals) {
+            var samplePromise = $.Deferred(),
                 filterCheck,
                 sampleSource = conf.globalData.sampleSource || {},
                 qfe = new QueryFilterEditor();
 
-            if(sampleDetails.hasCondition) {
-                if(_.isString(sampleDetails.condition)) {
+            if (sampleDetails.hasCondition) {
+                if (_.isString(sampleDetails.condition)) {
                     filterCheck = FilterEvaluator.evaluate(qfe.transform(QueryFilterUtils.convertFrom(sampleDetails.condition)), { "linkQualifier": globals.linkQualifier, "object": sampleSource});
 
-                    if(filterCheck) {
-                        if(sampleDetails.hasTransform) {
-                            ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults){
+                    if (filterCheck) {
+                        if (sampleDetails.hasTransform) {
+                            ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {
                                 samplePromise.resolve({
                                     conditionResults: {
                                         result: true
@@ -244,9 +250,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         });
                     }
                 } else {
-                    ScriptDelegate.evalScript(sampleDetails.condition, { "linkQualifier": globals.linkQualifier, "object": sampleSource}).then(function(conditionResults){
-                            if(sampleDetails.hasTransform && conditionResults === true) {
-                                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults){
+                    ScriptDelegate.evalScript(sampleDetails.condition, { "linkQualifier": globals.linkQualifier, "object": sampleSource}).then(function(conditionResults) {
+                            if (sampleDetails.hasTransform && conditionResults === true) {
+                                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {
                                     samplePromise.resolve({
                                         conditionResults: {
                                             result: conditionResults
@@ -269,7 +275,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         });
                 }
             } else if (sampleDetails.hasTransform) {
-                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults){
+                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {
                     samplePromise.resolve({
                         transformResults: transformResults
                     });
@@ -282,11 +288,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             return samplePromise;
         },
+
         loadMappingPropertiesGrid: function() {
             var _this = this,
-                mapProps = browserStorageDelegate.get(this.mapping.name + "_Properties") || browserStorageDelegate.get("currentMapping").properties,
+                mapProps = this.model.mappingProperties || this.getCurrentMapping().properties,
                 sampleSource = conf.globalData.sampleSource || {},
-                autocompleteProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps),
+                autocompleteProps = _.pluck(this.mapping.properties,"source").slice(0,this.getNumRepresentativeProps()),
                 processDisplayDetails = function(evalResults, gridDetailsPromise, props) {
                     var propCounter = 0;
 
@@ -302,13 +309,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                     cleanData = "";
 
                                 //Sets has condition icon and tooltip
-                                if(_.has(prop, "condition")) {
+                                if (_.has(prop, "condition")) {
                                     hasConditionScript = true;
                                     conditionScript = prop.condition;
                                 }
 
                                 //Logic to find and display source sample
-                                if(!_.isEmpty(sampleSource)) {
+                                if (!_.isEmpty(sampleSource)) {
                                     if(sampleSource[prop.source]){
                                         cleanData = sampleSource[prop.source];
                                     } else if (_.isUndefined(prop.source)){
@@ -325,13 +332,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                 }
 
                                 //Sets transform icon and tooltip
-                                if(_.has(prop, "transform")) {
+                                if (_.has(prop, "transform")) {
                                     hasTransformScript = true;
 
-                                    if(prop.transform.source) {
+                                    if (prop.transform.source) {
                                         transformScript = prop.transform.source;
                                     } else {
-                                        transformScript = "File: " +prop.transform.file;
+                                        transformScript = "File: " + prop.transform.file;
                                     }
                                 }
 
@@ -340,10 +347,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                 }
 
                                 //Display eval results for transform and conditional
-                                if(evalResults !== null && evalResults[propCounter] !== null) {
-                                    if(_.isObject(evalResults[propCounter].conditionResults)) {
-                                        if(evalResults[propCounter].conditionResults.result === true) {
-                                            if(evalResults[propCounter].transformResults) {
+                                if (evalResults !== null && evalResults[propCounter] !== null) {
+                                    if (_.isObject(evalResults[propCounter].conditionResults)) {
+                                        if (evalResults[propCounter].conditionResults.result === true) {
+                                            if (evalResults[propCounter].transformResults) {
                                                 sampleData = evalResults[propCounter].transformResults;
                                             } else {
                                                 sampleData = sampleSource[prop.source];
@@ -352,7 +359,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                             sampleData = "";
                                         }
                                     } else {
-                                        if(evalResults[propCounter].transformResults) {
+                                        if (evalResults[propCounter].transformResults) {
                                             sampleData = evalResults[propCounter].transformResults;
                                         } else {
                                             if(prop["default"]) {
@@ -363,10 +370,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                         }
                                     }
                                 } else if (typeof(prop.source) !== "undefined" && prop.source.length) {
-                                    if(_.isEmpty(sampleSource)){
+                                    if (_.isEmpty(sampleSource)) {
                                         sampleData = "";
                                     } else {
-                                        if(sampleSource[prop.source] === null || sampleSource[prop.source] === undefined) {
+                                        if (sampleSource[prop.source] === null || sampleSource[prop.source] === undefined) {
                                             if (!_.isUndefined(prop["default"])) {
                                                 sampleData = prop["default"];
                                             } else {
@@ -412,42 +419,39 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                             }).value()
                     );
                 },
+
                 gridFromMapProps = function (props) {
                     var propertyDetails = _.clone(props),
                         gridDetailsPromise = $.Deferred(),
                         evalPromises = [],
                         globals = {
-                            source : {
-
-                            }
+                            source : {}
                         },
                         evalCheck,
                         tempDetails = {};
 
                     _this.sampleDisplay = [];
 
-                    if(!_.isEmpty(sampleSource)) {
+                    if (!_.isEmpty(sampleSource)) {
                         _.each(propertyDetails, function (item) {
 
                             globals = {
-                                source: {
-
-                                }
+                                source: {}
                             };
 
                             tempDetails = {};
 
-                            if(item.condition || item.transform) {
+                            if (item.condition || item.transform) {
                                 globals.linkQualifier = _this.currentLinkQualifier;
 
-                                if(sampleSource[item.source]) {
+                                if (sampleSource[item.source]) {
                                     globals.source = sampleSource[item.source];
                                 } else {
                                     globals.source = sampleSource;
                                 }
                             }
 
-                            if(item.condition) {
+                            if (item.condition) {
                                 tempDetails.hasCondition = true;
                                 tempDetails.condition = item.condition;
                             } else {
@@ -461,7 +465,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                 tempDetails.hasTransform = false;
                             }
 
-                            evalCheck = _this.sampleEvalCheck(tempDetails, globals, item);
+                            evalCheck = _this.sampleEvalCheck(tempDetails, globals);
 
                             tempDetails.results = evalCheck;
 
@@ -471,12 +475,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         });
                     }
 
-                    if(evalPromises.length > 0) {
-
+                    if (evalPromises.length > 0) {
                         $.when.apply($, evalPromises).then(function() {
-                            var evalResults = arguments;
-
-                            processDisplayDetails(evalResults, gridDetailsPromise, props);
+                            processDisplayDetails(arguments, gridDetailsPromise, props);
                         }, function(e) {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
                         });
@@ -491,7 +492,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         "name": "source",
                         "label": $.t("templates.mapping.source"),
                         "width": "125px",
-                        "formatter" : function(data, opt, row) {
+                        "formatter": function(data, opt, row) {
                             var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
 
                             if(data !== undefined) {
@@ -511,16 +512,16 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         "width": "30px",
                         "align": "center",
                         "title": false,
-                        "formatter": function(iconDisplay,opt,row){
+                        "formatter": function(iconDisplay,opt,row) {
                             var iconElement = $('<div class="properties-icon-container-parent"><div class="properties-icon-container"></div></div>');
 
-                            if(iconDisplay !== undefined && iconDisplay.hasCondition) {
+                            if (iconDisplay !== undefined && iconDisplay.hasCondition) {
 
                                 if(_.isObject(iconDisplay.conditionScript)) {
                                     if(iconDisplay.conditionScript.source) {
                                         iconDisplay.conditionScript = iconDisplay.conditionScript.source;
                                     } else {
-                                        iconDisplay.conditionScript = "File: " +iconDisplay.conditionScript.file;
+                                        iconDisplay.conditionScript = "File: " + iconDisplay.conditionScript.file;
                                     }
                                 }
 
@@ -528,7 +529,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                 +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +iconDisplay.conditionScript +'</pre></div></span>');
                             }
 
-                            if(iconDisplay !== undefined && iconDisplay.hasTransform) {
+                            if (iconDisplay !== undefined && iconDisplay.hasTransform) {
                                 iconElement.find(".properties-icon-container").append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
                                 +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +iconDisplay.transformScript +'</pre></div></span>');
                             }
@@ -545,7 +546,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
                             previewElement.find(".property-container").append('<div class="title">' +data.property +'</div>');
 
-                            if(_.isString(data) !== true && data.sample.length > 0) {
+                            if (_.isString(data) !== true && data.sample.length > 0) {
                                 previewElement.find(".property-container").append('<div class="text-muted">(' +data.sample +')</div>');
                             } else if (_.isString(data) === true ) {
                                 previewElement.find(".property-container").html(data);
@@ -560,7 +561,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         "width": "25px",
                         "align": "center",
                         "title": false,
-                        "formatter": function(required,opt,row){
+                        "formatter": function(required,opt,row) {
                             return (!required) ? '<i target="' + row.target.property + '" title="' + $.t("common.form.removeAttribute") + ': ' + row.target.property + '" class="fa fa-times removePropertyBtn" style="margin-top:4px;"></i>' : '';
                         }
                     }
@@ -568,7 +569,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             this.data.mapProps = mapProps;
 
-            mappingUtils.setupSampleSearch($("#findSampleSource",this.$el),this.mapping,autocompleteProps, _.bind(function(item){
+            mappingUtils.setupSampleSearch($("#findSampleSource",this.$el), this.mapping, autocompleteProps, _.bind(function(item) {
                 conf.globalData.sampleSource = item;
                 sampleSource = item;
 
@@ -597,15 +598,15 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, id]});
                         }
                     },
+
                     beforeSelectRow: function (rowid, e) {
                         if ($(e.target).hasClass("removePropertyBtn")) {
                             return false;
                         }
                         return true;
                     },
-                    loadComplete: function (data) {
-                        var appendElement;
 
+                    loadComplete: function (data) {
                         if (!data.rows.length) {
                             $('#mappingTable').addRowData("blankRow", {"required": true, "target": $.t("templates.mapping.noPropertiesMapped"), "default": "", "script": "", "hasConditionScript": false});
                             _this.$el.find("#findSampleSource").parent().hide();
@@ -622,11 +623,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                             template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
                         });
 
-                        _this.$el.find("#linkQualifierSelect").change(function(event){
+                        _this.$el.find("#linkQualifierSelect").change(function(event) {
                             var element = event.target;
                             event.preventDefault();
 
-                            if($(element).val().length > 0) {
+                            if ($(element).val().length > 0) {
                                 _this.currentLinkQualifier = $(element).val();
                             }
 
@@ -650,11 +651,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
                         mapProps.splice((item.rowIndex - 1), 0, _this.draggedRow);
 
-                        browserStorageDelegate.set(_this.mapping.name + "_Properties", mapProps);
+                        _this.model.mappingProperties = mapProps;
 
                         _this.setNumRepresentativePropsLine();
                         _this.checkChanges();
                     },
+
                     start: function (ev, ui) {
                         _this.draggedRow = mapProps[(ui.item[0].rowIndex - 1)];
 
@@ -669,9 +671,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         checkAvailableProperties: function(){
             var availableProps;
 
-            availableProps = browserStorageDelegate.get(this.mapping.name + "_AvailableObjects").target.properties || [];
+            availableProps = this.model.availableObjects.target.properties || [];
 
-            if(!availableProps.length || _.difference(availableProps,_.pluck(this.data.mapProps,"target")).length) {
+            if (!availableProps.length || _.difference(availableProps, _.pluck(this.data.mapProps,"target")).length) {
                 this.$el.find('.addProperty').removeProp('disabled');
                 this.$el.find('#allPropertiesMapped').hide();
             } else {
@@ -680,17 +682,17 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             }
         },
 
-        setNumRepresentativePropsLine: function(){
-            $("#mappingTable", this.$el).find("tr:eq(" + this.data.numRepresentativeProps + ") td").css("border-bottom-width","5px");
+        setNumRepresentativePropsLine: function() {
+            $("#mappingTable", this.$el).find("tr:eq(" + this.getNumRepresentativeProps() + ") td").css("border-bottom-width","5px");
         },
 
-        buildAvailableObjectsMap: function(){
+        buildAvailableObjectsMap: function() {
             var sourceProm = $.Deferred(),
                 targetProm = $.Deferred(),
                 currentConnectors = connectorDelegate.currentConnectors(),
                 managedConfig = configDelegate.readEntity("managed");
 
-            return $.when(currentConnectors, managedConfig).then(_.bind(function(currConnectors, managed){
+            return $.when(currentConnectors, managedConfig).then(_.bind(function(currConnectors, managed) {
 
                 _.map(managed.objects,_.bind(function(o){
                     if(this.getCurrentMapping().source === "managed/" + o.name){
@@ -701,28 +703,28 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                     }
                 }, this));
 
-                if(!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")){
+                if (!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")) {
                     _.chain(currConnectors)
-                        .each(function(connector){
-                            _.each(connector.objectTypes, function(objType){
+                        .each(function(connector) {
+                            _.each(connector.objectTypes, function(objType) {
                                 var objTypeMap = {
                                         name: connector.name,
                                         fullName: "system/" + connector.name + "/" + objType
                                     },
                                     getProps = function(){
-                                        return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector){
+                                        return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector) {
                                             return connector.objectTypes[objType].properties;
                                         });
                                     };
 
-                                if(this.getCurrentMapping().source === objTypeMap.fullName){
+                                if (this.getCurrentMapping().source === objTypeMap.fullName) {
                                     getProps().then(function(props){
                                         objTypeMap.properties = _.keys(props).sort();
                                         sourceProm.resolve(objTypeMap);
                                     });
                                 }
-                                if(this.getCurrentMapping().target === objTypeMap.fullName){
-                                    getProps().then(_.bind(function(props){
+                                if (this.getCurrentMapping().target === objTypeMap.fullName) {
+                                    getProps().then(_.bind(function(props) {
                                         this.data.requiredProperties = _.keys(_.omit(props, function(val) { return !val.required; }));
                                         objTypeMap.properties = _.keys(props).sort();
                                         targetProm.resolve(objTypeMap);
@@ -732,34 +734,27 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         }, this);
                 }
 
-                return $.when(sourceProm,targetProm).then(function(source,target){
+                return $.when(sourceProm,targetProm).then(function(source,target) {
                     return { source: source, target: target};
                 });
 
             }, this));
         },
 
-        saveMapping: function(event) {
-            event.preventDefault();
+        saveMapping: function(e) {
+            e.preventDefault();
 
-            var syncMappings;
+            var mapping = this.getCurrentMapping();
 
-            syncMappings = _.map(MappingBaseView.data.syncConfig.mappings,_.bind(function(m){
-                var propertyChanges = browserStorageDelegate.get(this.getCurrentMapping().name + "_Properties");
-                if(m.name === this.getCurrentMapping().name){
-                    if(propertyChanges){
-                        m.properties = propertyChanges;
-                        browserStorageDelegate.remove(this.getCurrentMapping().name + "_Properties");
-                    }
-                }
-                return m;
-            }, this));
+            if (this.model.mappingProperties) {
+                mapping.properties = this.model.mappingProperties;
+                this.model.mappingProperties = null;
 
-            configDelegate.updateEntity("sync", {"mappings" : syncMappings}).then(_.bind(function(){
-                delete MappingBaseView.data.mapping;
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                this.render([this.getCurrentMapping().name]);
-            }, this));
+                this.AbstractMappingSave(mapping, _.bind(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                    this.render();
+                }, this));
+            }
         }
     });
 

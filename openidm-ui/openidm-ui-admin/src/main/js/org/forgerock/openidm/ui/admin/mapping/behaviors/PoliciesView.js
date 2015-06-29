@@ -25,27 +25,26 @@
 /*global define, $, _, require, window */
 
 define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView",
     "bootstrap-dialog"
+
 ], function(
-    AbstractView,
+    MappingAdminAbstractView,
     conf,
     constants,
     eventManager,
     uiUtils,
     ConfigDelegate,
-    BrowserStorageDelegate,
     PoliciesDialogView,
     BootstrapDialog) {
 
-    var PoliciesView = AbstractView.extend({
+    var PoliciesView = MappingAdminAbstractView.extend({
         element: "#policyPattern",
         noBaseTemplate: true,
         template: "templates/admin/mapping/behaviors/PoliciesTemplate.html",
@@ -105,9 +104,9 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
                 changes: false
             };
 
-            this.model.sync = args.sync;
-            this.model.mapping = args.mapping;
-            this.model.mappingName = args.mappingName;
+            this.model.sync = this.getSyncConfig();
+            this.model.mapping = this.getCurrentMapping();
+            this.model.mappingName = this.getMappingName();
             this.model.saveCallback = args.saveCallback;
             this.model.renderedPolicies = args.policies || _.clone(this.model.mapping.policies, true) || [];
 
@@ -205,15 +204,11 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
                 }
             }, this));
 
-
             if (_(newPoliciesFilledIn).isEqual(systemPoliciesList)) {
                 changes = false;
             }
 
             this.render({
-                "sync": this.model.sync,
-                "mapping": this.model.mapping,
-                "mappingName": this.model.mappingName,
                 "saveCallback": this.model.saveCallback,
                 "policies": newPolicies,
                 "changes": changes
@@ -390,8 +385,6 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
                 }
             }, this));
 
-
-
             _(this.model.allPatterns).each(_.bind(function(pattern, name) {
                 currentPattern = _.chain(pattern.policies)
                     .map(function(policy) {
@@ -416,7 +409,6 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
             if (!patternFound) {
                 this.model.currentPattern = "Custom";
             }
-
         },
 
         /**
@@ -464,7 +456,7 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
             event.preventDefault();
 
             _(this.$el.find("#situationalPolicies table .event-hook .delete-policy")).each(_.bind(function(deleteButton, index) {
-                if (deleteButton === event.currentTarget && !$(event.currentTarget).parent().hasClass("disabled")) {
+                if (deleteButton === event.currentTarget && !$(event.currentTarget).hasClass("disabled")) {
                     _(this.data.policies).each(function(policy, index) {
                         this.data.policies[index] = _.pick(policy, "action", "situation", "condition", "postAction");
                         this.data.policies[index].situation = _.invert(this.model.lookup)[this.data.policies[index].situation];
@@ -528,7 +520,6 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
 
         save: function() {
             var policies = [],
-                mapping,
                 _this = this;
 
             _(this.model.renderedPolicies).each(function(policy) {
@@ -545,20 +536,12 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
                 policies.push(policy);
             });
 
-            _(this.model.sync.mappings).each(function(map, index) {
-                if (map.name === this.model.mapping.name) {
-                    this.model.sync.mappings[index].policies = policies;
-                    mapping = map;
-                }
-            }, this);
+            this.model.mapping.policies = policies;
 
-            ConfigDelegate.updateEntity("sync", this.model.sync).then(function() {
+            this.AbstractMappingSave(this.model.mapping, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncPolicySaveSuccess");
-                BrowserStorageDelegate.set("currentMapping", mapping);
-
                 _this.model.saveCallback();
-            });
-
+            }, this));
         }
     });
 
