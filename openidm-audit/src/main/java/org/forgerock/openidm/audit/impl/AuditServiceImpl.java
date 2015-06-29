@@ -82,7 +82,7 @@ import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.util.promise.Function;
+import org.forgerock.util.Function;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -25,7 +25,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.util.promise.Function;
+import org.forgerock.util.Function;
 import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
