@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2014 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS.
   !    
 -->
 <chapter xml:id='chap-policies'
@@ -227,9 +227,9 @@ function required(fullObject, value, params, propName) {
       <para>
        The policy configuration file includes a pointer to the policy
        script, and the configured policies for each component resource.
-       The following includes three sample extracts from the
-       <filename>policy.js</filename> file, illustrating policies for
-       passwords, roles, and mobile telephone numbers.
+       The following includes two sample extracts from the
+       <filename>policy.json</filename> file, illustrating policies for
+       passwords and mobile telephone numbers.
       </para>
 
       <section xml:id="policy-config-file-password">
