@@ -1063,7 +1063,7 @@
    </programlisting>
    <para>
     Note that the default image files are located in
-    <filename>ui/default/enduser/public/images/passphrase</filename>.
+    <filename>ui/default/selfservice/public/images/passphrase</filename>.
    </para>
   </section>
   
@@ -1630,7 +1630,7 @@
     </listitem>
     <listitem>
      <para>
-      <filename>openidm/ui/default/enduser/public/css/common</filename>
+      <filename>openidm/ui/default/selfservice/public/css/common</filename>
      </para>
      <para>
       Contains Bootstrap theme files for the Self-Service UI.
@@ -1638,7 +1638,7 @@
     </listitem>
     <listitem>
      <para>
-      <filename>openidm/ui/default/enduser/public/css/fontawesome</filename>
+      <filename>openidm/ui/default/selfservice/public/css/fontawesome</filename>
      </para>
      <para>
       Contains Font Awesome CSS toolkit files for the Self-Service UI.
@@ -1692,7 +1692,7 @@
    <title>Changing the Default Logo</title>
    <para>
     The default logo is located in the
-    <filename>openidm/ui/default/enduser/public/images</filename> directory.
+    <filename>openidm/ui/default/selfservice/public/images</filename> directory.
     Any file named <filename>logo.png</filename>, added to the directory
     <filename>openidm/ui/extension/images</filename>, will replace the default
     logo when the browser is refreshed.
@@ -1733,9 +1733,9 @@
     <step>
      <para>
       Copy the default locale to a new folder in the same location
-      (<filename>openidm/ui/default/enduser/public/locales</filename>):
+      (<filename>openidm/ui/default/selfservice/public/locales</filename>):
      </para>
-     <screen>$ cd /path/to/openidm/ui/default/enduser/public/locales
+     <screen>$ cd /path/to/openidm/ui/default/selfservice/public/locales
 $ cp -R en/ fr/</screen>
      <para>
       The new locale (<literal>fr</literal>) now contains the default
@@ -1857,7 +1857,7 @@ $ ./startup.sh</screen>
    <listitem>
     <para>
      For the Self-Service UI, find HTML template files in the
-     <filename>enduser/public/templates</filename> subdirectory.
+     <filename>selfservice/public/templates</filename> subdirectory.
     </para>
    </listitem>
   </itemizedlist>
@@ -1895,7 +1895,7 @@ $ ./startup.sh</screen>
     <para>
      Copy the template file to the new subdirectory:
     </para>
-    <screen>$ <userinput>cd /path/to/openidm/ui/default/enduser/public/templates/admin</userinput>
+    <screen>$ <userinput>cd /path/to/openidm/ui/default/selfservice/public/templates/admin</userinput>
 $ <userinput>cp AdminUserRegistrationTemplate.html \
 /path/to/openidm/ui/extension/templates/admin</userinput></screen>
    </step>
