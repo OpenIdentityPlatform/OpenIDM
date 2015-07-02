@@ -3430,8 +3430,8 @@ Properties:
     OpenIDM includes a simple XML file connector. This connector is really
     useful only in a demonstration context and should not be used in the general
     provisioning of XML data stores. It is used in this document to demonstrate
-    provisioning to remote data stores. In real deployments, you should create
-    your own XML file connector by using the Groovy Scripted connector toolkit.
+    provisioning to a remote data store. In real deployments, you should create
+    your own scripted XML file connector by using the Groovy connector toolkit.
    </para>
 
    <para>
