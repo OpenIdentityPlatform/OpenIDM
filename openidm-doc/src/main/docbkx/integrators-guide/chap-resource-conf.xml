@@ -1805,299 +1805,6 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
    configurations interactively, see <xref linkend="connector-wiz"/>.
   </para>
 
-  <section xml:id="xml-file-connector">
-   <title>XML File Connector</title>
-
-   <para>
-    A sample XML connector configuration is provided in
-    <filename>path/to/openidm/samples/provisioners/provisioner.openicf-xml.json</filename>.
-    The following extract of the provisioner configuration shows the main
-    configurable properties.
-   </para>
-
-   <programlisting language="javascript">
-{
-    "connectorRef": {
-        "connectorHostRef": "#LOCAL",
-        "bundleName": "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion": "${openicf.xmlconnector.version}",
-        "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
-    }
-}</programlisting>
-
-   <para>
-    The <literal>connectorHostRef</literal> is optional if the connector server
-    is local.
-   </para>
-   <para>
-    The configuration properties for the XML file connector set the relative
-    path to the file containing the identity data, and also the paths to the
-    required XML schemas.
-   </para>
-   <programlisting language="javascript">{
-    "configurationProperties": {
-        "xsdIcfFilePath" : "&amp;{launcher.project.location}/data/resource-schema-1.xsd",
-        "xsdFilePath" : "&amp;{launcher.project.location}/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "&amp;{launcher.project.location}/data/xmlConnectorData.xml"
-    }
-}</programlisting>
-   <para>
-    <literal>&amp;{launcher.project.location}</literal> refers to the project
-    directory of your OpenIDM instance. For more information, see <link
-    xlink:show="new" xlink:href="integrators-guide#config-default-directories"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Default and
-    Custom Configuration Directories</citetitle></link>. Note that
-    relative paths such as these work only if your connector server runs
-    locally. For remote connector servers, you must specify the absolute path to
-    the schema and data files.
-   </para>
-   <variablelist>
-    <varlistentry>
-     <term>xsdIcfFilePath</term>
-     <listitem>
-      <para>
-       References the XSD file defining schema common to all XML file resources.
-       Do not change the schema defined in this file.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>xsdFilePath</term>
-     <listitem>
-      <para>
-       References custom schema defining attributes specific to your project.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>xmlFilePath</term>
-     <listitem>
-      <para>
-       References the XML file containing account entries.
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
-
-   <section xml:id="example-xml-connector">
-    <title>Example : Using the XML Connector to Reconcile Users in a Remote
-    XML Data Store</title>
-    <para>
-     This sample demonstrates reconciliation of users stored in an XML file on a
-     remote machine. The remote Java Connector Server enables OpenIDM to
-     synchronize the internal OpenIDM repository with the remote XML repository.
-    </para>
-    <bridgehead>Before You Start</bridgehead>
-    <para>
-     This sample assumes that a remote Java Connector Server is installed and
-     running on a host named <literal>remote-host</literal>. For instructions on
-     setting up the remote Java Connector Server, see
-     <xref linkend="java-connector-server-unix" /> or
-     <xref linkend="java-connector-server-windows" />.
-    </para>
-    <para>
-     The sample uses the XML data that is provided in the basic XML
-     reconciliation sample (Sample 1). Before you start, copy the XML data from
-     that sample to an accessible location on the machine that hosts the remote
-     Java Connector Server. For example:
-    </para>
-    <screen><userinput>$ cd path/to/openidm
- $ scp -r samples/sample1/data testuser@remote-host:/home/testuser/xml-sample</userinput>
- <computeroutput>testuser@remote-host's password:
- resource-schema-1.xsd                    100% 4083     4.0KB/s   00:00
- resource-schema-extension.xsd            100% 1351     1.3KB/s   00:00
- xmlConnectorData.xml                     100% 1648     1.6KB/s   00:00</computeroutput></screen>
-    <para>
-     The XML connector runs as a <emphasis>remote connector</emphasis>, that is,
-     on the remote host on which the Java Connector Server is installed. Copy
-     the XML connector .jar from the OpenIDM installation to the
-     <literal>openicf/bundles</literal> directory on the remote host.
-    </para>
-    <screen><userinput>$ cd path/to/openidm
- $ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/bundles</userinput>
- <computeroutput>testuser@remote-host's password:
- xml-connector-${openicf.xmlconnector.version}.jar                100% 4379KB   4.3MB/s   00:00</computeroutput></screen>
-
-    <procedure>
-    <title>Configuring OpenIDM for the XML Connector Example</title>
-     <para>
-      This example uses the configuration of Sample 1, which is effectively
-      your OpenIDM project location. Any configuration changes that you make
-      must therefore be made in the <literal>conf</literal> directory of
-      <literal>sample1</literal>.
-     </para>
-     <step>
-      <para>
-       Copy the remote connector configuration file
-       (<filename>provisioner.openicf.connectorinfoprovider.json</filename>) from
-       the provisioner samples directory to the configuration directory of your
-       OpenIDM project (sample 1).
-      </para>
-      <screen>$ cd path/to/openidm/samples/
- $ cp provisioners/provisioner.openicf.connectorinfoprovider.json sample1/conf</screen>
-     </step>
-     <step>
-      <para>
-       Edit the remote connector configuration file
-       (<literal>provisioner.openicf.connectorinfoprovider.json</literal>) to
-       match your network setup. Also, change the value of the
-       <literal>"connectorsLocation"</literal> property to
-       <literal>"bundles"</literal>, as this is where the connector will be
-       installed on the remote host.
-      </para>
-      <para>
-       The following example indicates that the remote Java Connector server is
-       running on the host <literal>remote-host</literal>, listening on the default
-       port, and configured with a secret key of <literal>Passw0rd</literal>.
-      </para>
-      <programlisting>{
-     "connectorsLocation" : "bundles",
-     "remoteConnectorServers" : [
-         {
-             "name" : "xml",
-             "host" : "remote-host",
-             "port" : 8759,
-             "useSSL" : false,
-             "timeout" : 0,
-             "key" : "Passw0rd"
-         }
-     ]
- }</programlisting>
-     </step>
-     <step>
-      <para>
-       Edit the XML connector configuration file
-       (<literal>provisioner.openicf-xml.json</literal>) in the
-       <literal>sample1/conf</literal> directory as follows.
-      </para>
-      <programlisting>{
-     "name" : "xmlfile",
-     "connectorRef" : {
-         "connectorHostRef" : "xml",
-         "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
-         "bundleVersion" : "${openicf.xmlconnector.version}",
-         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
-     },
-     "configurationProperties" : {
-         "xsdIcfFilePath" : "/home/testuser/xml-sample/data/resource-schema-1.xsd",
-         "xsdFilePath" : "/home/testuser/xml-sample/data/resource-schema-extension.xsd",
-         "xmlFilePath" : "/home/testuser/xml-sample/data/xmlConnectorData.xml"
-     },
- }</programlisting>
-     </step>
-     <step>
-      <itemizedlist>
-       <listitem>
-        <para>
-         The <literal>"connectorHostRef"</literal> property indicates which
-         remote connector server to use, and refers to the
-         <literal>"name"</literal> property defined in the
-         <filename>provisioner.openicf.connectorinfoprovider.json</filename> file.
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         The <literal>bundleVersion : ${openicf.xmlconnector.version}</literal>
-         must be exactly the same as the version of the XML connector that you
-         are using. If you specify a range here, the XML connector version must
-         be included in this range.
-        </para>
-       </listitem>
-       <listitem>
-        <para>
-         The <literal>"configurationProperties"</literal> must specify the
-         absolute path to the data files that you copied to the server on which
-         the Java Connector Server is running.
-        </para>
-       </listitem>
-      </itemizedlist>
-     </step>
-     <step>
-      <para>
-       Start OpenIDM with the configuration for Sample 1.
-      </para>
-      <screen>$ ./startup.sh -p samples/sample1/</screen>
-     </step>
-     <step>
-      <para>
-       In the Felix console, run the following command to show the state of the
-       remote connector:
-      </para>
-      <screen><userinput>-> scr list</userinput>
- <computeroutput>...
- [22] [active] org.forgerock.openidm.provisioner.openicf
- ...</computeroutput></screen>
-      <para>
-       The connector module (<literal>org.forgerock.openidm.provisioner.openicf</literal>)
-       should be <literal>active</literal>, indicating that the remote connector
-       has been installed correctly. If the connector state is not
-       <literal>active</literal>, check the configuration, following the
-       preceding steps.
-      </para>
-      <para>
-       The number of the connector module might differ. Make a note of the number
-       returned.
-      </para>
-     </step>
-     <step>
-      <para>
-       View the configuration of the remote connector, by running the following
-       command, substituting the number of the provisioner module returned in the
-       previous step:
-      </para>
-      <screen>-> scr info 22</screen>
-     </step>
-     <step>
-      <para>
-       To test that the connector has been configured correctly, run a
-       reconciliation operation as follows:
-      </para>
-      <screen>$ curl \
-  --cacert self-signed.crt \
-  --header "X-OpenIDM-Username: openidm-admin" \
-  --header "X-OpenIDM-Password: openidm-admin" \
-  --header "Content-Type: application/json" \
-  --request POST \
-  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
-      <para>
-       If successful, the operation returns a reconciliation ID, similar to the
-       following:
-      </para>
-      <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54","state":"ACTIVE"}</screen>
-     </step>
-     <step>
-      <para>
-       To verify that the users from the remote XML files have been created in
-       the OpenIDM repository, run the following command:
-      </para>
-      <screen><userinput>$ curl \
-  --cacert self-signed.crt \
-  --header "X-OpenIDM-Username: openidm-admin" \
-  --header "X-OpenIDM-Password: openidm-admin" \
-  --request GET \
-  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</userinput>
- <computeroutput>{
-   "remainingPagedResults": -1,
-   "pagedResultsCookie": null,
-   "resultCount": 2,
-   "result": [
-     {
-       "_rev": "0",
-       "_id": "bjensen"
-     },
-     {
-       "_rev": "0",
-       "_id": "scarter"
-     }
-   ]
- }</computeroutput>
-      </screen>
-     </step>
-    </procedure>
-   </section>
-
-  </section>
-
   <section xml:id="ldap-connector">
    <title>Generic LDAP Connector</title>
    <para>
@@ -3713,6 +3420,307 @@ Properties:
     xlink:href="http://openicf.forgerock.org/doc/config-reference/index.html">OpenICF
     Connector Configuration Reference</link>.
    </para>
+
+  </section>
+
+  <section xml:id="xml-file-connector">
+   <title>XML File Connector</title>
+
+   <para>
+    OpenIDM includes a simple XML file connector. This connector is really
+    useful only in a demonstration context and should not be used in the general
+    provisioning of XML data stores. It is used in this document to demonstrate
+    provisioning to remote data stores. In real deployments, you should create
+    your own XML file connector by using the Groovy Scripted connector toolkit.
+   </para>
+
+   <para>
+    A sample XML connector configuration is provided in
+    <filename>path/to/openidm/samples/provisioners/provisioner.openicf-xml.json</filename>.
+    The following extract of the provisioner configuration shows the main
+    configurable properties.
+   </para>
+
+   <programlisting language="javascript">
+    {
+    "connectorRef": {
+    "connectorHostRef": "#LOCAL",
+    "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+    "bundleVersion": "${openicf.xmlconnector.version}",
+    "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+    }
+    }</programlisting>
+
+   <para>
+    The <literal>connectorHostRef</literal> is optional if the connector server
+    is local.
+   </para>
+   <para>
+    The configuration properties for the XML file connector set the relative
+    path to the file containing the identity data, and also the paths to the
+    required XML schemas.
+   </para>
+   <programlisting language="javascript">{
+    "configurationProperties": {
+    "xsdIcfFilePath" : "&amp;{launcher.project.location}/data/resource-schema-1.xsd",
+    "xsdFilePath" : "&amp;{launcher.project.location}/data/resource-schema-extension.xsd",
+    "xmlFilePath" : "&amp;{launcher.project.location}/data/xmlConnectorData.xml"
+    }
+    }</programlisting>
+   <para>
+    <literal>&amp;{launcher.project.location}</literal> refers to the project
+    directory of your OpenIDM instance. For more information, see <link
+    xlink:show="new" xlink:href="integrators-guide#config-default-directories"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Default and
+    Custom Configuration Directories</citetitle></link>. Note that
+    relative paths such as these work only if your connector server runs
+    locally. For remote connector servers, you must specify the absolute path to
+    the schema and data files.
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term>xsdIcfFilePath</term>
+     <listitem>
+      <para>
+       References the XSD file defining schema common to all XML file resources.
+       Do not change the schema defined in this file.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>xsdFilePath</term>
+     <listitem>
+      <para>
+       References custom schema defining attributes specific to your project.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>xmlFilePath</term>
+     <listitem>
+      <para>
+       References the XML file containing account entries.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <section xml:id="example-xml-connector">
+    <title>Example : Using the XML Connector to Reconcile Users in a Remote
+     XML Data Store</title>
+    <para>
+     This sample demonstrates reconciliation of users stored in an XML file on a
+     remote machine. The remote Java Connector Server enables OpenIDM to
+     synchronize the internal OpenIDM repository with the remote XML repository.
+    </para>
+    <bridgehead>Before You Start</bridgehead>
+    <para>
+     This sample assumes that a remote Java Connector Server is installed and
+     running on a host named <literal>remote-host</literal>. For instructions on
+     setting up the remote Java Connector Server, see
+     <xref linkend="java-connector-server-unix" /> or
+     <xref linkend="java-connector-server-windows" />.
+    </para>
+    <para>
+     The sample uses the XML data that is provided in the basic XML
+     reconciliation sample (Sample 1). Before you start, copy the XML data from
+     that sample to an accessible location on the machine that hosts the remote
+     Java Connector Server. For example:
+    </para>
+    <screen><userinput>$ cd path/to/openidm
+     $ scp -r samples/sample1/data testuser@remote-host:/home/testuser/xml-sample</userinput>
+     <computeroutput>testuser@remote-host's password:
+      resource-schema-1.xsd                    100% 4083     4.0KB/s   00:00
+      resource-schema-extension.xsd            100% 1351     1.3KB/s   00:00
+      xmlConnectorData.xml                     100% 1648     1.6KB/s   00:00</computeroutput></screen>
+    <para>
+     The XML connector runs as a <emphasis>remote connector</emphasis>, that is,
+     on the remote host on which the Java Connector Server is installed. Copy
+     the XML connector .jar from the OpenIDM installation to the
+     <literal>openicf/bundles</literal> directory on the remote host.
+    </para>
+    <screen><userinput>$ cd path/to/openidm
+     $ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/bundles</userinput>
+     <computeroutput>testuser@remote-host's password:
+      xml-connector-${openicf.xmlconnector.version}.jar                100% 4379KB   4.3MB/s   00:00</computeroutput></screen>
+
+    <procedure>
+     <title>Configuring OpenIDM for the XML Connector Example</title>
+     <para>
+      This example uses the configuration of Sample 1, which is effectively
+      your OpenIDM project location. Any configuration changes that you make
+      must therefore be made in the <literal>conf</literal> directory of
+      <literal>sample1</literal>.
+     </para>
+     <step>
+      <para>
+       Copy the remote connector configuration file
+       (<filename>provisioner.openicf.connectorinfoprovider.json</filename>) from
+       the provisioner samples directory to the configuration directory of your
+       OpenIDM project (sample 1).
+      </para>
+      <screen>$ cd path/to/openidm/samples/
+       $ cp provisioners/provisioner.openicf.connectorinfoprovider.json sample1/conf</screen>
+     </step>
+     <step>
+      <para>
+       Edit the remote connector configuration file
+       (<literal>provisioner.openicf.connectorinfoprovider.json</literal>) to
+       match your network setup. Also, change the value of the
+       <literal>"connectorsLocation"</literal> property to
+       <literal>"bundles"</literal>, as this is where the connector will be
+       installed on the remote host.
+      </para>
+      <para>
+       The following example indicates that the remote Java Connector server is
+       running on the host <literal>remote-host</literal>, listening on the default
+       port, and configured with a secret key of <literal>Passw0rd</literal>.
+      </para>
+      <programlisting>{
+       "connectorsLocation" : "bundles",
+       "remoteConnectorServers" : [
+       {
+       "name" : "xml",
+       "host" : "remote-host",
+       "port" : 8759,
+       "useSSL" : false,
+       "timeout" : 0,
+       "key" : "Passw0rd"
+       }
+       ]
+       }</programlisting>
+     </step>
+     <step>
+      <para>
+       Edit the XML connector configuration file
+       (<literal>provisioner.openicf-xml.json</literal>) in the
+       <literal>sample1/conf</literal> directory as follows.
+      </para>
+      <programlisting>{
+       "name" : "xmlfile",
+       "connectorRef" : {
+       "connectorHostRef" : "xml",
+       "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
+       "bundleVersion" : "${openicf.xmlconnector.version}",
+       "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
+       },
+       "configurationProperties" : {
+       "xsdIcfFilePath" : "/home/testuser/xml-sample/data/resource-schema-1.xsd",
+       "xsdFilePath" : "/home/testuser/xml-sample/data/resource-schema-extension.xsd",
+       "xmlFilePath" : "/home/testuser/xml-sample/data/xmlConnectorData.xml"
+       },
+       }</programlisting>
+     </step>
+     <step>
+      <itemizedlist>
+       <listitem>
+        <para>
+         The <literal>"connectorHostRef"</literal> property indicates which
+         remote connector server to use, and refers to the
+         <literal>"name"</literal> property defined in the
+         <filename>provisioner.openicf.connectorinfoprovider.json</filename> file.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The <literal>bundleVersion : ${openicf.xmlconnector.version}</literal>
+         must be exactly the same as the version of the XML connector that you
+         are using. If you specify a range here, the XML connector version must
+         be included in this range.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         The <literal>"configurationProperties"</literal> must specify the
+         absolute path to the data files that you copied to the server on which
+         the Java Connector Server is running.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </step>
+     <step>
+      <para>
+       Start OpenIDM with the configuration for Sample 1.
+      </para>
+      <screen>$ ./startup.sh -p samples/sample1/</screen>
+     </step>
+     <step>
+      <para>
+       In the Felix console, run the following command to show the state of the
+       remote connector:
+      </para>
+      <screen><userinput>-> scr list</userinput>
+       <computeroutput>...
+        [22] [active] org.forgerock.openidm.provisioner.openicf
+        ...</computeroutput></screen>
+      <para>
+       The connector module (<literal>org.forgerock.openidm.provisioner.openicf</literal>)
+       should be <literal>active</literal>, indicating that the remote connector
+       has been installed correctly. If the connector state is not
+       <literal>active</literal>, check the configuration, following the
+       preceding steps.
+      </para>
+      <para>
+       The number of the connector module might differ. Make a note of the number
+       returned.
+      </para>
+     </step>
+     <step>
+      <para>
+       View the configuration of the remote connector, by running the following
+       command, substituting the number of the provisioner module returned in the
+       previous step:
+      </para>
+      <screen>-> scr info 22</screen>
+     </step>
+     <step>
+      <para>
+       To test that the connector has been configured correctly, run a
+       reconciliation operation as follows:
+      </para>
+      <screen>$ curl \
+       --cacert self-signed.crt \
+       --header "X-OpenIDM-Username: openidm-admin" \
+       --header "X-OpenIDM-Password: openidm-admin" \
+       --header "Content-Type: application/json" \
+       --request POST \
+       "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+      <para>
+       If successful, the operation returns a reconciliation ID, similar to the
+       following:
+      </para>
+      <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54","state":"ACTIVE"}</screen>
+     </step>
+     <step>
+      <para>
+       To verify that the users from the remote XML files have been created in
+       the OpenIDM repository, run the following command:
+      </para>
+      <screen><userinput>$ curl \
+       --cacert self-signed.crt \
+       --header "X-OpenIDM-Username: openidm-admin" \
+       --header "X-OpenIDM-Password: openidm-admin" \
+       --request GET \
+       "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</userinput>
+       <computeroutput>{
+        "remainingPagedResults": -1,
+        "pagedResultsCookie": null,
+        "resultCount": 2,
+        "result": [
+        {
+        "_rev": "0",
+        "_id": "bjensen"
+        },
+        {
+        "_rev": "0",
+        "_id": "scarter"
+        }
+        ]
+        }</computeroutput>
+      </screen>
+     </step>
+    </procedure>
+   </section>
 
   </section>
 
