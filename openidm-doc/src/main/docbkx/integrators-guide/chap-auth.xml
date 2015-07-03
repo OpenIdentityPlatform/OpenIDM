@@ -987,16 +987,19 @@
       </para>
     </listitem>
     <listitem>
-      <para><filename>openidm/script/access.js</filename></para>
+      <para><filename><replaceable>project-dir</replaceable>/script/access.js</filename></para>
     </listitem>
   </itemizedlist>
   
   <para>
-   OpenIDM calls these scripts for each request, via the
-   <literal>onRequest</literal> hook that is defined in the default
-   <filename>router.json</filename> file. The scripts either throw the string
-   <literal>Access denied</literal>, or nothing. If
-   <literal>Access denied</literal> is thrown, OpenIDM denies the request.
+   OpenIDM calls the <filename>router-authz.js</filename> script for each
+   request, through an <literal>onRequest</literal> hook that is defined in the
+   <filename>router.json</filename> file. <filename>router-authz.js</filename>
+   calls your project's access configuration script
+   (<filename>access.js</filename>) to determine the allowed HTTP requests. If
+   access is denied, according to the configuration defined in
+   <filename>access.js</filename>, the <filename>router-authz.js</filename>
+   script throws an exception, and OpenIDM denies the request.
   </para>
   
   <section xml:id="router-authz-js">
