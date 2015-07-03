@@ -489,13 +489,7 @@ $ ./startup.sh -p samples/sample1</screen>
 
  <section xml:id="sample-running-reconciliation">
   <title>Running Reconciliation</title>
-  
-  <para>Start OpenIDM with the configuration for sample 1.</para>
-  
-  <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/sample1
-  </screen>
-  
+
   <para>
    Reconcile the objects in the resources, either by setting
    <literal>"enabled" : true</literal> in the schedule configuration file
