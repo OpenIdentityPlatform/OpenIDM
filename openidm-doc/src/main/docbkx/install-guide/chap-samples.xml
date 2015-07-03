@@ -1367,14 +1367,16 @@ $ ./startup.sh -p samples/sample2c</screen>
   
   <section xml:id="external-ldap-config-2d">
    <title>External LDAP Configuration</title>
-   <para>Configure the LDAP server as for sample 2,
-   <xref linkend="external-ldap-config-2" />. The LDAP user must have write
-   access to create users from OpenIDM on the LDAP server.</para>
-   
-   <para>In addition, two LDAP Groups should be created, which can be found in 
-   the LDIF file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> 
-   (if they have not already been added through sample 2c):</para>
-   
+   <para>
+    Configure the LDAP server as for sample 2,
+    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
+    access to create users from OpenIDM on the LDAP server.
+   </para>
+   <para>
+    In addition, two LDAP Groups should be created, which can be found in the
+    LDIF file: <filename>openidm/samples/sample2d/data/Example.ldif</filename>
+    (if they have not already been added through sample 2c):
+   </para>
    <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
 ou: Groups
@@ -1389,7 +1391,6 @@ objectClass: top
 
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
 uniqueMember: uid=bjensen,ou=People,dc=example,dc=com
-uniqueMember: uid=jdoe,ou=People,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top
