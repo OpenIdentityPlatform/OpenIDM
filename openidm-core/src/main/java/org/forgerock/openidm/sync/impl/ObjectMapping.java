@@ -1824,7 +1824,7 @@ class ObjectMapping {
                                 break; // terminate UPDATE
                             case DELETE:
                                 if (isLinkingEnabled()) {
-                                    // Create and populate the PendingActionContext for the LINK action
+                                    // Create and populate the PendingActionContext for the UNLINK action
                                     context = PendingAction.createPendingActionContext(context, ReconAction.UNLINK, ObjectMapping.this.name, getSourceObject(), reconId, situation);
                                 }
                                 if (getTargetObjectId() != null && getTargetObject() != null) { // forgiving; does nothing if no target
