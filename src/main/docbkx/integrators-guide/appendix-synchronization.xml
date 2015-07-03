@@ -59,6 +59,7 @@
   "links"            : <replaceable>string</replaceable>,
   "validSource"      : <replaceable>script object</replaceable>,
   "validTarget"      : <replaceable>script object</replaceable>,
+  "sourceCondition"  : <replaceable>key:value pair</replaceable>,
   "correlationQuery" : <replaceable>script object</replaceable>,
   "correlationScript": <replaceable>script object</replaceable>,
   "linkQualifier"    : <replaceable>script object</replaceable>,
@@ -66,15 +67,11 @@
   "policies"         : [ <replaceable>policy object</replaceable>, ... ],
   "onCreate"         : <replaceable>script object</replaceable>,
   "onUpdate"         : <replaceable>script object</replaceable>,
+  "onDelete"         : <replaceable>script object</replaceable>,
   "onLink"           : <replaceable>script object</replaceable>,
   "onUnlink"         : <replaceable>script object</replaceable>,
   "result"           : <replaceable>script object</replaceable>
 }</programlisting>
-
-  <para>
-   The <literal>onCreate</literal>, <literal>onUpdate</literal>,
-   <literal>onLink</literal>, and <literal>onUnlink</literal> scripts
-  </para>
 
   <variablelist xml:id="mapping-object-properties">
    <title>Mapping Object Properties</title>
@@ -137,6 +134,18 @@
       provided in the <literal>"target"</literal> property. If the script is
       not specified, then all target objects are considered valid for
       mapping.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>sourceCondition</term>
+    <listitem>
+     <para>key:value pair, optional</para>
+     <para>
+      A key:value pair that determines if a source object should be included in
+      the mapping. If no <literal>sourceCondition</literal> element (or
+      <literal>validSource</literal> script) is specified, all source objects
+      are included in the mapping.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -216,6 +225,20 @@
       property. Any changes that the script makes to the target object will be
       persisted when the object is finally saved to the target resource. If the
       script throws an exception, the target object update is aborted.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onDelete</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>
+      A script to execute when a target object is to be deleted, after property
+      mappings have been applied. In the root scope, the source object is
+      provided in the <literal>"source"</literal> property, the target object in
+      the <literal>"target"</literal> property, and the link situation that led
+      to the delete operation in the <literal>"situation"</literal> property.
+      If the script throws an exception, the target object deletion is aborted.
      </para>
     </listitem>
    </varlistentry>
