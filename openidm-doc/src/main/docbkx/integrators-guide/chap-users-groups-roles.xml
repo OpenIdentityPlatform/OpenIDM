@@ -43,7 +43,7 @@
   This chapter describes how to work with the default managed objects that are
   provided with OpenIDM. More information about the OpenIDM object model is
   provided in the <link xlink:show="new" xlink:href="integrators-guide#appendix-objects"
-                        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
   Objects Reference</citetitle></link>.
  </para>
 
@@ -61,8 +61,8 @@
    OpenIDM provides RESTful access to managed users, at the context path
    <literal>/openidm/managed/user</literal>. For more information, see
    <link xlink:show="new" xlink:href="install-guide#first-steps-with-rest"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Get Started
-    With the OpenIDM REST Interface</citetitle></link> in the
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Get Started
+   With the OpenIDM REST Interface</citetitle></link> in the
    <citetitle>Installation Guide</citetitle>.
   </para>
  </section>
@@ -1401,10 +1401,46 @@ if (object.org === 'example') {
 
   </section>
 
+ <section xml:id="managed-objects-scripts">
+  <title>Running Scripts on Managed Objects</title>
+  <para>
+   OpenIDM provides a number of <emphasis>hooks</emphasis> that enable you to
+   manipulate managed objects using scripts. These scripts can be triggered
+   during various stages of the lifecycle of the managed object, and are
+   defined in the managed objects configuration file
+   (<filename>managed.json</filename>).
+  </para>
+  <para>
+   The scripts can be triggered when a managed object is created (onCreate),
+   updated (onUpdate), retrieved (onRetrieve), deleted (onDelete), validated
+   (onValidate), or stored in the repository (onStore).
+  </para>
+  <para>
+   In addition, OpenIDM supports the use of post-action scripts for managed
+   objects, including after the creation of an object is complete (postCreate),
+   after the update of an object is complete (postUpdate), and after the
+   deletion of an object (postDelete).
+  </para>
+  <para>
+   The following sample extract of a <literal>managed.json</literal> file runs
+   a script to calculate the effective assignments of a managed object, whenever
+   that object is retrieved from the repository.
+  </para>
+  <programlisting language="javascript">{
+    "name" : "effectiveAssignments",
+    "type" : "virtual",
+    "onRetrieve" : {
+        "type" : "text/javascript",
+        "file" : "roles/effectiveAssignments.js",
+        "effectiveRolesPropName" : "effectiveRoles"
+    }
+}</programlisting>
+ </section>
+
  <section xml:id="sync-encrypted-values">
   <title>Using Encrypted Values</title>
   <indexterm>
-   <primary>Synchronization</primary>
+   <primary>Managed objects</primary>
    <secondary>Encryption</secondary>
   </indexterm>
   <para>

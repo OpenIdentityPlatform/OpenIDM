@@ -777,7 +777,6 @@
      </section>
     </section>
 
-
     <section xml:id="link-qualifier-object">
      <title>Conditions related to the Object Variable</title>
 
@@ -816,7 +815,7 @@
     </section>
 
     <section xml:id="filtering-source-and-target">
-     <title>Filtering Synchronization Objects By Using Scripts</title>
+     <title>Filtering the Objects that are Synchronized</title>
      <variablelist>
       <indexterm>
        <primary>Synchronization</primary>
@@ -828,10 +827,10 @@
        to limit the scope of objects that the connector accesses. For example,
        the LDAP connector allows you to specify base DNs and LDAP filters so
        that you do not need to access every entry in the directory. OpenIDM also
-       allows you to filter what is considered a valid source or valid target
-       for synchronization by using scripts. To apply these filters, use the
-       <literal>validSource</literal>, and <literal>validTarget</literal>
-       properties in your mapping.
+       enables you to filter the source or target objects that are included in a
+       synchronization operation. To apply these filters, use the
+       <literal>validSource</literal>, <literal>validTarget</literal>, or
+       <literal>sourceCondition</literal> properties in your mapping.
       </para>
       <varlistentry>
        <term>validSource</term>
@@ -868,14 +867,51 @@
          is not specified, then all target objects are considered valid for
          mapping.
         </para>
-        <programlisting language="javascript">
-{
+        <programlisting language="javascript">{
     "validTarget": {
         "type": "text/javascript",
         "source": "target.employeeType == 'internal'"
     }
 }
 </programlisting>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>sourceCondition</term>
+       <listitem>
+        <para>
+         The <literal>sourceCondition</literal> element enables you to define an
+         additional set of key-value conditions that must be met in order for a
+         source object to be included in a mapping.
+        </para>
+        <para>
+         This condition is declarative, but functions in the same way as a
+         <literal>validSource</literal> script. <literal>sourceCondition</literal>
+         is used principally to specify that a mapping applies only to a
+         particular role or entitlement.
+        </para>
+        <para>
+         For example, the following <literal>sourceCondition</literal> restricts
+         synchronization to those user objects that have the
+         <literal>"ldap"</literal> assignment as an effective assignment.
+        </para>
+        <programlisting language="javascript">{
+    "mappings": [
+        {
+            "name": "managedUser_systemLdapAccounts",
+            "source": "managed/user",
+            "sourceCondition": {
+                "effectiveAssignments": "ldap"
+            },
+        ...
+        }
+    ]
+}</programlisting>
+        <para>
+         You can, however, define a declarative
+         <literal>sourceCondition</literal> outside of the entitlements context
+         to restrict the source objects that are candidates for synchronization.
+        </para>
        </listitem>
       </varlistentry>
      </variablelist>
@@ -952,14 +988,16 @@
     <primary>Synchronization</primary>
     <secondary>Creating attributes</secondary>
    </indexterm>
-
    <para>
-    OpenIDM enables you to construct and manipulate attributes using scripts
-    that are triggered when an object is created (onCreate), updated (onUpdate),
-    retrieved (onRetrieve), or deleted (onDelete). Additional scripts are
-    available when a managed object requires validation (onValidate), and when
-    an object is about to be stored in the repository (onStore). Similar scripts
-    are available for when a link is created (onLink) or removed (onUnlink).
+    OpenIDM provides a number of <emphasis>hooks</emphasis> that enable you to
+    construct and manipulate attributes using scripts. These scripts can be
+    triggered during various stages of the synchronization process, and are
+    defined as part of the mapping, in the <filename>sync.json</filename> file.
+   </para>
+   <para>
+    The scripts can be triggered when a managed or system object is created
+    (onCreate), updated (onUpdate), or deleted (onDelete). Scripts can also be
+    triggered when a link is created (onLink) or removed (onUnlink).
    </para>
    <para>
     In the default synchronization mapping, changes are
@@ -982,25 +1020,16 @@
     </para>
    </note>
    <para>
-    The following example derives a DN for an LDAP entry when the entry is
-    created in the internal repository.
+    The following sample extract of a <literal>sync.json</literal> file derives
+    a DN for an LDAP entry when the entry is created in the internal repository.
    </para>
-   <programlisting language="javascript">
-{
+   <programlisting language="javascript">{
     "onCreate": {
         "type": "text/javascript",
         "source":
             "target.dn = 'uid=' + source.uid + ',ou=people,dc=example,dc=com'"
     }
 }</programlisting>
-
-   <para>
-    In addition, OpenIDM supports the use of post-action scripts for managed
-    objects, including after the creation of an object is complete (postCreate),
-    after the update of an object is complete (postUpdate), and after the
-    deletion of an object (postDelete). These scripts are called in the managed
-    objects configuration file (<filename>managed.json</filename>).
-   </para>
   </section>
 
   <section xml:id="reusing-links">
@@ -3520,16 +3549,18 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     OpenIDM starts reconciliation and LiveSync by reading a list of objects from
     the resource. For reconciliation, the list includes all objects that are
     available through the connector. For LiveSync, the list contains only
-    changed objects. The connector can filter objects out of the list, too, by
-    using the script specified in the <literal>validSource</literal> property.
+    changed objects. OpenIDM can filter objects out of the list by using the
+    script specified in the <literal>validSource</literal> property, or the
+    conditions defined in the <literal>sourceCondition</literal> property.
    </para>
 
    <para>
     OpenIDM then iterates over the list, checking each entry against the
-    <literal>validSource</literal> filter, and classifying objects according to
-    their situations as described in <xref linkend="sync-situations"/>. OpenIDM
-    uses the list of links for the current mapping to classify objects. Finally,
-    OpenIDM executes the action that is configured for each situation.
+    <literal>validSource</literal> and <literal>sourceCondition</literal>
+    filters, and classifying objects according to their situations as described
+    in <xref linkend="sync-situations"/>. OpenIDM uses the list of links for the
+    current mapping to classify objects. Finally, OpenIDM executes the action
+    that is configured for each situation.
    </para>
 
    <para>
