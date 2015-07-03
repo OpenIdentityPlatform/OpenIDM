@@ -61,7 +61,7 @@
    <para>
     If you develop custom scripts, copy them to the <literal>script/</literal>
     directory for your project, such as
-    <literal>path/to/openidm/script/</literal>.
+    <literal>path/to/openidm/samples/sample2/script/</literal>.
    </para>
 
    <section xml:id="script-json">
@@ -451,22 +451,37 @@
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>The created OpenIDM resource object.</para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>The created OpenIDM resource object.</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Throws</title>
-      <para>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
        An exception is thrown if the object could not be created.
-      </para>
-     </blockquote>
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Example</title>
-      <programlisting language="javascript">openidm.create("managed/user", bjensen, <replaceable>map</replaceable>);</programlisting>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <programlisting language="javascript">openidm.create("managed/user", bjensen, <replaceable>map</replaceable>);</programlisting>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-patch">
@@ -516,25 +531,40 @@
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       The modified OpenIDM resource object.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         The modified OpenIDM resource object.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Throws</title>
-      <para>
-       An exception is thrown if the object could not be updated.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         An exception is thrown if the object could not be updated.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Example</title>
-      <programlisting language="javascript">openidm.patch("managed/user/" + user._id, null,
- [{"operation" : "replace", "field" : "/password", "value": "Passw0rd"}]);</programlisting>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <programlisting language="javascript">openidm.patch("managed/user/" + user._id, null,
+         [{"operation" : "replace", "field" : "/password", "value": "Passw0rd"}]);</programlisting>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-read">
@@ -555,17 +585,27 @@
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       The OpenIDM resource object, or <literal>null</literal> if not found.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         The OpenIDM resource object, or <literal>null</literal> if not found.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Example</title>
-      <programlisting language="javascript">openidm.read("managed/user/"+userId)</programlisting>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <programlisting language="javascript">openidm.read("managed/user/"+userId)</programlisting>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-update">
@@ -607,34 +647,47 @@
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       The modified OpenIDM resource object.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         The modified OpenIDM resource object.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Throws</title>
-      <para>
-       An exception is thrown if the object could not be updated.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         An exception is thrown if the object could not be updated.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
-     <title>Example</title>
-     <para>
-      In this example, the managed user entry is read (with an
-      <literal>openidm.read</literal>, the user entry that has been read is
-      updated with a new description, and the entire updated object is replaced
-      with the new value.
-     </para>
-     <programlisting language="javascript">
-    var user_read = openidm.read('managed/user/' + source._id);
-    user_read['description'] = 'The entry has been updated';
-    openidm.update('managed/user/' + source._id, null, user_read);
-     </programlisting>
-     </blockquote>
+     <variablelist>
+      <title>Example</title>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         In this example, the managed user entry is read (with an
+         <literal>openidm.read</literal>, the user entry that has been read is
+         updated with a new description, and the entire updated object is replaced
+         with the new value.
+        </para>
+        <programlisting language="javascript">var user_read = openidm.read('managed/user/' + source._id);
+user_read['description'] = 'The entry has been updated';
+openidm.update('managed/user/' + source._id, null, user_read);</programlisting>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-delete">
@@ -667,24 +720,39 @@
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       Returns the deleted object if successful.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         Returns the deleted object if successful.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Throws</title>
-      <para>
-       An exception is thrown if the object could not be deleted.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         An exception is thrown if the object could not be deleted.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
-     <title>Example</title>
-      <programlisting language="javascript">openidm.delete('managed/user/'+ user._id, user._rev)</programlisting>
-     </blockquote>
+     <variablelist>
+      <title>Example</title>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <programlisting language="javascript">openidm.delete('managed/user/'+ user._id, user._rev)</programlisting>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-query">
@@ -724,7 +792,7 @@
          query results. The following sample query passes paging parameters and
          sort keys to the query.
         </para>
-        <informalexample><?dbfo pgwide="1"?>
+        <informalexample>
 <programlisting>reconAudit = openidm.query("audit/recon", {
     "_queryFilter": queryFilter,
     "_pageSize": limit,
@@ -768,49 +836,53 @@ openidm.query("managed/user", { "_queryFilter": "/userName sw \"user.1\""}, ["us
       </varlistentry>
      </variablelist>
 
-     <blockquote>
-     <title>Returns</title>
-     <para>
-      The result of the query. A query result includes the following parameters:
-     </para>
      <variablelist>
+      <title>Returns</title>
       <varlistentry>
-       <term>"query-time-ms"</term>
+       <term> </term>
        <listitem>
         <para>
-         The time, in milliseconds, that OpenIDM took to process the query.
+         The result of the query. A query result includes the following
+         parameters:
         </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>"conversion-time-ms"</term>
-       <listitem>
+        <variablelist>
+         <varlistentry>
+          <term>"query-time-ms"</term>
+          <listitem>
+           <para>
+            The time, in milliseconds, that OpenIDM took to process the query.
+           </para>
+          </listitem>
+         </varlistentry>
+         <varlistentry>
+          <term>"conversion-time-ms"</term>
+          <listitem>
+           <para>
+            (For an OrientDB repository only) the time, in milliseconds, taken
+            to convert the data to a JSON object.
+           </para>
+          </listitem>
+         </varlistentry>
+         <varlistentry>
+          <term>"result"</term>
+          <listitem>
+           <para>
+            The list of entries retrieved by the query. The result includes the
+            revision (<literal>"_rev"</literal>) of the entry and any other
+            properties that were requested in the query.
+           </para>
+          </listitem>
+         </varlistentry>
+        </variablelist>
         <para>
-         (For an OrientDB repository only) the time, in milliseconds, taken to
-         convert the data to a JSON object.
+         The following example shows the result of a custom query that requests
+         the ID, user name, and email address of managed users in the
+         repository. For an OrientDB repository, the query would be something
+         like <literal>select _openidm_id, userName, email from managed_user,</literal>.
         </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>"result"</term>
-       <listitem>
-        <para>
-         The list of entries retrieved by the query. The result includes the
-         revision (<literal>"_rev"</literal>) of the entry and any other
-         properties that were requested in the query.
-        </para>
-       </listitem>
-      </varlistentry>
-     </variablelist>
-     <para>
-      The following example shows the result of a custom query that requests the
-      ID, user name, and email address of managed users in the repository. For
-      an OrientDB repository, the query would be something like
-      <literal>select _openidm_id, userName, email from managed_user,</literal>.
-     </para>
-     <programlisting language="javascript">{
-  "conversion-time-ms": 0,
-  "result": [
+        <programlisting language="javascript">{
+    "conversion-time-ms": 0,
+    "result": [
     {
       "email": "bjensen@example.com",
       "userName": "bjensen",
@@ -823,35 +895,47 @@ openidm.query("managed/user", { "_queryFilter": "/userName sw \"user.1\""}, ["us
       "_rev": "0",
       "_id": "cc3bf6f0-949e-4699-9b8e-8c78ce04a287"
     }
-  ],
-  "query-time-ms": 1
+    ],
+    "query-time-ms": 1
 }
       </programlisting>
-     </blockquote>
+       </listitem>
+      </varlistentry>
+  </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Throws</title>
-      <para>
-       An exception is thrown if the given query could not be processed.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         An exception is thrown if the given query could not be processed.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Examples</title>
-      <para>
-       The following sample query uses a <literal>_queryFilter</literal> to
-       query the managed user repository.
-      </para>
-      <programlisting>openidm.query("managed/user",
-{ '_queryFilter' : userIdPropertyName + ' eq "' + security.authenticationId  + '"' });</programlisting>
-      <para>
-       The following sample query references the <literal>for-userName</literal>
-       query, defined in the repository configuration, to query the managed user
-       repository.
-      </para>
-      <programlisting>openidm.query("managed/user",
-{"_queryId": "for-userName", "uid": request.additionalParameters.uid } );</programlisting>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         The following sample query uses a <literal>_queryFilter</literal> to
+         query the managed user repository.
+        </para>
+        <programlisting>openidm.query("managed/user",
+         { '_queryFilter' : userIdPropertyName + ' eq "' + security.authenticationId  + '"' });</programlisting>
+        <para>
+         The following sample query references the <literal>for-userName</literal>
+         query, defined in the repository configuration, to query the managed user
+         repository.
+        </para>
+        <programlisting>openidm.query("managed/user",
+         {"_queryId": "for-userName", "uid": request.additionalParameters.uid } );</programlisting>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-action">
@@ -1097,19 +1181,30 @@ openidm.action('workflow/processinstance/15', {"_action" : "claim"}, params);</p
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       The result of the action may be <literal>null</literal>.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         The result of the action may be <literal>null</literal>.
+        </para>
+       </listitem>
+      </varlistentry>
 
-     <blockquote>
+     </variablelist>
+
+     <variablelist>
       <title>Throws</title>
-      <para>
-       If the action cannot be executed, an exception is thrown.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         If the action cannot be executed, an exception is thrown.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-encrypt">
@@ -1150,20 +1245,31 @@ openidm.action('workflow/processinstance/15', {"_action" : "claim"}, params);</p
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       The value, encrypted with the specified cipher and key.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         The value, encrypted with the specified cipher and key.
+        </para>
+       </listitem>
+      </varlistentry>
 
-     <blockquote>
+     </variablelist>
+
+     <variablelist>
       <title>Throws</title>
-       <para>
-        An exception is thrown if the object could not be encrypted for any
-        reason.
-       </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         An exception is thrown if the object could not be encrypted for any
+         reason.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
      </section>
 
     <section xml:id="function-decrypt">
@@ -1182,21 +1288,32 @@ openidm.action('workflow/processinstance/15', {"_action" : "claim"}, params);</p
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       A deep copy of the value, with any encrypted value decrypted.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         A deep copy of the value, with any encrypted value decrypted.
+        </para>
+       </listitem>
+      </varlistentry>
 
-     <blockquote>
+     </variablelist>
+
+     <variablelist>
       <title>Throws</title>
-      <para>
-       An exception is thrown if the object could not be decrypted for any
-       reason. An error is thrown if the value is passed in as a string - it
-       must be passed in an object.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         An exception is thrown if the object could not be decrypted for any
+         reason. An error is thrown if the value is passed in as a string - it
+         must be passed in an object.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="function-isencrypted">
@@ -1218,21 +1335,32 @@ openidm.action('workflow/processinstance/15', {"_action" : "claim"}, params);</p
       </varlistentry>
      </variablelist>
 
-     <blockquote>
+     <variablelist>
       <title>Returns</title>
-      <para>
-       Boolean, <literal>true</literal> if the value is encrypted, and
-       <literal>false</literal> if it is not encrypted.
-      </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         Boolean, <literal>true</literal> if the value is encrypted, and
+         <literal>false</literal> if it is not encrypted.
+        </para>
+       </listitem>
+      </varlistentry>
 
-     <blockquote>
+     </variablelist>
+
+     <variablelist>
       <title>Throws</title>
-       <para>
-        An exception is thrown if the server is unable to detect whether the
-        value is encrypted, for any reason.
-       </para>
-     </blockquote>
+      <varlistentry>
+       <term> </term>
+       <listitem>
+        <para>
+         An exception is thrown if the server is unable to detect whether the
+         value is encrypted, for any reason.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
     </section>
 
     <section xml:id="logger-functions">
@@ -1306,19 +1434,30 @@ logger = LoggerFactory.getLogger('logger');
        </varlistentry>
       </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Returns</title>
-       <para>
-        A <literal>null</literal> value if successful.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          A <literal>null</literal> value if successful.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Throws</title>
-       <para>
-        An exception is thrown if the message could not be logged.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          An exception is thrown if the message could not be logged.
+         </para>
+        </listitem>
+       </varlistentry>
+
+      </variablelist>
      </section>
 
      <section xml:id="function-logger-error">
@@ -1349,19 +1488,29 @@ logger = LoggerFactory.getLogger('logger');
        </varlistentry>
       </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Returns</title>
-       <para>
-        A <literal>null</literal> value if successful.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          A <literal>null</literal> value if successful.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Throws</title>
-       <para>
-        An exception is thrown if the message could not be logged.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          An exception is thrown if the message could not be logged.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
      </section>
 
      <section xml:id="function-logger-info">
@@ -1392,19 +1541,29 @@ logger = LoggerFactory.getLogger('logger');
        </varlistentry>
       </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Returns</title>
-       <para>
-        A <literal>null</literal> value if successful.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          A <literal>null</literal> value if successful.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Throws</title>
-       <para>
-        An exception is thrown if the message could not be logged.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          An exception is thrown if the message could not be logged.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
      </section>
 
      <section xml:id="function-logger-trace">
@@ -1435,19 +1594,29 @@ logger = LoggerFactory.getLogger('logger');
        </varlistentry>
       </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Returns</title>
-       <para>
-        A <literal>null</literal> value if successful.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          A <literal>null</literal> value if successful.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Throws</title>
-       <para>
-        An exception is thrown if the message could not be logged.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          An exception is thrown if the message could not be logged.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
      </section>
 
      <section xml:id="function-logger-warn">
@@ -1478,19 +1647,30 @@ logger = LoggerFactory.getLogger('logger');
        </varlistentry>
       </variablelist>
 
-      <blockquote>
+      <variablelist>
        <title>Returns</title>
-       <para>
-        A <literal>null</literal> value if successful.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          A <literal>null</literal> value if successful.
+         </para>
+        </listitem>
+       </varlistentry>
 
-      <blockquote>
+      </variablelist>
+
+      <variablelist>
        <title>Throws</title>
-       <para>
-        An exception is thrown if the message could not be logged.
-       </para>
-      </blockquote>
+       <varlistentry>
+        <term> </term>
+        <listitem>
+         <para>
+          An exception is thrown if the message could not be logged.
+         </para>
+        </listitem>
+       </varlistentry>
+      </variablelist>
      </section>
     </section>
     </section>
