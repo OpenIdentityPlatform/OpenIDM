@@ -880,9 +880,9 @@
      membership property on the same assigned system.
     </para>
     <para>
-     To see how effective roles and effective assignments attributes are
-     configured, examine the following
-     <filename>openidm/conf/managed.json</filename> as follows:
+     The following extract of a <filename>managed.json</filename> file shows how
+     the effective roles and effective assignments virtual attributes are
+     calculated.
     </para>
     <programlisting language="java">
 {
