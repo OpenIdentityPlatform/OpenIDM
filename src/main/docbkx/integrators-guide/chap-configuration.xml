@@ -569,8 +569,9 @@
    supported on the <literal>/config</literal> endpoint.
   </para>
   <para>
-   The following example modifies the <filename>router.json</filename> file to
-   remove all filters, effectively bypassing any policy validation.
+   The following example modifies the configuration of the scheduler service
+   to increase the maximum number of threads that are available for the
+   concurrent execution of scheduled tasks.
   </para>
   
   <screen><userinput>$ curl \
@@ -580,26 +581,22 @@
  --header "Content-Type: application/json" \
  --request PUT \
  --data '{
-   "filters" : [
-     {
-       "onRequest" : {
-         "type" : "text/javascript",
-         "file" : "bin/defaults/script/router-authz.js"
-       }
-     }
-   ]
-   }' \
- "https://localhost:8443/openidm/config/router"</userinput>
-<computeroutput>{
-  "filters": [
-    {
-      "onRequest": {
-        "file": "bin/defaults/script/router-authz.js",
-        "type": "text/javascript"
-      }
+    "threadPool": {
+        "threadCount": "20"
+    },
+    "scheduler": {
+        "executePersistentSchedules": "&amp;{openidm.scheduler.execute.persistent.schedules}"
     }
-  ]
-} </computeroutput></screen>
+}' \
+ "https://localhost:8443/openidm/config/scheduler"</userinput>
+<computeroutput>{
+ "threadPool": {
+ "threadCount": "20"
+ },
+ "scheduler": {
+ "executePersistentSchedules": "&amp;{openidm.scheduler.execute.persistent.schedules}"
+ }
+ }</computeroutput></screen>
 
   <para>
    For more information about using the REST API to update objects, see the
