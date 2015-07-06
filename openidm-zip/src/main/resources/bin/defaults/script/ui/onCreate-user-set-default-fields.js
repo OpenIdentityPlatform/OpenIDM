@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
@@ -22,15 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/** 
+/**
  * @author jdabrowski
- * 
- * This script sets default fields. 
+ *
+ * This script sets default fields.
  * It forces that user role is openidm-authorized and account status
  * is active.
- * 
+ *
  * It is run every time new user is created.
- */  
+ */
 
 /*global object */
 
@@ -40,8 +40,16 @@ if (!object.accountStatus) {
     object.accountStatus = 'active';
 }
 
+if(!object.authzRoles) {
+    object.authzRoles = [
+        {
+            "_ref" : "repo/internal/role/openidm-authorized"
+        }
+    ];
+}
+
 if(!object.roles) {
-    object.roles = ['openidm-authorized'];    
+    object.roles = [ ];
 }
 
 if (!object.lastPasswordSet) {

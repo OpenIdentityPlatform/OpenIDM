@@ -1,4 +1,4 @@
-<input type="hidden" class="resourceCollectionArrayValue" propName="{{prop.propName}}" value="{{prop.value}}"/>
+<input type="hidden" class="resourceCollectionArrayValue" propName="{{prop.propName}}" value="{{stringify prop.value}}"/>
 <div class="list-table">
    <ul class="list-group" id="assignments-list">
       <li class="list-group-header">
@@ -12,7 +12,7 @@
          </div>
       </li>
       {{#each prop.value}}
-      <li class="list-group-item resourceListItem" resourcePath="{{this}}">
+      <li class="list-group-item resourceListItem" resourcePath="{{this._ref}}">
          <div class="row">
             <div class="col-xs-1  pull-right deleteArrayItem">
                <div class="btn-group pull-right">

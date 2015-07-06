@@ -3,8 +3,8 @@
 
 
 /**
- * This security context population script is called when the auth module authenticates a 
- * user from a security context which is related to managed/user, and we wish to aggregate 
+ * This security context population script is called when the auth module authenticates a
+ * user from a security context which is related to managed/user, and we wish to aggregate
  * the current security context with the one for the linked managed/user record (if found).
  *
  * global properties - auth module-specific properties from authentication.json for the
@@ -85,21 +85,33 @@
             throw {
                 "code" : 401,
                 "message" : "Access denied, linked managed/user entry is MISSING"
-            };        
+            };
         }
 
         if (managedUser.accountStatus === "inactive") {
             throw {
                 "code" : 401,
                 "message" : "Access denied, user inactive"
-            };        
+            };
         }
 
         security.authorization = {
             "id": managedUser._id,
             "component": "managed/user",
-            "roles": managedUser.roles ?
-                         _.uniq(security.authorization.roles.concat(managedUser.roles)) : 
+            "roles": managedUser.authzRoles ?
+                         _.uniq(
+                             security.authorization.roles.concat(
+                                 _.chain(managedUser.authzRoles)
+                                     .filter(function (r) {
+                                         return org.forgerock.json.resource.ResourceName.valueOf(r._ref).startsWith("repo/internal/role");
+                                     })
+                                     .map(function (r) {
+                                         // appending empty string gets the value from java into a format more familiar to JS
+                                         return org.forgerock.json.resource.ResourceName.valueOf(r._ref).leaf() + "";
+                                     })
+                                     .value()
+                            )
+                        ) :
                          security.authorization.roles
         };
 

@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             objectName = args[1],
             objectName2 = args[2];
 
-        if(objectType === "managed") {
+        if (objectType === "managed") {
             return configDelegate.readEntity("managed").then(function(managed){
                 var managedObject = _.findWhere(managed.objects,{ name: objectName });
 
@@ -53,7 +53,7 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
                     return "invalidObject";
                 }
             });
-        } else {
+        } else if (objectType === "system") {
             return obj.getProvisioner(objectType, objectName).then(function(prov){
                 var schema;
 
@@ -69,6 +69,8 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
                     return "invalidObject";
                 }
             });
+        } else {
+            return $.Deferred().resolve({});
         }
     };
 
