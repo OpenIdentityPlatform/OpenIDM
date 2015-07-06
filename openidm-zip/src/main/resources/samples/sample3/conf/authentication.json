@@ -27,12 +27,16 @@
             {
                 "name" : "MANAGED_USER",
                 "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "file" : "auth/populateRolesFromRelationship.js"
+                    },
                     "queryId" : "credential-query",
                     "queryOnResource" : "managed/user",
                     "propertyMapping" : {
                         "authenticationId" : "username",
                         "userCredential" : "password",
-                        "userRoles" : "roles"
+                        "userRoles" : "authzRoles"
                     },
                     "defaultUserRoles" : [ ]
                 },

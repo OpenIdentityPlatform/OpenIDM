@@ -56,6 +56,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                 if(args) {
                     this.element = args.element;
                     this.data.prop = args.prop;
+
                     this.onChange = args.onChange;
 
                     resourceDelegate.getSchema(this.data.prop.items.resourceCollection.path.split("/")).then(_.bind(function(schema) {
@@ -113,6 +114,14 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                     e.preventDefault();
                 }
 
+                var value = this.$el.parent().find("#autoCompleteResourceCollection_" + this.data.prop.propName).val();
+
+                if (value && value.length) {
+                    this.data.prop.value.push({ "_ref": this.data.prop.items.resourceCollection.path + "/" + value });
+                } else {
+                    return;
+                }
+
                 this.render();
                 this.onChange();
             },
@@ -123,7 +132,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                     e.preventDefault();
                 }
 
-                this.data.prop.value = _.reject(this.data.prop.value, function(val) { return val === path; });
+                this.data.prop.value = _.reject(this.data.prop.value, function(val) { return val._ref === path; });
 
                 this.render();
                 this.onChange();

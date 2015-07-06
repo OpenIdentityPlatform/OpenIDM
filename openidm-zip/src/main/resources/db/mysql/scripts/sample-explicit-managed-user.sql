@@ -9,6 +9,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managed_user` (
     `password` VARCHAR(255),
     `accountStatus` VARCHAR(255),
     `roles` VARCHAR(255),
+    `authzRoles` VARCHAR(255),
     `lastPasswordSet` VARCHAR(255),
     `postalCode` VARCHAR(255),
     `stateProvince` VARCHAR(255),

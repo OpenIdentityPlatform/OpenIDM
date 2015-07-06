@@ -63,7 +63,8 @@
                     "country",
                     "stateProvince",
                     "roles",
-                    "manager"
+                    "manager",
+                    "authzRoles"
                 ],
                 "properties" : {
                     "mail" : {
@@ -112,7 +113,7 @@
                     },
                     "roles" : {
                         "description" : "",
-                        "title" : "Roles",
+                        "title" : "Managed Roles",
                         "viewable" : true,
                         "type" : "array",
                         "items" : {
@@ -123,6 +124,23 @@
                                     "queryFilter" : "true",
                                     "fields" : ["properties/name"],
                                     "sortKeys" : ["properties/name"]
+                                }
+                            }
+                        }
+                    },
+                    "authzRoles" : {
+                        "description" : "",
+                        "title" : "OpenIDM Roles",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string",
+                            "resourceCollection" : {
+                                "path" : "repo/internal/role",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : [ "_id", "description"],
+                                    "sortKeys" : [ "_id" ]
                                 }
                             }
                         }
