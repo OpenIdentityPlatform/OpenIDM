@@ -87,7 +87,7 @@
                     "/sunset" : {
                         "searchable" : true
                     }
-                } 
+                }
             },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
@@ -167,6 +167,12 @@
                     "before" : "before",
                     "after" : "after",
                     "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"}
+            "internal/role" : {
+                "table" : "internalrole",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "description" : "description"
                 }
             },
             "audit/activity" : {

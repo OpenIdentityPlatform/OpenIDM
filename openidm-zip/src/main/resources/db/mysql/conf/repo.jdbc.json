@@ -25,7 +25,7 @@
             "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id LEFT OUTER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id AND complete.propkey=${taskState.completed} INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propvalue is NULL )",
-            
+
             "query-cluster-failed-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))",
             "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id WHERE (prop.propkey = '/type' AND prop.propvalue = 'state')",
             "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})"
@@ -37,22 +37,17 @@
             "for-internalcredentials" : "select * FROM ${_dbSchema}.${_table} WHERE objectid = ${uid}",
             "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
             "for-userName" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${uid}",
-            
+
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username} and accountStatus = 'active'",
             "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
-            
+
             "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
             "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
 
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
 
-            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",            
-            
-            "get-managed-users" : "call ${_dbSchema}.getAllFromTable('${_dbSchema}','${_table}',${orderBy},${orderByDir},${int:_pageSize},${int:_pagedResultsOffset},'userName,givenName,sn,mail,accountStatus')",
-            "get-managed-users-filtered" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%') ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END asc, CASE WHEN ${orderByDir} = 'desc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END desc LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
-            "get-managed-users-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table}",
-            "get-managed-users-filtered-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%')"
+            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}"
         }
     },
     "commands" : {
@@ -100,7 +95,7 @@
                     "/sunset" : {
                         "searchable" : true
                     }
-                } 
+                }
             },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
@@ -113,7 +108,7 @@
                 "searchableDefault" : true
             }
         },
-        "explicitMapping" : { 
+        "explicitMapping" : {
             "link" : {
                 "table" : "links",
                 "objectToColumn" : {

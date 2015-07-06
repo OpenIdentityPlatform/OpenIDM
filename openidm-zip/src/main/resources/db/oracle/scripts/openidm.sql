@@ -2,43 +2,43 @@
 
 
 PROMPT Creating Sequence genericobjects_id_SEQ ...
-CREATE SEQUENCE  genericobjects_id_SEQ  
+CREATE SEQUENCE  genericobjects_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
 -- DROP SEQUENCE configobjects_id_SEQ;
 
 
 PROMPT Creating Sequence configobjects_id_SEQ ...
-CREATE SEQUENCE  configobjects_id_SEQ  
+CREATE SEQUENCE  configobjects_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
 -- DROP SEQUENCE managedobjects_id_SEQ;
 
 
 PROMPT Creating Sequence managedobjects_id_SEQ ...
-CREATE SEQUENCE  managedobjects_id_SEQ  
+CREATE SEQUENCE  managedobjects_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
 -- DROP SEQUENCE schedulerobjects_id_SEQ;
 
 
 PROMPT Creating Sequence schedulerobjects_id_SEQ ...
-CREATE SEQUENCE  schedulerobjects_id_SEQ  
+CREATE SEQUENCE  schedulerobjects_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
 -- DROP SEQUENCE clusterobjects_id_SEQ;
 
 
 PROMPT Creating Sequence clusterobjects_id_SEQ ...
-CREATE SEQUENCE  clusterobjects_id_SEQ  
+CREATE SEQUENCE  clusterobjects_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
-  
+
 -- DROP SEQUENCE objecttypes_id_SEQ;
 
 
 PROMPT Creating Sequence objecttypes_id_SEQ ...
-CREATE SEQUENCE  objecttypes_id_SEQ  
+CREATE SEQUENCE  objecttypes_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
 -- DROP TABLE auditaccess CASCADE CONSTRAINTS;
@@ -76,7 +76,7 @@ CREATE TABLE auditaccess (
 COMMENT ON COLUMN auditaccess.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
 ;
 
-PROMPT Creating Primary Key Constraint PRIMARY on table auditaccess ... 
+PROMPT Creating Primary Key Constraint PRIMARY on table auditaccess ...
 ALTER TABLE auditaccess
 ADD CONSTRAINT PRIMARY_OBJECTID PRIMARY KEY
 (
@@ -101,7 +101,7 @@ CREATE TABLE uinotification (
   notificationSubtype VARCHAR2(255 CHAR)
 );
 
-PROMPT Creating Primary Key Constraint PRIMARY_0 on table uinotification ... 
+PROMPT Creating Primary Key Constraint PRIMARY_0 on table uinotification ...
 ALTER TABLE uinotification
 ADD CONSTRAINT PRIMARY_0 PRIMARY KEY
 (
@@ -212,7 +212,7 @@ CREATE TABLE auditactivity (
 COMMENT ON COLUMN auditactivity.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
 ;
 
-PROMPT Creating Primary Key Constraint PRIMARY_8 on table auditactivity ... 
+PROMPT Creating Primary Key Constraint PRIMARY_8 on table auditactivity ...
 ALTER TABLE auditactivity
 ADD CONSTRAINT PRIMARY_8 PRIMARY KEY
 (
@@ -258,7 +258,7 @@ CREATE TABLE auditrecon (
 COMMENT ON COLUMN auditrecon.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
 ;
 
-PROMPT Creating Primary Key Constraint PRIMARY_1 on table auditrecon ... 
+PROMPT Creating Primary Key Constraint PRIMARY_1 on table auditrecon ...
 ALTER TABLE auditrecon
 ADD CONSTRAINT PRIMARY_1 PRIMARY KEY
 (
@@ -293,7 +293,7 @@ CREATE TABLE auditsync (
 COMMENT ON COLUMN auditsync.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
 ;
 
-PROMPT Creating Primary Key Constraint PRIMARY_13 on table auditsync ... 
+PROMPT Creating Primary Key Constraint PRIMARY_13 on table auditsync ...
 ALTER TABLE auditsync
 ADD CONSTRAINT PRIMARY_13 PRIMARY KEY
 (
@@ -318,7 +318,7 @@ PROMPT Creating Index fk_configobjectproperties_conf on configobjectproperties .
 CREATE INDEX fk_configobjectproperties_conf ON configobjectproperties
 (
   configobjects_id
-) 
+)
 ;
 PROMPT Creating Index idx_configobjectpropert_1 on configobjectproperties ...
 CREATE INDEX idx_configobjectpropert_1 ON configobjectproperties
@@ -341,7 +341,7 @@ CREATE TABLE configobjects (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_3 on table configobjects ... 
+PROMPT Creating Primary Key Constraint PRIMARY_3 on table configobjects ...
 ALTER TABLE configobjects
 ADD CONSTRAINT PRIMARY_3 PRIMARY KEY
 (
@@ -354,13 +354,13 @@ CREATE UNIQUE INDEX idx_configobjects_object ON configobjects
 (
   objecttypes_id,
   objectid
-) 
+)
 ;
 PROMPT Creating Index fk_configobjects_objecttypes on configobjects ...
 CREATE INDEX fk_configobjects_objecttypes ON configobjects
 (
   objecttypes_id
-) 
+)
 ;
 
 -- DROP TABLE genericobjectproperties CASCADE CONSTRAINTS;
@@ -379,7 +379,7 @@ PROMPT Creating Index fk_genericobjectproperties_gen on genericobjectproperties 
 CREATE INDEX fk_genericobjectproperties_gen ON genericobjectproperties
 (
   genericobjects_id
-) 
+)
 ;
 PROMPT Creating Index idx_genericobjectproper_2 on genericobjectproperties ...
 CREATE INDEX idx_genericobjectproper_2 ON genericobjectproperties
@@ -402,7 +402,7 @@ CREATE TABLE genericobjects (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_5 on table genericobjects ... 
+PROMPT Creating Primary Key Constraint PRIMARY_5 on table genericobjects ...
 ALTER TABLE genericobjects
 ADD CONSTRAINT PRIMARY_5 PRIMARY KEY
 (
@@ -415,13 +415,13 @@ CREATE UNIQUE INDEX idx_genericobjects_object ON genericobjects
 (
   objecttypes_id,
   objectid
-) 
+)
 ;
 PROMPT Creating Index fk_genericobjects_objecttypes on genericobjects ...
 CREATE INDEX fk_genericobjects_objecttypes ON genericobjects
 (
   objecttypes_id
-) 
+)
 ;
 
 -- DROP TABLE internaluser CASCADE CONSTRAINTS;
@@ -429,14 +429,21 @@ CREATE INDEX fk_genericobjects_objecttypes ON genericobjects
 
 PROMPT Creating Table internaluser ...
 CREATE TABLE internaluser (
-  objectid VARCHAR2(254 CHAR) NOT NULL,
+  objectid VARCHAR2(255 CHAR) NOT NULL,
   rev VARCHAR2(38 CHAR) NOT NULL,
   pwd VARCHAR2(510 CHAR),
   roles VARCHAR2(1024 CHAR)
 );
 
+PROMPT Creating Table internalrole ...
+CREATE TABLE internalrole (
+  objectid VARCHAR2(255 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  description VARCHAR2(510 CHAR)
+);
 
-PROMPT Creating Primary Key Constraint PRIMARY_2 on table internaluser ... 
+
+PROMPT Creating Primary Key Constraint PRIMARY_2 on table internaluser ...
 ALTER TABLE internaluser
 ADD CONSTRAINT PRIMARY_2 PRIMARY KEY
 (
@@ -459,7 +466,7 @@ CREATE TABLE links (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_4 on table links ... 
+PROMPT Creating Primary Key Constraint PRIMARY_4 on table links ...
 ALTER TABLE links
 ADD CONSTRAINT PRIMARY_4 PRIMARY KEY
 (
@@ -473,7 +480,7 @@ CREATE INDEX idx_links_first ON links
   linktype,
   linkqualifier,
   firstid
-) 
+)
 ;
 PROMPT Creating Index idx_links_second on links ...
 CREATE INDEX idx_links_second ON links
@@ -481,7 +488,7 @@ CREATE INDEX idx_links_second ON links
   linktype,
   linkqualifier,
   secondid
-) 
+)
 ;
 
 -- DROP TABLE security CASCADE CONSTRAINTS;
@@ -495,7 +502,7 @@ CREATE TABLE security (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_11 on table security ... 
+PROMPT Creating Primary Key Constraint PRIMARY_11 on table security ...
 ALTER TABLE security
 ADD CONSTRAINT PRIMARY_11 PRIMARY KEY
 (
@@ -515,7 +522,7 @@ CREATE TABLE securitykeys (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_12 on table securitykeys ... 
+PROMPT Creating Primary Key Constraint PRIMARY_12 on table securitykeys ...
 ALTER TABLE securitykeys
 ADD CONSTRAINT PRIMARY_12 PRIMARY KEY
 (
@@ -540,7 +547,7 @@ PROMPT Creating Index fk_managedobjectproperties_man on managedobjectproperties 
 CREATE INDEX fk_managedobjectproperties_man ON managedobjectproperties
 (
   managedobjects_id
-) 
+)
 ;
 PROMPT Creating Index idx_managedobjectproper_3 on managedobjectproperties ...
 CREATE INDEX idx_managedobjectproper_3 ON managedobjectproperties
@@ -563,7 +570,7 @@ CREATE TABLE managedobjects (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_6 on table managedobjects ... 
+PROMPT Creating Primary Key Constraint PRIMARY_6 on table managedobjects ...
 ALTER TABLE managedobjects
 ADD CONSTRAINT PRIMARY_6 PRIMARY KEY
 (
@@ -576,13 +583,13 @@ CREATE UNIQUE INDEX idx_managedobjects_object ON managedobjects
 (
   objecttypes_id,
   objectid
-) 
+)
 ;
 PROMPT Creating Index fk_managedobjects_objectypes on managedobjects ...
 CREATE INDEX fk_managedobjects_objectypes ON managedobjects
 (
   objecttypes_id
-) 
+)
 ;
 
 -- DROP TABLE schedobjectproperties CASCADE CONSTRAINTS;
@@ -601,7 +608,7 @@ PROMPT Creating Index fk_schedobjectproperties_man on schedobjectproperties ...
 CREATE INDEX fk_schedobjectproperties_man ON schedobjectproperties
 (
   schedulerobjects_id
-) 
+)
 ;
 PROMPT Creating Index idx_schedobjectproperties_3 on schedobjectproperties ...
 CREATE INDEX idx_schedobjectproperties_3 ON schedobjectproperties
@@ -624,7 +631,7 @@ CREATE TABLE schedulerobjects (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_9 on table schedulerobjects ... 
+PROMPT Creating Primary Key Constraint PRIMARY_9 on table schedulerobjects ...
 ALTER TABLE schedulerobjects
 ADD CONSTRAINT PRIMARY_9 PRIMARY KEY
 (
@@ -637,13 +644,13 @@ CREATE UNIQUE INDEX idx_schedulerobjects_object ON schedulerobjects
 (
   objecttypes_id,
   objectid
-) 
+)
 ;
 PROMPT Creating Index fk_schedulerobjects_objectypes on schedulerobjects ...
 CREATE INDEX fk_schedulerobjects_objectypes ON schedulerobjects
 (
   objecttypes_id
-) 
+)
 ;
 
 -- DROP TABLE clusterobjectproperties CASCADE CONSTRAINTS;
@@ -662,7 +669,7 @@ PROMPT Creating Index fk_clusterobjectproperties_man on clusterobjectproperties 
 CREATE INDEX fk_clusterobjectproperties_man ON clusterobjectproperties
 (
   clusterobjects_id
-) 
+)
 ;
 PROMPT Creating Index idx_clusterobjectproperties_3 on clusterobjectproperties ...
 CREATE INDEX idx_clusterobjectproperties_3 ON clusterobjectproperties
@@ -685,7 +692,7 @@ CREATE TABLE clusterobjects (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_10 on table clusterobjects ... 
+PROMPT Creating Primary Key Constraint PRIMARY_10 on table clusterobjects ...
 ALTER TABLE clusterobjects
 ADD CONSTRAINT PRIMARY_10 PRIMARY KEY
 (
@@ -698,13 +705,13 @@ CREATE UNIQUE INDEX idx_clusterobjects_object ON clusterobjects
 (
   objecttypes_id,
   objectid
-) 
+)
 ;
 PROMPT Creating Index fk_clusterobjects_objectypes on clusterobjects ...
 CREATE INDEX fk_clusterobjects_objectypes ON clusterobjects
 (
   objecttypes_id
-) 
+)
 ;
 
 -- DROP TABLE objecttypes CASCADE CONSTRAINTS;
@@ -717,7 +724,7 @@ CREATE TABLE objecttypes (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_7 on table objecttypes ... 
+PROMPT Creating Primary Key Constraint PRIMARY_7 on table objecttypes ...
 ALTER TABLE objecttypes
 ADD CONSTRAINT PRIMARY_7 PRIMARY KEY
 (
@@ -729,7 +736,7 @@ PROMPT Creating Unique Index idx_objecttypes_objecttype on objecttypes...
 CREATE UNIQUE INDEX idx_objecttypes_objecttype ON objecttypes
 (
   objecttype
-) 
+)
 ;
 
 PROMPT Creating Foreign Key Constraint fk_configobjectproperties_conf on table configobjects...
@@ -819,14 +826,14 @@ ENABLE
 
 CREATE OR REPLACE TRIGGER genericobjects_id_TRG BEFORE INSERT ON genericobjects
 FOR EACH ROW
-DECLARE 
+DECLARE
 v_newVal NUMBER(12) := 0;
 v_incval NUMBER(12) := 0;
 BEGIN
   IF INSERTING AND :new.id IS NULL THEN
     SELECT  genericobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
     -- If this is the first time this table have been inserted into (sequence == 1)
-    IF v_newVal = 1 THEN 
+    IF v_newVal = 1 THEN
       --get the max indentity value from the table
       SELECT NVL(max(id),0) INTO v_newVal FROM genericobjects;
       v_newVal := v_newVal + 1;
@@ -837,7 +844,7 @@ BEGIN
       END LOOP;
     END IF;
     --used to emulate LAST_INSERT_ID()
-    --mysql_utilities.identity := v_newVal; 
+    --mysql_utilities.identity := v_newVal;
    -- assign the value from the sequence to emulate the identity column
    :new.id := v_newVal;
   END IF;
@@ -848,14 +855,14 @@ END;
 
 CREATE OR REPLACE TRIGGER configobjects_id_TRG BEFORE INSERT ON configobjects
 FOR EACH ROW
-DECLARE 
+DECLARE
 v_newVal NUMBER(12) := 0;
 v_incval NUMBER(12) := 0;
 BEGIN
   IF INSERTING AND :new.id IS NULL THEN
     SELECT  configobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
     -- If this is the first time this table have been inserted into (sequence == 1)
-    IF v_newVal = 1 THEN 
+    IF v_newVal = 1 THEN
       --get the max indentity value from the table
       SELECT NVL(max(id),0) INTO v_newVal FROM configobjects;
       v_newVal := v_newVal + 1;
@@ -866,7 +873,7 @@ BEGIN
       END LOOP;
     END IF;
     --used to emulate LAST_INSERT_ID()
-    --mysql_utilities.identity := v_newVal; 
+    --mysql_utilities.identity := v_newVal;
    -- assign the value from the sequence to emulate the identity column
    :new.id := v_newVal;
   END IF;
@@ -876,14 +883,14 @@ END;
 
 CREATE OR REPLACE TRIGGER managedobjects_id_TRG BEFORE INSERT ON managedobjects
 FOR EACH ROW
-DECLARE 
+DECLARE
 v_newVal NUMBER(12) := 0;
 v_incval NUMBER(12) := 0;
 BEGIN
   IF INSERTING AND :new.id IS NULL THEN
     SELECT  managedobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
     -- If this is the first time this table have been inserted into (sequence == 1)
-    IF v_newVal = 1 THEN 
+    IF v_newVal = 1 THEN
       --get the max indentity value from the table
       SELECT NVL(max(id),0) INTO v_newVal FROM managedobjects;
       v_newVal := v_newVal + 1;
@@ -894,7 +901,7 @@ BEGIN
       END LOOP;
     END IF;
     --used to emulate LAST_INSERT_ID()
-    --mysql_utilities.identity := v_newVal; 
+    --mysql_utilities.identity := v_newVal;
    -- assign the value from the sequence to emulate the identity column
    :new.id := v_newVal;
   END IF;
@@ -904,14 +911,14 @@ END;
 
 CREATE OR REPLACE TRIGGER clusterobjects_id_TRG BEFORE INSERT ON clusterobjects
 FOR EACH ROW
-DECLARE 
+DECLARE
 v_newVal NUMBER(12) := 0;
 v_incval NUMBER(12) := 0;
 BEGIN
   IF INSERTING AND :new.id IS NULL THEN
     SELECT  clusterobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
     -- If this is the first time this table have been inserted into (sequence == 1)
-    IF v_newVal = 1 THEN 
+    IF v_newVal = 1 THEN
       --get the max indentity value from the table
       SELECT NVL(max(id),0) INTO v_newVal FROM clusterobjects;
       v_newVal := v_newVal + 1;
@@ -922,7 +929,7 @@ BEGIN
       END LOOP;
     END IF;
     --used to emulate LAST_INSERT_ID()
-    --mysql_utilities.identity := v_newVal; 
+    --mysql_utilities.identity := v_newVal;
    -- assign the value from the sequence to emulate the identity column
    :new.id := v_newVal;
   END IF;
@@ -932,14 +939,14 @@ END;
 
 CREATE OR REPLACE TRIGGER schedulerobjects_id_TRG BEFORE INSERT ON schedulerobjects
 FOR EACH ROW
-DECLARE 
+DECLARE
 v_newVal NUMBER(12) := 0;
 v_incval NUMBER(12) := 0;
 BEGIN
   IF INSERTING AND :new.id IS NULL THEN
     SELECT  schedulerobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
     -- If this is the first time this table have been inserted into (sequence == 1)
-    IF v_newVal = 1 THEN 
+    IF v_newVal = 1 THEN
       --get the max indentity value from the table
       SELECT NVL(max(id),0) INTO v_newVal FROM schedulerobjects;
       v_newVal := v_newVal + 1;
@@ -950,7 +957,7 @@ BEGIN
       END LOOP;
     END IF;
     --used to emulate LAST_INSERT_ID()
-    --mysql_utilities.identity := v_newVal; 
+    --mysql_utilities.identity := v_newVal;
    -- assign the value from the sequence to emulate the identity column
    :new.id := v_newVal;
   END IF;
@@ -960,14 +967,14 @@ END;
 
 CREATE OR REPLACE TRIGGER objecttypes_id_TRG BEFORE INSERT ON objecttypes
 FOR EACH ROW
-DECLARE 
+DECLARE
 v_newVal NUMBER(12) := 0;
 v_incval NUMBER(12) := 0;
 BEGIN
   IF INSERTING AND :new.id IS NULL THEN
     SELECT  objecttypes_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
     -- If this is the first time this table have been inserted into (sequence == 1)
-    IF v_newVal = 1 THEN 
+    IF v_newVal = 1 THEN
       --get the max indentity value from the table
       SELECT NVL(max(id),0) INTO v_newVal FROM objecttypes;
       v_newVal := v_newVal + 1;
@@ -978,7 +985,7 @@ BEGIN
       END LOOP;
     END IF;
     --used to emulate LAST_INSERT_ID()
-    --mysql_utilities.identity := v_newVal; 
+    --mysql_utilities.identity := v_newVal;
    -- assign the value from the sequence to emulate the identity column
    :new.id := v_newVal;
   END IF;
@@ -989,5 +996,18 @@ END;
 INSERT INTO internaluser (objectid, rev, pwd, roles) VALUES ('openidm-admin', '0', 'openidm-admin', '["openidm-admin","openidm-authorized"]');
 
 INSERT INTO internaluser (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', '["openidm-reg"]');
+
+INSERT ALL
+    INTO internalrole (objectid, rev, description)
+         VALUES ('openidm-admin', 0, 'Administrative access')
+    INTO internalrole (objectid, rev, description)
+         VALUES ('openidm-authorized', 0, 'Basic minimum user')
+    INTO internalrole (objectid, rev, description)
+         VALUES ('openidm-cert', 0, 'Authenticated via certificate')
+    INTO internalrole (objectid, rev, description)
+         VALUES ('openidm-reg', 0, 'Anonymous access')
+    INTO internalrole (objectid, rev, description)
+         VALUES ('openidm-tasks-manager', 0, 'Allowed to reassign workflow tasks')
+SELECT * FROM dual;
 
 COMMIT;

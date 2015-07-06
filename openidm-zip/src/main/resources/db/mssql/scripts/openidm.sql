@@ -44,7 +44,7 @@ BEGIN TRANSACTION
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='objecttypes' AND xtype='U')
 BEGIN
-CREATE  TABLE [openidm].[objecttypes] 
+CREATE  TABLE [openidm].[objecttypes]
 (
   id NUMERIC(19,0) NOT NULL IDENTITY ,
   objecttype NVARCHAR(255) NOT NULL ,
@@ -58,7 +58,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='genericobjects' AND xtype='U')
 BEGIN
-CREATE  TABLE [openidm].[genericobjects] 
+CREATE  TABLE [openidm].[genericobjects]
 (
   id NUMERIC(19,0) NOT NULL IDENTITY ,
   objecttypes_id NUMERIC(19,0) NOT NULL ,
@@ -66,10 +66,10 @@ CREATE  TABLE [openidm].[genericobjects]
   rev NVARCHAR(38) NOT NULL ,
   fullobject NTEXT NULL ,
 
-  CONSTRAINT fk_genericobjects_objecttypes 
-  	FOREIGN KEY (objecttypes_id) 
-  	REFERENCES [openidm].[objecttypes] (id) 
-  	ON DELETE CASCADE 
+  CONSTRAINT fk_genericobjects_objecttypes
+  	FOREIGN KEY (objecttypes_id)
+  	REFERENCES [openidm].[objecttypes] (id)
+  	ON DELETE CASCADE
   	ON UPDATE NO ACTION,
   PRIMARY KEY CLUSTERED (id),
 );
@@ -94,7 +94,7 @@ CREATE  TABLE [openidm].[genericobjectproperties]
     REFERENCES [openidm].[genericobjects] (id)
     ON DELETE CASCADE
     ON UPDATE NO ACTION
-); 
+);
 CREATE INDEX fk_genericobjectproperties_genericobjects ON [openidm].[genericobjectproperties] (genericobjects_id ASC);
 CREATE INDEX idx_genericobjectproperties_prop ON [openidm].[genericobjectproperties] (propkey ASC, propvalue ASC);
 END
@@ -105,7 +105,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='managedobjects' AND xtype='U')
 BEGIN
-CREATE  TABLE [openidm].[managedobjects] 
+CREATE  TABLE [openidm].[managedobjects]
 (
   id NUMERIC(19,0) NOT NULL IDENTITY ,
   objecttypes_id NUMERIC(19,0) NOT NULL ,
@@ -129,7 +129,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='managedobjectproperties' AND xtype='U')
 BEGIN
-CREATE  TABLE [openidm].[managedobjectproperties] 
+CREATE  TABLE [openidm].[managedobjectproperties]
 (
   managedobjects_id NUMERIC(19,0) NOT NULL ,
   propkey NVARCHAR(255) NOT NULL ,
@@ -151,7 +151,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='configobjects' AND xtype='U')
 BEGIN
-CREATE  TABLE [openidm].[configobjects] 
+CREATE  TABLE [openidm].[configobjects]
 (
   id NUMERIC(19,0) NOT NULL IDENTITY ,
   objecttypes_id NUMERIC(19,0) NOT NULL ,
@@ -196,7 +196,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='links' AND xtype='U')
 BEGIN
-CREATE  TABLE  [openidm].[links] 
+CREATE  TABLE  [openidm].[links]
 (
   objectid NVARCHAR(38) NOT NULL ,
   rev NVARCHAR(38) NOT NULL ,
@@ -216,7 +216,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='security' AND xtype='U')
 BEGIN
-CREATE  TABLE  [openidm].[security] 
+CREATE  TABLE  [openidm].[security]
 (
   objectid NVARCHAR(38) NOT NULL ,
   rev NVARCHAR(38) NOT NULL ,
@@ -231,7 +231,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='securitykeys' AND xtype='U')
 BEGIN
-CREATE  TABLE  [openidm].[securitykeys] 
+CREATE  TABLE  [openidm].[securitykeys]
 (
   objectid NVARCHAR(38) NOT NULL ,
   rev NVARCHAR(38) NOT NULL ,
@@ -246,7 +246,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditrecon' AND xtype='U')
 BEGIN
-CREATE  TABLE  [openidm].[auditrecon] 
+CREATE  TABLE  [openidm].[auditrecon]
 (
   objectid NVARCHAR(38) NOT NULL ,
   transactionid NVARCHAR(56) NOT NULL ,
@@ -279,7 +279,7 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditsync' AND xtype='U')
 BEGIN
-CREATE  TABLE  [openidm].[auditsync] 
+CREATE  TABLE  [openidm].[auditsync]
 (
   objectid NVARCHAR(38) NOT NULL ,
   transactionid NVARCHAR(56) NOT NULL ,
@@ -334,7 +334,7 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditconfig' and xtype='U
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditactivity' and xtype='U')
 BEGIN
-CREATE  TABLE [openidm].[auditactivity] 
+CREATE  TABLE [openidm].[auditactivity]
 (
   objectid NVARCHAR(38) NOT NULL,
   activity NVARCHAR(24) NULL,
@@ -367,13 +367,28 @@ END
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='internaluser' and xtype='U')
 BEGIN
-CREATE  TABLE [openidm].[internaluser] 
+CREATE  TABLE [openidm].[internaluser]
 (
-  objectid NVARCHAR(254) NOT NULL ,
+  objectid NVARCHAR(255) NOT NULL ,
   rev NVARCHAR(38) NOT NULL ,
   pwd NVARCHAR(510) NULL ,
   roles NVARCHAR(1024) NULL ,
-  PRIMARY KEY CLUSTERED (objectid) 
+  PRIMARY KEY CLUSTERED (objectid)
+);
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`internalrole`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='internalrole' and xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[internalrole]
+(
+  objectid NVARCHAR(255) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  description NVARCHAR(510) NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
 );
 END
 
@@ -539,7 +554,7 @@ CREATE  TABLE [openidm].[uinotification] (
   receiverid NVARCHAR(38) NOT NULL ,
   requesterid NVARCHAR(38) NULL ,
   notificationsubtype NVARCHAR(255) NULL ,
-  PRIMARY KEY CLUSTERED (objectid) 
+  PRIMARY KEY CLUSTERED (objectid)
 );
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', uinotification, 'COLUMN', createdate;
 END
@@ -554,6 +569,13 @@ INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES (N'openi
 IF (NOT EXISTS (SELECT objectid FROM openidm.internaluser WHERE objectid = N'anonymous'))
 INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', '["openidm-reg"]');
 
+INSERT INTO openidm.internalrole (objectid, rev, description)
+VALUES
+('openidm-authorized', '0', 'Basic minimum user'),
+('openidm-admin', '0', 'Administrative access'),
+('openidm-cert', '0', 'Authenticated via certificate'),
+('openidm-tasks-manager', '0', 'Allowed to reassign workflow tasks'),
+('openidm-reg', '0', 'Anonymous access');
 
 COMMIT
 GO
