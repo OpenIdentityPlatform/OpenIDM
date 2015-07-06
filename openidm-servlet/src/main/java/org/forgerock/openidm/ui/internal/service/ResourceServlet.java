@@ -13,6 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Portions copyright 2013-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.ui.internal.service;
 
@@ -105,11 +107,17 @@ public final class ResourceServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         logger.debug("GET call on {}", req);
-        
-        String target = req.getPathInfo();
-        if (target == null || "/".equals(target)) {
-            res.sendRedirect(req.getServletPath() + "/index.html");
+
+        // the request pathInfo is always null for root contexts
+        String target = ("/".equals(contextRoot))
+                ? req.getServletPath()
+                : req.getPathInfo();
+        if (target == null || "".equals(target)) {
+            res.sendRedirect(req.getServletPath() + "/");
         } else {
+            if ("/".equals(target)) {
+                target = "/index.html";
+            }
             target = prependSlash(target);
 
             File extFile = null;
@@ -129,7 +137,7 @@ public final class ResourceServlet extends HttpServlet {
                     break;
                 }
             }
-            
+
             // Look in the bundle rather than the servlet context, as we're using shared servlet contexts
             URL url = null;
             if (extFile != null && extFile.exists()) {
