@@ -1746,7 +1746,7 @@ logger = LoggerFactory.getLogger('logger');
        <listitem>
         <para>
          onCreate, onRead, onUpdate, onDelete, onValidate, onRetrieve, onStore,
-         postCreate, postUpdate, and postDelete
+         onSync, postCreate, postUpdate, and postDelete
         </para>
         <para>
          <filename>managed.json</filename> supports only one script per hook. If
@@ -1804,10 +1804,12 @@ logger = LoggerFactory.getLogger('logger');
         <row>
          <entry>correlationQuery</entry>
          <entry>source</entry>
+         <entry><filename>sync.json</filename></entry>
         </row>
         <row>
          <entry>correlationScript</entry>
          <entry>source</entry>
+         <entry><filename>sync.json</filename></entry>
         </row>
         <row>
          <entry>linkQualifier</entry>
@@ -1837,20 +1839,24 @@ logger = LoggerFactory.getLogger('logger');
         <row>
          <entry>onLink</entry>
          <entry>source, target</entry>
+         <entry><filename>sync.json</filename></entry>
         </row>
         <row>
          <entry>onRead</entry>
          <entry><para>object, when called from either an object or a property storage trigger</para>
           <para>property, only when called from a property storage trigger</para>
          </entry>
+         <entry><filename>managed.json</filename></entry>
         </row>
         <row>
          <entry>onStore</entry>
          <entry>object, property</entry>
+         <entry><filename>managed.json</filename></entry>
         </row>
         <row>
          <entry>onUnlink</entry>
          <entry>source, target</entry>
+         <entry><filename>sync.json</filename></entry>
         </row>
         <row>
          <entry>onUpdate</entry>
@@ -1865,6 +1871,12 @@ logger = LoggerFactory.getLogger('logger');
         <row>
          <entry>onValidate</entry>
          <entry>object, property</entry>
+         <entry><filename>managed.json</filename></entry>
+        </row>
+        <row>
+         <entry>onSync</entry>
+         <entry>syncResults, request, oldObject, newObject</entry>
+         <entry><filename>managed.json</filename></entry>
         </row>
         <row>
          <entry>postCreate</entry>
@@ -1895,13 +1907,14 @@ logger = LoggerFactory.getLogger('logger');
         <row>
          <entry>validSource</entry>
          <entry>source</entry>
+         <entry><filename>sync.json</filename></entry>
         </row>
         <row>
          <entry>validTarget</entry>
          <entry>target</entry>
+         <entry><filename>sync.json</filename></entry>
         </row>
        </tbody>
-
       </tgroup>
 
      </table>

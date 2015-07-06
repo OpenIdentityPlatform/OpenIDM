@@ -311,6 +311,29 @@
        </para>
       </listitem>
      </varlistentry>
+     <varlistentry>
+      <term>onSync</term>
+      <listitem>
+       <para>
+        Called when a managed object is changed, and the change triggers an
+        implicit synchronization operation. The implicit synchronization
+        operation is triggered by calling the sync service, which attempts to
+        to go through all the configured managed-system mappings, defined in
+        <filename>sync.json</filename>. The sync service returns either a
+        response or an error. For both the response and the error, script that
+        is referenced by the <literal>onSync</literal> hook is called.
+       </para>
+       <para>
+        You can use this hook to inject business logic when the sync service
+        either fails or succeeds to synchronize all applicable mappings. See
+        <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+        xlink:href="integrators-guide#sync-failure-compensation"><citetitle>Configuring
+        Synchronization Failure Compensation</citetitle></link> for example of
+        how the <literal>onSync</literal> hook is used to revert partial
+        successful synchronization operations.
+       </para>
+      </listitem>
+     </varlistentry>
     </variablelist>
    </section>
 
@@ -488,8 +511,7 @@
 
     <para>Specifies the configuration of each managed object.</para>
 
-    <programlisting language="javascript">
-{
+    <programlisting language="javascript">{
   "name"      : <replaceable>string</replaceable>,
   "schema"    : <replaceable>json-schema object</replaceable>,
   "onCreate"  : <replaceable>script object</replaceable>,
@@ -502,6 +524,7 @@
   "onValidate": <replaceable>script object</replaceable>,
   "onRetrieve": <replaceable>script object</replaceable>,
   "onStore"   : <replaceable>script object</replaceable>,
+  "onSync"   : <replaceable>script object</replaceable>,
   "properties": [ <replaceable>property-configuration object</replaceable>, ... ]
 }</programlisting>
 
@@ -620,6 +643,20 @@
       the root scope as an object property. The script may change the
       object. If an exception is thrown, then object storage
       fails.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onSync</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>
+       A script object to trigger when a change to a managed object triggers an
+       implicit synchronization operation. The script has access to the
+       <literal>syncResults</literal> object, the <literal>request</literal>
+       object, the state of the object before the change
+       (<literal>oldObject</literal>) and the state of the object after the
+       change (<literal>newObject</literal>). The script may change the object.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
