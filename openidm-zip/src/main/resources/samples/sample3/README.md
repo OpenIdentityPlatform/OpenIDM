@@ -258,7 +258,7 @@ Run the Sample
         "lastPasswordAttempt" : "Wed Oct 22 2014 09:51:31 GMT-0700 (PDT)",
         "address2" : "",
         "givenName" : "Rowley",
-        "effectiveRoles" : [ "openidm-authorized" ],
+        "effectiveRoles" : [ ],
         "country" : "",
         "city" : "",
         "lastPasswordSet" : "",

@@ -21,9 +21,9 @@
                 }
                 
                 user.effectiveRoles.each {
-                    role = roles.find {e -&gt; e.rid.equals(it)};
+                    role = roles.find {e -&gt; e.rid.equals(it._ref)};
                     if (role != null) {
-                        role.dynamic = !user.roles.contains(it);
+                        role.dynamic = !user.roles.contains(it._ref);
                         role.actualManaged = true;
                         role.newManaged = true;
                     }

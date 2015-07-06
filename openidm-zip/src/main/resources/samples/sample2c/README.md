@@ -92,7 +92,7 @@ Run The Sample In OpenIDM
           "lastPasswordAttempt" : "Wed Nov 19 2014 15:12:14 GMT-0800 (PST)",
           "address2" : "",
           "givenName" : "Barbara",
-          "effectiveRoles" : [ "openidm-authorized" ],
+          "effectiveRoles" : [ ],
           "country" : "",
           "city" : "",
           "lastPasswordSet" : "",

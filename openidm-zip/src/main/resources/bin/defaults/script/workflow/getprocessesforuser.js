@@ -64,14 +64,10 @@ if (!request.additionalParameters || (!request.additionalParameters.userId && !r
         return users[userId];
     },
     
-    contains = function(object, items) {
+    containsRole = function(object, items) {
         var i;
-        if (typeof items === "string") {
-            items = items.split(',');
-        }
-        
         for (i = 0; i < items.length; i++) {
-            if (items[i] === object) {
+            if (items[i]._ref !== null && object._ref !== null && items[i]._ref === object._ref) {
                 return true;
             }
         }
@@ -92,7 +88,7 @@ if (!request.additionalParameters || (!request.additionalParameters.userId && !r
             requiresRole = props.requiresRole;
             
             if (processDefinition[property].match(matches)) {
-                if (contains(requiresRole, userRoles)) {
+                if (containsRole(requiresRole, userRoles)) {
                     return true;
                 }
             }

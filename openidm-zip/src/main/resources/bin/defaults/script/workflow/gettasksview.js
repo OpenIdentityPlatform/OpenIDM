@@ -176,10 +176,24 @@ if (request.method !== "query") {
         for (i = 0; i < userCandidateTasks.length; i++) {
             tasksUniqueMap[userCandidateTasks[i]._id] = userCandidateTasks[i];
         }
-        
+
+        var roleRefs = "";
+        if (typeof roles === "string") {
+            roleRefs = roles;
+        } else {
+            var roleRefArray = [];
+            for (var i = 0; i < roles.length; i++) {
+                if (roles[i]._ref !== null) {
+                    roleRefArray.push(roles[i]._ref);
+                }
+            }
+            if (roleRefArray.length > 0) {
+                roleRefs = join(roleRefArray, ",");
+            }
+        }
         userGroupCandidateTasksQueryParams = {
           "_queryId": "filtered-query",
-          "taskCandidateGroup": ((typeof roles === "string") ? roles : join(roles,","))
+          "taskCandidateGroup": roleRefs
         };
         userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
         for (i = 0; i < userGroupCandidateTasks.length; i++) {

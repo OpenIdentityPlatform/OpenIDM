@@ -227,7 +227,7 @@ Therefore you can assign the Employee role by using:
                  ]' \
                'https://localhost:8443/openidm/managed/user/8ff9639f-2a89-48a2-a0fd-9df4d5297eeb'
 
-               {"displayName":"Barbara Jensen","description":"Created for OpenIDM","givenName":"Barbara","mail":"bjensen@example.com","telephoneNumber":"1-360-229-7105","sn":"Jensen","userName":"bjensen","ldapGroups":["cn=openidm2,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized","managed/role/Employee"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized","managed/role/Employee"],"_id":"8ff9639f-2a89-48a2-a0fd-9df4d5297eeb","_rev":"4","effectiveAssignments":{"ldap":{"attributes":[{"name":"employeeType","value":"Employee","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Employee"}]}}}
+               {"displayName":"Barbara Jensen","description":"Created for OpenIDM","givenName":"Barbara","mail":"bjensen@example.com","telephoneNumber":"1-360-229-7105","sn":"Jensen","userName":"bjensen","ldapGroups":["cn=openidm2,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized","managed/role/Employee"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/Employee"}],"_id":"8ff9639f-2a89-48a2-a0fd-9df4d5297eeb","_rev":"4","effectiveAssignments":{"ldap":{"attributes":[{"name":"employeeType","value":"Employee","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Employee"}]}}}
 
 Let's take a closer look at bjensen's entry for what we're really interested
 in, i.e. the roles, effective roles and effective assignments:
@@ -243,7 +243,7 @@ in, i.e. the roles, effective roles and effective assignments:
     "_id" : "8ff9639f-2a89-48a2-a0fd-9df4d5297eeb",
     "userName" : "bjensen",
     "roles" : [ "openidm-authorized", "managed/role/Employee" ],
-    "effectiveRoles" : [ "openidm-authorized", "managed/role/Employee" ],
+    "effectiveRoles" : [ { "_ref" : "managed/role/Employee" } ],
     "effectiveAssignments" : {
       "ldap" : {
         "attributes" : [ {
@@ -452,7 +452,7 @@ Now we can update jdoe's entry with the Contractor role:
                  ]' \
                'https://localhost:8443/openidm/managed/user/3f9ada28-2809-4909-aadf-815567b00a4d'
 
-               {"displayName":"John Doe","description":"Created for OpenIDM","givenName":"John","mail":"jdoe@example.com","telephoneNumber":"1-415-599-1100","sn":"Doe","userName":"jdoe","ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized","managed/role/Contractor"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized","managed/role/Contractor"],"effectiveAssignments":{"ldap":{"attributes":[{"name":"ldapGroups","value":["cn=Contractors,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Contractor"},{"name":"employeeType","value":"Contractor","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Contractor"}]}},"_id":"3f9ada28-2809-4909-aadf-815567b00a4d","_rev":"2"}
+               {"displayName":"John Doe","description":"Created for OpenIDM","givenName":"John","mail":"jdoe@example.com","telephoneNumber":"1-415-599-1100","sn":"Doe","userName":"jdoe","ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized","managed/role/Contractor"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/Contractor"}],"effectiveAssignments":{"ldap":{"attributes":[{"name":"ldapGroups","value":["cn=Contractors,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Contractor"},{"name":"employeeType","value":"Contractor","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Contractor"}]}},"_id":"3f9ada28-2809-4909-aadf-815567b00a4d","_rev":"2"}
 
 Let's now take a look at jdoe's entry in order to make sure that the proper
 employee type has been set and that jdoe has been added to the Contractors
@@ -525,7 +525,7 @@ that is used in the request's URL:
                  ]' \
                'https://localhost:8443/openidm/managed/user/3f9ada28-2809-4909-aadf-815567b00a4d'
 
-               {"displayName":"John Doe","description":"Created for OpenIDM","givenName":"John","mail":"jdoe@example.com","telephoneNumber":"1-415-599-1100","sn":"Doe","userName":"jdoe","ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"_id":"3f9ada28-2809-4909-aadf-815567b00a4d","_rev":"3","effectiveAssignments":{}}
+               {"displayName":"John Doe","description":"Created for OpenIDM","givenName":"John","mail":"jdoe@example.com","telephoneNumber":"1-415-599-1100","sn":"Doe","userName":"jdoe","ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"_id":"3f9ada28-2809-4909-aadf-815567b00a4d","_rev":"3","effectiveAssignments":{}}
 
 This results in jdoe's entry in OpenDJ not belonging to the Contractors group
 anymore and its employee type being undefined."

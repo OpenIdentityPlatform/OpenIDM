@@ -35,31 +35,23 @@ if (rolesPropName === undefined) {
 }
 logger.trace("Configured rolesPropName: {}", rolesPropName);
 
-var effectiveRoles = [];
 var directRoles = object[rolesPropName];
-if (directRoles != null)  {
-    if (typeof directRoles === 'string') { 
-        // Basic compatibility with roles in comma separated format
-        effectiveRoles = directRoles.split(',');
-    }  else {
-        effectiveRoles = directRoles;
-    }
-}
+var effectiveRoles = directRoles === null ? [] : directRoles;
 
 // This is the location to expand to dynamic roles, 
 // project role script return values can then be added via
 // effectiveRoles = effectiveRoles.concat(dynamicRolesArray);
 if (object.department === 'Human Resources') {
-    effectiveRoles = effectiveRoles.concat(['managed/role/human-resources']);
+    effectiveRoles = effectiveRoles.concat([{"_ref":"managed/role/human-resources"}]);
 }
 if (object.department === 'Production Planning') {
-    effectiveRoles = effectiveRoles.concat(['managed/role/production-planning']);
+    effectiveRoles = effectiveRoles.concat([{"_ref":"managed/role/production-planning"}]);
 }
 if (object.department === 'Sales & Distribution') {
-    effectiveRoles = effectiveRoles.concat(['managed/role/sales-distribution']);
+    effectiveRoles = effectiveRoles.concat([{"_ref":"managed/role/sales-distribution"}]);
 }
 if (object.department === 'Treasury & Payments') {
-    effectiveRoles = effectiveRoles.concat(['managed/role/treasury-payments']);
+    effectiveRoles = effectiveRoles.concat([{"_ref":"managed/role/treasury-payments"}]);
 }
 
 effectiveRoles;

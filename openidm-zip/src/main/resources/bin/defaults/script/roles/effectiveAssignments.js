@@ -44,8 +44,8 @@ if (effectiveRoles != null)  {
         var roleId = effectiveRoles[i];
 
         // Only try to retrieve role details for role ids in URL format
-        if (roleId != null && roleId.indexOf("/") != -1) {
-            var roleInfo =  openidm.read(roleId);
+        if (roleId !== null && roleId._ref !== null && roleId._ref.indexOf("managed/role") != -1) {
+            var roleInfo =  openidm.read(roleId._ref);
             logger.debug("Role info read: {}", roleInfo);
 
             if (roleInfo != null) {
@@ -58,7 +58,7 @@ if (effectiveRoles != null)  {
                         "name" : assignmentName,
                         "attributes" : assignment.attributes
                     };
-                    effectiveAssignment["assignedThrough"] = roleId;
+                    effectiveAssignment["assignedThrough"] = roleId._ref;
                     if (typeof onAssignment !== "undefined" && onAssignment !== null) {
                         effectiveAssignment["onAssignment"] = onAssignment;
                     }
@@ -73,7 +73,7 @@ if (effectiveRoles != null)  {
                     logger.trace("effectiveAssignment: {}", effectiveAssignment);
                 }
             } else {
-                logger.debug("No role details could be read from: {}", roleId);
+                logger.debug("No role details could be read from: {}", roleId._ref);
             }
         } else {
             logger.debug("Role does not point to a resource, will not try to retrieve assignment details for {}", roleId);
