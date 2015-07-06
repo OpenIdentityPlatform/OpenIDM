@@ -1413,7 +1413,9 @@ if (object.org === 'example') {
   <para>
    The scripts can be triggered when a managed object is created (onCreate),
    updated (onUpdate), retrieved (onRetrieve), deleted (onDelete), validated
-   (onValidate), or stored in the repository (onStore).
+   (onValidate), or stored in the repository (onStore). A script can also be
+   triggered when a change to a managed object triggers an implicit
+   synchronization operation (onSync).
   </para>
   <para>
    In addition, OpenIDM supports the use of post-action scripts for managed
