@@ -806,9 +806,6 @@ Content-Length: 89
     <term>PATCH</term>
     <listitem>
      <para>Performs a partial modification of a managed object.</para>
-     <para>See the <link xlink:show="new"
-     xlink:href="http://tools.ietf.org/html/draft-pbryan-json-patch-04">JSON
-     Patch Internet-Draft</link> for details.</para>
      <para>Example Request</para>
      <programlisting language="http">
 PATCH /openidm/managed/user/5752c0fd9509
