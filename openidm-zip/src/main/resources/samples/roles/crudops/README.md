@@ -200,7 +200,7 @@ Let's use Felicitas Doe, the user we encounter in sample2b, as our test user:
                 }' \
                'https://localhost:8443/openidm/managed/user?_action=create'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"1"}
+               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"1"}
 
 As can be seen from the result output, our new user has only one role: openidm-
 authorized; this role is assigned automatically when new users are created.
@@ -226,7 +226,7 @@ a pointer to the role itself:
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized",["managed/role/Employee"]],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized","managed/role/Employee"],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"2"}
+               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized",["managed/role/Employee"]],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref","managed/role/Employee"}],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"2"}
 
 Let's take a closer look at Felicitas' entry using the query filter mechanism:
 
@@ -241,7 +241,7 @@ Let's take a closer look at Felicitas' entry using the query filter mechanism:
                    "_id" : "be30da0b-4c84-42c9-81bd-348a7779e840",
                    "userName" : "fdoe",
                    "roles" : [ "openidm-authorized", "managed/role/Employee" ],
-                   "effectiveRoles" : [ "openidm-authorized", "managed/role/Employee" ]
+                   "effectiveRoles" : [ { "_ref" : "managed/role/Employee" } ]
                  } ],
                  "resultCount" : 1,
                  "pagedResultsCookie" : null,
@@ -275,7 +275,7 @@ resulting PATCH request would look as follows:
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"5","effectiveAssignments":{}}
+               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"5","effectiveAssignments":{}}
 
 Our user now only has the original _openidm-authorized_ role and has lost the
 _Employee_ role.
@@ -304,7 +304,7 @@ with server-side generated identifier:
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized","managed/role/c22316ba-2096-4272-af10-9b17c17e555b"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized","managed/role/c22316ba-2096-4272-af10-9b17c17e555b"],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"6","effectiveAssignments":{}}
+               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized","managed/role/c22316ba-2096-4272-af10-9b17c17e555b"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/c22316ba-2096-4272-af10-9b17c17e555b"}],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"6","effectiveAssignments":{}}
 
 Now let's try and delete the Contractor role:
 
@@ -335,7 +335,7 @@ We must first deallocate that role from the user entry:
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":["openidm-authorized"],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"7","effectiveAssignments":{}}
+               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"7","effectiveAssignments":{}}
 
 Now let's try and delete the Contractor role again:
 
