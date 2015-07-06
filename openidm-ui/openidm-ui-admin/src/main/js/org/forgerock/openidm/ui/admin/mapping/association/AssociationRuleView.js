@@ -77,8 +77,8 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
 
             // Legacy Support
             if(_.has(this.model.mapping, "correlationQuery") && !_.isArray(this.model.mapping.correlationQuery)) {
-                args.mapping.correlationQuery.linkQualifier = "default";
-                args.mapping.correlationQuery = [this.model.mapping.correlationQuery];
+                this.model.mapping.correlationQuery.linkQualifier = "default";
+                this.model.mapping.correlationQuery = [this.model.mapping.correlationQuery];
             }
 
             this.data.correlationQueries = _.clone(this.model.mapping.correlationQuery, true);
