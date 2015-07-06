@@ -125,10 +125,6 @@ public class ObjectClassInfoHelper {
                 if (field.isEmpty() || returnResource || !Resource.FIELD_CONTENT_ID.equals(field.leaf()) || !Resource.FIELD_CONTENT_REVISION.equals(field.leaf())){
                     returnResource = true;
                 }
-                if (field.isEmpty()) {
-                    attrsToGet.addAll(attributesReturnedByDefault);
-                    continue;
-                }
                 
                 for (AttributeInfoHelper attribute : attributes) {
                     if (attribute.getName().equals(field.leaf()) && attribute.getAttributeInfo().isReadable()) {
