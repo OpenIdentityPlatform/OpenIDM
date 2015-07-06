@@ -186,7 +186,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private static final ConcurrentMap<String, Object> propertiesCache = new ConcurrentHashMap<String, Object>();
 
     private enum Action {
-        eval
+        compile, eval
     }
     
     private BundleWatcher<ManifestEntry> manifestWatcher;
@@ -609,6 +609,15 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 throw new NotSupportedException("Actions are not supported for resource instances");
             }
             switch (request.getActionAsEnum(Action.class)) {
+                case compile:
+                    if (scriptEntry.isActive()) {
+                        // just get the script - compilation technically happened above in takeScript
+                        scriptEntry.getScript(context);
+                        handler.handleResult(new JsonValue(true));
+                    } else {
+                        throw new ServiceUnavailableException();
+                    }
+                    break;
                 case eval:
                     if (scriptEntry.isActive()) {
                         Script script = scriptEntry.getScript(context);
