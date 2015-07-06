@@ -24,7 +24,7 @@
             "query-all-count" : "SELECT COUNT(obj.fullobject) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "for-userName" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE  json_extract_path_text(fullobject, 'userName') = ${uid} AND objtype.objecttype = ${_resource}",
             "scan-tasks" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE (json_extract_path_text(fullobject, VARIADIC string_to_array(SUBSTR(${property},2),'/')) < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( json_extract_path_text(fullobject, VARIADIC string_to_array(SUBSTR(${taskState.completed},2),'/')) is NULL )",
-            
+
             "query-cluster-failed-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'timestamp') <= ${timestamp} AND json_extract_path_text(fullobject, 'state') IN ('1','2')",
             "query-cluster-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'state'",
             "query-cluster-events" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'event' AND json_extract_path_text(fullobject, 'instanceId') = ${instanceId}"
@@ -34,18 +34,24 @@
 
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
             "for-internalcredentials" : "select * FROM ${_dbSchema}.${_table} WHERE objectid = ${uid}",
-            "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",        
-            
+            "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
+
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
             "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
-            
+
             "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
             "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
 
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
 
-            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}"
+            "audit-by-mapping" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE mapping = ${mappingName}",
+            "audit-by-recon-id" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId}",
+            "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND entryType = ${entryType}",
+            "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND situation = ${situation}",
+            "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentactionid = ${parentActionId}",
+            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
+            "get-recons" : "SELECT reconId, activitydate, mapping, message FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY activitydate DESC"
         }
     },
     "commands" : {
@@ -160,6 +166,12 @@
                     "before" : "before",
                     "after" : "after",
                     "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"}
+            "internal/role" : {
+                "table" : "internalrole",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "description" : "description"
                 }
             },
             "audit/activity" : {

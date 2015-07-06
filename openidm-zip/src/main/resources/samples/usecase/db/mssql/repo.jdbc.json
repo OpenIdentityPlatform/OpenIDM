@@ -25,7 +25,7 @@
             "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id LEFT OUTER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id AND complete.propkey=${taskState.completed} INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propvalue is NULL )",
-            
+
             "query-cluster-failed-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))",
             "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id WHERE (prop.propkey = '/type' AND prop.propvalue = 'state')",
             "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})"
@@ -105,7 +105,7 @@
                     "/lastPasswordSet" : {
                         "searchable" : true
                     }
-                } 
+                }
             },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",

@@ -303,10 +303,21 @@ ENGINE = InnoDB;
 -- Table `openidm`.`internaluser`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`internaluser` (
-  `objectid` VARCHAR(254) NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
   `rev` VARCHAR(38) NOT NULL ,
   `pwd` VARCHAR(510) NULL ,
   `roles` VARCHAR(1024) NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`internalrole`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`internalrole` (
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `description` VARCHAR(510) NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
@@ -438,26 +449,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
 ENGINE = InnoDB;
 
 
-
-delimiter //
-
-create procedure `openidm`.`getAllFromTable` (t_schema varchar(255), t_name varchar(255), order_by varchar(255), order_dir varchar(255), num_rows bigint, skip bigint, acceptable_order_by varchar(512))
-begin
-    set @num_rows = num_rows;
-    set @skip = skip;
-    select find_in_set(order_by, acceptable_order_by) into @order_by_ok;
-    select find_in_set(order_dir, 'asc,desc') into @order_dir_ok;
-    IF @order_by_ok != 0 && @order_dir_ok != 0 THEN
-        set @query = concat('select * from ', t_schema, '.', t_name ,' order by ', order_by ,' ', order_dir ,' limit ? offset ?');
-        prepare stmt from @query;
-        execute stmt using @num_rows, @skip;
-    END IF;
-end //
-
-delimiter ;
-
-
-
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
@@ -469,6 +460,15 @@ START TRANSACTION;
 USE `openidm`;
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) VALUES ('openidm-admin', '0', 'openidm-admin', '["openidm-admin","openidm-authorized"]');
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) VALUES ('anonymous', '0', 'anonymous', '["openidm-reg"]');
+
+INSERT INTO openidm.internalrole (objectid, rev, description)
+VALUES
+('openidm-authorized', '0', 'Basic minimum user'),
+('openidm-admin', '0', 'Administrative access'),
+('openidm-cert', '0', 'Authenticated via certificate'),
+('openidm-tasks-manager', '0', 'Allowed to reassign workflow tasks'),
+('openidm-reg', '0', 'Anonymous access');
+
 
 COMMIT;
 

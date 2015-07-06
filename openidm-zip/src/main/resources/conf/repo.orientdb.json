@@ -33,6 +33,11 @@
         "query-cluster-instances" : "SELECT * FROM cluster_states",
         "query-cluster-events" : "SELECT * FROM cluster_events WHERE instanceId = ${instanceId}",
 
+        "audit-by-mapping" : "select * FROM audit_recon WHERE mapping = ${mappingName}",
+        "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
+        "audit-by-recon-id-type" : "select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
+        "audit-by-recon-id-situation" : "select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
+        "audit-by-activity-parent-action" : "select * FROM audit_activity WHERE parentActionId = ${parentActionId}",
         "get-recons" : "SELECT reconId, timestamp, mapping, message FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY timestamp DESC"
     },
     "commands" : {
@@ -42,6 +47,15 @@
     "dbStructure" : {
         "orientdbClass" : {
             "internal_user" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "internal_role" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",

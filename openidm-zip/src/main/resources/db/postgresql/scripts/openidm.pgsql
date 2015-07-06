@@ -318,10 +318,22 @@ CREATE TABLE openidm.auditsync (
 -- -----------------------------------------------------
 
 CREATE TABLE openidm.internaluser (
-  objectid VARCHAR(254) NOT NULL,
+  objectid VARCHAR(255) NOT NULL,
   rev VARCHAR(38) NOT NULL,
   pwd VARCHAR(510) DEFAULT NULL,
   roles VARCHAR(1024) DEFAULT NULL,
+  PRIMARY KEY (objectid)
+);
+
+
+-- -----------------------------------------------------
+-- Table openidm.internalrole
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.internalrole (
+  objectid VARCHAR(255) NOT NULL,
+  rev VARCHAR(38) NOT NULL,
+  description VARCHAR(510) DEFAULT NULL,
   PRIMARY KEY (objectid)
 );
 
@@ -371,7 +383,7 @@ CREATE TABLE openidm.uinotification (
   receiverId VARCHAR(38) NOT NULL,
   requesterId VARCHAR(38) NULL,
   notificationSubtype VARCHAR(255) NULL,
-  PRIMARY KEY (objectid) 
+  PRIMARY KEY (objectid)
 );
 
 
@@ -413,6 +425,14 @@ CREATE INDEX idx_clusterobjectproperties_prop ON openidm.clusterobjectproperties
 START TRANSACTION;
 INSERT INTO openidm.internaluser (objectid, rev, pwd, roles) VALUES ('openidm-admin', '0', 'openidm-admin', '["openidm-admin","openidm-authorized"]');
 INSERT INTO openidm.internaluser (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', '["openidm-reg"]');
+
+INSERT INTO openidm.internalrole (objectid, rev, description)
+VALUES
+('openidm-authorized', '0', 'Basic minimum user'),
+('openidm-admin', '0', 'Administrative access'),
+('openidm-cert', '0', 'Authenticated via certificate'),
+('openidm-tasks-manager', '0', 'Allowed to reassign workflow tasks'),
+('openidm-reg', '0', 'Anonymous access');
 
 COMMIT;
 
