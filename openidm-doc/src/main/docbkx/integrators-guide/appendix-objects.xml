@@ -915,10 +915,9 @@ openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlistin
     <section xml:id="managed-objects-programmatic-patch">
      <title>Patching Objects</title>
 
-     <para>You can partially update a managed or system object using the patch
-      method, which changes only the specified properties of the object. OpenIDM
-      implements the JSON patch media type version 02, described at
-      <link xlink:show="new" xlink:href="http://tools.ietf.org/html/rfc6902" />.
+     <para>
+      You can partially update a managed or system object using the patch
+      method, which changes only the specified properties of the object.
      </para>
      
      <para>
