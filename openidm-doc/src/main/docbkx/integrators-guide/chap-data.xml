@@ -94,7 +94,7 @@ openidm.update("config/custom/mylookuptable", mymap)
 openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
 
   <para>
-   For managed objects, you can partially update an object with the
+   You can apply a partial update to a managed or system object by using the
    <literal>patch()</literal> function.
   </para>
 

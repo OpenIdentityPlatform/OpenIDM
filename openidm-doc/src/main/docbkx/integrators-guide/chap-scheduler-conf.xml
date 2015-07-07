@@ -659,8 +659,10 @@ openidm.scheduler.execute.persistent.schedules=true
    <para>
     To update a schedule definition, use a PUT request and update all properties
     of the object. Note that PATCH requests are currently supported only for
-    managed objects. The following example disables the schedule created in the
-    previous section.
+    managed and system objects.
+   </para>
+   <para>
+    The following example disables the schedule created in the previous section.
    </para>
    <screen>$ <userinput>curl \
  --cacert self-signed.crt \

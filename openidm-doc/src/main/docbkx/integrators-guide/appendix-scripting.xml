@@ -487,9 +487,9 @@
     <section xml:id="function-patch">
      <title>openidm.patch(id, rev, value)</title>
      <para>
-      This function performs a partial modification of a managed object. Unlike
-      the <literal>update</literal> function, only the modified attributes are
-      provided, not the entire object.
+      This function performs a partial modification of a managed or system
+      object. Unlike the <literal>update</literal> function, only the modified
+      attributes are provided, not the entire object.
      </para>
      <variablelist>
       <title>Parameters</title>

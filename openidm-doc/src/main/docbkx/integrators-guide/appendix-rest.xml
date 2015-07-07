@@ -377,9 +377,9 @@
   <title>Updating an Object</title>
   <para>
    An update replaces some or all of the contents of an existing object. Any
-   object can be updated over REST with a PUT request. <emphasis>Managed
-   objects</emphasis> can also be updated with a POST request, using the
-   <literal>patch</literal> action, or with a PATCH request.
+   object can be updated over REST with a PUT request. Managed objects can be
+   updated with a POST request, using the <literal>patch</literal> action.
+   Managed objects and system objects can also be updated with a PATCH request.
   </para>
   <para>
    To update an object with a <literal>PUT</literal> request, use the
@@ -436,7 +436,7 @@
    ...
 }</computeroutput></screen>
   <para>
-   To update a managed object with a PATCH request, use the
+   To update a managed or system object with a PATCH request, use the
    <literal>If-Match</literal> header. A PATCH request can add, remove, replace,
    or increment an attribute value. A <literal>replace</literal> operation
    replaces an existing value, or adds a value if no value exists.
@@ -708,9 +708,11 @@ ETag: "0"
    <varlistentry>
     <term>POST</term>
     <listitem>
-     <para>The POST method allows arbitrary actions to be performed on managed
-     objects. The <literal>_action</literal> query parameter defines the action
-     to be performed.</para>
+     <para>
+      The POST method enables you to perform arbitrary actions on managed
+      objects. The <literal>_action</literal> query parameter defines the action
+      to be performed.
+     </para>
      <para>The <literal>create</literal> action is used to create a managed
      object. Because POST is neither safe nor idempotent, PUT is the preferred
      method of creating managed objects, and should be used if the client knows
@@ -721,8 +723,10 @@ ETag: "0"
      query parameter to specify the identifier to give the newly created
      object. If an <literal>_id</literal> is not provided, the server selects
      its own identifier.</para>
-     <para>The <literal>patch</literal> action is used to update one or more
-     attributes of a managed object, without replacing the entire object.</para>
+     <para>
+      The <literal>patch</literal> action updates one or more attributes of
+      a managed object, without replacing the entire object.
+     </para>
 
      <para>Example Create Request</para>
      <programlisting language="http">
@@ -805,7 +809,9 @@ Content-Length: 89
    <varlistentry>
     <term>PATCH</term>
     <listitem>
-     <para>Performs a partial modification of a managed object.</para>
+     <para>
+      Performs a partial modification of a managed or system object.
+     </para>
      <para>Example Request</para>
      <programlisting language="http">
 PATCH /openidm/managed/user/5752c0fd9509
@@ -1258,8 +1264,13 @@ Content-Length: 89
       </row>
       <row>
        <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>/<replaceable>id</replaceable></entry>
+       <entry>PATCH</entry>
+       <entry>Updates the specified fields of a system object</entry>
+      </row>
+      <row>
+       <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>/<replaceable>id</replaceable></entry>
        <entry>DELETE</entry>
-       <entry>Deletes a system object.</entry>
+       <entry>Deletes a system object</entry>
       </row>
      </tbody>
     </tgroup>
@@ -1278,7 +1289,9 @@ Content-Length: 89
     "message":"The uid attribute is not single value attribute."
 }</screen>
     <para>
-     The <literal>patch</literal> action is not supported on system objects.
+     A <literal>POST</literal> request with a <literal>patch</literal> action is
+     not currently supported on system objects. To patch a system object, you
+     must send a <literal>PATCH</literal> request.
     </para>
    </note>
 
