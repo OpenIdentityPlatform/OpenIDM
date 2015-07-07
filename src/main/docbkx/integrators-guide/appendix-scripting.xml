@@ -2135,10 +2135,14 @@ logger = LoggerFactory.getLogger('logger');
   <para>
    Scripts called over the <literal>script</literal> endpoint have access to
    the <literal>"openidm"</literal> and <literal>"context"</literal> objects.
-   The only supported action on the <literal>script</literal> endpoint is
-   <literal>eval</literal>, so scripts can not be launched from this endpoint,
-   but merely evaluated. The last statement that is executed is the value
-   produced by the script, and the expected result of the REST call.
+   The <literal>script</literal> endpoint supports two actions -
+   <literal>eval</literal> and <literal>compile</literal>.
+  </para>
+  <para>
+   The <literal>eval</literal> action evaluates a script, by taking any actions
+   referenced in the script, such as router calls to affect the state of an
+   object. For JavaScript scripts, the last statement that is executed is the
+   value produced by the script, and the expected result of the REST call.
   </para>
   <para>
    The following REST call attempts to evaluate the
@@ -2169,13 +2173,59 @@ logger = LoggerFactory.getLogger('logger');
  "https://localhost:8443/openidm/script?_action=eval"</userinput>
 <computeroutput>
 "Must choose to either purge by expired or number of recons to keep"</computeroutput></screen>
+  <tip>
+   <para>
+    The variables passed into this scripts are namespaced with the
+    <literal>"globals"</literal> map. It is preferable to namespace variables
+    passed into scripts in this way, to avoid collisions with the top-level
+    reserved words for script maps, such as <literal>file</literal>,
+    <literal>source</literal>, and <literal>type</literal>.
+   </para>
+  </tip>
   <para>
-   Note that the variables passed into this script are namespaced with the
-   <literal>"globals"</literal> map. It is preferable to namespace variables
-   passed into scripts in this way, to avoid collisions with the top-level
-   reserved words for script maps, such as <literal>file</literal>,
-   <literal>source</literal>, and <literal>type</literal>.
+   The <literal>compile</literal> action compiles a script, but does not
+   execute it. This action is used primarily by the UI, to validate scripts that
+   are entered in the UI. A successful compilation returns
+   <literal>true</literal>. An unsuccessful compilation returns the reason for
+   the failure.
   </para>
+  <para>
+   The following REST call tests whether a transformation script will compile.
+  </para>
+  <screen>$ <userinput>curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --header "Content-Type: application/json" \
+   --request POST \
+   --data '{
+       "type":"text/javascript",
+       "source":"source.mail ? source.mail.toLowerCase() : null"
+   }' \
+   "https://localhost:8443/openidm/script?_action=compile"</userinput>
+<computeroutput>True</computeroutput></screen>
+  <para>
+   If the script is not valid, the action returns an indication of the error,
+   for example:
+  </para>
+  <screen>$ <userinput>curl \
+   --cacert self-signed.crt \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --header "Content-Type: application/json" \
+   --request POST \
+   --data '{
+       "type":"text/javascript",
+       "source":"source.mail ? source.mail.toLowerCase()"
+   }' \
+   "https://localhost:8443/openidm/script?_action=compile"</userinput>
+<computeroutput>{
+    "code": 400,
+    "reason": "Bad Request",
+    "message": "missing : in conditional expression
+        (3864142CB836831FAB8EAB662F566139CDC22BF2#1)
+        in 3864142CB836831FAB8EAB662F566139CDC22BF2
+        at line number 1 at column number 39"
+}</computeroutput></screen>
  </section>
-
 </appendix>
