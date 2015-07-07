@@ -30,6 +30,11 @@ require.config({
         i18next: "libs/i18next-1.7.3-min",
         i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-1.1.2-min",
+        "backbone.paginator": "libs/backbone.paginator.min-2.0.2-min",
+        "backbone-relational": "libs/backbone-relational-0.9.0-min",
+        "backgrid": "libs/backgrid.min-0.3.5-min",
+        "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
+        "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
         underscore: "libs/lodash-2.4.1-min",
         js2form: "libs/js2form-2.0",
         form2js: "libs/form2js-2.0",
@@ -63,6 +68,19 @@ require.config({
         backbone: {
             deps: ["underscore"],
             exports: "Backbone"
+        },
+        "backbone.paginator": {
+            deps: ["backbone"]
+        },
+        "backgrid": {
+            deps: ["jquery", "underscore", "backbone"],
+            exports: "Backgrid"
+        },
+        "backgrid-filter": {
+            deps: ["backgrid"]
+        },
+        "backgrid-paginator": {
+            deps: ["backgrid", "backbone.paginator"]
         },
         js2form: {
             exports: "js2form"
