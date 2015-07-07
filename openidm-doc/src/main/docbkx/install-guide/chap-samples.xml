@@ -3778,8 +3778,8 @@ $ <userinput>cp samples/provisioners/provisioner.openicf.connectorinfoprovider.j
       this sample directory, to the machine on which the connector server is
       installed.
      </para>
-     <screen>C:\><userinput>dir openidm\powershell2AD\tools</userinput>
-<computeroutput>Directory of C:\openidm\powershell2AD\tools
+     <screen>C:\><userinput>dir openidm\samples\powershell2AD\tools</userinput>
+<computeroutput>Directory of C:\openidm\samples\powershell2AD\tools
 
 11/27/2014  12:53 PM    &lt;DIR>          .
 11/27/2014  12:53 PM    &lt;DIR>          ..
@@ -3927,7 +3927,7 @@ $ ./startup.sh</screen>
       "account"
     ],
     "config": "config/provisioner.openicf/adpowershell",
-    "enabled": true,
+    "enabled": true,                              ypo
     "name": "adpowershell"
   }
 ]</computeroutput> </screen>
