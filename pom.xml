@@ -235,7 +235,6 @@
         <commons.forgerock-script.version>1.5.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
         <commons.forgerock-guava.version>18.0.1</commons.forgerock-guava.version>
-        <commons.json-patch.version>1.2.0-SNAPSHOT</commons.json-patch.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
@@ -454,11 +453,6 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-web-token</artifactId>
                 <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-patch</artifactId>
-                <version>${commons.json-patch.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
