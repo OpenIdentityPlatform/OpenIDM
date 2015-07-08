@@ -39,10 +39,6 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-patch</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
             <artifactId>json-crypto</artifactId>
         </dependency>
         <dependency>

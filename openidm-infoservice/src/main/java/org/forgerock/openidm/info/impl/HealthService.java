@@ -168,7 +168,6 @@ public class HealthService
         "org.forgerock.commons.i18n-slf4j",
         "org.forgerock.commons.json-crypto",
         "org.forgerock.commons.json-fluent",
-        "org.forgerock.commons.json-patch",
         "org.forgerock.commons.json-resource",
         "org.forgerock.commons.json-resource-servlet",
         "org.forgerock.commons.json-schema",
