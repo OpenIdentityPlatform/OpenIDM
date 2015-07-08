@@ -723,9 +723,9 @@
      <listitem>
       <para>script object, optional</para>
       <para>A script object to trigger when the property requires
-      validation. The property to be validated is provided in the root
-      scope as the <literal>property</literal> property. If an exception is
-      thrown, the validation fails.</para>
+      validation. The value of the property to be validated is provided in
+      the root scope as the <literal>property</literal> property. If an
+      exception is thrown, validation fails.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -733,10 +733,12 @@
      <listitem>
       <para>script object, optional</para>
       <para>A script object to trigger once a property is retrieved
-       from the repository. The property that was retrieved is provided
-       in the root scope as the <literal>property</literal> property. The
-       script may change the property value. If an exception is thrown, then
-       object retrieval fails.</para>
+       from the repository. That property may be one of two related variables:
+       <literal>property</literal> and <literal>propertyName</literal>.
+       The property that was retrieved is provided in the root scope as the
+       <literal>propertyName</literal> variable; its value is provided as
+       the <literal>property</literal> variable. If an exception is thrown,
+       then object retrieval fails.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -744,10 +746,12 @@
      <listitem>
       <para>script object, optional</para>
       <para>A script object to trigger when a property is about to be
-       stored in the repository. The property to be stored is provided
-       in the root scope as the <literal>property</literal> property. The
-       script may change the property value. If an exception is thrown, then
-       object storage fails.</para>
+       stored in the repository. That property may be one of two related variables:
+       <literal>property</literal> and <literal>propertyName</literal>.
+       The property that was retrieved is provided in the root scope as the
+       <literal>propertyName</literal> variable; its value is provided as
+       the <literal>property</literal> variable. If an exception is thrown,
+       then object storage fails.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
