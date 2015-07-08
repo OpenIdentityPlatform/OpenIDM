@@ -4329,7 +4329,8 @@ $ ./startup.sh</screen>
   <para>
    The functionality of this sample is now included in the following guide:
    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-         xlink:href="getting-started">Getting Started With OpenIDM</link>.
+         xlink:href="getting-started#getting-started-guide">Getting Started
+    With OpenIDM</link>.
   </para>
   <!--
 
