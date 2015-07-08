@@ -2093,8 +2093,6 @@ logger = LoggerFactory.getLogger('logger');
    you to call one from the other on the OpenIDM router.
   </para>
   <para>
-   Scripts called over the <literal>script</literal> endpoint have access to
-   the <literal>"openidm"</literal> and <literal>"context"</literal> objects.
    The <literal>script</literal> endpoint supports two actions -
    <literal>eval</literal> and <literal>compile</literal>.
   </para>
