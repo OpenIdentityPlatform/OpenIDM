@@ -37,6 +37,8 @@ import java.util.Map;
  * Minimum behavior for a provisioner used to provision resources to external sources.
  */
 public interface ProvisionerService {
+    
+    public static final String ROUTER_PREFIX = "/system";
 
     /**
      * Gets the unique {@link SystemIdentifier} of this instance.

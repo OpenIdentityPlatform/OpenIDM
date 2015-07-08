@@ -117,7 +117,6 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SimpleSystemIdentifier;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
-import org.forgerock.openidm.provisioner.impl.SystemObjectSetService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
@@ -447,11 +446,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             connectorInfoProvider.addConnectorFacadeCallback(connectorReference, connectorFacadeCallback);
 
             routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
-                    .withTemplate("/system/" + systemIdentifier.getName())
+                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName())
                     .withSingletonResourceProvider(this)
                     .buildNext()
                     .withModeStartsWith()
-                    .withTemplate("/system/" + systemIdentifier.getName() + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
+                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName() + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
                     .withRequestHandler(new ObjectClassRequestHandler())
                     .seal());
 
@@ -1299,7 +1298,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         private void handleLiveSync(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler)
                 throws ResourceException {
             final ActionRequest forwardRequest =
-                    Requests.newActionRequest(SystemObjectSetService.ROUTER_PREFIX, request.getAction())
+                    Requests.newActionRequest(ProvisionerService.ROUTER_PREFIX, request.getAction())
                             .setAdditionalParameter("source", getSource(objectClass));
 
             // forward request to be handled in SystemObjectSetService#actionInstance
