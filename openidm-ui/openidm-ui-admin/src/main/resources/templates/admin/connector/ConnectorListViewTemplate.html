@@ -2,18 +2,12 @@
     <div class="container">
 
         <div class="page-header">
-            <h1>{{t "templates.connector.resources"}}</h1>
+            <h1>{{t "config.AppConfiguration.Navigation.links.connectors"}}</h1>
         </div>
 
         <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
             <div class="btn-group" role="group" aria-label="add connector">
                 <a href="#connectors/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
-            </div>
-            <div class="btn-group" role="group" aria-label="add managed">
-                <a href="#managed/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addManagedObject"}}</button></a>
-            </div>
-            <div class="btn-group pull-right" role="group" aria-label="add mapping">
-                <a href="#mapping/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addMapping"}}</button></a>
             </div>
         </div>
 
@@ -46,6 +40,8 @@
                                         {{/each}}
                                         <li><a href="#connectors/edit/{{cleanUrlName}}/"><i class="fa fa-pencil"></i>{{t "common.form.edit"}}</a></li>
                                         <li class="connector-delete"><span><i class="fa fa-times"></i>{{t "common.form.delete"}}</span></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#mapping/add/connector/{{name}}"><i class="fa fa-plus"></i>{{t "templates.connector.addMapping"}}</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -86,73 +82,6 @@
                                 </div>
                                 <div class="content">
                                     {{t "templates.connector.addConnector"}}
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <hr>
-        <div class="section-header">
-            <div class="subtitle-bar">
-                <h2>{{t "templates.managed.managedTitle"}}</h2>
-                <a target="_blank" href="http://openidm.forgerock.org/doc/integrators-guide/index.html#chap-users-groups-roles">Help <i class="fa fa-question-circle"></i></a>
-            </div>
-            <div class="clearfix"></div>
-            <div class="help-body">
-                <p>{{t "templates.connector.whatIsAManagedObject"}}</p>
-            </div>
-        </div>
-
-        <div id="resourceManagedContainer" class="list-grid">
-            <div class="row">
-                {{#each currentManagedObjects}}
-                <div class="col-sm-6 col-md-3">
-                    <div class="card-container">
-                        <div  data-resource-type="managed" data-managed-title="{{name}}" class="card">
-                            <div class="front">
-                                <div class="card-heading">
-                                    <!-- Single button -->
-                                    <div class="btn-group">
-                                        <button type="button" id="{{name}}ManagedToggle" class="btn btn-link fa-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v"></i>
-                                        </button>
-                                        <ul class="dropdown-menu pull-right" role="menu">
-                                            <li><a href="#resource/managed/{{name}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}}</a></li>
-                                            <li><a href="#managed/edit/{{name}}/"><i class="fa fa-pencil"></i>{{t "common.form.edit"}}</a></li>
-                                            <li class="managed-delete"><span><i class="fa fa-times"></i>{{t "common.form.delete"}}</span></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="back">
-                                    <a href="#managed/edit/{{name}}/">
-                                        <div class="image circle">
-                                            <i class="{{#if schema.icon}} fa {{schema.icon}} {{else}} icon-database {{/if}}"></i>
-                                        </div>
-                                        <div class="content">
-                                            <div class="main">
-                                                <h3 class="name">{{name}}</h3>
-                                                <p class="cardtype">{{t "templates.connector.managedObjectType"}}</p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{/each}}
-                <div class="col-sm-6 col-md-3 ">
-                    <div class="add-card" style="z-index: 3;">
-                        <div class="">
-                            <a href="#managed/add/">
-                                <div class="image circle">
-                                    <i class="fa fa-plus"></i>
-                                </div>
-                                <div class="content">
-                                    {{t "templates.connector.addManagedObject"}}
                                 </div>
                             </a>
                         </div>

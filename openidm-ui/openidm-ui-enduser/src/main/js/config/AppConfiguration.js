@@ -105,6 +105,11 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                 configuration: {
+                    username: {
+                        "isLink": true,
+                        "href" : "#profile/",
+                        "secondaryLabel" : "config.AppConfiguration.Navigation.links.viewProfile"
+                    },
                     userBar: [
                         {
                             "id": "security_link",

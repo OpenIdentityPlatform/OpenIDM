@@ -28,10 +28,10 @@ define("config/routes/AdminRoutesConfig", [
 ], function(commonRoutes) {
 
     var obj = {
-        "resourcesView" : {
-            view: "org/forgerock/openidm/ui/admin/ResourcesView",
+        "connectorListView" : {
+            view: "org/forgerock/openidm/ui/admin/connector/ConnectorListView",
             role: "ui-admin",
-            url: "resources/"
+            url: "connectors/"
         },
         "editConnectorView" : {
             view: "org/forgerock/openidm/ui/admin/connector/EditConnectorView",
@@ -46,6 +46,11 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: "connectors/add/",
             forceUpdate: true
+        },
+        "managedListView" : {
+            view: "org/forgerock/openidm/ui/admin/managed/ManagedListView",
+            role: "ui-admin",
+            url: "managed/"
         },
         "editManagedView" : {
             view: "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
@@ -76,6 +81,13 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
             role: "ui-admin",
             url: "mapping/add/",
+            forceUpdate: true
+        },
+        "autoAddMappingView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
+            role: "ui-admin",
+            url: /mapping\/add\/(.+?)\/(.+?)$/,
+            pattern: "mapping/add/?/?",
             forceUpdate: true
         },
         "mappingListView" : {
@@ -171,10 +183,20 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: /^resource\/(managed)\/(role)\/edit\/(.+)\/(.+)$/,
             pattern: "resource/?/?/edit/?/?"
+        },
+        "processListView" : {
+            view: "org/forgerock/openidm/ui/admin/workflow/ProcessListView",
+            role: "ui-admin",
+            url: "workflow/processes/"
+        },
+        "taskListView" : {
+            view: "org/forgerock/openidm/ui/admin/workflow/TaskListView",
+            role: "ui-admin",
+            url: "workflow/tasks/"
         }
     };
 
-    obj.landingPage = obj.resourcesView;
+    obj.landingPage = obj.connectorListView;
     commonRoutes["default"].role = "ui-admin";
     return obj;
 });

@@ -70,6 +70,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             "click .edit-objectType" : "editObjectType",
             "click .delete-objectType" : "deleteObjectType",
             "click #addObjectType" : "addObjectType",
+            "click #deleteResource" : "deleteResource",
             "change #selectObjectConfig" : "changeObjectTypeConfig",
             "change .retryOptions": "retryOptionChanged",
             "change .maxRetries" : "pendingSyncChangesCheck",
@@ -306,6 +307,23 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             }
         },
 
+        deleteResource: function(event) {
+            event.preventDefault();
+
+            uiUtils.jqConfirm($.t("templates.connector.connectorDelete"), _.bind(function(){
+                ConfigDelegate.deleteEntity(this.data.systemType +"/" +this.data.connectorId).then(function(){
+                        ConnectorDelegate.deleteCurrentConnectorsCache();
+
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorListView});
+
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
+                    },
+                    function(){
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
+                    });
+            } , this));
+        },
+
         //Saves the connector tab
         connectorFormSubmit: function(event) {
             event.preventDefault();
@@ -374,6 +392,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                 this.$el.find("#connectorWarningMessage .message .objecttype-pending").remove();
 
                 this.warningMessageCheck();
+
+                this.updateActionDropdown(this.previousObjectType);
             }, this));
         },
 
@@ -729,6 +749,18 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             delete this.userDefinedObjectTypes[objectTypeName];
 
             this.renderObjectTypes(this.userDefinedObjectTypes);
+        },
+
+        //After saving or deleting an object type re-renders the action list so it is in sync with the available data pieces
+        updateActionDropdown: function(objectTypes) {
+            this.$el.find(".dropdown-menu .data-link").remove();
+
+            _.each(objectTypes, function(object, key){
+                this.$el.find(".dropdown-menu .divider").before(
+                        '<li class="data-link">'
+                        +'<a href="#resource/system/' +this.data.connectorName +'/' +key+'/list/"><i class="fa fa-database"> Data ('+key  +')</i></a>'
+                        +'</li>');
+            }, this);
         },
 
         //When adding a new object type

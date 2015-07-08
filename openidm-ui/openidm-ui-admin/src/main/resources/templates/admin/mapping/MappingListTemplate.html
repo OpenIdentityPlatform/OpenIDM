@@ -1,25 +1,25 @@
 <section>
     <div class="container">
-        <div class="page-header no-border">
+        <div class="page-header">
             <h1>{{t "templates.mapping.mappingListingTitle"}}
                 <div  class="pull-right help-link">
                     <a href="{{docHelpUrl}}integrators-guide/index.html#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
                 </div>
             </h1>
         </div>
+        <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
+            <div class="btn-group" role="group" aria-label="...">
+                <a href="#mapping/add/">
+                    <button type="button" class="btn btn-primary" id="addMapping">
+                        <i class="fa fa-plus"></i>
+                        {{t "templates.connector.addMapping"}}
+                    </button>
+                </a>
+            </div>
+        </div>
     </div>
 </section>
 <div class="container">
-    <div class="button-bar btn-toolbar" role="toolbar" aria-label="...">
-        <div class="btn-group" role="group" aria-label="...">
-            <a href="#mapping/add/">
-                <button type="button" class="btn btn-primary" id="addMapping">
-                    <i class="fa fa-plus"></i>
-                    {{t "templates.connector.addMapping"}}
-                </button>
-            </a>
-        </div>
-    </div>
     {{#if mappingConfig.length}}
     <div id="mappingConfigHolder" class="mapping-listing mappings-list">
         {{#each mappingConfig}}

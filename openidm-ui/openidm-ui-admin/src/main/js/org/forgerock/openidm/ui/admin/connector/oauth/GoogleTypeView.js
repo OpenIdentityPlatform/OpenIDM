@@ -68,7 +68,7 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView", [
 
                 ConfigDelegate.updateEntity(connectorLocation, connectorDetails).then(_.bind(function () {
                     _.delay(function () {
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorListView});
                     }, 1500);
                 }, this));
             }, this));

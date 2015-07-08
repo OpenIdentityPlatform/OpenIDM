@@ -1,32 +1,33 @@
 <section>
     <div class="back-bar">
         <div class="container">
-            <a href="#resources/">{{t "templates.connector.backToResources"}}</a>
+            <a href="#connectors/">{{t "templates.connector.backToConnectorList"}}</a>
         </div>
     </div>
     <div class="container">
-        <div class="page-header no-border">
-            <div class="media">
-                <div class="media-left media-top">
-                    <div class="header-icon"><i class="fa {{connectorIcon.iconClass}}"></i></div>
-                </div>
-                <div class="media-body media-top">
-                    <h4 class="page-type">{{displayConnectorType}} - {{fullversion}}</h4>
-                    <h1>{{connectorName}}</h1>
-                    <!--
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-secondary dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-ellipsis-v fa-lg"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-rightAd" role="menu">
-                            <li class="hidden"><a href="#"><i class="fa fa-copy"></i>Duplicate</a></li>
-                            <li><a href="#"><i class="fa fa-ban"></i>Disable</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#"><i class="fa fa-times"></i>Delete</a></li>
-                        </ul>
-                    </div> -->
+        <div class="page-header clearfix">
+            <span class="header-icon pull-left"><i class="fa {{connectorIcon.iconClass}}"></i></span>
+            <h4 class="page-type">{{displayConnectorType}} - {{fullversion}}</h4>
+            <div class="page-header-button-group">
+                <a href="#mapping/add/connector/{{connectorName}}">
+                    <button type="button" class="btn btn-primary btn-actions">
+                        <i class="fa fa-plus"></i> {{t "templates.connector.addMapping"}}
+                    </button>
+                </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default btn-secondary dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-ellipsis-v fa-lg"></i>
+                    </button>
+                    <ul class="dropdown-menu pull-rightAd" role="menu">
+                        {{#each objectTypes}}
+                        <li class="data-link"><a href="#resource/system/{{../connectorName}}/{{@key}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{@key}})</a></li>
+                        {{/each}}
+                        <li class="divider"></li>
+                        <li id="deleteResource"><a href="#"><i class="fa fa-times"></i>{{t "common.form.delete"}}</a></li>
+                    </ul>
                 </div>
             </div>
+            <h1>{{connectorName}}</h1>
         </div>
     </div>
 </section>

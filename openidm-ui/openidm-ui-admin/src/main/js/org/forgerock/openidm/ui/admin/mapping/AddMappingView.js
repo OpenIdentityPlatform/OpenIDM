@@ -125,8 +125,9 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                                 }
                             }, this)},
                         _.bind(function(){
-                            this.scrollCheck();
-                            $(document).scroll(_.bind(this.scrollCheck, this));
+                            if(args.length > 0) {
+                                this.preselectMappingCard(args);
+                            }
 
                             if (callback) {
                                 callback();
@@ -137,19 +138,29 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
             }, this));
         },
 
-        scrollCheck: function() {
-            if(this.$el.find("#resourceMappingBody").css('position') !== 'fixed') {
-                var scrollPos = $(document).scrollTop();
+        preselectMappingCard: function(selected) {
+            var resourceData = null;
 
-                if(scrollPos > this.scrollHeaderPos) {
-                    this.scrollInit = true;
+            if(selected[0] === "connector") {
+                resourceData =  _.find(this.data.currentConnectors, function(connector) {
+                    return selected[1] === connector.name;
+                });
 
-                    this.$el.find("#resourceMappingBody").addClass('attached').css({'top' : (scrollPos - this.scrollHeaderPos)+'px'});
-                } else if(this.scrollInit === true) {
-                    this.$el.find("#resourceMappingBody").removeClass('attached').css({'top' : '0px'});
-
-                    this.scrollInit = false;
+                if(resourceData !== null) {
+                    resourceData.resourceType = "connector";
                 }
+            } else {
+                resourceData =  _.find(this.data.currentManagedObjects, function(managed) {
+                    return selected[1] === managed.name;
+                });
+
+                if(resourceData !== null) {
+                    resourceData.resourceType = "managed";
+                }
+            }
+
+            if(resourceData !== null) {
+                MapResourceView.addMapping(resourceData);
             }
         },
 
