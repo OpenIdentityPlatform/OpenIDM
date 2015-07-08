@@ -4324,11 +4324,14 @@ $ ./startup.sh</screen>
  </section>
 
  <section xml:id="more-sample4">
-  <title>Sample 4 - CSV to XML File</title>
-  <indexterm>
-   <primary>Samples</primary>
-   <secondary>Sample 4 - CSV file</secondary>
-  </indexterm>
+  <title>Sample 4 - Deleted</title>
+
+  <para>
+   The functionality of this sample is now included in the following guide:
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="getting-started">Getting Started With OpenIDM</link>.
+  </para>
+  <!--
 
   <para>Sample 4 works with two databases, a comma-separated value file
    and an XML file. There is no need to include any external
@@ -4343,8 +4346,8 @@ $ ./startup.sh</screen>
   <section xml:id="install-sample4">
    <title>Install the Sample</title>
 
-   <para>No external configuration is required for this sample. Prepare 
-   OpenIDM as described in <xref linkend="preparing-openidm"/>, then start up 
+   <para>No external configuration is required for this sample. Prepare
+   OpenIDM as described in <xref linkend="preparing-openidm"/>, then start up
    OpenIDM with the configuration of sample 4.</para>
 
    <screen>$ cd /path/to/openidm
@@ -4360,7 +4363,7 @@ $ ./startup.sh -p samples/sample4</screen>
    </para>
 
    <para>
-    Review the current contents of the database in the
+    Review the current contents sof the database in the
     <filename>sample4/data/xmlConnectorData.xml</filename> file. For comparison
     purposes, make a copy of the file in a temporary directory with a command
     like:
@@ -4375,13 +4378,13 @@ $ ./startup.sh -p samples/sample4</screen>
    </para>
 
    <screen>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- --request POST \
+ -cacert self-signed.crt \
+ -header "X-OpenIDM-Username: openidm-admin" \
+ -header "X-OpenIDM-Password: openidm-admin" \
+ -header "Content-Type: application/json" \
+ -request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=csv_xmlfile&amp;waitForCompletion=true"</screen>
- 
+
    <para>Check the results of reconciliation. Review the updated contents
     of the <filename>sample4/data/xmlConnectorData.xml</filename> file.</para>
 
@@ -4398,7 +4401,7 @@ $ ./startup.sh -p samples/sample4</screen>
    </para>
 
 
-  </section>
+  </section>          -->
  </section>
 
  <section xml:id="more-sample5">

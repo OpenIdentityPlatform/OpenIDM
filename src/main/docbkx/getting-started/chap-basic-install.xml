@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! src/main/resources/legal-notices/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2015 ForgeRock AS.
+  !
+-->
+<chapter xml:id='chap-basic-install'
+         xmlns='http://docbook.org/ns/docbook'
+         version='5.0'
+         xml:lang='en'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://docbook.org/ns/docbook
+                             http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
+
+ <title>Getting Started With OpenIDM</title>
+
+ <!-- The suggestion was "Understanding OpenIDM", but that misses the point
+ of the chapter. I could split this chapter into two, but this chapter
+ is already pretty short to begin with. -->
+
+ <para>
+  Whenever you need access to important information, administrators need to
+  know who you are. They need to know your identity, which may be distributed
+  in multiple accounts.
+ </para>
+
+ <itemizedlist>
+  <para>
+   As a user, you might have several accounts even within your own company,
+   for functions such as:
+  </para>
+  <listitem>
+   <para>Email</para>
+  </listitem>
+  <listitem>
+   <para>Human Resources</para>
+  </listitem>
+  <listitem>
+   <para>Payroll</para>
+  </listitem>
+  <listitem>
+   <para>Engineering, Support, Accounting, and other functions</para>
+  </listitem>
+ </itemizedlist>
+
+ <para>
+  Each of these accounts may be stored in different resources, such as
+  Active Directory, OpenDJ, OpenLDAP, and more. Keeping track of user
+  identities in each of these resources (also known as data stores) can get
+  complex. OpenIDM can simplify the process, as it reconciles differences
+  between resources.
+ </para>
+
+ <para>
+  With situational policies, OpenIDM can handle situations such as a missing
+  or updated address for a specific user. OpenIDM includes default but
+  configurable policies to handle such conditions. In this way,
+  OpenIDM ensures consistency and predictability in an otherwise-chaotic
+  resource environment.
+ </para>
+
+ <para>
+  OpenIDM can make it easier to track user identities across these
+  resources. OpenIDM has a highly scalable, modular, readily deployable
+  architecture that can help you manage workflows and user information.
+ </para>
+
+ <section xml:id="gsg-what-openidm-cando">
+  <title>What Can You Do With OpenIDM?</title>
+
+  <para>
+   With OpenIDM, you can simplify the management of identity, as it can
+   help you synchronize data across multiple resources. Each organization
+   can maintain control of accounts within their respective domains.
+  </para>
+
+  <para>
+   OpenIDM works equally well with user, group, and device identities.
+  </para>
+
+  <para>
+   You can also configure workflows to help users manage how they sign up for
+   accounts, as part of how OpenIDM manages the life cycle of users and their
+   accounts.
+  </para>
+
+  <para>
+   You can manage employee identities as they move from job to job. You will
+   make their lives easier as OpenIDM can automatically register user accounts
+   on different systems. Later, OpenIDM will increase productivity when it
+   reconciles information from different accounts, saving users
+   the hassle of entering the same information on different systems.
+  </para>
+
+ </section>
+
+ <section xml:id="gsg-learning">
+  <title>What You Will See In This Document</title>
+
+  <para>
+   In this guide, you will see how OpenIDM reconciles user data between two data
+   stores. We will look at a department that is adding a third engineer,
+   Jane Sanchez.
+  </para>
+
+  <para>
+   Your Human Resources department has updated their data store with Jane
+   Sanchez's information. You want to use OpenIDM to update the internal
+   Engineering data store. But first, you have to start OpenIDM.
+  </para>
+
+ </section>
+
+ <section xml:id="before-you-start">
+  <title>What You Need Before Starting OpenIDM</title>
+
+  <para>
+   This section covers what you need to have on your system before running
+   OpenIDM.
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <para>
+     <literal>Operating System</literal>: Windows or UNIX/Linux.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>Java</literal>: Java Runtime Environment (JRE) Standard Edition
+     (Java SE) 7, update 6 or later, or Java 8. Alternatively, you can use the
+     same version of the Java Development Kit (JDK). On Linux, you may also
+     install the OpenJDK package native to your updated Linux distribution.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     At least 150 MB of free disk space.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     At least 1 GB of free RAM.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     If your operating system includes a firewall, make sure that it allows
+     traffic through (default) ports 8080 and 8443.
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <section xml:id="java-prerequisites">
+   <title>Java Environment</title>
+   <indexterm>
+    <primary>Java</primary>
+    <secondary>Requirements</secondary>
+   </indexterm>
+   <para>
+    On Windows systems, after installing Java, set the
+    <literal>JAVA_HOME</literal> environment variable. To do so on Windows 7,
+    take the following steps:
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Locate your JRE or JDK installation directory. For a default installation of
+      Java 8 on Windows 7, you should find the directory here:
+      <literal>C:\Program Files\Java\jre-<replaceable>version</replaceable></literal>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select Server Manager &gt; Local Server &gt; Computer Name to open a
+      System Properties window.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select Advanced &gt; Environment Variables.
+     </para>
+    </step>
+    <step>
+     <para>
+      Set the value of <literal>JAVA_HOME</literal> to match the
+      JRE or JDK installation directory.
+     </para>
+    </step>
+   </procedure>
+  </section>
+ </section>
+
+ <section xml:id="download-and-start">
+  <title>Downloading and Starting OpenIDM</title>
+
+  <procedure xml:id="download-start-openidm">
+
+   <para>
+    This procedure assumes that you are downloading and starting OpenIDM
+    as a regular (not administrative) user named <literal>user</literal>.
+   </para>
+
+   <!-- After discussion with Mark, I'll revise the noted chapter the
+    what's in comments for the release of OpenIDM 4.0.0. For now, we have
+    no choice. -->
+
+   <step>
+    <para>
+     Download the OpenIDM binary package,
+     <filename>openidm-${docTargetVersion}.zip</filename>. Navigate to the
+     <link xlink:show="new" xlink:href="http://forgerock.org/openidm/"
+      ><citetitle>ForgeRock Community</citetitle></link> page, and select
+     <literal>Unstable Community Builds</literal>.
+    </para>
+    <!-- As requested by marketing -->
+    <para>
+     For more information on the contents of the OpenIDM binary package, see
+     the following appendix of the Integrator's Guide:
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#appendix-file-layout">
+      <citetitle>File Layout</citetitle></link>.
+    </para>
+    <note>
+     <para>
+      There are risks with any unstable build. When the next version of
+      OpenIDM is released, ForgeRock will revise this section to point to the
+      stable enterprise build, which will be available from
+      <link xlink:show="new" xlink:href="https://backstage.forgerock.com/#!/downloads">
+       <citetitle>ForgeRock Backstage</citetitle></link>.
+     </para>
+    </note>
+   </step>
+
+   <!--
+   <step>
+    <para>Download the OpenIDM binary package,
+     <filename>openidm-4.0.0.zip</filename>. Navigate to the
+     <link xlink:show="new" xlink:href="http://forgerock.org/openidm/"
+      ><citetitle>ForgeRock Community</citetitle></link> page, and select
+     <literal>Stable Enterprise Builds</literal>.
+    </para>
+
+    <para>Enterprise downloads are tested, stable releases.</para>
+   </step>                            -->
+
+   <step>
+    <para>
+     Extract the contents of the OpenIDM binary file to your user's
+     <filename>Downloads</filename> directory. The process should unpack the
+     contents of OpenIDM to the <filename>Downloads/openidm</filename>
+     subdirectory.
+    </para>
+   </step>
+   <step>
+    <para>
+     Navigate to the <filename>Downloads/openidm</filename> subdirectory.
+    </para>
+    <stepalternatives>
+     <step>
+      <para>
+       In Microsoft Windows, use Windows Explorer to navigate to the
+       <literal>C:\Users\<replaceable>user</replaceable>\Downloads\openidm</literal>
+       directory.
+      </para>
+      <para>
+       Double-click the <filename>getting-started(.bat)</filename> file.
+       Do not select the <filename>getting-started.sh</filename> file, as
+       that is intended for use on UNIX/Linux systems.
+      </para>
+<!-- I'd like to include a screenshot of the Windows console here, but
+      that would reveal a warning, ref OPENIDM-3445 -->
+     </step>
+     <step>
+      <para>
+       In Linux/UNIX, open a command line interface and run the following
+       commands:
+      </para>
+      <screen>$ <userinput>cd /home/user/Downloads/openidm</userinput>
+$ <userinput>./getting-started.sh</userinput></screen>
+     </step>
+    </stepalternatives>
+    <para>
+     In both cases, the script starts OpenIDM with a group of configuration
+     and data files appropriate for users who need a quick introduction to
+     OpenIDM.
+    </para>
+   </step>
+   <step>
+    <para>
+     When OpenIDM is ready, you will see the following message:
+    </para>
+    <screen>-&gt; OpenIDM ready</screen>
+   </step>
+  </procedure>
+
+  <para>
+   Once OpenIDM is ready, you can administer it from a web browser. To do so,
+   navigate to <literal>http://localhost:8080/admin</literal> or
+   <literal>https://localhost:8443/admin</literal>. If you have
+   installed OpenIDM on a remote system, substitute that hostname or IP
+   address for <literal>localhost</literal>.
+  </para>
+
+  <note>
+   <para>
+    ForgeRock recommends that you connect to OpenIDM via the default secure
+    port, 8443, and import a signed certificate into the OpenIDM truststore,
+    as discussed in
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+          xlink:href="integrators-guide#security-management-service">
+     <citetitle>Accessing the Security Management Service</citetitle>.
+    </link>
+   </para>
+   <para>
+    Until you install that certificate, you will see a warning in your browser
+    at least the first time you access OpenIDM over a secure port.
+   </para>
+  </note>
+
+  <para>
+   The default username and password for the OpenIDM Administrator is
+   <literal>openidm-admin</literal> and <literal>openidm-admin</literal>.
+  </para>
+
+  <mediaobject>
+   <alt>The OpenIDM Web Console</alt>
+   <imageobject>
+    <imagedata fileref="images/gsg-openidm-login.png" format="PNG"/>
+   </imageobject>
+  </mediaobject>
+
+  <para>
+   When you log into OpenIDM at a URL with the <literal>/admin</literal>
+   endpoint, you are logging into the OpenIDM Administrative User Interface,
+   also known as the Admin UI.
+  </para>
+
+  <para>
+   The first time you log in as the OpenIDM Administrator, OpenIDM prompts
+   you to change your password. Do so. Note how OpenIDM requires a relatively
+   complex password. You can change password policies as described in the
+   OpenIDM Integrator's Guide chapter on
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="integrators-guide#chap-passwords"><citetitle>Managing
+   Passwords</citetitle></link>.
+  </para>
+
+  <mediaobject>
+   <alt>Change Your Administrative Password</alt>
+   <imageobject>
+    <imagedata fileref="images/gsg-password.png" format="PNG"/>
+   </imageobject>
+  </mediaobject>
+
+ </section>
+
+ <section xml:id="gsg-data-files">
+  <title>The Getting Started Data Files</title>
+
+  <para>
+   In a production deployment, you are likely to see resources like
+   Active Directory and OpenDJ. But the setup requirements for each
+   are extensive, and beyond the scope of this document.
+  </para>
+
+  <para>
+   For simplicity, this guide uses two static files as data stores:
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <para>
+     <filename>hr.csv</filename> represents the Human Resources
+     data store. It is in CSV format, commonly used to share data
+     between spreadsheet applications.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <filename>engineering.xml</filename> represents the Engineering
+     data store. It is in XML format, a generic means for storing complex
+     data that is commonly used over the Internet.
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   You can find these files in the OpenIDM binary package that you
+   downloaded earlier, in the following subdirectory:
+   <filename>openidm/samples/getting-started/data</filename>.
+  </para>
+ </section>
+
+ </chapter>
