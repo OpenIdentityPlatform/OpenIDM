@@ -913,9 +913,6 @@ openidm.scheduler.execute.persistent.schedules=true
         <literal>"property" : "sunset/date"</literal> indicates a JSON pointer
         that maps to the object attribute, and can be understood as
         <literal>sunset: {"date" : "<replaceable>date</replaceable>"}</literal>.
-        For more information about JSON pointer syntax, see
-        <link xlink:show="new"
-        xlink:href="http://tools.ietf.org/html/rfc6901">RFC 6901</link>.
        </para>
        <para>
         If you are using a JDBC repository, with a generic mapping, you must
