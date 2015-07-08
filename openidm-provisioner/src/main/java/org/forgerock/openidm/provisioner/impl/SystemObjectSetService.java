@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -92,13 +92,11 @@ import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CON
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = SystemObjectSetService.ROUTER_PREFIX)
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = ProvisionerService.ROUTER_PREFIX)
 })
 public class SystemObjectSetService implements ScheduledService, SingletonResourceProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(SystemObjectSetService.class);
-
-    public static final String ROUTER_PREFIX =  "/system";
 
     /** the system (provisioner) type (within connectorRef) */
     private static final String SYSTEM_TYPE = "systemType";

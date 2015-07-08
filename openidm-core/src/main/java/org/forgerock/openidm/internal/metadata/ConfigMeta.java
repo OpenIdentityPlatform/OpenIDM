@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,7 +34,6 @@ import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-import org.forgerock.openidm.router.impl.JsonResourceRouterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,9 +61,6 @@ public class ConfigMeta implements MetaDataProvider {
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData, NotConfiguration {
         if (ManagedObjectService.PID.equalsIgnoreCase(pidOrFactory)) {
-            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
-            return Collections.emptyList();
-        } else if (JsonResourceRouterService.PID.equalsIgnoreCase(pidOrFactory)) {
             logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
             return Collections.emptyList();
         }
