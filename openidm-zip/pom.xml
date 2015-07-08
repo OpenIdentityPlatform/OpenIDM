@@ -392,18 +392,6 @@
             <version>${slf4j.version}</version>
         </dependency>
 
-        <!-- Eclipse JSDT -->
-        <dependency>
-            <groupId>org.eclipse.wst.jsdt.debug</groupId>
-            <artifactId>rhino.debugger</artifactId>
-            <version>1.0.300.v201109150503</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.wst.jsdt.debug</groupId>
-            <artifactId>transport</artifactId>
-            <version>1.0.100.v201109150330</version>
-        </dependency>
-
         <!-- ForgeRock commons -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
