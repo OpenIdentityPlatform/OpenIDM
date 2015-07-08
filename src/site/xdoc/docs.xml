@@ -45,6 +45,12 @@
      <a href="./doc/OpenIDM-Release-Notes.pdf">PDF</a>
     </dd>
 
+    <dt>Getting Started With OpenIDM</dt>
+    <dd>
+     <a href="./doc/bootstrap/getting-started/index.html">HTML</a>,
+     <a href="./doc/OpenIDM-Getting-Started.pdf">PDF</a>
+    </dd>
+
     <dt>Installation Guide</dt>
     <dd>
      <a href="./doc/bootstrap/install-guide/index.html">HTML</a>,
