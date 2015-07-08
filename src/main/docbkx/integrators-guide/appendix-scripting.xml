@@ -1798,28 +1798,39 @@ logger = LoggerFactory.getLogger('logger');
        </thead>
        <tbody>
         <row>
-         <entry>managed.json</entry>
-         <entry>onRetrieve, onStore, onValidate</entry>
-         <entry>object, property</entry>
+         <entry morerows="7">managed.json</entry>
+         <entry>onCreate, onDelete</entry>
+         <entry>object, source, target, situation, linkQualifier</entry>
         </row>
         <row>
-         <entry>managed.json</entry>
+         <entry>onRetrieve, onStore</entry>
+         <entry><para>
+          object, when called from either an object or a property storage
+          trigger
+         </para>
+          <para>
+           property and propertyName, only when called from a property storage
+           trigger
+          </para></entry>
+        </row>
+        <row>
+         <entry>onSync</entry>
+         <entry>syncResults, request, oldObject, newObject</entry>
+        </row>
+        <row>
          <entry>onUpdate</entry>
-         <entry>oldObject, newObject</entry>
-  <!--       <entry><filename>sync.json</filename></entry>  -->
+         <entry>oldObject, newObject, source, target, situation, linkQualifier</entry>
         </row>
         <row>
-         <entry>managed.json</entry>
+         <entry>onValidate</entry>
+         <entry>property, only when called from a property storage
+         trigger</entry>
+        </row>
+        <row>
          <entry>postCreate, postDelete, postUpdate</entry>
          <entry>object</entry>
         </row>
         <row>
-         <entry>managed.json</entry>
-         <entry>onCreate, onDelete</entry>
-         <entry>object</entry>
-        </row>
-        <row>
-         <entry>managed.json</entry>
          <entry>onRead</entry>
          <entry><para>
           object, when called from either an object or a property storage trigger
@@ -1827,51 +1838,61 @@ logger = LoggerFactory.getLogger('logger');
          <para>
           property, only when called from a property storage trigger
          </para></entry>
- <!--        <entry><filename>managed.json</filename></entry>   -->
         </row>
         <row>
-         <entry>router.json</entry>
-         <entry>onFailure, onRequest, onResponse</entry>
-         <entry>object</entry>
- <!--        <entry><filename>managed.json</filename></entry>   -->
+         <entry>onStore</entry>
+         <entry>object, property</entry>
         </row>
         <row>
-         <entry>sync.json</entry>
-         <entry>onCreate, onDelete, onLink, onUnlink, onUpdate</entry>
-         <entry>object, source, target</entry>
+         <entry morerows="2">router.json</entry>
+         <entry>onFailure</entry>
+         <entry>exception</entry>
         </row>
         <row>
-         <entry>sync.json</entry>
-         <entry>validSource, validTarget</entry>
-         <entry>object (filter)</entry>
+         <entry>onRequest</entry>
+         <entry>request</entry>
         </row>
         <row>
-         <entry>sync.json</entry>
+         <entry>onResponse</entry>
+         <entry>response</entry>
+        </row>
+        <row>
+         <entry morerows="7">sync.json</entry>
+         <entry>onCreate, onDelete, onUpdate</entry>
+         <entry>object, source, target, situation, linkQualifier</entry>
+        </row>
+        <row>
+         <entry>onLink, onUnlink</entry>
+         <entry>source, target, linkQualifier</entry>
+        </row>
+        <row>
+         <entry>validSource</entry>
+         <entry>source, linkQualifier</entry>
+        </row>
+        <row>
+         <entry>validTarget</entry>
+         <entry>target, linkQualifier</entry>
+        </row>
+        <row>
          <entry>correlationQuery, correlationScript</entry>
-         <entry>object (correlation)</entry>
- <!--        <entry><filename>managed.json</filename></entry>    -->
+         <entry>source, linkQualifier</entry>
         </row>
         <row>
-         <entry>sync.json</entry>
          <entry>condition</entry>
-         <entry>object</entry>
+         <entry>object, linkQualifier</entry>
         </row>
         <row>
-         <entry>sync.json</entry>
          <entry>transform</entry>
-         <entry>source</entry>
+         <entry>source, linkQualifier</entry>
         </row>
         <row>
-         <entry>sync.json</entry>
          <entry>result</entry>
-         <entry>*</entry>
-   <!--      <entry><filename>sync.json</filename></entry>  -->
+         <entry>source, target, global, with reconciliation results</entry>
         </row>
         <row>
          <entry>*</entry>
          <entry>custom endpoint scripts</entry>
          <entry>request</entry>
- <!--        <entry><filename>sync.json</filename></entry>     -->
         </row>
 
        </tbody>
