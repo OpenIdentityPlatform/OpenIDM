@@ -99,6 +99,35 @@
             </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
+        <!-- Setup getting-started sample (replaces Sample4) -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/authentication.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+                <exclude>data/xmlConnectorData.xml</exclude>
+                <exclude>data/resource-schema-extension.xsd</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/getting-started</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-csv.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/getting-started/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/getting-started</outputDirectory>
+        </fileSet>
         <!-- Setup Sample1  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
@@ -290,34 +319,6 @@
                 <include>script/**</include>
             </includes>
             <outputDirectory>/openidm/samples/scriptedazure</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample4  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/authentication.json</exclude>
-                <exclude>data/Example.ldif</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample4</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-csv.json</include>
-                <include>provisioner.openicf-xml.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample4/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample4</outputDirectory>
         </fileSet>
         <!-- Setup Sample5  -->
         <fileSet>

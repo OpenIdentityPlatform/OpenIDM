@@ -1,17 +1,22 @@
 {
     "mappings" : [
         {
-            "name" : "csv_xmlfile",
+            "name" : "HumanResources_Engineering",
             "source" : "system/csv/account",
             "target" : "system/xmlfile/account",
             "correlationQuery" : {
+                "expressionTree" : {
+                    "all" : [
+                        "name"
+                    ]
+                },
+                "mapping" : "HumanResources_Engineering",
                 "type" : "text/javascript",
-                "source" : "var qry = { '_queryFilter': 'name eq \"' + source.mail + '\"' }; qry;"
+                "file" : "ui/correlateTreeToQueryFilter.js"
             },
-            "taskThreads" : 0,
             "properties" : [
                 {
-                    "source" : "mail",
+                    "source" : "email",
                     "target" : "name"
                 },
                 {
@@ -19,11 +24,11 @@
                     "target" : "lastname"
                 },
                 {
-                    "source" : "givenName",
+                    "source" : "firstName",
                     "target" : "firstname"
                 },
                 {
-                    "source" : "mail",
+                    "source" : "email",
                     "target" : "email"
                 },
                 {
@@ -36,7 +41,7 @@
                 },
                 {
                     "default" : "N/A",
-                    "target" : "mobileTelephoneNumber"
+                    "target" : "telephoneNumber"
                 }
             ],
             "policies" : [
