@@ -28,31 +28,30 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
-    "org/forgerock/openidm/ui/admin/ResourcesView",
+    "org/forgerock/openidm/ui/admin/connector/ConnectorListView",
     "../mocks/resourceDetails"
-], function (constants, router, eventManager, addEditManagedView, resourcesView, resourceDetails) {
+], function (constants, router, eventManager, ConnectorListView, resourceDetails) {
 
     return {
         executeAll: function (server, callback) {
 
             module('Admin Resource UI Functions');
 
-            QUnit.asyncTest("Resource View", function () {
+            QUnit.asyncTest("Connector List View", function () {
 
                 resourceDetails(server);
 
-                resourcesView.render([], function () {
+                ConnectorListView.render([], function () {
 
-                    QUnit.equal(resourcesView.$el.find("#resourceConnectorContainer .card-container").length, 1, "Connectors and add Connector successfully added");
+                    QUnit.equal(ConnectorListView.$el.find("#resourceConnectorContainer .card-container").length, 1, "Connectors and add Connector successfully added");
 
-                    QUnit.equal(resourcesView.$el.find("#resourceManagedContainer .card-container").length, 4, "Managed Objects and add Managed Object successfully added");
+                    QUnit.equal(ConnectorListView.$el.find("#resourceManagedContainer .card-container").length, 4, "Managed Objects and add Managed Object successfully added");
 
-                    QUnit.equal(resourcesView.$el.find(".btn-toolbar .btn-group").length, 3, "Button bar with correct number of actions found");
+                    QUnit.equal(ConnectorListView.$el.find(".btn-toolbar .btn-group").length, 3, "Button bar with correct number of actions found");
 
-                    QUnit.equal(resourcesView.$el.find(".subtitle-bar a").length, 2, "Help successfully detected");
+                    QUnit.equal(ConnectorListView.$el.find(".subtitle-bar a").length, 2, "Help successfully detected");
 
-                    resourcesView.$el.find("#resourceConnectorContainer .card-container:first").find(".dropdown-toggle").trigger("click");
+                    ConnectorListView.$el.find("#resourceConnectorContainer .card-container:first").find(".dropdown-toggle").trigger("click");
 
                     QUnit.equal($(".btn-group.open").length, 1, "Drop down successfully open");
 

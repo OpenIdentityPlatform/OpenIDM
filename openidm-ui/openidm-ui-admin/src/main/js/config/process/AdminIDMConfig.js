@@ -52,6 +52,11 @@ define("config/process/AdminIDMConfig", [
                     ConfigDelegate.readEntity("managed").then(function(managedConfig){
                         Navigation.configuration.links.admin.urls.managed.urls = [];
 
+                        Navigation.configuration.links.admin.urls.managed.urls.push({
+                            "header": true,
+                            "headerTitle": "data"
+                        });
+
                         _.each(managedConfig.objects, function(managed) {
                             if(!managed.schema) {
                                 managed.schema = {};
@@ -64,7 +69,8 @@ define("config/process/AdminIDMConfig", [
                             Navigation.configuration.links.admin.urls.managed.urls.push({
                                 "url" : "#resource/managed/" +managed.name +"/list/",
                                 "name" : managed.name,
-                                "icon" : "fa " +managed.schema.icon
+                                "icon" : "fa " +managed.schema.icon,
+                                "cssClass" : "navigation-managed-object"
                             });
                         });
 
@@ -73,9 +79,22 @@ define("config/process/AdminIDMConfig", [
                         });
 
                         Navigation.configuration.links.admin.urls.managed.urls.push({
-                            "url" : "#managed/add/",
-                            "name" : "New Managed Object",
-                            "icon" : "fa fa-plus"
+                            "header": true,
+                            "headerTitle": "workflow"
+                        });
+
+                        Navigation.configuration.links.admin.urls.managed.urls.push({
+                            "url": "#workflow/tasks/",
+                            "name": "Tasks",
+                            "icon": "fa fa-check-circle-o",
+                            "inactive": false
+                        });
+
+                        Navigation.configuration.links.admin.urls.managed.urls.push({
+                            "url": "#workflow/processes/",
+                            "name": "Processes",
+                            "icon": "fa fa-random",
+                            "inactive": false
                         });
 
                         Navigation.reload();

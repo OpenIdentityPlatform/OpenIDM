@@ -115,6 +115,11 @@
             "Navigation" : {
                 "links" : {
                     "dashboard" : "Dashboard",
+                    "systemPref" : "System Preferences",
+                    "managedObjects" : "Managed Objects",
+                    "manage" : "Manage",
+                    "viewProfile" : "View Profile",
+                    "connectors" : "Connectors",
                     "users" : "Users",
                     "apps" : "Applications",
                     "allApps" : "All applications",
@@ -124,7 +129,6 @@
                     "allTasks" : "Group's Tasks",
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process",
-                    "resources" : "Resources",
                     "mapping" : "Mappings",
                     "authentication": "Authentication",
                     "roles": "Roles"
@@ -335,6 +339,7 @@
         },
         "managed" : {
             "addManagedTitle" : "Add Managed Object",
+            "backToManaged" : "Back to Managed Objects",
             "managedTitle" : "Managed Objects",
             "managedDelete" : "Are you sure you want to delete this managed object?",
             "propertyDelete": "Are you sure you want to delete this property?",
@@ -658,7 +663,7 @@
             "select": "Make a Selection"
         },
         "connector" : {
-            "backToResources" : "Back to Resources",
+            "backToConnectorList" : "Back to Connectors",
             "addObjectType" : "Add Object Type",
             "saveConnector" : "Save Connector Changes",
             "saveObjectType" : "Save Object Type Changes",
@@ -958,7 +963,7 @@
             "source": "Source",
             "target": "Target",
             "more" : "more...",
-            "mappingListingTitle": "Mapping List",
+            "mappingListingTitle": "Mappings",
             "mappingDetailTitle": "Mapping Detail",
             "addToMapping" : "Add to Mapping",
             "newMapping" : "New Mapping",

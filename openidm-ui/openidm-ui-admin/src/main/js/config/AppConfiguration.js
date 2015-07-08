@@ -133,29 +133,42 @@ define("config/AppConfiguration", [
                         "admin" : {
                             "role": "ui-admin",
                             "urls": {
-                                "connectors": {
-                                    "url": "#resources/",
-                                    "name": "config.AppConfiguration.Navigation.links.resources",
-                                    "icon": "fa fa-cogs",
-                                    "inactive": false
-                                },
-                                "mapping": {
-                                    "url": "#mapping/",
-                                    "name": "config.AppConfiguration.Navigation.links.mapping",
-                                    "icon": "fa fa-map-marker",
-                                    "inactive": false
+                                "configuration": {
+                                    "name": "Configure",
+                                    "icon": "fa fa-wrench",
+                                    "dropdown": true,
+                                    "urls" : [
+                                        {
+                                            "url": "#connectors/",
+                                            "name": "config.AppConfiguration.Navigation.links.connectors",
+                                            "icon": "fa fa-cubes",
+                                            "inactive": false
+                                        },
+                                        {
+                                            "url": "#managed/",
+                                            "name": "config.AppConfiguration.Navigation.links.managedObjects",
+                                            "icon": "fa fa-th",
+                                            "inactive": false
+                                        },
+                                        {
+                                            "url": "#mapping/",
+                                            "name": "config.AppConfiguration.Navigation.links.mapping",
+                                            "icon": "fa fa-arrows-h",
+                                            "inactive": false
+                                        },
+                                        {
+                                            "url": "#settings/",
+                                            "name": "config.AppConfiguration.Navigation.links.systemPref",
+                                            "icon": "fa fa-cog",
+                                            "inactive": false
+                                        }
+                                    ]
                                 },
                                 "managed": {
-                                    "name": "Managed",
-                                    "icon": "fa fa-database",
+                                    "name": "config.AppConfiguration.Navigation.links.manage",
+                                    "icon": "fa fa-cogs",
                                     "dropdown": true,
                                     "urls" : []
-                                },
-                                "settings": {
-                                    "url": "#settings/",
-                                    "name": "common.form.settings",
-                                    "icon": "fa fa-wrench",
-                                    "inactive": false
                                 }
                             }
                         }

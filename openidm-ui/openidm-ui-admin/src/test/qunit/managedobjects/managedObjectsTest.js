@@ -29,10 +29,9 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
-    "org/forgerock/openidm/ui/admin/ResourcesView",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "../mocks/resourceDetails"
-], function (constants, router, eventManager, addEditManagedView, resourcesView, ConfigDelegate, resourceDetails) {
+], function (constants, router, eventManager, addEditManagedView, ConfigDelegate, resourceDetails) {
 
     return {
         executeAll: function (server) {

@@ -30,14 +30,12 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
     "org/forgerock/openidm/ui/admin/MapResourceView",
-    "org/forgerock/openidm/ui/admin/ResourcesView",
     "../mocks/addMapping"
 ], function (constants,
              router,
              eventManager,
              addMappingView,
              MapResourceView,
-             resourcesView,
              addMapping) {
 
     return {

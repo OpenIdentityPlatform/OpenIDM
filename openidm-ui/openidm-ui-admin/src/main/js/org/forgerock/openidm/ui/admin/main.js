@@ -38,7 +38,6 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./delegates/ScriptDelegate",
     "./delegates/SiteConfigurationDelegate",
 
-    "./ResourcesView",
     "./MapResourceView",
 
     "./connector/AbstractConnectorView",
@@ -47,8 +46,10 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./connector/ConnectorTypeAbstractView",
     "./connector/ConnectorTypeView",
     "./connector/ConnectorRegistry",
+    "./connector/ConnectorListView",
 
     "./managed/AddEditManagedView",
+    "./managed/ManagedListView",
 
     "./util/ConnectorUtils",
     "./util/LinkQualifierUtils",
@@ -111,6 +112,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./role/EditRoleView",
     "./role/RoleUsersView",
     "./role/RoleEntitlementsListView",
-    "./role/RoleEntitlementsEditView"
+    "./role/RoleEntitlementsEditView",
 
+    "./workflow/ProcessListView",
+    "./workflow/TaskListView"
 ]);

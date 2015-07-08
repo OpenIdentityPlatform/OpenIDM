@@ -43,7 +43,8 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             "onValidate": "onValidate",
             "click #managedObjectForm fieldset legend" : "sectionHideShow",
             "click #addManagedProperties": "addProperty",
-            "click .property-remove" : "removeProperty"
+            "click .property-remove" : "removeProperty",
+            "click #deleteManaged": "deleteManaged"
         },
         eventHooks: [],
         propertyHooks: [],
@@ -635,9 +636,44 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "managedObjectSaveSuccess");
 
                 _.delay(function () {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.managedListView});
                 }, 1500);
             });
+        },
+
+        deleteManaged: function(event) {
+            event.preventDefault();
+
+            var promises = [];
+
+            uiUtils.jqConfirm($.t("templates.managed.managedDelete"), _.bind(function(){
+                _.each(this.data.managedObjects.objects, function(managedObject, index){
+                    if(managedObject.name === this.data.currentManagedObject.name) {
+                        this.data.managedObjects.objects.splice(index, 1);
+                    }
+                }, this);
+
+                if(this.data.currentRepo === "repo.orientdb") {
+                    if(this.data.repoObject.dbStructure.orientdbClass["managed_"+this.data.currentManagedObject.name] !== undefined){
+                        delete this.data.repoObject.dbStructure.orientdbClass["managed_"+this.data.currentManagedObject.name];
+                    }
+
+                    promises.push(ConfigDelegate.updateEntity(this.data.currentRepo, this.data.repoObject));
+                }
+
+                promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.managedObjects.objects}));
+
+                $.when.apply($, promises).then(function(){
+                        eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
+
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.managedListView});
+                    },
+                    function(){
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
+                    });
+
+            },this));
         },
 
         setManagedObject: function(managedObject) {

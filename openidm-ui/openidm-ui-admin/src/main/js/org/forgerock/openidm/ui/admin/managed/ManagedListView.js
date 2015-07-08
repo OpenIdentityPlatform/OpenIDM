@@ -24,7 +24,7 @@
 
 /*global define, $, _, Handlebars */
 
-define("org/forgerock/openidm/ui/admin/ResourcesView", [
+define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -34,44 +34,24 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 ], function(AdminAbstractView, eventManager, constants, router, ConnectorDelegate, uiUtils, connectorUtils, ConfigDelegate) {
-    var ResourcesView = AdminAbstractView.extend({
-        template: "templates/admin/ResourcesViewTemplate.html",
+    var ManagedListView = AdminAbstractView.extend({
+        template: "templates/admin/managed/ManagedListViewTemplate.html",
         events: {
-            "click .connector-delete": "deleteConnections",
             "click .managed-delete": "deleteManaged"
         },
-        addMappingView: false,
         render: function(args, callback) {
-            var connectorPromise,
-                managedPromise,
+            var managedPromise,
                 repoCheckPromise,
                 iconPromise,
-                splitConfig,
                 tempIconClass;
 
             this.data.docHelpUrl = constants.DOC_URL;
 
-            connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
             repoCheckPromise = ConfigDelegate.getConfigList();
             iconPromise = connectorUtils.getIconList();
 
-            $.when(connectorPromise, managedPromise, repoCheckPromise, iconPromise).then(_.bind(function(connectors, managedObjects, configFiles, iconList){
-                _.each(connectors, _.bind(function(connector){
-                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName, iconList);
-                    connector.iconClass = tempIconClass.iconClass;
-                    connector.iconSrc = tempIconClass.src;
-
-                    splitConfig = connector.config.split("/");
-
-                    connector.cleanUrlName = splitConfig[1] + "_" +splitConfig[2];
-                    connector.cleanEditName = splitConfig[2];
-
-                    //remove the __ALL__ objectType
-                    connector.objectTypes = _.reject(connector.objectTypes, function(ot) { return ot === "__ALL__"; });
-                }, this));
-
-                this.data.currentConnectors = connectors;
+            $.when(managedPromise, repoCheckPromise, iconPromise).then(_.bind(function(managedObjects, configFiles, iconList){
                 this.data.currentManagedObjects = _.sortBy(managedObjects.objects, 'name');
 
                 _.each(this.data.currentManagedObjects, _.bind(function(managedObject){
@@ -99,49 +79,10 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
         resourceRender: function(callback) {
             this.parentRender(_.bind(function(){
-                if(this.$el.find(".resource-unavailable").length !== 0) {
-                    this.$el.find(".resource-unavailable").tooltip({
-                        tooltipClass: "resource-error-tooltip"
-                    });
-                }
-
-                if(this.$el.find(".resource-disabled").length !== 0) {
-                    this.$el.find(".resource-disabled").tooltip({
-                        tooltipClass: "resource-warning-tooltip"
-                    });
-                }
-
                 if (callback) {
                     callback();
                 }
-
             }, this));
-        },
-
-        deleteConnections: function(event) {
-            var selectedItems = $(event.currentTarget).parents(".card"),
-                url,
-                tempConnector = _.clone(this.data.currentConnectors);
-
-            uiUtils.jqConfirm($.t("templates.connector.connectorDelete"), _.bind(function(){
-
-                _.each(tempConnector, function(connectorObject, index){
-                    if(connectorObject.cleanUrlName === selectedItems.attr("data-connector-title")) {
-                        this.data.currentConnectors.splice(index, 1);
-                    }
-                }, this);
-
-                url = selectedItems.attr("data-connector-title").split("_");
-
-                ConfigDelegate.deleteEntity(url[0] +"/" +url[1]).then(function(){
-                        ConnectorDelegate.deleteCurrentConnectorsCache();
-                        selectedItems.parent().parent().remove();
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
-                    },
-                    function(){
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
-                    });
-            } , this));
         },
 
         deleteManaged: function(event) {
@@ -179,5 +120,5 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
         }
     });
 
-    return new ResourcesView();
+    return new ManagedListView();
 });

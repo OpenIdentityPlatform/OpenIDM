@@ -1,9 +1,11 @@
 <section>
     <div class="back-bar">
         <div class="container">
-            <a href="#resources/">{{t "templates.connector.backToResources"}}</a>
+            <a href="#managed/">{{t "templates.managed.backToManaged"}}</a>
         </div>
     </div>
+
+    {{#if addState}}
     <div class="container">
         <div class="page-header no-border">
             <h1>{{addEditTitle}}
@@ -13,6 +15,32 @@
             </h1>
         </div>
     </div>
+    {{else}}
+    <div class="container">
+        <div class="page-header clearfix">
+            <span class="header-icon pull-left"><i class="fa {{#if currentManagedObject.schema.icon}}{{currentManagedObject.schema.icon}}{{else}}fa-database{{/if}}"></i></span>
+            <h4 class="page-type">Managed Object</h4>
+            <div class="page-header-button-group">
+                <a href="#mapping/add/managed/{{currentManagedObject.name}}">
+                    <button type="button" class="btn btn-primary btn-actions">
+                        <i class="fa fa-plus"></i> {{t "templates.connector.addMapping"}}
+                    </button>
+                </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default btn-secondary dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-ellipsis-v fa-lg"></i>
+                    </button>
+                    <ul class="dropdown-menu pull-rightAd" role="menu">
+                        <li class="data-link"><a href="#resource/managed/{{currentManagedObject.name}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{currentManagedObject.name}})</a></li>
+                        <li class="divider"></li>
+                        <li id="deleteManaged"><a href="#"><i class="fa fa-times"></i>{{t "common.form.delete"}}</a></li>
+                    </ul>
+                </div>
+            </div>
+            <h1>{{currentManagedObject.name}}</h1>
+        </div>
+    </div>
+    {{/if}}
 </section>
 <div class="container">
     <div class="panel panel-default panel-content panel-collapse-group has-border">
