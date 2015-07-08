@@ -368,9 +368,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     building blocks shown in this section. In these expressions the simplest
     <replaceable>json-pointer</replaceable> is a field of the JSON resource,
     such as <literal>userName</literal> or <literal>id</literal>. A json-pointer
-    can, however, point to nested elements as described in the
-    <link xlink:show="new" xlink:href="http://tools.ietf.org/html/rfc6901">JSON
-    Pointer RFC</link>.
+    can, however, point to nested elements.
    </para>
    <varlistentry>
     <term>Comparison expressions</term>
