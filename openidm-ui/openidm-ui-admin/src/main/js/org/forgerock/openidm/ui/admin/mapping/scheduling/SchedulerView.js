@@ -26,14 +26,12 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/scheduling/SchedulerView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/openidm/ui/admin/util/Scheduler"
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             eventManager,
             constants,
             ConfigDelegate,

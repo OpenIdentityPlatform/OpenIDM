@@ -26,7 +26,6 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/ChangeAssociationDialog", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
@@ -35,7 +34,6 @@ define("org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManage
     "bootstrap-dialog",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             conf,
             uiUtils,
             searchDelegate,

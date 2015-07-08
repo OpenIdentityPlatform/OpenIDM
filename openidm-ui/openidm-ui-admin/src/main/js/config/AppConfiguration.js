@@ -143,33 +143,7 @@ define("config/AppConfiguration", [
                                     "url": "#mapping/",
                                     "name": "config.AppConfiguration.Navigation.links.mapping",
                                     "icon": "fa fa-map-marker",
-                                    "inactive": false,
-                                    "urls": {
-                                        "properties": {
-                                            "url": "#properties/",
-                                            "name": "templates.mapping.properties",
-                                            "icon": "fa fa-list",
-                                            "inactive": false
-                                        },
-                                        "association": {
-                                            "url": "#association/",
-                                            "name": "templates.correlation.correlation",
-                                            "icon": "fa fa-random",
-                                            "inactive": false
-                                        },
-                                        "sync": {
-                                            "url": "#behaviors/",
-                                            "name": "templates.sync.sync",
-                                            "icon": "fa fa-clock-o",
-                                            "inactive": false
-                                        },
-                                        "schedule": {
-                                            "url": "#schedule/",
-                                            "name": "templates.schedule.schedule",
-                                            "icon": "fa fa-calendar",
-                                            "inactive": false
-                                        }
-                                    }
+                                    "inactive": false
                                 },
                                 "managed": {
                                     "name": "Managed",

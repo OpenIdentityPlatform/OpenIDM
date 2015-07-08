@@ -36,6 +36,9 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView", [
     var currentMapping = {},
         syncConfig = {},
         numRepresentativeProps = 4,
+        recon = null,
+        syncCancelled = null,
+        runSync = _.noop(),
 
         MappingAdminAbstractView = AdminAbstractView.extend({
             getCurrentMapping: function() {
@@ -44,6 +47,18 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView", [
 
             getSyncConfig: function() {
                 return _.clone(syncConfig, true);
+            },
+
+            getRecon: function() {
+                return _.clone(recon, true);
+            },
+
+            getSyncNow: function() {
+                return runSync;
+            },
+
+            getSyncCancelled: function() {
+                return _.clone(syncCancelled, true);
             },
 
             getMappingName: function() {
@@ -73,6 +88,21 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView", [
                 return sync;
             },
 
+            setRecon: function(data) {
+                recon = data;
+                return data;
+            },
+
+            setSyncNow: function(syncNow) {
+                runSync = syncNow;
+                return syncNow;
+            },
+
+            setSyncCancelled: function(cancelled) {
+                syncCancelled = cancelled;
+                return cancelled;
+            },
+
             AbstractMappingSave: function(mapping, callback) {
                 _.each(syncConfig.mappings, function(map, key) {
                     syncConfig.mappings[key] = _.omit(mapping, "recon");
@@ -84,8 +114,6 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView", [
 
                 ConfigDelegate.updateEntity("sync", {"mappings" : syncConfig.mappings}).then(_.bind(callback, this));
             }
-
-
         });
 
     return MappingAdminAbstractView;

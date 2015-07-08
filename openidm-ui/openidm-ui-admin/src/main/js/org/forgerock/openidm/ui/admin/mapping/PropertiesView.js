@@ -27,12 +27,10 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView",
     "org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView",
     "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView"
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             LinkQualifiersView,
             RoleEntitlementsView,
             AttributesGridView) {
@@ -41,38 +39,24 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
         template: "templates/admin/mapping/PropertiesTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
-        events: {
-            "click .correlationBody fieldset legend": "sectionHideShow"
-        },
         data: {},
 
         render: function (args, callback) {
-            MappingBaseView.child = this;
+            this.data.hasLinkQualifiers = this.getCurrentMapping().linkQualifiers === true;
 
-            MappingBaseView.render(args, _.bind(function(){
-                if (this.getCurrentMapping().linkQualifiers) {
-                    this.data.hasLinkQualifiers = true;
-                } else {
-                    this.data.hasLinkQualifiers = false;
-                }
+            this.parentRender(_.bind(function () {
 
-                this.parentRender(_.bind(function () {
+                LinkQualifiersView.render();
 
-                    LinkQualifiersView.render();
-
-                    AttributesGridView.render({}, _.bind(function() {
-                        if (callback) {
-                            callback();
-                        }
-                    }, this));
-
-                    RoleEntitlementsView.render();
-
-                    MappingBaseView.moveSubmenu();
+                AttributesGridView.render({}, _.bind(function() {
+                    if (callback) {
+                        callback();
+                    }
                 }, this));
 
-            }, this));
+                RoleEntitlementsView.render();
 
+            }, this));
         }
     });
 

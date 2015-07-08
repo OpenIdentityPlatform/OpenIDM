@@ -26,7 +26,6 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/BehaviorsView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
@@ -39,7 +38,6 @@ define("org/forgerock/openidm/ui/admin/mapping/BehaviorsView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils"
 
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             eventManager,
             constants,
             ConfigDelegate,
@@ -55,7 +53,6 @@ define("org/forgerock/openidm/ui/admin/mapping/BehaviorsView", [
         template: "templates/admin/mapping/BehaviorsTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
-        events: {},
         mapping: null,
 
         render: function (args, callback) {
@@ -64,52 +61,47 @@ define("org/forgerock/openidm/ui/admin/mapping/BehaviorsView", [
                 args: args,
                 callback: callback
             };
-            MappingBaseView.child = this;
-            MappingBaseView.render(args,_.bind(function() {
-                this.mapping = this.getCurrentMapping();
+            this.mapping = this.getCurrentMapping();
 
-                this.data.mappingName = this.getMappingName();
-                this.data.hideSituational = true;
-                this.data.hideRecon = true;
-                this.data.hideSingleRecordRecon = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
+            this.data.mappingName = this.getMappingName();
+            this.data.hideSituational = true;
+            this.data.hideRecon = true;
+            this.data.hideSingleRecordRecon = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
 
-                _.each(SituationalEventScriptsView.model.scripts, function (script) {
-                    if (_.has(SituationalEventScriptsView.model, "mapping")) {
-                        if (_.has(SituationalEventScriptsView.model.mapping, script)) {
-                            this.data.hideSituational = false;
-                        }
-                    } else if (_.has(this.mapping, script)) {
+            _.each(SituationalEventScriptsView.model.scripts, function (script) {
+                if (_.has(SituationalEventScriptsView.model, "mapping")) {
+                    if (_.has(SituationalEventScriptsView.model.mapping, script)) {
                         this.data.hideSituational = false;
                     }
-                }, this);
+                } else if (_.has(this.mapping, script)) {
+                    this.data.hideSituational = false;
+                }
+            }, this);
 
-                _.each(ReconciliationScriptView.model.scripts, function (script) {
-                    if (_.has(ReconciliationScriptView.model, "mapping")) {
-                        if (_.has(ReconciliationScriptView.model.mapping, script)) {
-                            this.data.hideRecon = false;
-                        }
-                    } else if (_.has(this.mapping, script)) {
+            _.each(ReconciliationScriptView.model.scripts, function (script) {
+                if (_.has(ReconciliationScriptView.model, "mapping")) {
+                    if (_.has(ReconciliationScriptView.model.mapping, script)) {
                         this.data.hideRecon = false;
                     }
-                }, this);
+                } else if (_.has(this.mapping, script)) {
+                    this.data.hideRecon = false;
+                }
+            }, this);
 
-                this.parentRender(_.bind(function () {
-                    PoliciesView.render({
-                        saveCallback: _.bind(function () {
-                            this.render(this.model.args, this.model.callback);
-                        }, this)
-                    });
-                    SituationalEventScriptsView.render();
-                    ReconciliationScriptView.render();
-                    SingleRecordReconciliationView.render({recon: MappingBaseView.data.recon});
+            this.parentRender(_.bind(function () {
+                PoliciesView.render({
+                    saveCallback: _.bind(function () {
+                        this.render(this.model.args, this.model.callback);
+                    }, this)
+                });
+                SituationalEventScriptsView.render();
+                ReconciliationScriptView.render();
+                SingleRecordReconciliationView.render({recon: this.getRecon()});
 
-                    MappingBaseView.moveSubmenu();
+                if (callback) {
+                    callback();
+                }
 
-                    if (callback) {
-                        callback();
-                    }
-
-                }, this));
             }, this));
         }
     });

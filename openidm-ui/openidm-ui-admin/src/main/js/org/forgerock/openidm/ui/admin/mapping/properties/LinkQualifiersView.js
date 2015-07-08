@@ -29,7 +29,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
@@ -37,7 +36,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
             ConfigDelegate,
             Constants,
             EventManager,
-            MappingBaseView,
             inlineScriptEditor,
             ScriptDelegate,
             LinkQualifierUtils) {
