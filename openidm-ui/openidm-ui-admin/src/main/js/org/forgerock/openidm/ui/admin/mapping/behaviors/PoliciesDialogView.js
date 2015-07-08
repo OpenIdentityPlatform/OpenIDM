@@ -26,7 +26,6 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
@@ -35,7 +34,6 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView", [
     "bootstrap-dialog"
 
 ], function(AbstractView,
-            MappingBaseView,
             conf,
             uiUtils,
             InlineScriptEditor,
@@ -50,9 +48,7 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView", [
             "click .tabButtons .btn": "sectionControl"
         },
         model: {},
-        data: {
-
-        },
+        data: {},
 
         render: function(args, callback) {
             var _this = this,

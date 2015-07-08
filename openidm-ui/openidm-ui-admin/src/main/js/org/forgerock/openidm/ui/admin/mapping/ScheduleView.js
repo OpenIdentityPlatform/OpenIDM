@@ -26,13 +26,11 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/ScheduleView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/mapping/scheduling/SchedulerView",
     "org/forgerock/openidm/ui/admin/mapping/scheduling/LiveSyncView",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate"
 
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             SchedulerView,
             LiveSyncView,
             SchedulerDelegate) {
@@ -41,28 +39,20 @@ define("org/forgerock/openidm/ui/admin/mapping/ScheduleView", [
         template: "templates/admin/mapping/ScheduleTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
-        events: {
-            "click .correlationBody fieldset legend": "sectionHideShow"
-        },
-        data: {},
 
         render: function (args, callback) {
-            MappingBaseView.child = this;
-            MappingBaseView.render(args,_.bind(function(){
-                this.parentRender(_.bind(function () {
 
-                    SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
-                        SchedulerView.render({"schedules": schedules});
-                        LiveSyncView.render({"schedules": schedules});
+            this.parentRender(_.bind(function () {
 
-                        MappingBaseView.moveSubmenu();
+                SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
+                    SchedulerView.render({"schedules": schedules});
+                    LiveSyncView.render({"schedules": schedules});
 
-                        if (callback) {
-                            callback();
-                        }
-                    }, this));
-
+                    if (callback) {
+                        callback();
+                    }
                 }, this));
+
             }, this));
         }
     });

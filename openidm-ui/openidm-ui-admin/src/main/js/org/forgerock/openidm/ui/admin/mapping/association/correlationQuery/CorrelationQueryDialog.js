@@ -26,12 +26,16 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/CorrelationQueryDialog", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/CorrelationQueryBuilderView",
     "bootstrap-dialog"
-], function(AbstractView, MappingBaseView, conf, uiUtils, CorrelationQueryBuilderView, BootstrapDialog) {
+], function(AbstractView,
+            conf,
+            uiUtils,
+            CorrelationQueryBuilderView,
+            BootstrapDialog) {
+
     var CorrelationQueryDialog = AbstractView.extend({
         template: "templates/admin/mapping/association/correlationQuery/CorrelationQueryDialogTemplate.html",
         el: "#dialogs",

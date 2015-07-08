@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global window,define, $, _, form2js */
+/*global window,define, $, _, form2js, require */
 
 define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
@@ -59,13 +59,15 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         events: {
             "click #syncNowButton": "syncNow",
             "click #stopSyncButton": "stopSync",
-            "click #syncStatus": "toggleSyncDetails"
+            "click #syncStatus": "toggleSyncDetails",
+            "click #mappingTabs li": "reRoute"
         },
         data: {},
         model: {
             syncDetails: null,
             syncOpen: false
         },
+
         toggleSyncDetails: function(event){
             event.preventDefault();
 
@@ -81,41 +83,17 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 this.model.syncOpen = false;
             }
         },
+
         loadReconDetails: function(syncDetails) {
             ReconDetailsView.render(syncDetails);
         },
-        setSubmenu: function(){
-            _.each(nav.configuration.links.admin.urls.mapping.urls, _.bind(function(val){
-                var url = val.url.split("/")[0];
 
-                val.url = url + "/" + this.getCurrentMapping().name + "/";
-            },this));
-            nav.reload();
-        },
-        moveSubmenu: function(){
-            var submenuClone = $("#subNavHolder").clone(true),
-                submenuList = submenuClone.find("ul");
-
-            $("#subNavHolder").remove();
-            this.$el.find("#subNavHolderClone").remove();
-            submenuClone.attr({
-                "id":"subNavHolderClone",
-                "class": ""
-            });
-            submenuClone.find("#subNavBar").attr("class","");
-            submenuList.attr({
-                "class":"nav nav-tabs",
-                "role":"tablist"
-            });
-            submenuList.find("a").addClass("submenuNavButton");
-            submenuClone.insertBefore("#mappingContent", this.$el).show();
-            this.$el.find(".nav-tabs").tabdrop();
-        },
         syncType: function(type) {
             var tempType = type.split("/");
 
             return (tempType[0] === "managed") ? "managed" : tempType[1];
         },
+
         runningReconProgress: function(onReady){
             reconDelegate.waitForAll([this.data.recon._id], true, _.bind(function (reconStatus) {
                 if(this.data.recon._id === reconStatus._id && this.data.recon.mapping === this.getCurrentMapping().name){
@@ -124,6 +102,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                         this.$el.find("#stopSyncButton").prop("disabled",false);
                     } else {
                         this.data.syncCanceled = true;
+                        this.setSyncCanceled(true);
                         this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
                     }
 
@@ -139,12 +118,31 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                     this.$el.find("#stopSyncButton").hide();
 
                     this.data.recon = completedRecon[0];
+                    this.setRecon(this.data.recon);
                     this.data.syncLabel = $.t("templates.mapping.reconAnalysis.completed");
                     this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(this.data.recon.ended,"MMMM dd, yyyy HH:mm");
                     onReady();
                 }
             }, this));
         },
+
+        reRoute: function(e) {
+            var route = $(e.currentTarget).attr("data-route-name");
+            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes[route], args: [router.getCurrentHash().split("/")[1]]});
+            this.updateTab();
+        },
+
+        updateTab: function() {
+            var route = router.getCurrentHash().split("/")[0];
+
+            if (this.$el.find("#"+route+"Tab").length > 0) {
+                this.$el.find("#mappingTabs li").toggleClass("active", false);
+                this.$el.find("#" + route + "Tab").toggleClass("active", true);
+            }
+
+            require(router.currentRoute.childView).render();
+        },
+
         render: function(args, callback) {
             var syncConfig,
                 cleanName;
@@ -155,6 +153,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
             this.route = { url: window.location.hash.replace(/^#/, '') };
             this.data.docHelpUrl = constants.DOC_URL;
+            this.setSyncNow(_.bind(this.syncNow, this));
 
             //because there are relatively slow queries being called which would slow down the interface if they were called each time
             //decide here whether we want to render all of this view or only the child
@@ -170,7 +169,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
                     onReady = _.bind(function(runningRecon){
                         this.parentRender(_.bind(function () {
-                            this.setSubmenu();
+                            this.updateTab();
+
+                            this.$el.find(".nav-tabs").tabdrop();
 
                             if (this.model.syncOpen) {
                                 $("#syncStatus").trigger("click");
@@ -197,6 +198,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                     this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
                     this.data.syncStatus = $.t("templates.mapping.notYetSynced");
                     this.data.syncCanceled = false;
+                    this.setSyncCancelled(false);
 
                     this.data.targetType = this.syncType(this.data.mapping.target);
                     this.data.sourceType = this.syncType(this.data.mapping.source);
@@ -238,11 +240,13 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                         LinkQualifierUtil.checkLinkQualifier(this.data.mapping).then(_.bind(function(result){
                             if(this.data.mapping.recon){
                                 this.data.recon = this.data.mapping.recon;
+                                this.setRecon(this.data.recon);
                                 this.model.syncDetails = this.data.recon;
 
                                 if (this.data.recon.ended) {
                                     if(this.data.recon.state === "CANCELED"){
                                         this.data.syncCanceled = true;
+                                        this.setSyncCanceled(true);
                                         this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
                                         this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
                                     } else {
@@ -262,8 +266,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
                 }, this));
             } else {
-                this.setSubmenu();
-
                 this.parentRender();
 
                 if(callback){
@@ -271,10 +273,12 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 }
             }
         },
+
         setSyncInProgress: function(){
             this.$el.find("#syncNowButton").hide().prop("disabled",true);
             this.$el.find("#stopSyncButton").show().prop("disabled", true);
         },
+
         syncNow: function(event) {
             var total,
                 processed;
@@ -300,6 +304,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 }
 
                 this.data.recon = reconStatus;
+                this.setRecon(this.data.recon);
                 this.$el.find("#stopSyncButton").prop("disabled",false);
 
                 this.model.syncDetails = reconStatus;
@@ -318,11 +323,13 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             }, this)).then(_.bind(function(s){
                 this.data.reconAvailable = false;
                 this.data.recon = s;
+                this.setRecon(this.data.recon);
 
                 delete this.data.mapping;
-                this.child.render([this.getCurrentMapping().name]);
+                this.updateTab();
             }, this));
         },
+
         stopSync: function(e){
             e.preventDefault();
 
@@ -334,7 +341,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
             reconDelegate.stopRecon(this.data.recon._id, true).then(_.bind(function(){
                 delete this.data.mapping;
-                this.child.render([this.getCurrentMapping().name]);
+                this.updateTab();
             }, this));
         }
     });

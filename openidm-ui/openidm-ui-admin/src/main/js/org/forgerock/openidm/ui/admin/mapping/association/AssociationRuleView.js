@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
             this.model.mapping = this.getCurrentMapping();
             this.model.mappingName = this.getMappingName();
 
-            this.model.startSync = args.startSync;
+            this.model.startSync = this.getSyncNow();
 
             this.model.changes = args.changes || [];
             this.model.linkQualifiers = LinkQualifierUtils.getLinkQualifier(this.model.mappingName) || ["default"];
@@ -187,7 +187,6 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
 
         reload: function() {
             this.render({
-                startSync: this.model.startSync,
                 changes: this.model.changes
             });
         },

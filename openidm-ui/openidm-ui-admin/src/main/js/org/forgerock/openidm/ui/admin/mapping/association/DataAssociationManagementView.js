@@ -26,7 +26,6 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManagementView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -38,7 +37,6 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
     "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/ChangeAssociationDialog",
     "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/TestSyncDialog"
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             conf,
             eventManager,
             constants,
@@ -63,8 +61,9 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
         data: {},
 
         render: function(args, callback) {
-            this.data.recon = MappingBaseView.data.recon;
+            this.data.recon = this.getRecon();
             this.mapping = this.getCurrentMapping();
+            this.mappingSync = this.getSyncNow();
             this.data.numRepresentativeProps = this.getNumRepresentativeProps();
             this.data.sourceProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps);
             this.data.targetProps = _.pluck(this.mapping.properties,"target").slice(0,this.data.numRepresentativeProps);
@@ -72,7 +71,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
 
             this.data.reconAvailable = false;
             this.parentRender(_.bind(function() {
-                if(this.data.recon && !MappingBaseView.data.syncCanceled){
+                if(this.data.recon && !this.getSyncCancelled()){
                     this.renderReconResults(null, callback);
 
                     $(window).resize(function () {
@@ -91,7 +90,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
         syncNow: function(e) {
             e.preventDefault();
             $(e.target).closest("button").prop('disabled',true);
-            MappingBaseView.syncNow(e);
+            this.mappingSync(e);
         },
 
         singleRecordSync: function(e) {
@@ -100,7 +99,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
             e.preventDefault();
 
             TestSyncDialog.render({
-                recon: MappingBaseView.data.recon
+                recon: this.getRecon()
             });
         },
 
@@ -190,12 +189,12 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                             shrinkToFit:true,
                             height: "100%",
                             url: "/openidm/endpoint/reconResults?_queryId=reconResults&source="+ this.mapping.source +
-                                "&target="+ this.mapping.target +
-                                "&sourceProps="+ this.data.sourceProps.join(",") +
-                                "&targetProps="+ this.data.targetProps.join(",") +
-                                "&reconId="+ recon._id +
-                                "&situations=" + situations.join(",") +
-                                "&mapping=" + this.mapping.name,
+                            "&target="+ this.mapping.target +
+                            "&sourceProps="+ this.data.sourceProps.join(",") +
+                            "&targetProps="+ this.data.targetProps.join(",") +
+                            "&reconId="+ recon._id +
+                            "&situations=" + situations.join(",") +
+                            "&mapping=" + this.mapping.name,
                             datatype: "json",
                             rowNum: 10,
                             rowList: [10,20,50],

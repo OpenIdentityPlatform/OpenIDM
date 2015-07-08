@@ -87,5 +87,13 @@
         </div>
     </div>
 
-    <div id="mappingContent"></div>
+    <ul id="mappingTabs" class="nav nav-tabs">
+        <li id="propertiesTab" data-route-name="propertiesView" class="active"><a data-toggle="tab" href="#mappingContent">Properties</a></li>
+        <li id="associationTab" data-route-name="associationView"><a data-toggle="tab" href="#mappingContent">Association</a></li>
+        <li id="behaviorsTab" data-route-name="behaviorsView"><a data-toggle="tab" href="#mappingContent">Behaviors</a></li>
+        <li id="scheduleTab" data-route-name="scheduleView"><a data-toggle="tab" href="#mappingContent">Scheduling</a></li>
+    </ul>
+
+    <div class="tab-content" id="mappingContent"></div>
+
 </div>

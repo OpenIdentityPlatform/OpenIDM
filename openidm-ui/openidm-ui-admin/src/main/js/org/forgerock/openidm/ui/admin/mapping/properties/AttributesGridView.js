@@ -26,7 +26,6 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -41,7 +40,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor"
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             eventManager,
             conf,
             UIUtils,

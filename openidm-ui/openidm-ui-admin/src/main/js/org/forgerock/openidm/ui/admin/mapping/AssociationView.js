@@ -26,13 +26,11 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/AssociationView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManagementView",
     "org/forgerock/openidm/ui/admin/mapping/association/IndividualRecordValidationView",
     "org/forgerock/openidm/ui/admin/mapping/association/ReconciliationQueryFiltersView",
     "org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView"
 ], function(MappingAdminAbstractView,
-            MappingBaseView,
             DataAssociationManagementView,
             IndividualRecordValidationView,
             ReconciliationQueryFiltersView,
@@ -42,47 +40,33 @@ define("org/forgerock/openidm/ui/admin/mapping/AssociationView", [
         template: "templates/admin/mapping/AssociationTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
-        events: {
-            "click .correlationBody fieldset legend" : "sectionHideShow"
-        },
-        data: {},
 
         render: function (args, callback) {
-            MappingBaseView.child = this;
-            MappingBaseView.render(args,_.bind(function(){
-                var mapping = this.getCurrentMapping();
+            var mapping = this.getCurrentMapping();
 
-                this.data.hideObjectFilters = true;
-                _.each(IndividualRecordValidationView.model.scripts, function(script) {
-                    if (_.has(IndividualRecordValidationView.model, "mapping")) {
-                        if (_.has(IndividualRecordValidationView.model.mapping, script)) {
-                            this.data.hideObjectFilters = false;
-                        }
-                    } else if (_.has(mapping, script)) {
+            this.data.hideObjectFilters = true;
+            _.each(IndividualRecordValidationView.model.scripts, function(script) {
+                if (_.has(IndividualRecordValidationView.model, "mapping")) {
+                    if (_.has(IndividualRecordValidationView.model.mapping, script)) {
                         this.data.hideObjectFilters = false;
                     }
-                }, this);
+                } else if (_.has(mapping, script)) {
+                    this.data.hideObjectFilters = false;
+                }
+            }, this);
 
-                this.data.hideReconQueries = !mapping.sourceQuery && !mapping.targetQuery;
+            this.data.hideReconQueries = !mapping.sourceQuery && !mapping.targetQuery;
 
-                this.parentRender(_.bind(function () {
-                    DataAssociationManagementView.render();
-                    ReconciliationQueryFiltersView.render();
-                    IndividualRecordValidationView.render();
-                    AssociationRuleView.render({startSync: this.sync});
+            this.parentRender(_.bind(function () {
+                DataAssociationManagementView.render();
+                ReconciliationQueryFiltersView.render();
+                IndividualRecordValidationView.render();
+                AssociationRuleView.render({});
 
-                    MappingBaseView.moveSubmenu();
-
-                    if (callback) {
-                        callback();
-                    }
-                }, this));
-
+                if (callback) {
+                    callback();
+                }
             }, this));
-        },
-
-        sync: function () {
-            MappingBaseView.syncNow();
         }
     });
 
