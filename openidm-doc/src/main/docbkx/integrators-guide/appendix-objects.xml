@@ -206,17 +206,17 @@
 
   <section xml:id="managed-object-data-consistency">
    <title>Data Consistency</title>
-
-   <para>Single-object operations shall be consistent within the scope of
-   the operation performed, limited by capabilities of the underlying
-   data store. Bulk operations shall not have any consistency
-   guarantees. OpenIDM does not expose any transactional semantics
-   in the managed object access API.</para>
-
-   <para>All access through the REST API uses the ETag and associated
-   conditional headers: <literal>If-Match</literal>,
-   <literal>If-None-Match</literal>. In operations that
-   modify model objects, conditional headers are mandatory.</para>
+   <para>
+    Single-object operations are consistent within the scope of the operation
+    performed, limited by the capabilities of the underlying data store. Bulk
+    operations have no consistency guarantees. OpenIDM does not expose any
+    transactional semantics in the managed object access API.
+   </para>
+   <para>
+    All access through the REST API uses the ETag and associated conditional
+    headers: <literal>If-Match</literal>, <literal>If-None-Match</literal>. In
+    operations that modify model objects, conditional headers are mandatory.
+   </para>
   </section>
 
   <section xml:id="managed-object-triggers">
