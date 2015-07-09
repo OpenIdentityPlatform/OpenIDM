@@ -20,7 +20,7 @@
                 department = user.department
                 endDate = user.sunset.date
                 employeeNumber = user.employeeNumber
-                manager = user.manager.managerId
+                manager = openidm.read(user.manager)._id
           ]]>
             </script>
         </scriptTask>
@@ -128,7 +128,7 @@
                 requestDate = formatUTC.format(new Date());
                 
                 def newRequesterNotification = [
-                "receiverId": user.manager.managerId,
+                "receiverId": manager,
                 "requesterId" : "",
                 "requester" : "",
                 "createDate" : requestDate,
