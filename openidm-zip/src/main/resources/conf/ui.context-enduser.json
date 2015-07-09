@@ -1,6 +1,6 @@
 {
     "enabled" : true,
-    "urlContextRoot" : "/selfservice",
+    "urlContextRoot" : "/",
     "bundle" : {
         "name" : "org.forgerock.openidm.ui-enduser",
         "resourceDir" : "/public"

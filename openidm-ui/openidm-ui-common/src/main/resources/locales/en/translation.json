@@ -109,6 +109,9 @@
                 "objectFiltersSaved": "The object filter script(s) have been saved.",
                 "triggeredByReconSaved": "The triggered by reconciliation script(s) have been saved.",
                 "linkQualifierSaveSuccess": "The link qualifier(s) have been saved."
+            },
+            "settingMessages" : {
+                "saveSelfServiceSuccess": "Self service URL has been updated."
             }
         },
         "AppConfiguration" : {
@@ -662,6 +665,12 @@
             "moduleType": "Module Type",
             "select": "Make a Selection"
         },
+        "sysConfig": {
+            "title": "System Configurations",
+            "endUserConfigTitle": "Self-Service UI Features",
+            "urlDesc": "Application for end-users to perform self-service tasks (profile updates, workflow tasks, etc...)",
+            "url": "Relative URL"
+        },
         "connector" : {
             "backToConnectorList" : "Back to Connectors",
             "addObjectType" : "Add Object Type",
@@ -1108,7 +1117,7 @@
     "common" : {
         "form" : {
             "add" : "Add",
-            "userView" : "Data Management View",
+            "userView" : "Self Service",
             "removeAttribute" : "Remove Attribute",
             "ok" : "Okay",
             "list" : "List",

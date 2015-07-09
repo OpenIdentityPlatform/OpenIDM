@@ -20,6 +20,26 @@ define("config/validators/AdminValidators", [
                 callback();
             }
         },
+        "requiredURL": {
+            "name": "URL required",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                var v = $(input).val();
+                // This regex verifies there are no spaces in the context and that only valid URL characters are included.
+                if (v.length > 0 && !/^[a-zA-Z0-9\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]+$/.test(v)) {
+                    callback(["Not a valid URL"]);
+                    return;
+                }
+
+                if (v === "/openidm" || v === "/admin" ||  v === "/system") {
+                    callback(["URL cannot be an reserved name of \"openidm\", \"admin\" or \"system\"."]);
+                    return;
+                }
+
+                callback();
+            }
+        },
         "whitespace": {
             "name": "No whitespace allowed.",
             "dependencies": [

@@ -120,7 +120,8 @@ define("config/AppConfiguration", [
                     userBar: [
                         {
                             "id": "user_link",
-                            "href": "../selfservice",
+                            "href": "",
+                            "event" : constants.EVENT_SELF_SERVICE_CONTEXT,
                             "i18nKey": "common.form.userView"
                         },
                         {
