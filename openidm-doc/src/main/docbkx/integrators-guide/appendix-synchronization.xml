@@ -324,13 +324,35 @@
     <term>result</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute on each mapping event, independent of the nature
-      of the operation. In the root scope, the source object is provided in the
-      <literal>"source"</literal> property, projected target object in the
-      <literal>"target"</literal> property. If the script throws an exception,
-      then target object unlinking is aborted.</para>
-      <para>The "result" script is executed only during reconciliation 
-      operations!</para>
+     <para>
+      A script to execute on each mapping event, independent of the nature of
+      the operation. A <literal>result</literal> script is executed only during
+      reconciliation operations.
+     </para>
+     <itemizedlist>
+      <para>
+       The variables available to a <literal>result</literal> script are as
+       follows:
+      </para>
+      <listitem>
+       <para>
+        <literal>source</literal> - provides statistics about the source phase
+        of the reconciliation
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>target</literal> - provides statistics about the target phase
+        of the reconciliation
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>globals</literal> - provides statistics about the entire
+        reconciliation operation
+       </para>
+      </listitem>
+     </itemizedlist>
     </listitem>
    </varlistentry>
   </variablelist>
