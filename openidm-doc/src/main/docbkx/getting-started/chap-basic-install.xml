@@ -303,7 +303,9 @@ $ <userinput>./getting-started.sh</userinput></screen>
     <para>
      In both cases, the script starts OpenIDM with a group of configuration
      and data files appropriate for users who need a quick introduction to
-     OpenIDM.
+     OpenIDM. You will also see a warning about a password not being defined
+     in the CSV file (<literal>WARN Password attribute is not defined.
+     [CSVFileConfiguration]</literal>). You can ignore this warning.
     </para>
    </step>
    <step>
