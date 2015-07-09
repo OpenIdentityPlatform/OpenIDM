@@ -37,9 +37,8 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     var obj = commonSiteConfigurationDelegate;
 
     obj.checkForDifferences = function(){
-        if(_.contains(conf.loggedUser && conf.loggedUser.roles,"ui-admin")){
-            eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
-        }
+        eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
+
         return $.Deferred().resolve();
     };
 
