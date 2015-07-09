@@ -163,6 +163,10 @@ define("config/messages/AdminMessages", [
         "linkQualifierSaveSuccess": {
             msg: "config.messages.SyncMessages.linkQualifierSaveSuccess",
             type: "info"
+        },
+        "systemConfigSaveSuccess": {
+            msg: "config.messages.settingMessages.saveSelfServiceSuccess",
+            type: "info"
         }
     };
 

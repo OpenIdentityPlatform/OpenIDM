@@ -28,8 +28,14 @@ define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/settings/AuthenticationView",
     "org/forgerock/openidm/ui/admin/settings/AuditView",
+    "org/forgerock/openidm/ui/admin/settings/SystemConfigView",
     "bootstrap-tabdrop"
-], function(AdminAbstractView, AuthenticationView, AuditView, tabdrop) {
+
+], function(AdminAbstractView,
+            AuthenticationView,
+            AuditView,
+            SystemConfigView,
+            tabdrop) {
 
     var SettingsView = AdminAbstractView.extend({
         template: "templates/admin/settings/SettingsTemplate.html",
@@ -38,6 +44,7 @@ define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
             this.parentRender(_.bind(function () {
                 AuthenticationView.render();
                 AuditView.render();
+                SystemConfigView.render();
 
                 this.$el.find(".nav-tabs").tabdrop();
             }, this));

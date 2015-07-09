@@ -119,6 +119,20 @@ define("config/process/AdminIDMConfig", [
                     breadcrumbs.buildByUrl();
                     footer.render();
                 }
+            },
+            {
+                startEvent: constants.EVENT_SELF_SERVICE_CONTEXT,
+                description: "",
+                override: true,
+                dependencies: [
+                    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+                    "org/forgerock/commons/ui/common/main/Router"
+                ],
+                processDescription: function(event, configDelegate, router) {
+                    configDelegate.readEntity("ui.context/enduser").then(_.bind(function (data) {
+                        location.href = router.getCurrentUrlBasePart() + data.urlContextRoot;
+                    }, this));
+                }
             }
         ];
 
