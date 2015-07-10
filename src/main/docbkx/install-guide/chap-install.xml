@@ -838,7 +838,7 @@ C:\openidm\bin</computeroutput>     </screen>
 
    <para>
     OpenIDM includes UIs at two different endpoints,
-    <literal>/selfservice</literal> and <literal>/admin</literal>. We refer to the
+    <literal>/</literal> and <literal>/admin</literal>. We refer to the
     administrative tools available at each endpoint as the Self-Service UI and
     the Administrative UI (Admin UI), respectively.
    </para>
@@ -880,7 +880,7 @@ C:\openidm\bin</computeroutput>     </screen>
 
    <para>
     When OpenIDM is running on the localhost system, you can access these UIs
-    at <literal>https://localhost:8443/selfservice</literal> and
+    at <literal>https://localhost:8443/</literal> and
     <literal>https://localhost:8443/admin</literal>, respectively.
    </para>
 

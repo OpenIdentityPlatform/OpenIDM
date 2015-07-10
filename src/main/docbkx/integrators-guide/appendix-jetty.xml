@@ -300,7 +300,7 @@
       <term><literal>"urlPatterns"</literal></term>
       <listitem>
         <para>A list of URL patterns to which the filter applies. The default 
-        is <literal>["/openidm/*", "/selfservice/*"]</literal>.</para>
+        is <literal>["/*"]</literal>.</para>
       </listitem>
     </varlistentry>
     <varlistentry>

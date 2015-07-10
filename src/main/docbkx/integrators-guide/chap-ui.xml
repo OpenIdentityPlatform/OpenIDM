@@ -803,7 +803,7 @@
   </para>
   <para>
    To access the Self-Service UI, start OpenIDM, then navigate to
-   <link xlink:href="https://localhost:8443/selfservice" />. If you
+   <link xlink:href="https://localhost:8443/" />. If you
    have not installed a certificate that is trusted by a certificate authority,
    you are prompted with an "Untrusted Connection" warning the first time you
    log in to the UI.
@@ -882,7 +882,7 @@
     </programlisting>
     <para>
      When self-registration is enabled, OpenIDM includes a "Register your
-     account" link on the <literal>https://localhost:8443/selfservice</literal>
+     account" link on the <literal>https://localhost:8443/</literal>
      login page. When the account registration page is used to create an account,
      OpenIDM creates a managed object in the OpenIDM repository, and applies
      default policies for managed objects.
