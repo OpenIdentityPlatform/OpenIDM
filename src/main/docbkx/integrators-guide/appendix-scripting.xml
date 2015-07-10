@@ -1774,7 +1774,7 @@ logger = LoggerFactory.getLogger('logger');
     </section>
 
     <section xml:id="script-variables">
-     <title>Variables Available in Scripts</title>
+     <title>Variables Available to Scripts</title>
      <para>
       The variables that are available to scripts depend on the triggers that
       launch the script, and on the locations in which those triggers are
@@ -1882,6 +1882,14 @@ logger = LoggerFactory.getLogger('logger');
          <entry>object, linkQualifier</entry>
         </row>
         <row>
+         <entry>action</entry>
+         <entry>
+          source, target, linkQualifier, recon (where
+          <literal>recon.actionParam</literal> contains information about the
+          current reconciliation operation)
+         </entry>
+        </row>
+        <row>
          <entry>transform</entry>
          <entry>source, linkQualifier</entry>
         </row>
@@ -1894,10 +1902,8 @@ logger = LoggerFactory.getLogger('logger');
          <entry>custom endpoint scripts</entry>
          <entry>request</entry>
         </row>
-
        </tbody>
       </tgroup>
-
      </table>
 
      <variablelist>

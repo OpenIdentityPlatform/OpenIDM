@@ -4012,36 +4012,90 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   </section>
 
   <section xml:id="script-actions">
-   <title>Providing a Script as an Action</title>
-
+   <title>Launching a Script as an Action</title>
    <para>
     In addition to the static synchronization actions described in the previous
     section, you can provide a script that is run in specific synchronization
-    situations. The following extract of a sample <filename>sync.json</filename>
-    file specifies that when a synchronization operation assesses an entry as
-    <literal>ABSENT</literal>, the workflow named
-    <literal>managedUserApproval</literal> is invoked. The parameters for the
-    workflow are passed in as properties of the <literal>action</literal>
-    parameter.
+    situations. The script can be either JavaScript or Groovy, and can be
+    provided inline (with the <literal>"source"</literal> property), or
+    referenced from a file, (with the <literal>"file"</literal> property).
    </para>
+   <para>
+    The following extract of a sample <filename>sync.json</filename> file
+    specifies that an inline script should be invoked, when a synchronization
+    operation assesses an entry as <literal>ABSENT</literal> in the target
+    system. The script checks whether the <literal>"employeeType"</literal>
+    property of the corresponding source entry is <literal>"contractor"</literal>.
+    If the <literal>"employeeType"</literal> is <literal>"contractor"</literal>,
+    the entry is ignored. Otherwise, the entry is created on the target system.
+   </para>
+   <programlisting language="javascript">{
+    "situation" : "ABSENT",
+    "action" : {
+        "type" : "text/javascript",
+        "globals" : { },
+        "source" : "if (source.employeeType === "contractor") {action='IGNORE'} else {action='CREATE'};action;"
+    },
+}  </programlisting>
+   <para>
+    The variables available to a script that is called as an action are
+    <literal>source</literal> <literal>target</literal>,
+    <literal>linkQualifier</literal>, and <literal>recon</literal> (where
+    <literal>recon.actionParam</literal> contains information about the current
+    reconciliation operation). For more information about the variables
+    available to scripts, see <link xlink:show="new"
+    xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#script-variables"><citetitle>Variables
+    Available to Scripts</citetitle></link>.
+   </para>
+   <para>
+    The result obtained from evaluating this script must be a string, whose
+    value is one of the synchronization actions listed in
+    <xref linkend="sync-actions" />. This resulting action will be shown in the
+    reconciliation log.
+   </para>
+   <para>
+    To launch a script as a synchronization action in the Admin UI, select your
+    mapping, click on Behaviors, and edit the action for which you want the
+    script to be launched.
+   </para>
+  </section>
 
-   <programlisting language="javascript">
-{
+  <section xml:id="workflow-actions">
+   <title>Launching a Workflow as an Action</title>
+   <para>
+    OpenIDM provides a default script
+    (<filename>triggerWorkflowFromSync.js</filename>) that enables you to launch
+    a predefined workflow when a synchronization operation assesses a particular
+    situation. The mechanism for triggering this script is the same as for any
+    other script. The script is provided in the
+    <literal>openidm/bin/defaults/script/workflow</literal> directory. If you
+    customize the script, copy it to the <literal>script</literal> directory of
+    your project, to ensure that your customizations are preserved during an
+    upgrade.
+   </para>
+   <para>
+    The parameters for the workflow are passed in as properties of the
+    <literal>action</literal> parameter.
+   </para>
+   <para>
+    The following extract of a sample <filename>sync.json</filename> file
+    specifies that, when a synchronization operation assesses an entry as
+    <literal>ABSENT</literal>, the workflow named
+    <literal>managedUserApproval</literal> is invoked.
+   </para>
+   <programlisting language="javascript">{
     "situation" : "ABSENT",
     "action" : {
         "workflowName" : "managedUserApproval",
         "type" : "text/javascript",
         "file" : "workflow/triggerWorkflowFromSync.js"
     }
-}
-   </programlisting>
-
+}  </programlisting>
    <para>
-    The variables available to these scripts are described in
-    <link xlink:href="integrators-guide#appendix-scripting"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Variables
-     Available in Scripts</citetitle></link> in the <citetitle>Scripting
-    Appendix</citetitle>.
+    To launch a workflow as a synchronization action in the Admin UI, select
+    your mapping, click on Behaviors, and edit the action for which you want the
+    workflow to be launched.
    </para>
   </section>
 
