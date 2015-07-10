@@ -101,4 +101,4 @@ Run The Sample In OpenIDM
           "remainingPagedResults" : -1
         }
 
-After you have created the managed/user entries you can use them to login to the UI at https://localhost:8443/selfservice/
+After you have created the managed/user entries you can use them to login to the UI at https://localhost:8443/

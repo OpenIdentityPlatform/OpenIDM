@@ -90,7 +90,7 @@ To try the sample, follow these steps.
        samples/sample5/data/xml_LDAP_Data.xml, and run reconciliation again
        to see the result show up in samples/sample5/data/xml_AD_Data.xml.
 
-    7. Login to the UI at https://localhost:8443/selfservice. You can use openidm-admin/openidm-admin for admin access or
+    7. Login to the UI at https://localhost:8443/. You can use openidm-admin/openidm-admin for admin access or
        DDOE1/TestPassw0rd2 for non-admin access. Updates to DDOE1 will be synced backed to both XML files.
 
     8. If you have configured the recon email summary in steps 1 and 2, you should have gotten an email 
