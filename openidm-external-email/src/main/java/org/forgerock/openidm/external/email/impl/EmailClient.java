@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -42,46 +42,45 @@ import org.forgerock.json.resource.BadRequestException;
  */
 public class EmailClient {
 
-    private String host = "localhost";
-    private String port = "25";
+    private static final String DEFAULT_HOST = "localhost";
+    private static final String DEFAULT_PORT = "25";
     private String username = null;
     private String password = null;
     private String fromAddr = null;
     private boolean smtpAuth = false;
     private Properties props = new Properties();
     private Session session;
+    
+    // Keys in the JSON configuration
+    public static final String CONFIG_MAIL_SMTP_HOST = "host";
+    public static final String CONFIG_MAIL_SMTP_PORT = "port";
+    public static final String CONFIG_MAIL_SMTP_AUTH = "auth";
+    public static final String CONFIG_MAIL_SMTP_AUTH_ENABLE = "enable";
+    public static final String CONFIG_MAIL_SMTP_AUTH_PASSWORD = "password";
+    public static final String CONFIG_MAIL_SMTP_AUTH_USERNAME = "username";
+    public static final String CONFIG_MAIL_SMTP_STARTTLS = "starttls";
+    public static final String CONFIG_MAIL_SMTP_STARTTLS_ENABLE = "enable";
+    public static final String CONFIG_MAIL_FROM = "from";
+    public static final String CONFIG_MAIL_DEBUG = "debug";
 
     public EmailClient(JsonValue config) throws RuntimeException {
-        if (config.get("host").asString() != null) {
-            host = config.get("host").asString();
-            props.put("mail.smtp.host", host);
-        }
-        if (config.get("port").asString() != null) {
-            port = config.get("port").asString();
-            props.put("mail.smtp.port", port);
-        }
-        if (config.get("from").asString() != null) {
-            fromAddr = config.get("from").asString();
-        }
 
-        if (config.get("mail.smtp.auth").asString().equalsIgnoreCase("true")) {
-            if (config.get("username").asString() != null) {
-                username = config.get("username").asString();
-            } else {
-                throw new RuntimeException("No username provided for SMTP auth");
-            }
-            if (config.get("password").asString() != null) {
-                password = config.get("password").asString();
-            } else {
-                throw new RuntimeException("No password provided for SMTP auth");
-            }
-            props.put("mail.smtp.auth", "true");
-            smtpAuth = true;
+        props.put("mail.smtp.host", config.get(CONFIG_MAIL_SMTP_HOST).defaultTo(DEFAULT_HOST).asString());
+        props.put("mail.smtp.port", config.get(CONFIG_MAIL_SMTP_PORT).defaultTo(DEFAULT_PORT).asString());
+        props.put("mail.debug", String.valueOf(config.get(CONFIG_MAIL_DEBUG).defaultTo(false).asBoolean()));
+
+        JsonValue authConfig = config.get(CONFIG_MAIL_SMTP_AUTH);
+        if (!authConfig.isNull()) {
+            smtpAuth = authConfig.get(CONFIG_MAIL_SMTP_AUTH_ENABLE).defaultTo(false).asBoolean();
+            username = authConfig.get(CONFIG_MAIL_SMTP_AUTH_USERNAME).required().asString();
+            password = authConfig.get(CONFIG_MAIL_SMTP_AUTH_PASSWORD).required().asString();
+            props.put("mail.smtp.auth", String.valueOf(smtpAuth));
         }
-
-        if (config.get("mail.smtp.starttls.enable").asString().equalsIgnoreCase("true")) {
-            props.put("mail.smtp.starttls.enable", "true");
-
+        
+        JsonValue starttlsConfig = config.get(CONFIG_MAIL_SMTP_STARTTLS);
+        boolean startTLS = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_ENABLE).defaultTo(false).asBoolean();
+        if (startTLS) {
+            props.put("mail.smtp.starttls.enable", String.valueOf(startTLS));
             // temporary hack to avoid cert check
             try {
                 MailSSLSocketFactory sf = new MailSSLSocketFactory();
@@ -91,6 +90,7 @@ public class EmailClient {
             }
         }
 
+        fromAddr = config.get(CONFIG_MAIL_FROM).asString();
         session = Session.getInstance(props);
     }
 

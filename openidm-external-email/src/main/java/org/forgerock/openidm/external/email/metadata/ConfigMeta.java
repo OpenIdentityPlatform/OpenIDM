@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,6 +26,7 @@ package org.forgerock.openidm.external.email.metadata;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.external.email.impl.EmailServiceImpl;
+import org.forgerock.openidm.external.email.impl.EmailClient;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class ConfigMeta implements MetaDataProvider {
     public ConfigMeta() {
         propertiesToEncrypt = new HashMap<String, List<JsonPointer>>();
         List<JsonPointer> props = new ArrayList<JsonPointer>();
-        props.add(new JsonPointer("password"));
+        props.add(new JsonPointer(EmailClient.CONFIG_MAIL_SMTP_AUTH).child(EmailClient.CONFIG_MAIL_SMTP_AUTH_PASSWORD));
         propertiesToEncrypt.put(EmailServiceImpl.PID, props);
     }
 
