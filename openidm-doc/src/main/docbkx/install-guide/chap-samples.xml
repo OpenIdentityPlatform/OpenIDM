@@ -2216,7 +2216,7 @@ mysql &gt; <userinput>select * from users;</userinput>
     </para>
     <step>
      <para>
-      Log in to the OpenIDM UI (https://localhost:8443/selfservice) as any one of
+      Log in to the OpenIDM UI (https://localhost:8443/) as any of
       the users that was created in the repository by the previous
       reconciliation operation.
      </para>
@@ -4728,16 +4728,17 @@ $ ./startup.sh -p samples/sample5b</screen>
    </para>
    <para>
     Log into the OpenIDM UI as the administrative user. On a local system,
-    navigate to <literal>https://localhost:8443/selfservice</literal>. The default
+    navigate to <literal>https://localhost:8443/admin</literal>. The default
     administrative account and password are both <literal>openidm-admin</literal>.
    </para>
    <para>
-    Make a change to the data of an existing user (<literal>DDOE1</literal>).
-    As a result of the implicit synchronization from the managed object
-    repository, that change is reflected almost immediately on the external
-    resources. For sample 5b, you should see the changes in both XML files in
-    the <filename>sample5b/data</filename> directory. Alternatively, you can
-    query the external resources over REST, as described previously.
+    Select Manage &gt; User. Make a change to the data of an existing user
+    (<literal>DDOE1</literal>). As a result of the implicit synchronization
+    from the managed object repository, that change is reflected almost
+    immediately on the external resources. For sample 5b, you should see the
+    changes in both XML files in the <filename>sample5b/data</filename>
+    directory. Alternatively, you can query the external resources over REST,
+    as described previously.
    </para>
    <para>
     The synchronization is successful, across all configured external resources,
@@ -6800,11 +6801,13 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
 
    <para>
     After you complete the steps described in Sample 2b, do one more thing.
-    Navigate to the Self-Service UI at
-    <literal>https://openidm.example.com:8443/selfservice</literal>, and select
-    Users. Select a specific user, such as <literal>bjensen</literal>. Click
-    Change Password and change that password.
+    Navigate to the Admin UI at
+    <literal>https://openidm.example.com:8443/admin</literal>, and select
+    Manage &gt; User. Select a specific user, such as
+    <literal>bjensen</literal>. Click Change Password and change that password.
    </para>
+
+   <!-- Currently broken, per OPENIDM-3560 -->
 
    <para>
     Return to the Admin UI, select Mappings, and select the

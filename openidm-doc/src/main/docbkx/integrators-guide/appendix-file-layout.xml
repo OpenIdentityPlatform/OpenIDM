@@ -404,7 +404,7 @@
    <term><filename>openidm/conf/ui.context-enduser.json</filename></term>
    <listitem>
     <para>Configuration file that specifies the context root of the UI,
-    <literal>/selfservice</literal> by default</para>
+    <literal>/</literal> by default</para>
    </listitem>
   </varlistentry>
   <varlistentry>

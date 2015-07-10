@@ -532,14 +532,16 @@ $ ./startup.sh -p samples/fullStack</screen>
 
    <para>
     After you complete the steps described in Sample 2b, do one more thing.
-    Navigate to the Self-Service UI at
+    Navigate to the Admin UI at
     <literal>https://openidm.example.com:8443/selfservice</literal>, and select
-    Users. Select a specific user, such as <literal>bjensen</literal>. Click
-    Change Password and change that password.
+    Manage &gt; User. Select a specific user, such as
+    <literal>bjensen</literal>. Click Change Password and change that password.
    </para>
 
+  <!-- TODO: Change Password button missing. update based on OPENIDM-3560 -->
+
    <para>
-    Return to the Admin UI, select Mappings, and select the
+    Now select Configure &gt; Mappings, and select the
     managedUser_systemLdapAccounts mapping. Click Reconcile Now to propegate the
     password you just changed to OpenDJ. You are now ready for the next section.
    </para>
