@@ -129,7 +129,7 @@ class Policy {
         if (action != null) { // static action specified
             return action;
         }
-        if (script != null) { // action is dynamically determine
+        if (script != null) { // action is dynamically determined
             Map<String, Object> scope = new HashMap<String, Object>();
             Map<String, Object> recon = new HashMap<String, Object>();
             scope.put("recon", recon);
