@@ -1777,7 +1777,7 @@ logger = LoggerFactory.getLogger('logger');
      <title>Variables Available to Scripts</title>
      <para>
       The variables that are available to scripts depend on the triggers that
-      launch the script, and on the locations in which those triggers are
+      launch the script, and on the file in which those triggers are
       defined. The following table lists triggers, with associated variables.
      </para>
 
