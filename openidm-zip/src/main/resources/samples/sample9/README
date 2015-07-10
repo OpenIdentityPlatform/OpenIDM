@@ -47,7 +47,7 @@ To try the sample, follow these steps.
 
 Option 1: Using the UI
 
-    3. Using your browser, open https://localhost:8443/selfservice/ .
+    3. Using your browser, open https://localhost:8443/ .
        Login with openidm-admin/openidm-admin.
 
     4. In your "My Tasks" list, you should see two requests for "Evaluate request".

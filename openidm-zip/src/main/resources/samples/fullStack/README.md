@@ -25,11 +25,23 @@
 # OpenAM Sample:
 ## Integration with OpenAM for strong, flexible authentication and single-sign on
 
-This sample demonstrates how to use OpenIDM together with OpenAM and OpenDJ, showing how the entire ForgeRock Open Identity Stack can be used to maximize identity and access management (IAM) functionality. Any application for which your users need access can be secured with OpenAM, and the data for those users can be maintained with OpenIDM.
+This sample demonstrates how to use OpenIDM together with OpenAM and OpenDJ, 
+showing how the entire ForgeRock Open Identity Stack can be used to maximize 
+identity and access management (IAM) functionality. Any application for which
+your users need access can be secured with OpenAM, and the data for those 
+users can be maintained with OpenIDM.
 
-OpenAM and OpenIDM are both powerful products on their own, but even more so when used together. Each has their core use-cases - access management and provisioning - both of which are necessary to build a complete IAM solution. It is perfectly reasonable to setup both products in an organization, each doing their separate job but having no direct interaction with each other. However, using OpenAM to secure OpenIDM improves the available functionality in both OpenIDM and OpenAM, above and beyond what is available when they run separate from each other.
+OpenAM and OpenIDM are both powerful products on their own, but even more so 
+when used together. Each has their core use-cases - access management and 
+provisioning - both of which are necessary to build a complete IAM solution. 
+It is perfectly reasonable to setup both products in an organization, each 
+doing their separate job but having no direct interaction with each other. 
+However, using OpenAM to secure OpenIDM improves the available functionality in
+both OpenIDM and OpenAM, above and beyond what is available when they run 
+separate from each other.
 
-OpenIDM benefits from the strong access management that OpenAM provides - more authentication options, multi-factor authentication, powerful authentication chaining, and single-sign on. OpenAM also benefits when used this way - the OpenIDM user profile management functionality is far more feature-rich than what is provided by default in OpenAM. OpenIDM provides a sophisticated data validation service and has an easily-extensible, flexible environment to build upon.
+OpenIDM benefits from the strong access management that OpenAM provides - 
+more authentication options, multi-factor authentication, powerful authentication chaining, and single-sign on. OpenAM also benefits when used this way - the OpenIDM user profile management functionality is far more feature-rich than what is provided by default in OpenAM. OpenIDM provides a sophisticated data validation service and has an easily-extensible, flexible environment to build upon.
 
 ### Prerequisites
 
@@ -64,7 +76,7 @@ If you are using SSL (as in the above HTTPS example) then you will need to make 
 
 You must verify that the domain you will be using to access the OpenIDM UI is listed under "Configuration"->"System"->"Platform"->"Cookie Domains". For example, if you plan on accessing the UI like so:
 
-    https://idm.example.com/selfservice
+    https://idm.example.com/
     
 Then you should ensure that ".example.com" is listed there. This is necessary for the OpenIDM UI to set the OpenAM SSO token cookie.
 
@@ -97,7 +109,7 @@ At this point you may also wish to enable scheduled reconcilation and livesync, 
 
 ### Logging In
 
-Once you have followed the above steps, you can access the OpenIDM UI as normal (https://domain:port/selfservice). The UI has been modified slightly for this sample; instead of the regular login process, we use a proxy service to communicate with OpenAM's REST-based Authentication service. This proxy service is implemented as a custom endpoint - read more details in the source at bin//defaults/script/ui/openamProxy.js.
+Once you have followed the above steps, you can access the OpenIDM UI as normal (https://domain:port/). The UI has been modified slightly for this sample; instead of the regular login process, we use a proxy service to communicate with OpenAM's REST-based Authentication service. This proxy service is implemented as a custom endpoint - read more details in the source at bin//defaults/script/ui/openamProxy.js.
 
 If everything is setup properly, when the OpenIDM UI loads you will see one of two things happen: 
 
