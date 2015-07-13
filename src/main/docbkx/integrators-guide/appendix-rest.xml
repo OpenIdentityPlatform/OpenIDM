@@ -382,8 +382,14 @@
    Managed objects and system objects can also be updated with a PATCH request.
   </para>
   <para>
-   To update an object with a <literal>PUT</literal> request, use the
-   <literal>If-Match</literal> header, for example:
+   When you update a managed or system object with a PUT request, you can
+   include the optional <literal>If-Match</literal> conditional header. If no
+   conditional header is specified, a default of <literal>If-Match: "*"</literal>
+   is applied.
+  </para>
+  <para>
+   The following example updates the <literal>"description"</literal> field for
+   Babs Jensen.
   </para>
   <screen>$ <userinput> curl \
  --cacert self-signed.crt \
@@ -436,10 +442,15 @@
    ...
 }</computeroutput></screen>
   <para>
-   To update a managed or system object with a PATCH request, use the
-   <literal>If-Match</literal> header. A PATCH request can add, remove, replace,
-   or increment an attribute value. A <literal>replace</literal> operation
-   replaces an existing value, or adds a value if no value exists.
+   A PATCH request can add, remove, replace, or increment an attribute value. A
+   <literal>replace</literal> operation replaces an existing value, or adds a
+   value if no value exists.
+  </para>
+  <para>
+   When you update a managed or system object with a PATCH request, you can
+   include the optional <literal>If-Match</literal> conditional header. If no
+   conditional header is specified, a default of <literal>If-Match: "*"</literal>
+   is applied.
   </para>
   <para>
    The following example shows a patch request that updates a multi-valued
@@ -544,13 +555,15 @@
 
  <section xml:id="rest-conditional-operations">
   <title>Conditional Operations</title>
-
-  <para>The REST API fully supports conditional operations through the use of
-  the <literal>ETag</literal>, <literal>If-Match</literal> and
-  <literal>If-None-Match</literal> HTTP headers. The use of HTTP conditional
-  operations is the basis of OpenIDM's optimistic concurrency control system.
-  Clients should make requests conditional in order to prevent inadvertent
-  modification of the wrong version of an object.</para>
+  <para>
+   The REST API supports conditional operations through the use of the
+   <literal>ETag</literal>, <literal>If-Match</literal> and
+   <literal>If-None-Match</literal> HTTP headers. The use of HTTP conditional
+   operations is the basis of OpenIDM's optimistic concurrency control system.
+   Clients should make requests conditional in order to prevent inadvertent
+   modification of the wrong version of an object. If no conditional header is
+   specified, a default of <literal>If-Match: "*"</literal> is applied.
+  </para>
  </section>
 
  <section xml:id="rest-supported-methods">

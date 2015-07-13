@@ -215,7 +215,10 @@
    <para>
     All access through the REST API uses the ETag and associated conditional
     headers: <literal>If-Match</literal>, <literal>If-None-Match</literal>. In
-    operations that modify model objects, conditional headers are mandatory.
+    operations that modify objects, if no conditional header is provided, the
+    default <literal>If-Match: "*"</literal> is applied. This header indicates
+    that the call explicitly accepts overwriting other potential changes on the
+    object.
    </para>
   </section>
 
