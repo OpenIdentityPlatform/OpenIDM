@@ -974,10 +974,10 @@ isMemberOf: cn=openidm,ou=Groups,dc=example,dc=com</computeroutput>
     </step>
     <step>
      <para>
-      Select the Events tab. If desired, you can add custom Javascript or
-      Groovy scripts. Since this sample works with default
+      Select the Events tab. You can add custom JavaScript or Groovy scripts
+      here. Because this sample works with the default
       <literal>onAssignment</literal> and <literal>onUnassignment</literal>
-      scripts, no changes are required here.
+      scripts, no changes are required in this case.
      </para>
      <mediaobject>
       <alt>Assignment and Unassignment Scripts</alt>

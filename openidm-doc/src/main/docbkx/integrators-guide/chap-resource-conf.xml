@@ -3470,13 +3470,11 @@ Properties:
     }</programlisting>
    <para>
     <literal>&amp;{launcher.project.location}</literal> refers to the project
-    directory of your OpenIDM instance. For more information, see <link
-    xlink:show="new" xlink:href="integrators-guide#config-default-directories"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Default and
-    Custom Configuration Directories</citetitle></link>. Note that
-    relative paths such as these work only if your connector server runs
-    locally. For remote connector servers, you must specify the absolute path to
-    the schema and data files.
+    directory of your OpenIDM instance, for example,
+    <filename>path/to/openidm/samples/sample1</filename>. Note that relative
+    paths such as these work only if your connector server runs locally. For
+    remote connector servers, you must specify the absolute path to the schema
+    and data files.
    </para>
    <variablelist>
     <varlistentry>

@@ -1516,66 +1516,344 @@ Removed per CR-7197.http://openidm.forgerock.org/doc/bootstrap/integrators-guide
 
    </section>
 
-  <section xml:id="config-default-directories">
-   <title>Default and Custom Configuration Directories</title>
-
+  <section xml:id="script-config">
+   <title>Setting the Script Configuration</title>
    <para>
-    You can set up custom configuration files in directories as
-    defined in the <filename>openidm/conf/script.json</filename> file.
+    The script configuration file (<filename>conf/script.json</filename>)
+    enables you to modify the parameters that are used when compiling,
+    debugging, and running JavaScript and Groovy scripts.
    </para>
-
    <para>
-    The following portion of the <filename>script.json</filename> file
-    points to sources in installation and project directories. As implied in the
-    section on
-    <link xlink:href="integrators-guide#startup-configuration" xlink:show="new"
-    xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Specifying the OpenIDM Startup Configuration</citetitle></link>,
-    the <literal>launcher.project.location</literal> is the directory
-    cited if you start OpenIDM with a specific project directory.</para>
-
-   <programlisting>...
+    The default <filename>script.json</filename> file includes the following
+    parameters:
+   </para>
+   <variablelist>
+    <varlistentry>
+     <term>properties</term>
+     <listitem>
+      <para>
+       Any custom properties that should be provided to the script engine.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>ECMAScript</term>
+     <listitem>
+      <para>
+       Specifies JavaScript debug and compile options. JavaScript is an
+       ECMAScript language.
+      </para>
+      <itemizedlist>
+    <!-- Removing this reference until OPENIDM-3546 is resolved
+        <listitem>
+         <para>
+          <literal>javascript.debug</literal> - see
+          <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+          xlink:href="integrators-guide#debugging-scripts">Debugging JavaScripts</link>.
+         </para>
+        </listitem> -->
+       <listitem>
+        <para>
+         <literal>javascript.recompile.minimumInterval</literal> - minimum time
+         after which a script can be recompiled.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Groovy</term>
+     <listitem>
+      <para>
+       Specifies compilation and debugging options related to Groovy scripts.
+       Many of these options are commented out in the default script
+       configuration file. Remove the comments to set these properties.
+      </para>
+      <itemizedlist>
+       <listitem>
+        <para>
+         <literal>groovy.warnings</literal> - the log level for Groovy scripts.
+         Possible values are <literal>none</literal>, <literal>likely</literal>,
+         <literal>possible</literal> and <literal>paranoia</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.source.encoding</literal> - the encoding format for
+         Groovy scripts. The value set in the default file is
+         <literal>UTF-8</literal>. Possible values include
+         <literal>US-ASCII</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.target.directory</literal> - the directory to which
+         compiled Groovy classes will be output. The default directory is
+         <filename><replaceable>install-dir</replaceable>/classes</filename>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.target.bytecode</literal> - the bytecode version that
+         is used to compile Groovy scripts. The default version is
+         <literal>1.5</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.classpath</literal> - the directory in which the
+         compiler should look for compiled classes. The default classpath is
+         <filename><replaceable>install-dir</replaceable>/lib</filename>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.output.verbose</literal> - specifies the verbosity of
+         stack traces. Boolean, <literal>true</literal> or
+         <literal>false</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.output.debug</literal> - specifies whether debugging
+         messages are output. Boolean, <literal>true</literal> or
+         <literal>false</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.errors.tolerance</literal> - sets the number of
+         non-fatal errors that can occur before a compilation is aborted. The
+         default is <literal>10</literal> errors.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.script.extension</literal> - specifies the file
+         extension for Groovy scripts. The default is <literal>.groovy</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.script.base</literal> - defines the base class for
+         Groovy scripts. By default any class extends
+         <literal>groovy.lang.Script</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.recompile</literal> - indicates whether scripts can be
+         recompiled. Boolean, <literal>true</literal> or
+         <literal>false</literal>, with default <literal>true</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.recompile.minimumInterval</literal> - sets the minimum
+         time between which Groovy scripts can be recompiled. The default
+         interval is <literal>100</literal>, in milliseconds.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.target.indy</literal> - specifies whether a <link
+         xlink:show="new"
+         xlink:href="http://docs.groovy-lang.org/latest/html/documentation/invokedynamic-support.html">Groovy
+         indy test</link> can be used. Boolean, <literal>true</literal> or
+         <literal>false</literal>, with default <literal>true</literal>.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>groovy.disabled.global.ast.transformations</literal> -
+         specifies a list of disabled Abstract Syntax Transformations (ASTs).
+        </para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>sources</term>
+     <listitem>
+      <para>
+       Specifies the locations in which OpenIDM expects to find JavaScript and
+       Groovy scripts that are referenced in the configuration.
+      </para>
+      <para>
+       The following excerpt of the <filename>script.json</filename> file shows
+       the default locations.
+      </para>
+      <programlisting>...
 "sources" : {
-  "default" : {
-    "directory" : "&amp;{launcher.install.location}/bin/defaults/script"
-  },
-  "install" : {
-    "directory" : "&amp;{launcher.install.location}"
-  },
-  "project" : {
-    "directory" : "&amp;{launcher.project.location}"
-  },
-  "project-script" : {
-    "directory" : "&amp;{launcher.project.location}/script"
-  }
+    "default" : {
+        "directory" : "&amp;{launcher.install.location}/bin/defaults/script"
+    },
+    "install" : {
+        "directory" : "&amp;{launcher.install.location}"
+    },
+    "project" : {
+        "directory" : "&amp;{launcher.project.location}"
+    },
+    "project-script" : {
+        "directory" : "&amp;{launcher.project.location}/script"
+    }
 ...</programlisting>
-
-   <para>
-    For example, if you start OpenIDM from the <filename>/path/to/openidm</filename>
-    directory with the following command:
-   </para>
-   <screen>$ ./startup.sh -p /path/to/openidm/customconfig
-   </screen>
-   <para>
-    The <literal>launcher.project.location</literal> directory would be
-    <filename>/path/to/openidm/customconfig</filename>.
-   </para>
-   <para>
-    The <filename>script.json</filename> file also refers to a
-    <literal>launcher.install.location</literal> directory, which is
-    <filename>/path/to/openidm</filename>.
-   </para>
-
-   <para>Thus, based on the way the <filename>script.json</filename> file
-    is configured for <literal>project</literal>
-    and <literal>project-script</literal>, you can add custom
-    configuration and script files to the
-    <filename>/path/to/openidm/customconfig</filename> and the
-    <filename>/path/to/openidm/customconfig/script</filename> directories.
-   </para>
-
+      <note>
+       <para>
+        The order in which locations are listed in the
+        <literal>"sources"</literal> property is important. Scripts are loaded
+        from the <emphasis>bottom up</emphasis> in this list, that is, scripts
+        found in the last location on the list are loaded first.
+       </para>
+      </note>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </section>
 
+ <section xml:id="script-call">
+  <title>Calling A Script From a Configuration File</title>
+  <para>
+   You can call a script from within a configuration file by providing the
+   script source, or by referencing a file that contains the script source.
+   For example:
+  </para>
+
+  <programlisting language="javascript">{
+    "type" : "text/javascript",
+    "source": <replaceable>string</replaceable>
+} </programlisting>
+
+  <para>or</para>
+
+  <programlisting language="javascript">{
+    "type" : "text/javascript",
+    "file" : <replaceable>file location</replaceable>
+} </programlisting>
+
+  <variablelist>
+   <varlistentry>
+    <term>type</term>
+    <listitem>
+     <para>string, required</para>
+     <para>
+      Specifies the type of script to be executed. Supported types include
+      <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>source</term>
+    <listitem>
+     <para>
+      string, required if <literal>file</literal> is not specified
+     </para>
+     <para>
+      Specifies the source code of the script to be executed.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>file</term>
+    <listitem>
+     <para>
+      string, required if <literal>source</literal> is not specified
+     </para>
+     <para>
+      Specifies the file containing the source code of the script to execute.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  <para>
+   The following sample excerpts from configuration files indicate how scripts
+   can be called.
+  </para>
+  <para>
+   The following example (included in the <filename>sync.json</filename> file)
+   returns <literal>true</literal> if the <literal>employeeType</literal> is
+   equal to <literal>external</literal>, otherwise returns
+   <literal>false</literal>. This script can be useful during reconciliation to
+   establish whether a target object should be included in the reconciliation
+   process, or should be ignored.
+  </para>
+  <programlisting language="javascript">"validTarget": {
+    "type" : "text/javascript",
+    "source": "target.employeeType == 'external'"
+}  </programlisting>
+  <para>
+   The following example (included in the <filename>sync.json</filename> file)
+   sets the <literal>__PASSWORD__</literal> attribute to
+   <literal>defaultpwd</literal> when OpenIDM creates a target object.
+  </para>
+  <programlisting language="javascript">"onCreate" : {
+    "type" : "text/javascript",
+    "source": "target.__PASSWORD__ = 'defaultpwd'"
+} </programlisting>
+  <para>
+   The following example (included in the <filename>router.json</filename>
+   file) shows a trigger to create Solaris home directories using a script. The
+   script is located in the file,
+   <filename><replaceable>project-dir</replaceable>/script/createUnixHomeDir.js</filename>.
+  </para>
+  <programlisting language="javascript">{
+    "filters" : [ {
+        "pattern" : "^system/solaris/account$",
+        "methods" : [ "create" ],
+        "onResponse" : {
+            "type" : "text/javascript",
+            "file" : "script/createUnixHomeDir.js"
+        }
+    } ]
+} </programlisting>
+  <para>
+   Often, script files are reused in different contexts. You can pass
+   variables to your scripts to provide these contextual details at runtime.
+   You pass variables to the scripts that are referenced in configuration
+   files by declaring the variable name in the script reference.
+  </para>
+  <para>
+   The following example of a scheduled task configuration calls a script
+   named <literal>triggerEmailNotification.js</literal>. The example sets the
+   sender and recipient of the email in the schedule configuration, rather
+   than in the script itself.
+  </para>
+  <programlisting language="javascript">{
+    "enabled" : true,
+    "type" : "cron",
+    "schedule" : "0 0/1 * * * ?",
+    "invokeService" : "script",
+    "invokeContext" : {
+        "script": {
+            "type" : "text/javascript",
+            "file" : "script/triggerEmailNotification.js",
+            "fromSender" : "admin@example.com",
+            "toEmail" : "user@example.com"
+        }
+    }
+} </programlisting>
+  <para>
+   In general, you should namespace variables passed into scripts with the
+   <literal>"globals"</literal> map. Passing variables in this way prevents
+   collisions with the top-level reserved words for script maps, such as
+   <literal>file</literal>, <literal>source</literal>, and
+   <literal>type</literal>. The following example uses the
+   <literal>"globals"</literal> map to namespace the variables passed in the
+   previous example.
+  </para>
+  <programlisting language="javascript">"script": {
+    "type" : "text/javascript",
+    "file" : "script/triggerEmailNotification.js",
+    "globals" : {
+        "fromSender" : "admin@example.com",
+        "toEmail" : "user@example.com"
+    }
+} </programlisting>
+  <para>
+   Script variables are not necessarily simple <literal>key:value</literal>
+   pairs. A script variable can be any arbitrarily complex JSON object.
+  </para>
+ </section>
 <!-- Add this when OrientDB is supported in production
   <section xml:id="orientdb-perf">
       <title>Tuning the Performance of the OrientDB Repository</title>
