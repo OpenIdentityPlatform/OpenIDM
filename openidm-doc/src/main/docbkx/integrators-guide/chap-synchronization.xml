@@ -4026,8 +4026,8 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     operation assesses an entry as <literal>ABSENT</literal> in the target
     system. The script checks whether the <literal>"employeeType"</literal>
     property of the corresponding source entry is <literal>"contractor"</literal>.
-    If the <literal>"employeeType"</literal> is <literal>"contractor"</literal>,
-    the entry is ignored. Otherwise, the entry is created on the target system.
+    If so, the entry is ignored. Otherwise, the entry is created on the target
+    system.
    </para>
    <programlisting language="javascript">{
     "situation" : "ABSENT",
@@ -4039,7 +4039,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
 }  </programlisting>
    <para>
     The variables available to a script that is called as an action are
-    <literal>source</literal> <literal>target</literal>,
+    <literal>source</literal>, <literal>target</literal>,
     <literal>linkQualifier</literal>, and <literal>recon</literal> (where
     <literal>recon.actionParam</literal> contains information about the current
     reconciliation operation). For more information about the variables
