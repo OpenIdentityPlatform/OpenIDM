@@ -33,7 +33,7 @@ define("config/validators/AdminValidators", [
                 }
 
                 if (v === "/openidm" || v === "/admin" ||  v === "/system") {
-                    callback(["URL cannot be an reserved name of \"openidm\", \"admin\" or \"system\"."]);
+                    callback(["The URL cannot be one of the following reserved names: \"openidm\", \"admin\" or \"system\"."]);
                     return;
                 }
 
