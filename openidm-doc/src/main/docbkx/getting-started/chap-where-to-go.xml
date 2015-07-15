@@ -33,11 +33,11 @@
          xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Where To Go From Here</title>
 
- <indexterm>
+<!-- <indexterm>
   <primary>OpenIDM</primary>
   <secondary>Where To Go From Here</secondary>
  </indexterm>
-
+-->
  <para>
   OpenIDM can do much more than reconcile data between two different sources.
   In this chapter, you will read about the key features of OpenIDM,
@@ -284,7 +284,7 @@
   <title>Reconciliation</title>
 
   <para>
-   OpenIDM supports both reconciliation between two data stores, as a
+   OpenIDM supports reconciliation between two data stores, as a
    source and a target.
   </para>
 
