@@ -173,10 +173,10 @@
 
   <section xml:id="java-prerequisites">
    <title>Java Environment</title>
-   <indexterm>
+<!--   <indexterm>
     <primary>Java</primary>
     <secondary>Requirements</secondary>
-   </indexterm>
+   </indexterm> -->
    <para>
     On Windows systems, after installing Java, set the
     <literal>JAVA_HOME</literal> environment variable. To do so on Windows 7,
@@ -231,7 +231,7 @@
      <filename>openidm-${docTargetVersion}.zip</filename>. Navigate to the
      <link xlink:show="new" xlink:href="http://forgerock.org/openidm/"
       ><citetitle>ForgeRock Community</citetitle></link> page, and select
-     <literal>Unstable Community Builds</literal>.
+     <literal>Unstable Nightly Builds</literal>.
     </para>
     <!-- As requested by marketing -->
     <para>
