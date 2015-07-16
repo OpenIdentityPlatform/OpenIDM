@@ -45,6 +45,7 @@
    Groovy. Script options, and the locations in which OpenIDM expects to find
    scripts, are configured in the <filename>conf/script.json</filename> file for
    your project. For more information, see <link xlink:show="new"
+   xlink:role="http://docbook.org/xlink/role/olink"
    xlink:href="integrators-guide#script-config"><citetitle>Setting the Script
    Configuration</citetitle></link>.
   </para>
