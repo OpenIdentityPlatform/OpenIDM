@@ -30,28 +30,36 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
- <title>OpenIDM Web-based User Interfaces</title>
+ <title>OpenIDM Web-Based User Interfaces</title>
+ <!-- TODO reword when we work on the data management section of the Admin UI
+  <para>
+   OpenIDM provides a customizable, browser-based user interface, known as the
+   Self-Service UI. The Self-Service UI provides a graphical view of the
+   OpenIDM <link xlink:show="new"
+   xlink:href="integrators-guide#managed-objects"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
+   Objects</citetitle></link> under <literal>managed/user</literal>. Most of the
+   <link xlink:show="new" xlink:href="install-guide#chap-samples"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+   Samples</citetitle></link> demonstrate how you can deploy OpenIDM with managed
+   users.
+  </para>
 
+  <para>
+   The Self-Service UI enables administrative users to create, modify, and
+   delete user and other accounts. It also provides role-based access to
+   tasks based on BPMN2 workflows, and allows users to manage certain aspects of
+   their own accounts, including configurable self-service registration. When
+   OpenIDM starts, you can access the Self-Service UI at
+   <literal>https://localhost:8443/selfservice</literal>.
+  </para>
+ -->
  <para>
   OpenIDM provides a customizable, browser-based user interface, known as the
-  Self-Service UI. The Self-Service UI provides a graphical view of the
-  OpenIDM <link xlink:show="new"
-  xlink:href="integrators-guide#managed-objects"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
-  Objects</citetitle></link> under <literal>managed/user</literal>. Most of the
-  <link xlink:show="new" xlink:href="install-guide#chap-samples"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
-  Samples</citetitle></link> demonstrate how you can deploy OpenIDM with managed
-  users.
- </para>
-
- <para>
-  The Self-Service UI enables administrative users to create, modify, and
-  delete user and other accounts. It also provides role-based access to
-  tasks based on BPMN2 workflows, and allows users to manage certain aspects of
-  their own accounts, including configurable self-service registration. When
+  Self-Service UI. The Self-Service UI enables managed users to manage certain
+  aspects of their own accounts, including self-service registration. When
   OpenIDM starts, you can access the Self-Service UI at
-  <literal>https://localhost:8443/selfservice</literal>.
+  <literal>https://localhost:8443</literal>.
  </para>
 
  <para>
@@ -1105,7 +1113,13 @@
 
  <section xml:id="ui-managing-users">
   <title>Managing Data Accounts With the Self-Service UI</title>
-
+  <warning>
+   <para>
+    The data management functionality has moved to the Admin UI in the latest
+    OpenIDM build. This section of the documentation will be updated shortly to
+    reflect that change.
+   </para>
+  </warning>
   <para>
    Only administrative users (with the role <literal>openidm-admin</literal>)
    can add, modify, and delete data accounts. Regular users can modify certain
@@ -1129,8 +1143,7 @@
    <step>
     <para>
      Log into the Self-Service UI at
-     <literal>https://localhost:8443/selfservice</literal> as an administrative
-     user.
+     <literal>https://localhost:8443</literal> as an administrative user.
     </para>
    </step>
    <step>
@@ -1278,8 +1291,7 @@
    <step>
     <para>
      Log into the Self-Service UI at
-     <literal>https://localhost:8443/selfservice</literal> as an administrative
-     user.
+     <literal>https://localhost:8443</literal> as an administrative user.
     </para>
    </step>
    <step>
@@ -1374,8 +1386,7 @@
    <step>
     <para>
      Log into the Self-Service UI at
-     <literal>https://localhost:8443/selfservice</literal> as an administrative
-     user.
+     <literal>https://localhost:8443</literal> as an administrative user.
     </para>
    </step>
    <step>
@@ -1428,7 +1439,7 @@
    <step>
     <para>
      Log into the Self-Service UI at
-     <literal>https://localhost:8443/selfservice</literal> as an administrative
+     <literal>https://localhost:8443</literal> as an administrative
      user.
     </para>
    </step>
@@ -1869,7 +1880,7 @@ $ ./startup.sh</screen>
 
   <para>
    Start OpenIDM in the Self-Service UI by navigating to
-   <literal>https://localhost:8443/selfservice</literal>. Select Users and click
+   <literal>https://localhost:8443</literal>. Select Users and click
    Add User.
   </para>
 
@@ -1942,7 +1953,7 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
    <step>
     <para>
      Open a browser free of any cached information. Navigate to the
-     Self-Service UI at <literal>https://localhost:8443/selfservice</literal>.
+     Self-Service UI at <literal>https://localhost:8443</literal>.
      Select Users and then click Add User.
     </para>
    </step>
@@ -2014,7 +2025,7 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
   </para>
   <para>
    The logout URL is <literal>#logout</literal>, appended to the UI URL, for
-   example, <literal>https://localhost:8443/selfservice/index.html#logout/</literal>.
+   example, <literal>https://localhost:8443/index.html#logout/</literal>.
   </para>
   <para>
    The logout URL effectively performs the same action as clicking on the Log
@@ -2025,16 +2036,40 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
  <section xml:id="ui-path">
   <title>Changing the UI Path</title>
   <para>
-   By default, the UI is registered at a specific URL
-   (<literal><replaceable>context-root</replaceable>/selfservice</literal>). To
-   override the default URL and specify your own path, edit the
-   <filename>openidm/conf/ui.context-enduser.json</filename> file, setting the
-   <literal>urlContextRoot</literal> property to the new URL. For example, to
-   change the path to
-   <literal><replaceable>context-root</replaceable>/exampleui</literal>, edit
+   By default, the self service UI is registered at the root context and is
+   accessible at the URL <literal>https://localhost:8443</literal>. To specify
+   a different URL, edit the
+   <filename><replaceable>project-dir</replaceable>/conf/ui.context-enduser.json</filename>
+   file, setting the <literal>urlContextRoot</literal> property to the new URL.
+  </para>
+  <para>
+   For example, to change the URL of the self service UI to
+   <literal>https://localhost:8443/exampleui</literal>, edit
    the file as follows:
   </para>
   <screen>"urlContextRoot" : "/exampleui",</screen>
+  <para>
+   Alternatively, to change the Self-Service UI URL in the Admin UI, follow
+   these steps:
+  </para>
+  <procedure>
+   <step>
+    <para>
+     Log in to the Admin UI.
+    </para>
+   </step>
+   <step>
+    <para>
+     Select Configure > System Preferences, and select the System Configurations
+     tab.
+    </para>
+   </step>
+   <step>
+    <para>
+     Specify the new context route in the Relative URL field.
+    </para>
+   </step>
+  </procedure>
  </section>
 
  <section xml:id="ui-disabling">
