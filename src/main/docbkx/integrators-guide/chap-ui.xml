@@ -31,42 +31,27 @@
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Web-Based User Interfaces</title>
- <!-- TODO reword when we work on the data management section of the Admin UI
-  <para>
-   OpenIDM provides a customizable, browser-based user interface, known as the
-   Self-Service UI. The Self-Service UI provides a graphical view of the
-   OpenIDM <link xlink:show="new"
-   xlink:href="integrators-guide#managed-objects"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed
-   Objects</citetitle></link> under <literal>managed/user</literal>. Most of the
-   <link xlink:show="new" xlink:href="install-guide#chap-samples"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
-   Samples</citetitle></link> demonstrate how you can deploy OpenIDM with managed
-   users.
-  </para>
-
-  <para>
-   The Self-Service UI enables administrative users to create, modify, and
-   delete user and other accounts. It also provides role-based access to
-   tasks based on BPMN2 workflows, and allows users to manage certain aspects of
-   their own accounts, including configurable self-service registration. When
-   OpenIDM starts, you can access the Self-Service UI at
-   <literal>https://localhost:8443/selfservice</literal>.
-  </para>
- -->
  <para>
-  OpenIDM provides a customizable, browser-based user interface, known as the
-  Self-Service UI. The Self-Service UI enables managed users to manage certain
-  aspects of their own accounts, including self-service registration. When
-  OpenIDM starts, you can access the Self-Service UI at
-  <literal>https://localhost:8443</literal>.
+  OpenIDM provides a customizable, browser-based user interface. The
+  functionality is subdivided into Administration and Self-Service.
  </para>
 
  <para>
-  OpenIDM also provides a configurable administrative user interface (Admin UI)
-  that allows you to configure connectors, customize managed objects, set up
-  attribute mappings, and more. When OpenIDM starts, you can access the Admin UI
-  at <literal>https://localhost:8443/admin</literal>.
+  If you are administering OpenIDM, navigate to the Administrative User
+  Interface, also known as the Admin UI. If OpenIDM is installed on the
+  local system, you can get to the Admin UI at the following URL:
+  <literal>https://localhost:8443/admin</literal>. In the Admin UI, you
+  can configure connectors, customize managed objects, set up attribute
+  mappings, manage accounts, and more.
+ </para>
+
+ <para>
+  The Self-Service User Interface, also known as the Self-Service UI,
+  provides role-based access to tasks based on BPMN2 workflows, and
+  allows users to manage certain aspects of their own accounts,
+  including configurable self-service registration. When OpenIDM starts,
+  you can access the Self-Service UI at
+  <literal>https://localhost:8443/</literal>.
  </para>
 
  <para>
@@ -85,712 +70,88 @@
  </mediaobject>
 
  <section xml:id="ui-admin">
-  <title>Configuring OpenIDM from the Admin UI</title>
+ <title>Configuring OpenIDM from the Admin UI</title>
 
-  <para>
-   You can set up a basic configuration for OpenIDM with the Administrative User
-   Interface (Admin UI).
-  </para>
+ <para>
+  You can set up a basic configuration for OpenIDM with the Administrative User
+  Interface (Admin UI).
+ </para>
 
-  <para>
-   Through the Admin UI, you can connect to resources, configure attribute
-   mapping, and set up managed objects, reconciled on a defined schedule.
-  </para>
+ <para>
+  Through the Admin UI, you can connect to resources, configure attribute
+  mapping and scheduled reconciliation, and set up and manage objects, such
+  as users, groups and devices.
+ </para>
 
-  <para>
-   You can customize the configuration of connectors, managed objects,
-   mapping between resources, and more. You can add and edit properties to be
-   synchronized, configure correlation queries, set up correlation scripts,
-   and enable LiveSync.
-  </para>
+ <para>
+  To access the initial Admin UI screen, navigate to
+  <literal>https://localhost:8443/admin</literal>.
+ </para>
+        <!--   TODO, para included as a limit; may need to expand the following
+        section for more features
+ <para>
+  We have incorporated descriptions of the Admin UI in appropriate functional
+  sections. We include the following links based on the
+  <link xlink:show="new"
+        xlink:href="http://docs.forgerock.org/en/openidm/3.1.0/integrators-guide/index.html#ui-admin">
+   previous version of this document</link>, to help readers who expect
+  Admin UI guidance in this section.
+ </para>    -->
 
-  <para>
-   To access the initial Admin UI screen, navigate to
-   <literal>https://localhost:8443/admin</literal>.
-  </para>
-
-  <mediaobject>
-   <alt>Initial Admin UI Screen</alt>
-   <imageobject>
-    <imagedata fileref="images/admin-ui-main.png" format="PNG" />
-   </imageobject>
-  </mediaobject>
-
-  <para>
-   The information that appears in the initial Admin UI screen depends on how
-   you started OpenIDM. For example, if you start OpenIDM with one of the
-   <link xlink:role="http://docbook.org/role/xlink/olink" xlink:show="new"
-         xlink:href="install-guide#more-samples">OpenIDM Samples</link>, your
-   first Resources screen will display connectors and managed objects as
-   configured in the selected sample.
-  </para>
-
-  <para>
-   As shown in the initial screen, the Admin UI supports: <link
-   xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:href="integrators-guide#chap-resource-conf" xlink:show="new">
-   Connecting to External Resources</link> and
-   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-         xlink:href="integrators-guide#chap-users-groups-roles">Managing Users,
-   Groups, and Roles</link>.
-  </para>
-
-  <para>
-   Scroll up and down the Admin UI screen. Review configured
-   connectors and managed objects. The screenshots in this section assume that
-   you have started OpenIDM with the
-   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-         xlink:href="install-guide#full-stack-sample">
-   <citetitle>Full Stack Sample</citetitle></link>.
-  </para>
-
-  <para>
-   Connectors facilitate communication between OpenIDM and a remote resource,
-   such as a database, an identity store, or another organized data store. The
-   Admin UI uses the term <emphasis>connector</emphasis> to refer to the remote
-   resource to which you are connecting. When you have connected two resources,
-   you can create a mapping between the objects that are stored in those
-   resources. Mapping the individual object properties enables synchronization
-   between the resources.
-  </para>
-
-  <note>
+  <itemizedlist>
    <para>
-    To edit a configured connector or managed object in the Admin UI, click on
-    it. To delete either a connector or managed object, click the icon in the
-    upper right of the box, and select Delete from the pop-up menu that appears.
+    The initial Admin UI screens shows active connectors. You should see
+    <literal>Configure</literal> and <literal>Manage</literal> menus
+    to configure OpenIDM and manage data, including workflows.
    </para>
-  </note>
-
-  <section xml:id="ui-admin-connectors">
-   <title>Administering Connectors from the UI</title>
-
-   <para>
-    You can include several different connectors in an OpenIDM configuration.
-    Select the option to create a new connector. Try some of the different
-    connector types in the screen that appears. Observe as the Admin UI changes
-    the configuration options to match the requirements of the connector type.
-   </para>
-
-   <mediaobject>
-    <alt>Add Connector Admin UI Screen</alt>
-    <imageobject>
-     <imagedata fileref="images/admin-ui-con-types.png" format="PNG" />
-    </imageobject>
-   </mediaobject>
-
-   <para>
-    If you are not sure what to enter in a specific Add Connector text box,
-    review the list of <link xlink:show="new"
-    xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:href="integrators-guide#connectors-with-openidm"><citetitle>Connectors
-    Supported With OpenIDM</citetitle></link>. You should be able to find
-    guidance and or examples on how each supported connector is configured.
-   </para>
-
-   <para>
-    For additional guidance, review sample connector files in the
-    <filename>samples/provisioners/</filename> subdirectory.
-   </para>
-
-   <para>
-    When you have filled in all required text boxes, the Admin UI allows you
-    to validate the connector configuration.
-   </para>
-
-  </section>
-
-  <section xml:id="ui-admin-managedobjects">
-   <title>Administering Managed Objects from the UI</title>
-
-   <para>
-    You can set up Managed Objects in a fashion similar to the way you set up
-    connectors. Typically, OpenIDM uses managed objects as defined in
-    <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
-          xlink:href="integrators-guide#chap-users-groups-roles">
-     <citetitle>Managing Users, Groups, and Roles</citetitle>.</link>
-   </para>
-
-   <para>
-    To set up a new Managed Object, navigate to the URL for the Admin UI,
-    <literal>https://localhost:8443/admin</literal>.
-   </para>
-
-   <para>
-    You can set up Managed Objects for any item that can be collected in a
-    data set. For example, with the right schema, you can set up any device
-    associated with the Internet of Things (IoT).
-   </para>
-
-   <para>
-    To access details of a Managed Object, navigate to the Resources screen.
-    Select the Edit icon associated with the desired Managed Object, such as
-    user, group, role, part, or something else.
-   </para>
-
-   <mediaobject>
-    <alt>Managed Object Admin UI Screen</alt>
-    <imageobject>
-     <imagedata fileref="images/admin-ui-managed.png" format="PNG" />
-    </imageobject>
-   </mediaobject>
-
-   <section xml:id="ui-admin-mo-schema">
-    <title>Managed Object Schema</title>
-
+   <listitem>
+    <para><literal>Connectors</literal></para>
     <para>
-     When you set up a Managed Object, you should set up associated schema. When
-     you Add or Edit a Managed Object, scroll down the window to the Schema
-     section, where you can add properties and fields.
-    </para>
-
-    <mediaobject>
-     <alt>Managed Object Schema UI Screen</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-schema-title.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     Start with the Readable Title (<literal>Object Title</literal>) and
-     Description (<literal>Object Description</literal>). The
-     Readable Title is a "human-readable" version of the name of the Managed
-     Object. The Description allows you to elaborate on the
-     Managed Object.
-    </para>
-
-    <mediaobject>
-     <alt>Managed Object Schema Properties</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-schema-prop.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     In the screen shown here, the administrator has added the following
-     properties for the device: <literal>deviceName</literal>,
-     <literal>deviceBrand</literal>, <literal>deviceMarket</literal>,
-     <literal>deviceManufacture</literal>, and <literal>deviceRetail</literal>.
-    </para>
-
-    <para>
-     Now you can add the properties of your choice. When you enter a Property
-     Name, OpenIDM substitutes that name in the left-hand column.
-    </para>
-
-    <para>
-     Each property typically includes several fields as follows:
-    </para>
-
-   <itemizedlist>
-    <listitem>
-     <para><literal>Property Name</literal></para>
-     <para>Name of the property</para>
-    </listitem>
-    <listitem>
-     <para><literal>Readable Title</literal></para>
-     <para>Name of the property, in human-readable language</para>
-    </listitem>
-    <listitem>
-     <para><literal>Description</literal></para>
-     <para>Description of the property</para>
-    </listitem>
-    <listitem>
-     <para><literal>Viewable</literal></para>
-     <para>Determines whether this property is viewable in the
-      Self-Service UI, in the profile for the Managed Object. May be
-      true or false.</para>
-    </listitem>
-    <listitem>
-     <para><literal>Searchable</literal></para>
-     <para>Determines whether this property is searchable from the
-     OpenIDM repository. A searchable property should be visible within
-     the Managed Object data grid in the Self-Service UI. May be true
-     or false.</para>
-    </listitem>
-    <listitem>
-     <para><literal>Required</literal></para>
-     <para>Specifies whether or not this property is required for the
-      OpenIDM repository. May be true or false.</para>
-    </listitem>
-    <listitem>
-     <para><literal>Type</literal></para>
-     <para>Type of property; could be <literal>String</literal>,
-      <literal>array</literal>, <literal>boolean</literal>,
-      <literal>integer</literal>, <literal>number</literal>,
-      <literal>object</literal>, or <literal>Resource Collection</literal>.
-     </para>
-    </listitem>
-   </itemizedlist>
-
-   <para>
-    After you create a new Managed Object, you can review and manage associated
-    information in the Self-Service UI. For more information, see
-    <xref linkend="ui-managing-users" />.
-   </para>
-
-   </section>
-
-  </section>
-
-  <section xml:id="admin-ui-resource-mapping">
-   <title>Configuring a Resource Mapping from the UI</title>
-
-   <para>
-    Your deployment might include multiple external systems that you need to
-    connect, either to each other, or to the OpenIDM managed object repository.
-    You can use the Admin UI to configure mappings between any two sets of
-    resources. In the Admin UI terminology, a <emphasis>connector</emphasis>
-    represents an external data store. The connectors that are supported for use
-    with OpenIDM are described in
-    <link xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:show="new" xlink:href="integrators-guide#openicf-provisioner-conf">
-    <citetitle>Connectors Supported with OpenIDM</citetitle></link>. Managed
-    objects represents the data repository that is internal to OpenIDM.
-   </para>
-
-   <para>
-    Resource mapping requires a source and a target. Generally, a resource
-    contains user accounts, which include properties such as username, address,
-    surname, and title. Resources can contain other types of data, however,
-    such as groups, or devices.
-   </para>
-
-   <para>
-    When a source object is mapped to a target object, during a reconciliation
-    operation, a <emphasis>link</emphasis> is created between the two objects.
-    In some cases, there might be multiple target objects that map to a single
-    source object. When there are multiple target objects, OpenIDM uses
-    <emphasis>link qualifiers</emphasis> to distinguish between the types of
-    relationships that are created from source to target. For more information,
-    see <link xlink:show="new"
-    xlink:href="integrators-guide#correlating-multiple-targets"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
-    Multiple Target Objects</citetitle></link>.
-   </para>
-   <para>
-    You can create and remove link qualifiers on this screen, and use them when
-    you define correlation queries, set up correlation scripts, or use
-    transformation scripts to set the attribute values on target systems. The
-    link qualifiers that you create here are added to your mapping
-    (<filename>conf/sync.json</filename>) file. For more information about link
-    qualifiers, see <link xlink:show="new"
-    xlink:href="integrators-guide#mapping-link-qualifiers"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Link
-    Qualifiers in a Mapping</citetitle></link>.
-   </para>
-   <para>
-    When you create a mapping between two resources, you identify the properties
-    whose values you want to control in the target. The Attributes panel on this
-    screen enables you to configure how OpenIDM matches properties in the source
-    resource to properties in the target resource.
-   </para>
-   <para>
-    The following screenshot illustrates a property mapping between two
-    resources. Every resource includes identifiers for each attribute. For
-    example, different resources might use one of the following identifiers for
-    usernames: un, uid, user, sAMAccountName, and account. For more information
-    on property mappings, see <link xlink:show="new"
-    xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:href="integrators-guide#synchronization-mappings-file"><citetitle>Configuring
-    the Synchronization Mapping</citetitle></link>.
-   </para>
-
-   <mediaobject>
-    <alt>Admin UI - Property Mapping</alt>
-    <imageobject>
-     <imagedata fileref="images/admin-ui-map-sync.png" format="PNG" />
-    </imageobject>
-   </mediaobject>
-
-   <para>
-    The bold grey line determines which properties are displayed for each
-    object in the Data Association Management panel, under the Association tab.
-    By default, four properties are displayed. To change the number of
-    properties that are displayed, edit the <emphasis>Number of representative
-    properties</emphasis>. To include a property in the display, drag it above
-    the bold line.
-   </para>
-   <para>
-    The value of the target property might not be a simple direct mapping from
-    the value of the source property. To define how the value of the target
-    property should be calculated, double-click the property name. A window
-    similar to the following is displayed:
-   </para>
-   <mediaobject>
-    <alt>Admin UI - Property Mapping</alt>
-    <imageobject>
-     <imagedata fileref="images/admin-ui-map-properties.png" format="PNG" />
-    </imageobject>
-   </mediaobject>
-   <para>
-    This window enables you to manipulate the target attribute value in the
-    following ways:
-   </para>
-   <itemizedlist>
-    <listitem>
-     <para>
-      Property List enables a direct mapping from the value of the selected
-      source attribute.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      Transformation Script enables you to do something with the value of the
-      source attribute, to generate the value of the target attribute.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      Conditional Update Script enables you to indicate that a source and target
-      attribute should be mapped <emphasis>only</emphasis> if a certain
-      condition is true.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      Default Values enables you to set a static value for the target attribute.
-     </para>
-    </listitem>
-   </itemizedlist>
-   <para>
-    For more information about setting and changing target attribute values, see
-    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-    xlink:href="integrators-guide#synchronization-mappings-file"><citetitle>Configuring
-    the Synchronization Mapping</citetitle></link>.
-   </para>
-  </section>
-
-  <section xml:id="admin-ui-sync">
-   <title>Configuring Reconciliation from the UI</title>
-
-   <para>
-    Reconciliation changes data on a target system to match the corresponding
-    data on a source system. You can customize how OpenIDM performs
-    reconciliation in several ways.
-   </para>
-
-   <section xml:id="admin-ui-correlation">
-    <title>Association Options</title>
-
-    <para>
-     If you are reconciling objects in a source system, with
-     <emphasis>existing</emphasis> objects in a target system, OpenIDM uses
-     <emphasis>correlation</emphasis> to determine whether the objects on the
-     target system match the objects on the source system. Correlation involves
-     writing a query to specify how OpenIDM should attempt to match the existing
-     records.
-    </para>
-    <para>
-     The Association tab in the UI enables you to create correlation queries, or
-     set up correlation scripts, and to associate source and target objects
-     manually.
-    </para>
-    <para>
-     Before you define a correlation query, you must specify at least one link
-     qualifier on the <emphasis>Properties</emphasis> panel (as described in the
-     previous section). To configure a correlation query for a mapping you can
-     use the Expression Builder.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Correlation Queries</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-corr.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     Instead of a correlation query, you can set up a correlation script. In
-     a correlation script, you can include the logic otherwise associated with
-     a link qualifier.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Correlation Scripts</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-corr-script.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     For either a correlation query or a correlation script, you can type your
-     JavaScript or Groovy script inline, or otherwise reference a pre-existing
-     script file.
-    </para>
-    <para>
-     For more information about correlation, see the section
-     on <link xlink:href="integrators-guide#correlation" xlink:show="new"
-              xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
-     Existing Target Objects</citetitle></link>. If there is more than one
-     potential target object that should be linked to each source object, use
-     the Link Qualifier field to indicate how OpenIDM should create links to
-     each target object. For more information about mapping to multiple
-     accounts, see <link xlink:show="new"
-                         xlink:href="integrators-guide#correlating-multiple-targets"
-                         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
-     Multiple Target Objects</citetitle></link>.
-    </para>
-    <para>
-     When a reconciliation operation finds a matching target entry, the process
-     creates a link between the source and the target entries. This is also known
-     as a Data Association. Data associations serve two purposes - they speed up
-     future reconciliation operations, and they serve as a record of the
-     relationship between a source and a target entry.
-    </para>
-
-    <para>
-     The association rules that are configured in the previous section enable
-     automatic linking of source and target objects, in accordance with a set of
-     defined criteria. These rules might not always link the correct target
-     objects to the corresponding source objects. In this case, the Data
-     Association Management panel enables you to manipulate links between
-     individual source and target objects, manually. You must have run at least
-     one reconciliation for any data to appear here. When a reconciliation has
-     been run, select the source object that has been incorrectly mapped and
-     select Change Source to Target Association, to specify the correct target
-     object that should be linked to that source object.
-    </para>
-    <para>
-     To limit the list of records displayed here, select the synchronization
-     situation from the View list. For more information on the situations in
-     this list, see the corresponding section on <link xlink:show="new"
-     xlink:href="integrators-guide#sync-situations"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
-     Situations</citetitle></link>.
-    </para>
-    <para>
-     In the case of multiple target objects, if the source object has been
-     linked to the incorrect corresponding target object, or if OpenIDM was
-     unable to determine the correct target object, select the correct link
-     qualifier from the dropdown list. For more information about mapping to
-     multiple accounts, see <link xlink:show="new"
-     xlink:href="integrators-guide#correlating-multiple-targets"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Correlating
-     Multiple Target Objects</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Data Association Management</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-data-assoc.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     The Association tab also allows you to configure reconciliation query
-     filters, and to define scripts to determine which individual source and
-     target objects should be assessed in a reconciliation operation.
-    </para>
-    <para>
-     By default, all entries on a source and target system are
-     candidates for reconciliation. Reconciliation query filters enable you to
-     restrict reconciliation operations to specific entries by defining explicit
-     queries that are run on the source or on the target. For more information,
-     see the section on
-     <link xlink:show="new" xlink:href="integrators-guide#recon-by-query"
-     xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Restricting Reconciliation by Using Queries</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Reconciliation Query Filters</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-recon-query.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     By default, OpenIDM synchronizes all objects that match those defined in
-     the connector configuration for the resource. You can filter what is
-     considered a valid source or valid target for synchronization by using
-     individual record validation scripts. For more information, see the <link
-     xlink:show="new" xlink:href="integrators-guide#filtering-source-and-target"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Filtering
-     Synchronization Objects By Using Scripts</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Individual Record Validation</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-recon-validation.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-   </section>
-
-   <section xml:id="admin-ui-recon">
-    <title>Reconciliation Options (Behaviors)</title>
-
-    <para>
-     Before activating reconciliation, look at the options under the Behaviors
-     tab. You can use these options to configure situational policies,
-     action scripts dependent on situational events, and reconciliation scripts.
-    </para>
-
-    <itemizedlist>
-     <listitem>
-      <para>
-       You can configure situational policies. For new mappings, the default
-       policy is "read-only". As such, OpenIDM does not change anything on the
-       target system.
-      </para>
-      <para>
-       With situational policies, you can define different actions as shown in
-       the screenshot below. For a full list of available
-       policies, see the following section:
-       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-             xlink:href="integrators-guide#handling-sync">
-        <citetitle> Synchronization Situations and Actions</citetitle></link>.
-      </para>
-      <para>
-       To access the following screen, select the Mapping of your choice and
-       select edit. In the sub-tabs that appear, select Behaviors.
-      </para>
-      <mediaobject>
-       <alt>Admin UI Screen, User-Defined Situational Policies</alt>
-       <imageobject>
-        <imagedata fileref="images/admin-ui-situ-policy.png" format="PNG" />
-       </imageobject>
-      </mediaobject>
-     </listitem>
-     <listitem>
-      <para>
-       You can configure situational event scripts, which are really action
-       scripts. To that end, you can configure script
-       events (<literal>onCreate</literal>, <literal>onDelete</literal>,
-       <literal>onLink</literal>, <literal>onUnlink</literal>, and
-       <literal>onUpdate</literal>) to help you with
-       <link xlink:href="integrators-guide#constructing-attributes"
-             xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new">
-        <citetitle>Constructing and Manipulating Attributes</citetitle></link>.
-      </para>
-      <mediaobject>
-       <alt>Admin UI Screen, Situational Event Scripts</alt>
-       <imageobject>
-        <imagedata fileref="images/admin-ui-situ-event.png" format="PNG" />
-       </imageobject>
-      </mediaobject>
-     </listitem>
-     <listitem>
-      <para>
-       You can configure scripts that are triggered on reconciliation, as part of
-       the <link xlink:href="integrators-guide#advanced-dataflow"
-                 xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
-       <citetitle>Advanced Dataflow Configuration</citetitle></link>.
-      </para>
-      <mediaobject>
-       <alt>Admin UI Screen, Reconciliation Script</alt>
-       <imageobject>
-        <imagedata fileref="images/admin-ui-recon-script.png" format="PNG" />
-       </imageobject>
-      </mediaobject>
-     </listitem>
-    </itemizedlist>
-
-    <para>
-     You can test the overall process with the reconciliation of a single
-     record. In other words, you need not test these policies and scripts
-     against the entire data set. For example, you can
-     <link xlink:href="integrators-guide#recon-by-id" xlink:show="new"
-           xlink:role="http://docbook.org/xlink/role/olink">
-      <citetitle>Restrict Reconciliation to a Specific ID</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Single Record Reconciliation</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-single.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <note>
-     <para>
-      If you do not see the Single Record Reconciliation option under the
-      Behaviors tab, it means that you have not yet reconciled that mapping, or
-      the policies that you have set are <emphasis>Read-only</emphasis>.
-     </para>
-    </note>
-
-    <para>
-     Finally, you should set up a schedule, as described in
-     the following section: <link xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:show="new" xlink:href="integrators-guide#configuring-sync-schedule">
-     <citetitle>Configuring Scheduled Synchronization</citetitle></link>.
-    </para>
-
-    <mediaobject>
-     <alt>Admin UI Screen, Synchronization</alt>
-     <imageobject>
-      <imagedata fileref="images/admin-ui-sync.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
-
-    <para>
-     You can also configure LiveSync, which captures the changes that happen on
-     a remote system, and then pushes those changes to OpenIDM.
-    </para>
-
-    <para>
-     For more information on Reconciliation and LiveSync, see the section that
-     explains: <link xlink:href="integrators-guide#sync-types" xlink:show="new"
-                     xlink:role='http://docbook.org/xlink/role/olink'><citetitle>Types of
-     Synchronization</citetitle></link>.
-    </para>
-
-    <para>
-     While Reconciliation and LiveSync are two different concepts, you can
-     manage both with the embedded Quartz scheduler. For more information, see
-     the following section:
+     You can use the Admin UI to connect to external resources by
      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-           xlink:href="integrators-guide#chap-scheduler-conf">
-      <citetitle>Scheduling Tasks and Events</citetitle></link>.
+           xlink:href="integrators-guide#connector-wiz-adminui">
+      <citetitle>Adding New Connectors from the Admin UI</citetitle></link>.
     </para>
-
+   </listitem>
+   <listitem>
+    <para><literal>Managed Objects</literal></para>
     <para>
-     Once you've set up Reconciliation based on configured properties,
-     correlation queries or correlation scripts, and a synchronization schedule,
-     you can start the synchronization process. Try it out! You'll see the
-     results in the target data store.
+     You can use the Admin UI to set up managed objects, including users, groups,
+     roles, or even IoT devices by
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#working-with-mo-ui">
+      <citetitle>Administering Managed Objects From the UI</citetitle></link>.
     </para>
-
+   </listitem>
+   <listitem>
+    <para><literal>Synchronization</literal></para>
     <para>
-     Once you have taken the steps required to configure OpenIDM through the
-     Admin UI, you can start the synchronization process from a source to a
-     target. Once a synchronization is complete, you can review the results in
-     this window.
+     You can customize the OpenIDM reconciliation process with correlation
+     queries and scripts as described in the following section:
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#basic-sync"><citetitle>Configuring
+     Basic Synchronization</citetitle></link>.
     </para>
-
-   </section>
-
-  </section>
-
-  <section xml:id="admin-ui-auth">
-   <title>Configuring Authentication Modules from the UI</title>
-
-   <para>
-    You can also configure authentication modules from the Admin UI. To access
-    those modules, select the Settings option in the top navigation bar.
-   </para>
-
-   <para>
-    The page shown here displays several available modules, based on the
-    ForgeRock Common Authentication Framework. For more information on each
-    module, see the following section:
-    <link xlink:href="integrators-guide#supported-auth-modules"
-          xlink:show="new" xlink:role="http://forgerock.org/xlink/role/olink">
-     <citetitle>Supported Authentication Modules</citetitle>
-    </link>.
-   </para>
-
-   <mediaobject>
-    <alt>Admin UI Screen, Authentication Settings</alt>
-    <imageobject>
-     <imagedata fileref="images/admin-ui-auth.png" format="PNG" />
-    </imageobject>
-   </mediaobject>
-
-  </section>
+   </listitem>
+   <listitem>
+    <para><literal>Resource Mapping</literal></para>
+    <para>
+     You can set up mappings between properties by
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#synchronization-mappings-file">
+      <citetitle>Configuring the Synchronization Mapping</citetitle></link>.
+    </para>
+   </listitem>
+   <listitem>
+    <para><literal>Authentication Modules</literal></para>
+    <para>
+     You can configure Authentication Modules as described in the following
+     section: <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+                    xlink:href="integrators-guide#supported-auth-session-modules">
+     <citetitle>Supported Authentication and Session Modules</citetitle></link>.
+    </para>
+   </listitem>
+  </itemizedlist>
 
  </section>
 
@@ -800,14 +161,6 @@
    For all users, the Self-Service UI includes a Dashboard tab, which
    lists any tasks assigned to the user who as logged in, processes available
    to be invoked, and any notifications for that user.
-  </para>
-  <para>
-   For the administrative user, (role <literal>openidm-admin</literal>), the
-   Self-Service UI also includes a Users option in the top menu bar,
-   which provides an interface for user entries, if you have configured managed
-   users in the OpenIDM repository. If you have created additional Managed
-   Objects as defined in <xref linkend="ui-admin-managedobjects" />, you can
-   also see and select those Managed Objects in the top menu bar.
   </para>
   <para>
    To access the Self-Service UI, start OpenIDM, then navigate to
@@ -1190,7 +543,7 @@
   </procedure>
 
   <mediaobject>
-   <alt>OpenIDM Self-Service UI - Create User Account</alt>
+   <alt>OpenIDM Admin UI - Create User Account</alt>
    <imageobject>
     <imagedata fileref="images/ui-create-account.png" format="PNG" />
    </imageobject>
@@ -1198,13 +551,15 @@
 
   <para>
    In a similar fashion, you can create accounts for other managed objects. If
-   you followed the instructions discussed in section
-   <xref linkend="ui-admin-mo-schema" />, you should now see a Wearable Device
-   managed object in the Self-Service UI.
+   you followed the instructions discussed in the section on
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="integrators-guide#ui-admin-mo-schema"><citetitle>Managed
+    Object Schema</citetitle></link>, you should now see a Wearable Device
+   managed object in the Admin UI.
   </para>
 
   <mediaobject>
-   <alt>OpenIDM Self-Service UI - With Another Managed Object</alt>
+   <alt>OpenIDM Admin UI - With Another Managed Object</alt>
    <imageobject>
     <imagedata fileref="images/ui-wearable-device-mo.png" format="PNG" />
    </imageobject>
@@ -1225,7 +580,7 @@
    </para>
 
    <mediaobject>
-    <alt>OpenIDM Self-Service UI - New Managed Object</alt>
+    <alt>OpenIDM Admin UI - New Managed Object</alt>
     <imageobject>
      <imagedata fileref="images/ui-initial-mo.png" format="PNG" />
     </imageobject>
@@ -1233,8 +588,11 @@
 
    <para>
     The items that you can add to the new Managed Object depends on the
-    associated properties, as discussed in <xref linkend="ui-admin-mo-schema" />.
-    This procedure assumes that your new Managed Object is a wearable device.
+    associated properties, as discussed in
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+          xlink:href="integrators-guide#ui-admin-mo-schema"><citetitle>Managed
+     Object Schema</citetitle></link>. This procedure assumes that your new
+    Managed Object is a wearable device.
    </para>
 
    <step>

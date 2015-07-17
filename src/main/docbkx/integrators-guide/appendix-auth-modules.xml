@@ -38,7 +38,7 @@
  <para>
   This appendix includes configuration details for various authentication
   modules described in
-  <link xlink:show="new" xlink:href="integrators-guide#supported-auth-modules"
+  <link xlink:show="new" xlink:href="integrators-guide#supported-auth-session-modules"
         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Supported
    Authentication and Session Modules</citetitle></link>.
  </para>
