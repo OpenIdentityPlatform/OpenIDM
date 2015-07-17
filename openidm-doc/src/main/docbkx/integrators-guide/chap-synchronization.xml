@@ -290,17 +290,50 @@
    </para>
 
    <para>
-    An excerpt from an example connector configuration follows. The example
-    shows the name for the connector and two attributes of an account object
-    type. In the attribute mapping definitions, the attribute name is mapped
-    from the <literal>nativeName</literal> (the attribute name used on the
-    external resource) to the attribute name that is used in OpenIDM. The
-    example shows that the <literal>sn</literal> attribute in LDAP is mapped to
-    <literal>lastName</literal> in OpenIDM. The <literal>homePhone</literal>
-    attribute is defined as an array, because it can have multiple values.
+    You can modify the connector configuration through the Admin UI or
+    directly in the configuration file, as described in the following sections.
    </para>
 
-   <programlisting language="javascript">
+   <section xml:id="connector-config-adminui">
+    <title>Setting up the Connector Configuration in the Admin UI</title>
+
+    <para>
+     To review the corresponding information in the Admin UI, navigate to
+     <literal>https://localhost:8443/admin</literal>, and log in as an
+     administrative user. The default administrative username and password is
+     <literal>openidm-admin</literal> and <literal>openidm-admin</literal>.
+    </para>
+
+    <para>
+     Navigate to Configure &gt; Connectors, and select the connector associated
+     with the desired external resource. Select the object type such as
+     <literal>account</literal>, and select the edit icon.
+    </para>
+
+    <para>
+     You should see a window where you can select all applicable object type
+     properties such as <literal>lastName</literal> and
+     <literal>homePhone</literal>.
+    </para>
+
+   </section>
+
+   <section xml:id="connector-config-files-cli">
+    <title>Editing Connector Configuration Files</title>
+
+    <para>
+     To help you modify connector configuration files, look at the following
+     example, which shows the name for the connector and two attributes of an
+     account object type. In the attribute mapping definitions, the attribute
+     name is mapped from the <literal>nativeName</literal> (the attribute
+     name used on the external resource) to the attribute name that is used
+     in OpenIDM. The example shows that the <literal>sn</literal> attribute
+     in LDAP is mapped to <literal>lastName</literal> in OpenIDM.
+     The <literal>homePhone</literal> attribute is defined as an array,
+     because it can have multiple values.
+    </para>
+
+    <programlisting language="javascript">
 {
     "name": "MyLDAP",
     "objectTypes": {
@@ -331,7 +364,9 @@
      construct attributes and to manipulate their values, you use the
      synchronization mappings file, described in the following section.
     </para>
+
    </section>
+  </section>
 
   <section xml:id="synchronization-mappings-file">
    <title>Configuring the Synchronization Mapping</title>
@@ -342,6 +377,18 @@
     <indexterm>
      <primary>Mappings</primary>
     </indexterm>
+    <para>
+     A synchronization mapping specifies a relationship between properties in
+     two data stores. One typical mapping between an external LDAP directory
+     and an internal Managed User data store is:
+    </para>
+    <screen>"source": "lastName",
+"target": "sn"</screen>
+    <para>
+     In this case, the <literal>lastName</literal> source attribute is mapped
+     to the <literal>sn</literal> (surname) attribute on the target.
+    </para>
+
     <para>
      The synchronization mappings file (<filename>conf/sync.json</filename>)
      represents the core configuration for OpenIDM synchronization.
@@ -354,14 +401,41 @@
      from an LDAP server to the repository and also from the repository to the
      LDAP server, you would define two separate mappings.
     </para>
+
     <para>
-     You can update mappings in the <filename>sync.json</filename> file while
-     the server is running, as long as you do not update a mapping that is
-     currently being used by a reconciliation process.
+     You can also identify and add mappings in the Admin UI. To do so,
+     navigate to <literal>https://localhost:8443/admin</literal>, and click
+     Configure &gt; Mappings.
     </para>
 
-    <section xml:id="mapping-resources">
-     <title>Identifying Resources in a Mapping</title>
+    <para>
+     You can update mappings in the <filename>sync.json</filename> file or
+     the Admin UI while the server is running, as long as you do not update a
+     mapping that is currently being used by a reconciliation process.
+    </para>
+
+    <para>
+     In the Admin UI, you can also configure mappings for individual attributes.
+     Click on a specific mapping &gt; Properties. In the Attributes Grid,
+     select a property.
+    </para>
+
+    <mediaobject>
+     <alt>Admin UI - Property Mapping</alt>
+     <imageobject>
+      <imagedata fileref="images/admin-ui-map-properties.png" format="PNG" />
+     </imageobject>
+    </mediaobject>
+
+    <para>
+     The Admin UI serves as a front-end to OpenIDM configuration files. The
+     changes you make to resource and attribute mappings are written to the
+     <filename>sync.json</filename> file as described in the following
+     sections:
+    </para>
+
+    <section xml:id="mapping-resources-text">
+     <title>Identifying Resource Mappings in <literal>sync.json</literal></title>
      <para>
       External resources are shown in a mapping as
       <literal>system/<replaceable>name</replaceable>/<replaceable>object-type</replaceable></literal>,
@@ -442,6 +516,7 @@
       target <literal>system/ldap/account</literal>. In this case, the name for
       the mapping would be <literal>managedUser_systemLdapAccounts</literal>.
      </para>
+
     </section>
 
     <section xml:id="mapping-creating-attributes">
@@ -463,6 +538,14 @@
       (for update and create actions) if the <literal>"source"</literal>
       property and the <literal>"transform"</literal> script yield a null value.
       The default value overrides the target value, if one exists.
+     </para>
+
+     <para>
+      To set up these attributes in the Admin UI, log into
+      <literal>https://localhost:8443/admin</literal>. Select Configure &gt;
+      Mappings, and select the Mapping. In this case, select the
+      <literal>phoneExtension</literal> attribute, and enter the desired
+      <literal>"default"</literal> property.
      </para>
     </section>
 
@@ -497,6 +580,17 @@
       to calculate the <literal>displayName</literal>, the example specifies
       <literal>"source" : ""</literal>.
      </para>
+
+     <para>
+      To set up this transformation in the Admin UI, log into
+      <literal>https://localhost:8443/admin</literal>. Select Configure &gt;
+      Mappings, and select the Mapping. In this case, select the line with
+      the <literal>displayName</literal> target attribute, and select
+      Transformation Script from the window that appears. You can then enter
+      <literal>Javascript</literal> for the transformation type, and the
+      noted source as an <literal>Inline Script</literal>.
+     </para>
+
     </section>
 
     <section xml:id="mapping-link-qualifiers">
@@ -569,6 +663,13 @@
       correlating target object exists) OpenIDM uses a default link qualifier,
       with the value <literal>"default"</literal>.
      </para>
+
+     <para>
+      To set up <literal>linkQualifier</literal> conditions in the Admin UI,
+      navigate to <literal>https://localhost:8443/admin</literal> and click
+      Configure &gt; Mappings. Select a mapping, and click Properties &gt;
+      Link Qualifiers.
+     </para>
     </section>
 
     <section xml:id="mapping-conditions">
@@ -599,6 +700,19 @@
        </para>
       </listitem>
      </itemizedlist>
+
+     <para>
+      You can set up these mapping conditions in the Admin UI. To do so,
+      log into <literal>https://localhost:8443/admin</literal> and
+      Select Properties &gt; the attribute that you want to map,
+      and select Conditional Updates from the window that appears.
+     </para>
+
+     <para>
+      You can then enter Link Qualifier information as a
+      <literal>Condition Filter</literal>. Alternatively, you can enter a
+      scriptable condition as a <literal>Script</literal>.
+     </para>
 
      <section xml:id="mapping-scriptable-conditions">
       <title>Using Scriptable Conditions</title>
@@ -1712,11 +1826,19 @@
             "runTargetPhase" : false,
    ...  </programlisting>
 
+  <para>
+   You can also restrict reconciliation by using queries, through the Admin UI
+   at <literal>https://localhost:8443/admin</literal>. Navigate to
+   Configure &gt; Mappings, select a Mapping &gt; Association &gt;
+   Reconciliation Query Filters. You can then specify desired
+   source and target queries.
+  </para>
+
   <section xml:id="recon-query-optimization">
    <title>Improving Reconciliation Query Performance</title>
    <para>
     In most reconciliation configurations, source and target queries make a read
-    call to every record on the source and target systems, to determine
+     call to every record on the source and target systems, to determine
     candidates for reconciliation. On slow source or target systems, these
     frequent calls can incur a substantial performance cost.
    </para>
@@ -3104,7 +3226,10 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   </para>
   <para>
    The following sections describe the possible situations and their default
-   corresponding actions.
+   corresponding actions. You can also view these situations and actions in the
+   Admin UI. Navigate to <literal>https://localhost:8443/admin</literal>,
+   log in as the <literal>openidm-admin</literal> user, select
+   Configure &gt; Mappings, select a Mapping &gt; Behaviors &gt; Policies.
   </para>
 
   <section xml:id="sync-situations">
@@ -4538,6 +4663,19 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     following section: .... these types of scripts are relatively complex.
 "
   -->
+
+  <para>
+   You can configure correlation queries and correlation scripts from the Admin
+   UI. To do so, navigate to <literal>https://localhost:8443/admin</literal>
+   and click Configure &gt; Mappings. Select a Mapping and then click
+   Association &gt; Association Rules.
+  </para>
+
+  <para>
+   See the following sections for guidance on what you would include in a
+   correlation query and a correlation script, in the UI and in the
+   <filename>sync.json</filename> configuration file.
+  </para>
 
   <section xml:id="correlation-queries-overview">
    <title>Correlation Queries, in Detail</title>

@@ -34,15 +34,23 @@
 
  <para>
   OpenIDM does not control the structure of objects that are stored in its
-  repository. You can define any kind of managed object, but a definition for
-  users, groups and roles is provided by default. Managed objects, and their
-  properties are defined in your project's
-  <filename>conf/managed.json</filename> file.
+  repository. You can set up Managed Objects for any item that can be collected
+  in a data set. For example, with the right schema, you can set up any device
+  associated with the Internet of Things (IoT).
  </para>
+
  <para>
-  This chapter describes how to work with the default managed objects that are
-  provided with OpenIDM. More information about the OpenIDM object model is
-  provided in the <link xlink:show="new" xlink:href="integrators-guide#appendix-objects"
+  For the traditional managed objects (users, groups, and roles), OpenIDM
+  provides a default definition. Managed Objects, and their
+  properties are defined in your project's
+  <filename>conf/managed.json</filename> file. You can set up IoT-based
+  Managed Objects in a similar fashion.
+ </para>
+
+ <para>
+  This chapter describes how to work with different types of managed objects.
+  More information about the OpenIDM object model is provided in the
+  <link xlink:show="new" xlink:href="integrators-guide#appendix-objects"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
   Objects Reference</citetitle></link>.
  </para>
@@ -96,6 +104,112 @@
    Synchronizing LDAP Groups</citetitle></link> in the <citetitle>Installation
    Guide</citetitle>.
   </para>
+ </section>
+
+ <section xml:id="working-with-mo-ui">
+  <title>Administering Managed Objects from the UI</title>
+
+  <para>
+   To set up a new Managed Object, navigate to the URL for the Admin UI,
+   <literal>https://localhost:8443/admin</literal>. Select Configure &gt;
+   Managed Objects.
+  </para>
+
+  <para>
+   To access details of a Managed Object, select it from the Managed Object
+   screen.
+  </para>
+
+  <section xml:id="ui-admin-mo-schema">
+   <title>Managed Object Schema</title>
+
+   <para>
+    When you set up a Managed Object, you should set up associated schema. When
+    you Add or Edit a Managed Object, scroll down the window to the Schema
+    section, where you can add properties and fields.
+   </para>
+
+   <mediaobject>
+    <alt>Managed Object Schema UI Screen</alt>
+    <imageobject>
+     <imagedata fileref="images/admin-schema-title.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+
+   <para>
+    Start with the Readable Title (<literal>Object Title</literal>) and
+    Description (<literal>Object Description</literal>). The
+    Readable Title is a "human-readable" version of the name of the Managed
+    Object. The Description allows you to elaborate on the
+    Managed Object.
+   </para>
+
+   <mediaobject>
+    <alt>Managed Object Schema Properties</alt>
+    <imageobject>
+     <imagedata fileref="images/admin-schema-prop.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+
+   <para>
+    In the screen shown here, the administrator has added the following
+    properties for the device: <literal>deviceName</literal>,
+    <literal>deviceBrand</literal>, <literal>deviceMarket</literal>,
+    <literal>deviceManufacture</literal>, and <literal>deviceRetail</literal>.
+   </para>
+
+   <para>
+    Now you can add the properties of your choice. When you enter a Property
+    Name, OpenIDM substitutes that name in the left-hand column.
+   </para>
+
+   <para>
+    Each property typically includes several fields as follows:
+   </para>
+
+   <itemizedlist>
+    <listitem>
+     <para><literal>Property Name</literal></para>
+     <para>Name of the property</para>
+    </listitem>
+    <listitem>
+     <para><literal>Readable Title</literal></para>
+     <para>Name of the property, in human-readable language</para>
+    </listitem>
+    <listitem>
+     <para><literal>Description</literal></para>
+     <para>Description of the property</para>
+    </listitem>
+    <listitem>
+     <para><literal>Viewable</literal></para>
+     <para>Determines whether this property is viewable in the
+      Self-Service UI, in the profile for the Managed Object. May be
+      true or false.</para>
+    </listitem>
+    <listitem>
+     <para><literal>Searchable</literal></para>
+     <para>Determines whether this property is searchable from the
+      OpenIDM repository. A searchable property should be visible within
+      the Managed Object data grid in the Self-Service UI. May be true
+      or false.</para>
+    </listitem>
+    <listitem>
+     <para><literal>Required</literal></para>
+     <para>Specifies whether or not this property is required for the
+      OpenIDM repository. May be true or false.</para>
+    </listitem>
+    <listitem>
+     <para><literal>Type</literal></para>
+     <para>Type of property; could be <literal>String</literal>,
+      <literal>array</literal>, <literal>boolean</literal>,
+      <literal>integer</literal>, <literal>number</literal>,
+      <literal>object</literal>, or <literal>Resource Collection</literal>.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+  </section>
+
  </section>
 
  <section xml:id="configuring-custom-roles">

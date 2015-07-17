@@ -347,7 +347,7 @@
    </section>
   </section>
 
-  <section xml:id="supported-auth-modules">
+  <section xml:id="supported-auth-session-modules">
    <title>Supported Authentication and Session Modules</title>
    <para>
     The authentication configuration is defined in
@@ -356,70 +356,70 @@
     and authentication module configuration.
    </para>
 
-   <!-- For those modules in the Admin UI, I want to set up tables for each
-   auth module in this section, in appendix-auth-modules.xml -->
+   <para>
+    You may review and configure supported modules in the Admin UI. To do so,
+    log into <literal>https://localhost:8443/admin</literal>, and select
+    Configure &gt; System Preferences &gt; Authentication.
+   </para>
 
-   <variablelist>
-    <para>
-     OpenIDM supports one module for managing authentication sessions.
-    </para>
-    <varlistentry>
-     <term>JWT_SESSION</term>
-     <listitem>
-      <para>
-       The JSON Web Token session module configuration specifies keystore
-       information, and details about the session lifespan. The default
-       <literal>JWT_SESSION</literal> configuration is as follows:
-      </para>
-      <programlisting language="javascript">
-    "name" : "JWT_SESSION",
-    "properties" : {
-        "keyAlias" : "openidm-localhost",
-        "privateKeyPassword" : "&amp;{openidm.keystore.password}",
-        "keystoreType" : "&amp;{openidm.keystore.type}",
-        "keystoreFile" : "&amp;{openidm.keystore.location}",
-        "keystorePassword" : "&amp;{openidm.keystore.password}",
-        "maxTokenLifeMinutes" : "120",
-        "tokenIdleTimeMinutes" : "30",
-        "sessionOnly" : true
-    }
-      </programlisting>
-      <para>
-       For more information about the <literal>JWT_SESSION</literal> module, see
-       the following Javadoc page: <link xlink:show="new"
-       xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
-       <citetitle>Class JwtSessionModule</citetitle></link>.
-      </para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
+   <!-- TODO include screenshot when the UI stabilizes -->
 
-   <variablelist>
+   <section xml:id="supported-session-modules">
+    <title>Supported Session Module</title>
+
     <para>
-     In addition to the <literal>JWT_SESSION</literal> module, OpenIDM supports
-     a number of authentication modules. This section describes the supported
-     authentication modules.
+     At this time, OpenIDM includes one supported session module. The JSON
+     Web Token session module configuration specifies keystore
+     information, and details about the session lifespan. The default
+     <literal>JWT_SESSION</literal> configuration is as follows:
     </para>
+    <programlisting language="javascript">
+   "name" : "JWT_SESSION",
+   "properties" : {
+       "keyAlias" : "openidm-localhost",
+       "privateKeyPassword" : "&amp;{openidm.keystore.password}",
+       "keystoreType" : "&amp;{openidm.keystore.type}",
+       "keystoreFile" : "&amp;{openidm.keystore.location}",
+       "keystorePassword" : "&amp;{openidm.keystore.password}",
+       "maxTokenLifeMinutes" : "120",
+       "tokenIdleTimeMinutes" : "30",
+       "sessionOnly" : true
+   }</programlisting>
     <para>
-     OpenIDM evaluates authentication modules in the order in which they are
-     listed in the <filename>authentication.json</filename> file.
+     For more information about the <literal>JWT_SESSION</literal> module, see
+     the following Javadoc page:
+     <link xlink:show="new"
+           xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
+     <citetitle>Class JwtSessionModule</citetitle></link>.
     </para>
+
+   </section>
+
+   <section xml:id="supported-auth-modules">
+    <title>Supported Authentication Modules</title>
+
+    <variablelist>
+     <para>
+      OpenIDM evaluates authentication modules in the order in which they are
+      listed in the <filename>authentication.json</filename> file.
+     </para>
+
     <!-- Include OpenID Connect when a sample is available, or another statement
     of support is made. -->
-    <varlistentry>
-     <term>CLIENT_CERT</term>
-     <listitem>
-      <para>
-       The client certificate module accommodates users who authenticate with a
-       client certificate. By default, OpenIDM queries the truststore for the
-       certificate, but you can specify an alternative location by modifying the
-       <literal>"queryOnResource"</literal> property in the configuration.
-      </para>
-      <para>
-       A sample <literal>CLIENT_CERT</literal> authentication configuration
-       follows:
-      </para>
-      <programlisting>{
+     <varlistentry>
+      <term>CLIENT_CERT</term>
+      <listitem>
+       <para>
+        The client certificate module accommodates users who authenticate with a
+        client certificate. By default, OpenIDM queries the truststore for the
+        certificate, but you can specify an alternative location by modifying the
+        <literal>"queryOnResource"</literal> property in the configuration.
+       </para>
+       <para>
+        A sample <literal>CLIENT_CERT</literal> authentication configuration
+        follows:
+       </para>
+       <programlisting>{
     "name" : "CLIENT_CERT",
     "enabled" : true,
     "properties" : {
@@ -428,27 +428,27 @@
         "allowedAuthenticationIdPatterns" : [ ]
     }
 },
-      </programlisting>
-      <para>
-       The <literal>"allowedAuthenticationIdPatterns"</literal> filter enables
-       you to specify an array of usernames or username patterns that will be
-       accepted for authentication. If this property is empty, any username can
-       authenticate.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>INTERNAL_USER</term>
-     <listitem>
-      <para>
-       <literal>INTERNAL_USER</literal> authentication queries the repository,
-       specifically the <literal>repo/internal/user</literal> objects, and
-       allows authentication if the credentials match. The default configuration
-       uses the <literal>username</literal> and <literal>password</literal> of
-       the internal user to authenticate, as shown in the following sample
-       configuration.
-      </para>
-      <programlisting language="javascript">{
+       </programlisting>
+       <para>
+        The <literal>"allowedAuthenticationIdPatterns"</literal> filter enables
+        you to specify an array of usernames or username patterns that will be
+        accepted for authentication. If this property is empty, any username can
+        authenticate.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>INTERNAL_USER</term>
+      <listitem>
+       <para>
+        <literal>INTERNAL_USER</literal> authentication queries the repository,
+        specifically the <literal>repo/internal/user</literal> objects, and
+        allows authentication if the credentials match. The default configuration
+        uses the <literal>username</literal> and <literal>password</literal> of
+        the internal user to authenticate, as shown in the following sample
+        configuration.
+       </para>
+       <programlisting language="javascript">{
     "name" : "INTERNAL_USER",
     "enabled" : true,
     "properties" : {
@@ -462,20 +462,20 @@
         "defaultUserRoles" : [ ]
     }
 },    </programlisting>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>STATIC_USER</term>
-     <listitem>
-      <para>
-       <literal>STATIC_USER</literal> authentication provides an anonymous
-       authentication mechanism that bypasses any database lookups if the
-       headers in a request indicate that the user is
-       <literal>anonymous</literal>. The following sample REST call uses
-       <literal>STATIC_USER</literal> authentication in the self-registration
-       process:
-      </para>
-      <screen>$ curl \
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>STATIC_USER</term>
+      <listitem>
+       <para>
+        <literal>STATIC_USER</literal> authentication provides an anonymous
+        authentication mechanism that bypasses any database lookups if the
+        headers in a request indicate that the user is
+        <literal>anonymous</literal>. The following sample REST call uses
+        <literal>STATIC_USER</literal> authentication in the self-registration
+        process:
+       </para>
+       <screen>$ curl \
  --header "X-OpenIDM-Password: anonymous" \
  --header "X-OpenIDM-Username: anonymous" \
  --header "Content-Type: application/json" \
@@ -490,26 +490,26 @@
  --request POST \
  "https://localhost:8443/openidm/managed/user/?_action=create"
 </screen>
-      <para>
-       Note that this is not the same as an anonymous request that is issued
-       without headers.
-      </para>
-      <para>
-       Authenticating with the <literal>STATIC_USER</literal> module avoids the
-       performance cost of reading the database for self-registration, certain
-       UI requests, and other actions that can be performed anonymously.
-       Authenticating the anonymous user with the <literal>STATIC_USER</literal>
-       module is identical to authenticating the anonymous user with the
-       <literal>INTERNAL_USER</literal> module, except that the database is not
-       accessed. So, <literal>STATIC_USER</literal> authentication provides an
-       authentication mechanism for the anonymous user that avoids the database
-       lookups incurred when using <literal>INTERNAL_USER</literal>.
-      </para>
-      <para>
-       A sample <literal>STATIC_USER</literal> authentication configuration
-       follows:
-      </para>
-      <programlisting>{
+       <para>
+        Note that this is not the same as an anonymous request that is issued
+        without headers.
+       </para>
+       <para>
+        Authenticating with the <literal>STATIC_USER</literal> module avoids the
+        performance cost of reading the database for self-registration, certain
+        UI requests, and other actions that can be performed anonymously.
+        Authenticating the anonymous user with the <literal>STATIC_USER</literal>
+        module is identical to authenticating the anonymous user with the
+        <literal>INTERNAL_USER</literal> module, except that the database is not
+        accessed. So, <literal>STATIC_USER</literal> authentication provides an
+        authentication mechanism for the anonymous user that avoids the database
+        lookups incurred when using <literal>INTERNAL_USER</literal>.
+       </para>
+       <para>
+        A sample <literal>STATIC_USER</literal> authentication configuration
+        follows:
+       </para>
+       <programlisting>{
     "name" : "STATIC_USER",
     "enabled" : true,
     "properties" : {
@@ -523,21 +523,21 @@
         "augmentSecurityContext" : null
     }
 }
-      </programlisting>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>MANAGED_USER</term>
-     <listitem>
-      <para>
-       <literal>MANAGED_USER</literal> authentication queries the repository,
-       specifically the <literal>managed/user</literal> objects, and allows
-       authentication if the credentials match. The default configuration uses
-       the <literal>username</literal> and <literal>password</literal> of the
-       managed user to authenticate, as shown in the following sample
-       configuration.
-      </para>
-      <programlisting language="javascript">{
+       </programlisting>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>MANAGED_USER</term>
+      <listitem>
+       <para>
+        <literal>MANAGED_USER</literal> authentication queries the repository,
+        specifically the <literal>managed/user</literal> objects, and allows
+        authentication if the credentials match. The default configuration uses
+        the <literal>username</literal> and <literal>password</literal> of the
+        managed user to authenticate, as shown in the following sample
+        configuration.
+       </para>
+       <programlisting language="javascript">{
     "name" : "MANAGED_USER",
     "enabled" : true,
     "properties" : {
@@ -551,21 +551,21 @@
         "defaultUserRoles" : [ ]
     }
 },    </programlisting>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>PASSTHROUGH</term>
-     <listitem>
-      <para>
-       <literal>PASSTHROUGH</literal> authentication queries an external system,
-       such as an LDAP server, and allows authentication if the provided
-       credentials match those in the external system. The following sample
-       configuration shows pass-through authentication using the user objects
-       in the system endpoint <literal>system/ldap/account</literal>. For more
-       information on pass-through authentication, see
-       <xref linkend="passthrough-auth" />.
-      </para>
-      <programlisting language="javascript">{
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>PASSTHROUGH</term>
+      <listitem>
+       <para>
+        <literal>PASSTHROUGH</literal> authentication queries an external system,
+        such as an LDAP server, and allows authentication if the provided
+        credentials match those in the external system. The following sample
+        configuration shows pass-through authentication using the user objects
+        in the system endpoint <literal>system/ldap/account</literal>. For more
+        information on pass-through authentication, see
+        <xref linkend="passthrough-auth" />.
+       </para>
+       <programlisting language="javascript">{
     "name" : "PASSTHROUGH",
     "enabled" : true,
     "properties" : {
@@ -583,46 +583,46 @@
         ]
     }
 },    </programlisting>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>OPENAM_SESSION</term>
-     <listitem>
-      <para>
-       The <literal>OPENAM_SESSION</literal> module enables you to protect an
-       OpenIDM deployment with ForgeRock's <link xlink:show="new"
-       xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
-       <citetitle>OpenAM Access Management</citetitle></link> product. For an
-       example of how you might use the <literal>OPENAM_SESSION</literal>
-       module, see <link xlink:role="http://docbook.org/xlink/role/olink"
-       xlink:show="new" xlink:href="install-guide#full-stack-sample">
-       <citetitle>The Full Stack Sample</citetitle></link> in the
-       <citetitle>Installation Guide</citetitle>.
-      </para>
-      <para>
-       For detailed options, see the
-       <link xlink:show="new" xlink:href="integrators-guide#openam-module-details"
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>OPENAM_SESSION</term>
+      <listitem>
+       <para>
+        The <literal>OPENAM_SESSION</literal> module enables you to protect an
+        OpenIDM deployment with ForgeRock's <link xlink:show="new"
+        xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
+        <citetitle>OpenAM Access Management</citetitle></link> product. For an
+        example of how you might use the <literal>OPENAM_SESSION</literal>
+        module, see <link xlink:role="http://docbook.org/xlink/role/olink"
+        xlink:show="new" xlink:href="install-guide#full-stack-sample">
+        <citetitle>The Full Stack Sample</citetitle></link> in the
+        <citetitle>Installation Guide</citetitle>.
+       </para>
+       <para>
+        For detailed options, see the
+        <link xlink:show="new" xlink:href="integrators-guide#openam-module-details"
              xlink:role="http://docbook.org/xlink/role/olink">
         <citetitle>OPENAM_SESSION Module Configuration Options</citetitle></link>
-       in the following Appendix: <citetitle>Configuration Details for
-       Authentication Modules</citetitle>.
-      </para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>IWA</term>
-     <listitem>
-      <para>
-       The IWA module supports Integrated Windows Authentication. In other words,
-       the IWA module supports the use of an LDAP connector for an Active
-       Directory server. For an example of how you can set that up with a
-       Kerberos server, see the following <link xlink:show="new"
-       xlink:href="integrators-guide#openidm-auth-kerberos"
-       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Kerberos
-       Configuration Example</citetitle></link>.
-      </para>
-     </listitem>
-    </varlistentry>
+        in the following Appendix: <citetitle>Configuration Details for
+        Authentication Modules</citetitle>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>IWA</term>
+      <listitem>
+       <para>
+        The IWA module supports Integrated Windows Authentication. In other words,
+        the IWA module supports the use of an LDAP connector for an Active
+        Directory server. For an example of how you can set that up with a
+        Kerberos server, see the following <link xlink:show="new"
+        xlink:href="integrators-guide#openidm-auth-kerberos"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Kerberos
+        Configuration Example</citetitle></link>.
+       </para>
+      </listitem>
+     </varlistentry>
 
     <!--          Waiting for OpenID sample, per OPENIDM-2477
     <varlistentry>
@@ -636,7 +636,10 @@
      </listitem>
     </varlistentry>
                       when sample is available, add a link here             -->
-   </variablelist>
+    </variablelist>
+
+
+   </section>
 
   </section>
 
