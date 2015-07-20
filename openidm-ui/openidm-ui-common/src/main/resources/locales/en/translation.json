@@ -21,6 +21,9 @@
             "dayNamesShort" : "Sun. , Mon., Tue., Wed., Thu., Fri., Sat."
         },
         "messages" : {
+            "WorkflowMessages" : {
+              "deletedActiveProcess" : "Workflow Process successfully deleted."
+            },
             "AuditMessages" : {
               "auditSaveSuccessful": "Audit configurations have been saved."
             },
@@ -500,6 +503,18 @@
             "addSchedule": "Add Schedule"
         },
         "workflows": {
+            "processes" : {
+                "processInstance" : "PROCESS INSTANCE",
+                "created" : "CREATED",
+                "startedBy" : "Started By",
+                "processes" : "Workflow Processes",
+                "assignedTo" : "Assigned To: ",
+                "filterByType" : "Filter by Type: ",
+                "activeProcesses" : "Active",
+                "processDefinitions" : "Definitions",
+                "processesCompleted" : "Completed",
+                "noActiveProcesses" : "No Active Processes"
+            },
             "sync": "These data properties are sent when the workflow is triggered",
             "nonSync": "Workflow scripts can access these object/properties.",
             "noWorkflows": "No Available Workflows",

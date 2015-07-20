@@ -164,6 +164,10 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.SyncMessages.linkQualifierSaveSuccess",
             type: "info"
         },
+        "deletedActiveProcess": {
+            msg: "config.messages.WorkflowMessages.deletedActiveProcess",
+            type: "info"
+        },
         "systemConfigSaveSuccess": {
             msg: "config.messages.settingMessages.saveSelfServiceSuccess",
             type: "info"
