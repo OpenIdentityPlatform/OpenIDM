@@ -1571,7 +1571,7 @@ logger = LoggerFactory.getLogger('logger');
         <row>
          <entry>*</entry>
          <entry>custom endpoint scripts</entry>
-         <entry>request</entry>
+         <entry>request, context</entry>
         </row>
        </tbody>
       </tgroup>
