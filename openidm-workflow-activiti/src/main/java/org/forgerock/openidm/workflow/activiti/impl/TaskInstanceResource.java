@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.task.IdentityLink;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.Map;
@@ -111,7 +112,24 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     @Override
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+        try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
+
+            Task task = processEngine.getTaskService().createTaskQuery().taskId(resourceId).singleResult();
+            if (task == null) {
+                handler.handleError(new NotFoundException("Task " + resourceId + " not found."));
+                return;
+            }
+
+            Map<String, Object> deletedTask = mapper.convertValue(task, Map.class);
+            processEngine.getTaskService()
+                    .deleteTask(resourceId, request.getAdditionalParameter(ActivitiConstants.ACTIVITI_DELETEREASON));
+            handler.handleResult(new Resource(task.getId(), null, new JsonValue(deletedTask)));
+        } catch (ActivitiObjectNotFoundException ex) {
+            handler.handleError(new NotFoundException(ex.getMessage()));
+        } catch (Exception ex) {
+            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+        }
     }
 
     @Override
@@ -129,9 +147,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
                     setTaskParams(query, request);
                 }
-                if (!request.getSortKeys().isEmpty()) {
-                    setSortKey(query, request);
-                }
+                setSortKeys(query, request);
                 List<Task> list = query.list();
                 for (Task taskInstance : list) {
                     Map value = mapper.convertValue(taskInstance, HashMap.class);
@@ -326,7 +342,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
      * @param request incoming request
      * @throws NotSupportedException
      */
-    private void setSortKey(TaskQuery query, QueryRequest request) throws NotSupportedException {
+    private void setSortKeys(TaskQuery query, QueryRequest request) throws NotSupportedException {
         for (SortKey key : request.getSortKeys()) {
             if (key.getField() != null && !key.getField().isEmpty()) {
                 switch (key.getField().toString().substring(1)) { // remove leading JsonPointer slash
