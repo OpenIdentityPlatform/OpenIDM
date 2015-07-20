@@ -1528,7 +1528,7 @@ logger = LoggerFactory.getLogger('logger');
          <entry>response</entry>
         </row>
         <row>
-         <entry morerows="7">sync.json</entry>
+         <entry morerows="9">sync.json</entry>
          <entry>onCreate, onDelete, onUpdate</entry>
          <entry>object, source, target, situation, linkQualifier</entry>
         </row>
