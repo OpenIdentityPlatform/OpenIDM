@@ -117,7 +117,13 @@
                         "viewable" : true,
                         "type" : "array",
                         "items" : {
-                            "type" : "string",
+                            "type" : "relationship",
+                            "returnByDefault" : true,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                        	    }
+                            },
                             "resourceCollection" : {
                                 "path" : "managed/role",
                                 "query" : {
@@ -145,6 +151,26 @@
                             }
                         }
                     },
+                    "effectiveRoles" : {
+                        "type" : "array",
+                        "title" : "Effective Roles",
+                        "viewable" : false,
+                        "items" : {
+                            "type" : "string",
+                            "returnByDefault" : true,
+                            "isVirtual" : true
+                        }
+                    },
+                    "effectiveAssignments" : {
+                        "type" : "array",
+                        "title" : "Effective Assignments",
+                        "viewable" : false,
+                        "items" : {
+                            "type" : "string",
+                            "returnByDefault" : true,
+                            "isVirtual" : true
+                        }
+                    },
                     "telephoneNumber" : {
                         "type" : "string",
                         "title" : "Mobile Phone",
@@ -167,10 +193,17 @@
                         "searchable" : true
                     },
                     "manager" : {
+                        "type" : "relationship",
+                        "returnByDefault" : false,
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
                         "searchable" : false,
+                        "properties" : {
+                        	"_ref" : {
+                        	    "type" : "string"
+                        	}
+                        },
                         "resourceCollection" : {
                             "path" : "managed/user",
                             "label" : "Reports",
@@ -185,8 +218,7 @@
                                     "userName"
                                 ]
                             }
-                        },
-                        "type" : "string"
+                        }
                     }
                 },
                 "type" : "object",

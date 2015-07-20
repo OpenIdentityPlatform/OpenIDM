@@ -18,6 +18,7 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -29,11 +30,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.script.ScriptException;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -57,13 +58,13 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
+import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.managed.ManagedObjectSet.Action;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.sync.impl.SynchronizationService;
@@ -148,7 +149,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     private final ResourcePath managedObjectPath;
 
     /** The schema to use to validate the structure and content of the managed object. */
-    private final JsonValue schema;
+    private final ManagedObjectSchema schema;
 
     /** Map of scripts to execute on specific {@link ScriptHook}s. */
     private final Map<ScriptHook, ScriptEntry> scriptHooks = new EnumMap<ScriptHook, ScriptEntry>(ScriptHook.class);
@@ -193,8 +194,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             throw new JsonValueException(config.get("name"), "Failed to validate the name");
         }
         this.managedObjectPath = new ResourcePath("managed").child(name);
-        // TODO: parse into json-schema object
-        schema = config.get("schema").expect(Map.class);
+
+        schema = new ManagedObjectSchema(config.get("schema").expect(Map.class));
+        
         for (ScriptHook hook : ScriptHook.values()) {
             if (config.isDefined(hook.name())) {
                 scriptHooks.put(hook, scriptRegistry.takeScript(config.get(hook.name())));
@@ -203,9 +205,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         for (JsonValue property : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(scriptRegistry, cryptoService, property));
         }
-        enforcePolicies =
-                Boolean.parseBoolean(IdentityServer.getInstance().getProperty(
-                        "openidm.policy.enforcement.enabled", "true"));
+        enforcePolicies = Boolean.parseBoolean(IdentityServer.getInstance().getProperty("openidm.policy.enforcement.enabled", "true"));
         logger.debug("Instantiated managed object set: {}", name);
     }
 
@@ -547,11 +547,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             		SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), createResponse.getContent());
 
-            if (ContextUtil.isExternal(context)) {
-                createResponse = cullPrivateProperties(createResponse);
-            }
-
-            return createResponse.asPromise();
+            // TODO Check the relative id
+            return prepareResponse(ContextUtil.isExternal(context), createResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -569,15 +566,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             ResourceResponse readResponse = connectionFactory.getConnection().read(context, readRequest);
 
             onRetrieve(context, request, resourceId, readResponse);
-            execScript(context, ScriptHook.onRead, readResponse.getContent(), null);
+            execScript(context, onRead, readResponse.getContent(), null);
             activityLogger.log(context, request, "read", managedId(readResponse.getId()).toString(),
                     null, readResponse.getContent(), Status.SUCCESS);
-
-            if (ContextUtil.isExternal(context)) {
-            	readResponse = cullPrivateProperties(readResponse);
-            }
             
-            return readResponse.asPromise();
+            return prepareResponse(ContextUtil.isExternal(context), readResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -602,17 +595,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             ResourceResponse readResponse = connectionFactory.getConnection().read(context, readRequest);
             ResourceResponse decryptedResponse = decrypt(readResponse);
 
-            ResourceResponse updatedResponse = update(context, request, resourceId, request.getRevision(), 
-            		decryptedResponse.getContent(), _new);
-            
-            activityLogger.log(context, request, "update", managedId(readResponse.getId()).toString(), 
-            		readResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
+            ResourceResponse updatedResource = update(context, request, resourceId, request.getRevision(), decryptedResponse.getContent(), _new);
+            activityLogger.log(context, request, "update",
+                    managedId(readResponse.getId()).toString(), readResponse.getContent(), updatedResource.getContent(),
+                    Status.SUCCESS);
 
-            if (ContextUtil.isExternal(context)) {
-                updatedResponse = cullPrivateProperties(updatedResponse);
-            }
-
-            return updatedResponse.asPromise();
+            return prepareResponse(ContextUtil.isExternal(context), updatedResource, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -649,12 +637,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
 
-            // only cull private properties if this is an external call
-            if (ContextUtil.isExternal(context)) {
-                deletedResource = cullPrivateProperties(deletedResource);
-            }
-
-            return deletedResource.asPromise();
+            return prepareResponse(ContextUtil.isExternal(context), deletedResource, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -767,10 +750,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 retry = false;
                 logger.debug("Patch successful!");
 
-                if (ContextUtil.isExternal(context)) {
-                    patchedResource = cullPrivateProperties(patchedResource);
-                }
-                return patchedResource;
+                return prepareResponse(ContextUtil.isExternal(context), patchedResource, request.getFields());
             } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
                     logger.debug("Unable to update due to revision conflict. Retrying.");
@@ -819,11 +799,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                         }
                     }
                     results.add(resource.getContent().asMap());
-                    if (ContextUtil.isExternal(context)) {
-                        // If it came over a public interface we have to cull each resulting object
-                        return handler.handleResource(cullPrivateProperties(resource));
-                    }
-                    return handler.handleResource(resource);
+                    return handler.handleResource(prepareResponse(ContextUtil.isExternal(context), resource, request.getFields()));
                 }
             });
         	
@@ -926,20 +902,56 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     public String getTemplate() {
         return name.indexOf('/') == 0 ? name : '/' + name;
     }
+    
 
     /**
-     * Culls properties that are marked private
-     *
-     * @param resource ResourceResponse to cull private properties from
-     * @return the supplied ResourceResponse with private properties culled
+     * Prepares the response contents by removing the following: any private properties (if the request is
+     * from an external call), any virtual or relationship properties that are not set to returnByDefault.
+     * 
+     * @param context the current ServerContext
+     * @param resource the Resource to prepare
+     * @param fields a list of fields to return specified in the request
+     * @return the prepared Resource object
      */
-    private ResourceResponse cullPrivateProperties(ResourceResponse resource) {
-        for (ManagedObjectProperty property : properties) {
-            if (property.isPrivate()) {
-                resource.getContent().remove(property.getName());
+    private ResourceResponse prepareResponse(boolean isExternal, ResourceResponse resource, List<JsonPointer> fields) {
+        JsonValue fieldsToRemove = schema.getHiddenByDefaultFields().copy();
+        if (fields != null && fields.size() > 0) {
+            for (JsonPointer field : new ArrayList<JsonPointer>(fields)) {
+                if (field.equals(new JsonPointer(SchemaField.FIELD_ALL_RELATIONSHIPS))) {
+                    // Return all relationship fields, so remove them from fieldsToRemove map
+                    for (String key : schema.getRelationshipFields()) {
+                        logger.debug("Allowing field {} to be returned, due to *_ref", key);
+                        fieldsToRemove.remove(key);
+                        fields.add(new JsonPointer(key));
+                    }
+                    fields.remove(field);
+                } else {
+                    // TODO: Do more advanced reference field handling such as checking if the field is a 
+                    // subfield of a reference object
+                    
+                    // Remove the field
+                    logger.debug("Allowing field {} to be returned", field);
+                    fieldsToRemove.remove(field);
+                }
             }
         }
-        return resource;
+        
+        // Remove all relationship and virtual fields that are not returned by default, or explicitly listed
+        for (String key : fieldsToRemove.keys()) {
+            logger.debug("Removing field {} from the response object", key);
+            resource.getContent().remove(key);
+        }
+        
+        // only cull private properties if this is an external call
+        if (isExternal) {
+            for (ManagedObjectProperty property : properties) {
+                if (property.isPrivate()) {
+                    resource.getContent().remove(property.getName());
+                }
+            }
+        }
+        
+        return Resources.filterResource(resource, fields);
     }
     
     /**
@@ -1014,6 +1026,4 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             throw e;
         }
     }
-    
-    
 }
