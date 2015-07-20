@@ -59,6 +59,10 @@
                 },
                 {
                     "source" : "roles",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.split(',')"
+                    },
                     "target" : "roles"
                 },
                 {
@@ -177,6 +181,10 @@
                 },
                 {
                     "source" : "roles",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.join(',')"
+                    },
                     "target" : "roles"
                 },
                 {
