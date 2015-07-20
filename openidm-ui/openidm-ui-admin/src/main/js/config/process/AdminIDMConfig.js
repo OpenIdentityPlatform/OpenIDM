@@ -97,8 +97,8 @@ define("config/process/AdminIDMConfig", [
                             "inactive": false
                         });
 
-                        Navigation.reload();
-                    });
+                        return Navigation.reload();
+                    }).then(event ? event.callback : $.noop);
                 }
             },
             {

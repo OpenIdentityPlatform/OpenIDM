@@ -31,17 +31,31 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(conf, commonSiteConfigurationDelegate, eventManager, constants) {
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/components/Navigation",
+], function(conf, commonSiteConfigurationDelegate, eventManager, constants, Navigation) {
 
     var obj = commonSiteConfigurationDelegate;
 
     obj.checkForDifferences = function(){
-        if(_.contains(conf.loggedUser && conf.loggedUser.roles,"ui-admin")){
-            eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
+        var promise = $.Deferred();
+
+        if (_.contains(conf.loggedUser && conf.loggedUser.roles,"ui-admin") &&
+            Navigation.configuration.links.admin.urls.managed.urls.length === 0) {
+
+            eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION,
+                {
+                    callback: function () {
+                        promise.resolve();
+                    }
+                }
+            );
+
+        } else {
+            promise.resolve();
         }
 
-        return $.Deferred().resolve();
+        return promise;
     };
 
     return obj;
