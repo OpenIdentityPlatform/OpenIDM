@@ -224,7 +224,6 @@ if (assignments != null) {
                 var attributes = assignment.attributes;
                 var onAssignment = assignment.onAssignment;
                 var linkQualifiers = assignment.linkQualifiers;
-                java.lang.System.out.println("onAssignment: " + JSON.stringify(onAssignment));
 
                 // Only map if no linkQualifiers were specified or the current linkQualifier is in the list of linkQualifiers specified in the assignment
                 if (typeof linkQualifiers === 'undefined' || linkQualifiers === null
