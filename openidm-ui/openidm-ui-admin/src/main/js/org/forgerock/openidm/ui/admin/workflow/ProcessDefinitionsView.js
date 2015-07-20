@@ -24,28 +24,26 @@
 
 /*global define, $, _, Handlebars */
 
-define("org/forgerock/openidm/ui/admin/workflow/ProcessListView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView",
-    "org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView"
-], function(AdminAbstractView,
-            ActiveProcessesView,
-            ProcessDefinitionsView) {
-    var ProcessListView = AdminAbstractView.extend({
-        template: "templates/admin/workflow/ProcessListViewTemplate.html",
+define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView"
+], function(AdminAbstractView) {
+    var ProcessDefinitionsView = AdminAbstractView.extend({
+        template: "templates/admin/workflow/ProcessDefinitionsViewTemplate.html",
         events: {
-            "change #processFilterType" : "filterType"
         },
         model : {
 
         },
+        element: "#processDefinitions",
         render: function(args, callback) {
             this.parentRender(_.bind(function(){
-                ActiveProcessesView.render([] , callback);
-                ProcessDefinitionsView.render([], callback);
+
+                if(callback) {
+                    callback();
+                }
             }, this));
         }
     });
 
-    return new ProcessListView();
+    return new ProcessDefinitionsView();
 });

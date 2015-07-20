@@ -74,8 +74,12 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
             html = "";
 
         _.each(buttons, function(button, index) {
-            events["click .button-"+index] = button.callback;
-            html += ("<i class=\"button-" + index + " " + button.className +  "\"></i>");
+            if(button.href) {
+                html += ("<a href=\"" +button.href +"\"><i class=\"button-" + index + " " + button.className +  "\"></i></a>");
+            } else {
+                events["click .button-"+index] = button.callback;
+                html += ("<i class=\"button-" + index + " " + button.className +  "\"></i>");
+            }
         });
 
         return Backgrid.Cell.extend({

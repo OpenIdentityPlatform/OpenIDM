@@ -1,0 +1,78 @@
+#activeProcesses,
+#processDefinitions {
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.toolbar {
+  border-bottom: 1px solid #ddd;
+  padding:20px;
+
+  .form-group {
+    margin-right:20px;
+    margin-right:20px;
+  }
+
+}
+
+.grid-icon {
+  margin-right:10px;
+  cursor: pointer;
+  color: #777;
+}
+
+.grid-icon:hover {
+  color: @base-theme-color;
+}
+
+
+#activeProcesses .selectize-input {
+  width:250px;
+}
+
+.user-fullname .fa {
+  margin-right: 10px;
+}
+
+.table .sort-caret {
+  .fa-icon();
+
+  width: 5px;
+  position: relative;
+  font-weight:bold;
+  margin-left: 5px;
+  color: #999;
+}
+
+.table .descending .sort-caret {
+  bottom:3px;
+
+  &:before {
+    content:@fa-var-sort-desc;
+  }
+}
+
+.table .ascending .sort-caret {
+  top: 3px;
+
+  &:before {
+    content:@fa-var-sort-asc;
+  }
+}
+
+.table .empty {
+  width:100%;
+  text-align:center;
+  margin-top:50px;
+  margin-bottom:50px;
+  font-weight:bold;
+  background-color:#f7f7f7;
+}
+
+.table .empty td {
+  padding-top:50px;
+  padding-bottom:50px;
+  font-size:18px;
+  color:@base-theme-color;
+}
