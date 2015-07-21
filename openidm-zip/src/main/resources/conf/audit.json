@@ -1,32 +1,19 @@
 {
-    "eventTypes" : {
-        "activity" : {
-            "filter" : {
-                "actions" : [
-                    "create",
-                    "update",
-                    "delete",
-                    "patch",
-                    "action"
-                ]
-            },
-            "watchedFields" : [ ],
-            "passwordFields" : [ "password" ]
-        },
-        "recon" : { }
+    "auditServiceConfig" : {
+        "handlerForQueries" : "csv"
     },
-    "logTo" : [
+    "eventHandlers" : [
         {
-            "logType" : "csv",
-            "location" : "audit"
-        },
-        {
-            "logType" : "repository",
-            "useForQueries" : true
+            "name" : "csv",
+            "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+            "config" : {
+                "logDirectory" : "audit"
+            },
+            "events" : [ "access", "activity", "recon", "sync" ]
         }
     ],
-    "exceptionFormatter" : {
-        "type" : "text/javascript",
-        "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+    "extendedEventTypes" : {
+    },
+    "customEventTypes" : {
     }
 }
