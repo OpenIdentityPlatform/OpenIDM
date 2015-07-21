@@ -45,7 +45,16 @@ define("org/forgerock/openidm/ui/dashboard/workflow/processes/StartProcessView",
         
         events: {
             "click input[name=startProcessButton]": "formSubmit",
-            "onValidate": "onValidate"
+            "onValidate": "onValidate",
+            "click .closeLink" : "hideDetails"
+        },
+
+        hideDetails: function(event) {
+            if(event) {
+                event.preventDefault();
+            }
+
+            this.$el.empty();
         },
         
         
