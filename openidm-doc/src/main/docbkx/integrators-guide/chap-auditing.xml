@@ -443,7 +443,7 @@
       take the following format:
      </para>
      <programlisting language="javascript">"throw {
-    'openidmCode' : <replaceable>HTTP error code</replaceable>,
+    'code' : <replaceable>HTTP error code</replaceable>,
     'message' : <replaceable>error message</replaceable>,
     'detail' : {
         <replaceable>details</replaceable>
@@ -623,7 +623,7 @@
      </para>
      <programlisting>
       "throw {
-      'openidmCode' : <replaceable>HTTP error code</replaceable>,
+      'code' : <replaceable>HTTP error code</replaceable>,
       'message' : <replaceable>error message</replaceable>,
       'detail' : {
       <replaceable>details</replaceable>
