@@ -26,10 +26,9 @@
 
 define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
     "backgrid",
-    "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
+    "org/forgerock/commons/ui/common/util/DateUtil"
 
-], function (Backgrid, DateUtil, ResourceDelegate) {
+], function (Backgrid, DateUtil) {
     var obj = {};
 
     /**
