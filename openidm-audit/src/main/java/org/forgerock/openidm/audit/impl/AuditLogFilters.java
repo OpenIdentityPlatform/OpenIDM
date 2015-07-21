@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
@@ -39,9 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 
-import static org.forgerock.openidm.audit.impl.AuditServiceImpl.TYPE_ACTIVITY;
-import static org.forgerock.openidm.audit.impl.AuditServiceImpl.TYPE_RECON;
-
 
 /**
  * A utility class containing various factory methods for creating {@link AuditLogFilter}s.
@@ -51,6 +48,9 @@ public class AuditLogFilters {
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
+
+    private static final String TYPE_ACTIVITY = "activity";
+    private static final String TYPE_RECON = "recon";
 
     /** Type alias for converting the value of a JsonValue to a particular type */
     interface JsonValueObjectConverter<V> extends Function<JsonValue, V, JsonValueException> {}
