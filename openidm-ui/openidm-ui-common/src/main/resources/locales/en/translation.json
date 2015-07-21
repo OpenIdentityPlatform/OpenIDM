@@ -343,6 +343,38 @@
                 "linkQualifiers": "Link Qualifiers"
             }
         },
+        "taskInstance": {
+            "reassign": "Reassign",
+            "assign": "Assign",
+            "viewAllTasks": "View all Tasks",
+            "dueDate": "Due date",
+            "priority": "Priority",
+            "aboutThisTask": "About this Task",
+            "taskDetail": "Task Detail",
+            "noDueDate": "No due date",
+            "category": "Category",
+            "relatedProcess": "Related Process",
+            "owner": "Owner",
+            "assignee": "Assignee",
+            "subtasks": "Subtasks",
+            "none": "None",
+            "parentTask": "Parent Task",
+            "taskDetailInfo": "The following information has been submitted for completion.",
+            "task": "Task",
+            "assignedSuccess": "Task successfully assigned/reassigned",
+            "assignTask": "Assign Task",
+            "selectUser": "Select User",
+            "nonCanditateWarning": "The user you are attempting to assign does not belong to the list of the task's candidate users. Are you sure you want to assign '__userName__' to this task?"
+        },
+        "processInstance": {
+            "viewAllProcesses": "View all Processes",
+            "process": "Process",
+            "cancelProcess": "Cancel Process",
+            "cancelConfirmation": "Are you sure you want to cancel this Process?",
+            "started": "Started",
+            "startedBy": "Started By",
+            "cancelProcessSuccess": "Process successfully canceled"
+        },
         "managed" : {
             "addManagedTitle" : "Add Managed Object",
             "backToManaged" : "Back to Managed Objects",
@@ -1160,6 +1192,7 @@
             "accept" : "Accept",
             "reject" : "Reject",
             "createdAt" : "Created at",
+            "created" : "Created",
             "generalDetails" : "General Details",
             "search" : "Search",
             "settings": "Settings",

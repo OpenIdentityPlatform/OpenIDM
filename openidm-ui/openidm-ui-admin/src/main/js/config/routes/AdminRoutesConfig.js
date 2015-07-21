@@ -193,6 +193,18 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/admin/workflow/TaskListView",
             role: "ui-admin",
             url: "workflow/tasks/"
+        },
+        "taskInstanceView" : {
+            view: "org/forgerock/openidm/ui/admin/workflow/TaskInstanceView",
+            role: "ui-admin",
+            url: /^workflow\/taskinstance\/(.+)$/,
+            pattern: "workflow/taskinstance/?"
+        },
+        "processInstanceView" : {
+            view: "org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView",
+            role: "ui-admin",
+            url: /^workflow\/processinstance\/(.+)$/,
+            pattern: "workflow/processinstance/?"
         }
     };
 
