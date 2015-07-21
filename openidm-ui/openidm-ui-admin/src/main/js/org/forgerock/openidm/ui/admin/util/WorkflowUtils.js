@@ -148,7 +148,7 @@ define("org/forgerock/openidm/ui/admin/util/WorkflowUtils", [
              * before changing assignee alert the "assigner" that the user 
              * being assigned does not exist in the list of candidate users
              */
-            if (id !== "none" && !_.contains(model.get("candidates").candidateUsers, id)) {
+            if (id !== "noUserAssigned" && !_.contains(model.get("candidates").candidateUsers, id)) {
                 UIUtils.jqConfirm($.t("templates.taskInstance.nonCanditateWarning",{ userName: label }), _.bind(function() {
                     assignNow();
                 }, this));
