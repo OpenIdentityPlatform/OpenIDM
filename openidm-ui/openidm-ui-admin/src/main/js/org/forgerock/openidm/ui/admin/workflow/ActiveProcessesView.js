@@ -60,7 +60,14 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
             this.model.processDefinitions.url =  "/openidm/workflow/processdefinition?_queryId=filtered-query";
 
             this.model.processDefinitions.getFirstPage().then(_.bind(function(processDefinitions){
-                this.data.processDefinitions = processDefinitions.result;
+                this.data.processDefinitions = _.chain(processDefinitions.result)
+                                                    .map(function (pd) {
+                                                        return _.pick(pd,"name","key");
+                                                    })
+                                                    .uniq(function (pdm) {
+                                                        return pdm.name;
+                                                    })
+                                                    .value();
 
                 this.parentRender(_.bind(function() {
                     var processGrid,
@@ -82,6 +89,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
 
                     this.model.processes.url = "/openidm/workflow/processinstance?_queryId=filtered-query";
                     this.model.processes.state.pageSize = null;
+                    this.model.processes.state.sortKey = "-startTime";
 
                     processGrid = new Backgrid.Grid({
                         className: "table",
@@ -237,10 +245,10 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                 filterString = "_queryId=filtered-query&startUserId=" + this.model.userFilter;
 
                 if(this.model.processTypeFilter !== "all") {
-                    filterString = filterString + "&processDefinitionId=" +this.model.processTypeFilter;
+                    filterString = filterString + "&processDefinitionKey=" +this.model.processTypeFilter;
                 }
             } else if (this.model.processTypeFilter !== "all") {
-                filterString = "_queryId=filtered-query&processDefinitionId=" + this.model.processTypeFilter;
+                filterString = "_queryId=filtered-query&processDefinitionKey=" + this.model.processTypeFilter;
             }
 
             if(filterString.length > 0) {
