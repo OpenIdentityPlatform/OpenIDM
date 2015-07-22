@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -59,7 +59,7 @@ import org.forgerock.json.resource.Route;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.router.RouteService;
@@ -120,6 +120,10 @@ public class ManagedObjectService implements RequestHandler {
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     private final ConcurrentMap<String, Route> managedRoutes = new ConcurrentHashMap<String, Route>();
 
     private final Router managedRouter = new Router();
@@ -133,7 +137,7 @@ public class ManagedObjectService implements RequestHandler {
      */
     @Activate
     protected void activate(ComponentContext context) throws Exception {
-        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         for (JsonValue value : configuration.get("objects").expect(List.class)) {
             ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, value);
             if (managedRoutes.containsKey(objectSet.getName())) {
@@ -145,7 +149,7 @@ public class ManagedObjectService implements RequestHandler {
 
     @Modified
     protected void modified(ComponentContext context) throws Exception {
-        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
 
         Set<String> tempRoutes = new HashSet<String>();
         for (JsonValue value : configuration.get("objects").expect(List.class)) {

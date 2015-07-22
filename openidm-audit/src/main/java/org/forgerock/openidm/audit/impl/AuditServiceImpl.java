@@ -70,7 +70,6 @@ import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter
 import org.forgerock.openidm.audit.util.AuditConstants;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
@@ -210,6 +209,10 @@ public class AuditServiceImpl implements AuditService {
     @Reference(policy = ReferencePolicy.STATIC)
     protected ScriptRegistry scriptRegistry;
 
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     /** the script to execute to format exceptions */
     private static ScriptEntry exceptionFormatterScript = null;
 
@@ -244,8 +247,6 @@ public class AuditServiceImpl implements AuditService {
             return auditLogger;
         }
     };
-
-    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
     AuditLogFilter auditFilter = AuditLogFilters.NEVER;
 

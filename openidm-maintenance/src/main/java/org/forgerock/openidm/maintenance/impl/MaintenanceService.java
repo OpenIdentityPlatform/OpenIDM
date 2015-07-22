@@ -90,6 +90,7 @@ public class MaintenanceService implements RequestHandler {
         "org.forgerock.openidm.cluster",
         "org.forgerock.openidm.config.enhanced",
         "org.forgerock.openidm.config.enhanced.starter",
+        "org.forgerock.openidm.config.manage",
         "org.forgerock.openidm.endpoint",
         "org.forgerock.openidm.external.email",
         "org.forgerock.openidm.external.rest",

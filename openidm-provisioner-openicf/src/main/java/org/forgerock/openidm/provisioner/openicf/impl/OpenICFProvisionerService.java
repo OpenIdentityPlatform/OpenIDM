@@ -110,8 +110,8 @@ import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
@@ -323,6 +323,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     protected SyncFailureHandlerFactory syncFailureHandlerFactory = null;
 
     /**
+     * Enhanced configuration service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
+    /**
      * Reference to the ThreadSafe {@code ConnectorFacade} instance.
      */
     private final AtomicReference<ConnectorFacade> connectorFacade =
@@ -332,7 +338,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     protected void activate(ComponentContext context) {
         try {
             factoryPid = (String)context.getProperties().get("config.factory-pid");
-            jsonConfiguration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+            jsonConfiguration = enhancedConfig.getConfigurationAsJson(context);
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
 
             if (!jsonConfiguration.get("enabled").defaultTo(true).asBoolean()) {

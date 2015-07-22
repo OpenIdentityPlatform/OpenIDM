@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -67,7 +67,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UntypedCrossCutFilter;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.filter.ScriptedFilter;
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -125,11 +124,14 @@ public class ServletConnectionFactory implements ConnectionFactory {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scriptRegistry = null;
 
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         logger.debug("Creating servlet router/connection factory");
-        EnhancedConfig config = JSONEnhancedConfig.newInstance();
-        String factoryPid = config.getConfigurationFactoryPid(context);
+        String factoryPid = enhancedConfig.getConfigurationFactoryPid(context);
         if (StringUtils.isNotBlank(factoryPid)) {
             throw new IllegalArgumentException(
                     "Factory configuration not allowed, must not have property: "
@@ -137,7 +139,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
         }
         try {
             connectionFactory = newWrappedInternalConnectionFactory(Resources.newInternalConnectionFactory(
-                    init(config.getConfigurationAsJson(context), requestHandler)));
+                    init(enhancedConfig.getConfigurationAsJson(context), requestHandler)));
         } catch (Throwable t) {
             logger.error("Failed to configure the Filtered Router service", t);
         }

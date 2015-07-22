@@ -68,8 +68,6 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.service.component.ComponentContext;
@@ -113,9 +111,7 @@ public class ReconciliationService
                 return false;
             }
         }
-    };
-
-    final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+    }
 
     /**
      * The Connection Factory
@@ -422,7 +418,6 @@ public class ReconciliationService
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
 
-        JsonValue config = null;
         try {
             // Until we have a recon service config, allow overrides via (unsupported) properties
             String maxCompletedStr =
@@ -431,8 +426,6 @@ public class ReconciliationService
 
             int maxConcurrentFullRecons = 10; // TODO: make configurable
             fullReconExecutor = Executors.newFixedThreadPool(maxConcurrentFullRecons);
-
-            config = enhancedConfig.getConfigurationAsJson(compContext);
 
             registerMBean();
         } catch (RuntimeException ex) {

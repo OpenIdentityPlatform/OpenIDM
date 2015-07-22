@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -74,7 +74,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -262,6 +262,12 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     protected CryptoService cryptoService = null;
 
     /**
+     * Enhanced configuration service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
+    /**
      * ConnectorEventPublisher service.
      */
     public synchronized void bindConnectorEventPublisher(ConnectorEventPublisher service) {
@@ -278,7 +284,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     @Activate
     public void activate(ComponentContext context) {
         logger.trace("Activating Service with configuration {}", context.getProperties());
-        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
 
         try {
             // String connectorLocation = DEFAULT_CONNECTORS_LOCATION;

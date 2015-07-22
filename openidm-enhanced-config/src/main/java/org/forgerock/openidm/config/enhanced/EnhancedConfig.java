@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -45,8 +45,7 @@ public interface EnhancedConfig {
      * @throws InternalErrorException
      *             if a failure occurred in retrieving the configuration
      */
-    public Map<String, Object> getConfiguration(ComponentContext compContext)
-            throws InvalidException, InternalErrorException;
+    Map<String, Object> getConfiguration(ComponentContext compContext) throws InvalidException, InternalErrorException;
 
     /**
      * Gets the extended Configuration which allows for nested Maps and Lists
@@ -59,8 +58,7 @@ public interface EnhancedConfig {
      * @throws InternalErrorException
      *             if a failure occurred in retrieving the configuration
      */
-    public JsonValue getConfigurationAsJson(ComponentContext compContext) throws InvalidException,
-            InternalErrorException;
+    JsonValue getConfigurationAsJson(ComponentContext compContext) throws InvalidException, InternalErrorException;
 
     /**
      * Gets the extended Configuration which allows for nested Maps and Lists
@@ -76,11 +74,32 @@ public interface EnhancedConfig {
      *         empty map if no configuration properties exist.
      * @throws InvalidException
      */
-    public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context,
-            String servicePid) throws InvalidException, InternalErrorException;
+    JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid)
+            throws InvalidException, InternalErrorException;
 
+    /**
+     * Gets the extended Configuration which allows for nested Maps and Lists
+     *
+     * @param dict
+     *            The standard OSGi configuration properties dictionary
+     * @param servicePid
+     *            the service pid this configuration is for
+     * @param decrypt
+     *            true if any encrypted values should be decrypted in the result
+     * @return the enhanced configuration (with nested maps, list allowed),
+     *         empty map if no configuration properties exist.
+     * @throws InvalidException
+     */
+    JsonValue getConfiguration(Dictionary<String, Object> dict, String servicePid, boolean decrypt)
+            throws InvalidException, InternalErrorException;
 
-    public String getConfigurationFactoryPid(ComponentContext compContext);
-
+    /**
+     * Gets the service factory pid from the given OSGi component context.
+     *
+     * @param compContext
+     *            The component context with the configuration to retrieve
+     * @return the service factory pid
+     */
+    String getConfigurationFactoryPid(ComponentContext compContext);
 
 }

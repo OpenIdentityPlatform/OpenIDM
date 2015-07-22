@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -43,6 +43,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
@@ -68,7 +69,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.RepoJobStore;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
@@ -150,8 +150,6 @@ public class SchedulerService implements RequestHandler {
     private boolean executePersistentSchedules = false;
     private boolean started = false;
 
-    EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
-
     private final ObjectMapper mapper = new ObjectMapper();
 
     // Optional user defined name for this instance, derived from the file install name
@@ -181,7 +179,11 @@ public class SchedulerService implements RequestHandler {
         logger.debug("unbinding RepositoryService");
         RepoJobStore.setServerContext(null);
     }
-    
+
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
