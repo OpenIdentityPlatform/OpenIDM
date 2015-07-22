@@ -1528,7 +1528,7 @@ logger = LoggerFactory.getLogger('logger');
          <entry>response</entry>
         </row>
         <row>
-         <entry morerows="7">sync.json</entry>
+         <entry morerows="8">sync.json</entry>
          <entry>onCreate, onDelete, onUpdate</entry>
          <entry>object, source, target, situation, linkQualifier</entry>
         </row>
@@ -1571,7 +1571,7 @@ logger = LoggerFactory.getLogger('logger');
         <row>
          <entry>*</entry>
          <entry>custom endpoint scripts</entry>
-         <entry>request</entry>
+         <entry>request, context</entry>
         </row>
        </tbody>
       </tgroup>

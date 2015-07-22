@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2015 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.servletregistration.impl;
@@ -27,7 +27,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SYSTEM_PROPERTIES;
@@ -59,17 +59,13 @@ public class ServletFilterConfiguration {
             name = "ref_ServletFilterRegistration",
             referenceInterface = ServletRegistration.class,
             policy = ReferencePolicy.DYNAMIC,
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            bind = "bindServletFilterRegistration",
-            unbind = "unbindServletFilterRegistration"
+            cardinality = ReferenceCardinality.MANDATORY_UNARY
     )
     private ServletRegistration servletFilterRegistration;
-    private void bindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
-        this.servletFilterRegistration = servletFilterRegistration;
-    }
-    private void unbindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
-        this.servletFilterRegistration = null;
-    }
+
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
 
     /**
      * Parses the servlet filter configuration and registers a servlet filter in OSGi.
@@ -80,7 +76,7 @@ public class ServletFilterConfiguration {
     @Activate
     protected synchronized void activate(ComponentContext context) throws Exception {
         logger.info("Activating servlet registrator with configuration {}", context.getProperties());
-        JsonValue config = new JSONEnhancedConfig().getConfigurationAsJson(context);
+        JsonValue config = enhancedConfig.getConfigurationAsJson(context);
 
         logger.debug("Parsed servlet filter config: {}", config);
 

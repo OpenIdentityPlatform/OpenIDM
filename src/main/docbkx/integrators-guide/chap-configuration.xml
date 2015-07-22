@@ -1401,15 +1401,15 @@ Removed per CR-7197.http://openidm.forgerock.org/doc/bootstrap/integrators-guide
        Synchronizing LDAP Group Membership</citetitle></link>.
      </para>
 
-     <para>6
+     <para>
       The final statement in the script is the return value. In the following
       example, there is no <literal>return</literal> keyword, and the value of
       the last statement (<literal>x</literal>) is returned.
      </para>
 
      <programlisting language="javascript">var x = "Sample return";
-      functioncall();
-      x   </programlisting>
+functioncall();
+x   </programlisting>
 
      </section>
     </section>

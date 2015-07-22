@@ -1,0 +1,22 @@
+<div class="tab-pane-body">
+    <div class="toolbar clearfix" role="toolbar" aria-label="toolbar">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="processAssignedTo">{{t "templates.workflows.processes.assignedTo"}}</label>
+                <select id="processAssignedTo" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label for="processFilterType">{{t "templates.workflows.processes.filterByType"}}</label>
+                <select id="processFilterType" class="form-control">
+                    <option value="all">All</option>
+                    {{#each processDefinitions}}
+                    <option value="{{key}}">{{name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+        </form>
+    </div>
+    <div id="processGridHolder" class="panel-body">
+
+    </div>
+</div>

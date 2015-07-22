@@ -45,7 +45,6 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
 import org.forgerock.openidm.script.AbstractScriptedService;
@@ -77,13 +76,9 @@ public class InfoService extends AbstractScriptedService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private HealthInfo healthInfoSvc;
 
-    private void bindHealthInfoSvc(final HealthInfo service) {
-        healthInfoSvc = service;
-    }
-
-    private void unbindHealthInfoSvc(final HealthInfo service) {
-        healthInfoSvc = null;
-    }
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
 
     private ComponentContext context;
 
@@ -97,15 +92,14 @@ public class InfoService extends AbstractScriptedService {
 
         Dictionary properties = context.getProperties();
         setProperties(properties);
-        EnhancedConfig config = JSONEnhancedConfig.newInstance();
 
-        String factoryPid = config.getConfigurationFactoryPid(context);
+        String factoryPid = enhancedConfig.getConfigurationFactoryPid(context);
         if (StringUtils.isBlank(factoryPid)) {
             throw new IllegalArgumentException("Configuration must have property: "
                     + ServerConstants.CONFIG_FACTORY_PID);
         }
 
-        JsonValue configuration = config.getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         configuration.put(ServerConstants.CONFIG_FACTORY_PID, factoryPid);
 
         activate(context.getBundleContext(), factoryPid, configuration);

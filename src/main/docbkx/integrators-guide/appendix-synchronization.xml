@@ -348,7 +348,7 @@
       </listitem>
       <listitem>
        <para>
-        <literal>globals</literal> - provides statistics about the entire
+        <literal>global</literal> - provides statistics about the entire
         reconciliation operation
        </para>
       </listitem>

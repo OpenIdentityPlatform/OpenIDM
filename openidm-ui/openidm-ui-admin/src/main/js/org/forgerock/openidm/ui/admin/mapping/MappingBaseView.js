@@ -347,6 +347,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
                 delete this.data.mapping;
                 this.updateTab();
+
+                this.$el.find("#syncNowButton").show().prop("disabled",false);
+                this.$el.find("#stopSyncButton").hide().prop("disabled", true);
             }, this));
         },
 
@@ -354,8 +357,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             e.preventDefault();
 
             this.$el.find("#syncMessage").text($.t("templates.mapping.stoppingSync"));
-            this.$el.find("#stopSyncButton").hide().prop("disabled",true);
-            this.$el.find("#syncNowButton").hide().prop("disabled",true);
+            this.$el.find("#stopSyncButton").hide().prop("disabled", true);
+            this.$el.find("#syncNowButton").show().prop("disabled", false);
             this.$el.find(".reconProgressContainer").hide();
             this.$el.find("#stoppingSync").show();
 

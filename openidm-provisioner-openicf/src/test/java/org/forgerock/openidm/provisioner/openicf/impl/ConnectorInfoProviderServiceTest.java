@@ -99,6 +99,7 @@ public class ConnectorInfoProviderServiceTest {
         // stubbing
         when(context.getProperties()).thenReturn(properties);
         ConnectorInfoProviderService instance = new ConnectorInfoProviderService();
+        instance.bindEnhancedConfig(new JSONEnhancedConfig());
         instance.activate(context);
         testableConnectorInfoProvider = instance;
     }

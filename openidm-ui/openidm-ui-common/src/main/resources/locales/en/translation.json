@@ -21,6 +21,9 @@
             "dayNamesShort" : "Sun. , Mon., Tue., Wed., Thu., Fri., Sat."
         },
         "messages" : {
+            "WorkflowMessages" : {
+              "cancelActiveProcess" : "Workflow Process successfully cancelled."
+            },
             "AuditMessages" : {
               "auditSaveSuccessful": "Audit configurations have been saved."
             },
@@ -340,6 +343,38 @@
                 "linkQualifiers": "Link Qualifiers"
             }
         },
+        "taskInstance": {
+            "reassign": "Reassign",
+            "assign": "Assign",
+            "viewAllTasks": "View all Tasks",
+            "dueDate": "Due date",
+            "priority": "Priority",
+            "aboutThisTask": "About this Task",
+            "taskDetail": "Task Detail",
+            "noDueDate": "No due date",
+            "category": "Category",
+            "relatedProcess": "Related Process",
+            "owner": "Owner",
+            "assignee": "Assignee",
+            "subtasks": "Subtasks",
+            "none": "None",
+            "parentTask": "Parent Task",
+            "taskDetailInfo": "The following information has been submitted for completion.",
+            "task": "Task",
+            "assignedSuccess": "Task successfully assigned/reassigned",
+            "assignTask": "Assign Task",
+            "selectUser": "Select User",
+            "nonCanditateWarning": "The user you are attempting to assign does not belong to the list of the task's candidate users. Are you sure you want to assign '__userName__' to this task?"
+        },
+        "processInstance": {
+            "viewAllProcesses": "View all Processes",
+            "process": "Process",
+            "cancelProcess": "Cancel Process",
+            "cancelConfirmation": "Are you sure you want to cancel this Process?",
+            "started": "Started",
+            "startedBy": "Started By",
+            "cancelProcessSuccess": "Process successfully canceled"
+        },
         "managed" : {
             "addManagedTitle" : "Add Managed Object",
             "backToManaged" : "Back to Managed Objects",
@@ -500,6 +535,19 @@
             "addSchedule": "Add Schedule"
         },
         "workflows": {
+            "processes" : {
+                "processInstance" : "PROCESS INSTANCE",
+                "created" : "CREATED",
+                "startedBy" : "STARTED BY",
+                "processes" : "Workflow Processes",
+                "assignedTo" : "Assigned To: ",
+                "filterByType" : "Filter by Type: ",
+                "activeProcesses" : "Active",
+                "processDefinitions" : "Definitions",
+                "processesCompleted" : "Completed",
+                "noActiveProcesses" : "No Active Processes",
+                "processCancelDialog" : "Are you sure you wish to cancel this active process?"
+            },
             "sync": "These data properties are sent when the workflow is triggered",
             "nonSync": "Workflow scripts can access these object/properties.",
             "noWorkflows": "No Available Workflows",
@@ -962,6 +1010,7 @@
             "backToMapping" : "Back to Mappings",
             "conditionalUpon" : "Conditional Upon:",
             "validLinkQualifierScript" : "Requires a valid Link Qualifier script.",
+            "linkQualifierNotArray" : "Valid Link Qualifier must be an array.",
             "transformationScriptApplied" : "Transformation script applied",
             "attributes": "Attributes",
             "badScript" : "Invalid; a Link Qualifier script must return an array of strings",
@@ -1145,6 +1194,7 @@
             "accept" : "Accept",
             "reject" : "Reject",
             "createdAt" : "Created at",
+            "created" : "Created",
             "generalDetails" : "General Details",
             "search" : "Search",
             "settings": "Settings",
@@ -1183,7 +1233,7 @@
                 "atLeastOneNumber" : "At least one number",
                 "atLeast8Characters" : "At least 8 characters",
                 "cannotMatchLogin" : "Cannot match login",
-                "confirmationMatchesPassword" : "Confirmation matches password",
+                "confirmationMatchesPassword" : "Passwords do not match",
                 "usernameExists" : "Username already exists",
                 "emailAddressAlreadyExists" : "Email address already exists",
                 "onlyAlphabeticCharacters" : "Only alphabetic characters",
@@ -1235,7 +1285,7 @@
             "OAuth" : "OAuth",
             "createNewUser" : "Create New User",            
             "password" : "Password",
-            "confirmPassword" : "Confirm Password",
+            "confirmPassword" : "ReType Password",
             "newPassword" : "New password",
             "oldPassword" : "Old password",
             "confirmNewPassword" : "Confirm new password",

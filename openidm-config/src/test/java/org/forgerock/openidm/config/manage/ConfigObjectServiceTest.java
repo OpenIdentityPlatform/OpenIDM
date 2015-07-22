@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -35,6 +35,7 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
@@ -109,6 +110,7 @@ public class ConfigObjectServiceTest {
 
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         when(connectionFactory.getConnection()).thenReturn(mock(Connection.class));
+        configObjectService.bindEnhancedConfig(mock(EnhancedConfig.class));
         configObjectService.bindConnectionFactory(connectionFactory);
 
         configObjectService.activate(context);
@@ -206,7 +208,7 @@ public class ConfigObjectServiceTest {
         Assert.assertNotNull(config.getProperties());
 
         Dictionary properties = config.getProperties();
-        JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+        EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         JsonValue value = enhancedConfig.getConfiguration(properties, rname.toString(), false);
         Assert.assertTrue(value.keys().contains("property1"));
         Assert.assertEquals(value.get("property1").asString(), "value1");

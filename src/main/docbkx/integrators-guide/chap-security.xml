@@ -786,7 +786,7 @@ Server: Jetty(8.y.z-SNAPSHOT)
   <para>
    The JWT session cookie is based on the <literal>JWT_SESSION</literal> module
    documented in <link xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:href="integrators-guide#supported-auth-modules" xlink:show="new">
+   xlink:href="integrators-guide#supported-auth-session-modules" xlink:show="new">
    <citetitle>Supported Authentication Modules</citetitle></link>.
   </para>
 

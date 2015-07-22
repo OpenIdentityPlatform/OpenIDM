@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -79,7 +79,7 @@ import org.forgerock.openidm.cluster.ClusterEventListener;
 import org.forgerock.openidm.cluster.ClusterEventType;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.ServerConstants;
@@ -97,7 +97,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(
-        name = "org.forgerock.openidm.config.enhanced",
+        name = "org.forgerock.openidm.config.manage",
         immediate = true,
         policy = ConfigurationPolicy.OPTIONAL
 )
@@ -147,6 +147,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
+
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
 
     private ConfigCrypto configCrypto;
 
@@ -216,7 +220,6 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     throw new NotFoundException("No configuration exists for id " + resourceName.toString());
                 }
                 Dictionary props = config.getProperties();
-                JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
                 result =  enhancedConfig.getConfiguration(props, resourceName.toString(), false);
                 result.put("_id", resourceName.toString());
                 logger.debug("Read configuration for service {}", resourceName);
@@ -423,7 +426,6 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             }
             
             Dictionary existingConfig = config.getProperties();
-            JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
             JsonValue value = enhancedConfig.getConfiguration(existingConfig, resourceName.toString(), false);
 
             if (existingConfig == null) {

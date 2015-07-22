@@ -417,11 +417,9 @@ Id   State          Name
      <step>
       <para>
        Download the <literal>bnd</literal> Java archive file
-       (<filename>biz.aQute.bnd.jar</filename>) that enables you to create OSGi
-       bundles. The file (Bundle Version 1.50.0) can be downloaded from <link
-       xlink:href="http://central.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar" />.
-       For more information about <literal>bnd</literal>, see <link
-       xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
+       (<link xlink:href="http://central.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar">bnd-1.50.0.jar</link>)
+       that enables you to create OSGi bundles. For more information about
+       <literal>bnd</literal>, see <link xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
       </para>
       <para>
        Copy the file to <filename>openidm\db\mssql\scripts</filename>.
@@ -433,7 +431,7 @@ Id   State          Name
        contain the following files:
       </para>
        <screen>
-       biz.aQute.bnd.jar  openidm.sql  sqljdbc4.bnd  sqljdbc4.jar
+        bnd-1.50.0.jar  openidm.sql  sqljdbc4.bnd  sqljdbc4.jar
        </screen>
      </step>
      <step>
@@ -442,7 +440,7 @@ Id   State          Name
       </para>
       <screen>
 C:\> cd \path\to\openidm\db\mssql\scripts
-./> java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd sqljdbc4.jar
+./> java -jar bnd-1.50.0.jar wrap -properties sqljdbc4.bnd sqljdbc4.jar
       </screen>
       <para>
        This step creates a single <literal>.bar</literal> file, named
@@ -641,18 +639,16 @@ Bundle-Version: &#36;{version}</screen>
   <step>
    <para>
     Download the <literal>bnd</literal> Java archive file
-    (<filename>biz.aQute.bnd.jar</filename>) that enables you to create
-    OSGi bundles. The file (Bundle Version 1.50.0) can be downloaded from
-    <link xlink:show="new" xlink:href="http://central.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar" />.
-    For more information about <literal>bnd</literal>, see
-    <link xlink:show="new" xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
+    (<link xlink:href="http://central.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar">bnd-1.50.0.jar</link>)
+    that enables you to create OSGi bundles. For more information about
+    <literal>bnd</literal>, see <link xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
    </para>
    <para>
     Place the <literal>bnd</literal> Java archive file in the same
     directory as the JDBC driver, and the bind file.
    </para>
    <screen><userinput>$ ls /path/to/openidm/db/oracle/scripts</userinput>
-biz.aQute.bnd.jar    ojdbc6_g.jar    openidm.sql    sqljdbc4.bnd</screen>
+bnd-1.50.0.jar    ojdbc6_g.jar    openidm.sql    sqljdbc4.bnd</screen>
   </step>
   <step>
    <para>
@@ -660,7 +656,7 @@ biz.aQute.bnd.jar    ojdbc6_g.jar    openidm.sql    sqljdbc4.bnd</screen>
     following command to create the OSGi bundle.
    </para>
    <screen>$ cd /path/to/openidm/db/oracle/scripts
-$ java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd ojdbc6_g.jar
+$ java -jar bnd-1.50.0.jar wrap -properties sqljdbc4.bnd ojdbc6_g.jar
 Dec 10, 2013 9:53:28 AM java.util.prefs.FileSystemPreferences$1 run
 INFO: Created user preferences directory.
 ojdbc6_g 984 0</screen>
@@ -668,7 +664,7 @@ ojdbc6_g 984 0</screen>
     A new <literal>.bar</literal> file has now been created.
    </para>
    <screen><userinput>$ ls</userinput>
-biz.aQute.bnd.jar  ojdbc6_g.bar  ojdbc6_g.jar  openidm.sql  sqljdbc4.bnd</screen>
+bnd-1.50.0.jar  ojdbc6_g.bar  ojdbc6_g.jar  openidm.sql  sqljdbc4.bnd</screen>
   </step>
   <step>
    <para>Move the <literal>.bar</literal> file to the

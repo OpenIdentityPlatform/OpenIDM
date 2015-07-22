@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2012 ForgeRock Inc. All rights reserved.
+ * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,9 +23,12 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.engine.task.IdentityLink;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +49,9 @@ import org.forgerock.json.resource.*;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskEntityMixIn;
 
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
 /**
  * Resource implementation of TaskInstance related Activiti operations
  */
@@ -59,7 +65,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
         mapper.getSerializationConfig().addMixInAnnotations(TaskEntity.class, TaskEntityMixIn.class);
         mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
-}
+    }
 
     public TaskInstanceResource(ProcessEngine processEngine) {
         this.processEngine = processEngine;
@@ -106,7 +112,24 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     @Override
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+        try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
+
+            Task task = processEngine.getTaskService().createTaskQuery().taskId(resourceId).singleResult();
+            if (task == null) {
+                handler.handleError(new NotFoundException("Task " + resourceId + " not found."));
+                return;
+            }
+
+            Map<String, Object> deletedTask = mapper.convertValue(task, Map.class);
+            processEngine.getTaskService()
+                    .deleteTask(resourceId, request.getAdditionalParameter(ActivitiConstants.ACTIVITI_DELETEREASON));
+            handler.handleResult(new Resource(task.getId(), null, new JsonValue(deletedTask)));
+        } catch (ActivitiObjectNotFoundException ex) {
+            handler.handleError(new NotFoundException(ex.getMessage()));
+        } catch (Exception ex) {
+            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+        }
     }
 
     @Override
@@ -124,6 +147,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
                     setTaskParams(query, request);
                 }
+                setSortKeys(query, request);
                 List<Task> list = query.list();
                 for (Task taskInstance : list) {
                     Map value = mapper.convertValue(taskInstance, HashMap.class);
@@ -139,6 +163,8 @@ public class TaskInstanceResource implements CollectionResourceProvider {
             } else {
                 handler.handleError(new BadRequestException("Unknown query-id"));
             }
+        } catch (NotSupportedException e) {
+            handler.handleError(e);
         } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
@@ -155,7 +181,6 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 handler.handleError(new NotFoundException());
             } else {
                 Map value = mapper.convertValue(task, HashMap.class);
-                Resource r = new Resource(task.getId(), null, new JsonValue(value));
                 TaskFormData data = processEngine.getFormService().getTaskFormData(task.getId());
                 List<Map> propertyValues = new ArrayList<Map>();
                 for (FormProperty p : data.getFormProperties()) {
@@ -163,22 +188,48 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                     entry.put(p.getId(), p.getValue());
                     propertyValues.add(entry);
                 }
-                r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyValues);
+                value.put(ActivitiConstants.FORMPROPERTIES, propertyValues);
+
                 if (task.getDelegationState() == DelegationState.PENDING) {
-                    r.getContent().add(ActivitiConstants.ACTIVITI_DELEGATE, task.getAssignee());
+                    value.put(ActivitiConstants.ACTIVITI_DELEGATE, task.getAssignee());
                 } else {
-                    r.getContent().add(ActivitiConstants.ACTIVITI_ASSIGNEE, task.getAssignee());
+                    value.put(ActivitiConstants.ACTIVITI_ASSIGNEE, task.getAssignee());
                 }
-                Map<String, Object> variables = new HashMap<String, Object>(processEngine.getTaskService().getVariables(task.getId()));
+                Map<String, Object> variables = processEngine.getTaskService().getVariables(task.getId());
                 if (variables.containsKey(ActivitiConstants.OPENIDM_CONTEXT)){
                     variables.remove(ActivitiConstants.OPENIDM_CONTEXT);
                 }
-                r.getContent().add(ActivitiConstants.ACTIVITI_VARIABLES, variables);
-                handler.handleResult(r);
+
+                value.put(ActivitiConstants.ACTIVITI_VARIABLES, variables);
+                value.put("candidates", getCandidateIdentities(task).getObject());
+
+                handler.handleResult(new Resource(task.getId(), null, new JsonValue(value)));
             }
         } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
+    }
+
+    /**
+     * Retrieves candidate users and groups from a Task.
+     *
+     * @param task Task that needs to be searched
+     * @return JsonValue of candidates
+     */
+    private JsonValue getCandidateIdentities(Task task) {
+        JsonValue candidates = json(object())
+                .add("candidateUsers", new HashSet<>())
+                .add("candidateGroups", new HashSet<>());
+        List<IdentityLink> candidateIdentity = processEngine.getTaskService().getIdentityLinksForTask(task.getId());
+        for (IdentityLink identityLink : candidateIdentity) {
+            if (identityLink.getUserId() != null) {
+                candidates.get("candidateUsers").asSet().add(identityLink.getUserId());
+            }
+            if (identityLink.getGroupId() != null) {
+                candidates.get("candidateGroups").asSet().add(identityLink.getGroupId());
+            }
+        }
+        return candidates;
     }
 
     @Override
@@ -214,39 +265,67 @@ public class TaskInstanceResource implements CollectionResourceProvider {
     }
 
     /**
-     * Process the query parameters of the request and set it on the TaskQuery
+     * Process the query parameters of the request and set it on the TaskQuery.
      *
      * @param query Query to update
      * @param request incoming request
      */
     private void setTaskParams(TaskQuery query, QueryRequest request) {
-        String executionId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_EXECUTIONID);
-        query = executionId == null ? query : query.executionId(executionId);
-        String processDefinitionId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID);
-        query = processDefinitionId == null ? query : query.processDefinitionId(processDefinitionId);
-        String processDefinitionKey = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONKEY);
-        query = processDefinitionKey == null ? query : query.processDefinitionKey(processDefinitionKey);
-        String processInstanceId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSINSTANCEID);
-        query = processInstanceId == null ? query : query.processInstanceId(processInstanceId);
-        String taskAssignee = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_ASSIGNEE);
-        query = taskAssignee == null ? query : query.taskAssignee(taskAssignee);
-        String taskCandidateGroup = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_CANDIDATEGROUP);
-        if (taskCandidateGroup != null) {
-            String[] taskCandidateGroups = taskCandidateGroup.split(",");
-            if (taskCandidateGroups.length > 1) {
-                query.taskCandidateGroupIn(Arrays.asList(taskCandidateGroups));
-            } else {
-                query.taskCandidateGroup(taskCandidateGroup);
+
+        for (Map.Entry<String, String> param : request.getAdditionalParameters().entrySet()) {
+            switch (param.getKey()) {
+                case ActivitiConstants.ACTIVITI_EXECUTIONID:
+                    query.executionId(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID:
+                    query.processDefinitionId(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_PROCESSDEFINITIONKEY:
+                    query.processDefinitionKey(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_PROCESSINSTANCEID:
+                    query.processInstanceId(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_ASSIGNEE:
+                    query.taskAssignee(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_CANDIDATEGROUP:
+                    String taskCandidateGroup = param.getValue();
+                    String[] taskCandidateGroups = taskCandidateGroup.split(",");
+                    if (taskCandidateGroups.length > 1) {
+                        query.taskCandidateGroupIn(Arrays.asList(taskCandidateGroups));
+                    } else {
+                        query.taskCandidateGroup(taskCandidateGroup);
+                    }
+                    break;
+                case ActivitiConstants.ACTIVITI_CANDIDATEUSER:
+                    query.taskCandidateUser(param.getValue());
+                    break;
+                case ActivitiConstants.ID:
+                    query.taskId(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_NAME:
+                    query.taskName(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_OWNER:
+                    query.taskOwner(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_DESCRIPTION:
+                    query.taskDescription(param.getValue());
+                    break;
+                case ActivitiConstants.ACTIVITI_PRIORITY:
+                    query.taskPriority(Integer.parseInt(param.getValue()));
+                    break;
+                case ActivitiConstants.ACTIVITI_UNASSIGNED:
+                    if (Boolean.parseBoolean(param.getValue())) {
+                        query.taskUnassigned();
+                    }
+                    break;
+                case ActivitiConstants.ACTIVITI_TENANTID:
+                    query.taskTenantId(param.getValue());
+                    break;
             }
         }
-        String taskCandidateUser = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_CANDIDATEUSER);
-        query = taskCandidateUser == null ? query : query.taskCandidateUser(taskCandidateUser);
-        String taskId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_TASKID);
-        query = taskId == null ? query : query.taskId(taskId);
-        String taskName = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_TASKNAME);
-        query = taskName == null ? query : query.taskName(taskName);
-        String taskOwner = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_OWNER);
-        query = taskOwner == null ? query : query.taskOwner(taskOwner);
 
         Map<String, String> wfParams = ActivitiUtil.fetchVarParams(request);
         Iterator<Map.Entry<String, String>> itWf = wfParams.entrySet().iterator();
@@ -254,5 +333,55 @@ public class TaskInstanceResource implements CollectionResourceProvider {
             Map.Entry<String, String> e = itWf.next();
             query = query.processVariableValueEquals(e.getKey(), e.getValue());
         }
+    }
+
+    /**
+     * Sets what the result set should be filtered by.
+     *
+     * @param query TaskQuery that needs to be modified for filtering
+     * @param request incoming request
+     * @throws NotSupportedException
+     */
+    private void setSortKeys(TaskQuery query, QueryRequest request) throws NotSupportedException {
+        for (SortKey key : request.getSortKeys()) {
+            if (key.getField() != null && !key.getField().isEmpty()) {
+                switch (key.getField().toString().substring(1)) { // remove leading JsonPointer slash
+                    case ActivitiConstants.ID:
+                        query.orderByTaskId();
+                        break;
+                    case ActivitiConstants.ACTIVITI_NAME:
+                        query.orderByTaskName();
+                        break;
+                    case ActivitiConstants.ACTIVITI_DESCRIPTION:
+                        query.orderByTaskDescription();
+                        break;
+                    case ActivitiConstants.ACTIVITI_PRIORITY:
+                        query.orderByTaskPriority();
+                        break;
+                    case ActivitiConstants.ACTIVITI_ASSIGNEE:
+                        query.orderByTaskAssignee();
+                        break;
+                    case ActivitiConstants.ACTIVITI_CREATETIME:
+                        query.orderByTaskCreateTime();
+                        break;
+                    case ActivitiConstants.ACTIVITI_PROCESSINSTANCEID:
+                        query.orderByProcessInstanceId();
+                        break;
+                    case ActivitiConstants.ACTIVITI_EXECUTIONID:
+                        query.orderByExecutionId();
+                        break;
+                    case ActivitiConstants.ACTIVITI_DUEDATE:
+                        query.orderByDueDate();
+                        break;
+                    case ActivitiConstants.ACTIVITI_TENANTID:
+                        query.orderByTenantId();
+                        break;
+                    default:
+                        throw new NotSupportedException("Sort key: " + key.getField().toString().substring(1) + " is not valid");
+                }
+                query = key.isAscendingOrder() ? query.asc() : query.desc();
+            }
+        }
+
     }
 }
