@@ -367,18 +367,6 @@
             </build>
         </profile>
         <profile>
-            <id>functional-test</id>
-            <activation>
-                <property>
-                    <name>enableCiProfile</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <modules>
-                <module>openidm-integration-tests</module>
-            </modules>
-        </profile>
-        <profile>
             <!-- To scan the licenses -->
             <id>generateLicenseReport</id>
             <build>
