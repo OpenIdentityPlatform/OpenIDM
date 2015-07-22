@@ -1010,6 +1010,7 @@
             "backToMapping" : "Back to Mappings",
             "conditionalUpon" : "Conditional Upon:",
             "validLinkQualifierScript" : "Requires a valid Link Qualifier script.",
+            "linkQualifierNotArray" : "Valid Link Qualifier must be an array.",
             "transformationScriptApplied" : "Transformation script applied",
             "attributes": "Attributes",
             "badScript" : "Invalid; a Link Qualifier script must return an array of strings",
