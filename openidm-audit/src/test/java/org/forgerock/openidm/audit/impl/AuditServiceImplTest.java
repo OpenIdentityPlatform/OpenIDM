@@ -40,12 +40,6 @@ import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.mockito.ArgumentCaptor;
 import org.osgi.service.component.ComponentContext;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.testng.PowerMockObjectFactory;
-import org.powermock.modules.testng.PowerMockTestCase;
-import org.testng.IObjectFactory;
-import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -63,18 +57,16 @@ import static org.mockito.Mockito.when;
 /**
  * Test the audit service.
  */
-@PrepareForTest(JSONEnhancedConfig.class)
-public class AuditServiceImplTest extends PowerMockTestCase {
+public class AuditServiceImplTest {
 
     //private Collection<Map<String, Object>> memory = new ArrayList<>();
 
     @Test
     public void testAuditServiceActivation() throws Exception {
         //given
-        PowerMockito.mockStatic(JSONEnhancedConfig.class);
         final JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
-        when(JSONEnhancedConfig.newInstance()).thenReturn(jsonEnhancedConfig);
         final AuditServiceImpl auditService = new AuditServiceImpl();
+        auditService.bindEnhancedConfig(jsonEnhancedConfig);
         final JsonValue config = AuditTestUtils.getJson(getResource("/audit.json"));
         when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(config);
 
@@ -595,20 +587,13 @@ public class AuditServiceImplTest extends PowerMockTestCase {
     }
 
     private AuditServiceImpl createAuditService(final String configFile) throws Exception {
-        PowerMockito.mockStatic(JSONEnhancedConfig.class);
         JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
-        when(JSONEnhancedConfig.newInstance()).thenReturn(jsonEnhancedConfig);
         final AuditServiceImpl auditService = new AuditServiceImpl();
+        auditService.bindEnhancedConfig(jsonEnhancedConfig);
         final JsonValue config = AuditTestUtils.getJson(getResource(configFile));
         when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(config);
         auditService.activate(mock(ComponentContext.class));
         return auditService;
-    }
-
-
-    @ObjectFactory
-    public IObjectFactory getObjectFactory() {
-        return new PowerMockObjectFactory();
     }
 
     static class TestAuditEventBuilder<T extends TestAuditEventBuilder<T>>
