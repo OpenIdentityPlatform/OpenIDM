@@ -1,0 +1,169 @@
+<div class="editResourceViewContainer">
+	<section>
+	    <div class="back-bar">
+	        <div class="container">
+	            <a href="#workflow/tasks/"><span class="header-link-text">{{t "templates.taskInstance.viewAllTasks" }}</span></a>
+	        </div>
+	    </div>
+	    <div class="container">
+	        <div class="page-header no-border">
+	            <div class="media">
+	                <div class="media-left media-top">
+	                    <div class="header-icon pull-left"><i class="fa fa-check"></i></div>
+	                </div>
+	                <div class="media-body media-top">
+	                    <h4 class="page-type">
+	                        {{t "templates.taskInstance.task" }}
+	                            <span class="meta">
+	                                <span class="meta-icon-bullet"><i class="fa fa-calendar"></i> {{#if task.dueDate }}{{t "templates.taskInstance.dueDate" }}: {{date task.dueDate "MMM dd, yyyy  h:mm:ss TT"}}{{else}}{{t "templates.taskInstance.noDueDate" }}{{/if}}</span> 
+	                                <span class="meta-icon-bullet"><i class="fa fa-clock-o"></i> {{t "common.form.created" }}: {{date task.createTime "MMM dd, yyyy  h:mm:ss TT"}}</span> 
+	                            </span>
+	                    </h4>
+	                    <h1 class="pull-left">{{task.name}} <small class="text-muted">({{task._id}})</small></h1>
+	                    <div class="btn-toolbar pull-right no-border">
+	                        <div class="btn-group">
+	                            <a href="#" id="assignTaskBtnTop" class="btn btn-primary assignTask">
+	                                <i class="fa fa-arrow-right"></i>
+	                                {{#if task.assignee }}
+	                                    {{t "templates.taskInstance.reassign" }}
+	                                {{else}}
+	                                    {{t "templates.taskInstance.assign" }}
+	                                {{/if}}
+	                            </a>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+	<section>
+	    <div class="container">
+	        <div class="tab-pane-body panel-collapse-group">
+	            <div id="taskAboutPanel" class="panel panel-default panel-collapse">
+	                <div class="panel-heading" role="tab" id="taskAboutHeading">
+	                    <h4 class="panel-title">
+	                        <a data-toggle="collapse" href="#taskAboutBody" aria-expanded="true" aria-controls="taskAboutHeading">{{t "templates.taskInstance.aboutThisTask" }}</a>
+	                    </h4>
+	                </div>
+	                <div id="taskAboutBody" class="collapse in" role="tabpanel" aria-expanded="true" aria-labelledby="taskAboutHeading">
+	                  <div class="panel-body">
+	                    <div id="taskAboutContent" class="detailTable">
+	                        {{#if task.description }}
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.description" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                {{task.description}}
+	                            </div>
+	                        </div>
+	                        {{/if}}
+	                        {{#if task.category }}
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.category" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                {{task.category}}
+	                            </div>
+	                        </div>
+	                        {{/if}}
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.priority" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                {{task.priority}}
+	                            </div>
+	                        </div>
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.relatedProcess" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                <a href="#workflow/processinstance/{{task.processInstanceId}}">{{process.name}} <small class="text-muted">({{task.processInstanceId}})</small></a>
+	                            </div>
+	                        </div>
+	                        {{#if task.owner }}
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.owner" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                {{task.owner}}
+	                            </div>
+	                        </div>
+	                        {{/if}}
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.assignee" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                {{#if task.assignee }}
+	                                    <div class="media">
+	                                        <div class="media-left">
+	                                            <div class="circle-icon circle-icon-xs">
+	                                                <i class="fa fa-user"></i>
+	                                            </div>
+	                                        </div>
+	                                        <div class="media-body media-middle">
+	                                            <a href="#resource/managed/user/edit/{{task.assignee}}/">{{assignee.givenName}} {{assignee.sn}} <small class="text-muted">({{assignee.userName}})</small></a> 
+	                                            <button id="assigneeTaskBtnUser_{{task.assignee}}" class="btn btn-default btn-xs assignTask">{{t "templates.taskInstance.reassign" }}</button>
+	                                        </div>
+	                                    </div>
+	                                    <a href=""></a>
+	                                {{else}}
+	                                    {{t "templates.taskInstance.none" }}
+	                                {{/if}}
+	                            </div>
+	                        </div>
+	                        {{#if task.parentTaskId }}
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.parentTask" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                <a href="#workflow/taskinstance/{{task.parentTaskId}}">{{parentTaskName}} <small class="text-muted">({{task.parentTaskId}})</small></a>
+	                            </div>
+	                        </div>
+	                        {{/if}}
+	                        {{#if task.subtasks }}
+	                        <div class="row">
+	                            <div class="col-md-3 text-right">
+	                                <strong>{{t "templates.taskInstance.subtasks" }}</strong>
+	                            </div>
+	                            <div class="col-md-9">
+	                                {{task.subtasks}}
+	                            </div>
+	                        </div>
+	                        {{/if}}
+	                    </div>
+	                  </div>
+	                </div>
+	            </div>
+	        </div>
+	        {{#if showForm}}
+	        <div class="tab-pane-body panel-collapse-group">
+	            <div id="taskDetailPanel" class="panel panel-default panel-collapse">
+	                <div class="panel-heading" role="tab" id="taskDetailHeading">
+	                    <h4 class="panel-title">
+	                        <a data-toggle="collapse" href="#taskDetailBody" aria-expanded="true" aria-controls="taskDetailHeading">{{t "templates.taskInstance.taskDetail" }}</a>
+	                    </h4>
+	                </div>
+	                <div id="taskDetailBody" class="collapse in" role="tabpanel" aria-expanded="true" aria-labelledby="taskDetailHeading">
+	                  <div class="panel-body">
+	                    <p class="panel-description">{{t "templates.taskInstance.taskDetailInfo" }}</p>
+	                    <div id="taskDetailContent" class="well detailTable">
+	                        <form id="taskForm" class="form-horizontal">
+	                            {{{taskForm}}}
+	                        </form>
+	                    </div>
+	                  </div>
+	                </div>
+	            </div>
+	        </div>
+	        {{/if}}
+	    </div>
+	</section>
+</div>

@@ -3442,15 +3442,14 @@ Properties:
     configurable properties.
    </para>
 
-   <programlisting language="javascript">
-    {
+   <programlisting language="javascript">{
     "connectorRef": {
-    "connectorHostRef": "#LOCAL",
-    "bundleName": "org.forgerock.openicf.connectors.xml-connector",
-    "bundleVersion": "${openicf.xmlconnector.version}",
-    "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+        "connectorHostRef": "#LOCAL",
+        "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+        "bundleVersion": "${openicf.xmlconnector.version}",
+        "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
     }
-    }</programlisting>
+}</programlisting>
 
    <para>
     The <literal>connectorHostRef</literal> is optional if the connector server
@@ -3463,11 +3462,11 @@ Properties:
    </para>
    <programlisting language="javascript">{
     "configurationProperties": {
-    "xsdIcfFilePath" : "&amp;{launcher.project.location}/data/resource-schema-1.xsd",
-    "xsdFilePath" : "&amp;{launcher.project.location}/data/resource-schema-extension.xsd",
-    "xmlFilePath" : "&amp;{launcher.project.location}/data/xmlConnectorData.xml"
+        "xsdIcfFilePath" : "&amp;{launcher.project.location}/data/resource-schema-1.xsd",
+        "xsdFilePath" : "&amp;{launcher.project.location}/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "&amp;{launcher.project.location}/data/xmlConnectorData.xml"
     }
-    }</programlisting>
+}</programlisting>
    <para>
     <literal>&amp;{launcher.project.location}</literal> refers to the project
     directory of your OpenIDM instance, for example,
@@ -3527,11 +3526,11 @@ Properties:
      Java Connector Server. For example:
     </para>
     <screen><userinput>$ cd path/to/openidm
-     $ scp -r samples/sample1/data testuser@remote-host:/home/testuser/xml-sample</userinput>
+$ scp -r samples/sample1/data testuser@remote-host:/home/testuser/xml-sample</userinput>
      <computeroutput>testuser@remote-host's password:
-      resource-schema-1.xsd                    100% 4083     4.0KB/s   00:00
-      resource-schema-extension.xsd            100% 1351     1.3KB/s   00:00
-      xmlConnectorData.xml                     100% 1648     1.6KB/s   00:00</computeroutput></screen>
+resource-schema-1.xsd                    100% 4083     4.0KB/s   00:00
+resource-schema-extension.xsd            100% 1351     1.3KB/s   00:00
+xmlConnectorData.xml                     100% 1648     1.6KB/s   00:00</computeroutput></screen>
     <para>
      The XML connector runs as a <emphasis>remote connector</emphasis>, that is,
      on the remote host on which the Java Connector Server is installed. Copy
@@ -3539,9 +3538,9 @@ Properties:
      <literal>openicf/bundles</literal> directory on the remote host.
     </para>
     <screen><userinput>$ cd path/to/openidm
-     $ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/bundles</userinput>
-     <computeroutput>testuser@remote-host's password:
-      xml-connector-${openicf.xmlconnector.version}.jar                100% 4379KB   4.3MB/s   00:00</computeroutput></screen>
+$ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/bundles</userinput>
+<computeroutput>testuser@remote-host's password:
+xml-connector-${openicf.xmlconnector.version}.jar                100% 4379KB   4.3MB/s   00:00</computeroutput></screen>
 
     <procedure>
      <title>Configuring OpenIDM for the XML Connector Example</title>
@@ -3559,7 +3558,7 @@ Properties:
        OpenIDM project (sample 1).
       </para>
       <screen>$ cd path/to/openidm/samples/
-       $ cp provisioners/provisioner.openicf.connectorinfoprovider.json sample1/conf</screen>
+$ cp provisioners/provisioner.openicf.connectorinfoprovider.json sample1/conf</screen>
      </step>
      <step>
       <para>
@@ -3576,18 +3575,18 @@ Properties:
        port, and configured with a secret key of <literal>Passw0rd</literal>.
       </para>
       <programlisting>{
-       "connectorsLocation" : "bundles",
-       "remoteConnectorServers" : [
-       {
-       "name" : "xml",
-       "host" : "remote-host",
-       "port" : 8759,
-       "useSSL" : false,
-       "timeout" : 0,
-       "key" : "Passw0rd"
-       }
-       ]
-       }</programlisting>
+    "connectorsLocation" : "bundles",
+    "remoteConnectorServers" : [
+        {
+            "name" : "xml",
+            "host" : "remote-host",
+            "port" : 8759,
+            "useSSL" : false,
+            "timeout" : 0,
+            "key" : "Passw0rd"
+        }
+    ]
+}</programlisting>
      </step>
      <step>
       <para>
@@ -3596,19 +3595,19 @@ Properties:
        <literal>sample1/conf</literal> directory as follows.
       </para>
       <programlisting>{
-       "name" : "xmlfile",
-       "connectorRef" : {
-       "connectorHostRef" : "xml",
-       "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
-       "bundleVersion" : "${openicf.xmlconnector.version}",
-       "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
-       },
-       "configurationProperties" : {
-       "xsdIcfFilePath" : "/home/testuser/xml-sample/data/resource-schema-1.xsd",
-       "xsdFilePath" : "/home/testuser/xml-sample/data/resource-schema-extension.xsd",
-       "xmlFilePath" : "/home/testuser/xml-sample/data/xmlConnectorData.xml"
-       },
-       }</programlisting>
+    "name" : "xmlfile",
+    "connectorRef" : {
+        "connectorHostRef" : "xml",
+        "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
+        "bundleVersion" : "${openicf.xmlconnector.version}",
+        "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
+    },
+    "configurationProperties" : {
+        "xsdIcfFilePath" : "/home/testuser/xml-sample/data/resource-schema-1.xsd",
+        "xsdFilePath" : "/home/testuser/xml-sample/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "/home/testuser/xml-sample/data/xmlConnectorData.xml"
+    },
+}</programlisting>
      </step>
      <step>
       <itemizedlist>
@@ -3649,9 +3648,9 @@ Properties:
        remote connector:
       </para>
       <screen><userinput>-> scr list</userinput>
-       <computeroutput>...
-        [22] [active] org.forgerock.openidm.provisioner.openicf
-        ...</computeroutput></screen>
+<computeroutput>...
+[22] [active] org.forgerock.openidm.provisioner.openicf
+...</computeroutput></screen>
       <para>
        The connector module (<literal>org.forgerock.openidm.provisioner.openicf</literal>)
        should be <literal>active</literal>, indicating that the remote connector
@@ -3678,12 +3677,12 @@ Properties:
        reconciliation operation as follows:
       </para>
       <screen>$ curl \
-       --cacert self-signed.crt \
-       --header "X-OpenIDM-Username: openidm-admin" \
-       --header "X-OpenIDM-Password: openidm-admin" \
-       --header "Content-Type: application/json" \
-       --request POST \
-       "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request POST \
+"https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
       <para>
        If successful, the operation returns a reconciliation ID, similar to the
        following:
@@ -3696,26 +3695,26 @@ Properties:
        the OpenIDM repository, run the following command:
       </para>
       <screen><userinput>$ curl \
-       --cacert self-signed.crt \
-       --header "X-OpenIDM-Username: openidm-admin" \
-       --header "X-OpenIDM-Password: openidm-admin" \
-       --request GET \
-       "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</userinput>
-       <computeroutput>{
-        "remainingPagedResults": -1,
-        "pagedResultsCookie": null,
-        "resultCount": 2,
-        "result": [
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+"https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+    "remainingPagedResults": -1,
+    "pagedResultsCookie": null,
+    "resultCount": 2,
+    "result": [
         {
-        "_rev": "0",
-        "_id": "bjensen"
+            "_rev": "0",
+            "_id": "bjensen"
         },
         {
-        "_rev": "0",
-        "_id": "scarter"
+            "_rev": "0",
+            "_id": "scarter"
         }
-        ]
-        }</computeroutput>
+    ]
+}</computeroutput>
       </screen>
      </step>
     </procedure>
@@ -3732,98 +3731,162 @@ Properties:
    <secondary>Generating configurations</secondary>
   </indexterm>
   <para>
-   Rather than creating provisioner files by hand, use the service that OpenIDM
-   exposes through the REST interface to create basic connector configuration
-   files, or use the <command>cli.sh</command> or <command>cli.bat</command>
-   scripts to generate a basic connector configuration.
+   You have three ways to create provisioner files:
   </para>
-  <para>
-   This section describes how to create connector configurations over the REST
-   interface. For instructions on using the CLI to create connector
-   configurations, see the <link xlink:show="new"
-   xlink:href="integrators-guide#cli-configureconnector"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle
-   >configureconnector</citetitle></link> section of the <citetitle>CLI
-   Interface</citetitle> chapter.
-  </para>
-  <orderedlist>
-   <para>
-    You create a new connector configuration file in three stages:
-   </para>
-   <listitem>
-    <para>
-     List the available connectors.
-    </para>
-   </listitem>
-   <listitem>
-    <para>
-     Generate the core configuration.
-    </para>
-   </listitem>
-   <listitem>
-    <para>
-     Connect to the target system and generate the final configuration.
-    </para>
-   </listitem>
-  </orderedlist>
-  <para>
-   List the available connectors by using the following command.
-  </para>
-  <screen>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- --request POST \
- "https://localhost:8443/openidm/system?_action=availableConnectors"</screen>
 
   <itemizedlist>
-   <para>
-    Available connectors are installed in <filename>openidm/connectors</filename>.
-    OpenIDM ${docTargetVersion} bundles the following connectors:
-   </para>
    <listitem>
-    <para>CSV File Connector</para>
-   </listitem>
-   <listitem>
-    <para>Database Table Connector</para>
+    <para>
+     Start with the sample provisioner files in the
+     <filename>/path/to/openidm/samples/provisioners</filename> directory. For
+     more information, see <xref linkend="connectors-with-openidm" />.
+    </para>
    </listitem>
    <listitem>
     <para>
-     Scripted Groovy Connector Toolkit, which includes the following
-     sample implementations:
+     Set up connectors with the help of the Admin UI. To start this
+     process, navigate to <literal>https://localhost:8443/admin</literal> and
+     log into OpenIDM. Continue with <xref linkend="connector-wiz-adminui" />.
     </para>
-    <itemizedlist>
-     <listitem>
-      <para>Scripted SQL Connector</para>
-     </listitem>
-     <listitem>
-      <para>Scripted CREST Connector</para>
-     </listitem>
-     <listitem>
-      <para>Scripted REST Connector</para>
-     </listitem>
-    </itemizedlist>
    </listitem>
    <listitem>
-    <para>LDAP Connector</para>
-   </listitem>
-   <listitem>
-    <para>XML Connector</para>
-   </listitem>
-   <listitem>
-    <para>GoogleApps Connector (OpenIDM Enterprise only)</para>
-   </listitem>
-   <listitem>
-    <para>Salesforce Connector (OpenIDM Enterprise only)</para>
+    <para>
+     Use the service that OpenIDM exposes through the REST interface to create
+     basic connector configuration files, or use the <command>cli.sh</command>
+     or <command>cli.bat</command> scripts to generate a basic connector
+     configuration. To see how this works continue with
+     <xref linkend="connector-wiz-cli" />.
+    </para>
    </listitem>
   </itemizedlist>
 
-  <para>
-   The preceding command therefore returns the following output:
-  </para>
+  <section xml:id="connector-wiz-adminui">
+   <title>Adding New Connectors from the Admin UI</title>
 
-  <programlisting xml:id="step1-return" language="javascript">{
+   <para>
+    You can include several different connectors in an OpenIDM configuration.
+    In the Admin UI, select Configure &gt; Connector. Try some of the different
+    connector types in the screen that appears. Observe as the Admin UI changes
+    the configuration options to match the requirements of the connector type.
+   </para>
+
+   <!--    TODO, consider restoring close to product release.
+   <mediaobject>
+    <alt>Add Connector Admin UI Screen</alt>
+    <imageobject>
+     <imagedata fileref="images/admin-ui-con-types.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+        -->
+   <para>
+    If you are not sure what to enter in a specific Add Connector text box,
+    review the list of
+    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+          xlink:href="integrators-guide#connectors-with-openidm">
+     <citetitle>Connectors Supported With OpenIDM</citetitle></link>. You
+    should be able to find guidance and examples on how each supported
+    connector is configured.
+   </para>
+
+   <para>
+    When you have filled in all required text boxes, the Admin UI allows you
+    to validate the connector configuration.
+   </para>
+
+   <!-- TODO, include screenshot when UI is more mature -->
+
+  </section>
+
+  <section xml:id="connector-wiz-cli">
+   <title>Adding New Connectors from the Command Line</title>
+   <para>
+    This section describes how to create connector configurations over the REST
+    interface. For instructions on how to create connector configurations from
+    the command line, see the
+    <link xlink:show="new"
+          xlink:href="integrators-guide#cli-configureconnector"
+          xlink:role="http://docbook.org/xlink/role/olink"><citetitle
+    >configureconnector</citetitle></link> section of the <citetitle>OpenIDM
+    Command-Line Interface</citetitle> chapter.
+   </para>
+   <orderedlist>
+    <para>
+     You create a new connector configuration file in three stages:
+    </para>
+    <listitem>
+     <para>
+      List the available connectors.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Generate the core configuration.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Connect to the target system and generate the final configuration.
+     </para>
+    </listitem>
+   </orderedlist>
+   <para>
+    List the available connectors by using the following command.
+   </para>
+   <screen>$ <userinput>curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request POST \
+"https://localhost:8443/openidm/system?_action=availableConnectors"</userinput></screen>
+
+   <itemizedlist>
+    <para>
+     Available connectors are installed in <filename>openidm/connectors</filename>.
+     OpenIDM ${docTargetVersion} bundles the following connectors:
+    </para>
+    <listitem>
+     <para>CSV File Connector</para>
+    </listitem>
+    <listitem>
+     <para>Database Table Connector</para>
+    </listitem>
+    <listitem>
+     <para>
+      Scripted Groovy Connector Toolkit, which includes the following
+      sample implementations:
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>Scripted SQL Connector</para>
+      </listitem>
+      <listitem>
+       <para>Scripted CREST Connector</para>
+      </listitem>
+      <listitem>
+       <para>Scripted REST Connector</para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+    <listitem>
+     <para>LDAP Connector</para>
+    </listitem>
+    <listitem>
+     <para>XML Connector</para>
+    </listitem>
+    <listitem>
+     <para>GoogleApps Connector (OpenIDM Enterprise only)</para>
+    </listitem>
+    <listitem>
+     <para>Salesforce Connector (OpenIDM Enterprise only)</para>
+    </listitem>
+   </itemizedlist>
+
+   <para>
+    The preceding command therefore returns the following output:
+   </para>
+
+   <programlisting xml:id="step1-return" language="javascript">{
   "connectorRef": [
     {
       "bundleVersion": "${openicf.csvconnector.version}",
@@ -3902,44 +3965,44 @@ Properties:
       "displayName": "Salesforce Connector",
       "connectorName": "org.forgerock.openidm.salesforce.Salesforce"
     }
-  ]
-}</programlisting>
+    ]
+    }</programlisting>
 
-  <para>
-   To generate the core configuration, choose one of the available connectors by
-   copying one of the JSON objects from the generated list into the body of the
-   REST command, as shown below for the XML connector.
-  </para>
+   <para>
+    To generate the core configuration, choose one of the available connectors by
+    copying one of the JSON objects from the generated list into the body of the
+    REST command, as shown below for the XML connector.
+   </para>
 
-  <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- --request POST \
- --data '{"connectorRef":
- {"connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
- "displayName": "XML Connector",
- "bundleName": "org.forgerock.openicf.connectors.xml-connector",
- "bundleVersion": "${openicf.xmlconnector.version}"}
- }' \
- "https://localhost:8443/openidm/system?_action=createCoreConfig"</userinput></screen>
-  <para>
-   This command returns a core connector configuration, similar to the
-   following:
-  </para>
-  <programlisting language="javascript">{
-   "poolConfigOption": {
-   "minIdle": 1,
-   "minEvictableIdleTimeMillis": 120000,
-   "maxWait": 150000,
-   "maxIdle": 10,
-   "maxObjects": 10
+   <screen><userinput>$ curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request POST \
+--data '{"connectorRef":
+    {"connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
+    "displayName": "XML Connector",
+    "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+    "bundleVersion": "${openicf.xmlconnector.version}"}
+}' \
+    "https://localhost:8443/openidm/system?_action=createCoreConfig"</userinput></screen>
+   <para>
+    This command returns a core connector configuration, similar to the
+    following:
+   </para>
+   <programlisting language="javascript">{
+    "poolConfigOption": {
+    "minIdle": 1,
+    "minEvictableIdleTimeMillis": 120000,
+    "maxWait": 150000,
+    "maxIdle": 10,
+    "maxObjects": 10
   },
-   "resultsHandlerConfig": {
-   "enableAttributesToGetSearchResultsHandler": true,
-   "enableFilteredResultsHandler": true,
-   "enableNormalizingResultsHandler": true
+    "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableFilteredResultsHandler": true,
+    "enableNormalizingResultsHandler": true
   },
   "operationTimeout": {
     "SCHEMA": -1,
@@ -3957,10 +4020,10 @@ Properties:
     "RESOLVEUSERNAME": -1
   },
   "configurationProperties": {
-   "xsdIcfFilePath": null,
-   "xsdFilePath": null,
-   "createFileIfNotExists": false,
-   "xmlFilePath": null
+    "xsdIcfFilePath": null,
+    "xsdFilePath": null,
+    "createFileIfNotExists": false,
+    "xmlFilePath": null
   },
   "connectorRef": {
     "bundleVersion": "${openicf.xmlconnector.version}",
@@ -3977,98 +4040,100 @@ Properties:
     connector. In addition, the configuration does not include the complete list
     of <literal>"objectTypes"</literal> and
     <literal>"operationOptions"</literal>.
-  </para>
-  <para>
-   To generate the final configuration, add values for the
-   "configurationProperties" to the core configuration, and use the updated
-   configuration as the body for the next command.
-  </para>
-  
-  <screen>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- --request POST \
- --data '{
+   </para>
+   <para>
+    To generate the final configuration, add values for the
+    "configurationProperties" to the core configuration, and use the updated
+    configuration as the body for the next command.
+   </para>
+
+   <screen>$ curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request POST \
+--data '{
   "configurationProperties":
     {
       "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
       "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
       "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml",
       "createFileIfNotExists": false
-  },
-  "operationTimeout": {
-    "SCHEMA": -1,
-    "SYNC": -1,
-    "VALIDATE": -1,
-    "SEARCH": -1,
-    "AUTHENTICATE": -1,
-    "CREATE": -1,
-    "UPDATE": -1,
-    "DELETE": -1,
-    "TEST": -1,
-    "SCRIPT_ON_CONNECTOR": -1,
-    "SCRIPT_ON_RESOURCE": -1,
-    "GET": -1,
-    "RESOLVEUSERNAME": -1
-  },
-  "resultsHandlerConfig": {
-    "enableAttributesToGetSearchResultsHandler": true,
-    "enableFilteredResultsHandler": true,
-    "enableNormalizingResultsHandler": true
-  },
-  "poolConfigOption": {
-    "minIdle": 1,
-    "minEvictableIdleTimeMillis": 120000,
-    "maxWait": 150000,
-    "maxIdle": 10,
-    "maxObjects": 10
-  },
-  "connectorRef": {
-    "bundleVersion": "${openicf.xmlconnector.version}",
-    "bundleName": "org.forgerock.openicf.connectors.xml-connector",
-    "displayName": "XML Connector",
-    "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
-  }
-}' \
- "https://localhost:8443/openidm/system?_action=createFullConfig"</screen>
+    },
+    "operationTimeout": {
+      "SCHEMA": -1,
+      "SYNC": -1,
+      "VALIDATE": -1,
+      "SEARCH": -1,
+      "AUTHENTICATE": -1,
+      "CREATE": -1,
+      "UPDATE": -1,
+      "DELETE": -1,
+      "TEST": -1,
+      "SCRIPT_ON_CONNECTOR": -1,
+      "SCRIPT_ON_RESOURCE": -1,
+      "GET": -1,
+      "RESOLVEUSERNAME": -1
+    },
+    "resultsHandlerConfig": {
+      "enableAttributesToGetSearchResultsHandler": true,
+      "enableFilteredResultsHandler": true,
+      "enableNormalizingResultsHandler": true
+    },
+    "poolConfigOption": {
+      "minIdle": 1,
+      "minEvictableIdleTimeMillis": 120000,
+      "maxWait": 150000,
+      "maxIdle": 10,
+      "maxObjects": 10
+    },
+    "connectorRef": {
+      "bundleVersion": "${openicf.xmlconnector.version}",
+      "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+      "displayName": "XML Connector",
+      "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+    }
+  }' \
+"https://localhost:8443/openidm/system?_action=createFullConfig"</screen>
 
-  <note>
+   <note>
+    <para>
+     Notice the single quotes around the argument to the <option>--data</option>
+     option in the preceding command. For most UNIX shells, single quotes around
+     a string prevent the shell from executing the command when encountering a
+     newline in the content. You can therefore pass the
+     <option>--data '...'</option> option on a single line, or including line
+     feeds.
+    </para>
+   </note>
    <para>
-    Notice the single quotes around the argument to the <option>--data</option>
-    option in the preceding command. For most UNIX shells, single quotes around
-    a string prevent the shell from executing the command when encountering a
-    newline in the content. You can therefore pass the
-    <option>--data '...'</option> option on a single line, or including line
-    feeds.
+    OpenIDM attempts to read the schema, if available, from the external
+    resource in order to generate output. OpenIDM then iterates through schema
+    objects and attributes, creating JSON representations for "objectTypes" and
+    "operationOptions" for supported objects and operations.
    </para>
-  </note>
-  <para>
-   OpenIDM attempts to read the schema, if available, from the external
-  resource in order to generate output. OpenIDM then iterates through schema
-  objects and attributes, creating JSON representations for "objectTypes" and
-  "operationOptions" for supported objects and operations.
-  </para>
-  <para>
-   The output includes the basic <literal>--data</literal> input, along with
-   <literal>operationOptions</literal> and <literal>objectTypes</literal>.
-  </para>
-  <para>
-   Because OpenIDM produces a full property set for all attributes and all
-   object types in the schema from the external resource, the resulting
-   configuration can be large. For an LDAP server, OpenIDM can generate a
-   configuration containing several tens of thousands of lines, for example.
-   You might therefore want to reduce the schema to a minimum on the external
-   resource before you run the <literal>createFullConfig</literal> command.
-  </para>
-  <para>
-   When you have the complete connector configuration, save that configuration
-   in a file named <filename>provisioner.openicf-<replaceable>name</replaceable>.json</filename>
-   (where name corresponds to the name of the connector) and place it in the
-   <literal>conf</literal> folder of your project. For more information, see
-   <xref linkend="openicf-provisioner-conf" />.
-  </para>
+   <para>
+    The output includes the basic <literal>--data</literal> input, along with
+    <literal>operationOptions</literal> and <literal>objectTypes</literal>.
+   </para>
+   <para>
+    Because OpenIDM produces a full property set for all attributes and all
+    object types in the schema from the external resource, the resulting
+    configuration can be large. For an LDAP server, OpenIDM can generate a
+    configuration containing several tens of thousands of lines, for example.
+    You might therefore want to reduce the schema to a minimum on the external
+    resource before you run the <literal>createFullConfig</literal> command.
+   </para>
+   <para>
+    When you have the complete connector configuration, save that configuration
+    in a file named <filename>provisioner.openicf-<replaceable>name</replaceable>.json</filename>
+    (where name corresponds to the name of the connector) and place it in the
+    <literal>conf</literal> folder of your project. For more information, see
+    <xref linkend="openicf-provisioner-conf" />.
+   </para>
+  </section>
+
  </section>
 
  <section xml:id="systems-over-rest">

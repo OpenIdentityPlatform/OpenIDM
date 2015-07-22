@@ -1,7 +1,7 @@
 /*
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock Inc. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,6 +28,9 @@ import java.util.Dictionary;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
@@ -46,11 +49,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A utility to handle enhanced configuration, including nested lists and maps
+ * A service to handle enhanced configuration, including nested lists and maps
  * to represent JSON based structures.
- *
  */
+@Component(
+        name = JSONEnhancedConfig.PID,
+        policy = ConfigurationPolicy.IGNORE,
+        description = "OpenIDM Enhanced Config Service",
+        immediate = true,
+        metatype = true)
+@Service
 public class JSONEnhancedConfig implements EnhancedConfig {
+
+    public static final String PID = "org.forgerock.openidm.config.enhanced";
 
     /**
      * The key in the OSGi configuration dictionary holding the complete JSON
@@ -68,15 +79,6 @@ public class JSONEnhancedConfig implements EnhancedConfig {
 
     // Keep track of the cryptography OSGi service
     private static ServiceTracker cryptoTracker;
-
-    /**
-     * Creates a new newBuilder of {@code JSONEnhancedConfig}.
-     *
-     * @return new newBuilder of this class.
-     */
-    public static JSONEnhancedConfig newInstance() {
-        return new JSONEnhancedConfig();
-    }
 
     /**
      * Sets the escaping mode.

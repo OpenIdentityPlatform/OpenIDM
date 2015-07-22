@@ -1,7 +1,7 @@
-/*
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,22 +22,28 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.test.module;
+/*global define, $, _, Handlebars */
 
-import org.forgerock.commons.launcher.OSGiFramework;
-import org.testng.Assert;
-import org.testng.IModuleFactory;
-import org.testng.ITestContext;
-import com.google.inject.Module;
+define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView"
+], function(AdminAbstractView) {
+    var ProcessDefinitionsView = AdminAbstractView.extend({
+        template: "templates/admin/workflow/ProcessDefinitionsViewTemplate.html",
+        events: {
+        },
+        model : {
 
-/**
- * A ModuleFactory does ...
- *
- */
-public class ModuleFactory implements IModuleFactory {
-    public Module createModule(ITestContext context, Class<?> testClass) {
-        OSGiFramework service = (OSGiFramework) context.getAttribute(OSGiFramework.class.getName());
-        Assert.assertNotNull(service);
-        return new OpenIDMTestModule(service.getSystemBundle().getBundleContext());
-    }
-}
+        },
+        element: "#processDefinitions",
+        render: function(args, callback) {
+            this.parentRender(_.bind(function(){
+
+                if(callback) {
+                    callback();
+                }
+            }, this));
+        }
+    });
+
+    return new ProcessDefinitionsView();
+});

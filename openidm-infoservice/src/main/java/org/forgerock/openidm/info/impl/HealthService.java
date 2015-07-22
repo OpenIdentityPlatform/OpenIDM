@@ -232,6 +232,7 @@ public class HealthService
             "org.forgerock.openidm.bootrepo.(orientdb|jdbc)",
             "org.forgerock.openidm.cluster",
             "org.forgerock.openidm.config.enhanced",
+            "org.forgerock.openidm.config.manage",
             "org.forgerock.openidm.crypto",
             "org.forgerock.openidm.external.rest",
             "org.forgerock.openidm.internal",

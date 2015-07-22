@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -68,7 +68,6 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.DateUtil;
@@ -142,6 +141,10 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     /**
      * A list of listeners to notify when an instance fails
      */
@@ -152,11 +155,6 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      * A thread to perform cluster management
      */
     private ClusterManagerThread clusterManagerThread = null;
-
-    /**
-     * Enhanced configuration utility
-     */
-    private EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
 
     /**
      * The Cluster Manager Configuration

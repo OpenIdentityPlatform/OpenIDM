@@ -40,8 +40,9 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
@@ -83,7 +84,11 @@ public final class ResourceServlet extends HttpServlet {
     
     @Reference
     private WebContainer webContainer;
-    
+
+    /**vn comEnhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         logger.info("Activating resource servlet with configuration {}", context.getProperties());
@@ -167,7 +172,7 @@ public final class ResourceServlet extends HttpServlet {
      * @throws NamespaceException
      */
     private void init(ComponentContext context) throws ServletException, NamespaceException {
-        JsonValue config = new JSONEnhancedConfig().getConfigurationAsJson(context);
+        JsonValue config = enhancedConfig.getConfigurationAsJson(context);
         
         if (!config.get(CONFIG_ENABLED).isNull() && Boolean.FALSE.equals(config.get(CONFIG_ENABLED).asBoolean())) {
             logger.info("UI is disabled - not registering UI servlet");

@@ -36,8 +36,8 @@ A OpenDJ connector sample with sync of LDAP Groups.
 ### Sample3
 A ScriptSQL connector with mySQL.
 
-### Sample4
-A CSV connector sample.
+### Getting-Started
+Designed for the Getting Started Guide. Based on the original Sample 4.
 
 ### Sample5
 Attribute flow: LDAP -> OpenIDM -> AD with simulating xml resources

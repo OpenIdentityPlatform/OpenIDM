@@ -115,8 +115,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
             if(_.isArray(data) === true) {
                 _.each(data, function(linkQualifier){
                     this.$el.find("#scriptLinkQualifierList").append('<button disabled="true" type="button" class="removeLinkQualifier btn btn-primary">'
-                    + '<span class="linkQualifier">' +linkQualifier  +'</span>'
-                    + '</button>');
+                        + '<span class="linkQualifier">' +linkQualifier  +'</span>'
+                        + '</button>');
                 }, this);
 
                 this.$el.find("#badLinkQualifierScript").hide();
@@ -157,9 +157,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
                 this.data.linkQualifiers.push(toAdd);
 
                 this.$el.find("#staticLinkQualifierList").append('<button type="button" class="removeLinkQualifier btn btn-primary">'
-                + '<span class="linkQualifier">' +toAdd  +'</span>'
-                + '<i class="fa fa-times fa-lg"></i>'
-                + '</button>');
+                    + '<span class="linkQualifier">' +toAdd  +'</span>'
+                    + '<i class="fa fa-times fa-lg"></i>'
+                    + '</button>');
 
                 this.$el.find(".newLinkQualifier").val("");
 
@@ -210,35 +210,37 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
 
             if(scriptDetails !== null) {
                 ScriptDelegate.evalLinkQualifierScript(scriptDetails).then(_.bind(function (result) {
-                    if(_.isArray(result)) {
-                        _.each(result, function(item) {
-                            if(!_.isString(item)) {
-                                this.model.scriptError = true;
-                            }
-                        }, this);
-                    } else {
+                        if(_.isArray(result)) {
+                            _.each(result, function(item) {
+                                if(!_.isString(item)) {
+                                    this.model.scriptError = true;
+                                    this.model.errorMessage = $.t("templates.mapping.validLinkQualifierScript");
+                                }
+                            }, this);
+                        } else {
+                            this.model.scriptError = true;
+                            this.model.errorMessage = $.t("templates.mapping.linkQualifierNotArray");
+                        }
+
+                        if(!this.model.scriptError) {
+                            this.model.scriptResult = result;
+
+                            this.model.mapping.linkQualifiers = this.linkQualifierScript.generateScript();
+                            LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
+
+                            this.AbstractMappingSave(this.model.mapping, _.bind(function() {
+                                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
+                                EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
+                            }, this));
+
+                        } else {
+                            this.showErrorMessage(this.model.errorMessage);
+                        }
+                    }, this),
+                    _.bind(function (result) {
                         this.model.scriptError = true;
-                    }
-
-                    if(!this.model.scriptError) {
-                        this.model.scriptResult = result;
-
-                        this.model.mapping.linkQualifiers = this.linkQualifierScript.generateScript();
-                        LinkQualifierUtils.setLinkQualifier(this.model.scriptResult, this.model.mappingName);
-
-                        this.AbstractMappingSave(this.model.mapping, _.bind(function() {
-                            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "linkQualifierSaveSuccess");
-                            EventManager.sendEvent(Constants.EVENT_QUALIFIER_CHANGED, this.model.mappingName);
-                        }, this));
-
-                    } else {
-                        this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
-                    }
-                }, this),
-                _.bind(function (result) {
-                    this.model.scriptError = true;
-                    this.showErrorMessage(result.responseJSON.message);
-                }, this));
+                        this.showErrorMessage(result.responseJSON.message);
+                    }, this));
             } else {
                 this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
             }

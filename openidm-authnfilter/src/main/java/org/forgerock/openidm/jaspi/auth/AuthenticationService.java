@@ -52,7 +52,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.servlet.HttpContext;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
@@ -107,6 +107,10 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     /** a factory Function to build an Authenticator from an auth module config */
     private AuthenticatorFactory toAuthenticatorFromProperties;
 
@@ -153,7 +157,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
     @Activate
     public synchronized void activate(ComponentContext context) {
         logger.info("Activating Authentication Service with configuration {}", context.getProperties());
-        config = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        config = enhancedConfig.getConfigurationAsJson(context);
 
         // factory Function that instantiates an Authenticator from an auth module's config properties
         toAuthenticatorFromProperties = new AuthenticatorFactory(connectionFactory, cryptoService);
