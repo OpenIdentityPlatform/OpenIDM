@@ -224,7 +224,6 @@
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <jackson.version>1.9.12</jackson.version>
         <fasterxml.jackson.version>2.5.0</fasterxml.jackson.version>
-        <powermock.version>1.5.6</powermock.version>
         <!--fasterxml.jackson.version>2.2.1</fasterxml.jackson.version-->
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
@@ -907,18 +906,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>1.0.13</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-testng</artifactId>
-                <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
