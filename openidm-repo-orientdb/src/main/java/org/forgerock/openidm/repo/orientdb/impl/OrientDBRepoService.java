@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -67,7 +67,6 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -128,6 +127,10 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     private ODatabaseDocumentPool pool;
 
     private static final int DEFAULT_POOL_MIN_SIZE = 5;
@@ -151,7 +154,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     PredefinedQueries predefinedQueries = new PredefinedQueries();
     Queries queries = new Queries();
     Commands commands = new Commands();
-    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
     EmbeddedOServerService embeddedServer;
     

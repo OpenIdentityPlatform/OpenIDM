@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -39,7 +39,6 @@ import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.script.AbstractScriptedService;
 import org.osgi.framework.BundleContext;
@@ -73,13 +72,9 @@ public class EndpointsService extends AbstractScriptedService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private PersistenceConfig persistenceConfig;
 
-    protected void bindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = service;
-    }
-
-    protected void unbindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = null;
-    }
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
 
     private ComponentContext context;
 
@@ -89,15 +84,14 @@ public class EndpointsService extends AbstractScriptedService {
 
         Dictionary<String, Object> properties = context.getProperties();
         setProperties(properties);
-        EnhancedConfig config = JSONEnhancedConfig.newInstance();
 
-        String factoryPid = config.getConfigurationFactoryPid(context);
+        String factoryPid = enhancedConfig.getConfigurationFactoryPid(context);
         if (StringUtils.isBlank(factoryPid)) {
             throw new IllegalArgumentException("Configuration must have property: "
                     + ServerConstants.CONFIG_FACTORY_PID);
         }
 
-        JsonValue configuration = config.getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         configuration.put(ServerConstants.CONFIG_FACTORY_PID, factoryPid);
 
         activate(context.getBundleContext(), factoryPid, configuration);

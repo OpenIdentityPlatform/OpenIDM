@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -39,13 +39,15 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.script.AbstractScriptedService;
@@ -74,6 +76,10 @@ public class PolicyService extends AbstractScriptedService {
      * Setup logging for the {@link PolicyService}.
      */
     private static final Logger logger = LoggerFactory.getLogger(PolicyService.class);
+
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
 
     private ComponentContext context;
     
@@ -130,7 +136,7 @@ public class PolicyService extends AbstractScriptedService {
     }
 
     private JsonValue getConfiguration(ComponentContext context) {
-        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         init(configuration);
         return configuration;
     }

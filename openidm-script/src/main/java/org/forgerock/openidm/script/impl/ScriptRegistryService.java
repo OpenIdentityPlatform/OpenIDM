@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -80,7 +80,7 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -180,7 +180,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private static final String SOURCE_VISIBILITY = "visibility";
     private static final String SOURCE_TYPE = "type";
     private static final String SOURCE_GLOBALS = "globals";
-    
+
+    /** Enhanced configuration service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
 
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
     private static final ConcurrentMap<String, Object> propertiesCache = new ConcurrentHashMap<String, Object>();
@@ -193,7 +197,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     @Activate
     protected void activate(ComponentContext context) throws Exception {
-        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
 
         setConfiguration(configuration.required().asMap());
 
@@ -273,7 +277,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     @Modified
     protected void modified(ComponentContext context) {
-        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         setConfiguration(configuration.required().asMap());
         propertiesCache.clear();
         Set<String> keys =
