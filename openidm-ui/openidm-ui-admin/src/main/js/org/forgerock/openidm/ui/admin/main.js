@@ -63,7 +63,6 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/SaveChangesView",
     "./util/FilterEvaluator",
     "./util/BackgridUtils",
-    "./util/WorkflowUtils",
 
     "./objectTypes/ObjectTypesDialog",
 
@@ -120,6 +119,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./workflow/ProcessDefinitionsView",
     "./workflow/ProcessListView",
     "./workflow/ProcessInstanceView",
+    "./workflow/ProcessHistoryView",
     "./workflow/TaskListView",
     "./workflow/TaskInstanceView"
 ]);

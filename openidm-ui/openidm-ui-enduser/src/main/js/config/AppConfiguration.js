@@ -155,9 +155,8 @@ define("config/AppConfiguration", [
                 moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                 configuration: {
                     templateUrls: [ //preloaded templates
-                        //"templates/apps/application.html",
-                        "templates/dashboard/workflow/tasks/ProcessUserTaskTableTemplate.html",
-                        "templates/dashboard/workflow/tasks/ShowUserProfile.html"
+                        "templates/workflow/tasks/ProcessUserTaskTableTemplate.html",
+                        "templates/workflow/tasks/ShowUserProfile.html"
                     ]
                 }
             },
