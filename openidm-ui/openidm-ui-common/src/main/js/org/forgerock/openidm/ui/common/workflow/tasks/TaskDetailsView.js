@@ -27,19 +27,19 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/dashboard/workflow/tasks/TaskDetailsView", [
+define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/dashboard/workflow/WorkflowDelegate",
-    "org/forgerock/openidm/ui/dashboard/workflow/FormManager",
-    "org/forgerock/openidm/ui/dashboard/workflow/tasks/TemplateTaskForm",
+    "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
+    "org/forgerock/openidm/ui/common/workflow/FormManager",
+    "org/forgerock/openidm/ui/common/workflow/tasks/TemplateTaskForm",
     "org/forgerock/commons/ui/common/util/FormGenerationUtils",
     "UserDelegate"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm, formGenerationUtils, userDelegate) {
     var TaskDetailsView = AbstractView.extend({
-        template: "templates/dashboard/workflow/tasks/TaskDetailsTemplate.html",
+        template: "templates/workflow/tasks/TaskDetailsTemplate.html",
 
         element: "#taskDetails",
         

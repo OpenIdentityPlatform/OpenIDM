@@ -25,55 +25,49 @@
 /*global define, $, form2js, _, js2form, document */
 
 /**
- * @author jdabrowski
+ * @author mbilski
  */
-define("org/forgerock/openidm/ui/dashboard/workflow/processes/AbstractProcessForm", [
+define("org/forgerock/openidm/ui/common/workflow/tasks/AbstractTaskForm", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/dashboard/workflow/WorkflowDelegate",
+    "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
-    var AbstractProcessForm = AbstractView.extend({
+    var AbstractTaskForm = AbstractView.extend({
         template: "templates/common/EmptyTemplate.html",
-        element: "#processContent",
+        element: "#taskContent",
         
         events: {
             "onValidate": "onValidate"
         },
         
-        postRender: function() {
-            
+        postRender: function(callback) {
+            if(callback) {
+                callback();
+            }
         },
         
-        prepareData: function(callback) {
-            callback();
-        },
-        
-        render: function(processDefinition, category, args, callback) { 
+        render: function(task, category, args, callback) { 
             this.setElement(this.element);
             this.$el.unbind();
             this.delegateEvents();
-            this.processDefinition = processDefinition;
+            this.task = task;
             this.category = category;
             this.args = args;
             
-            this.prepareData(_.bind(function() {
-                this.parentRender(function() {  
-                    this.postRender(callback);
-                    this.reloadData();
-                }); 
-            }, this));
-                       
+            this.parentRender(function() {      
+                this.postRender(callback);
+                this.reloadData();
+            });            
         },
         
         reloadData: function() {
         }
-        
     }); 
     
-    return AbstractProcessForm;
+    return AbstractTaskForm;
 });
 
 

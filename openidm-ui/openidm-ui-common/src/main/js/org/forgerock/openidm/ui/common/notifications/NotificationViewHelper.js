@@ -22,34 +22,24 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, Handlebars */
+/*global define*/
 
-/**
- * @author mbilski
- */
-define("org/forgerock/openidm/ui/dashboard/workflow/processes/TemplateStartProcessForm", [
-    "org/forgerock/openidm/ui/dashboard/workflow/processes/AbstractProcessForm",
-    "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractProcessForm, DateUtil, conf, uiUtils) {
-    
-    var TemplateStartProcessForm = AbstractProcessForm.extend({
-        
-        template: "templates/common/EmptyTemplate.html",
-        
-        postRender: function(callback) {
-            var t = Handlebars.compile(this.args)(this.processDefinition);
-            
-            this.$el.html(t);
-            
-            if (callback) {
-                callback();
-            }
+define("org/forgerock/openidm/ui/common/notifications/NotificationViewHelper", [
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function (constants, eventManager, config, AbstractConfigurationAware) {
+
+    var obj = {};
+    eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function (event) {
+        if(config.notificationTypes) {
+            obj.notificationTypes = config.notificationTypes;
         }
         
-    }); 
-    
-    return new TemplateStartProcessForm();
+        if(config.defaultNotificationType) {
+            obj.defaultType = config.defaultNotificationType;
+        }
+    });
+    return obj;
 });
-
-

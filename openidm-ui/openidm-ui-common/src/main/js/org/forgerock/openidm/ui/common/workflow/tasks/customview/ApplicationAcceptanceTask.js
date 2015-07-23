@@ -27,14 +27,14 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/dashboard/workflow/tasks/customview/ApplicationAcceptanceTask", [
-    "org/forgerock/openidm/ui/dashboard/workflow/tasks/AbstractTaskForm",
+define("org/forgerock/openidm/ui/common/workflow/tasks/customview/ApplicationAcceptanceTask", [
+    "org/forgerock/openidm/ui/common/workflow/tasks/AbstractTaskForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractTaskForm, DateUtil, userDelegate, conf) {
     var ApplicationAcceptanceTask = AbstractTaskForm.extend({
-        template: "templates/dashboard/workflow/tasks/customview/ApplicationAcceptanceTemplate.html",
+        template: "templates/workflow/tasks/customview/ApplicationAcceptanceTemplate.html",
         
         reloadData: function() {
             var self = this;
