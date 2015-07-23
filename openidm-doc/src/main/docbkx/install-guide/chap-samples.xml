@@ -4411,12 +4411,11 @@ $ ./startup.sh -p samples/sample4</screen>
    <primary>Samples</primary>
    <secondary>Sample 5 - Synchronization of two resources</secondary>
   </indexterm>
-
   <para>
    Sample 5 demonstrates the flow of data from one external resource to
    another. The resources are named <literal>LDAP</literal> and
-   <literal>AD</literal> but in the sample, both directory-like resources are
-   simulated with XML files.
+   <literal>AD</literal> but in the sample, both resources are simulated with
+   XML files.
   </para>
   <para>
    You can optionally configure an outbound email service, if you want to
@@ -4428,20 +4427,21 @@ $ ./startup.sh -p samples/sample4</screen>
    <title>Configure Email for the Sample</title>
    <para>
     If you do not configure the email service, the functionality of the sample
-    does not change. However, you might see the following message at the
+    does not change. However, you might see the following message in the
     OpenIDM console when you run a reconciliation operation:
    </para>
    <screen>Email service not configured; report not generated.</screen>
 
    <procedure>
     <para>
-     To configure an email summary, follow these steps:
+     To configure OpenIDM to send a reconciliation summary by email, follow
+     these steps:
     </para>
-
     <step>
      <para>
       Copy the template <filename>external.email.json</filename> file from
-      the <filename>samples/misc</filename> directory:
+      the <filename>samples/misc</filename> directory to the <literal>conf</literal>
+      directory of Sample 5:
      </para>
      <screen>$ cd /path/to/openidm
 $ cp samples/misc/external.email.json samples/sample5/conf
