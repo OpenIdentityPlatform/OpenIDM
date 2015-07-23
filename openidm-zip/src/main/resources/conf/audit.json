@@ -9,7 +9,7 @@
             "config" : {
                 "logDirectory" : "audit"
             },
-            "events" : [ "access", "activity", "recon", "sync" ]
+            "events" : [ "access", "activity", "recon", "sync", "authentication" ]
         }
     ],
     "extendedEventTypes" : {
