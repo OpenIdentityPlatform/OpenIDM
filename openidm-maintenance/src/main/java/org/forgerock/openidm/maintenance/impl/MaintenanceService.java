@@ -213,7 +213,7 @@ public class MaintenanceService implements RequestHandler {
     private void enableMaintenanceMode() throws ResourceException {
         if (maintenanceModeLock.tryAcquire()) {
             try {
-                logger.info("Enabling maintenence mode");
+                logger.info("Enabling maintenance mode");
                 List<String> componentNames = Arrays.asList(maintenanceModeComponents);
                 maintenanceEnabled = true;
                 org.apache.felix.scr.Component[] components = scrService.getComponents();
@@ -246,7 +246,7 @@ public class MaintenanceService implements RequestHandler {
     private void disableMaintenanceMode() throws ResourceException {
         if (maintenanceModeLock.tryAcquire()) {
             try {
-                logger.info("Disabling maintenence mode");
+                logger.info("Disabling maintenance mode");
                 List<String> componentNames = Arrays.asList(maintenanceModeComponents);
                 maintenanceEnabled = false;
                 org.apache.felix.scr.Component[] components = scrService.getComponents();
