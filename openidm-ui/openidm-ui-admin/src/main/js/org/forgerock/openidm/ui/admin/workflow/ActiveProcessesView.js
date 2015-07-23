@@ -26,7 +26,6 @@
 
 define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/AbstractModel",
@@ -34,9 +33,9 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
+    "org/forgerock/commons/ui/common/main/Router",
     "backgrid"
 ], function(AdminAbstractView,
-            ModuleLoader,
             ResourceDelegate,
             uiUtils,
             AbstractModel,
@@ -44,6 +43,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
             eventManager,
             constants,
             BackgridUtils,
+            router,
             Backgrid) {
     var ActiveProcessesView = AdminAbstractView.extend({
         template: "templates/admin/workflow/ActiveProcessViewTemplate.html",
@@ -110,16 +110,16 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                                 editable: false
                             },
                             {
-                                name: "startTime",
-                                label: $.t("templates.workflows.processes.created"),
-                                cell: BackgridUtils.DateCell("startTime"),
+                                name: "startUserId",
+                                label: $.t("templates.workflows.processes.startedBy"),
+                                cell: "string",
                                 sortable: true,
                                 editable: false
                             },
                             {
-                                name: "startUserId",
-                                label: $.t("templates.workflows.processes.startedBy"),
-                                cell: "string",
+                                name: "startTime",
+                                label: $.t("templates.workflows.processes.created"),
+                                cell: BackgridUtils.DateCell("startTime"),
                                 sortable: true,
                                 editable: false
                             },
@@ -128,14 +128,16 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                                 cell: BackgridUtils.ButtonCell([
                                     {
                                         className: "fa fa-pencil grid-icon",
-                                        href: "#workflow/processinstance/"
+                                        callback: function() {
+                                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.processInstanceView, args: [this.model.id]});
+                                        }
                                     },
                                     {
                                         className: "fa fa-times grid-icon",
                                         callback: function(event){
                                             event.preventDefault();
 
-                                            uiUtils.jqConfirm("Are you sure you wish to delete this active process?", _.bind(function(){
+                                            uiUtils.jqConfirm($.t("templates.workflows.processes.cancelProcessDialog"), _.bind(function(){
                                                 this.model.destroy({
                                                     success: _.bind(function() {
                                                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deletedActiveProcess");

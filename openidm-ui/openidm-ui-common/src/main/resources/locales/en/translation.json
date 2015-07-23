@@ -537,16 +537,17 @@
         "workflows": {
             "processes" : {
                 "processInstance" : "PROCESS INSTANCE",
+                "processDefinitions" : "PROCESS DEFINITIONS",
                 "created" : "CREATED",
                 "startedBy" : "STARTED BY",
                 "processes" : "Workflow Processes",
-                "assignedTo" : "Assigned To: ",
+                "startedByFilter" : "Started By: ",
                 "filterByType" : "Filter by Type: ",
                 "activeProcesses" : "Active",
                 "processDefinitions" : "Definitions",
                 "processesCompleted" : "Completed",
                 "noActiveProcesses" : "No Active Processes",
-                "processCancelDialog" : "Are you sure you wish to cancel this active process?"
+                "cancelProcessDialog" : "Are you sure you wish to cancel this active process?"
             },
             "sync": "These data properties are sent when the workflow is triggered",
             "nonSync": "Workflow scripts can access these object/properties.",

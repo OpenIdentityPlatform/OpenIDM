@@ -30,7 +30,7 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/dashboard/workflow/tasks/TasksDashboard",
+    "org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard",
     "org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader"
 ], function(_, AbstractView, eventManager, constants, conf, tasksDashboard, DashboardWidgetLoader) {
     var Dashboard = AbstractView.extend({
