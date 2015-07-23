@@ -51,6 +51,26 @@ define("org/forgerock/openidm/ui/common/main", [
     "./dashboard/widgets/MemoryUsageWidget",
     "./dashboard/widgets/ReconProcessesWidget",
     "./dashboard/widgets/CPUUsageWidget",
-    
+
+    "./notifications/NotificationDelegate",
+    "./notifications/NotificationsView",
+    "./notifications/NotificationViewHelper",
+
+    "./workflow/FormManager",
+    "./workflow/WorkflowDelegate",
+
+    "./workflow/tasks/TaskDetailsView",
+    "./workflow/tasks/AbstractTaskForm",
+    "./workflow/tasks/customview/ApplicationAcceptanceTask",
+    "./workflow/tasks/TasksMenuView",
+    "./workflow/tasks/TasksDashboard",
+    "./workflow/tasks/TemplateTaskForm",
+
+    "./workflow/processes/AbstractProcessForm",
+    "./workflow/processes/StartProcessDashboardView",
+    "./workflow/processes/StartProcessView",
+    "./workflow/processes/TemplateStartProcessForm",
+    "./workflow/processes/customview/SendNotificationProcess",
+
     "./linkedView/LinkedView"
 ]);
