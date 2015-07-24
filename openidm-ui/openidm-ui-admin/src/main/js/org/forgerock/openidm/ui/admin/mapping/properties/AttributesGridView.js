@@ -38,7 +38,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/FilterEvaluator",
     "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
-    "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor"
+    "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
+    "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
+    "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog"
 ], function(MappingAdminAbstractView,
             eventManager,
             conf,
@@ -52,7 +54,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             ScriptDelegate,
             FilterEvaluator,
             QueryFilterUtils,
-            QueryFilterEditor) {
+            QueryFilterEditor,
+            AddPropertyMappingDialog,
+            EditPropertyMappingDialog) {
 
     var AttributesGridView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/AttributesGridTemplate.html",
@@ -61,7 +65,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         events: {
             "click .addProperty": "addProperty",
             "click .removePropertyBtn": "removeProperty",
-            "click .attrTabBtn": "openPropertyEditTab",
             "keyup #numRepresentativeProps": "resetNumRepresentativeProps",
             "click #updateMappingButton": "saveMapping",
             "click #clearChanges": "clearChanges",
@@ -133,7 +136,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
         addProperty: function (e) {
             e.preventDefault();
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "addMappingProperty", args: [this.mapping.name]});
+            AddPropertyMappingDialog.render({
+                mappingProperties: this.model.mappingProperties,
+                availProperties: this.model.availableObjects.target.properties,
+                saveCallback: _.bind(function(props) {
+                    this.setMappingProperties(props);
+                }, this)
+            });
         },
 
         clearChanges: function(e) {
@@ -156,21 +165,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
                 this.render();
             }, this));
-        },
-
-        openPropertyEditTab: function(e) {
-            var id = $(e.target).attr('rowId'),
-                tab = $(e.target).attr('tab');
-
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.mapping.name, id]});
-
-            if (tab === 'condition'){
-                $("[href=#Condition_Script]").click();
-            } else if (tab === 'transform'){
-                $("[href=#Transformation_Script]").click();
-            } else if (tab === 'default'){
-                $("[href=#Default_Values]").click();
-            }
         },
 
         resetNumRepresentativeProps: function(e) {
@@ -206,6 +200,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             });
 
             this.model.mappingProperties = props;
+            this.render();
+        },
+
+        setMappingProperties: function(mappingProperties) {
+            this.model.mappingProperties = mappingProperties;
             this.render();
         },
 
@@ -579,7 +578,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                 });
             }, this));
 
-            gridFromMapProps(mapProps).then(function(gridResults) {
+            gridFromMapProps(mapProps).then(_.bind(function(gridResults) {
                 $('#mappingTable').jqGrid({
                     datatype: "local",
                     data: gridResults,
@@ -591,19 +590,18 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                     hidegrid: false,
                     colModel: cols,
                     cmTemplate: {sortable: false},
-                    onSelectRow: function (id) {
+                    onSelectRow: function(id) {
                         if (id !== "blankRow") {
-                            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [_this.mapping.name, id]});
+                            EditPropertyMappingDialog.render({
+                                id: id,
+                                mappingProperties: _this.model.mappingProperties,
+                                availProperties: _this.model.availableObjects.target.properties,
+                                saveCallback: function(props) {
+                                    _this.setMappingProperties(props);
+                                }
+                            });
                         }
                     },
-
-                    beforeSelectRow: function (rowid, e) {
-                        if ($(e.target).hasClass("removePropertyBtn")) {
-                            return false;
-                        }
-                        return true;
-                    },
-
                     loadComplete: function (data) {
                         if (!data.rows.length) {
                             $('#mappingTable').addRowData("blankRow", {"required": true, "target": $.t("templates.mapping.noPropertiesMapped"), "default": "", "script": "", "hasConditionScript": false});
@@ -663,7 +661,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         $("#mappingTable", _this.$el).find("tr td").css("border-bottom-width", "");
                     }
                 });
-            });
+            }, this));
         },
 
         checkAvailableProperties: function(){
