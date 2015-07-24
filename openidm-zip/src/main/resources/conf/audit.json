@@ -13,6 +13,27 @@
         }
     ],
     "extendedEventTypes" : {
+        "activity": {
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "/",
+                "type": "object",
+                "properties": {
+                    "objectId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "passwordChanged": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
     },
     "customEventTypes" : {
     }
