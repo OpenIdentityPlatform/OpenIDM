@@ -25,16 +25,235 @@
 /*global define, $, _, Handlebars */
 
 define("org/forgerock/openidm/ui/admin/workflow/TaskListView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView"
-], function(AdminAbstractView) {
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/commons/ui/common/main/AbstractModel",
+    "org/forgerock/commons/ui/common/main/AbstractCollection",
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/openidm/ui/admin/util/WorkflowUtils",
+    "backgrid"
+
+], function(AdminAbstractView,
+            ModuleLoader,
+            ResourceDelegate,
+            AbstractModel,
+            AbstractCollection,
+            CustomCells,
+            EventManager,
+            Constants,
+            Router,
+            WorkflowUtils,
+            Backgrid) {
+
     var TaskListView = AdminAbstractView.extend({
         template: "templates/admin/workflow/TaskListViewTemplate.html",
         events: {
-
+            "click .assignTask": "assignTask"
         },
+        model: {},
         render: function(args, callback) {
-            this.parentRender(_.bind(function(){
+            this.parentRender(_.bind(function() {
+                var tasksGrid,
+                    TaskModel = AbstractCollection.extend({
+                        model: AbstractModel.extend({ "url": "/openidm/workflow/taskinstance?_queryId=filtered-query" })
+                    }),
+                    TaskInstanceModel = AbstractModel.extend({ url: "/openidm/workflow/taskinstance" }),
+                    Tasks = new TaskModel();
 
+                this.model = new TaskInstanceModel();
+
+                Tasks.url = "/openidm/workflow/taskinstance?_queryId=filtered-query";
+                Tasks.setSorting("createTime");
+                Tasks.state.pageSize = null;
+
+                tasksGrid = new Backgrid.Grid({
+                    className: "table",
+                    columns: [{
+                        name: "smallScreenCell",
+                        cell: Backgrid.Cell.extend({
+                            className: "smallScreenCell",
+                            render: function () {
+                                var username = this.model.get("assignee") || "unassigned",
+                                    className = "badge assignTask",
+                                    html;
+
+                                if (_.isNull(this.model.get("assignee"))) {
+                                    className += " unassigned";
+                                }
+
+                                html = "<a href='#workflow/taskinstance/"+this.model.id+"'><i class='fa fa-pencil grid-icon pull-right'></i></a>" +
+                                "<p>" + this.model.get("name") + "</p>" +
+                                "<p><a href='#workflow/taskinstance/"+this.model.id+"'>" + this.model.get("processDefinitionId") + " <small class='text-muted'>(" + this.model.id + ")</small></a></p>" +
+                                "<p><a class='" + className + "' data-id='" + this.model.id + "'>" + username + "</a></p>" +
+                                "<p>" + CustomCells.formatDate(this.model.get("createTime")) + "</p>" +
+                                "<p>" + CustomCells.formatDate(this.model.get("dueDate")) + "</p>";
+
+
+                                this.$el.html(html);
+                                return this;
+                            }
+                        }),
+                        sortable: false,
+                        editable: false
+                    }, {
+                        label: $.t("templates.workflows.tasks.task"),
+                        name: "_id",
+                        cell: CustomCells.DisplayNameCell("name"),
+                        sortable: true,
+                        editable: false
+                    }, {
+                        label: $.t("templates.workflows.tasks.process"),
+                        name: "processDefinitionId",
+                        cell: Backgrid.Cell.extend({
+                            render: function () {
+                                this.$el.html("<a href='#workflow/taskinstance/"+this.model.id+"'>" + this.model.get("processDefinitionId")+ " <small class='text-muted'>(" + this.model.id + ")</small></a>");
+                                return this;
+                            }
+                        }),
+                        sortable: false,
+                        editable: false
+                    }, {
+                        label: $.t("templates.workflows.tasks.assignee"),
+                        name: "assignee",
+                        cell: Backgrid.Cell.extend({
+                            render: function() {
+                                var username = this.model.get("assignee") || "unassigned",
+                                    className = "badge assignTask",
+                                    html;
+
+                                if (_.isNull(this.model.get("assignee"))) {
+                                    className += " unassigned";
+                                }
+
+                                html = '<a class="' + className + '" data-id="' + this.model.id + '">' + username + '</a>';
+
+                                this.$el.html(html);
+
+                                return this;
+                            }
+                        }),
+                        sortable: true,
+                        editable: false
+                    }, {
+                        name: "createTime",
+                        label: $.t("templates.workflows.tasks.created"),
+                        cell: CustomCells.DateCell("createTime"),
+                        sortable: true,
+                        editable: false
+                    }, {
+                        name: "dueDate",
+                        label: $.t("templates.workflows.tasks.due"),
+                        cell: CustomCells.DateCell("dueDate"),
+                        sortable: true,
+                        editable: false
+                    }, {
+                        name: "",
+                        cell: CustomCells.ButtonCell([{
+                            className: "fa fa-pencil grid-icon",
+                            callback: function() {
+                                EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.taskInstanceView, args: [this.model.id]});
+                            }
+                        }]),
+                        sortable: false,
+                        editable: false
+                    }],
+                    collection: Tasks
+                });
+
+                this.$el.find("#taskGridHolder").append(tasksGrid.render().el);
+                Tasks.getFirstPage();
+
+                this.$el.find("#taskAssignedTo").selectize({
+                    valueField: '_id',
+                    labelField: 'userName',
+                    searchField: ["given", "sn", "userName"],
+                    create: false,
+                    preload: true,
+                    onChange: _.bind(function(value) {
+                        if(value === "anyone") {
+                            Tasks.url = "/openidm/workflow/taskinstance?_queryId=query-all-ids";
+                        } else if(value === "unassigned") {
+                            Tasks.url = "/openidm/workflow/taskinstance?_queryId=filtered-query&unassigned=true";
+                        } else {
+                            Tasks.url = "/openidm/workflow/taskinstance?_queryId=filtered-query&assignee=" + value;
+                        }
+
+                        Tasks.getFirstPage();
+                    },this),
+
+                    render : {
+                        item: function(item, escape) {
+                            var icon = "fa-user",
+                                userName = item.userName.length > 0 ? ' (' + escape(item.userName) + ')': "";
+
+                            if(item._id === "anyone") {
+                                icon = "fa-users";
+                            }
+
+                            return '<div>' +
+                                '<span class="user-title">' +
+                                '<span class="user-fullname"><i class="fa ' +icon +'"></i> ' + escape(item.displayName) + userName + '</span>' +
+                                '</span>' +
+                                '</div>';
+                        },
+                        option: function(item, escape) {
+                            var icon = "fa-user",
+                                userName = item.userName.length > 0 ? ' (' + escape(item.userName) + ')': "";
+
+                            if(item._id === "anyone") {
+                                icon = "fa-users";
+                            }
+
+                            return '<div>' +
+                                '<span class="user-title">' +
+                                '<span class="user-fullname"><i class="fa ' +icon +'"></i> ' + escape(item.displayName) + userName + '</span>' +
+                                '</span>' +
+                                '</div>';
+                        }
+                    },
+
+                    load: _.bind(function(query, callback) {
+                        var queryFilter;
+
+                        if (!query.length) {
+                            queryFilter = "userName sw \"\" &_pageSize=10";
+                        } else {
+                            queryFilter = "displayName co \"" + query + "\" or userName co \"" + query + "\"";
+                        }
+
+                        ResourceDelegate.searchResource(queryFilter, "managed/user").then(function (search) {
+                                callback(search.result);
+                            },
+                            function() {
+                                callback();
+                            }
+                        );
+                    }, this)
+                });
+
+                this.$el.find("#taskAssignedTo")[0].selectize.addOption({_id : "anyone", userName: "", displayName : $.t("templates.workflows.tasks.anyone")});
+                this.$el.find("#taskAssignedTo")[0].selectize.addOption({_id : "unassigned", userName: "", displayName : $.t("templates.workflows.tasks.unassigned")});
+
+                this.$el.find("#taskAssignedTo")[0].selectize.setValue("anyone");
+
+                if(callback) {
+                    callback();
+                }
+
+            }, this));
+        },
+
+        assignTask: function(e) {
+            if (e) {
+                e.preventDefault();
+            }
+            this.model.id = $(e.currentTarget).attr("data-id");
+            this.model.fetch().then(_.bind(function() {
+                WorkflowUtils.showCandidateUserSelection(this);
             }, this));
         }
     });
