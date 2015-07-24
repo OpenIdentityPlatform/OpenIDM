@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -527,6 +527,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                                 handler.handleResult(response.getContent());
                             } catch (ResourceException e) {
                                 handler.handleError(e);
+                            } catch (Exception e) {
+                                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
                             }
                         } else {
                             handler.handleError(new NotFoundException("Query returned no results"));
