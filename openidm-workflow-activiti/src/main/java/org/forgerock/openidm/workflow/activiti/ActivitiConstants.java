@@ -103,4 +103,7 @@ public class ActivitiConstants {
     public static final String ACTIVITI_UNASSIGNED = "unassigned";
     public static final String ACTIVITI_FINISHED = "finished";
     public static final String ACTIVITI_UNFINISHED = "unfinished";
+    public static final String ACTIVITI_PROCESSFINISHED = "processFinished";
+    public static final String ACTIVITI_PROCESSUNFINISHED = "processUnfinished";
+
 }

@@ -49,12 +49,13 @@ import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricTaskInstanceEn
 
 /**
  * Resource implementation of ProcessInstance related Activiti operations
+ * for both currently running processes and historic processes.
  */
 public class ProcessInstanceResource implements CollectionResourceProvider {
 
     private final static ObjectMapper MAPPER;
     private ProcessEngine processEngine;
-    private PersistenceConfig persistenceConfig;
+    private HistoricProcessInstanceQuery historicProcessInstanceQuery;
 
     static {
         MAPPER = new ObjectMapper();
@@ -64,13 +65,9 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
         MAPPER.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
-    public ProcessInstanceResource(ProcessEngine processEngine, PersistenceConfig config) {
+    public ProcessInstanceResource(ProcessEngine processEngine, HistoricProcessInstanceQuery query) {
         this.processEngine = processEngine;
-        this.persistenceConfig = config;
-    }
-
-    public void setProcessEngine(ProcessEngine processEngine) {
-        this.processEngine = processEngine;
+        historicProcessInstanceQuery = query;
     }
 
     @Override
@@ -148,11 +145,8 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             if (ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
-                HistoricProcessInstanceQuery query = processEngine.getHistoryService().createHistoricProcessInstanceQuery();
-                query = query.unfinished();
-                List<HistoricProcessInstance> list = query.list();
-                for (HistoricProcessInstance i : list) {
-                    Map value = MAPPER.convertValue(i, HashMap.class);
+                for (HistoricProcessInstance i : historicProcessInstanceQuery.list()) {
+                    Map<String, Object> value = MAPPER.convertValue(i, Map.class);
                     // TODO OPENIDM-3603 add relationship support
                     value.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(i));
                     Resource r = new Resource(i.getId(), null, new JsonValue(value));
@@ -160,12 +154,9 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 }
                 handler.handleResult(new QueryResult());
             } else if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
-                HistoricProcessInstanceQuery query = processEngine.getHistoryService().createHistoricProcessInstanceQuery();
-                setProcessInstanceParams(query, request);
-                setSortKeys(query, request);
-                query = query.unfinished();
-                List<HistoricProcessInstance> list = query.list();
-                for (HistoricProcessInstance processinstance : list) {
+                setProcessInstanceParams(historicProcessInstanceQuery, request);
+                setSortKeys(historicProcessInstanceQuery, request);
+                for (HistoricProcessInstance processinstance : historicProcessInstanceQuery.list()) {
                     Map<String, Object> value = MAPPER.convertValue(processinstance, Map.class);
                     // TODO OPENIDM-3603 add relationship support
                     value.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(processinstance));
