@@ -25,6 +25,7 @@
 package org.forgerock.openidm.audit.util;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
@@ -41,7 +42,8 @@ public class NullActivityLogger implements ActivityLogger {
      * {@inheritDoc}
      */
     @Override
-    public void log(ServerContext context, RequestType requestType, String message, String objectId, JsonValue before, JsonValue after, Status status) throws ResourceException {
+    public void log(ServerContext context, Request request, String message, String objectId,
+                    JsonValue before, JsonValue after, Status status) throws ResourceException {
         // don't log
     }
 }

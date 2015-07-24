@@ -609,7 +609,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             // log the ConnectorException
             logger.debug(message, exception);
             try {
-                connectorExceptionActivityLogger.log(context, request.getRequestType(), message, resourceId,
+                connectorExceptionActivityLogger.log(context, request, message, resourceId,
                         before, after, Status.FAILURE);
             } catch (ResourceException e) {
                 // this means the ActivityLogger couldn't log request; log to error log
@@ -1339,7 +1339,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         AttributeUtil.filterUid(createAttributes), operationOptions);
 
                 Resource resource = getCurrentResource(facade, uid, null);
-                activityLogger.log(context, RequestType.CREATE, "message", getSource(objectClass, uid.getUidValue()), null, resource.getContent(), Status.SUCCESS);
+                activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()), null, resource.getContent(), Status.SUCCESS);
                 handler.handleResult(resource);
             } catch (ResourceException e) {
                 handler.handleError(e);
@@ -1380,7 +1380,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != uid.getRevision()) {
                     result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
                 }
-                activityLogger.log(context, RequestType.DELETE, "message", getSource(objectClass, uid.getUidValue()), before.getContent(), null, Status.SUCCESS);
+                activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()), before.getContent(), null, Status.SUCCESS);
                 handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
             } catch (ResourceException e) {
                 handler.handleError(e);
@@ -1447,7 +1447,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         AttributeUtil.filterUid(patchedAttributes), operationOptions);
 
                 Resource resource = getCurrentResource(facade, uid, null);
-                activityLogger.log(context, RequestType.PATCH, "message", getSource(objectClass, uid.getUidValue()), beforeValue, resource.getContent(), Status.SUCCESS);
+                activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()), beforeValue, resource.getContent(), Status.SUCCESS);
                 handler.handleResult(resource);
             } catch (ResourceException e) {
                 handler.handleError(e);
@@ -1534,7 +1534,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 }
                             }
                         }, operationOptionsBuilder.build());
-                activityLogger.log(context, request.getRequestType(),
+                activityLogger.log(context, request,
                         "query: " + request.getQueryId()
                         + ", queryExpression: " + request.getQueryExpression()
                         + ", queryFilter: " + (request.getQueryFilter() != null ? request.getQueryFilter().toString() : null)
@@ -1576,7 +1576,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
                 if (null != connectorObject) {
                     Resource resource = objectClassInfoHelper.build(connectorObject, cryptoService);
-                    activityLogger.log(context, RequestType.READ, "message", getSource(objectClass, uid.getUidValue()), resource.getContent(), resource.getContent(), Status.SUCCESS);
+                    activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()), resource.getContent(), resource.getContent(), Status.SUCCESS);
                     handler.handleResult(resource);
                 } else {
                     final String matchedUri = context.containsContext(RouterContext.class)
@@ -1646,7 +1646,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         AttributeUtil.filterUid(replaceAttributes), operationOptions);
 
                 Resource resource = getCurrentResource(facade, uid, null);
-                activityLogger.log(context, RequestType.UPDATE, "message", getSource(objectClass, uid.getUidValue()), before.getContent(), resource.getContent(), Status.SUCCESS);
+                activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()), before.getContent(), resource.getContent(), Status.SUCCESS);
                 handler.handleResult(resource);
             } catch (ResourceException e) {
                 handler.handleError(e);
@@ -2308,7 +2308,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setContent(content);
                                                     connectionFactory.getConnection().action(routerContext, onCreateRequest);
 
-                                                    activityLogger.log(routerContext, RequestType.ACTION,
+                                                    activityLogger.log(routerContext, onCreateRequest,
                                                                     "sync-create", onCreateRequest.getResourceName(),
                                                                     deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
@@ -2328,7 +2328,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setContent(content);
                                                     connectionFactory.getConnection().action(routerContext, onUpdateRequest);
 
-                                                    activityLogger.log(routerContext, RequestType.ACTION,
+                                                    activityLogger.log(routerContext, onUpdateRequest,
                                                             "sync-update", onUpdateRequest.getResourceName(),
                                                             deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
@@ -2343,7 +2343,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setContent(content);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);
 
-                                                    activityLogger.log(routerContext, RequestType.ACTION,
+                                                    activityLogger.log(routerContext, onDeleteRequest,
                                                             "sync-delete", onDeleteRequest.getResourceName(),
                                                             null, null, Status.SUCCESS);
                                                     break;
@@ -2416,5 +2416,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             throw new InternalServerErrorException("Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
         }
         return stage;
+    }
+
+    /**
+     * Package level setter to allow unit tests to set the logger.
+     * @param activityLogger
+     */
+    void setActivityLogger(ActivityLogger activityLogger) {
+        this.activityLogger = activityLogger;
     }
 }
