@@ -535,6 +535,18 @@
             "addSchedule": "Add Schedule"
         },
         "workflows": {
+            "tasks": {
+                "title": "Workflow Tasks",
+                "newTask": "New Task",
+                "assigned": "Assigned To",
+                "task": "Task",
+                "process": "Process",
+                "assignee": "Assignee",
+                "created": "Created",
+                "due": "Due",
+                "anyone": "Anyone",
+                "unassigned": "Unassigned"
+            },
             "processes" : {
                 "processInstance" : "PROCESS INSTANCE",
                 "processDefinitions" : "PROCESS DEFINITIONS",
