@@ -85,11 +85,11 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessHistoryView", [
                     emptyText: $.t("templates.workflows.processes.noCompletedProcesses"),
                     columns: [
                         {
-                            name: "processDefinitionId",
+                            name: "processDefinitionResourceName",
                             label: $.t("templates.workflows.processes.processInstance"),
                             cell: Backgrid.Cell.extend({
                                 render: function () {
-                                    this.$el.html('<a href="#workflow/processinstance/' +this.model.id +'">' +this.model.get("processDefinitionId") +'<small class="text-muted"> (' +this.model.id +')</small></a>');
+                                    this.$el.html('<a href="#workflow/processinstance/' +this.model.id +'">' +this.model.get("processDefinitionResourceName") +'<small class="text-muted"> (' +this.model.id +')</small></a>');
 
                                     this.delegateEvents();
                                     return this;
