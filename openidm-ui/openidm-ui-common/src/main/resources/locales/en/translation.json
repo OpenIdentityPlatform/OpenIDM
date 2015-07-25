@@ -22,7 +22,7 @@
         },
         "messages" : {
             "WorkflowMessages" : {
-              "cancelActiveProcess" : "Workflow Process successfully cancelled."
+              "cancelActiveProcess" : "Workflow Process cancelled."
             },
             "AuditMessages" : {
               "auditSaveSuccessful": "Audit configurations have been saved."
@@ -548,10 +548,10 @@
                 "unassigned": "Unassigned"
             },
             "processes" : {
-                "processInstance" : "PROCESS INSTANCE",
-                "processDefinitions" : "PROCESS DEFINITIONS",
-                "created" : "CREATED",
-                "startedBy" : "STARTED BY",
+                "processInstance" : "Process Instance",
+                "processDefinitions" : "Process Definitions",
+                "created" : "Created",
+                "startedBy" : "Started By",
                 "processes" : "Workflow Processes",
                 "startedByFilter" : "Started By: ",
                 "filterByType" : "Filter by Type: ",
