@@ -559,6 +559,8 @@
                 "processDefinitions" : "Definitions",
                 "processesCompleted" : "Completed",
                 "noActiveProcesses" : "No Active Processes",
+                "noCompletedProcesses" : "No Completed Processes",
+                "noProcessesDefinitions" : "No Process Definitions",
                 "cancelProcessDialog" : "Are you sure you wish to cancel this active process?"
             },
             "sync": "These data properties are sent when the workflow is triggered",
