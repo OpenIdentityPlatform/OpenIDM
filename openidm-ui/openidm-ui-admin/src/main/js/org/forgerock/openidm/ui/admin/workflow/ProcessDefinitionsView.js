@@ -43,43 +43,36 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
         element: "#processDefinitions",
         render: function(args, callback) {
             this.parentRender(_.bind(function(){
-                this.model.processDefinitions = new AbstractCollection();
-                this.model.processDefinitions.url =  "/openidm/workflow/processdefinition?_queryId=filtered-query";
+                this.parentRender(_.bind(function() {
+                    var processDefinitionGrid,
+                        ProcessDefinitionModel = AbstractModel.extend({ "url": "/openidm/workflow/processdefinition" }),
+                        Process = AbstractCollection.extend({ model: ProcessDefinitionModel });
 
-                this.model.processDefinitions.getFirstPage().then(_.bind(function(processDefinitions){
-                    this.data.processDefinitions = processDefinitions.result;
+                    this.model.processes = new Process();
+                    this.model.processes.url = "/openidm/workflow/processdefinition?_queryId=filtered-query";
+                    this.model.processes.state.pageSize = null;
 
-                    this.parentRender(_.bind(function() {
-                        var processDefinitionGrid,
-                            ProcessDefinitionModel = AbstractModel.extend({ "url": "/openidm/workflow/processdefinition" }),
-                            Process = AbstractCollection.extend({ model: ProcessDefinitionModel });
+                    processDefinitionGrid = new Backgrid.Grid({
+                        className: "table",
+                        emptyText: $.t("templates.workflows.processes.noProcessesDefinitions"),
+                        columns: [
+                        {
+                            name: "name",
+                            label: $.t("templates.workflows.processes.processDefinitions"),
+                            cell: "string",
+                            sortable: true,
+                            editable: false
+                        }],
+                        collection: this.model.processes
+                    });
 
-                        this.model.processes = new Process();
-                        this.model.processes.url = "/openidm/workflow/processdefinition?_queryId=filtered-query";
-                        this.model.processes.state.pageSize = null;
+                    this.$el.find("#processDefinitionGridHolder").append(processDefinitionGrid.render().el);
 
-                        processDefinitionGrid = new Backgrid.Grid({
-                            className: "table",
-                            emptyText: $.t("templates.workflows.processes.noActiveProcesses"),
-                            columns: [
-                            {
-                                name: "name",
-                                label: $.t("templates.workflows.processes.processDefinitions"),
-                                cell: "string",
-                                sortable: true,
-                                editable: false
-                            }],
-                            collection: this.model.processes
-                        });
+                    this.model.processes.getFirstPage();
 
-                        this.$el.find("#processDefinitionGridHolder").append(processDefinitionGrid.render().el);
-
-                        this.model.processes.getFirstPage();
-
-                        if(callback) {
-                            callback();
-                        }
-                    }, this));
+                    if(callback) {
+                        callback();
+                    }
                 }, this));
             }, this));
         }

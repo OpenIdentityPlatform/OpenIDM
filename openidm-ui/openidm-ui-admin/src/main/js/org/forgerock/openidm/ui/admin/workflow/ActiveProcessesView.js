@@ -56,181 +56,169 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
         },
         element: "#activeProcesses",
         render: function(args, callback) {
-            this.model.processDefinitions = new AbstractCollection();
-            this.model.processDefinitions.url =  "/openidm/workflow/processdefinition?_queryId=filtered-query";
+            this.data.processDefinitions = args[0];
 
-            this.model.processDefinitions.getFirstPage().then(_.bind(function(processDefinitions){
-                this.data.processDefinitions = _.chain(processDefinitions.result)
-                                                    .map(function (pd) {
-                                                        return _.pick(pd,"name","key");
-                                                    })
-                                                    .uniq(function (pdm) {
-                                                        return pdm.name;
-                                                    })
-                                                    .value();
+            this.parentRender(_.bind(function() {
+                var processGrid,
+                    ProcessModel = AbstractModel.extend({ "url": "/openidm/workflow/processinstance" }),
+                    Process = AbstractCollection.extend({ model: ProcessModel });
 
-                this.parentRender(_.bind(function() {
-                    var processGrid,
-                        ProcessModel = AbstractModel.extend({ "url": "/openidm/workflow/processinstance" }),
-                        Process = AbstractCollection.extend({ model: ProcessModel });
+                this.model.processes = new Process();
 
-                    this.model.processes = new Process();
-
-                    this.model.processes.on('backgrid:sort', function(model) {
-                        var cid = model.cid,
-                            filtered = model.collection.filter(function (model) {
-                                return model.cid !== cid;
-                            });
-
-                        _.each(filtered, function (model) {
-                            model.set('direction', null);
+                this.model.processes.on('backgrid:sort', function(model) {
+                    var cid = model.cid,
+                        filtered = model.collection.filter(function (model) {
+                            return model.cid !== cid;
                         });
+
+                    _.each(filtered, function (model) {
+                        model.set('direction', null);
                     });
+                });
 
-                    this.model.processes.url = "/openidm/workflow/processinstance?_queryId=filtered-query";
-                    this.model.processes.state.pageSize = null;
-                    this.model.processes.state.sortKey = "-startTime";
+                this.model.processes.url = "/openidm/workflow/processinstance?_queryId=filtered-query";
+                this.model.processes.state.pageSize = null;
+                this.model.processes.state.sortKey = "-startTime";
 
-                    processGrid = new Backgrid.Grid({
-                        className: "table",
-                        emptyText: $.t("templates.workflows.processes.noActiveProcesses"),
-                        columns: [
-                            {
-                                name: "processDefinitionId",
-                                label: $.t("templates.workflows.processes.processInstance"),
-                                cell: Backgrid.Cell.extend({
-                                    render: function () {
-                                        this.$el.html('<a href="#workflow/processinstance/' +this.model.id +'">' +this.model.get("processDefinitionId") +'<small class="text-muted"> (' +this.model.id +')</small></a>');
+                processGrid = new Backgrid.Grid({
+                    className: "table",
+                    emptyText: $.t("templates.workflows.processes.noActiveProcesses"),
+                    columns: [
+                        {
+                            name: "processDefinitionId",
+                            label: $.t("templates.workflows.processes.processInstance"),
+                            cell: Backgrid.Cell.extend({
+                                render: function () {
+                                    this.$el.html('<a href="#workflow/processinstance/' +this.model.id +'">' +this.model.get("processDefinitionId") +'<small class="text-muted"> (' +this.model.id +')</small></a>');
 
-                                        this.delegateEvents();
-                                        return this;
-                                    }
-                                }),
-                                sortable: true,
-                                editable: false
-                            },
-                            {
-                                name: "startUserId",
-                                label: $.t("templates.workflows.processes.startedBy"),
-                                cell: "string",
-                                sortable: true,
-                                editable: false
-                            },
-                            {
-                                name: "startTime",
-                                label: $.t("templates.workflows.processes.created"),
-                                cell: BackgridUtils.DateCell("startTime"),
-                                sortable: true,
-                                editable: false
-                            },
-                            {
-                                name: "",
-                                cell: BackgridUtils.ButtonCell([
-                                    {
-                                        className: "fa fa-pencil grid-icon",
-                                        callback: function() {
-                                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.processInstanceView, args: [this.model.id]});
-                                        }
-                                    },
-                                    {
-                                        className: "fa fa-times grid-icon",
-                                        callback: function(event){
-                                            event.preventDefault();
-
-                                            uiUtils.jqConfirm($.t("templates.workflows.processes.cancelProcessDialog"), _.bind(function(){
-                                                this.model.destroy({
-                                                    success: _.bind(function() {
-                                                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deletedActiveProcess");
-                                                    }, this)
-                                                });
-                                            }, this));
-                                        }
-                                    }
-                                ]),
-                                sortable: false,
-                                editable: false
-                            }],
-                        collection: this.model.processes
-                    });
-
-                    this.$el.find("#processGridHolder").append(processGrid.render().el);
-
-                    this.model.processes.getFirstPage();
-
-                    this.$el.find("#processAssignedTo").selectize({
-                        valueField: '_id',
-                        labelField: 'userName',
-                        searchField: ["userName","givenName", "sn"],
-                        create: false,
-                        preload: true,
-                        onChange: _.bind(function(value) {
-                            this.model.userFilter = value;
-
-                            this.reloadGrid();
-                        },this),
-                        render : {
-                            item: function(item, escape) {
-                                var username = '<small class="text-muted"> (' +escape(item.userName) +')</small>';
-
-                                if(item._id === "anyone") {
-                                    username = '';
+                                    this.delegateEvents();
+                                    return this;
                                 }
-
-                                return '<div>' +
-                                    '<span class="user-title">' +
-                                    '<span class="user-fullname">' + escape(item.givenName) +' ' +escape(item.sn) + '</span>' +
-                                    username +
-                                    '</span>' +
-                                    '</div>';
-                            },
-                            option: function(item, escape) {
-                                var username = '<small class="text-muted"> (' +escape(item.userName) +')</small>';
-
-                                if(item._id === "anyone") {
-                                    username = "";
-                                }
-
-                                return '<div>' +
-                                    '<span class="user-title">' +
-                                    '<span class="user-fullname">' + escape(item.givenName) +' ' +escape(item.sn) + '</span>' +
-                                    username +
-                                    '</span>' +
-                                    '</div>';
-                            }
+                            }),
+                            sortable: true,
+                            editable: false
                         },
-                        load: _.bind(function(query, callback) {
-                            var queryFilter;
+                        {
+                            name: "startUserId",
+                            label: $.t("templates.workflows.processes.startedBy"),
+                            cell: "string",
+                            sortable: true,
+                            editable: false
+                        },
+                        {
+                            name: "startTime",
+                            label: $.t("templates.workflows.processes.created"),
+                            cell: BackgridUtils.DateCell("startTime"),
+                            sortable: true,
+                            editable: false
+                        },
+                        {
+                            name: "",
+                            cell: BackgridUtils.ButtonCell([
+                                {
+                                    className: "fa fa-pencil grid-icon",
+                                    callback: function() {
+                                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.processInstanceView, args: [this.model.id]});
+                                    }
+                                },
+                                {
+                                    className: "fa fa-times grid-icon",
+                                    callback: function(event){
+                                        event.preventDefault();
 
-                            if (!query.length) {
-                                queryFilter = "userName sw \"\" &_pageSize=10";
-                            } else {
-                                queryFilter = "givenName sw \"" +query +"\" or sn sw \"" +query +"\" or userName sw \"" +query +"\"";
+                                        uiUtils.jqConfirm($.t("templates.workflows.processes.cancelProcessDialog"), _.bind(function(){
+                                            this.model.destroy({
+                                                success: _.bind(function() {
+                                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deletedActiveProcess");
+                                                }, this)
+                                            });
+                                        }, this));
+                                    }
+                                }
+                            ]),
+                            sortable: false,
+                            editable: false
+                        }],
+                    collection: this.model.processes
+                });
+
+                this.$el.find("#processGridHolder").append(processGrid.render().el);
+
+                this.model.processes.getFirstPage();
+
+                this.$el.find("#processAssignedTo").selectize({
+                    valueField: '_id',
+                    labelField: 'userName',
+                    searchField: ["userName","givenName", "sn"],
+                    create: false,
+                    preload: true,
+                    onChange: _.bind(function(value) {
+                        this.model.userFilter = value;
+
+                        this.reloadGrid();
+                    },this),
+                    render : {
+                        item: function(item, escape) {
+                            var username = '<small class="text-muted"> (' +escape(item.userName) +')</small>';
+
+                            if(item._id === "anyone") {
+                                username = '';
                             }
 
-                            ResourceDelegate.searchResource(queryFilter, "managed/user").then(function(search) {
-                                    callback(search.result);
-                                },
-                                function(){
-                                    callback();
-                                }
-                            );
+                            return '<div>' +
+                                '<span class="user-title">' +
+                                '<span class="user-fullname">' + escape(item.givenName) +' ' +escape(item.sn) + '</span>' +
+                                username +
+                                '</span>' +
+                                '</div>';
+                        },
+                        option: function(item, escape) {
+                            var username = '<small class="text-muted"> (' +escape(item.userName) +')</small>';
 
-                        }, this)
-                    });
+                            if(item._id === "anyone") {
+                                username = "";
+                            }
 
-                    this.$el.find("#processAssignedTo")[0].selectize.addOption({
-                        _id : "anyone",
-                        userName: "Anyone",
-                        givenName : "Anyone",
-                        sn : ""
-                    });
+                            return '<div>' +
+                                '<span class="user-title">' +
+                                '<span class="user-fullname">' + escape(item.givenName) +' ' +escape(item.sn) + '</span>' +
+                                username +
+                                '</span>' +
+                                '</div>';
+                        }
+                    },
+                    load: _.bind(function(query, callback) {
+                        var queryFilter;
 
-                    this.$el.find("#processAssignedTo")[0].selectize.setValue("anyone", true);
+                        if (!query.length) {
+                            queryFilter = "userName sw \"\" &_pageSize=10";
+                        } else {
+                            queryFilter = "givenName sw \"" +query +"\" or sn sw \"" +query +"\" or userName sw \"" +query +"\"";
+                        }
 
-                    if(callback) {
-                        callback();
-                    }
-                }, this));
+                        ResourceDelegate.searchResource(queryFilter, "managed/user").then(function(search) {
+                                callback(search.result);
+                            },
+                            function(){
+                                callback();
+                            }
+                        );
+
+                    }, this)
+                });
+
+                this.$el.find("#processAssignedTo")[0].selectize.addOption({
+                    _id : "anyone",
+                    userName: "Anyone",
+                    givenName : "Anyone",
+                    sn : ""
+                });
+
+                this.$el.find("#processAssignedTo")[0].selectize.setValue("anyone", true);
+
+                if(callback) {
+                    callback();
+                }
             }, this));
         },
 
