@@ -114,7 +114,8 @@
                 "linkQualifierSaveSuccess": "The link qualifier(s) have been saved."
             },
             "settingMessages" : {
-                "saveSelfServiceSuccess": "Self service URL has been updated."
+                "saveSelfServiceSuccess": "Self service URL has been updated.",
+                "saveEmailSuccess": "Email configuration has been saved."
             }
         },
         "AppConfiguration" : {
@@ -728,11 +729,22 @@
             "moduleType": "Module Type",
             "select": "Make a Selection"
         },
-        "sysConfig": {
-            "title": "System Configurations",
+        "selfService": {
+            "title": "Self-Service UI",
             "endUserConfigTitle": "Self-Service UI Features",
             "urlDesc": "Application for end-users to perform self-service tasks (profile updates, workflow tasks, etc...)",
             "url": "Relative URL"
+        },
+        "emailConfig": {
+            "title": "Email",
+            "desc": "Configure the outbound email service",
+            "host": "Host",
+            "port": "Port",
+            "username": "Username",
+            "password": "Password",
+            "smtp": "Use SMTP Authentication",
+            "tls": "Use TLS",
+            "from": "Sender Email Address"
         },
         "connector" : {
             "backToConnectorList" : "Back to Connectors",
@@ -1298,7 +1310,7 @@
             "adaptiveAuthMethod" : "Adaptive authentication method",
             "SMS" : "SMS",
             "OAuth" : "OAuth",
-            "createNewUser" : "Create New User",            
+            "createNewUser" : "Create New User",
             "password" : "Password",
             "confirmPassword" : "ReType Password",
             "newPassword" : "New password",

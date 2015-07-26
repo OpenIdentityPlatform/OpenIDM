@@ -109,6 +109,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./settings/SettingsView",
     "./settings/AuthenticationView",
     "./settings/AuditView",
+    "./settings/EmailConfigView",
+    "./settings/SelfServiceView",
 
     "./role/EditRoleView",
     "./role/RoleUsersView",

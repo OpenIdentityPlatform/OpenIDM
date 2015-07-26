@@ -24,7 +24,7 @@
 
 /*global define, $, _, Handlebars, form2js, JSONEditor */
 
-define("org/forgerock/openidm/ui/admin/settings/SystemConfigView", [
+define("org/forgerock/openidm/ui/admin/settings/SelfServiceView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -37,9 +37,9 @@ define("org/forgerock/openidm/ui/admin/settings/SystemConfigView", [
             ConfigDelegate,
             validatorsManager) {
 
-    var SystemConfigView = AdminAbstractView.extend({
-        template: "templates/admin/settings/SystemConfigTemplate.html",
-        element: "#systemConfigContainer",
+    var SelfServiceView = AdminAbstractView.extend({
+        template: "templates/admin/settings/SelfServiceTemplate.html",
+        element: "#selfServiceContainer",
         noBaseTemplate: true,
         events: {
             "click #saveSelfServiceURL": "saveSelfServiceURL",
@@ -72,7 +72,7 @@ define("org/forgerock/openidm/ui/admin/settings/SystemConfigView", [
             this.model.uiContextObject.urlContextRoot = this.$el.find("#selfServiceURL").val();
 
             ConfigDelegate.updateEntity("ui.context/enduser", this.model.uiContextObject).then(_.bind(function () {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "systemConfigSaveSuccess");
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "selfServiceSaveSuccess");
             }, this));
         },
 
@@ -83,5 +83,5 @@ define("org/forgerock/openidm/ui/admin/settings/SystemConfigView", [
         }
     });
 
-    return new SystemConfigView();
+    return new SelfServiceView();
 });
