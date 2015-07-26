@@ -168,8 +168,12 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.WorkflowMessages.cancelActiveProcess",
             type: "info"
         },
-        "systemConfigSaveSuccess": {
+        "selfServiceSaveSuccess": {
             msg: "config.messages.settingMessages.saveSelfServiceSuccess",
+            type: "info"
+        },
+        "emailConfigSaveSuccess": {
+            msg: "config.messages.settingMessages.saveEmailSuccess",
             type: "info"
         }
     };
