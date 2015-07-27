@@ -2263,12 +2263,17 @@ $ ./startup.sh -p samples/usecase/usecase2
 $ more samples/usecase/usecase2/conf/external.email.json
      </userinput>
 <computeroutput>{
-        "host" : "smtp.gmail.com",
-        "port" : "587",
-        "username" : "my-username",
-        "password" : "my-password",
-        "mail.smtp.auth" : "true",
-        "mail.smtp.starttls.enable" : "true"
+    "host" : "smtp.example.com",
+    "port" : "587",
+    "debug" : false,
+    "auth" : {
+        "enable" : true,
+        "username" : "admin",
+        "password" : "Passw0rd"
+    },
+    "starttls" : {
+        "enable" : true
+    }
 }</computeroutput></screen>
     </step>
     <step>
@@ -3252,14 +3257,18 @@ $ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</user
      </para>
      <screen><userinput>$ cd /path/to/openidm
 $ more samples/usecase/usecase6/conf/external.email.json</userinput>
-<computeroutput>
-{
-        "host" : "smtp.gmail.com",
-        "port" : "587",
-        "username" : "my-username",
-        "password" : "my-password",
-        "mail.smtp.auth" : "true",
-        "mail.smtp.starttls.enable" : "true"
+<computeroutput>{
+    "host" : "smtp.example.com",
+    "port" : "587",
+    "debug" : false,
+    "auth" : {
+        "enable" : true,
+        "username" : "admin",
+        "password" : "Passw0rd"
+    },
+    "starttls" : {
+        "enable" : true
+     }
 }</computeroutput>
      </screen>
     </step>
