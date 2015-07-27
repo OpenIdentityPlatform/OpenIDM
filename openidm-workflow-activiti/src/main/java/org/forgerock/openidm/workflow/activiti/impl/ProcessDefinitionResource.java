@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2012 ForgeRock Inc. All rights reserved.
+ * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,10 +23,11 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,12 +50,14 @@ import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.ProcessDefinitionMixIn;
+import org.forgerock.util.encode.Base64;
 
 /**
  * Resource implementation of ProcessDefinition related Activiti operations
@@ -75,10 +78,6 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     }
 
     public ProcessDefinitionResource(ProcessEngine processEngine) {
-        this.processEngine = processEngine;
-    }
-
-    public void setProcessEngine(ProcessEngine processEngine) {
         this.processEngine = processEngine;
     }
 
@@ -103,7 +102,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) processEngine.getRepositoryService().getProcessDefinition(resourceId);
             if (processDefinition != null) {
-                Resource r = convertInstance(processDefinition);
+                Resource r = convertInstance(processDefinition, request.getFields());
                 processEngine.getRepositoryService().deleteDeployment(processDefinition.getDeploymentId(), false);
                 handler.handleResult(r);
             } else {
@@ -113,8 +112,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
             handler.handleError(new NotFoundException(ex.getMessage()));
         } catch (PersistenceException ex) {
             handler.handleError(new ConflictException("The process definition has running instances, can not be deleted"));
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
     }
@@ -160,9 +158,10 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-            ProcessDefinitionEntity def = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(resourceId);
-            Resource r = convertInstance(def);
-            handler.handleResult(r);
+            ProcessDefinitionEntity def =
+                    (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService())
+                            .getDeployedProcessDefinition(resourceId);
+            handler.handleResult(convertInstance(def, request.getFields()));
         } catch (ActivitiObjectNotFoundException ex) {
             handler.handleError(new NotFoundException(ex.getMessage()));
         } catch (Exception ex) {
@@ -208,20 +207,21 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     }
 
     /**
-     * Add FormProperty related data to the map of task properties
+     * Return the list of FormProperty-related data
      *
-     * @param propertyList map containing the result
      * @param handlers list of handlers to process
+     * @return propertyList list of form properties
      */
-    private void addFormHandlerData(List<Map> propertyList, List<FormPropertyHandler> handlers) {
+    private List<Map<String, Object>> getFormHandlerData(List<FormPropertyHandler> handlers) {
+        final List<Map<String, Object>> propertyList = new ArrayList<>();
         for (FormPropertyHandler h : handlers) {
-            Map<String, Object> entry = new HashMap<String, Object>();
+            Map<String, Object> entry = new HashMap<>();
             entry.put(ActivitiConstants.ID, h.getId());
             entry.put(ActivitiConstants.FORMPROPERTY_DEFAULTEXPRESSION, h.getDefaultExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLEEXPRESSION, h.getVariableExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLENAME, h.getVariableName());
             entry.put(ActivitiConstants.ACTIVITI_NAME, h.getName());
-            Map<String, Object> type = new HashMap<String, Object>(3);
+            Map<String, Object> type = new HashMap<>(3);
             if (h.getType() != null) {
                 type.put(ActivitiConstants.ACTIVITI_NAME, h.getType().getName());
                 type.put(ActivitiConstants.ENUM_VALUES, h.getType().getInformation("values"));
@@ -233,35 +233,49 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
             entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, h.isWritable());
             propertyList.add(entry);
         }
+        return propertyList;
     }
     
     /**
      * Converts a ProcessDefinitionEntity to Resource object
+     *
      * @param processDefinition entity to be converted
+     * @param fields the list of requested fields
      * @return converted process definition
      * @throws IOException 
      */
-    private Resource convertInstance(ProcessDefinitionEntity processDefinition) throws IOException {
-        Map value = mapper.convertValue(processDefinition, HashMap.class);
-        Resource r = new Resource(processDefinition.getId(), null, new JsonValue(value));
-        FormService formService = processEngine.getFormService();
-        StartFormData startFormData = formService.getStartFormData(processDefinition.getId());
+    private Resource convertInstance(ProcessDefinitionEntity processDefinition, List<JsonPointer> fields)
+            throws IOException {
+        final String deploymentId = processDefinition.getDeploymentId();
+        final JsonValue content = new JsonValue(mapper.convertValue(processDefinition, Map.class));
+
+        // add form data
         if (processDefinition.hasStartFormKey()) {
-            r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
-            ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(processDefinition.getDeploymentId(), startFormData.getFormKey());
-            Reader reader = new InputStreamReader(startForm);
-            try {
+            FormService formService = processEngine.getFormService();
+            StartFormData startFormData = formService.getStartFormData(processDefinition.getId());
+            content.put(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
+            try (final InputStream startForm = processEngine.getRepositoryService().getResourceAsStream(
+                    deploymentId, startFormData.getFormKey());
+                 final Reader reader = new InputStreamReader(startForm)) {
+
                 Scanner s = new Scanner(reader).useDelimiter("\\A");
                 String formTemplate = s.hasNext() ? s.next() : "";
-                r.getContent().add(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
-            } finally {
-                reader.close();
+                content.put(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
+            }
+        }
+
+        // add diagram if requested and exists
+        if (fields.contains(ActivitiConstants.ACTIVITI_DIAGRAM)
+                && processDefinition.getDiagramResourceName() != null) {
+            try (final InputStream is = processEngine.getRepositoryService().getResourceAsStream(
+                    deploymentId, processDefinition.getDiagramResourceName())) {
+                final byte[] data = new byte[is.available()];
+                is.read(data);
+                content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(data));
             }
         }
         DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) processDefinition.getStartFormHandler();
-        List<Map> propertyList = new ArrayList<Map>();
-        addFormHandlerData(propertyList, startFormHandler.getFormPropertyHandlers());
-        r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
-        return r;
+        content.put(ActivitiConstants.FORMPROPERTIES, getFormHandlerData(startFormHandler.getFormPropertyHandlers()));
+        return new Resource(processDefinition.getId(), null, content);
     }
 }

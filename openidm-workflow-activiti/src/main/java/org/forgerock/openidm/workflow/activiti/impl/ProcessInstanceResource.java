@@ -23,10 +23,20 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.engine.ActivitiException;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
+import org.activiti.engine.impl.RepositoryServiceImpl;
+import org.activiti.engine.impl.bpmn.diagram.ProcessDiagramGenerator;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.HistoricTaskInstanceEntity;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,6 +56,7 @@ import org.forgerock.json.resource.*;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricProcessInstanceMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricTaskInstanceEntityMixIn;
+import org.forgerock.util.encode.Base64;
 
 /**
  * Resource implementation of ProcessInstance related Activiti operations
@@ -177,14 +188,47 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             HistoricProcessInstance instance =
                     processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult();
+
             if (instance == null) {
                 handler.handleError(new NotFoundException());
             } else {
-                Map<String, Object> value = MAPPER.convertValue(instance, Map.class);
+                JsonValue content = new JsonValue(MAPPER.convertValue(instance, Map.class));
                 // TODO OPENIDM-3603 add relationship support
-                value.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(instance));
-                value.put("tasks", getTasksForProcess(instance.getId()));
-                handler.handleResult(new Resource(instance.getId(), null, new JsonValue(value)));
+                content.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(instance));
+                content.put("tasks", getTasksForProcess(instance.getId()));
+
+                // diagram support
+                if (request.getFields().contains(ActivitiConstants.ACTIVITI_DIAGRAM)) {
+                    final RuntimeService runtimeService = processEngine.getRuntimeService();
+                    final RepositoryServiceImpl repositoryService =
+                            (RepositoryServiceImpl) processEngine.getRepositoryService();
+                    final ExecutionEntity executionEntity = (ExecutionEntity) runtimeService
+                            .createProcessInstanceQuery()
+                            .processInstanceId(resourceId)
+                            .singleResult();
+                    if (executionEntity == null) {
+                        throw new ActivitiObjectNotFoundException(
+                                "Process instance with id" + resourceId + " could not be found", ProcessInstance.class);
+                    }
+
+                    final ProcessDefinitionEntity def =
+                            (ProcessDefinitionEntity) repositoryService.getDeployedProcessDefinition(
+                                    executionEntity.getProcessDefinitionId());
+                    if (def == null || !def.isGraphicalNotationDefined()) {
+                        throw new ActivitiException(
+                                "Process instance with id " + resourceId + " has no graphic description");
+                    }
+
+                    final BpmnModel model = repositoryService.getBpmnModel(def.getId());
+                    try (final InputStream is = ProcessDiagramGenerator.generateDiagram(model, "png",
+                            runtimeService.getActiveActivityIds(resourceId))) {
+                        final byte[] data = new byte[is.available()];
+                        is.read(data);
+                        content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(data));
+                    }
+                }
+
+                handler.handleResult(new Resource(instance.getId(), null, content));
             }
         } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
