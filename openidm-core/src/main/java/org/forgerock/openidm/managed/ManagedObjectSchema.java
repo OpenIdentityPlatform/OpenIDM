@@ -23,15 +23,14 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,33 +47,33 @@ public class ManagedObjectSchema {
     /** 
      * The schema to use to validate the structure and content of the managed object. 
      */
-    private final Map<String, SchemaField> fields;
+    private final Map<JsonPointer, SchemaField> fields;
 
     /** 
      * The schema to use to validate the structure and content of the managed object.
      */
-    private final List<String> relationshipFields;
+    private final List<JsonPointer> relationshipFields;
 
     /** 
      * The schema to use to validate the structure and content of the managed object. 
      */
-    private final JsonValue hiddenByDefaultFields;
+    private final Map<JsonPointer, SchemaField> hiddenByDefaultFields;
     
     public ManagedObjectSchema(JsonValue schema) {
         JsonValue schemaProperties = schema.get("properties").expect(Map.class);
-        fields = new HashMap<String, SchemaField>();
-        relationshipFields = new ArrayList<String>();
-        hiddenByDefaultFields = json(object());
+        fields = new HashMap<JsonPointer, SchemaField>();
+        relationshipFields = new ArrayList<JsonPointer>();
+        hiddenByDefaultFields = new HashMap<JsonPointer, SchemaField>();
         if (!schemaProperties.isNull()) {
             for (String propertyKey : schemaProperties.keys()) {
                 SchemaField schemaField = new SchemaField(propertyKey, schemaProperties.get(propertyKey));
-                fields.put(propertyKey, schemaField);
+                fields.put(new JsonPointer(propertyKey), schemaField);
                 if (!schemaField.isReturnedByDefault()) {
                     logger.debug("Field {} is not returned by default", propertyKey);
-                    hiddenByDefaultFields.put(propertyKey, schemaProperties.get(propertyKey));
+                    hiddenByDefaultFields.put(new JsonPointer(propertyKey), schemaField);
                 }
                 if (schemaField.isRelationship()) {
-                    relationshipFields.add(propertyKey);
+                    relationshipFields.add(new JsonPointer(propertyKey));
                 }
             }
         }
@@ -85,8 +84,27 @@ public class ManagedObjectSchema {
      * 
      * @return a map of the schema fields.
      */
-    public Map<String, SchemaField> getFields() {
+    public Map<JsonPointer, SchemaField> getFields() {
         return fields;
+    }
+
+    /**
+     * Returns a {@link SchemaField} representing a schema field corresponding to the supplied field name.
+     * 
+     * @param field a {@link JsonPointer} representing a field name.
+     * @return a {@link SchemaField} representing a schema field.
+     */
+    public SchemaField getField(JsonPointer field) {
+        return fields.get(field);
+    }
+
+    /**
+     * Returns a boolean indicating if the supplied {@link JsonPointer} is a field declared in the schema.
+     * 
+     * @return true if the field is declared in the schema, false otherwise.
+     */
+    public boolean hasField(JsonPointer field) {
+        return fields.containsKey(field);
     }
 
     /**
@@ -94,7 +112,7 @@ public class ManagedObjectSchema {
      * 
      * @return a list of relationship fields
      */
-    public List<String> getRelationshipFields() {
+    public List<JsonPointer> getRelationshipFields() {
         return relationshipFields;
     }
 
@@ -104,7 +122,48 @@ public class ManagedObjectSchema {
      * 
      * @return a map of fields that are hidden by default.
      */
-    public JsonValue getHiddenByDefaultFields() {
+    public Map<JsonPointer, SchemaField> getHiddenByDefaultFields() {
         return hiddenByDefaultFields;
     }
+    
+    /**
+     * Determines if the supplied {@link JsonPointer} represents a resource expanded field name or a relationship 
+     * field, and if so, returns a {@link Pair} representing the relationship field's name on the left and the 
+     * expanded resource's field name on the right.
+     * 
+     * @param field a {@link JsonPointer} representing a field name.
+     * @return a {@link Pair} representing the relationship field's name on the left and the 
+     * expanded resource's field name on the right, or null if the field is not an expanded field.
+     */
+    public Pair<JsonPointer, JsonPointer> getResourceExpansionField(JsonPointer field) {
+        for (JsonPointer relationshipField : relationshipFields) {
+            JsonPointer fieldToMatch = field;
+            boolean matches = true;
+            for (String relationshipFieldToken : relationshipField.toArray()) {
+                if (!relationshipFieldToken.equals(fieldToMatch.get(0))) {
+                    matches = false;
+                    break;
+                }
+                fieldToMatch = field.relativePointer();
+            }
+            if (matches) {
+                if (fieldToMatch.equals(new JsonPointer("*")) 
+                        || fieldToMatch.get(0).equals("*")) {
+                    if (fieldToMatch.toArray().length > 1) {
+                        // Return the remaining field name
+                        return Pair.of(relationshipField, fieldToMatch.relativePointer());
+                    } else if (fieldToMatch.toArray().length == 1) {
+                        // Return all fields "*"
+                        return Pair.of(relationshipField, fieldToMatch);
+                    } 
+                } else {
+                    // No expansion
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+    
+    
 }

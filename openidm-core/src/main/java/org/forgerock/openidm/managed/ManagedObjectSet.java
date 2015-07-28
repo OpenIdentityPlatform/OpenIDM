@@ -18,9 +18,12 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onCreate;
+import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onDelete;
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -77,6 +80,7 @@ import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -548,7 +552,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     new JsonValue(null), createResponse.getContent());
 
             // TODO Check the relative id
-            return prepareResponse(ContextUtil.isExternal(context), createResponse, request.getFields()).asPromise();
+            return prepareResponse(context, createResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -570,7 +574,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             activityLogger.log(context, request, "read", managedId(readResponse.getId()).toString(),
                     null, readResponse.getContent(), Status.SUCCESS);
             
-            return prepareResponse(ContextUtil.isExternal(context), readResponse, request.getFields()).asPromise();
+            return prepareResponse(context, readResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -600,7 +604,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     managedId(readResponse.getId()).toString(), readResponse.getContent(), updatedResource.getContent(),
                     Status.SUCCESS);
 
-            return prepareResponse(ContextUtil.isExternal(context), updatedResource, request.getFields()).asPromise();
+            return prepareResponse(context, updatedResource, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -637,7 +641,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
 
-            return prepareResponse(ContextUtil.isExternal(context), deletedResource, request.getFields()).asPromise();
+            return prepareResponse(context, deletedResource, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -750,7 +754,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 retry = false;
                 logger.debug("Patch successful!");
 
-                return prepareResponse(ContextUtil.isExternal(context), patchedResource, request.getFields());
+                return prepareResponse(context, patchedResource, request.getFields());
             } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
                     logger.debug("Unable to update due to revision conflict. Retrying.");
@@ -799,7 +803,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                         }
                     }
                     results.add(resource.getContent().asMap());
-                    return handler.handleResource(prepareResponse(ContextUtil.isExternal(context), resource, request.getFields()));
+                    return handler.handleResource(prepareResponse(context, resource, request.getFields()));
                 }
             });
         	
@@ -912,38 +916,77 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param resource the Resource to prepare
      * @param fields a list of fields to return specified in the request
      * @return the prepared Resource object
+     * @throws ResourceException 
      */
-    private ResourceResponse prepareResponse(boolean isExternal, ResourceResponse resource, List<JsonPointer> fields) {
-        JsonValue fieldsToRemove = schema.getHiddenByDefaultFields().copy();
+    private ResourceResponse prepareResponse(Context context, ResourceResponse resource, List<JsonPointer> fields) {
+        Map<JsonPointer, SchemaField> fieldsToRemove = new HashMap<JsonPointer, SchemaField>(schema.getHiddenByDefaultFields());
+        Map<JsonPointer, List<JsonPointer>> resourceExpansionMap = new HashMap<JsonPointer, List<JsonPointer>>();
         if (fields != null && fields.size() > 0) {
             for (JsonPointer field : new ArrayList<JsonPointer>(fields)) {
-                if (field.equals(new JsonPointer(SchemaField.FIELD_ALL_RELATIONSHIPS))) {
+                if (field.equals(SchemaField.FIELD_ALL_RELATIONSHIPS)) {
                     // Return all relationship fields, so remove them from fieldsToRemove map
-                    for (String key : schema.getRelationshipFields()) {
+                    for (JsonPointer key : schema.getRelationshipFields()) {
                         logger.debug("Allowing field {} to be returned, due to *_ref", key);
                         fieldsToRemove.remove(key);
-                        fields.add(new JsonPointer(key));
+                        fields.add(key);
                     }
                     fields.remove(field);
-                } else {
-                    // TODO: Do more advanced reference field handling such as checking if the field is a 
-                    // subfield of a reference object
-                    
-                    // Remove the field
-                    logger.debug("Allowing field {} to be returned", field);
-                    fieldsToRemove.remove(field);
+                } else if (!field.equals(new JsonPointer("*")) && !field.equals(new JsonPointer(""))){
+                    if (schema.hasField(field)) {
+                        // Allow the field by removing it from the fieldsToRemove list.
+                        logger.debug("Allowing field {} to be returned", field);
+                        fieldsToRemove.remove(field);
+                    } else {
+                        // Check for resource expansion and build up map of fields to expand
+                        Pair<JsonPointer, JsonPointer> expansionPair = schema.getResourceExpansionField(field);
+                        if (expansionPair != null) {
+                            JsonPointer relationshipField = expansionPair.getFirst();
+                            if (!resourceExpansionMap.containsKey(relationshipField)) {
+                                resourceExpansionMap.put(relationshipField, new ArrayList<JsonPointer>());
+                            }
+                            resourceExpansionMap.get(relationshipField).add(expansionPair.getSecond());
+                        }
+                    }
                 }
             }
         }
         
         // Remove all relationship and virtual fields that are not returned by default, or explicitly listed
-        for (String key : fieldsToRemove.keys()) {
+        for (JsonPointer key : fieldsToRemove.keySet()) {
             logger.debug("Removing field {} from the response object", key);
             resource.getContent().remove(key);
         }
         
+        // Loop over the relationship fields to expand
+        for (JsonPointer fieldToExpand : resourceExpansionMap.keySet()) {
+            // The schema for the field to expand
+            SchemaField schemaField = schema.getField(fieldToExpand);
+            // The list of fields to include from the expanded resource
+            List<JsonPointer> fieldsList = resourceExpansionMap.get(fieldToExpand);
+            // The value of the relationship field
+            JsonValue fieldValue = resource.getContent().get(fieldToExpand);
+            try {
+                // Perform the resource expansion
+                if (fieldValue != null && !fieldValue.isNull()) {
+                    if (schemaField.isArray()) {
+                        // The field is an array of relationship objects
+                        for (JsonValue value : fieldValue) {
+                            expandResource(context, value, fieldsList);
+                        }
+                    } else {
+                        // The field is a relationship object  
+                        expandResource(context, fieldValue, fieldsList);
+                    }
+                } else {
+                    logger.warn("Cannot expand a null relationship object");
+                }
+            } catch (ResourceException e) {
+                logger.error("Error expanding resource " + fieldToExpand + " with value " + fieldValue, e);
+            }
+        }
+        
         // only cull private properties if this is an external call
-        if (isExternal) {
+        if (ContextUtil.isExternal(context)) {
             for (ManagedObjectProperty property : properties) {
                 if (property.isPrivate()) {
                     resource.getContent().remove(property.getName());
@@ -953,6 +996,33 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         
         return Resources.filterResource(resource, fields);
     }
+    
+    /**
+     * Expands the provided resource represented by a {@link JsonValue} relationship object.  A read request 
+     * will be issued for the resource identified by the "_ref" field in the supplied relationship object. A
+     * supplied {@link List} of fields indicates which fields to read and then merge with the relationship
+     * object.
+     *    
+     * @param context the context of the request
+     * @param value the value of the relationship object
+     * @param fieldsList the list of fields to read and merge with the relationship object.
+     * @throws ResourceException if an error is encountered.
+     */
+    private void expandResource(Context context, JsonValue value, List<JsonPointer> fieldsList)
+            throws ResourceException {
+        if (!value.isNull() && value.get(SchemaField.FIELD_REFERENCE) != null) {
+            // Create and issue a read request on the referenced resource with the specified list of fields
+            ReadRequest request = Requests.newReadRequest(value.get(SchemaField.FIELD_REFERENCE).asString());
+            request.addField(fieldsList.toArray(new JsonPointer[fieldsList.size()]));
+            ResourceResponse resource = connectionFactory.getConnection().read(context, request);
+            
+            // Merge the result with the supplied relationship object
+            value.asMap().putAll(resource.getContent().asMap());
+        } else {
+            logger.warn("Cannot expand a null relationship object");
+        }
+    }
+    
     
     /**
      * Sends a sync action request to the synchronization service

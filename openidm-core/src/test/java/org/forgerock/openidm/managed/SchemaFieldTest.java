@@ -121,4 +121,14 @@ public class SchemaFieldTest {
         assertTrue(!coreArrayNullableField.isRelationship());
     }
     
+    @Test
+    public void testArrayField() {
+        assertTrue(!virtualField.isArray());
+        assertTrue(virtualArrayField.isArray());
+        assertTrue(!relationshipField.isArray());
+        assertTrue(relationshipArrayField.isArray());
+        assertTrue(!coreField.isArray());
+        assertTrue(coreArrayField.isArray());
+    }
+    
 }
