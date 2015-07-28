@@ -38,18 +38,27 @@
   <primary>Business processes</primary>
  </indexterm>
 
- <para>Key to any identity management solution is the ability to provide
- workflow-driven provisioning activities, whether for self-service actions
- such as requests for entitlements, roles or resources, running sunrise or
- sunset processes, handling approvals with escalations, or performing
- maintenance.</para>
- 
- <para>OpenIDM provides an embedded workflow and business process engine
- based on Activiti and the Business Process Model and Notation (BPMN) 2.0
- standard.</para>
- 
- <para>More information about Activiti and the Activiti project can be found
- at <link xlink:href="http://www.activiti.org" xlink:show="new" />.</para>
+ <para>
+  Key to any identity management solution is the ability to provide
+  workflow-driven provisioning activities, whether for self-service actions
+  such as requests for entitlements, roles or resources, running sunrise or
+  sunset processes, handling approvals with escalations, or performing
+  maintenance.
+ </para>
+ <para>
+  OpenIDM provides an embedded workflow and business process engine based on
+  Activiti and the Business Process Model and Notation (BPMN) 2.0 standard.
+ </para>
+ <para>
+  More information about Activiti and the Activiti project can be found at
+  <link xlink:href="http://www.activiti.org" xlink:show="new" />.
+ </para>
+ <para>
+  This chapter describes how to configure the Activiti engine, and how to manage
+  workflow tasks and processes over the REST interface. You can also manage
+  workflows in the Admin UI by selecting Manage > Workflow and then selecting
+  Tasks or Processes.
+ </para>
  
  <section xml:id="about-bmpm-2-activiti">
   <title>BPMN 2.0 and the Activiti Tools</title>
@@ -1026,6 +1035,205 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      The delete request returns the contents of the deleted process instance.
     </para>
+   </listitem>
+  </itemizedlist>
+
+  <bridgehead>openidm/workflow/processinstance/history</bridgehead>
+  <itemizedlist>
+   <listitem>
+    <para>
+     List the running and completed workflows (process instances).
+    </para>
+    <para>
+     The following query returns two process instances - one that has completed
+     (<literal>"endActivityId": "end"</literal>) and one that is still running
+     (<literal>"endActivityId": null</literal>):
+    </para>
+    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "_id": "12",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 465287,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T14:43:53.374+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "12",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T14:36:08.087+02:00",
+      "startUserId": "user.1",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 2,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}</computeroutput>
+    </screen>
+   </listitem>
+   <listitem>
+    <para>
+     Obtain the list of running and completed workflows, based on specific
+     filter criteria.
+    </para>
+    <para>
+     The following command returns the running and completed workflows that
+     were launched by <literal>user.0</literal>.
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&amp;startUserId=user.0</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 1,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}</computeroutput></screen>
+    <para>
+     For large result sets, you can use the <literal>_sortKeys</literal>
+     parameter with a <literal>filtered-query</literal> to order search results
+     by one or more fields. You can append a <literal>-</literal> character to
+     the field name to specify that results should be returned in descending
+     order, rather than ascending order.
+    </para>
+    <para>
+     The following query orders results according to their
+     <literal>startTime</literal>. The <literal>-</literal> character in this
+     case indicates that results should be sorted in reverse order, that is,
+     with the most recent results returned first.
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&amp;_sortKeys=-startTime"</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "_id": "104",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "104",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T16:33:37.834+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 3738013,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T16:38:38.200+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "12",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 465287,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T14:43:53.374+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "12",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T14:36:08.087+02:00",
+      "startUserId": "user.1",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 3,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}</computeroutput>
+    </screen>
+    <caution>
+     <para>
+      The Activiti engine treats certain property values as
+      <emphasis>strings</emphasis>, regardless of their actual data type. This
+      might result in results being returned in an order that is different to
+      what you might expect. For example, if you wanted to sort the following
+      results by their <literal>_id</literal> field,
+      <literal>"88", "45", "101"</literal>, you would expect them to be returned
+      in the order <literal>"45", "88", "101"</literal>. Because Activiti treats
+      IDs as strings, rather than numbers, they would be returned in the
+      order <literal>"88","45","101"</literal>.
+     </para>
+    </caution>
    </listitem>
   </itemizedlist>
 
