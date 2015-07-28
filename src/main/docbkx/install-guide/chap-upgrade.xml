@@ -33,8 +33,8 @@
 
  <para>
   The migration process is largely dependent on your particular deployment and
-  on the extent to which you have customized OpenIDM. We recommend that you
-  engage ForgeRock services for help in migrating an existing deployment.
+  on the extent to which you have customized OpenIDM. You should engage
+  ForgeRock services for help in migrating an existing deployment.
  </para>
  <para>
   This process assumes that you are migrating a deployment from OpenIDM 3.1 to
@@ -48,19 +48,89 @@
   xlink:show="new"><citetitle>Migrating to OpenIDM 3.0.0</citetitle></link> in
   the <citetitle>OpenIDM 3.0.0 Installation Guide</citetitle>.
  </para>
- <para>
-  The steps outlined in this section indicate how to preserve customizations,
-  where possible, and take advantage of the new functionality offered in this
-  release. However, you must be aware of the changes made in
-  OpenIDM ${docTargetVersion} that might affect your existing deployment.
-  Therefore, before starting this process, see the <link xlink:show="new"
-  xlink:href="release-notes#chap-compatibility"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Compatibility
-  chapter</citetitle></link> in the Release Notes, and adjust your scripts and
-  clients accordingly.
- </para>
 
- <procedure>
+ <section xml:id="maintenance-mode">
+  <title>Placing an OpenIDM Instance in Maintenance Mode</title>
+  <para>
+   OpenIDM ${docTargetVersion} supports a Maintenance Service that disables
+   non-essential services of a running OpenIDM instance, in preparation for a
+   migration to a later version. When maintenance mode is enabled, services such
+   as recon, sync, scheduling and workflow are disabled. The complete list of
+   disabled services is output to the OpenIDM log file.
+  </para>
+  <para>
+   The router remains functional and requests to the <literal>maintenance</literal>
+   endpoint continue to be serviced. Requests to endpoints that are serviced by
+   a disabled component return the following response:
+  </para>
+  <screen>404 Resource <replaceable>endpoint-name</replaceable> not found</screen>
+  <para>
+   Maintenance mode is enabled and disabled over the REST interface.
+  </para>
+  <para>
+   To enable maintenance mode, run the following command:
+  </para>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/maintenance?_action=enable"</userinput>
+<computeroutput>{
+  "maintenanceEnabled": true
+}</computeroutput></screen>
+  <para>
+   When maintenance mode is enabled, you can safely migrate a running OpenIDM
+   instance, without the risk of data corruption.
+  </para>
+  <para>
+   When the migration is complete, disable maintenance mode as follows:
+  </para>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/maintenance?_action=disable"</userinput>
+<computeroutput>{
+  "maintenanceEnabled": false
+}</computeroutput></screen>
+  <para>
+   To check whether OpenIDM is in maintenance mode, run the following command:
+  </para>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/maintenance?_action=status"</userinput>
+<computeroutput>{
+  "maintenanceEnabled": false
+}</computeroutput></screen>
+  <para>
+   If the system is in maintenance mode, the command returns
+   <literal>"maintenanceEnabled": true</literal>, otherwise it returns
+   <literal>"maintenanceEnabled": false</literal>.
+  </para>
+ </section>
+
+ <section xml:id="migrate-idm">
+  <title>Migrating an Existing OpenIDM Instance</title>
+  <para>
+   The steps outlined in this section indicate how to preserve customizations,
+   where possible, and take advantage of the new functionality offered in this
+   release. However, you must be aware of the changes made in
+   OpenIDM ${docTargetVersion} that might affect your existing deployment.
+   Therefore, before starting this process, see the <link xlink:show="new"
+   xlink:href="release-notes#chap-compatibility"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Compatibility
+   chapter</citetitle></link> in the <citetitle>Release Notes</citetitle>, and
+   adjust your scripts and clients accordingly.
+  </para>
+  <procedure>
   <para>
    To perform a basic migration to OpenIDM ${docTargetVersion}, follow these
    steps. For the purposes of this procedure, the path to the existing 3.1.0
@@ -387,5 +457,6 @@ $ ./startup.sh
     Test that your existing clients and scripts are working as intended.
    </para>
   </step>
- </procedure>
+  </procedure>
+ </section>
 </chapter>

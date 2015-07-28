@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012 ForgeRock Inc. All rights reserved.
+ * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,9 +24,12 @@
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.Function;
+import org.forgerock.util.promise.NeverThrowsException;
 
 /**
  * Implementation of the Activiti Engine Resource
@@ -37,18 +40,23 @@ public class ActivitiResource implements RequestHandler {
     private Router resources = new Router();
     private Router subResources = new Router();
 
-    public ActivitiResource(ProcessEngine engine, PersistenceConfig config) {
+    public ActivitiResource(ProcessEngine engine) {
         resources.addRoute("/processdefinition", new ProcessDefinitionResource(engine));
         resources.addRoute("/processdefinition/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
-        resources.addRoute("/processinstance", new ProcessInstanceResource(engine, config));
+        resources.addRoute("/processinstance", new ProcessInstanceResource(engine,
+                new Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException>() {
+                    public HistoricProcessInstanceQuery apply(ProcessEngine engine) {
+                        return engine.getHistoryService().createHistoricProcessInstanceQuery().unfinished();
+                     }
+                }));
+        resources.addRoute("/processinstance/history", new ProcessInstanceResource(engine,
+                new Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException>() {
+                    public HistoricProcessInstanceQuery apply(ProcessEngine engine) {
+                        return engine.getHistoryService().createHistoricProcessInstanceQuery();
+                    }
+                }));
         resources.addRoute("/taskinstance", new TaskInstanceResource(engine));
-    }
-
-    public void setProcessEngine(ProcessEngine engine, PersistenceConfig config) {
-        resources.addRoute("/processdefinition", new ProcessDefinitionResource(engine));
-        resources.addRoute("/processdefinition/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
-        resources.addRoute("/processinstance", new ProcessInstanceResource(engine, config));
-        resources.addRoute("/taskinstance", new TaskInstanceResource(engine));
+        resources.addRoute("/taskinstance/history", new TaskInstanceHistoryResource(engine));
     }
 
     @Override

@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012-2014 ForgeRock AS
+  !      Copyright 2012-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-mail'
@@ -39,16 +39,21 @@
 
  <para>
   This chapter shows you how to configure the outbound email service, so that
-  you can send email through OpenIDM either by script or through the REST API.
+  you can send email through OpenIDM, either by script or through the REST API.
+ </para>
+ <para>
+  You can also configure the outbound email service in the Admin UI, by clicking
+  Configure > System Preferences > Email. The fields on that screen correspond
+  to what is described in the following sections.
  </para>
 
  <procedure xml:id="setup-outbound-email">
   <title>To Set Up Outbound Email</title>
   <para>
    The outbound email service relies on a configuration object to identify the
-   email account used to send messages. A sample configuration is provided in
-   <filename>/path/to/openidm/samples/misc/external.email.json</filename>. To
-   set up the external email service, follow these steps.
+   email account that is used to send messages. A sample configuration is
+   provided in <filename>/path/to/openidm/samples/misc/external.email.json</filename>.
+   To set up the external email service, follow these steps.
   </para>
   <step>
    <para>
@@ -57,7 +62,8 @@
   </step>
   <step>
    <para>
-    Copy the sample configuration to the <filename>conf</filename> directory.
+    Copy the sample email configuration to the <filename>conf</filename>
+    directory of your project. For example:
    </para>
    <screen>$ cd /path/to/openidm/
 $ cp samples/misc/external.email.json conf/</screen>
@@ -65,64 +71,99 @@ $ cp samples/misc/external.email.json conf/</screen>
   <step>
    <para>
     Edit <filename>external.email.json</filename> to reflect the account that is
-    used to send messages.
+    used to send messages, for example:
    </para>
-   <programlisting language="javascript">
-{
-        "host" : "smtp.example.com",
-        "port" : "25",
-        "username" : "openidm",
-        "password" : "secret12",
-        "mail.smtp.auth" : "true",
-        "mail.smtp.starttls.enable" : "true"
+   <programlisting language="javascript">{
+    "host" : "smtp.example.com",
+    "port" : "587",
+    "debug" : false,
+    "auth" : {
+        "enable" : true,
+        "username" : "admin",
+        "password" : "Passw0rd"
+    },
+    "starttls" : {
+        "enable" : true
+    }
 }</programlisting>
     <para>OpenIDM encrypts the password you provide.</para>
    <variablelist>
-    <para>Follow these hints when editing the configuration.</para>
+    <para>
+     The mail configuration file includes the following properties:
+    </para>
     <varlistentry>
      <term><literal>"host"</literal></term>
      <listitem>
-      <para>SMTP server host name or IP address. This can be
-      <literal>"localhost"</literal> if the server is on the same system as
-      OpenIDM.</para>
+      <para>
+       The SMTP server host name or IP address. This can be the
+       <literal>"localhost"</literal>, if the mail server is on the same system
+       as OpenIDM.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><literal>"port"</literal></term>
      <listitem>
-      <para>SMTP server port number such as 25, or 587</para>
+      <para>
+       SMTP server port number, such as 25 or 587
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><literal>"username"</literal></term>
+     <term><literal>"debug"</literal></term>
      <listitem>
-      <para>Mail account user name needed when <literal>"mail.smtp.auth" :
-      "true"</literal></para>
+      <para>
+       When set to <literal>true</literal>, this option outputs diagnostic
+       messages from the JavaMail library. Debug mode can be useful if you are
+       having difficulty configuring the external email endpoint with your mail
+       server.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><literal>"password"</literal></term>
+     <term><literal>"auth"</literal></term>
      <listitem>
-      <para>Mail account user password needed when <literal>"mail.smtp.auth" :
-      "true"</literal></para>
+      <para>
+       The authentication details for the mail account from which emails will be
+       sent.
+      </para>
+      <itemizedlist>
+       <listitem>
+        <para>
+         <literal>"enable"</literal> - indicates whether the mail service
+         should use SMTP authentication.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>"username"</literal> - the mail account username, required to
+         authenticate, if SMTP authentication is enabled.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>"password"</literal> - the mail account password, required to
+         authenticate if SMTP authentication is enabled.
+        </para>
+       </listitem>
+      </itemizedlist>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term><literal>"mail.smtp.auth"</literal></term>
+     <term><literal>"starttls"</literal></term>
      <listitem>
-      <para>If <literal>"true"</literal>, use SMTP authentication</para>
-     </listitem>
-    </varlistentry>
-    <varlistentry>
-     <term><literal>"mail.smtp.starttls.enable"</literal></term>
-     <listitem>
-      <para>If <literal>"true"</literal>, use TLS</para>
+      <para>
+       Indicates whether STARTTLS should be used to secure outgoing email. If
+       <literal>"enable" : true</literal>, STARTTLS is used.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><literal>"from"</literal></term>
      <listitem>
-      <para>Optional default <literal>From:</literal> address</para>
+      <para>
+       (Optional) Specifies a default <literal>From:</literal> address.
+      </para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -139,62 +180,50 @@ $ cp samples/misc/external.email.json conf/</screen>
   </step>
  </procedure>
 
- <note>
-  <para>
-   The REST call described in the section that follows may use the local
-   SMTP server. For a "quick and dirty" test, you could use the default
-   port, disable authentication, and TLS:
-  </para>
-  <programlisting>
-"host" : "localhost",
-"port" : "25,
-"username" : "xxxxxx",
-"password" : "xxxxxx",
-"mail.smtp.auth" : "false",
-"mail.smtp.starttls.enable" : "false"
-  </programlisting>
- </note>
-
  <section xml:id="send-mail-rest">
   <title>Sending Mail Over REST</title>
-  <para>Although you are more likely to send mail from a script in production,
-  you can send email using the REST API by sending an HTTP POST to
-  <literal>/openidm/external/email</literal> in order to test that your
-  configuration works. You pass the message parameters as POST parameters,
-  URL encoding the content as necessary.</para>
-
-  <para>The following example sends a test email using the REST API.</para>
-  <screen>
-$ <userinput>curl \
+  <para>
+   Although you are more likely to send mail from a script in production,
+   you can send email using the REST API by sending an HTTP POST to
+   <literal>/openidm/external/email</literal>, to test that your configuration
+   works. You pass the message parameters as part of the POST payload, URL
+   encoding the content as necessary.
+  </para>
+  <para>
+   The following example sends a test email using the REST API.
+  </para>
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- --data '{"from":"openidm@example.com",
+ --data '{
+   "from":"openidm@example.com",
    "to":"admin@example.com",
    "subject":"Test",
    "body":"Test"}' \
- "https://localhost:8443/openidm/external/email?_action=send"</userinput></screen>
+ "https://localhost:8443/openidm/external/email?_action=send"</userinput>
+<computeroutput>{
+ "status": "OK"
+}</computeroutput>  </screen>
  </section>
 
  <section xml:id="send-mail-script">
   <title>Sending Mail From a Script</title>
-
   <para>
-   You can send email by using the resource API <link
-  xlink:href="integrators-guide#function-ref"
-  xlink:role="http://docbook.org/xlink/role/olink">functions</link> with
-  the <literal>external/email</literal> context, as in the following
-  example, where <literal>params</literal> is an object that contains the
-  POST parameters.
+   You can send email by using the resource API <link xlink:show="new"
+   xlink:href="integrators-guide#function-ref"
+   xlink:role="http://docbook.org/xlink/role/olink">functions</link> with
+   the <literal>external/email</literal> context. In the following example,
+   <literal>params</literal> is an object that contains the POST parameters.
   </para>
 
   <programlisting language="javascript">
 var params =  new Object();
 params.from = "openidm@example.com";
 params.to = "admin@example.com";
-params.cc = "wally@example.com,dilbert@example.com";
+params.cc = "bjensen@example.com,scarter@example.com";
 params.subject = "OpenIDM recon report";
 params.type = "text/html";
 params.body = "&lt;html&gt;&lt;body&gt;&lt;p&gt;Recon report follows...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;";

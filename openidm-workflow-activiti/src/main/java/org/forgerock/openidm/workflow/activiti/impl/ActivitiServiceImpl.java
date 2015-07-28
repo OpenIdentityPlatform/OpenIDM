@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012-2015 ForgeRock Inc. All rights reserved.
+ * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -340,11 +340,11 @@ public class ActivitiServiceImpl implements RequestHandler {
                                 java.util.logging.Logger.getLogger(ActivitiServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
-                        activitiResource = new ActivitiResource(processEngine, persistenceConfig);
+                        activitiResource = new ActivitiResource(processEngine);
                         logger.debug("Activiti ProcessEngine is enabled");
                         break;
                     case local: //ProcessEngine is connected by @Reference
-                        activitiResource = new ActivitiResource(processEngine, persistenceConfig);
+                        activitiResource = new ActivitiResource(processEngine);
                         break;
 //                    case remote: //fetch remote connection parameters
 //                        activitiResource = new HttpRemoteJsonResource(url, username, password);

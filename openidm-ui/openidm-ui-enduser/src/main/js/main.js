@@ -54,7 +54,7 @@ require.config({
         d3 : "libs/d3-3.5.5-min",
         dimple : "libs/dimple-2.1.2-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
-        UserDelegate: "org/forgerock/openidm/ui/util/delegates/UserDelegate",
+        UserDelegate: "org/forgerock/openidm/ui/common/util/UserDelegate",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
         jsonEditor: "libs/jsoneditor-0.7.9-min"
     },

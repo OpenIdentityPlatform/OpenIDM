@@ -25,27 +25,5 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/dashboard/main", [
-    "org/forgerock/openidm/ui/dashboard/workflow/tasks/customview/main",
-    "org/forgerock/openidm/ui/dashboard/workflow/processes/customview/main",
-
-    "./workflow/FormManager",
-
-    "./workflow/tasks/TaskDetailsView",
-    "./workflow/tasks/AbstractTaskForm",
-    "./workflow/tasks/customview/ApplicationAcceptanceTask",
-    "./workflow/tasks/TasksMenuView",
-    "./workflow/tasks/TasksDashboard",
-    "./workflow/tasks/TemplateTaskForm",
-
-    "./workflow/processes/AbstractProcessForm",
-    "./workflow/processes/StartProcessDashboardView",
-
-    "./workflow/WorkflowDelegate",
-
-    "./Dashboard",
-
-    "./notifications/NotificationDelegate",
-    "./notifications/NotificationsView",
-    "./notifications/NotificationViewHelper"
-
+    "./Dashboard"
 ]);

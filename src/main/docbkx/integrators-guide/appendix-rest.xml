@@ -1552,12 +1552,17 @@ Content-Length: 89
        <row>
         <entry>/openidm/workflow/processinstance?_queryId=query-all-ids</entry>
         <entry>GET</entry>
-        <entry>Lists the available running workflows, by IDs</entry>
+        <entry>Lists the available running workflows, by their ID</entry>
        </row>
        <row>
         <entry>/openidm/workflow/processinstance/<replaceable>id</replaceable></entry>
         <entry>GET</entry>
         <entry>Provides detailed information of a running process instance</entry>
+       </row>
+       <row>
+        <entry>/openidm/workflow/processinstance/history?_queryId=query-all-ids</entry>
+        <entry>GET</entry>
+        <entry>Lists running and completed workflows, by their ID</entry>
        </row>
        <row>
         <entry>/openidm/workflow/processdefinition/<replaceable>id</replaceable>/taskdefinition</entry>

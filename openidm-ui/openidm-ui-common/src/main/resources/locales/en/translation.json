@@ -22,7 +22,7 @@
         },
         "messages" : {
             "WorkflowMessages" : {
-              "cancelActiveProcess" : "Workflow Process successfully cancelled."
+              "cancelActiveProcess" : "Workflow Process cancelled."
             },
             "AuditMessages" : {
               "auditSaveSuccessful": "Audit configurations have been saved."
@@ -114,7 +114,8 @@
                 "linkQualifierSaveSuccess": "The link qualifier(s) have been saved."
             },
             "settingMessages" : {
-                "saveSelfServiceSuccess": "Self service URL has been updated."
+                "saveSelfServiceSuccess": "Self service URL has been updated.",
+                "saveEmailSuccess": "Email configuration has been saved."
             }
         },
         "AppConfiguration" : {
@@ -535,18 +536,33 @@
             "addSchedule": "Add Schedule"
         },
         "workflows": {
+            "tasks": {
+                "title": "Workflow Tasks",
+                "newTask": "New Task",
+                "assigned": "Assigned To",
+                "task": "Task",
+                "process": "Process",
+                "assignee": "Assignee",
+                "created": "Created",
+                "due": "Due",
+                "anyone": "Anyone",
+                "unassigned": "Unassigned"
+            },
             "processes" : {
-                "processInstance" : "PROCESS INSTANCE",
-                "created" : "CREATED",
-                "startedBy" : "STARTED BY",
+                "processInstance" : "Process Instance",
+                "processDefinitions" : "Process Definitions",
+                "created" : "Created",
+                "startedBy" : "Started By",
                 "processes" : "Workflow Processes",
-                "assignedTo" : "Assigned To: ",
+                "startedByFilter" : "Started By: ",
                 "filterByType" : "Filter by Type: ",
                 "activeProcesses" : "Active",
                 "processDefinitions" : "Definitions",
                 "processesCompleted" : "Completed",
                 "noActiveProcesses" : "No Active Processes",
-                "processCancelDialog" : "Are you sure you wish to cancel this active process?"
+                "noCompletedProcesses" : "No Completed Processes",
+                "noProcessesDefinitions" : "No Process Definitions",
+                "cancelProcessDialog" : "Are you sure you wish to cancel this active process?"
             },
             "sync": "These data properties are sent when the workflow is triggered",
             "nonSync": "Workflow scripts can access these object/properties.",
@@ -713,11 +729,22 @@
             "moduleType": "Module Type",
             "select": "Make a Selection"
         },
-        "sysConfig": {
-            "title": "System Configurations",
+        "selfService": {
+            "title": "Self-Service UI",
             "endUserConfigTitle": "Self-Service UI Features",
             "urlDesc": "Application for end-users to perform self-service tasks (profile updates, workflow tasks, etc...)",
             "url": "Relative URL"
+        },
+        "emailConfig": {
+            "title": "Email",
+            "desc": "Configure the outbound email service",
+            "host": "Host",
+            "port": "Port",
+            "username": "Username",
+            "password": "Password",
+            "smtp": "Use SMTP Authentication",
+            "tls": "Use TLS",
+            "from": "Sender Email Address"
         },
         "connector" : {
             "backToConnectorList" : "Back to Connectors",
@@ -1283,7 +1310,7 @@
             "adaptiveAuthMethod" : "Adaptive authentication method",
             "SMS" : "SMS",
             "OAuth" : "OAuth",
-            "createNewUser" : "Create New User",            
+            "createNewUser" : "Create New User",
             "password" : "Password",
             "confirmPassword" : "ReType Password",
             "newPassword" : "New password",

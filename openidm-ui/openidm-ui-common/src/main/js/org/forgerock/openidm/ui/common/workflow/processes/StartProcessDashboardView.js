@@ -27,17 +27,17 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/dashboard/workflow/processes/StartProcessDashboardView", [
+define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboardView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/dashboard/workflow/WorkflowDelegate",
+    "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/dashboard/workflow/processes/StartProcessView",
+    "org/forgerock/openidm/ui/common/workflow/processes/StartProcessView",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, workflowManager, eventManager, constants, startProcessView, conf) {
     var StartProcessDashboardView = AbstractView.extend({
 
-        template: "templates/dashboard/workflow/processes/StartProcessDashboardTemplate.html",
+        template: "templates/workflow/processes/StartProcessDashboardTemplate.html",
 
         events: {
             "click .processName": "showStartProcessView"

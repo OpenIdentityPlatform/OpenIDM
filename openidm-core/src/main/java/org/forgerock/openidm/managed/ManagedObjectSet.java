@@ -527,6 +527,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                                 handler.handleResult(response.getContent());
                             } catch (ResourceException e) {
                                 handler.handleError(e);
+                            } catch (Exception e) {
+                                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
                             }
                         } else {
                             handler.handleError(new NotFoundException("Query returned no results"));

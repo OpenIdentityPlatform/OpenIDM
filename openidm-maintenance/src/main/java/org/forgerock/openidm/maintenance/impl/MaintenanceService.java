@@ -88,7 +88,6 @@ public class MaintenanceService implements RequestHandler {
      */
     private static final String[] DEFAULT_MAINTENANCE_MODE_COMPONENTS = new String[] {
         "org.forgerock.openidm.cluster",
-        "org.forgerock.openidm.config.enhanced",
         "org.forgerock.openidm.config.enhanced.starter",
         "org.forgerock.openidm.config.manage",
         "org.forgerock.openidm.endpoint",
@@ -115,6 +114,7 @@ public class MaintenanceService implements RequestHandler {
         "org.forgerock.openidm.api-servlet",
         "org.forgerock.openidm.audit",
         "org.forgerock.openidm.authnfilter",
+        "org.forgerock.openidm.config.enhanced",
         "org.forgerock.openidm.http.context",
         "org.forgerock.openidm.internal",
         "org.forgerock.openidm.policy",
@@ -213,7 +213,7 @@ public class MaintenanceService implements RequestHandler {
     private void enableMaintenanceMode() throws ResourceException {
         if (maintenanceModeLock.tryAcquire()) {
             try {
-                logger.info("Enabling maintenence mode");
+                logger.info("Enabling maintenance mode");
                 List<String> componentNames = Arrays.asList(maintenanceModeComponents);
                 maintenanceEnabled = true;
                 org.apache.felix.scr.Component[] components = scrService.getComponents();
@@ -246,7 +246,7 @@ public class MaintenanceService implements RequestHandler {
     private void disableMaintenanceMode() throws ResourceException {
         if (maintenanceModeLock.tryAcquire()) {
             try {
-                logger.info("Disabling maintenence mode");
+                logger.info("Disabling maintenance mode");
                 List<String> componentNames = Arrays.asList(maintenanceModeComponents);
                 maintenanceEnabled = false;
                 org.apache.felix.scr.Component[] components = scrService.getComponents();

@@ -27,22 +27,22 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/dashboard/workflow/tasks/TasksDashboard", [
+define("org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/dashboard/workflow/WorkflowDelegate",
+    "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/dashboard/workflow/tasks/TasksMenuView",
-    "org/forgerock/openidm/ui/dashboard/notifications/NotificationsView",
+    "org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView",
+    "org/forgerock/openidm/ui/common/notifications/NotificationsView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/dashboard/notifications/NotificationDelegate",
-    "org/forgerock/openidm/ui/dashboard/workflow/tasks/TaskDetailsView",
-    "org/forgerock/openidm/ui/dashboard/workflow/processes/StartProcessDashboardView"
+    "org/forgerock/openidm/ui/common/notifications/NotificationDelegate",
+    "org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView",
+    "org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboardView"
 ], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView,
             NotificationsView, conf, notificationDelegate, taskDetailsView, startProcessView) {
 
     var TasksDashboard = AbstractView.extend({
-        template: "templates/dashboard/workflow/tasks/TasksDashboardTemplate.html",
+        template: "templates/workflow/tasks/TasksDashboardTemplate.html",
         element: "#dashboardWorkflow",
         noBaseTemplate: true,
         data: {

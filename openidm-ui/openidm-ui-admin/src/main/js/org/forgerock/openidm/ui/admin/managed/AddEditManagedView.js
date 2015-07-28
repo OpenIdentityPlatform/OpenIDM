@@ -636,6 +636,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "managedObjectSaveSuccess");
 
                 _.delay(function () {
+                    eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.managedListView});
                 }, 1500);
             });
