@@ -148,8 +148,8 @@ $ cp samples/misc/external.email.json conf/</screen>
      <term><literal>"starttls"</literal></term>
      <listitem>
       <para>
-       Indicates whether TLS should be used to secure outgoing email. If
-       <literal>"enable" : true</literal>, TLS is used.
+       Indicates whether STARTTLS should be used to secure outgoing email. If
+       <literal>"enable" : true</literal>, STARTTLS is used.
       </para>
      </listitem>
     </varlistentry>
