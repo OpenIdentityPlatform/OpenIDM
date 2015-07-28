@@ -24,9 +24,12 @@
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.Function;
+import org.forgerock.util.promise.NeverThrowsException;
 
 /**
  * Implementation of the Activiti Engine Resource
@@ -41,9 +44,17 @@ public class ActivitiResource implements RequestHandler {
         resources.addRoute("/processdefinition", new ProcessDefinitionResource(engine));
         resources.addRoute("/processdefinition/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
         resources.addRoute("/processinstance", new ProcessInstanceResource(engine,
-                engine.getHistoryService().createHistoricProcessInstanceQuery().unfinished()));
+                new Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException>() {
+                    public HistoricProcessInstanceQuery apply(ProcessEngine engine) {
+                        return engine.getHistoryService().createHistoricProcessInstanceQuery().unfinished();
+                     }
+                }));
         resources.addRoute("/processinstance/history", new ProcessInstanceResource(engine,
-                engine.getHistoryService().createHistoricProcessInstanceQuery()));
+                new Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException>() {
+                    public HistoricProcessInstanceQuery apply(ProcessEngine engine) {
+                        return engine.getHistoryService().createHistoricProcessInstanceQuery();
+                    }
+                }));
         resources.addRoute("/taskinstance", new TaskInstanceResource(engine));
         resources.addRoute("/taskinstance/history", new TaskInstanceHistoryResource(engine));
     }
