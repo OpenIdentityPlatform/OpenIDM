@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -42,6 +42,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonProcessingException;
+import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -117,6 +118,18 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         String scriptName = (String) contextMap.get(CONFIG_NAME);
         JsonValue params = new JsonValue(contextMap).get(CONFIGURED_INVOKE_CONTEXT);
         startTaskScanJob(context, invokerName, scriptName, params);
+    }
+
+    @Override
+    public void auditScheduledService(final ServerContext context, final AuditEvent auditEvent)
+            throws ExecutionException {
+        try {
+            connectionFactory.getConnection().create(
+                    context, Requests.newCreateRequest("audit/access", auditEvent.getValue()));
+        } catch (ResourceException e) {
+            logger.error("Unable to audit scheduled service {}", auditEvent.toString());
+            throw new ExecutionException("Unable to audit scheduled service", e);
+        }
     }
 
     @Override
