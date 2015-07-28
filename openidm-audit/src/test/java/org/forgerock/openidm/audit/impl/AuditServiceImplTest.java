@@ -42,7 +42,7 @@ import org.mockito.ArgumentCaptor;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.Test;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.openidm.audit.util.AuditTestUtils.mockResultHandler;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
