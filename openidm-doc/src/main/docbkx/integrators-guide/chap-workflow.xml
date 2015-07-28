@@ -1815,7 +1815,7 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
    use cases for OpenIDM. The use cases, provided in
    <filename>/path/to/openidm/samples/usecase</filename>, work together to
    provide a complete business story, with the same set of sample data. Each of
-   the use cases is integrated with the default UI.
+   the use cases is integrated with the self service UI.
   </para>
   <para>
    These use cases use OrientDB as a repository by default. Alternative
@@ -1937,7 +1937,7 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
     <listitem>
      <para>
       Download and install OpenDJ, as described in <link xlink:show="new"
-      xlink:href="http://docs.forgerock.org/en/opendj/2.6.0/install-guide/index.html#chap-install-gui">Installing
+      xlink:href="https://backstage.forgerock.com/#!/docs/opendj/2.6.0/install-guide#chap-install-gui">Installing
       OpenDJ With the QuickSetup Wizard</link>.
      </para>
      <para>
@@ -1969,8 +1969,7 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
       Start OpenIDM with the configuration for use case 1.
      </para>
      <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/usecase/usecase1
-     </screen>
+$ ./startup.sh -p samples/usecase/usecase1</screen>
     </step>
     <step>
      <para>
@@ -1983,9 +1982,11 @@ $ ./startup.sh -p samples/usecase/usecase1
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHRAccounts_managedUser"
-      </userinput>
-     </screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHRAccounts_managedUser"</userinput>
+<computeroutput>{
+ "_id": "376b3290-24f0-47a9-8a9e-bba025536c39",
+ "state": "ACTIVE"
+ }</computeroutput>     </screen>
     </step>
     <step>
      <para>
@@ -1999,30 +2000,36 @@ $ ./startup.sh -p samples/usecase/usecase1
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
       </userinput>
 <computeroutput>{
-  "result" : [ {
-    "_id" : "user.5",
-    "_rev" : "0"
-  }, {
-    "_id" : "user.10",
-    "_rev" : "0"
-  }, {
-    "_id" : "user.1",
-    "_rev" : "0"
-  },
+  "result": [
+    {
+      "_id": "user.7",
+      "_rev": "1"
+    },
+    {
+      "_id": "user.3",
+      "_rev": "1"
+    },
+    {
+      "_id": "user.4",
+      "_rev": "1"
+    },
  ...
- {
-    "_id" : "hradmin",
-    "_rev" : "0"
-  }, {
-    "_id" : "systemadmin",
-    "_rev" : "0"
-  }, {
-    "_id" : "superadmin",
-    "_rev" : "0"
-  } ],
-  "resultCount" : 23,
-  "pagedResultsCookie" : null,
-  "remainingPagedResults" : -1
+    {
+      "_id": "systemadmin",
+      "_rev": "1"
+    },
+    {
+      "_id": "hradmin",
+      "_rev": "1"
+    },
+    {
+      "_id": "superadmin",
+      "_rev": "1"
+    }
+  ],
+  "resultCount": 23,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
 }</computeroutput>
      </screen>
      <para>
@@ -2064,8 +2071,8 @@ $ ./shutdown.sh
    </para>
    <para>
     The use case works with the OpenIDM Self-Service UI. If you deploy OpenIDM
-    on the local system, you can access it at the following URL:
-    <literal>https://localhost:8443//</literal>.
+    on the local system, you can access the UI at the following URL:
+    <literal>https://localhost:8443</literal>.
    </para>
 
    <procedure xml:id="initiate-onboarding">
@@ -2080,8 +2087,8 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Log into the UI as <literal>user.1</literal> with password
-      <literal>Passw0rd</literal>.
+      Log into the Self-Service UI (<literal>https://localhost:8443</literal>)
+      as <literal>user.1</literal> with password <literal>Passw0rd</literal>.
      </para>
      <mediaobject>
       <alt>Log into the UI</alt>
@@ -2150,8 +2157,8 @@ $ ./startup.sh -p samples/usecase/usecase2
       department. All users have the password <literal>Passw0rd</literal>.
      </para>
      <para>
-      Notice that this user now has an Onboarding Approval task in the queue of
-      tasks assigned to his group.
+      Notice that the management user now has an Onboarding Approval task in the
+      queue of tasks assigned to that user's group.
      </para>
      <mediaobject>
       <alt>Approval task in group queue</alt>
@@ -2162,7 +2169,8 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Click on the Onboarding Approval task and select "Assign to Me".
+      Click on the Onboarding Approval task and select "Assign to Me" from the
+      Actions list.
      </para>
      <para>
       This action "claims" the task for <literal>user.0</literal>, removes it
@@ -2172,8 +2180,7 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Click on the Onboarding Approval task under the My group's tasks and click
-      Details.
+      Click on the Onboarding Approval task under "My tasks" and click Details.
      </para>
      <para>
       The complete new user request is displayed for the manager's approval. As
@@ -2203,13 +2210,6 @@ $ ./startup.sh -p samples/usecase/usecase2
       </listitem>
       <listitem>
        <para>
-        <emphasis>Manager</emphasis>. Selecting "Yes" here adds a
-        <literal>"title"</literal> property, with a value of
-        <literal>"manager"</literal>, to the new managed user entry.
-       </para>
-      </listitem>
-      <listitem>
-       <para>
         <emphasis>Decision</emphasis>. Selecting "Reject" here terminates the
         workflow and sends a notification to the user who initiated the
         workflow. Selecting "Accept" creates the managed user entry in OpenIDM.
@@ -2219,8 +2219,8 @@ $ ./startup.sh -p samples/usecase/usecase2
         Two notifications are created when the request is accepted - one for the
         user who initiated the workflow, and one for the newly created user.
         The notifications are visible in the UI after login. If you selected
-        email notification, one email is sent to the user defined when you
-        configured email notification, as described in
+        email notification, one email is sent to the user that you defined when
+        you configured email notification, as described in
         <xref linkend="configure-email-notification" />.
        </para>
       </listitem>
@@ -2232,7 +2232,7 @@ $ ./startup.sh -p samples/usecase/usecase2
       request or to Complete it. Click Complete.
      </para>
      <para>
-      If you click Requeue here, the task is removed from the list of My Tasks
+      If you click Requeue here, the task is removed from the list of "My tasks"
       for that user, and returned to the list of tasks pending for that group.
       The task can then be claimed by any member of that group.
      </para>
