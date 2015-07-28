@@ -317,7 +317,7 @@
    help you protect your systems. For more information, see the following
    section of the Integrator's Guide:
    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-         xlink:href="integrators-guide#supported-auth-modules">
+         xlink:href="integrators-guide#supported-auth-session-modules">
     <citetitle>Supported Authentication and Session Modules</citetitle>.
    </link>
   </para>
