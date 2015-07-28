@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-1014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -27,6 +27,7 @@ package org.forgerock.openidm.quartz.impl;
 
 import java.util.Map;
 
+import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.resource.ServerContext;
 
 /**
@@ -56,4 +57,12 @@ public interface ScheduledService {
      * Implementations can also throw RuntimeExceptions which will get logged.
      */
     void execute(ServerContext context, Map<String, Object> scheduledContext) throws ExecutionException;
+
+    /**
+     * Invoked by the scheduler to audit the scheduled event.
+     * @param context the server context to use to audit the event
+     * @param auditEvent the event to audit
+     * @throws ExecutionException if the audit event fails
+     */
+    void auditScheduledService(final ServerContext context, final AuditEvent auditEvent) throws ExecutionException;
 }

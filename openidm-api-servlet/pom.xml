@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -37,7 +37,7 @@
     <name>OpenIDM API servlet</name>
 
     <dependencies>
-
+        <!-- OpenIDM project dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
@@ -48,24 +48,19 @@
             <artifactId>openidm-servlet-registrator</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource-servlet</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-httpcontext</artifactId>
+            <artifactId>openidm-audit</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-util</artifactId>
-            <version>${project.version}</version>
-        </dependency> -->
+
+        <!-- Forgerock commons dependencies -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-common</artifactId>
         </dependency>
+
+        <!-- Third party dependencies -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-api</artifactId>

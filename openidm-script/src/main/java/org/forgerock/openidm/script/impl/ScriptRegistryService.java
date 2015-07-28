@@ -55,6 +55,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
@@ -74,6 +75,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
@@ -163,6 +165,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     // Public Constants
     public static final String PID = "org.forgerock.openidm.script";
+
+    private ConnectionFactory connectionFactory = null;
 
     /**
      * Setup logging for the {@link ScriptRegistryService}.
@@ -325,6 +329,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         openidm.put("query", ResourceFunctions.newQueryFunction(connectionFactory));
         openidm.put("delete", ResourceFunctions.newDeleteFunction(connectionFactory));
         openidm.put("action", ResourceFunctions.newActionFunction(connectionFactory));
+        this.connectionFactory = connectionFactory;
         logger.info("Resource functions are enabled");
     }
 
@@ -336,6 +341,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         openidm.remove("query");
         openidm.remove("delete");
         openidm.remove("action");
+        this.connectionFactory = null;
         logger.info("Resource functions are disabled");
     }
 
@@ -707,6 +713,20 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             throw new ExecutionException(e);
         } catch (ResourceException e) {
             throw new ExecutionException(e);
+        }
+    }
+
+    @Override
+    public void auditScheduledService(final ServerContext context, final AuditEvent auditEvent)
+            throws ExecutionException {
+        try {
+            if (connectionFactory != null) {
+                connectionFactory.getConnection().create(
+                        context, Requests.newCreateRequest("audit/access", auditEvent.getValue()));
+            }
+        } catch (ResourceException e) {
+            logger.error("Unable to audit scheduled service {}", auditEvent.toString());
+            throw new ExecutionException("Unable to audit scheduled service", e);
         }
     }
 
