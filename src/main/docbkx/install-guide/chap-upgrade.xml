@@ -79,8 +79,7 @@
  "https://localhost:8443/openidm/maintenance?_action=enable"</userinput>
 <computeroutput>{
   "maintenanceEnabled": true
-}</computeroutput>
-  </screen>
+}</computeroutput></screen>
   <para>
    When maintenance mode is enabled, you can safely migrate a running OpenIDM
    instance, without the risk of data corruption.
@@ -97,8 +96,25 @@
  "https://localhost:8443/openidm/maintenance?_action=disable"</userinput>
 <computeroutput>{
   "maintenanceEnabled": false
-}</computeroutput>
-  </screen>
+}</computeroutput></screen>
+  <para>
+   To check whether OpenIDM is in maintenance mode, run the following command:
+  </para>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/maintenance?_action=status"</userinput>
+<computeroutput>{
+  "maintenanceEnabled": false
+}</computeroutput></screen>
+  <para>
+   If the system is in maintenance mode, the command returns
+   <literal>"maintenanceEnabled": true</literal>, otherwise it returns
+   <literal>"maintenanceEnabled": false</literal>.
+  </para>
  </section>
 
  <section xml:id="migrate-idm">
