@@ -1644,134 +1644,181 @@ logger = LoggerFactory.getLogger('logger');
      </variablelist>
 
     </section>
-
-    <!--TODO Uncomment this section when OPENIDM-3351 is resolved
-    <section xml:id="debugging-scripts">
-     <title>Debugging OpenIDM JavaScripts</title>
-
-     <para>
-      OpenIDM includes Eclipse JSDT libraries so you can use Eclipse to debug
-      your OpenIDM JavaScripts during development.
-     </para>
-
-     <procedure xml:id="enable-debugging">
-      <title>To Enable Debugging</title>
+<!--TODO Reintegrate, and possible revise, when debugging is resolved on Mars
+ <section xml:id="debugging-scripts">
+  <title>Debugging OpenIDM JavaScripts</title>
+  <para>
+   OpenIDM includes Eclipse JSDT libraries that enable you to use Eclipse to
+   debug your OpenIDM JavaScript scripts during development.
+  </para>
+  <caution>
+   <para>
+    Debugging with Eclipse is currently supported <emphasis>only</emphasis> for
+    Eclipse Luna.
+   </para>
+  </caution>
+  <para>
+   To enable debugging
+   with Eclipse, follow these steps:
+  </para>
+  <procedure>
+   <step>
+    <para>
+     Stop OpenIDM, if it is running.
+    </para>
+   </step>
+   <step>
+    <para>
+     Install a version of Eclipse that supports JavaScript development (from the
+     <link xlink:href="http://www.eclipse.org/downloads/"
+     xlink:show="new">Eclipse download page</link>), or add the <link xlink:show="new"
+     xlink:href="http://wiki.eclipse.org/JSDT">JavaScript Development
+     Tools</link> to your existing Eclipse installation.
+    </para>
+    <para>
+     This procedure uses <link xlink:href="http://www.eclipse.org/downloads/packages/eclipse-ide-java-ee-developers/lunasr2"
+     xlink:show="new">Eclipse IDE for Java EE Developers</link>.
+    </para>
+   </step>
+   <step>
+    <para>
+     Copy the Rhino Debugger that is provided with Eclipse into the
+     <literal>openidm/bundle</literal> directory.
+    </para>
+    <informalexample><?dbfo pgwide="1"?>
+<screen>$ cd /path/to/openidm/bundle
+$ cp /path/to/Eclipse/plugins/org.eclipse.wst.jsdt.debug.rhino.debugger_1.0.500.v201503300052.jar .</screen>
+    </informalexample>
+   </step>
+   <step>
+    <para>
+     Copy the transport JAR file (used to load scripts to be debugged) that is
+     provided with Eclipse into the <literal>openidm/bundle</literal> directory.
+    </para>
+    <informalexample><?dbfo pgwide="1"?>
+     <screen>$ cd /path/to/openidm/bundle
+$ cp /path/to/Eclipse/plugins/org.eclipse.wst.jsdt.debug.transport_1.0.300.v201502261613.jar .</screen>
+    </informalexample>
+   </step>
+   <step>
+    <para>
+     If you have previously started this OpenIDM instance, delete the
+     <literal>felix-cache</literal> directory.
+    </para>
+   </step>
+   <step>
+    <para>
+     Enable debugging by editing the script configuration file for your project
+     (<filename><replaceable>project-dir</replaceable>/conf/script.json</filename>).
+    </para>
+    <para>
+     Specifically, uncomment the following line:
+    </para>
+    <screen>"javascript.debug" : "transport=socket,suspend=y,address=9888,trace=true",</screen>
+    <para>
+     The <literal>suspend=y</literal> parameter prevents OpenIDM from starting
+     until the remote JavaScript debugger has connected. You might want to set
+     this to <literal>suspend=n</literal>, if you do not want to prevent OpenIDM
+     from starting.
+    </para>
+   </step>
+   <step>
+    <para>
+     Start Eclipse and create an empty JavaScript project named, for example,
+     <literal>OpenIDM_Scripts</literal>.
+    </para>
+    <para>
+     Eclipse will create an <filename>OpenIDM_Scripts</filename>
+     directory in the default Eclipse workspace location, and will use this
+     directory to store the sources that it loads from OpenIDM.
+    </para>
+   </step>
+   <step>
+    <para>
+     Link the folder, within your OpenIDM project, that contains the script or
+     scripts that you want to debug.
+    </para>
+    <substeps>
+     <step>
       <para>
-       Follow these steps to enable debugging using Eclipse.
+       Select Project > Properties > JavaScript > Include Path.
       </para>
-      <step>
-       <para>
-        Install the environment to support JavaScript development in either of
-        the following ways.
-       </para>
-       <stepalternatives>
-        <step>
-         <para>
-          Download and install Eclipse IDE for JavaScript Web Developers from
-          the <link xlink:href="http://www.eclipse.org/downloads/"
-          xlink:show="new">Eclipse download page</link>.
-         </para>
-        </step>
-        <step>
-         <para>
-          Add <link xlink:href="http://wiki.eclipse.org/JSDT"
-          xlink:show="new">JavaScript Development Tools</link> to your existing
-          Eclipse installation.
-         </para>
-        </step>
-       </stepalternatives>
-      </step>
-      <step>
-       <para>
-        Create an empty JavaScript project called <literal>External JavaScript
-        Source</literal> in Eclipse.
-       </para>
-       <para>
-        Eclipse then uses the <filename>External JavaScript Source</filename>
-        directory in the default workspace location to store sources that it
-        downloads from OpenIDM.
-       </para>
-      </step>
-      <step>
-       <para>
-        Stop OpenIDM.
-       </para>
-      </step>
-      <step>
-       <para>
-        Edit <filename>openidm/conf/boot/boot.properties</filename> to enable
-        debugging.
-       </para>
-       <substeps>
-        <step>
-         <para>
-          Uncomment and edit the following line.
-         </para>
-         <programlisting>
-#openidm.script.javascript.debug=transport=socket,suspend=y,address=9888,trace=true
-         </programlisting>
-         <para>
-          Here <literal>suspend=y</literal> prevents OpenIDM from starting until
-          the remote JavaScript debugger has connected. You might therefore
-          choose to set this to <literal>suspend=n</literal>.
-         </para>
-        </step>
-        <step>
-         <para>
-          Uncomment and edit the following line.
-         </para>
-         <programlisting>
-#openidm.script.javascript.sources=/Eclipse/workspace/External JavaScript Source/
-         </programlisting>
-         <para>
-          Adjust <literal>/Eclipse/workspace/External JavaScript Source/</literal>
-          to match the absolute path to this folder including the trailing
-          <literal>/</literal> character. On Windows, also use forward slashes,
-          such as<literal>C:/Eclipse/workspace/External JavaScript Source/</literal>.
-         </para>
-         <para>
-          Each time OpenIDM loads a new script, it then creates or overwrites
-          the file in the <filename>External JavaScript Source</filename>
-          directory. Before toggling breakpoints, be sure to refresh the source
-          manually in Eclipse so you have the latest version.
-         </para>
-        </step>
-       </substeps>
-      </step>
-      <step>
-       <para>
-        Edit the <filename>conf/script.json</filename> file to enable debugging.
-        Specifically, uncomment and edit the following line:
-       </para>
-       <programlisting>
-"#javascript.debug": "transport=socket,suspend=y,address=9888,trace=true",
-       </programlisting>
-      </step>
-      <step>
-       <para>
-        Prepare the Eclipse debugger to allow you to set breakpoints.
-       </para>
-       <para>
-        In the Eclipse Debug perspective, select the Breakpoints tab, and click
-        the Add Script Load Breakpoint icon to open the list of scripts.
-       </para>
-       <para>
-        In the Add Script Load Breakpoint window, select your scripts, and click
-        OK.
-       </para>
-      </step>
-      <step>
-       <para>
-        Start OpenIDM, and connect the debugger.
-       </para>
-       <para>
-        To create a new debug configuration, select Run &gt; Debug
-        Configurations... &gt; Remote JavaScript &gt; New, and set the port to
-        9888 as shown in the previous step.
-       </para>
-      </step>
-     </procedure>
-    </section> -->
+     </step>
+     <step>
+      <para>
+       Click on the Source tab and click Link External Folder.
+      </para>
+     </step>
+     <step>
+      <para>
+       Browse for the folder or folders that will contain the JavaScript files
+       that you want to debug, for example,
+       <filename><replaceable>project-dir</replaceable>/script</filename>, and
+       click Finish.
+      </para>
+     </step>
+    </substeps>
+    <para>
+     Each time OpenIDM loads a new script, it creates or overwrites the file in
+     the <filename>External JavaScript Source</filename> directory. Before you
+     toggle breakpoints, you must refresh the source manually in Eclipse, so
+     that you have the latest version of the script.
+    </para>
+   </step>
+   <step>
+    <para>
+     Start the OpenIDM instance.
+    </para>
+   </step>
+   <step>
+    <para>
+     Connect the debugger to OpenIDM by creating a new debug configuration:
+    </para>
+    <substeps>
+     <step>
+      <para>
+       Select Run > Debug Configurations > Remote JavaScript > New
+      </para>
+     </step>
+     <step>
+      <para>
+       Provide a name for the configuration, for example, OpenIDM_Scripts, and
+       set the port to 9888.
+      </para>
+     </step>
+     <step>
+      <para>
+       Click Apply.
+      </para>
+     </step>
+    </substeps>
+   </step>
+   <step>
+    <para>
+     Prepare the Eclipse debugger to allow you to set breakpoints.
+    </para>
+    <substeps>
+     <step>
+      <para>
+       In the Eclipse Debug perspective, select the Breakpoints tab.
+      </para>
+     </step>
+     <step>
+      <para>
+       Click the Add Script Load Breakpoint icon to display the list of scripts
+       in the external directory that you have specified.
+      </para>
+     </step>
+     <step>
+      <para>
+       In the Add Script Load Breakpoint window, select the script or scripts
+       you want to debug, and click OK.
+      </para>
+     </step>
+    </substeps>
+   </step>
+  </procedure>
+ </section> -->
 
  <section xml:id="script-endpoint">
   <title>Validating Scripts Over REST</title>

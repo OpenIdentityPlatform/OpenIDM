@@ -51,13 +51,21 @@ if (effectiveRoles != null)  {
             if (roleInfo != null) {
                 for (var assignmentName in roleInfo.assignments) {
                     var assignment = roleInfo.assignments[assignmentName];
+                    var onAssignment = assignment.onAssignment;
+                    var onUnassignment = assignment.onUnassignment;
                     var linkQualifers = assignment.linkQualifiers;
                     var effectiveAssignment = {
                         "name" : assignmentName,
                         "attributes" : assignment.attributes
                     };
                     effectiveAssignment["assignedThrough"] = roleId;
-                    if (linkQualifers !== null) {
+                    if (typeof onAssignment !== "undefined" && onAssignment !== null) {
+                        effectiveAssignment["onAssignment"] = onAssignment;
+                    }
+                    if (typeof onUnassignment !== "undefined" && onUnassignment !== null) {
+                        effectiveAssignment["onUnassignment"] = onUnassignment;
+                    }
+                    if (typeof linkQualifers !== "undefined" && linkQualifers !== null) {
                         effectiveAssignment["linkQualifiers"] = linkQualifers;
                     }
                     logger.trace("assignmentName: {} value : {}", assignmentName, assignment);

@@ -24,7 +24,7 @@
 
 /*global define, $, _, Handlebars */
 
-define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
+define("org/forgerock/openidm/ui/admin/workflow/ProcessHistoryView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -45,22 +45,22 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
             BackgridUtils,
             router,
             Backgrid) {
-    var ActiveProcessesView = AdminAbstractView.extend({
-        template: "templates/admin/workflow/ActiveProcessViewTemplate.html",
+    var ProcessHistoryView = AdminAbstractView.extend({
+        template: "templates/admin/workflow/ProcessHistoryViewTemplate.html",
         events: {
-            "change #processFilterType" : "filterType"
+            "change #processHistoryFilterType" : "filterType"
         },
         model : {
             userFilter: "anyone",
             processTypeFilter: "all"
         },
-        element: "#activeProcesses",
+        element: "#processHistory",
         render: function(args, callback) {
             this.data.processDefinitions = args[0];
 
             this.parentRender(_.bind(function() {
                 var processGrid,
-                    ProcessModel = AbstractModel.extend({ "url": "/openidm/workflow/processinstance" }),
+                    ProcessModel = AbstractModel.extend({ "url": "/openidm/workflow/processinstance/history" }),
                     Process = AbstractCollection.extend({ model: ProcessModel });
 
                 this.model.processes = new Process();
@@ -76,13 +76,13 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                     });
                 });
 
-                this.model.processes.url = "/openidm/workflow/processinstance?_queryId=filtered-query";
+                this.model.processes.url = "/openidm/workflow/processinstance/history?_queryId=filtered-query&finished=true";
                 this.model.processes.state.pageSize = null;
                 this.model.processes.state.sortKey = "-startTime";
 
                 processGrid = new Backgrid.Grid({
                     className: "table",
-                    emptyText: $.t("templates.workflows.processes.noActiveProcesses"),
+                    emptyText: $.t("templates.workflows.processes.noCompletedProcesses"),
                     columns: [
                         {
                             name: "processDefinitionResourceName",
@@ -113,26 +113,19 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                             editable: false
                         },
                         {
+                            name: "endTime",
+                            label: "COMPLETED",
+                            cell: BackgridUtils.DateCell("endTime"),
+                            sortable: true,
+                            editable: false
+                        },
+                        {
                             name: "",
                             cell: BackgridUtils.ButtonCell([
                                 {
                                     className: "fa fa-pencil grid-icon",
                                     callback: function() {
                                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.processInstanceView, args: [this.model.id]});
-                                    }
-                                },
-                                {
-                                    className: "fa fa-times grid-icon",
-                                    callback: function(event){
-                                        event.preventDefault();
-
-                                        uiUtils.jqConfirm($.t("templates.workflows.processes.cancelProcessDialog"), _.bind(function(){
-                                            this.model.destroy({
-                                                success: _.bind(function() {
-                                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deletedActiveProcess");
-                                                }, this)
-                                            });
-                                        }, this));
                                     }
                                 }
                             ]),
@@ -142,11 +135,11 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                     collection: this.model.processes
                 });
 
-                this.$el.find("#processGridHolder").append(processGrid.render().el);
+                this.$el.find("#processHistoryGridHolder").append(processGrid.render().el);
 
                 this.model.processes.getFirstPage();
 
-                this.$el.find("#processAssignedTo").selectize({
+                this.$el.find("#processHistoryAssignedTo").selectize({
                     valueField: '_id',
                     labelField: 'userName',
                     searchField: ["userName","givenName", "sn"],
@@ -207,14 +200,14 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                     }, this)
                 });
 
-                this.$el.find("#processAssignedTo")[0].selectize.addOption({
+                this.$el.find("#processHistoryAssignedTo")[0].selectize.addOption({
                     _id : "anyone",
                     userName: "Anyone",
                     givenName : "Anyone",
                     sn : ""
                 });
 
-                this.$el.find("#processAssignedTo")[0].selectize.setValue("anyone", true);
+                this.$el.find("#processHistoryAssignedTo")[0].selectize.setValue("anyone", true);
 
                 if(callback) {
                     callback();
@@ -229,27 +222,23 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
         },
 
         reloadGrid: function() {
-            var filterString = "";
+            var filterString = "_queryId=filtered-query&finished=true";
 
             if(this.model.userFilter !== "anyone") {
-                filterString = "_queryId=filtered-query&startUserId=" + this.model.userFilter;
+                filterString = filterString +"&startUserId=" + this.model.userFilter;
 
                 if(this.model.processTypeFilter !== "all") {
                     filterString = filterString + "&processDefinitionKey=" +this.model.processTypeFilter;
                 }
             } else if (this.model.processTypeFilter !== "all") {
-                filterString = "_queryId=filtered-query&processDefinitionKey=" + this.model.processTypeFilter;
+                filterString = filterString + "&processDefinitionKey=" + this.model.processTypeFilter;
             }
 
-            if(filterString.length > 0) {
-                this.model.processes.url = "/openidm/workflow/processinstance?" + filterString;
-            } else {
-                this.model.processes.url = "/openidm/workflow/processinstance?_queryId=query-all-ids";
-            }
+            this.model.processes.url = "/openidm/workflow/processinstance/history?" + filterString;
 
             this.model.processes.getFirstPage();
         }
     });
 
-    return new ActiveProcessesView();
+    return new ProcessHistoryView();
 });

@@ -1,70 +1,64 @@
 <div class="editResourceViewContainer">
-	<section>
-	    <div class="back-bar">
-	        <div class="container">
-	            <a href="#workflow/processes/"><span class="header-link-text">{{t "templates.processInstance.viewAllProcesses" }}</span></a>
-	        </div>
-	    </div>
-	    <div class="container">
-	        <div class="page-header no-border">
-	            <div class="media">
-	                <div class="media-left media-top">
-	                    <div class="header-icon pull-left"><i class="fa fa-cogs"></i></div>
-	                </div>
-	                <div class="media-body media-top">
-	                    <h4 class="page-type">
-	                        {{t "templates.processInstance.process" }}
-                                <span class="meta">
-                                    <span class="meta-icon-bullet"><i class="fa fa-clock-o"></i> {{t "templates.processInstance.started" }}: {{date processInstance.startTime "MMM d, yyyy  h:mm:ss TT"}}</span> 
-                                </span>
-                                <span class="meta">
-                                    <span class="meta-icon-bullet"><i class="fa fa-user"></i> {{t "templates.processInstance.startedBy" }}: <a href="#resource/managed/user/edit/{{startedBy._id}}/">{{startedBy.givenName}} {{startedBy.sn}} <small class="text-muted">({{startedBy.userName}})</small></a></span> 
-                                </span>
-	                    </h4>
-	                    <h1 class="pull-left">{{processDefinition.name}} <small class="text-muted">({{processInstance._id}})</small></h1>
-	                    <div class="btn-toolbar pull-right no-border">
-	                        <div class="btn-group">
-	                            <a href="#" id="cancelProcessBtn" class="btn btn-primary">
-	                                <i class="fa fa-remove"></i>
-	                                {{t "templates.processInstance.cancelProcess" }}
-	                            </a>
-	                        </div>
-	                    </div>
-	                </div>
-	            </div>
-	        </div>
-	    </div>
-	</section>
-	<section>
-	   <div id="tabs" class="tab-menu">
-	      <div class="container">
-	         <ul class="nav nav-tabs">
-	            <li class="dropdown pull-right tabdrop hide">
-	               <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <b class="caret"></b></a>
-	               <ul class="dropdown-menu"></ul>
-	            </li>
-	            <li class="active"><a data-toggle="tab" href="#tasksTab">Tasks</a></li>
-	            <!--- <li><a data-toggle="tab" href="#definitionTab">Definition</a></li> --->
-	         </ul>
-	      </div>
-	   </div>
-	   <div class="container">
-	      <div class="tab-content" id="settings">
-             <div id="tasksTab" class="tab-pane active" role="tabpanel">
-                <div class="tab-pane-body">
-                   <div class="container">
-                       <div id="tasksGrid"></div>
-                   </div>
+    <section>
+        <div class="back-bar">
+            <div class="container">
+                <a href="#workflow/processes/"><span class="header-link-text">{{t "templates.processInstance.viewAllProcesses" }}</span></a>
+            </div>
+        </div>
+        <div class="container">
+            <div class="page-header clearfix">
+                <span class="header-icon pull-left"><i class="fa fa-cogs"></i></span>
+                <h4 class="page-type">
+                    {{t "templates.processInstance.process" }}
+                    <span class="meta">
+                        <span class="meta-icon-bullet"><i class="fa fa-clock-o"></i> {{t "templates.processInstance.started" }}: {{date processInstance.startTime "MMM d, yyyy  h:mm:ss TT"}}</span>
+                    </span>
+                    <span class="meta">
+                        <span class="meta-icon-bullet"><i class="fa fa-user"></i> {{t "templates.processInstance.startedBy" }}: <a href="#resource/managed/user/edit/{{startedBy._id}}/">{{startedBy.givenName}} {{startedBy.sn}} <small class="text-muted">({{startedBy.userName}})</small></a></span>
+                    </span>
+                </h4>
+                <div class="page-header-button-group">
+                    <div class="btn-group">
+                        <a href="#" id="cancelProcessBtn" class="btn btn-primary">
+                            <i class="fa fa-remove"></i>
+                            {{t "templates.processInstance.cancelProcess" }}
+                        </a>
+                    </div>
                 </div>
-             </div>
-             <div id="definitionTab" class="tab-pane" role="tabpanel">
-                <div class="tab-pane-body">
-                   <div class="container">
-                       DEFINITION
-                   </div>
+                <h1>{{processDefinition.name}} <small class="text-muted">({{processInstance._id}})</small></h1>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div id="tabs" class="tab-menu">
+            <div class="container">
+                <ul class="nav nav-tabs">
+                    <li class="dropdown pull-right tabdrop hide">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <b class="caret"></b></a>
+                        <ul class="dropdown-menu"></ul>
+                    </li>
+                    <li class="active"><a data-toggle="tab" href="#tasksTab">Tasks</a></li>
+                    <!--- <li><a data-toggle="tab" href="#definitionTab">Definition</a></li> --->
+                </ul>
+            </div>
+        </div>
+        <div class="container">
+            <div class="tab-content" id="settings">
+                <div id="tasksTab" class="tab-pane active" role="tabpanel">
+                    <div class="tab-pane-body">
+                        <div class="container">
+                            <div id="tasksGrid" class="table-responsive"></div>
+                        </div>
+                    </div>
                 </div>
-             </div>
-	      </div>
-	   </div>
-	</section>
+                <div id="definitionTab" class="tab-pane" role="tabpanel">
+                    <div class="tab-pane-body">
+                        <div class="container">
+                            DEFINITION
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>

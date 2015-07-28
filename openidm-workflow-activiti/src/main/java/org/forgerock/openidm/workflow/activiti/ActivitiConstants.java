@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.workflow.activiti;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.openidm.core.ServerConstants;
 
@@ -103,4 +104,7 @@ public class ActivitiConstants {
     public static final String ACTIVITI_UNASSIGNED = "unassigned";
     public static final String ACTIVITI_FINISHED = "finished";
     public static final String ACTIVITI_UNFINISHED = "unfinished";
+    public static final String ACTIVITI_PROCESSFINISHED = "processFinished";
+    public static final String ACTIVITI_PROCESSUNFINISHED = "processUnfinished";
+    public static final JsonPointer ACTIVITI_DIAGRAM = new JsonPointer("/diagram");
 }

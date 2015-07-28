@@ -9,20 +9,20 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
+    "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
     "bootstrap-dialog"
 ], function(MappingAdminAbstractView,
-            AttributesGridView,
             conf,
             uiUtils,
             eventManager,
             constants,
             autoCompleteUtils,
+            EditPropertyMappingDialog,
             BootstrapDialog) {
 
     var AddPropertyMappingDialog = MappingAdminAbstractView.extend({
@@ -36,13 +36,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
             "click input[type=submit]": "formSubmit",
             "change :input": "validateMapping"
         },
-        model: {
-            closeCallback: null
-        },
+        model: {},
 
         formSubmit: function (event) {
             var property = $(":input[name=propertyList]",this.$el).val(),
-                mappingProperties = AttributesGridView.model.mappingProperties;
+                mappingProperties = this.data.currentProperties;
 
             if (event) {
                 event.preventDefault();
@@ -53,12 +51,15 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
 
                 mappingProperties.push({target: property});
 
-                AttributesGridView.model.mappingProperties = mappingProperties;
+                this.model.saveCallback(mappingProperties);
 
                 this.close();
-                this.model.closeCallback = _.bind(function(){
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, mappingProperties.length.toString()]});
-                }, this);
+                EditPropertyMappingDialog.render({
+                    id: mappingProperties.length.toString(),
+                    mappingProperties: mappingProperties,
+                    availProperties: this.data.availableTargetProps,
+                    saveCallback: this.model.saveCallback
+                });
             }
         },
 
@@ -88,25 +89,15 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
             $("#dialogs").hide();
         },
 
-        getAvailableTargetProps: function(){
-            var availableProps;
-
-            this.data.currentProperties = AttributesGridView.model.mappingProperties || this.getCurrentMapping().properties;
-
-            AttributesGridView.model.mappingProperties = this.data.currentProperties;
-
-            availableProps = AttributesGridView.model.availableObjects.target.properties || [];
-
-            return availableProps;
-        },
-
         render: function(params, callback) {
             var _this = this,
                 settings;
 
-            this.data.mappingName = params[0];
+            this.data.mappingName = this.getMappingName();
             this.property = "_new";
-            this.data.availableTargetProps = this.getAvailableTargetProps();
+            this.data.currentProperties = params.mappingProperties || this.getCurrentMapping().properties;
+            this.data.availableTargetProps = params.availProperties;
+            this.model.saveCallback = params.saveCallback;
 
             settings = {
                 "title": $.t("templates.mapping.propertyAdd.title"),
@@ -128,13 +119,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
-                onhide: function(dialogRef){
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
-
-                    if (_this.model.closeCallback) {
-                        _this.model.closeCallback();
-                    }
-                },
                 onshown : function (dialogRef) {
                     uiUtils.renderTemplate(settings.template, _this.$el,
                         _.extend(conf.globalData, _this.data),

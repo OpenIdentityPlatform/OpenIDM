@@ -31,6 +31,18 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
 ], function (Backgrid, DateUtil) {
     var obj = {};
 
+    obj.formatDate = function(date) {
+        var returnDate = "";
+        if(date) {
+            returnDate = DateUtil.formatDate(date, "MMM dd, yyyy") +
+            " <small class='text-muted'>" +
+            DateUtil.formatDate(date, "h:mm:ss TT") +
+            "</small>";
+        }
+
+        return returnDate;
+    };
+
     /**
      * The date cell will search the model attributes for the provided property and format that into a standard date.
      * @param dateProperty{string}
@@ -38,14 +50,11 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
      * @constructor
      */
     obj.DateCell = function (dateProperty) {
+        var _this = this;
         return Backgrid.Cell.extend({
             render: function () {
                 if (this.model.get(dateProperty)) {
-                    var html = DateUtil.formatDate(this.model.get(dateProperty), "MMM dd, yyyy") +
-                        " <small class='text-muted'>" +
-                        DateUtil.formatDate(this.model.get(dateProperty), "h:mm:ss TT") +
-                        "</small>";
-                    this.$el.html(html);
+                    this.$el.html(_this.formatDate(this.model.get(dateProperty)));
                 }
                 return this;
             }

@@ -1,1 +1,27 @@
-Task List
+<div class="container tasks-container">
+    <div class="page-header">
+        <h1>{{t "templates.workflows.tasks.title" }}</h1>
+        <div class="btn-toolbar hidden">
+            <div class="btn-group">
+                <a href="#" class="btn btn-primary ">
+                    <i class="fa fa-plus"></i>{{t "templates.workflows.tasks.newTask" }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default panel-content">
+        <div class="toolbar clearfix" role="toolbar" aria-label="toolbar">
+            <form class="form-inline">
+                <div class="form-group taskAssignedToContainer">
+                    <label for="taskAssignedTo">{{t "templates.workflows.tasks.assigned" }}: </label>
+                    <select id="taskAssignedTo" class="form-control"></select>
+                </div>
+
+            </form>
+        </div>
+        <div id="taskGridHolder" class="panel-body">
+
+        </div>
+    </div>
+</div>

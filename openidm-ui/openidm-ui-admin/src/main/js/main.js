@@ -56,6 +56,7 @@ require.config({
         moment: "libs/moment-2.8.1-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
+        UserDelegate: "org/forgerock/openidm/ui/common/util/UserDelegate",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min",
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min"

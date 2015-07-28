@@ -38,18 +38,27 @@
   <primary>Business processes</primary>
  </indexterm>
 
- <para>Key to any identity management solution is the ability to provide
- workflow-driven provisioning activities, whether for self-service actions
- such as requests for entitlements, roles or resources, running sunrise or
- sunset processes, handling approvals with escalations, or performing
- maintenance.</para>
- 
- <para>OpenIDM provides an embedded workflow and business process engine
- based on Activiti and the Business Process Model and Notation (BPMN) 2.0
- standard.</para>
- 
- <para>More information about Activiti and the Activiti project can be found
- at <link xlink:href="http://www.activiti.org" xlink:show="new" />.</para>
+ <para>
+  Key to any identity management solution is the ability to provide
+  workflow-driven provisioning activities, whether for self-service actions
+  such as requests for entitlements, roles or resources, running sunrise or
+  sunset processes, handling approvals with escalations, or performing
+  maintenance.
+ </para>
+ <para>
+  OpenIDM provides an embedded workflow and business process engine based on
+  Activiti and the Business Process Model and Notation (BPMN) 2.0 standard.
+ </para>
+ <para>
+  More information about Activiti and the Activiti project can be found at
+  <link xlink:href="http://www.activiti.org" xlink:show="new" />.
+ </para>
+ <para>
+  This chapter describes how to configure the Activiti engine, and how to manage
+  workflow tasks and processes over the REST interface. You can also manage
+  workflows in the Admin UI by selecting Manage > Workflow and then selecting
+  Tasks or Processes.
+ </para>
  
  <section xml:id="about-bmpm-2-activiti">
   <title>BPMN 2.0 and the Activiti Tools</title>
@@ -1029,6 +1038,205 @@ openidm.create('workflow/processinstance', null, params);
    </listitem>
   </itemizedlist>
 
+  <bridgehead>openidm/workflow/processinstance/history</bridgehead>
+  <itemizedlist>
+   <listitem>
+    <para>
+     List the running and completed workflows (process instances).
+    </para>
+    <para>
+     The following query returns two process instances - one that has completed
+     (<literal>"endActivityId": "end"</literal>) and one that is still running
+     (<literal>"endActivityId": null</literal>):
+    </para>
+    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "_id": "12",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 465287,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T14:43:53.374+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "12",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T14:36:08.087+02:00",
+      "startUserId": "user.1",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 2,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}</computeroutput>
+    </screen>
+   </listitem>
+   <listitem>
+    <para>
+     Obtain the list of running and completed workflows, based on specific
+     filter criteria.
+    </para>
+    <para>
+     The following command returns the running and completed workflows that
+     were launched by <literal>user.0</literal>.
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&amp;startUserId=user.0</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 1,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}</computeroutput></screen>
+    <para>
+     For large result sets, you can use the <literal>_sortKeys</literal>
+     parameter with a <literal>filtered-query</literal> to order search results
+     by one or more fields. You can append a <literal>-</literal> character to
+     the field name to specify that results should be returned in descending
+     order, rather than ascending order.
+    </para>
+    <para>
+     The following query orders results according to their
+     <literal>startTime</literal>. The <literal>-</literal> character in this
+     case indicates that results should be sorted in reverse order, that is,
+     with the most recent results returned first.
+    </para>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&amp;_sortKeys=-startTime"</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "_id": "104",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "104",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T16:33:37.834+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 3738013,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T16:38:38.200+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "12",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 465287,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T14:43:53.374+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "12",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T14:36:08.087+02:00",
+      "startUserId": "user.1",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 3,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}</computeroutput>
+    </screen>
+    <caution>
+     <para>
+      The Activiti engine treats certain property values as
+      <emphasis>strings</emphasis>, regardless of their actual data type. This
+      might result in results being returned in an order that is different to
+      what you might expect. For example, if you wanted to sort the following
+      results by their <literal>_id</literal> field,
+      <literal>"88", "45", "101"</literal>, you would expect them to be returned
+      in the order <literal>"45", "88", "101"</literal>. Because Activiti treats
+      IDs as strings, rather than numbers, they would be returned in the
+      order <literal>"88","45","101"</literal>.
+     </para>
+    </caution>
+   </listitem>
+  </itemizedlist>
+
   <bridgehead>openidm/workflow/processdefinition/{id}/taskdefinition</bridgehead>
   <itemizedlist>
    <listitem>
@@ -1815,7 +2023,7 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
    use cases for OpenIDM. The use cases, provided in
    <filename>/path/to/openidm/samples/usecase</filename>, work together to
    provide a complete business story, with the same set of sample data. Each of
-   the use cases is integrated with the default UI.
+   the use cases is integrated with the self service UI.
   </para>
   <para>
    These use cases use OrientDB as a repository by default. Alternative
@@ -1937,7 +2145,7 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
     <listitem>
      <para>
       Download and install OpenDJ, as described in <link xlink:show="new"
-      xlink:href="http://docs.forgerock.org/en/opendj/2.6.0/install-guide/index.html#chap-install-gui">Installing
+      xlink:href="https://backstage.forgerock.com/#!/docs/opendj/2.6.0/install-guide#chap-install-gui">Installing
       OpenDJ With the QuickSetup Wizard</link>.
      </para>
      <para>
@@ -1969,8 +2177,7 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
       Start OpenIDM with the configuration for use case 1.
      </para>
      <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/usecase/usecase1
-     </screen>
+$ ./startup.sh -p samples/usecase/usecase1</screen>
     </step>
     <step>
      <para>
@@ -1983,9 +2190,11 @@ $ ./startup.sh -p samples/usecase/usecase1
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHRAccounts_managedUser"
-      </userinput>
-     </screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHRAccounts_managedUser"</userinput>
+<computeroutput>{
+ "_id": "376b3290-24f0-47a9-8a9e-bba025536c39",
+ "state": "ACTIVE"
+ }</computeroutput>     </screen>
     </step>
     <step>
      <para>
@@ -1999,30 +2208,36 @@ $ ./startup.sh -p samples/usecase/usecase1
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
       </userinput>
 <computeroutput>{
-  "result" : [ {
-    "_id" : "user.5",
-    "_rev" : "0"
-  }, {
-    "_id" : "user.10",
-    "_rev" : "0"
-  }, {
-    "_id" : "user.1",
-    "_rev" : "0"
-  },
+  "result": [
+    {
+      "_id": "user.7",
+      "_rev": "1"
+    },
+    {
+      "_id": "user.3",
+      "_rev": "1"
+    },
+    {
+      "_id": "user.4",
+      "_rev": "1"
+    },
  ...
- {
-    "_id" : "hradmin",
-    "_rev" : "0"
-  }, {
-    "_id" : "systemadmin",
-    "_rev" : "0"
-  }, {
-    "_id" : "superadmin",
-    "_rev" : "0"
-  } ],
-  "resultCount" : 23,
-  "pagedResultsCookie" : null,
-  "remainingPagedResults" : -1
+    {
+      "_id": "systemadmin",
+      "_rev": "1"
+    },
+    {
+      "_id": "hradmin",
+      "_rev": "1"
+    },
+    {
+      "_id": "superadmin",
+      "_rev": "1"
+    }
+  ],
+  "resultCount": 23,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
 }</computeroutput>
      </screen>
      <para>
@@ -2064,8 +2279,8 @@ $ ./shutdown.sh
    </para>
    <para>
     The use case works with the OpenIDM Self-Service UI. If you deploy OpenIDM
-    on the local system, you can access it at the following URL:
-    <literal>https://localhost:8443//</literal>.
+    on the local system, you can access the UI at the following URL:
+    <literal>https://localhost:8443</literal>.
    </para>
 
    <procedure xml:id="initiate-onboarding">
@@ -2080,8 +2295,8 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Log into the UI as <literal>user.1</literal> with password
-      <literal>Passw0rd</literal>.
+      Log into the Self-Service UI (<literal>https://localhost:8443</literal>)
+      as <literal>user.1</literal> with password <literal>Passw0rd</literal>.
      </para>
      <mediaobject>
       <alt>Log into the UI</alt>
@@ -2150,8 +2365,8 @@ $ ./startup.sh -p samples/usecase/usecase2
       department. All users have the password <literal>Passw0rd</literal>.
      </para>
      <para>
-      Notice that this user now has an Onboarding Approval task in the queue of
-      tasks assigned to his group.
+      Notice that the management user now has an Onboarding Approval task in the
+      queue of tasks assigned to that user's group.
      </para>
      <mediaobject>
       <alt>Approval task in group queue</alt>
@@ -2162,7 +2377,8 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Click on the Onboarding Approval task and select "Assign to Me".
+      Click on the Onboarding Approval task and select "Assign to Me" from the
+      Actions list.
      </para>
      <para>
       This action "claims" the task for <literal>user.0</literal>, removes it
@@ -2172,8 +2388,7 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Click on the Onboarding Approval task under the My group's tasks and click
-      Details.
+      Click on the Onboarding Approval task under "My tasks" and click Details.
      </para>
      <para>
       The complete new user request is displayed for the manager's approval. As
@@ -2203,13 +2418,6 @@ $ ./startup.sh -p samples/usecase/usecase2
       </listitem>
       <listitem>
        <para>
-        <emphasis>Manager</emphasis>. Selecting "Yes" here adds a
-        <literal>"title"</literal> property, with a value of
-        <literal>"manager"</literal>, to the new managed user entry.
-       </para>
-      </listitem>
-      <listitem>
-       <para>
         <emphasis>Decision</emphasis>. Selecting "Reject" here terminates the
         workflow and sends a notification to the user who initiated the
         workflow. Selecting "Accept" creates the managed user entry in OpenIDM.
@@ -2219,8 +2427,8 @@ $ ./startup.sh -p samples/usecase/usecase2
         Two notifications are created when the request is accepted - one for the
         user who initiated the workflow, and one for the newly created user.
         The notifications are visible in the UI after login. If you selected
-        email notification, one email is sent to the user defined when you
-        configured email notification, as described in
+        email notification, one email is sent to the user that you defined when
+        you configured email notification, as described in
         <xref linkend="configure-email-notification" />.
        </para>
       </listitem>
@@ -2232,7 +2440,7 @@ $ ./startup.sh -p samples/usecase/usecase2
       request or to Complete it. Click Complete.
      </para>
      <para>
-      If you click Requeue here, the task is removed from the list of My Tasks
+      If you click Requeue here, the task is removed from the list of "My tasks"
       for that user, and returned to the list of tasks pending for that group.
       The task can then be claimed by any member of that group.
      </para>
@@ -2263,12 +2471,17 @@ $ ./startup.sh -p samples/usecase/usecase2
 $ more samples/usecase/usecase2/conf/external.email.json
      </userinput>
 <computeroutput>{
-        "host" : "smtp.gmail.com",
-        "port" : "587",
-        "username" : "my-username",
-        "password" : "my-password",
-        "mail.smtp.auth" : "true",
-        "mail.smtp.starttls.enable" : "true"
+    "host" : "smtp.example.com",
+    "port" : "587",
+    "debug" : false,
+    "auth" : {
+        "enable" : true,
+        "username" : "admin",
+        "password" : "Passw0rd"
+    },
+    "starttls" : {
+        "enable" : true
+    }
 }</computeroutput></screen>
     </step>
     <step>
@@ -3252,14 +3465,18 @@ $ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</user
      </para>
      <screen><userinput>$ cd /path/to/openidm
 $ more samples/usecase/usecase6/conf/external.email.json</userinput>
-<computeroutput>
-{
-        "host" : "smtp.gmail.com",
-        "port" : "587",
-        "username" : "my-username",
-        "password" : "my-password",
-        "mail.smtp.auth" : "true",
-        "mail.smtp.starttls.enable" : "true"
+<computeroutput>{
+    "host" : "smtp.example.com",
+    "port" : "587",
+    "debug" : false,
+    "auth" : {
+        "enable" : true,
+        "username" : "admin",
+        "password" : "Passw0rd"
+    },
+    "starttls" : {
+        "enable" : true
+     }
 }</computeroutput>
      </screen>
     </step>

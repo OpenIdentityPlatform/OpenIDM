@@ -103,22 +103,6 @@ define("config/routes/AdminRoutesConfig", [
             url: /^properties\/([^\/]+)\/$/,
             pattern: "properties/?/"
         },
-        "editMappingProperty" : {
-            base: "propertiesView",
-            dialog: "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
-            role: "ui-admin",
-            url: /properties\/(.+?)\/(.+?)$/,
-            pattern: "properties/?/?",
-            forceUpdate: true
-        },
-        "addMappingProperty" : {
-            base: "propertiesView",
-            dialog: "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
-            role: "ui-admin",
-            url: /properties\/(.+?)\/_new$/,
-            pattern: "properties/?/_new",
-            forceUpdate: true
-        },
         "behaviorsView" : {
             childView: "org/forgerock/openidm/ui/admin/mapping/BehaviorsView",
             view: "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",

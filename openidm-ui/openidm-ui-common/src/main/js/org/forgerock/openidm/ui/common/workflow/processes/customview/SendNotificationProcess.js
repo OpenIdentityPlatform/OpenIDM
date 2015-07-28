@@ -27,16 +27,16 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/dashboard/workflow/processes/customview/SendNotificationProcess", [
-    "org/forgerock/openidm/ui/dashboard/workflow/processes/AbstractProcessForm",
+define("org/forgerock/openidm/ui/common/workflow/processes/customview/SendNotificationProcess", [
+    "org/forgerock/openidm/ui/common/workflow/processes/AbstractProcessForm",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/dashboard/notifications/NotificationViewHelper"
+    "org/forgerock/openidm/ui/common/notifications/NotificationViewHelper"
 ], function(AbstractProcessForm, userDelegate, conf, validatorsManager, notificationViewHelper) {
     var SendNotificationProcess = AbstractProcessForm.extend({
         
-        template: "templates/dashboard/workflow/processes/customview/SendNotificationTemplate.html",
+        template: "templates/workflow/processes/customview/SendNotificationTemplate.html",
         
         prepareData: function(callback) {
              var nTypes, notificationType;

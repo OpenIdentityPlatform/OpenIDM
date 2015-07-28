@@ -9,7 +9,6 @@
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -23,7 +22,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
     "bootstrap-dialog",
     "bootstrap-tabdrop"
 ], function(MappingAdminAbstractView,
-            AttributesGridView,
             syncDelegate,
             validatorsManager,
             conf,
@@ -127,7 +125,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             }
 
             var formContent = form2js(this.el),
-                mappingProperties = AttributesGridView.model.mappingProperties,
+                mappingProperties = this.data.currentProperties,
                 target = this.property,
                 propertyObj = mappingProperties[target - 1];
 
@@ -182,9 +180,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 delete propertyObj["default"];
             }
 
-            AttributesGridView.model.propertyMapping = mappingProperties;
-
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
+            this.data.saveCallback(mappingProperties);
         },
 
         close: function () {
@@ -196,16 +192,15 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 currentProperties,
                 settings;
 
-            this.data.mappingName = params[0];
-            this.property = params[1];
+            this.data.mappingName = this.getMappingName();
+            this.property = params.id;
             this.transform_script_editor = undefined;
             this.conditional_script_editor = undefined;
             this.conditionFilterEditor = null;
 
-            this.data.currentProperties = currentProperties = AttributesGridView.model.mappingProperties || this.getCurrentMapping().properties;
-
-            AttributesGridView.model.mappingProperties = currentProperties;
-
+            this.data.saveCallback = params.saveCallback;
+            this.data.availableSourceProps = params.availProperties || [];
+            this.data.currentProperties = currentProperties = params.mappingProperties || this.getCurrentMapping().properties;
             this.data.property = currentProperties[this.property - 1];
 
             if (conf.globalData.sampleSource && _.isUndefined(this.data.property.source)) {
@@ -232,9 +227,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
-                onhide: function(dialogRef){
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [_this.data.mappingName]});
-                },
                 onshown : function (dialogRef) {
                     uiUtils.renderTemplate(settings.template, _this.currentDialog,
                         _.extend(conf.globalData, _this.data),
@@ -286,8 +278,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
         loadData: function() {
             var _this = this,
                 prop = this.data.property;
-
-            this.data.availableSourceProps = AttributesGridView.model.availableObjects.source.properties || [];
 
             if (prop) {
                 if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&

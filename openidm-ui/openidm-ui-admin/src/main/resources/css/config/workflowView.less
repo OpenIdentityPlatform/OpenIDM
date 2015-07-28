@@ -1,5 +1,35 @@
+
+.tasks-container {
+  .selectize-control {
+    width: 260px;
+  }
+
+  .badge {
+    color: #555;
+    background-color: rgba(0,0,0,.1);
+    border: 1px solid #ddd;
+    border-radius: 40px;
+    -webkit-transition: background-color 0.1s linear;
+    -moz-transition: background-color 0.1s linear;
+    -o-transition: background-color 0.1s linear;
+    transition: background-color 0.1s linear;
+    font-weight: 400;
+
+    &:hover {
+      color: #555!important;
+      background-color: rgba(0,0,0,.2);
+    }
+  }
+
+  .unassigned {
+    background-color: transparent;
+    color: #999!important;
+  }
+}
+
 #activeProcesses,
-#processDefinitions {
+#processDefinitions,
+#processHistory {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
@@ -27,7 +57,8 @@
 }
 
 
-#activeProcesses .selectize-input {
+#activeProcesses .selectize-input,
+#processHistory .selectize-input {
   width:250px;
 }
 
@@ -78,11 +109,11 @@
 }
 
 .editResourceViewContainer {
-  
+
   span.meta-icon-bullet {
     margin-left: 15px;
   }
-  
+
   .circle-icon.circle-icon-xs {
     height: 24px;
     width: 24px;
@@ -94,20 +125,82 @@
     text-align: center;
     padding-top: 4px;
   }
-  
+
   .detailTable .row {
     margin-bottom: 15px;
-    
+
     .btn-xs {
-        margin-left: 15px;
+      margin-left: 15px;
     }
   }
-  
+
   .page-header .media, .page-header .media-body {
     overflow: visible;
   }
-  
+
   .tab-content .container .table {
     width:97%;
+  }
+}
+
+.form-horizontal .control-text {
+  padding-top:7px;
+}
+
+/*
+  Temp styles to fix header
+*/
+
+.table thead tr th{
+  font-size:12px;
+  text-transform: uppercase;
+
+  a {
+    color: #2a2f32;
+    cursor: pointer;
+  }
+}
+
+.table thead tr th a:hover {
+  text-decoration:none;
+}
+
+.table-responsive {
+  border:none;
+}
+
+
+/*
+    Backgrid media query
+*/
+
+@media (max-width: 899px) {
+
+  tbody>tr:first-of-type .smallScreenCell{
+    border-top: none;
+  }
+
+  thead {
+    display: none;
+  }
+
+  th:not(.smallScreenCell), td:not(.smallScreenCell) {
+    display: none;
+    border: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .smallScreenCell {
+    display: none;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  th:not(.smallScreenCell), td:not(.smallScreenCell) {
+    display: table-cell;
+    border-bottom: 2px solid #ddd;
   }
 }

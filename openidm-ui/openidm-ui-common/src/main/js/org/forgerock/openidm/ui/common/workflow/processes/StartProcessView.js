@@ -27,19 +27,19 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/dashboard/workflow/processes/StartProcessView", [
+define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/dashboard/workflow/WorkflowDelegate",
-    "org/forgerock/openidm/ui/dashboard/workflow/FormManager",
-    "org/forgerock/openidm/ui/dashboard/workflow/processes/TemplateStartProcessForm",
+    "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
+    "org/forgerock/openidm/ui/common/workflow/FormManager",
+    "org/forgerock/openidm/ui/common/workflow/processes/TemplateStartProcessForm",
     "org/forgerock/commons/ui/common/util/FormGenerationUtils",
     "org/forgerock/commons/ui/common/util/DateUtil"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm, formGenerationUtils, dateUtil) {
     var StartProcessView = AbstractView.extend({
-        template: "templates/dashboard/workflow/processes/StartProcessTemplate.html",
+        template: "templates/workflow/processes/StartProcessTemplate.html",
 
         element: "#processDetails",
         

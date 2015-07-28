@@ -25,8 +25,14 @@
 /*global define, $, _, Handlebars */
 
 define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView"
-], function(AdminAbstractView) {
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/commons/ui/common/main/AbstractModel",
+    "org/forgerock/commons/ui/common/main/AbstractCollection",
+    "backgrid"
+], function(AdminAbstractView,
+            AbstractModel,
+            AbstractCollection,
+            Backgrid) {
     var ProcessDefinitionsView = AdminAbstractView.extend({
         template: "templates/admin/workflow/ProcessDefinitionsViewTemplate.html",
         events: {
@@ -37,10 +43,37 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
         element: "#processDefinitions",
         render: function(args, callback) {
             this.parentRender(_.bind(function(){
+                this.parentRender(_.bind(function() {
+                    var processDefinitionGrid,
+                        ProcessDefinitionModel = AbstractModel.extend({ "url": "/openidm/workflow/processdefinition" }),
+                        Process = AbstractCollection.extend({ model: ProcessDefinitionModel });
 
-                if(callback) {
-                    callback();
-                }
+                    this.model.processes = new Process();
+                    this.model.processes.url = "/openidm/workflow/processdefinition?_queryId=filtered-query";
+                    this.model.processes.state.pageSize = null;
+
+                    processDefinitionGrid = new Backgrid.Grid({
+                        className: "table",
+                        emptyText: $.t("templates.workflows.processes.noProcessesDefinitions"),
+                        columns: [
+                        {
+                            name: "name",
+                            label: $.t("templates.workflows.processes.processDefinitions"),
+                            cell: "string",
+                            sortable: true,
+                            editable: false
+                        }],
+                        collection: this.model.processes
+                    });
+
+                    this.$el.find("#processDefinitionGridHolder").append(processDefinitionGrid.render().el);
+
+                    this.model.processes.getFirstPage();
+
+                    if(callback) {
+                        callback();
+                    }
+                }, this));
             }, this));
         }
     });
