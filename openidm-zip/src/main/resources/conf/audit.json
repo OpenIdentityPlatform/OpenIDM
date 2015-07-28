@@ -32,6 +32,15 @@
                         "type": "boolean"
                     }
                 }
+            },
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
             }
         }
     },
