@@ -41,6 +41,11 @@
   This chapter shows you how to configure the outbound email service, so that
   you can send email through OpenIDM, either by script or through the REST API.
  </para>
+ <para>
+  You can also configure the outbound email service in the Admin UI, by clicking
+  Configure > System Preferences > Email. The fields on that screen correspond
+  to what is described in the following sections.
+ </para>
 
  <procedure xml:id="setup-outbound-email">
   <title>To Set Up Outbound Email</title>
