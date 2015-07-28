@@ -144,16 +144,6 @@
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
         </repository-->
-        <!--<repository>
-            <id>codehaus-snapshots-repo</id>
-            <name>Codehaus snapshots Repo</name>
-            <url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
-        </repository>-->
-        <repository>
-            <id>codehaus-release-repo</id>
-            <name>Codehaus Release Repo</name>
-            <url>http://repository.codehaus.org/</url>
-        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -169,16 +159,6 @@
                 <enabled>true</enabled>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
-        </pluginRepository>
-        <!--<pluginRepository>
-            <id>codehaus-snapshots-repo</id>
-            <name>Codehaus snapshots Repo</name>
-            <url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
-        </pluginRepository>-->
-        <pluginRepository>
-            <id>codehaus-release-repo</id>
-            <name>Codehaus Release Repo</name>
-            <url>http://repository.codehaus.org/</url>
         </pluginRepository>
     </pluginRepositories>
 
