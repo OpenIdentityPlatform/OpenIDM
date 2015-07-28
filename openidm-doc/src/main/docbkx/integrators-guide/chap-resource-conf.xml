@@ -129,8 +129,10 @@
   <tip>
    <para>
     Connectors that use the .NET framework <emphasis>must</emphasis> run
-    remotely. Java connectors can be run locally or remotely. Run them as remote
-    services for scalability, or to have the service run in the cloud.
+    remotely. Java connectors can be run locally or remotely. You might run a
+    Java connector remotely for security reasons (firewall constraints), for
+    geographical reasons, or if the JVM version that is required by the
+    connector conflicts with the JVM version that is required by OpenIDM.
    </para>
   </tip>
 
