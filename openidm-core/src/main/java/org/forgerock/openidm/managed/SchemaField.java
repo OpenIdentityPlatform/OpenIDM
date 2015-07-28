@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.managed;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
@@ -31,8 +32,10 @@ import org.forgerock.json.fluent.JsonValueException;
  * Represents a single field or property in a managed object's schema
  */
 public class SchemaField {
-    
-    public static String FIELD_ALL_RELATIONSHIPS = "*_ref";
+
+    public static JsonPointer FIELD_ALL_RELATIONSHIPS = new JsonPointer("*_ref");
+    public static JsonPointer FIELD_REFERENCE = new JsonPointer("_ref");
+    public static JsonPointer FIELD_PROPERTIES = new JsonPointer("_properties");
 
     /** Schema field types */
     enum SchemaFieldType {
@@ -55,6 +58,9 @@ public class SchemaField {
     /** A boolean indicating if the field is virtual */
     private boolean virtual;
     
+    /** A boolean indicating if the field is an array */
+    private boolean isArray = false;
+    
     /**
      * Constructor
      */
@@ -74,6 +80,7 @@ public class SchemaField {
     private void initialize(JsonValue schema) throws JsonValueException {
         JsonValue type = schema.get("type");
         if (type.isString() && type.asString().equals("array")) {
+            isArray = true;
             initialize(schema.get("items"));
         } else {
             if (type.isString()) {
@@ -139,6 +146,15 @@ public class SchemaField {
      */
     public boolean isNullable() {
         return nullable;
+    }
+    
+    /**
+     * Returns a boolean indicating if the field is an array.
+     * 
+     * @return true if the field is an array, false otherwise.
+     */
+    public boolean isArray() {
+        return isArray;
     }
 
     /**

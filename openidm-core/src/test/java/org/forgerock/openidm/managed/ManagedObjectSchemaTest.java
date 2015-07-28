@@ -28,10 +28,12 @@ import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNull;
 
 import java.util.List;
 import java.util.Set;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.testng.annotations.Test;
 
 /**
@@ -66,37 +68,53 @@ public class ManagedObjectSchemaTest {
     
     @Test
     public void testSchemaFields() {
-        Set<String> schemaFields = schema.getFields().keySet();
+        Set<JsonPointer> schemaFields = schema.getFields().keySet();
         assertEquals(schemaFields.size(), 6);
-        assertTrue(schemaFields.contains("field1"));
-        assertTrue(schemaFields.contains("field2"));
-        assertTrue(schemaFields.contains("field3"));
-        assertTrue(schemaFields.contains("field4"));
-        assertTrue(schemaFields.contains("field5"));
-        assertTrue(schemaFields.contains("field6"));
+        assertTrue(schemaFields.contains(new JsonPointer("field1")));
+        assertTrue(schemaFields.contains(new JsonPointer("field2")));
+        assertTrue(schemaFields.contains(new JsonPointer("field3")));
+        assertTrue(schemaFields.contains(new JsonPointer("field4")));
+        assertTrue(schemaFields.contains(new JsonPointer("field5")));
+        assertTrue(schemaFields.contains(new JsonPointer("field6")));
     }
     
     @Test
     public void testHiddenByDefaultFields() {
-        Set<String> hiddenByDefaultFields = schema.getHiddenByDefaultFields().keys();
+        Set<JsonPointer> hiddenByDefaultFields = schema.getHiddenByDefaultFields().keySet();
         assertEquals(hiddenByDefaultFields.size(), 2);
-        assertTrue(!hiddenByDefaultFields.contains("field1"));
-        assertTrue(!hiddenByDefaultFields.contains("field2"));
-        assertTrue(hiddenByDefaultFields.contains("field3"));
-        assertTrue(!hiddenByDefaultFields.contains("field4"));
-        assertTrue(hiddenByDefaultFields.contains("field5"));
-        assertTrue(!hiddenByDefaultFields.contains("field6"));
+        assertTrue(!hiddenByDefaultFields.contains(new JsonPointer("field1")));
+        assertTrue(!hiddenByDefaultFields.contains(new JsonPointer("field2")));
+        assertTrue(hiddenByDefaultFields.contains(new JsonPointer("field3")));
+        assertTrue(!hiddenByDefaultFields.contains(new JsonPointer("field4")));
+        assertTrue(hiddenByDefaultFields.contains(new JsonPointer("field5")));
+        assertTrue(!hiddenByDefaultFields.contains(new JsonPointer("field6")));
     }
     
     @Test
     public void testRelationshipFields() {
-        List<String> relationshipFields = schema.getRelationshipFields();
+        List<JsonPointer> relationshipFields = schema.getRelationshipFields();
         assertEquals(relationshipFields.size(), 2);
-        assertTrue(!relationshipFields.contains("field1"));
-        assertTrue(!relationshipFields.contains("field2"));
-        assertTrue(!relationshipFields.contains("field3"));
-        assertTrue(!relationshipFields.contains("field4"));
-        assertTrue(relationshipFields.contains("field5"));
-        assertTrue(relationshipFields.contains("field6"));
+        assertTrue(!relationshipFields.contains(new JsonPointer("field1")));
+        assertTrue(!relationshipFields.contains(new JsonPointer("field2")));
+        assertTrue(!relationshipFields.contains(new JsonPointer("field3")));
+        assertTrue(!relationshipFields.contains(new JsonPointer("field4")));
+        assertTrue(relationshipFields.contains(new JsonPointer("field5")));
+        assertTrue(relationshipFields.contains(new JsonPointer("field6")));
+    }
+    
+    @Test 
+    public void testResourceExpansionFields() {
+        assertNull(schema.getResourceExpansionField(new JsonPointer("field1")));
+        assertNull(schema.getResourceExpansionField(new JsonPointer("field1/*")));
+        assertNull(schema.getResourceExpansionField(new JsonPointer("field1/*/*")));
+        assertNull(schema.getResourceExpansionField(new JsonPointer("field1/*/field2")));
+        assertNull(schema.getResourceExpansionField(new JsonPointer("*")));
+        assertNull(schema.getResourceExpansionField(new JsonPointer("field5/field1")));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*")).getFirst(), new JsonPointer("field5"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*")).getSecond(), new JsonPointer("*"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2")).getFirst(), new JsonPointer("field5"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2")).getSecond(), new JsonPointer("field2"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2/field3")).getFirst(), new JsonPointer("field5"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2/field3")).getSecond(), new JsonPointer("field2/field3"));     
     }
 }
