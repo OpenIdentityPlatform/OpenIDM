@@ -38,6 +38,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.AuditServiceConfiguration;
+import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -227,11 +228,22 @@ public class AuditServiceImpl implements AuditService {
             AuditServiceConfiguration serviceConfig =
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
             auditService.configure(serviceConfig);
+            auditService.registerDependencyProvider(new DependencyProviderBase() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
+                    if (ConnectionFactory.class.isAssignableFrom(clazz)) {
+                        return (T) connectionFactory;
+                    } else {
+                        return super.getDependency(clazz);
+                    }
+                }
+            });
 
             //register Event Handlers
             final JsonValue eventHandlers = config.get(EVENT_HANDLERS);
-            for (final JsonValue eventHandler : eventHandlers) {
-                AuditJsonConfig.registerHandlerToService(eventHandler, auditService, this.getClass().getClassLoader());
+            for (final JsonValue handlerConfig : eventHandlers) {
+                AuditJsonConfig.registerHandlerToService(handlerConfig, auditService, this.getClass().getClassLoader());
             }
         } catch (Exception ex) {
             LOGGER.warn("Configuration invalid, can not start Audit service.", ex);
@@ -313,6 +325,7 @@ public class AuditServiceImpl implements AuditService {
 
         Map<String, Object> obj = request.getContent().asMap();
 
+        // TODO pretty sure this is in CAUD now
         // Don't audit the audit log
         if (context.containsContext(AuditContext.class)) {
             handler.handleResult(new Resource(null, null, new JsonValue(obj)));
@@ -328,7 +341,7 @@ public class AuditServiceImpl implements AuditService {
         JsonValue action = request.getContent().get("action");
 
         //TODO RE-ADD FILTERING
-        //if (audi  tFilter.isFiltered(context, request)) {
+        //if (auditFilter.isFiltered(context, request)) {
         //    logger.debug("Filtered by filter for action {}", new Object[] { action.toString() });
         //    handler.handleResult(new Resource(null, null, new JsonValue(obj)));
         //    return;
