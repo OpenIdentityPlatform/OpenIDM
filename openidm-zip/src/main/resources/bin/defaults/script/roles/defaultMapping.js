@@ -217,6 +217,8 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
 if (assignments != null) {
     var effectiveAssignments = source.effectiveAssignments;
     if (effectiveAssignments != null) {
+        // Used to carry information across different assignmentOperations
+        var attibutesInfo; attributesInfoMap = {};
         for (var x = 0; x < effectiveAssignments.length; x++) {
             assignment = effectiveAssignments[x];
             // Check that this assignment is relevant to this mapping
@@ -235,18 +237,24 @@ if (assignments != null) {
                         execOnScript(onAssignment);
                     }
 
-                    // Used to carry information across different assignmentOperations
-                    var attributesInfo = {};
                     // Loop through attributes, performing the assignmentOperations
                     for (var i = 0; i < attributes.length; i++) {
                         var attribute = attributes[i];
                         var assignmentOperation = attribute.assignmentOperation;
                         var value = attribute.value;
                         var name = attribute.name;
+                        
+                        attributesInfo = attributesInfoMap[name];
+                        if (typeof attributesInfo === "undefined" || attributesInfo === null) {
+                            // Initialize if it has not already been defined for this attribute
+                            attributesInfo = {};
+                        }
+                        
                         if (assignmentOperation == null) {
                             // Default to replace and use the entire value
                             assignmentOperation = defaultAssignmentOperation;
                         }
+                        
                         // Process the assignmentOperation
                         var config = getConfig(assignmentOperation);
                         config.attributeName = name;
@@ -258,7 +266,7 @@ if (assignments != null) {
                         target[name] = assignmentResult.value;
                         // Update any passed back attributesInfo
                         if (assignmentResult.hasOwnProperty("attributesInfo")) {
-                            attributesInfo = assignmentResult.attributesInfo;
+                            attributesInfoMap[name] = assignmentResult.attributesInfo;
                         }
                     }
                 }
