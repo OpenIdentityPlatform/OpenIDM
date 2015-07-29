@@ -1114,7 +1114,7 @@ openidm.create('workflow/processinstance', null, params);
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&amp;startUserId=user.0</userinput>
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&amp;startUserId=user.0"</userinput>
 <computeroutput>{
   "result": [
     {
@@ -1143,7 +1143,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      For large result sets, you can use the <literal>_sortKeys</literal>
      parameter with a <literal>filtered-query</literal> to order search results
-     by one or more fields. You can append a <literal>-</literal> character to
+     by one or more fields. You can prefix a <literal>-</literal> character to
      the field name to specify that results should be returned in descending
      order, rather than ascending order.
     </para>
@@ -1231,7 +1231,7 @@ openidm.create('workflow/processinstance', null, params);
       <literal>"88", "45", "101"</literal>, you would expect them to be returned
       in the order <literal>"45", "88", "101"</literal>. Because Activiti treats
       IDs as strings, rather than numbers, they would be returned in the
-      order <literal>"88","45","101"</literal>.
+      order <literal>"101", "45", "88"</literal>.
      </para>
     </caution>
    </listitem>
