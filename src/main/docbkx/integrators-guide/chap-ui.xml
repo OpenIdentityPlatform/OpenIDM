@@ -62,13 +62,6 @@
   X in the upper right corner.
  </para>
 
- <mediaobject>
-  <alt>OpenIDM UI Administrator Password Change</alt>
-  <imageobject>
-   <imagedata fileref="images/ui-admin-password-change.png" format="PNG" />
-  </imageobject>
- </mediaobject>
-
  <section xml:id="ui-admin">
  <title>Configuring OpenIDM from the Admin UI</title>
 
@@ -162,36 +155,13 @@
    lists any tasks assigned to the user who as logged in, processes available
    to be invoked, and any notifications for that user.
   </para>
+  <!-- TODO: add screenshot when the UI is (more) stable -->
   <para>
    To access the Self-Service UI, start OpenIDM, then navigate to
    <link xlink:href="https://localhost:8443/" />. If you
    have not installed a certificate that is trusted by a certificate authority,
    you are prompted with an "Untrusted Connection" warning the first time you
    log in to the UI.
-  </para>
-  <para>
-   The following image shows the Dashboard tab for the administrative user when
-   no tasks, processes, or notifications are available.
-  </para>
-  <mediaobject>
-   <alt>OpenIDM Self-Service UI Administrator View - Dashboard</alt>
-   <imageobject>
-   <imagedata fileref="images/ui-admin-view.png" format="PNG" />
-   </imageobject>
-</mediaobject>
-  <para>
-   The following image shows the Users tab, populated with two sample users,
-   after a reconciliation associated with Sample 2b.
-  </para>
-  <mediaobject>
-   <alt>OpenIDM Self-Service UI Administrator View - Users</alt>
-   <imageobject>
-   <imagedata fileref="images/ui-users-tab.png" format="PNG" />
-   </imageobject>
-  </mediaobject>
-  <para>
-   You can sort the list of users alphabetically, by any of the column values.
-   Click on the column title to sort.
   </para>
   <para>
    The <literal>Profile</literal> link enables the user to modify his username
@@ -202,19 +172,11 @@
    new security question.
   </para>
   <para>
-   Password changes are subject to the default password policy, as shown in the
-   following password update screen.
-  </para>
-  <mediaobject>
-   <alt>OpenIDM UI - Password Change</alt>
-   <imageobject>
-   <imagedata fileref="images/ui-password-change.png" format="PNG" />
-   </imageobject>
-  </mediaobject>
-  <para>
-   For a regular user (role <literal>openidm-authorized</literal>), the Users
-   tab is not displayed. By default, regular users cannot manage user accounts,
-   except for certain aspects of their own accounts.
+   Password changes are subject to the default password policy. For details, see
+   the following section:
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="intergators-guide#enforce-password-policy">
+    <citetitle>Enforcing Password Policy</citetitle></link>.
   </para>
 
  <section xml:id="ui-configuring">
@@ -242,18 +204,12 @@
 ...    
     </programlisting>
     <para>
-     When self-registration is enabled, OpenIDM includes a "Register your
-     account" link on the <literal>https://localhost:8443/</literal>
+     When self-registration is enabled, OpenIDM includes a "Don't have an
+     account? Register" link on the <literal>https://localhost:8443/</literal>
      login page. When the account registration page is used to create an account,
      OpenIDM creates a managed object in the OpenIDM repository, and applies
      default policies for managed objects.
     </para>
-    <mediaobject>
-     <alt>OpenIDM UI - Self Registration</alt>
-     <imageobject>
-     <imagedata fileref="images/ui-register-account.png" format="PNG" />
-     </imageobject>
-    </mediaobject>
     <para>
      User objects created using self-registration automatically have the role
      <literal>openidm-authorized</literal>.
@@ -290,7 +246,7 @@
    </para>
    <para>
     When security questions are enabled, the following panel is included on the
-    self registration page.
+    self-registration page.
    </para>
    <mediaobject>
     <alt>OpenIDM Self-Service UI - Security Questions</alt>
@@ -301,19 +257,13 @@
 
    <para>
     In addition, a "Reset your password" link is provided on the login page.
-    When a user attempts to reset her password, she is prompted for the
-    response to the security question that she set up during registration.
+    When a user attempts to reset a password, that user is prompted for the
+    response to the security question configured during registration.
    </para>
-   <mediaobject>
-    <alt>OpenIDM Self-Service UI - Reset Password</alt>
-    <imageobject>
-    <imagedata fileref="images/ui-reset-password.png" format="PNG" />
-    </imageobject>
-   </mediaobject>
    <note>
     <para>
      If security questions are enabled <emphasis>after</emphasis> a specific
-     user has registered, that particular user will be unable to use the
+     user has registered, that user will be unable to use the
      password reset functionality.
     </para>
    </note>
@@ -376,16 +326,6 @@
      Refresh your browser after this configuration change for the change to be
      picked up by the UI.
     </para>
-   <para>
-    When site identification is enabled, the following panel is included on the
-    self registration page.
-   </para>
-   <mediaobject>
-    <alt>OpenIDM UI - Site Identification</alt>
-    <imageobject>
-    <imagedata fileref="images/ui-site-identification.png" format="PNG" />
-    </imageobject>
-   </mediaobject>
    <para>
     A default list of four images is presented for site identification. The
     images are defined in the <literal>siteImages</literal> property in the
