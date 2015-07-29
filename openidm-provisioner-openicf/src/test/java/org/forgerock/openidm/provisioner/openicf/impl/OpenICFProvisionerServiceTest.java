@@ -87,6 +87,7 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyAccessor;
@@ -408,6 +409,9 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             service.bindSyncFailureHandlerFactory(this);
             service.bindEnhancedConfig(new JSONEnhancedConfig());
             service.bindConnectionFactory(Resources.newInternalConnectionFactory(router));
+
+            //set as NullActivityLogger to be the mock logger.
+            service.setActivityLogger(NullActivityLogger.INSTANCE);
 
             // Attempt to activate the provisioner service up to 4 times, using ConnectorFacade#test to
             // validate proper initialization.  If the connector info manager is not be initialized, the

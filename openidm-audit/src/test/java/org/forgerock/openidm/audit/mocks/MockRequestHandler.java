@@ -1,4 +1,4 @@
-/*
+/**
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -11,10 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.mocks;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -34,10 +38,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
  * Mocks a RequestHandler that can be used in the Rep, Router, and CSV Audit Loggers
@@ -47,50 +48,69 @@ public class MockRequestHandler implements RequestHandler {
     /**
      * Stores the list of requests received.
      */
-    private final List<Request> requests = new ArrayList<Request>();
+    private final List<Request> requests = new ArrayList<>();
 
     /**
      * Stores the resources to be returned by the handlers. The test method should set the expected Resource to return.
      */
-    private final List<Resource> resources = new ArrayList<Resource>();
+    private final List<Resource> resources = new ArrayList<>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         requests.add(request);
-        handler.handleResult(new JsonValue(new HashMap<String,String>()));
+        handler.handleResult(json(object()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
         requests.add(request);
         handler.handleResult(new Resource(request.getNewResourceId(), "1", request.getContent()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
         requests.add(request);
-        handler.handleResult(new Resource("","",new JsonValue(new HashMap<String,String>())));
+        handler.handleResult(new Resource("", "", json(object())));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
         requests.add(request);
-        handler.handleResult(new Resource("","",new JsonValue(new HashMap<String,String>())));
+        handler.handleResult(new Resource("", "", json(object())));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         requests.add(request);
+        assertThat(resources.size()).isNotEqualTo(0);
         for (final Resource resource : resources) {
             handler.handleResource(resource);
         }
         handler.handleResult(new QueryResult());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         requests.add(request);
-        assertThat(resources.size() != 0);
+        assertThat(resources.size()).isNotEqualTo(0);
         Resource returnResource = null;
         String requestID = getRequestID(request);
         for (Resource resource : resources) {
@@ -99,14 +119,17 @@ public class MockRequestHandler implements RequestHandler {
                 break;
             }
         }
-        assertThat(returnResource != null);
+        assertThat(returnResource).isNotNull();
         handler.handleResult(returnResource);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
         requests.add(request);
-        handler.handleResult(new Resource("","",new JsonValue(new HashMap<String,String>())));
+        handler.handleResult(new Resource("", "", json(object())));
     }
 
     public void addResource(final Resource resource) {

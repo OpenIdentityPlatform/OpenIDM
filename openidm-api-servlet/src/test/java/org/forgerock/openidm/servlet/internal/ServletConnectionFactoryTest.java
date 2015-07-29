@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,9 +24,15 @@
 
 package org.forgerock.openidm.servlet.internal;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -45,10 +51,14 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.source.DirectoryContainer;
+import org.osgi.service.component.ComponentContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -102,18 +112,34 @@ public class ServletConnectionFactoryTest {
         Assert.assertNotNull(script, "Failed to find /recon/script folder in test");
         sr.addSourceUnit(new DirectoryContainer("script", script));
 
+        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(configuration);
+        when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class)))
+                .thenReturn("");
+
         ServletConnectionFactory filterService = new ServletConnectionFactory();
         filterService.bindRequestHandler(requestHandler);
         filterService.bindScriptRegistry(sr);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.activate(mock(ComponentContext.class));
 
-        testable = Resources.newInternalConnection(filterService.init(configuration, requestHandler));
+        testable = filterService.getConnection();
     }
 
     @Test
     public void testActivate() throws Exception {
         JsonValue content = new JsonValue(new HashMap<String, Object>());
-        Resource user1 = testable.create(
-                new RootContext(),
-                Requests.newCreateRequest("/managed/user", content));
+        Resource user1 = testable.create(createContext("admin"), Requests.newCreateRequest("/managed/user", content));
+    }
+
+    private ServerContext createContext(String id) {
+        final Map<String, Object> authzid = new HashMap<>();
+        authzid.put(SecurityContext.AUTHZID_ID, id);
+        List<String> roles = new ArrayList<String>();
+        roles.add("system");
+        authzid.put(SecurityContext.AUTHZID_ROLES, roles);
+        authzid.put(SecurityContext.AUTHZID_COMPONENT, "managed");
+        SecurityContext securityContext = new SecurityContext(new RootContext(), id, authzid);
+        return new ServerContext(securityContext);
     }
 }

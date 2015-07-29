@@ -567,7 +567,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             Resource _new = connectionFactory.getConnection().create(context, createRequest);
 
-            activityLogger.log(context, request.getRequestType(), "create", managedId(_new.getId()).toString(),
+            activityLogger.log(context, request, "create", managedId(_new.getId()).toString(),
                     null, _new.getContent(), Status.SUCCESS);
 
             // Execute the postCreate script if configured
@@ -602,7 +602,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             onRetrieve(context, request, resourceId, resource);
             execScript(context, onRead, resource.getContent(), null);
-            activityLogger.log(context, request.getRequestType(), "read", managedId(resource.getId()).toString(),
+            activityLogger.log(context, request, "read", managedId(resource.getId()).toString(),
                     null, resource.getContent(), Status.SUCCESS);
 
             handler.handleResult(ContextUtil.isExternal(context) ? cullPrivateProperties(resource) : resource);
@@ -631,7 +631,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             Resource _old = decrypt(resource);
 
             Resource updated = update(context, request, resourceId, request.getRevision(), _old, _new);
-            activityLogger.log(context, request.getRequestType(), "update",
+            activityLogger.log(context, request, "update",
                     managedId(resource.getId()).toString(), resource.getContent(), updated.getContent(),
                     Status.SUCCESS);
 
@@ -665,7 +665,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             }
             Resource deletedResource = connectionFactory.getConnection().delete(context, deleteRequest);
 
-            activityLogger.log(context, request.getRequestType(), "delete", managedId(resource.getId()).toString(),
+            activityLogger.log(context, request, "delete", managedId(resource.getId()).toString(),
                     resource.getContent(), null, Status.SUCCESS);
 
             // Execute the postDelete script if configured
@@ -787,8 +787,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
                 Resource patchedResource = update(context, request, resource.getId(), _rev, resource, newValue);
 
-                // Empty message : do not show the content of patch operations in Audit log; old and new object is logged anyway
-                activityLogger.log(context, request.getRequestType(), "",
+                activityLogger.log(context, request, "Patch " + patchOperations.toString(),
                         managedId(patchedResource.getId()).toString(), resource.getContent(), patchedResource.getContent(),
                         Status.SUCCESS);
                 retry = false;
@@ -861,7 +860,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 }
             });
 
-            activityLogger.log(context, request.getRequestType(),
+            activityLogger.log(context, request,
                     "query: " + request.getQueryId() + ", parameters: " + request.getAdditionalParameters(),
                     request.getQueryId(), null, new JsonValue(results), Status.SUCCESS);
         } catch (ResourceException e) {
@@ -874,7 +873,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             ResultHandler<JsonValue> handler) {
 
         try {
-            activityLogger.log(context, request.getRequestType(), "Action: " + request.getAction(),
+            activityLogger.log(context, request, "Action: " + request.getAction(),
                     managedId(resourceId).toString(), null, null, Status.SUCCESS);
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
@@ -925,7 +924,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         logger.debug("action name={} id={}", name, request.getResourceName());
 
         try {
-            activityLogger.log(context, request.getRequestType(), "Action: " + request.getAction(),
+            activityLogger.log(context, request, "Action: " + request.getAction(),
                     request.getResourceName(), null, null, Status.SUCCESS);
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:

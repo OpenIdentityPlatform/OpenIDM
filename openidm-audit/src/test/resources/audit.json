@@ -1,0 +1,49 @@
+{
+  "auditServiceConfig" : {
+    "handlerForQueries" : "passthrough"
+  },
+  "eventHandlers" : [
+    {
+      "name" : "passthrough",
+      "class" : "org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler",
+      "config" : {
+        "message" : "added an event"
+      },
+      "events" : [ "access" ],
+      "ignoreLoggingFailures" : false
+    }
+  ],
+  "extendedEventTypes" : {
+  },
+  "customEventTypes" : {
+    "test": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "authentication": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

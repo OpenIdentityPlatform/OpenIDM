@@ -1,6 +1,38 @@
 {
-    "eventTypes" : {
-        "activity" : {
+    "auditServiceConfig" : {
+        "handlerForQueries" : "csv"
+    },
+    "eventHandlers" : [
+        {
+            "name" : "csv",
+            "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+            "config" : {
+                "logDirectory" : "audit"
+            },
+            "events" : [ "access", "activity", "recon", "sync", "authentication" ]
+        }
+    ],
+    "extendedEventTypes" : {
+        "activity": {
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "/",
+                "type": "object",
+                "properties": {
+                    "objectId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "passwordChanged": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "filter" : {
                 "actions" : [
                     "create",
@@ -9,24 +41,138 @@
                     "patch",
                     "action"
                 ]
-            },
-            "watchedFields" : [ ],
-            "passwordFields" : [ "password" ]
-        },
-        "recon" : { }
-    },
-    "logTo" : [
-        {
-            "logType" : "csv",
-            "location" : "audit"
-        },
-        {
-            "logType" : "repository",
-            "useForQueries" : true
+            }
         }
-    ],
-    "exceptionFormatter" : {
-        "type" : "text/javascript",
-        "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+    },
+    "customEventTypes" : {
+        "recon": {
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "/",
+                "type": "object",
+                "properties": {
+                    "transactionId": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "string"
+                    },
+                    "eventName": {
+                        "type": "string"
+                    },
+                    "authentication": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "exception": {
+                        "type": "string"
+                    },
+                    "linkQualifier": {
+                        "type": "string"
+                    },
+                    "mapping": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "messageDetail": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "situation": {
+                        "type": "string"
+                    },
+                    "sourceObjectId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "targetObjectId": {
+                        "type": "string"
+                    },
+                    "reconciling": {
+                        "type": "string"
+                    },
+                    "ambiguousTargetObjectIds": {
+                        "type": "string"
+                    },
+                    "reconAction": {
+                        "type": "string"
+                    },
+                    "entryType": {
+                        "type": "string"
+                    },
+                    "reconId": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "sync": {
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "/",
+                "type": "object",
+                "properties": {
+                    "transactionId": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "string"
+                    },
+                    "eventName": {
+                        "type": "string"
+                    },
+                    "authentication": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "exception": {
+                        "type": "string"
+                    },
+                    "linkQualifier": {
+                        "type": "string"
+                    },
+                    "mapping": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "messageDetail": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "situation": {
+                        "type": "string"
+                    },
+                    "sourceObjectId": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "targetObjectId": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
     }
 }

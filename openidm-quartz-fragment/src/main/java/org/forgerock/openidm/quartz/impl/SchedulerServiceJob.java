@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -29,10 +29,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.forgerock.audit.events.AccessAuditEventBuilder;
+import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
@@ -111,13 +113,26 @@ public class SchedulerServiceJob implements Job {
         if (scheduledService == null) {
             logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
         } else {
+            final long startTime = System.currentTimeMillis();
+            final ServerContext serverContext =
+                    newScheduledServerContext((String) scheduledServiceContext.get(ScheduledService.INVOKER_NAME));
             try {
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
-                scheduledService.execute(newScheduledServerContext((String)scheduledServiceContext.get(ScheduledService.INVOKER_NAME)), scheduledServiceContext);
+                scheduledService.execute(serverContext, scheduledServiceContext);
+                scheduledService.auditScheduledService(
+                        serverContext,
+                        createScheduledAuditEvent(serverContext, startTime, context, Status.SUCCESS, null));
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
                         new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
+                try {
+                    scheduledService.auditScheduledService(
+                            serverContext,
+                            createScheduledAuditEvent(serverContext, startTime, context, Status.FAILURE, ex));
+                } catch (ExecutionException exception) {
+                    logger.error("Unable to audit scheduled task {}", context.getJobDetail().getFullName(), exception);
+                }
             }
         }
         scheduledServiceTracker.close();
@@ -138,5 +153,28 @@ public class SchedulerServiceJob implements Job {
         serviceTracker.open();
 
         return serviceTracker;
+    }
+
+    private AuditEvent createScheduledAuditEvent(final ServerContext context, final long startTime,
+                                                 final JobExecutionContext jobContext, final Status status,
+                                                 final Exception e) {
+        final AccessAuditEventBuilder auditEventBuilder = new AccessAuditEventBuilder();
+        auditEventBuilder
+                .authorizationIdFromSecurityContext(context)
+                .resourceOperation("scheduler", "CREST", "ScheduledTask", jobContext.getJobDetail().getFullName())
+                .transactionIdFromRootContext(context)
+                .timestamp(System.currentTimeMillis())
+                .authenticationFromSecurityContext(context)
+                .eventName("access");
+
+        final long elapsedTime = System.currentTimeMillis() - startTime;
+
+        if (Status.SUCCESS.equals(status)) {
+            auditEventBuilder.response(Status.SUCCESS.name(), elapsedTime);
+        } else {
+            auditEventBuilder.responseWithMessage(Status.FAILURE.name(), elapsedTime, e.getMessage());
+        }
+
+        return auditEventBuilder.toEvent();
     }
 }
