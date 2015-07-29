@@ -405,7 +405,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                                         "Failed to create FIX ME"));
                             } else {
                                 final Resource resource = new Resource(result.get("id").asString(), "", result);
-                                activityLogger.log(context, request.getRequestType(), "message",
+                                activityLogger.log(context, request, "message",
                                         getSource(type, resource.getId()), null,
                                         resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
                                 handler.handleResult(resource);
@@ -415,7 +415,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                                     "Failed to create FIX ME?"));
                         }
                     } catch (ResourceException e) {
-                        activityLogger.log(context, request.getRequestType(), "message",
+                        activityLogger.log(context, request, "message",
                                 getSource(type, request.getNewResourceId()), request.getContent(),
                                 null, org.forgerock.openidm.audit.util.Status.FAILURE);
                         handler.handleError(e);
@@ -453,11 +453,11 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                     }
                     resource = new Resource(resourceId, request.getRevision(), result);
                     result.put(Resource.FIELD_CONTENT_ID, resource.getId());
-                    activityLogger.log(context, request.getRequestType(), "message", getSource(type, resource.getId()),
+                    activityLogger.log(context, request, "message", getSource(type, resource.getId()),
                             resource.getContent(), null, org.forgerock.openidm.audit.util.Status.SUCCESS);
                     handler.handleResult(resource);
                 } catch (ResourceException e) {
-                    activityLogger.log(context, request.getRequestType(), "message",
+                    activityLogger.log(context, request, "message",
                             getSource(type, resourceId), null,
                             null, org.forgerock.openidm.audit.util.Status.FAILURE);
                     handler.handleError(e);
@@ -539,7 +539,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         result.put(Resource.FIELD_CONTENT_ID, result.get("Id").asString());
                         final Resource resource =
                                 new Resource(result.get("Id").asString(), result.get(REVISION_FIELD).asString(), result);
-                        activityLogger.log(context, request.getRequestType(), "message",
+                        activityLogger.log(context, request, "message",
                                 getSource(type, resource.getId()), resource.getContent(),
                                 resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
                         handler.handleResult(resource);
@@ -547,7 +547,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         handler.handleError(new NotFoundException());
                     }
                 } catch (ResourceException e) {
-                    activityLogger.log(context, request.getRequestType(), "message",
+                    activityLogger.log(context, request, "message",
                             getSource(type, resourceId), null,
                             null, org.forgerock.openidm.audit.util.Status.FAILURE);
                     handler.handleError(e);
@@ -591,12 +591,12 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         result.asMap().putAll(update.asMap());
                         result.put(Resource.FIELD_CONTENT_ID, resourceId);
                         final Resource resource = new Resource(resourceId, request.getRevision(), result);
-                        activityLogger.log(context, request.getRequestType(), "message",
+                        activityLogger.log(context, request, "message",
                                 getSource(type, resource.getId()), null,
                                 resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
                         handler.handleResult(resource);
                     } catch (ResourceException e) {
-                        activityLogger.log(context, request.getRequestType(), "message",
+                        activityLogger.log(context, request, "message",
                                 getSource(type, resourceId), request.getContent(),
                                 null, org.forgerock.openidm.audit.util.Status.FAILURE);
                         handler.handleError(e);
