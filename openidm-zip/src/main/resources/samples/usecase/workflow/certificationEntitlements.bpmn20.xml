@@ -1,64 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-    <process id="certificationEntitlements" name="Entitlement Certification process">
-        <startEvent id="start" activiti:initiator="startUserId" />
-        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
-
-        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy">
-            <script><![CDATA[ 
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+  <process id="certificationEntitlements" name="Entitlement Certification process" isExecutable="true">
+    <startEvent id="start" activiti:initiator="startUserId"></startEvent>
+    <sequenceFlow id="sequenceFlow-60da23b6-6b51-40fe-a660-be6c65ccbac3" sourceRef="start" targetRef="readUserData"></sequenceFlow>
+    <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script> 
                 role = openidm.read('managed/role/' + roleId);
                 assignments = role.assignments;
                 uidata = [rolename:role.name, roleid:role._id, roledescription:role.properties.description];
                 uiassignments = [];
-                assignments.each { key, value ->
+                assignments.each { key, value -&gt;
                     uiassignments.push([assignmentname:key, attributes:value.attributes]);
                 }
                 uidata.assignments = uiassignments;
                 execution.setVariable('uidata', uidata);
-                ]]>
+                
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="readUserData" targetRef="approval"/>
-        
-        <userTask id="approval" name="Entitlement Status Check" activiti:assignee="systemadmin" activiti:formKey="certificationEntitlementsForm.xhtml"/>
-        <sequenceFlow sourceRef="approval" targetRef="decisionMadeGateway"/>
-        
-        <exclusiveGateway id="decisionMadeGateway" name="Decision Made" default="endProcess"/>
-        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="patchManagedRole">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='update'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="patchManagedRole" scriptFormat="groovy">
-            <script><![CDATA[
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-7bcbfc6b-0cfb-42dd-a559-ab0ea8201aac" sourceRef="readUserData" targetRef="approval"></sequenceFlow>
+    <userTask id="approval" name="Entitlement Status Check" activiti:assignee="systemadmin" activiti:formKey="certificationEntitlementsForm.xhtml"></userTask>
+    <sequenceFlow id="sequenceFlow-b0841f18-c0a9-424f-ba41-be9adaebe2c7" sourceRef="approval" targetRef="decisionMadeGateway"></sequenceFlow>
+    <exclusiveGateway id="decisionMadeGateway" name="Decision Made" default="endProcess"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-15f88692-aa04-46db-8b59-f0ab6355f4f5" sourceRef="decisionMadeGateway" targetRef="patchManagedRole">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='update'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask id="patchManagedRole" name="Patch Role" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 role = openidm.read('managed/role/' + roleId);
                 role.assignments.each{ key, value ->
                     for (attribute in value.attributes) {
                         newValue = execution.getVariable(key + attribute.name + 'Assignments');
                         org.json.JSONArray jsonObj = new org.json.JSONArray(newValue)
                         list = [];
-                        for(int i = 0; i < jsonObj.length(); i++){
+                        for(int i = 0; i &lt; jsonObj.length(); i++){
                             list.push(jsonObj.getString(i));
                         }
                         attribute.value = list;
                     }
                 }
                 openidm.update('managed/role/' + roleId, null, role);
-                ]]>
+                
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="patchManagedRole" targetRef="end"/>
-        
-        <sequenceFlow id ="endProcess" sourceRef="decisionMadeGateway" targetRef="end"/>
-
-        <endEvent id="end"/>
-
-    </process>
-
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-e44c0feb-3a12-4753-b46f-721df5e0d6dd" sourceRef="patchManagedRole" targetRef="end"></sequenceFlow>
+    <sequenceFlow id="endProcess" sourceRef="decisionMadeGateway" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_certificationEntitlements">
+    <bpmndi:BPMNPlane bpmnElement="certificationEntitlements" id="BPMNPlane_certificationEntitlements">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="59.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="readUserData" id="BPMNShape_readUserData">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="44.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="approval" id="BPMNShape_approval">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="42.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="decisionMadeGateway" id="BPMNShape_decisionMadeGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="48.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="patchManagedRole" id="BPMNShape_patchManagedRole">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="620.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-60da23b6-6b51-40fe-a660-be6c65ccbac3" id="BPMNEdge_sequenceFlow-60da23b6-6b51-40fe-a660-be6c65ccbac3">
+        <omgdi:waypoint x="35.0" y="76.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="74.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-7bcbfc6b-0cfb-42dd-a559-ab0ea8201aac" id="BPMNEdge_sequenceFlow-7bcbfc6b-0cfb-42dd-a559-ab0ea8201aac">
+        <omgdi:waypoint x="180.0" y="74.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="74.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="72.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="72.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-b0841f18-c0a9-424f-ba41-be9adaebe2c7" id="BPMNEdge_sequenceFlow-b0841f18-c0a9-424f-ba41-be9adaebe2c7">
+        <omgdi:waypoint x="330.0" y="72.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="72.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="68.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-15f88692-aa04-46db-8b59-f0ab6355f4f5" id="BPMNEdge_sequenceFlow-15f88692-aa04-46db-8b59-f0ab6355f4f5">
+        <omgdi:waypoint x="420.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-e44c0feb-3a12-4753-b46f-721df5e0d6dd" id="BPMNEdge_sequenceFlow-e44c0feb-3a12-4753-b46f-721df5e0d6dd">
+        <omgdi:waypoint x="570.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="65.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="67.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="endProcess" id="BPMNEdge_endProcess">
+        <omgdi:waypoint x="420.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="65.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="67.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

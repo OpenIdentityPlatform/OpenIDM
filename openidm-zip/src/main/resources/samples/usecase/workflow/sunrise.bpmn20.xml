@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-    <process id="sunrise" name="Sunrise process">
-        <startEvent id="start" activiti:initiator="startUserId" />
-            
-        <sequenceFlow sourceRef="start" targetRef="activateManagedUser"/>
-
-        <scriptTask id="activateManagedUser" scriptFormat="groovy">
-            <script>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+  <process id="sunrise" name="Sunrise process" isExecutable="true">
+    <startEvent id="start" activiti:initiator="startUserId"></startEvent>
+    <sequenceFlow id="sequenceFlow-56954256-f914-47aa-a2db-658c825e9a69" sourceRef="start" targetRef="activateManagedUser"></sequenceFlow>
+    <scriptTask id="activateManagedUser" name="Activate User" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 user = openidm.read(userId)
                 
                 params = [[operation:'replace', field:'accountStatus', value :'active'],
@@ -38,11 +30,33 @@
                 openidm.create("repo/ui/notification/", null, notification)
                 
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="activateManagedUser" targetRef="end"/>
-        
-        <endEvent id="end"/>
-
-    </process>
-
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-1770cc72-bfa9-47ce-bb7f-b2f15d73878d" sourceRef="activateManagedUser" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_sunrise">
+    <bpmndi:BPMNPlane bpmnElement="sunrise" id="BPMNPlane_sunrise">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="activateManagedUser" id="BPMNShape_activateManagedUser">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="230.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-56954256-f914-47aa-a2db-658c825e9a69" id="BPMNEdge_sequenceFlow-56954256-f914-47aa-a2db-658c825e9a69">
+        <omgdi:waypoint x="35.0" y="32.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-1770cc72-bfa9-47ce-bb7f-b2f15d73878d" id="BPMNEdge_sequenceFlow-1770cc72-bfa9-47ce-bb7f-b2f15d73878d">
+        <omgdi:waypoint x="180.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="32.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

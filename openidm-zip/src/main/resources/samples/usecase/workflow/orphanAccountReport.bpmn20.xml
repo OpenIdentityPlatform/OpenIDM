@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
-
-
-    <process id="orphanAccountReport" name="Orphan Account Handling Workflow">
-        <startEvent id="start" />
-        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
-        <scriptTask id="readUserData" scriptFormat="groovy" activiti:autoStoreVariables="true">
-            <script>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+  <process id="orphanAccountReport" name="Orphan Account Handling Workflow" isExecutable="true">
+    <startEvent id="start"></startEvent>
+    <sequenceFlow id="sequenceFlow-c6654df0-8eda-4607-8585-28c058dccbdb" sourceRef="start" targetRef="readUserData"></sequenceFlow>
+    <scriptTask id="readUserData" name="Read User" scriptFormat="groovy" activiti:autoStoreVariables="true">
+      <script>
                 user = openidm.read('system/business/account/'+ targetId)
                 userName = user.userName
                 givenName = user.givenName
@@ -20,48 +12,28 @@
                 email = user.email 
                 department = user.department
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="readUserData" targetRef="systemadminDecision"/>
-        
-        <userTask id="systemadminDecision" name="Orphan Account Task" activiti:assignee="systemadmin">
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="familyName"
-                                       name="Last Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="email"
-                                       name="Email"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="linkTo"
-                                       variable="linkTo"
-                                       name="Link to"
-                                       type="string" />
-                <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
-                    <activiti:value id="delete" name="Delete"></activiti:value>
-                    <activiti:value id="link" name="Link"></activiti:value>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="systemadminDecision" targetRef="decisionGateway"/>
-        
-        <exclusiveGateway id="decisionGateway" name="Decision"></exclusiveGateway>
-        
-        <sequenceFlow sourceRef="decisionGateway" targetRef="deleteAccount">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='delete'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="deleteAccount" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-992669e0-4f81-436e-859f-04157ea33ce7" sourceRef="readUserData" targetRef="systemadminDecision"></sequenceFlow>
+    <userTask id="systemadminDecision" name="Orphan Account Task" activiti:assignee="systemadmin">
+      <extensionElements>
+        <activiti:formProperty id="userName" name="Username" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="givenName" name="First Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="familyName" name="Last Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="email" name="Email" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="linkTo" name="Link to" type="string" variable="linkTo"></activiti:formProperty>
+        <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+          <activiti:value id="delete" name="Delete"></activiti:value>
+          <activiti:value id="link" name="Link"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-78d14dc7-5037-40d6-b4ce-73f81c24c24e" sourceRef="systemadminDecision" targetRef="decisionGateway"></sequenceFlow>
+    <exclusiveGateway id="decisionGateway" name="Decision"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-f98049f5-db96-4984-9898-09b67f09bde9" sourceRef="decisionGateway" targetRef="deleteAccount">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='delete'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask id="deleteAccount" name="Delete Account" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 params = new java.util.HashMap();
                 params.put('reconId', reconId)
                 params.put('mapping', mapping)
@@ -73,16 +45,13 @@
                 }
                 openidm.action('sync', 'performAction', [:], params)
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="deleteAccount" targetRef="end"/>
-
-        <sequenceFlow sourceRef="decisionGateway" targetRef="linkAccount">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='link'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="linkAccount" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-025c6a4b-0db7-4f19-beff-bcf91c250b3f" sourceRef="deleteAccount" targetRef="end"></sequenceFlow>
+    <sequenceFlow id="sequenceFlow-83061ba6-f76d-4033-a510-505e5996d3be" sourceRef="decisionGateway" targetRef="linkAccount">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='link'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask id="linkAccount" name="Link Account" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 params = new java.util.HashMap();
                 params.put('reconId', reconId)
                 params.put('mapping', mapping)
@@ -91,8 +60,69 @@
                 params.put('targetId', targetId)
                 openidm.action('sync', 'performAction', [:], params)
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="linkAccount" targetRef="end"/>
-        <endEvent id="end"/>
-    </process>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-19c9dc8d-9b65-48bd-8a13-fa002f2fe6ad" sourceRef="linkAccount" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_orphanAccountReport">
+    <bpmndi:BPMNPlane bpmnElement="orphanAccountReport" id="BPMNPlane_orphanAccountReport">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="95.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="readUserData" id="BPMNShape_readUserData">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="systemadminDecision" id="BPMNShape_systemadminDecision">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="decisionGateway" id="BPMNShape_decisionGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="90.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="deleteAccount" id="BPMNShape_deleteAccount">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="linkAccount" id="BPMNShape_linkAccount">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="620.0" y="95.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-c6654df0-8eda-4607-8585-28c058dccbdb" id="BPMNEdge_sequenceFlow-c6654df0-8eda-4607-8585-28c058dccbdb">
+        <omgdi:waypoint x="35.0" y="112.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="110.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-992669e0-4f81-436e-859f-04157ea33ce7" id="BPMNEdge_sequenceFlow-992669e0-4f81-436e-859f-04157ea33ce7">
+        <omgdi:waypoint x="180.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="110.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-78d14dc7-5037-40d6-b4ce-73f81c24c24e" id="BPMNEdge_sequenceFlow-78d14dc7-5037-40d6-b4ce-73f81c24c24e">
+        <omgdi:waypoint x="330.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="110.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-f98049f5-db96-4984-9898-09b67f09bde9" id="BPMNEdge_sequenceFlow-f98049f5-db96-4984-9898-09b67f09bde9">
+        <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="190.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-025c6a4b-0db7-4f19-beff-bcf91c250b3f" id="BPMNEdge_sequenceFlow-025c6a4b-0db7-4f19-beff-bcf91c250b3f">
+        <omgdi:waypoint x="570.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="112.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-83061ba6-f76d-4033-a510-505e5996d3be" id="BPMNEdge_sequenceFlow-83061ba6-f76d-4033-a510-505e5996d3be">
+        <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-19c9dc8d-9b65-48bd-8a13-fa002f2fe6ad" id="BPMNEdge_sequenceFlow-19c9dc8d-9b65-48bd-8a13-fa002f2fe6ad">
+        <omgdi:waypoint x="570.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="112.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

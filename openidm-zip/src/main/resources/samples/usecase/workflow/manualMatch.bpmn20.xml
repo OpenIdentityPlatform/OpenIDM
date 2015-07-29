@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
-
-
-    <process id="manualMatch" name="Manual Linking Workflow">
-        <startEvent id="start" />
-        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
-        <scriptTask id="readUserData" scriptFormat="groovy">
-            <script>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+  <process id="manualMatch" name="Manual Linking Workflow" isExecutable="true">
+    <startEvent id="start"></startEvent>
+    <sequenceFlow id="sequenceFlow-89ef8f09-edf5-4a42-bfef-c70a9b1e6593" sourceRef="start" targetRef="readUserData"></sequenceFlow>
+    <scriptTask id="readUserData" name="Read User" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 sourceuser = openidm.read('managed/user/' + sourceId)
                 correlationQueryParams = [_queryFilter : 'userName eq "' + sourceuser.userName + '"']
                 results = openidm.query("system/business/account", correlationQueryParams)
@@ -24,14 +16,12 @@
                 execution.setVariable("sourceuser", sourceuser)
                 execution.setVariable("possibleTargets", possibleTargets)
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="readUserData" targetRef="matchAccounts"/>
-        
-        <userTask id="matchAccounts" name="Manual Linking Task" activiti:assignee="systemadmin" activiti:formKey="manualMatch.xhtml"/>
-        <sequenceFlow sourceRef="matchAccounts" targetRef="linkAccount"/>
-        
-        <scriptTask id="linkAccount" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-401ac7be-a0f3-47f3-84f6-76a2b53f379d" sourceRef="readUserData" targetRef="matchAccounts"></sequenceFlow>
+    <userTask id="matchAccounts" name="Manual Linking Task" activiti:assignee="systemadmin" activiti:formKey="manualMatch.xhtml"></userTask>
+    <sequenceFlow id="sequenceFlow-52ea2708-ae3f-4db7-9314-e9c51aa27c18" sourceRef="matchAccounts" targetRef="linkAccount"></sequenceFlow>
+    <scriptTask id="linkAccount" name="Link Account" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 if ("__ignore" != target) {
                     params = new java.util.HashMap();
                     params.put('reconId', reconId)
@@ -42,8 +32,51 @@
                     openidm.action('sync', 'performAction', [:], params)
                 }
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="linkAccount" targetRef="end"/>
-        <endEvent id="end"/>
-    </process>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-795108d3-7052-435d-adc8-d75a3d53223c" sourceRef="linkAccount" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_manualMatch">
+    <bpmndi:BPMNPlane bpmnElement="manualMatch" id="BPMNPlane_manualMatch">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="readUserData" id="BPMNShape_readUserData">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="matchAccounts" id="BPMNShape_matchAccounts">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="linkAccount" id="BPMNShape_linkAccount">
+        <omgdc:Bounds height="60.0" width="100.0" x="380.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="530.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-89ef8f09-edf5-4a42-bfef-c70a9b1e6593" id="BPMNEdge_sequenceFlow-89ef8f09-edf5-4a42-bfef-c70a9b1e6593">
+        <omgdi:waypoint x="35.0" y="32.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-401ac7be-a0f3-47f3-84f6-76a2b53f379d" id="BPMNEdge_sequenceFlow-401ac7be-a0f3-47f3-84f6-76a2b53f379d">
+        <omgdi:waypoint x="180.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-52ea2708-ae3f-4db7-9314-e9c51aa27c18" id="BPMNEdge_sequenceFlow-52ea2708-ae3f-4db7-9314-e9c51aa27c18">
+        <omgdi:waypoint x="330.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-795108d3-7052-435d-adc8-d75a3d53223c" id="BPMNEdge_sequenceFlow-795108d3-7052-435d-adc8-d75a3d53223c">
+        <omgdi:waypoint x="480.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="492.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="492.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="530.0" y="32.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

@@ -1,30 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
-
-    <process id="managedUserApproval" name="Managed User Approval Workflow">
-        <startEvent id="start"/>
-        <sequenceFlow sourceRef="start" targetRef="evaluateRequest"/>
-        
-        <userTask id="evaluateRequest" name="Evaluate request" activiti:assignee="openidm-admin">
-            <extensionElements> 
-                <activiti:formProperty id="requesterName" name="Requester's name" expression="${sourceId}" writable="false"/>
-                <activiti:formProperty id="requestApproved"  name="Do you approve the request?" required="true" type="enum">
-                    <activiti:value id="true" name="Yes"/>
-                    <activiti:value id="false" name="No"/>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        
-        <sequenceFlow sourceRef="evaluateRequest" targetRef="callOpenidmSync"/>
-        <scriptTask id="callOpenidmSync" scriptFormat="groovy">
-            <script>
-                <![CDATA[
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+  <process id="managedUserApproval" name="Managed User Approval Workflow" isExecutable="true">
+    <startEvent id="start"></startEvent>
+    <sequenceFlow id="sequenceFlow-9892c09c-294c-4972-93ce-6082e06fd1f9" sourceRef="start" targetRef="evaluateRequest"></sequenceFlow>
+    <userTask id="evaluateRequest" name="Evaluate request" activiti:assignee="openidm-admin">
+      <extensionElements>
+        <activiti:formProperty id="requesterName" name="Requester's name" expression="${sourceId}" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="requestApproved" name="Do you approve the request?" type="enum" required="true">
+          <activiti:value id="true" name="Yes"></activiti:value>
+          <activiti:value id="false" name="No"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-b637c31e-f3e3-4e15-88ba-8e238c5f11a2" sourceRef="evaluateRequest" targetRef="callOpenidmSync"></sequenceFlow>
+    <scriptTask id="callOpenidmSync" name="Call Sync" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
+                
                 if (requestApproved == 'true') {
                     params = new java.util.HashMap();
                     params.put('reconId', reconId)
@@ -38,14 +29,44 @@
                     }
                     openidm.action('sync', 'performAction', [:], params)
                 }
-                ]]>
+                
             </script>
-        </scriptTask>
-        
-        
-        <sequenceFlow sourceRef="callOpenidmSync" targetRef="end"/>
-        
-        <endEvent id="end"/>
-
-    </process>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-5a453f6f-99d2-43fa-b250-f2e6619d5c54" sourceRef="callOpenidmSync" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_managedUserApproval">
+    <bpmndi:BPMNPlane bpmnElement="managedUserApproval" id="BPMNPlane_managedUserApproval">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="evaluateRequest" id="BPMNShape_evaluateRequest">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="callOpenidmSync" id="BPMNShape_callOpenidmSync">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="380.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-9892c09c-294c-4972-93ce-6082e06fd1f9" id="BPMNEdge_sequenceFlow-9892c09c-294c-4972-93ce-6082e06fd1f9">
+        <omgdi:waypoint x="35.0" y="32.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-b637c31e-f3e3-4e15-88ba-8e238c5f11a2" id="BPMNEdge_sequenceFlow-b637c31e-f3e3-4e15-88ba-8e238c5f11a2">
+        <omgdi:waypoint x="180.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-5a453f6f-99d2-43fa-b250-f2e6619d5c54" id="BPMNEdge_sequenceFlow-5a453f6f-99d2-43fa-b250-f2e6619d5c54">
+        <omgdi:waypoint x="330.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="32.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

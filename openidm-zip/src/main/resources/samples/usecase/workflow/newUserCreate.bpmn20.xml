@@ -1,82 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-    <process id="newUserCreate" name="User onboarding process">
-        <startEvent id="start" activiti:initiator="startUserId" activiti:formKey="nUCStartForm.xhtml" >
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="sn"
-                                       name="Last Name"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="mail"
-                                       name="Email"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="country"
-                                       name="Country"
-                                       type="string" />
-                <activiti:formProperty id="city"
-                                       name="City"
-                                       type="string" />
-                <activiti:formProperty id="stateProvince"
-                                       name="State"
-                                       type="string" />
-                <activiti:formProperty id="postalCode"
-                                       name="Postal Code"
-                                       type="string" />
-                <activiti:formProperty id="address1"
-                                       name="Address"
-                                       type="string" />
-                <activiti:formProperty id="telephoneNumber"
-                                       name="Phone Number"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="department"
-                                       name="Department"
-                                       required="true"
-                                       type="enum">
-                    <activiti:value id="Human Resources" name="Human Resources"/>
-                    <activiti:value id="Production Planning" name="Production Planning"/>
-                    <activiti:value id="Sales &amp; Distribution" name="Sales &amp; Distribution"/>
-                    <activiti:value id="Treasury &amp; Payments" name="Treasury &amp; Payments"/>
-                </activiti:formProperty>
-                <activiti:formProperty id="employeeNumber"
-                                       name="Employee number"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="displayName"
-                                       name="Display Name"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="userType"
-                                       name="User Type"
-                                       required="true"
-                                       type="enum" >
-                    <activiti:value id="employee" name="Employee"/>
-                    <activiti:value id="contractor" name="Contractor"/>
-                </activiti:formProperty>
-                <activiti:formProperty id="emailEnabled"
-                           name="Send Email Notification"
-                           type="boolean" />
-            </extensionElements>
-        </startEvent>
-        <sequenceFlow sourceRef="start" targetRef="decisionPrep"/>
-
-        <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
-            <script><![CDATA[ 
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+  <process id="newUserCreate" name="User onboarding process" isExecutable="true">
+    <startEvent id="start" activiti:initiator="startUserId" activiti:formKey="nUCStartForm.xhtml">
+      <extensionElements>
+        <activiti:formProperty id="userName" name="Username" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="givenName" name="First Name" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="sn" name="Last Name" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="mail" name="Email" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="country" name="Country" type="string"></activiti:formProperty>
+        <activiti:formProperty id="city" name="City" type="string"></activiti:formProperty>
+        <activiti:formProperty id="stateProvince" name="State" type="string"></activiti:formProperty>
+        <activiti:formProperty id="postalCode" name="Postal Code" type="string"></activiti:formProperty>
+        <activiti:formProperty id="address1" name="Address" type="string"></activiti:formProperty>
+        <activiti:formProperty id="telephoneNumber" name="Phone Number" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="department" name="Department" type="enum" required="true">
+          <activiti:value id="Human Resources" name="Human Resources"></activiti:value>
+          <activiti:value id="Production Planning" name="Production Planning"></activiti:value>
+          <activiti:value id="Sales &amp; Distribution" name="Sales &amp; Distribution"></activiti:value>
+          <activiti:value id="Treasury &amp; Payments" name="Treasury &amp; Payments"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="employeeNumber" name="Employee number" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="displayName" name="Display Name" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="userType" name="User Type" type="enum" required="true">
+          <activiti:value id="employee" name="Employee"></activiti:value>
+          <activiti:value id="contractor" name="Contractor"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="emailEnabled" name="Send Email Notification" type="boolean"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    <sequenceFlow id="sequenceFlow-5052ea89-fbac-4bcd-9dd7-c9659e0b45c2" sourceRef="start" targetRef="decisionPrep"></sequenceFlow>
+    <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
+      <script> 
                 params = [_queryFilter:'/department eq "' + department + '" and /title eq "manager"'];
                 manager = openidm.query("managed/user", params)
 
@@ -84,106 +38,54 @@
                 for ( m in manager.result._id ) {
                     candidateUsers.add(m)
                 }
-          ]]>
+          
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="decisionPrep" targetRef="decideApprovalTask"/>
-        
-        <userTask id="decideApprovalTask" name="Onboarding Approval" activiti:candidateUsers="${candidateUsers}" activiti:formKey="nUCDecideApprovalForm.xhtml">
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="sn"
-                                       name="Last Name"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="mail"
-                                       name="Email"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="country"
-                                       name="Country"
-                                       type="string" />
-                <activiti:formProperty id="city"
-                                       name="City"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="stateProvince"
-                                       name="State"
-                                       type="string" />
-                <activiti:formProperty id="postalCode"
-                                       name="Postal Code"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="address1"
-                                       name="Address"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="telephoneNumber"
-                                       name="Phone Number"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="department"
-                                       name="Department"
-                                       required="true"
-                                       type="enum">
-                    <activiti:value id="Human Resources" name="Human Resources"/>
-                    <activiti:value id="Production Planning" name="Production Planning"/>
-                    <activiti:value id="Sales &amp; Distribution" name="Sales &amp; Distribution"/>
-                    <activiti:value id="Treasury &amp; Payments" name="Treasury &amp; Payments"/>
-                </activiti:formProperty>
-                <activiti:formProperty id="startDate"
-                                       name="Start Date (yyyy-MM-dd)"
-                                       type="string"/>
-                <activiti:formProperty id="endDate"
-                                       name="End Date (yyyy-MM-dd)"
-                                       type="string" />
-                <activiti:formProperty id="employeeNumber"
-                                       name="Employee number"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="displayName"
-                                       name="Display Name"
-                                       required="true"
-                                       type="string" />
-                <activiti:formProperty id="userType"
-                                       name="User Type"
-                                       required="true"
-                                       type="enum" >
-                    <activiti:value id="employee" name="Employee"/>
-                    <activiti:value id="contractor" name="Contractor"/>
-                </activiti:formProperty>
-                <activiti:formProperty id="title"
-                                       name="Manager"
-                                       required="true"
-                                       type="enum" >
-                    <activiti:value id="yes" name="Yes"/>
-                    <activiti:value id="no" name="No"/>
-                </activiti:formProperty>
-                <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
-              <activiti:value id="accept" name="Accept"></activiti:value>
-              <activiti:value id="reject" name="Reject"></activiti:value>
-            </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="decideApprovalTask" targetRef="decisionMadeGateway"></sequenceFlow>
-        
-        <exclusiveGateway id="decisionMadeGateway" name="Decision Made"></exclusiveGateway>
-
-        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="createManagedUser">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='accept'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="createManagedUser" scriptFormat="groovy">
-            <script>
-                <![CDATA[
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-af050ef9-99fd-45b6-94ca-08861ce557f7" sourceRef="decisionPrep" targetRef="decideApprovalTask"></sequenceFlow>
+    <userTask id="decideApprovalTask" name="Onboarding Approval" activiti:candidateUsers="${candidateUsers}" activiti:formKey="nUCDecideApprovalForm.xhtml">
+      <extensionElements>
+        <activiti:formProperty id="userName" name="Username" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="givenName" name="First Name" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="sn" name="Last Name" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="mail" name="Email" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="country" name="Country" type="string"></activiti:formProperty>
+        <activiti:formProperty id="city" name="City" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="stateProvince" name="State" type="string"></activiti:formProperty>
+        <activiti:formProperty id="postalCode" name="Postal Code" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="address1" name="Address" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="telephoneNumber" name="Phone Number" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="department" name="Department" type="enum" required="true">
+          <activiti:value id="Human Resources" name="Human Resources"></activiti:value>
+          <activiti:value id="Production Planning" name="Production Planning"></activiti:value>
+          <activiti:value id="Sales &amp; Distribution" name="Sales &amp; Distribution"></activiti:value>
+          <activiti:value id="Treasury &amp; Payments" name="Treasury &amp; Payments"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="startDate" name="Start Date (yyyy-MM-dd)" type="string"></activiti:formProperty>
+        <activiti:formProperty id="endDate" name="End Date (yyyy-MM-dd)" type="string"></activiti:formProperty>
+        <activiti:formProperty id="employeeNumber" name="Employee number" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="displayName" name="Display Name" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="userType" name="User Type" type="enum" required="true">
+          <activiti:value id="employee" name="Employee"></activiti:value>
+          <activiti:value id="contractor" name="Contractor"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="title" name="Manager" type="enum" required="true">
+          <activiti:value id="yes" name="Yes"></activiti:value>
+          <activiti:value id="no" name="No"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+          <activiti:value id="accept" name="Accept"></activiti:value>
+          <activiti:value id="reject" name="Reject"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-41df1e1f-2f0f-4e47-ae49-5f81e127bbd4" sourceRef="decideApprovalTask" targetRef="decisionMadeGateway"></sequenceFlow>
+    <exclusiveGateway id="decisionMadeGateway" name="Decision Made"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-75f429f4-b59d-464f-8b97-383b4946c4de" sourceRef="decisionMadeGateway" targetRef="createManagedUser">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='accept'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask id="createManagedUser" name="Create User" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
+                
                 user = [_id:userName, userName:userName, givenName:givenName, sn:sn,
                 mail:mail, country:country, city:city, stateProvince:stateProvince,
                 postalCode:postalCode, address1:address1, telephoneNumber:telephoneNumber,
@@ -239,17 +141,14 @@
                 
                 readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]
                 execution.setVariable('readNewUserFromRepoParams', readNewUserFromRepoParams)
-                ]]>
+                
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="createManagedUser" targetRef="serviceTask"/>
-        
-        <serviceTask id="serviceTask" activiti:expression="${openidm.query('managed/user', readNewUserFromRepoParams)}"
-                     activiti:resultVariableName="newUserFromRepo"/>
-        <sequenceFlow sourceRef="serviceTask" targetRef="sendAcceptNotification"/>
-
-        <scriptTask id="sendAcceptNotification" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-1437e4f9-bfde-4b7f-b8d3-1807b18cd4c0" sourceRef="createManagedUser" targetRef="serviceTask"></sequenceFlow>
+    <serviceTask id="serviceTask" name="Read User" activiti:expression="${openidm.query('managed/user', readNewUserFromRepoParams)}" activiti:resultVariableName="newUserFromRepo"></serviceTask>
+    <sequenceFlow id="sequenceFlow-7c5e7aa8-9e5a-4956-85ad-2a1c3e9db6c9" sourceRef="serviceTask" targetRef="sendAcceptNotification"></sequenceFlow>
+    <scriptTask id="sendAcceptNotification" name="Accept Email" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
@@ -288,16 +187,13 @@
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
-        
-        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="sendDenyNotification">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='reject'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="sendDenyNotification" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-69ecfdb6-83f5-4c5a-9461-a0fee37ce1c8" sourceRef="sendAcceptNotification" targetRef="end"></sequenceFlow>
+    <sequenceFlow id="sequenceFlow-70a62fcc-60a9-4067-81c8-c516aaa45842" sourceRef="decisionMadeGateway" targetRef="sendDenyNotification">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask id="sendDenyNotification" name="Deny Email" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
                 requestDate = formatUTC.format(new Date());
@@ -325,11 +221,87 @@
                 }
                 
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="sendDenyNotification" targetRef="end"/>
-        
-        <endEvent id="end"/>
-
-    </process>
-
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-cb101df7-729c-4865-a8b8-c2713b218e91" sourceRef="sendDenyNotification" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_newUserCreate">
+    <bpmndi:BPMNPlane bpmnElement="newUserCreate" id="BPMNPlane_newUserCreate">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="95.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="decisionPrep" id="BPMNShape_decisionPrep">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="decideApprovalTask" id="BPMNShape_decideApprovalTask">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="decisionMadeGateway" id="BPMNShape_decisionMadeGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="90.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="createManagedUser" id="BPMNShape_createManagedUser">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="serviceTask" id="BPMNShape_serviceTask">
+        <omgdc:Bounds height="60.0" width="100.0" x="620.0" y="145.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sendAcceptNotification" id="BPMNShape_sendAcceptNotification">
+        <omgdc:Bounds height="60.0" width="100.0" x="770.0" y="130.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sendDenyNotification" id="BPMNShape_sendDenyNotification">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="920.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-5052ea89-fbac-4bcd-9dd7-c9659e0b45c2" id="BPMNEdge_sequenceFlow-5052ea89-fbac-4bcd-9dd7-c9659e0b45c2">
+        <omgdi:waypoint x="35.0" y="112.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="110.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-af050ef9-99fd-45b6-94ca-08861ce557f7" id="BPMNEdge_sequenceFlow-af050ef9-99fd-45b6-94ca-08861ce557f7">
+        <omgdi:waypoint x="180.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="110.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-41df1e1f-2f0f-4e47-ae49-5f81e127bbd4" id="BPMNEdge_sequenceFlow-41df1e1f-2f0f-4e47-ae49-5f81e127bbd4">
+        <omgdi:waypoint x="330.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="110.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-75f429f4-b59d-464f-8b97-383b4946c4de" id="BPMNEdge_sequenceFlow-75f429f4-b59d-464f-8b97-383b4946c4de">
+        <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="190.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-1437e4f9-bfde-4b7f-b8d3-1807b18cd4c0" id="BPMNEdge_sequenceFlow-1437e4f9-bfde-4b7f-b8d3-1807b18cd4c0">
+        <omgdi:waypoint x="570.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="175.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="175.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-7c5e7aa8-9e5a-4956-85ad-2a1c3e9db6c9" id="BPMNEdge_sequenceFlow-7c5e7aa8-9e5a-4956-85ad-2a1c3e9db6c9">
+        <omgdi:waypoint x="720.0" y="175.0"></omgdi:waypoint>
+        <omgdi:waypoint x="732.0" y="175.0"></omgdi:waypoint>
+        <omgdi:waypoint x="732.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="770.0" y="160.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-69ecfdb6-83f5-4c5a-9461-a0fee37ce1c8" id="BPMNEdge_sequenceFlow-69ecfdb6-83f5-4c5a-9461-a0fee37ce1c8">
+        <omgdi:waypoint x="870.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="882.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="882.0" y="95.0"></omgdi:waypoint>
+        <omgdi:waypoint x="920.0" y="97.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-70a62fcc-60a9-4067-81c8-c516aaa45842" id="BPMNEdge_sequenceFlow-70a62fcc-60a9-4067-81c8-c516aaa45842">
+        <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-cb101df7-729c-4865-a8b8-c2713b218e91" id="BPMNEdge_sequenceFlow-cb101df7-729c-4865-a8b8-c2713b218e91">
+        <omgdi:waypoint x="570.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="95.0"></omgdi:waypoint>
+        <omgdi:waypoint x="920.0" y="97.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>
