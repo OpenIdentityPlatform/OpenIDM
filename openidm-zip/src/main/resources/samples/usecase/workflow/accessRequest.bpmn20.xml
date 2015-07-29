@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-    <process id="accessRequest" name="Access request process">
-        <startEvent id="start" activiti:initiator="startUserId" />
-        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
-
-        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
-            <script><![CDATA[
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+  <process id="accessRequest" name="Access request process" isExecutable="true">
+    <startEvent id="start" activiti:initiator="startUserId"></startEvent>
+    <sequenceFlow id="sequenceFlow-8062e9e1-5513-4a5e-af0f-b97509ecba34" sourceRef="start" targetRef="readUserData"></sequenceFlow>
+    <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
+      <script>
                 user = openidm.read("managed/user/" + startUserId)
                 userName = user.userName
                 givenName = user.givenName
@@ -20,158 +13,90 @@
                 department = user.department
                 params = [ _queryId: 'getManager', userId: startUserId];
                 candidateManagers = openidm.query('endpoint/getusermanager', params).result
-                hasBusiness = (user.accounts != null && user.accounts.contains("Business"))
-                hasProject = (user.accounts != null && user.accounts.contains("Project"))
+                hasBusiness = (user.accounts != null &amp;&amp; user.accounts.contains("Business"))
+                hasProject = (user.accounts != null &amp;&amp; user.accounts.contains("Project"))
                 execution.setVariable('candidateManagers', candidateManagers)
-                ]]>
+                
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="readUserData" targetRef="userAccessRequest"/>
-        
-        <userTask id="userAccessRequest" name="User Access Request" activiti:assignee="${startUserId}">
-            <extensionElements>
-                <activiti:formProperty id="business"
-                                       name="Access to Business system "
-                                       expression="#{hasBusiness}"
-                                       type="boolean"/>
-                <activiti:formProperty id="project"
-                                       name="Access to Project system "
-                                       expression="#{hasProject}"
-                                       type="boolean"/>
-                <activiti:formProperty id="emailEnabled"
-                           name="Send Email Notification"
-                           type="boolean" />
-                <activiti:formProperty id="request" name="Request" type="enum" required="true">
-                    <activiti:value id="accept" name="Request"></activiti:value>
-                    <activiti:value id="cancel" name="Cancel"></activiti:value>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="userAccessRequest" targetRef="requestMadeGateway"></sequenceFlow>
-        
-        <exclusiveGateway id="requestMadeGateway" name="Request Made"></exclusiveGateway>
-        <sequenceFlow sourceRef="requestMadeGateway" targetRef="managerApproval">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${request=='accept'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <userTask id="managerApproval" name="User Access Request Approval" activiti:candidateUsers="${candidateManagers}">
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="sn"
-                                       name="Last Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="mail"
-                                       name="Email"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="business"
-                                       name="Access to Business system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="project"
-                                       name="Access to Project system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="managerDecision" name="Decision" type="enum" required="true">
-                    <activiti:value id="accept" name="Accept"></activiti:value>
-                    <activiti:value id="reject" name="Reject"></activiti:value>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="managerApproval" targetRef="managerDecisionMadeGateway"/>
-        
-        <boundaryEvent id="boundarytimer" cancelActivity="true" attachedToRef="managerApproval">
-            <timerEventDefinition>
-                <timeDuration>PT10M</timeDuration>
-            </timerEventDefinition>
-        </boundaryEvent>
-        <sequenceFlow sourceRef="boundarytimer" targetRef="escalationApproval"/>
-
-        <userTask id="escalationApproval" name="User Access Request Approval Escalation" activiti:assignee="superadmin">
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="sn"
-                                       name="Last Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="mail"
-                                       name="Email"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="business"
-                                       name="Access to Business system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="project"
-                                       name="Access to Project system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="managerDecision" name="Decision" type="enum" required="true">
-                    <activiti:value id="accept" name="Accept"></activiti:value>
-                    <activiti:value id="reject" name="Reject"></activiti:value>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="escalationApproval" targetRef="managerDecisionMadeGateway"/>
-        
-        <exclusiveGateway id="managerDecisionMadeGateway" name="Manager Decision Made"></exclusiveGateway>
-        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="administratorApproval">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${managerDecision=='accept'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <userTask id="administratorApproval" name="User Access Request Approval" activiti:assignee="systemadmin">
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="sn"
-                                       name="Last Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="mail"
-                                       name="Email"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="business"
-                                       name="Access to Business system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="project"
-                                       name="Access to Project system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="adminDecision" name="Decision" type="enum" required="true">
-                    <activiti:value id="accept" name="Accept"></activiti:value>
-                    <activiti:value id="reject" name="Reject"></activiti:value>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="administratorApproval" targetRef="adminDecisionMadeGateway"/>
-        
-        <exclusiveGateway id="adminDecisionMadeGateway" name="Administrator Decision Made"></exclusiveGateway>
-        <sequenceFlow sourceRef="adminDecisionMadeGateway" targetRef="patchManagedUser">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${adminDecision=='accept'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="patchManagedUser" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-39cdeb4d-8d10-4988-9cbe-b0a7290a1c92" sourceRef="readUserData" targetRef="userAccessRequest"></sequenceFlow>
+    <userTask id="userAccessRequest" name="User Access Request" activiti:assignee="${startUserId}">
+      <extensionElements>
+        <activiti:formProperty id="business" name="Access to Business system " type="boolean" expression="#{hasBusiness}"></activiti:formProperty>
+        <activiti:formProperty id="project" name="Access to Project system " type="boolean" expression="#{hasProject}"></activiti:formProperty>
+        <activiti:formProperty id="emailEnabled" name="Send Email Notification" type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="request" name="Request" type="enum" required="true">
+          <activiti:value id="accept" name="Request"></activiti:value>
+          <activiti:value id="cancel" name="Cancel"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-4dbe55c6-05e3-4635-ad4a-cb6c7e1ef18d" sourceRef="userAccessRequest" targetRef="requestMadeGateway"></sequenceFlow>
+    <exclusiveGateway id="requestMadeGateway" name="Request Made"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-3f8dcfd2-560c-4517-ac9b-54af3817b2d1" sourceRef="requestMadeGateway" targetRef="managerApproval">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${request=='accept'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="managerApproval" name="User Access Request Approval" activiti:candidateUsers="${candidateManagers}">
+      <extensionElements>
+        <activiti:formProperty id="userName" name="Username" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="givenName" name="First Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="sn" name="Last Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="mail" name="Email" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="business" name="Access to Business system: " type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="project" name="Access to Project system: " type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="managerDecision" name="Decision" type="enum" required="true">
+          <activiti:value id="accept" name="Accept"></activiti:value>
+          <activiti:value id="reject" name="Reject"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-2cbc9ec2-38df-4f18-b67e-bb771086c9c5" sourceRef="managerApproval" targetRef="managerDecisionMadeGateway"></sequenceFlow>
+    <boundaryEvent id="boundarytimer" attachedToRef="managerApproval" cancelActivity="true">
+      <timerEventDefinition>
+        <timeDuration>PT10M</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="sequenceFlow-901a16b2-a110-4343-805d-3579a1053ef1" sourceRef="boundarytimer" targetRef="escalationApproval"></sequenceFlow>
+    <userTask id="escalationApproval" name="User Access Request Approval Escalation" activiti:assignee="superadmin">
+      <extensionElements>
+        <activiti:formProperty id="userName" name="Username" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="givenName" name="First Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="sn" name="Last Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="mail" name="Email" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="business" name="Access to Business system: " type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="project" name="Access to Project system: " type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="managerDecision" name="Decision" type="enum" required="true">
+          <activiti:value id="accept" name="Accept"></activiti:value>
+          <activiti:value id="reject" name="Reject"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-643d1999-e947-4c68-bd1c-17613386695c" sourceRef="escalationApproval" targetRef="managerDecisionMadeGateway"></sequenceFlow>
+    <exclusiveGateway id="managerDecisionMadeGateway" name="Manager Decision Made"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-171bc1f0-6bcc-47db-9e9d-0fab640588ba" sourceRef="managerDecisionMadeGateway" targetRef="administratorApproval">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${managerDecision=='accept'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="administratorApproval" name="User Access Request Approval" activiti:assignee="systemadmin">
+      <extensionElements>
+        <activiti:formProperty id="userName" name="Username" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="givenName" name="First Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="sn" name="Last Name" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="mail" name="Email" type="string" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="business" name="Access to Business system: " type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="project" name="Access to Project system: " type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="adminDecision" name="Decision" type="enum" required="true">
+          <activiti:value id="accept" name="Accept"></activiti:value>
+          <activiti:value id="reject" name="Reject"></activiti:value>
+        </activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-55caf097-3b16-4a73-8430-97ccbf233c21" sourceRef="administratorApproval" targetRef="adminDecisionMadeGateway"></sequenceFlow>
+    <exclusiveGateway id="adminDecisionMadeGateway" name="Administrator Decision Made"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-8ff249e4-8d62-496e-8d1b-d3d46a6a74b3" sourceRef="adminDecisionMadeGateway" targetRef="patchManagedUser">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${adminDecision=='accept'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask name="Patch User" id="patchManagedUser" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 newAccounts = []
                 if (business) {
                     newAccounts.push("Business")
@@ -183,11 +108,10 @@
                 patchParams = [[operation:'replace', field: 'accounts', value : newAccounts]]
                 openidm.patch('managed/user/'+userName, null, patchParams)
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="patchManagedUser" targetRef="sendAcceptNotification"/>
-        
-        <scriptTask id="sendAcceptNotification" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-5d573644-f421-413d-94bf-a328de434941" sourceRef="patchManagedUser" targetRef="sendAcceptNotification"></sequenceFlow>
+    <scriptTask name="Accept Email" id="sendAcceptNotification" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
@@ -215,20 +139,16 @@
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
-        
-        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="sendDenyNotification">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${managerDecision=='reject'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        <sequenceFlow sourceRef="adminDecisionMadeGateway" targetRef="sendDenyNotification">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${adminDecision=='reject'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="sendDenyNotification" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-7c083ca7-f4e4-4c01-80ef-7b50f93f6afc" sourceRef="sendAcceptNotification" targetRef="end"></sequenceFlow>
+    <sequenceFlow id="sequenceFlow-2d66e79d-58f8-4527-8b59-a5bb741bcbbb" sourceRef="managerDecisionMadeGateway" targetRef="sendDenyNotification">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${managerDecision=='reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sequenceFlow-209bfaae-0825-468a-96d9-b4d794c63b5f" sourceRef="adminDecisionMadeGateway" targetRef="sendDenyNotification">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${adminDecision=='reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask name="Deny Email" id="sendDenyNotification" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
                 requestDate = formatUTC.format(new Date());
@@ -260,16 +180,149 @@
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="sendDenyNotification" targetRef="end"/>
-        
-        <sequenceFlow sourceRef="requestMadeGateway" targetRef="end">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${request=='cancel'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <endEvent id="end"/>
-
-    </process> 
-
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-3c1d4d61-a8f1-44ed-81d7-4cbb3cb4f39d" sourceRef="sendDenyNotification" targetRef="end"></sequenceFlow>
+    <sequenceFlow id="sequenceFlow-f7342e4b-8ed1-4bfa-b94f-3a30d29c259a" sourceRef="requestMadeGateway" targetRef="end">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${request=='cancel'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_accessRequest">
+    <bpmndi:BPMNPlane bpmnElement="accessRequest" id="BPMNPlane_accessRequest">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="57.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="readUserData" id="BPMNShape_readUserData">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="42.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="userAccessRequest" id="BPMNShape_userAccessRequest">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="41.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="requestMadeGateway" id="BPMNShape_requestMadeGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="48.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="managerApproval" id="BPMNShape_managerApproval">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundarytimer" id="BPMNShape_boundarytimer">
+        <omgdc:Bounds height="30.0" width="30.0" x="535.0" y="145.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="escalationApproval" id="BPMNShape_escalationApproval">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="managerDecisionMadeGateway" id="BPMNShape_managerDecisionMadeGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="620.0" y="197.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="administratorApproval" id="BPMNShape_administratorApproval">
+        <omgdc:Bounds height="60.0" width="100.0" x="710.0" y="130.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="adminDecisionMadeGateway" id="BPMNShape_adminDecisionMadeGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="860.0" y="140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="patchManagedUser" id="BPMNShape_patchManagedUser">
+        <omgdc:Bounds height="60.0" width="100.0" x="950.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sendAcceptNotification" id="BPMNShape_sendAcceptNotification">
+        <omgdc:Bounds height="60.0" width="100.0" x="1100.0" y="130.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sendDenyNotification" id="BPMNShape_sendDenyNotification">
+        <omgdc:Bounds height="60.0" width="100.0" x="950.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="1250.0" y="145.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-8062e9e1-5513-4a5e-af0f-b97509ecba34" id="BPMNEdge_sequenceFlow-8062e9e1-5513-4a5e-af0f-b97509ecba34">
+        <omgdi:waypoint x="35.0" y="74.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="72.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-39cdeb4d-8d10-4988-9cbe-b0a7290a1c92" id="BPMNEdge_sequenceFlow-39cdeb4d-8d10-4988-9cbe-b0a7290a1c92">
+        <omgdi:waypoint x="180.0" y="72.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="72.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="71.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="71.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-4dbe55c6-05e3-4635-ad4a-cb6c7e1ef18d" id="BPMNEdge_sequenceFlow-4dbe55c6-05e3-4635-ad4a-cb6c7e1ef18d">
+        <omgdi:waypoint x="330.0" y="71.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="71.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="68.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-3f8dcfd2-560c-4517-ac9b-54af3817b2d1" id="BPMNEdge_sequenceFlow-3f8dcfd2-560c-4517-ac9b-54af3817b2d1">
+        <omgdi:waypoint x="420.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-2cbc9ec2-38df-4f18-b67e-bb771086c9c5" id="BPMNEdge_sequenceFlow-2cbc9ec2-38df-4f18-b67e-bb771086c9c5">
+        <omgdi:waypoint x="570.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="217.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-901a16b2-a110-4343-805d-3579a1053ef1" id="BPMNEdge_sequenceFlow-901a16b2-a110-4343-805d-3579a1053ef1">
+        <omgdi:waypoint x="550.0" y="175.0"></omgdi:waypoint>
+        <omgdi:waypoint x="550.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0" y="330.0"></omgdi:waypoint>
+        <omgdi:waypoint x="520.0" y="330.0"></omgdi:waypoint>
+        <omgdi:waypoint x="520.0" y="320.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-643d1999-e947-4c68-bd1c-17613386695c" id="BPMNEdge_sequenceFlow-643d1999-e947-4c68-bd1c-17613386695c">
+        <omgdi:waypoint x="570.0" y="290.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="290.0"></omgdi:waypoint>
+        <omgdi:waypoint x="582.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="217.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-171bc1f0-6bcc-47db-9e9d-0fab640588ba" id="BPMNEdge_sequenceFlow-171bc1f0-6bcc-47db-9e9d-0fab640588ba">
+        <omgdi:waypoint x="660.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="672.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="672.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="710.0" y="160.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-55caf097-3b16-4a73-8430-97ccbf233c21" id="BPMNEdge_sequenceFlow-55caf097-3b16-4a73-8430-97ccbf233c21">
+        <omgdi:waypoint x="810.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="860.0" y="160.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-8ff249e4-8d62-496e-8d1b-d3d46a6a74b3" id="BPMNEdge_sequenceFlow-8ff249e4-8d62-496e-8d1b-d3d46a6a74b3">
+        <omgdi:waypoint x="900.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="912.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="912.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="950.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-5d573644-f421-413d-94bf-a328de434941" id="BPMNEdge_sequenceFlow-5d573644-f421-413d-94bf-a328de434941">
+        <omgdi:waypoint x="1050.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1062.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1062.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1100.0" y="160.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-7c083ca7-f4e4-4c01-80ef-7b50f93f6afc" id="BPMNEdge_sequenceFlow-7c083ca7-f4e4-4c01-80ef-7b50f93f6afc">
+        <omgdi:waypoint x="1200.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1250.0" y="162.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-2d66e79d-58f8-4527-8b59-a5bb741bcbbb" id="BPMNEdge_sequenceFlow-2d66e79d-58f8-4527-8b59-a5bb741bcbbb">
+        <omgdi:waypoint x="660.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="672.0" y="217.0"></omgdi:waypoint>
+        <omgdi:waypoint x="672.0" y="290.0"></omgdi:waypoint>
+        <omgdi:waypoint x="950.0" y="290.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-209bfaae-0825-468a-96d9-b4d794c63b5f" id="BPMNEdge_sequenceFlow-209bfaae-0825-468a-96d9-b4d794c63b5f">
+        <omgdi:waypoint x="900.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="912.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="912.0" y="290.0"></omgdi:waypoint>
+        <omgdi:waypoint x="950.0" y="290.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-3c1d4d61-a8f1-44ed-81d7-4cbb3cb4f39d" id="BPMNEdge_sequenceFlow-3c1d4d61-a8f1-44ed-81d7-4cbb3cb4f39d">
+        <omgdi:waypoint x="1050.0" y="290.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1062.0" y="290.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1062.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1250.0" y="162.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-f7342e4b-8ed1-4bfa-b94f-3a30d29c259a" id="BPMNEdge_sequenceFlow-f7342e4b-8ed1-4bfa-b94f-3a30d29c259a">
+        <omgdi:waypoint x="420.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="68.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1250.0" y="162.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

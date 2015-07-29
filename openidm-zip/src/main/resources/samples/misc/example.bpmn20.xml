@@ -1,37 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-
-
-    <process id="osgiProcess" name="Osgi process">
-
-        <startEvent id="start" />
-        <sequenceFlow sourceRef="start" targetRef="scripttask1"/>
-        <scriptTask id="scripttask1" scriptFormat="groovy">
-            <script>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+  <process id="osgiProcess" name="Osgi process" isExecutable="true">
+    <startEvent id="start"></startEvent>
+    <sequenceFlow id="sequenceFlow-3a5e7ed7-d28e-43a9-8faa-82d1252c7f40" sourceRef="start" targetRef="scripttask1"></sequenceFlow>
+    <scriptTask id="scripttask1" name="Script Task 1" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 params = [_queryId:'query-all-ids']
                 out:println "script task using resolver: " + openidm.query('workflow/processdefinition', params)
                 execution.setVariable('params', params)
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="scripttask1" targetRef="serviceTask"/>
-        <serviceTask id="serviceTask" activiti:expression="${openidm.query('workflow/processdefinition', params)}"
-                 activiti:resultVariableName="idmresult"/>
-        <sequenceFlow sourceRef="serviceTask" targetRef="scripttask2"/>
-        
-        <scriptTask id="scripttask2" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-49562128-71b5-4087-a084-e62236d2576f" sourceRef="scripttask1" targetRef="serviceTask"></sequenceFlow>
+    <serviceTask id="serviceTask" name="Service Task" activiti:expression="${openidm.query('workflow/processdefinition', params)}" activiti:resultVariableName="idmresult"></serviceTask>
+    <sequenceFlow id="sequenceFlow-5da9eb45-80e6-4571-9d6a-6c237e9e6f8e" sourceRef="serviceTask" targetRef="scripttask2"></sequenceFlow>
+    <scriptTask id="scripttask2" name="Script Task 2" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 out:println "script task using expression resolver: " + idmresult
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="scripttask2" targetRef="end"/>
-        <endEvent id="end"/>
-
-    </process>
-
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-97b3fa00-6a2f-4968-b5f2-e83c837f445e" sourceRef="scripttask2" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_osgiProcess">
+    <bpmndi:BPMNPlane bpmnElement="osgiProcess" id="BPMNPlane_osgiProcess">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask1" id="BPMNShape_scripttask1">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="serviceTask" id="BPMNShape_serviceTask">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask2" id="BPMNShape_scripttask2">
+        <omgdc:Bounds height="60.0" width="100.0" x="380.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="530.0" y="15.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-3a5e7ed7-d28e-43a9-8faa-82d1252c7f40" id="BPMNEdge_sequenceFlow-3a5e7ed7-d28e-43a9-8faa-82d1252c7f40">
+        <omgdi:waypoint x="35.0" y="32.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="42.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-49562128-71b5-4087-a084-e62236d2576f" id="BPMNEdge_sequenceFlow-49562128-71b5-4087-a084-e62236d2576f">
+        <omgdi:waypoint x="180.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-5da9eb45-80e6-4571-9d6a-6c237e9e6f8e" id="BPMNEdge_sequenceFlow-5da9eb45-80e6-4571-9d6a-6c237e9e6f8e">
+        <omgdi:waypoint x="330.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="30.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-97b3fa00-6a2f-4968-b5f2-e83c837f445e" id="BPMNEdge_sequenceFlow-97b3fa00-6a2f-4968-b5f2-e83c837f445e">
+        <omgdi:waypoint x="480.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="492.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="492.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="530.0" y="32.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

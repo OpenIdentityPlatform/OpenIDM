@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<definitions id="definitions"
-             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:activiti="http://activiti.org/bpmn"
-             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="
-             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-    <process id="certification" name="Certification process">
-        <startEvent id="start" activiti:initiator="startUserId" />
-        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
-
-        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy">
-            <script><![CDATA[ 
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+  <process id="certification" name="Certification process" isExecutable="true">
+    <startEvent id="start" activiti:initiator="startUserId"></startEvent>
+    <sequenceFlow id="sequenceFlow-461e23ba-ddee-4a7a-a2ee-87ddd886e17e" sourceRef="start" targetRef="readUserData"></sequenceFlow>
+    <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script> 
                 user = openidm.read('managed/user/' + userId);
                 userName = user.userName;
                 givenName = user.givenName;
@@ -28,7 +21,7 @@
                 }
                 
                 user.effectiveRoles.each {
-                    role = roles.find {e -> e.rid.equals(it)};
+                    role = roles.find {e -&gt; e.rid.equals(it)};
                     if (role != null) {
                         role.dynamic = !user.roles.contains(it);
                         role.actualManaged = true;
@@ -48,65 +41,56 @@
                 decisionOptions = [ 'change':'Change', 'certify':'Certify', 'escalate':'Escalate'];
                 execution.setVariable('decisionOptions', decisionOptions);
                 
-                ]]>
+                
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="readUserData" targetRef="managerApproval"/>
-        
-        <userTask id="managerApproval" name="Role Status Check" activiti:candidateUsers="${candidateManagers}" activiti:formKey="certificationRolesForm.xhtml">
-            <extensionElements>
-                <activiti:taskListener event="assignment" expression="${execution.setVariable('assignedManager', task.assignee)}" />
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="managerApproval" targetRef="managerDecisionMadeGateway"/>
-        
-        <exclusiveGateway id="managerDecisionMadeGateway" name="Manager Decision Made" default="endProcess"/>
-        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="changeDecisionOptions">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='escalate'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="patchManagedUser">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='change'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <scriptTask id="changeDecisionOptions"  scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-a112a5aa-c943-4cd4-ae75-46d48de21e8c" sourceRef="readUserData" targetRef="managerApproval"></sequenceFlow>
+    <userTask id="managerApproval" name="Role Status Check" activiti:candidateUsers="${candidateManagers}" activiti:formKey="certificationRolesForm.xhtml">
+      <extensionElements>
+        <activiti:taskListener event="assignment" expression="${execution.setVariable('assignedManager', task.assignee)}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-f486bb8d-53aa-44f7-bfd0-f3848b2d109c" sourceRef="managerApproval" targetRef="managerDecisionMadeGateway"></sequenceFlow>
+    <exclusiveGateway id="managerDecisionMadeGateway" name="Manager Decision Made" default="endProcess"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-83905577-33ad-4bff-9ef2-3cdb9b7fe21f" sourceRef="managerDecisionMadeGateway" targetRef="changeDecisionOptions">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='escalate'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sequenceFlow-231dc1ee-f6c6-4cec-97a7-3effb9cc89cd" sourceRef="managerDecisionMadeGateway" targetRef="patchManagedUser">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='change'}]]></conditionExpression>
+    </sequenceFlow>
+    <scriptTask id="changeDecisionOptions" name="Change Decision Options" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 newdecisionOptions = [ 'change':'Change' , 'certify':'Certify'];
                 execution.setVariable('decisionOptions', newdecisionOptions);
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="changeDecisionOptions" targetRef="administratorApproval"/>
-        
-        <userTask id="administratorApproval" name="Access Status Check" activiti:assignee="superadmin" activiti:formKey="certificationRolesForm.xhtml">
-        </userTask>
-        <exclusiveGateway id="adminDecisionMadeGateway" name="Administrator Decision Made"  default="endEscalation"/>
-        <sequenceFlow sourceRef="administratorApproval" targetRef="adminDecisionMadeGateway"/>
-        
-        <scriptTask id="patchManagedUser" scriptFormat="groovy">
-            <script><![CDATA[
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-1fdb2ba5-6b8f-4b46-8bf5-28b9c657a89f" sourceRef="changeDecisionOptions" targetRef="administratorApproval"></sequenceFlow>
+    <userTask id="administratorApproval" name="Access Status Check" activiti:assignee="superadmin" activiti:formKey="certificationRolesForm.xhtml"></userTask>
+    <exclusiveGateway id="adminDecisionMadeGateway" name="Administrator Decision Made" default="endEscalation"></exclusiveGateway>
+    <sequenceFlow id="sequenceFlow-a16b5f4e-e20f-4cfa-9a3d-8c188ed037dd" sourceRef="administratorApproval" targetRef="adminDecisionMadeGateway"></sequenceFlow>
+    <scriptTask id="patchManagedUser" name="Patch User" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 availableRoles.each {
-                    role = roles.find {e -> e.name.equals(it._id)};
+                    role = roles.find {e -&gt; e.name.equals(it._id)};
                     role.newManaged = execution.hasVariable(it._id+'_newManaged') || role.dynamic;
  	 	        }
                 
                 user = openidm.read('managed/user/' + userId);
                 newManagedRoles = user.roles.findAll {it.startsWith('openidm-')}.toList();
                 roles.each {
-                    if (it.newManaged && !it.dynamic) {
+                    if (it.newManaged &amp;&amp; !it.dynamic) {
                         newManagedRoles.push(it.rid);
                     }
                 }
                 
                 patchParams = [[operation:'replace', field: 'roles', value : newManagedRoles]];
                 openidm.patch('managed/user/'+userId, null, patchParams);
-                ]]>
+                
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="patchManagedUser" targetRef="sendAcceptNotification"/>
-        
-        <scriptTask id="sendAcceptNotification" scriptFormat="groovy">
-            <script>
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-8a771e7d-ef4c-437b-a4b6-c774e30bb738" sourceRef="patchManagedUser" targetRef="sendAcceptNotification"></sequenceFlow>
+    <scriptTask id="sendAcceptNotification" name="Accept Email" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>
                 java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
@@ -123,19 +107,109 @@
                 
                 openidm.create('repo/ui/notification/', null, requesterNotification);
             </script>
-        </scriptTask>
-        <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
-        
-        <sequenceFlow sourceRef="adminDecisionMadeGateway" targetRef="patchManagedUser">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='change'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <sequenceFlow id ="endProcess" sourceRef="managerDecisionMadeGateway" targetRef="end"/>
-        <sequenceFlow id ="endEscalation" sourceRef="adminDecisionMadeGateway" targetRef="end"/>
-        
-        <endEvent id="end"/>
-
-    </process>
-
+    </scriptTask>
+    <sequenceFlow id="sequenceFlow-de28a6c2-c74b-4e25-a2b9-18de794395f7" sourceRef="sendAcceptNotification" targetRef="end"></sequenceFlow>
+    <sequenceFlow id="sequenceFlow-035b8818-ef0f-4eb8-8f77-c1e8e112cf22" sourceRef="adminDecisionMadeGateway" targetRef="patchManagedUser">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='change'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="endProcess" sourceRef="managerDecisionMadeGateway" targetRef="end"></sequenceFlow>
+    <sequenceFlow id="endEscalation" sourceRef="adminDecisionMadeGateway" targetRef="end"></sequenceFlow>
+    <endEvent id="end"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_certification">
+    <bpmndi:BPMNPlane bpmnElement="certification" id="BPMNPlane_certification">
+      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="93.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="readUserData" id="BPMNShape_readUserData">
+        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="78.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="managerApproval" id="BPMNShape_managerApproval">
+        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="76.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="managerDecisionMadeGateway" id="BPMNShape_managerDecisionMadeGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="82.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="changeDecisionOptions" id="BPMNShape_changeDecisionOptions">
+        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="200.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="administratorApproval" id="BPMNShape_administratorApproval">
+        <omgdc:Bounds height="60.0" width="100.0" x="620.0" y="200.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="adminDecisionMadeGateway" id="BPMNShape_adminDecisionMadeGateway">
+        <omgdc:Bounds height="40.0" width="40.0" x="770.0" y="210.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="patchManagedUser" id="BPMNShape_patchManagedUser">
+        <omgdc:Bounds height="60.0" width="100.0" x="860.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sendAcceptNotification" id="BPMNShape_sendAcceptNotification">
+        <omgdc:Bounds height="60.0" width="100.0" x="1010.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+        <omgdc:Bounds height="35.0" width="35.0" x="1160.0" y="115.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-461e23ba-ddee-4a7a-a2ee-87ddd886e17e" id="BPMNEdge_sequenceFlow-461e23ba-ddee-4a7a-a2ee-87ddd886e17e">
+        <omgdi:waypoint x="35.0" y="110.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="108.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a112a5aa-c943-4cd4-ae75-46d48de21e8c" id="BPMNEdge_sequenceFlow-a112a5aa-c943-4cd4-ae75-46d48de21e8c">
+        <omgdi:waypoint x="180.0" y="108.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="108.0"></omgdi:waypoint>
+        <omgdi:waypoint x="192.0" y="106.0"></omgdi:waypoint>
+        <omgdi:waypoint x="230.0" y="106.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-f486bb8d-53aa-44f7-bfd0-f3848b2d109c" id="BPMNEdge_sequenceFlow-f486bb8d-53aa-44f7-bfd0-f3848b2d109c">
+        <omgdi:waypoint x="330.0" y="106.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="106.0"></omgdi:waypoint>
+        <omgdi:waypoint x="342.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="380.0" y="102.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-83905577-33ad-4bff-9ef2-3cdb9b7fe21f" id="BPMNEdge_sequenceFlow-83905577-33ad-4bff-9ef2-3cdb9b7fe21f">
+        <omgdi:waypoint x="420.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="230.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-231dc1ee-f6c6-4cec-97a7-3effb9cc89cd" id="BPMNEdge_sequenceFlow-231dc1ee-f6c6-4cec-97a7-3effb9cc89cd">
+        <omgdi:waypoint x="420.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="434.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="434.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="860.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-1fdb2ba5-6b8f-4b46-8bf5-28b9c657a89f" id="BPMNEdge_sequenceFlow-1fdb2ba5-6b8f-4b46-8bf5-28b9c657a89f">
+        <omgdi:waypoint x="570.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="620.0" y="230.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a16b5f4e-e20f-4cfa-9a3d-8c188ed037dd" id="BPMNEdge_sequenceFlow-a16b5f4e-e20f-4cfa-9a3d-8c188ed037dd">
+        <omgdi:waypoint x="720.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="770.0" y="230.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-8a771e7d-ef4c-437b-a4b6-c774e30bb738" id="BPMNEdge_sequenceFlow-8a771e7d-ef4c-437b-a4b6-c774e30bb738">
+        <omgdi:waypoint x="960.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1010.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-de28a6c2-c74b-4e25-a2b9-18de794395f7" id="BPMNEdge_sequenceFlow-de28a6c2-c74b-4e25-a2b9-18de794395f7">
+        <omgdi:waypoint x="1110.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1160.0" y="132.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-035b8818-ef0f-4eb8-8f77-c1e8e112cf22" id="BPMNEdge_sequenceFlow-035b8818-ef0f-4eb8-8f77-c1e8e112cf22">
+        <omgdi:waypoint x="810.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="822.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="822.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="860.0" y="130.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="endProcess" id="BPMNEdge_endProcess">
+        <omgdi:waypoint x="420.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="102.0"></omgdi:waypoint>
+        <omgdi:waypoint x="432.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1160.0" y="132.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="endEscalation" id="BPMNEdge_endEscalation">
+        <omgdi:waypoint x="810.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="822.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="822.0" y="130.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1160.0" y="132.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>
