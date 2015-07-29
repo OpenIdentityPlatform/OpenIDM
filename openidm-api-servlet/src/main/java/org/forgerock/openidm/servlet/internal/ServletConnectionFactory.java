@@ -66,6 +66,7 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UntypedCrossCutFilter;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.filter.AuditFilter;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.filter.ScriptedFilter;
@@ -138,8 +139,10 @@ public class ServletConnectionFactory implements ConnectionFactory {
                             + ServerConstants.CONFIG_FACTORY_PID);
         }
         try {
+            final AuditFilter auditFilter = new AuditFilter(connectionFactory);
             connectionFactory = newWrappedInternalConnectionFactory(Resources.newInternalConnectionFactory(
-                    init(enhancedConfig.getConfigurationAsJson(context), requestHandler)));
+                    init(enhancedConfig.getConfigurationAsJson(context), requestHandler, auditFilter)));
+            auditFilter.setConnectionFactory(connectionFactory);
         } catch (Throwable t) {
             logger.error("Failed to configure the Filtered Router service", t);
         }
@@ -397,14 +400,16 @@ public class ServletConnectionFactory implements ConnectionFactory {
      *
      * @param configuration the router configuration listing filters that are installed
      * @param handler the request handler (router)
+     * @param auditFilter the audit filter to attach to the request handler
      * @return the RequestHandler decorated with a FilterChain consisting of any filters that are configured
      */
-    RequestHandler init(JsonValue configuration, final RequestHandler handler)
-            throws ScriptException {
+    RequestHandler init(JsonValue configuration, final RequestHandler handler, final AuditFilter auditFilter)
+            throws ScriptException, ResourceException {
         final JsonValue filterConfig = configuration.get("filters").expect(List.class);
-        final List<Filter> filters = new ArrayList<Filter>(filterConfig.size() + 1); // add one for the logging filter
+        final List<Filter> filters = new ArrayList<>(filterConfig.size() + 1); // add one for the logging filter
 
         filters.add(newLoggingFilter());
+        filters.add(Filters.conditionalFilter(Filters.matchResourceName("^(?!.*(^audit/)).*$"), auditFilter));
 
         for (JsonValue jv : filterConfig) {
             Filter filter = newFilter(jv);

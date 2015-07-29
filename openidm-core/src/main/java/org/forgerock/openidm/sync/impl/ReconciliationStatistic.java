@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.util.DateUtil;
 
@@ -55,7 +56,7 @@ public class ReconciliationStatistic {
     private AtomicInteger linkCreated = new AtomicInteger();
     private AtomicInteger targetProcessed = new AtomicInteger();
     private AtomicInteger targetCreated = new AtomicInteger();
-    private Map<ObjectMapping.Status, AtomicInteger> statusProcessed = new EnumMap<ObjectMapping.Status, AtomicInteger>(ObjectMapping.Status.class);
+    private Map<Status, AtomicInteger> statusProcessed = new EnumMap<Status, AtomicInteger>(Status.class);
 
     private PhaseStatistic sourceStat;
     private PhaseStatistic targetStat;
@@ -66,7 +67,7 @@ public class ReconciliationStatistic {
         this.reconContext = reconContext;
         sourceStat = new PhaseStatistic(this, PhaseStatistic.Phase.SOURCE, reconContext.getObjectMapping().getSourceObjectSet());
         targetStat = new PhaseStatistic(this, PhaseStatistic.Phase.TARGET, reconContext.getObjectMapping().getTargetObjectSet());
-        for (ObjectMapping.Status status : ObjectMapping.Status.values()) {
+        for (Status status : Status.values()) {
             statusProcessed.put(status, new AtomicInteger());
         }
     }
@@ -171,7 +172,7 @@ public class ReconciliationStatistic {
         }
     }
 
-    public void processStatus(ObjectMapping.Status status) {
+    public void processStatus(Status status) {
         statusProcessed.get(status).incrementAndGet();
     }
 
@@ -295,7 +296,7 @@ public class ReconciliationStatistic {
 
     public Map<String, Integer> getStatusSummary() {
         Map<String, Integer> statusSummary = new ConcurrentHashMap<String, Integer>();
-        for (Map.Entry<ObjectMapping.Status, AtomicInteger> entry : statusProcessed.entrySet()) {
+        for (Map.Entry<Status, AtomicInteger> entry : statusProcessed.entrySet()) {
             statusSummary.put(entry.getKey().toString(), entry.getValue().intValue());
         }
         return statusSummary;

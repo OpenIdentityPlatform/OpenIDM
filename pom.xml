@@ -223,7 +223,7 @@
         <orientdb.version>1.7.10</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <jackson.version>1.9.12</jackson.version>
-        <fasterxml.jackson.version>2.4.3</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.5.0</fasterxml.jackson.version>
         <!--fasterxml.jackson.version>2.2.1</fasterxml.jackson.version-->
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
@@ -235,6 +235,7 @@
         <commons.forgerock-script.version>1.5.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
         <commons.forgerock-guava.version>18.0.1</commons.forgerock-guava.version>
+        <commons.forgerock-audit.version>0.2.0-SNAPSHOT</commons.forgerock-audit.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
@@ -521,6 +522,21 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-util</artifactId>
                 <version>${commons.forgerock-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-core</artifactId>
+                <version>${commons.forgerock-audit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-json</artifactId>
+                <version>${commons.forgerock-audit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-csv</artifactId>
+                <version>${commons.forgerock-audit.version}</version>
             </dependency>
 
             <!-- Commons -->
@@ -860,6 +876,12 @@
                 <groupId>org.easytesting</groupId>
                 <artifactId>fest-assert-core</artifactId>
                 <version>2.0M10</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>2.1.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

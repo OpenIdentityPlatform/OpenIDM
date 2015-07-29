@@ -11,24 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.config;
 
+import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
 import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Creates audit entries for each authentication attempt.
@@ -37,12 +37,14 @@ public class JaspiAuditApi implements AuditApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JaspiAuditApi.class);
 
-    private static final DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
-
     private final OSGiAuthnFilterHelper authnFilterHelper;
 
     public JaspiAuditApi() {
-        this.authnFilterHelper = OSGiAuthnFilterBuilder.getInstance();
+        this(OSGiAuthnFilterBuilder.getInstance());
+    }
+
+    JaspiAuditApi(OSGiAuthnFilterHelper authnFilterHelper) {
+        this.authnFilterHelper = authnFilterHelper;
     }
 
     /**
@@ -50,46 +52,29 @@ public class JaspiAuditApi implements AuditApi {
      */
     @Override
     public void audit(JsonValue auditMessage) {
-        List<String> principals = auditMessage.get("principal").asList(String.class);
+        List<String> principals = auditMessage.get(AuthenticationAuditEventBuilder.PRINCIPAL).asList(String.class);
         String username = "";
         if (principals != null && !principals.isEmpty()) {
             username = principals.get(0);
         }
-        String userId = auditMessage.get("context").get("id").asString();
-        List<String> roles = auditMessage.get("context").get("roles").asList(String.class);
-        String ipAddress = auditMessage.get("context").get("ipAddress").asString();
-        boolean status = "SUCCESSFUL".equalsIgnoreCase(auditMessage.get("result").asString());
-        String requestId = auditMessage.get("requestId").asString();
-        String sessionId = auditMessage.get("sessionId").asString();
 
-        logAuthRequest(ipAddress, username, userId, roles, status, requestId, sessionId);
-    }
+        AuditEvent auditEvent = new AuthenticationAuditEventBuilder()
+                .context(auditMessage.get(AuthenticationAuditEventBuilder.CONTEXT).asMap())
+                .entries(auditMessage.get(AuthenticationAuditEventBuilder.ENTRIES).asList())
+                .principal(principals)
+                .sessionId(auditMessage.get(AuthenticationAuditEventBuilder.SESSION_ID).asString())
+                .result(auditMessage.get(
+                        AuthenticationAuditEventBuilder.RESULT).asEnum(AuthenticationAuditEventBuilder.Status.class))
+                .authentication(username)
+                .transactionId(UUID.randomUUID().toString()) //CAUDTODO Support transactionId OPENIDM-3427
+                .timestamp(System.currentTimeMillis())
+                .eventName("authentication")
+                .toEvent();
 
-    /**
-     * Logs the authentication request.
-     *
-     * @param ipAddress The ip address of the client that made the authentication request.
-     * @param username The username of the user that made the authentication request.
-     * @param userId The user id of the user that made the authentication request.
-     * @param roles The roles of the user that made the authentication request.
-     * @param status The status of the authentication request, either true for success or false for failure.
-     * @param requestId The unique ID of the request.
-     * @param sessionId The unique ID of the session.
-     */
-    protected void logAuthRequest(String ipAddress, String username, String userId, List<String> roles,
-            boolean status, String requestId, String sessionId) {
         try {
-            JsonValue entry = new JsonValue(new HashMap<String, Object>());
-            entry.put("timestamp", DATE_UTIL.now());
-            entry.put("action", "authenticate");
-            entry.put("status", status ? Status.SUCCESS.toString() : Status.FAILURE.toString());
-            entry.put("principal", username);
-            entry.put("userid", userId);
-            entry.put("roles", roles);
-            entry.put("ip", ipAddress);
             if (authnFilterHelper.getRouter() != null) {
                 // TODO We need Context!!!
-                CreateRequest createRequest = Requests.newCreateRequest("audit/access", entry);
+                CreateRequest createRequest = Requests.newCreateRequest("audit/authentication", auditEvent.getValue());
                 ServerContext ctx = authnFilterHelper.getRouter().createServerContext();
                 authnFilterHelper.getConnectionFactory().getConnection().create(ctx, createRequest);
             } else {

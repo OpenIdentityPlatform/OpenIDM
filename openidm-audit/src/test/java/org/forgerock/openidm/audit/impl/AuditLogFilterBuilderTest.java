@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
@@ -167,9 +167,39 @@ public class AuditLogFilterBuilderTest {
         ServerContext context = mock(ServerContext.class);
 
         // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
+        CreateRequest create = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "create")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest update = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "update")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest skittle = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "skittle")
+                                        ))
+                                ))
+                        )
+                )
+        );
 
         // Then
         assertFalse(filter.isFiltered(context, create));
@@ -204,9 +234,40 @@ public class AuditLogFilterBuilderTest {
         ServerContext context = mock(ServerContext.class);
 
         // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
+        // When
+        CreateRequest create = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "create")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest update = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "update")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest skittle = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "skittle")
+                                        ))
+                                ))
+                        )
+                )
+        );
 
         // Then
         assertTrue(filter.isFiltered(context, create));
@@ -324,9 +385,40 @@ public class AuditLogFilterBuilderTest {
         ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
 
         // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
+        // When
+        CreateRequest create = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "create")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest update = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "update")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest skittle = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "skittle")
+                                        ))
+                                ))
+                        )
+                )
+        );
 
         // Then
         assertFalse(filter.isFiltered(noTrigger, create));
@@ -368,9 +460,40 @@ public class AuditLogFilterBuilderTest {
         ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
 
         // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
+        // When
+        CreateRequest create = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "create")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest update = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "update")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest skittle = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "skittle")
+                                        ))
+                                ))
+                        )
+                )
+        );
 
         // Then
         assertFalse(filter.isFiltered(noTrigger, create));
@@ -426,9 +549,40 @@ public class AuditLogFilterBuilderTest {
         ServerContext context = mock(ServerContext.class);
 
         // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
+        // When
+        CreateRequest create = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "create")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest update = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "update")
+                                        ))
+                                ))
+                        )
+                )
+        );
+        CreateRequest skittle = Requests.newCreateRequest("activity", null,
+                json(
+                        object(
+                                field("resourceOperation", object(
+                                        field("operation", object(
+                                                field("method", "skittle")
+                                        ))
+                                ))
+                        )
+                )
+        );
 
         // Then
         assertFalse(filter.isFiltered(context, create));  // don't filter creates

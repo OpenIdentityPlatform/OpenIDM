@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
@@ -19,10 +19,10 @@ package org.forgerock.openidm.audit.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.Context;
@@ -39,9 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 
-import static org.forgerock.openidm.audit.impl.AuditServiceImpl.TYPE_ACTIVITY;
-import static org.forgerock.openidm.audit.impl.AuditServiceImpl.TYPE_RECON;
-
 
 /**
  * A utility class containing various factory methods for creating {@link AuditLogFilter}s.
@@ -51,6 +48,9 @@ public class AuditLogFilters {
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
+
+    private static final String TYPE_ACTIVITY = "activity";
+    private static final String TYPE_RECON = "recon";
 
     /** Type alias for converting the value of a JsonValue to a particular type */
     interface JsonValueObjectConverter<V> extends Function<JsonValue, V, JsonValueException> {}
@@ -70,7 +70,7 @@ public class AuditLogFilters {
             new JsonValueObjectConverter<String>() {
                 @Override
                 public String apply(JsonValue value) {
-                    return value.asString();
+                    return value != null ? value.asString() :  null;
                 }
             };
 
@@ -80,9 +80,8 @@ public class AuditLogFilters {
                 @Override
                 public AuditLogFilter apply(JsonValue value) {
                     return newFieldValueFilter(
-                            value.get("name").required().asString(),
-                            // FIXME replace with JsonValue#asSet as soon as available in non-snapshot
-                            new HashSet<String>(value.get("values").required().asList(String.class)),
+                            new JsonPointer(value.get("name").required().asString()),
+                            value.get("values").required().asSet(String.class),
                             AS_STRING); // currently assumes values are strings
                 }
             };
@@ -92,11 +91,11 @@ public class AuditLogFilters {
      * filtered out if the field value in the request is not in the values-set.
      */
     private static class FieldValueFilter<V> implements AuditLogFilter {
-        String field;
+        JsonPointer field;
         Set<V> values;
         JsonValueObjectConverter<V> asValue;
 
-        FieldValueFilter(String field, Set<V> values, JsonValueObjectConverter<V> asValue) {
+        FieldValueFilter(JsonPointer field, Set<V> values, JsonValueObjectConverter<V> asValue) {
             this.field = field;
             this.values = values;
             this.asValue = asValue;
@@ -116,10 +115,44 @@ public class AuditLogFilters {
      */
     private static class ActionFilter<A extends Enum<A>> extends FieldValueFilter<A> {
 
-        private static final String FIELD_ACTION = "action";
+        private static final JsonPointer FIELD_ACTION = new JsonPointer("action");
 
         private ActionFilter(final Class<A> clazz, final Set<A> actionsToLog) {
             super(FIELD_ACTION, actionsToLog, new JsonValueObjectConverter<A>() {
+                public A apply(JsonValue value) throws JsonValueException {
+                    return value.asEnum(clazz);
+                }
+            });
+        }
+
+        @Override
+        public boolean isFiltered(ServerContext context, CreateRequest request) {
+            // don't filter requests that do not specify an action
+            if (request.getContent().get(field).isNull()) {
+                return false;
+            }
+            try {
+                return super.isFiltered(context, request);
+            } catch (IllegalArgumentException e) {
+                // don't filter an action that isn't one of the designated enum constants
+                return false;
+            }
+        }
+    }
+
+    /**
+     * A filter that filters out any CRUDPAQ method <em>A</em> that are not contained
+     * in the set of {em}actionsToLog{em}
+     *
+     * @param <A> the action enum type
+     */
+    private static class ResourceOperationFilter<A extends Enum<A>> extends FieldValueFilter<A> {
+
+        private static final JsonPointer RESOURCE_OPERATION_METHOD =
+                new JsonPointer("resourceOperation/operation/method");
+
+        private ResourceOperationFilter(final Class<A> clazz, final Set<A> actionsToLog) {
+            super(RESOURCE_OPERATION_METHOD, actionsToLog, new JsonValueObjectConverter<A>() {
                 public A apply(JsonValue value) throws JsonValueException {
                     return value.asEnum(clazz);
                 }
@@ -188,17 +221,6 @@ public class AuditLogFilters {
          * @return the trigger value if the chain contains a trigger context, null if it does not
          */
         private String getTrigger(Context context) {
-            /*
-            String trigger = null;
-            // Loop through parent contexts, and return highest "trigger"
-            while (context != null) {
-                JsonValue tmp = (JsonValue) context.getParams().get("trigger");
-                if (!tmp.isNull()) {
-                    trigger = tmp.asString();
-                }
-                context = context.getParent();
-            }
-            */
             return context.containsContext(TriggerContext.class)
                     ? context.asContext(TriggerContext.class).getTrigger()
                     : null;
@@ -249,7 +271,7 @@ public class AuditLogFilters {
         final List<AuditLogFilter> filters;
 
         private CompositeFilter(List<AuditLogFilter> filters) {
-            this.filters = new ArrayList<AuditLogFilter>();
+            this.filters = new ArrayList<>();
             for (AuditLogFilter filter : filters) {
                 if (!filter.equals(NEVER)) {
                     this.filters.add(filter);
@@ -346,7 +368,7 @@ public class AuditLogFilters {
      */
     static AuditLogFilter newActivityActionFilter(JsonValue actions) {
         return newEventTypeFilter(TYPE_ACTIVITY,
-                new ActionFilter<RequestType>(RequestType.class, getActions(RequestType.class, actions)));
+                new ResourceOperationFilter<>(RequestType.class, getActions(RequestType.class, actions)));
     }
 
     /**
@@ -361,7 +383,7 @@ public class AuditLogFilters {
     static AuditLogFilter newActivityActionFilter(JsonValue actions, String trigger) {
         return newEventTypeFilter(TYPE_ACTIVITY,
                 new TriggerFilter(trigger,
-                        new ActionFilter<RequestType>(RequestType.class, getActions(RequestType.class, actions))));
+                        new ResourceOperationFilter<>(RequestType.class, getActions(RequestType.class, actions))));
     }
 
     /**
@@ -374,7 +396,7 @@ public class AuditLogFilters {
      */
     static AuditLogFilter newReconActionFilter(JsonValue actions) {
         return newEventTypeFilter(TYPE_RECON,
-                new ActionFilter<ReconAction>(ReconAction.class, getActions(ReconAction.class, actions)));
+                new ActionFilter<>(ReconAction.class, getActions(ReconAction.class, actions)));
     }
 
     /**
@@ -389,7 +411,7 @@ public class AuditLogFilters {
     static AuditLogFilter newReconActionFilter(JsonValue actions, String trigger) {
         return newEventTypeFilter(TYPE_RECON,
                 new TriggerFilter(trigger,
-                        new ActionFilter<ReconAction>(ReconAction.class, getActions(ReconAction.class, actions))));
+                        new ActionFilter<>(ReconAction.class, getActions(ReconAction.class, actions))));
     }
 
     /**
@@ -466,9 +488,9 @@ public class AuditLogFilters {
      * @return an audit log filter that includes (does not filter) records whose value for a particular
      *         field is in a set of values
      */
-    static <V> AuditLogFilter newFieldValueFilter(String field, Set<V> values,
+    static <V> AuditLogFilter newFieldValueFilter(JsonPointer field, Set<V> values,
             final JsonValueObjectConverter<V> asValue) {
-        return new FieldValueFilter<V>(field, values, asValue);
+        return new FieldValueFilter<>(field, values, asValue);
     }
 
     /**

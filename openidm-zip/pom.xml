@@ -407,6 +407,10 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-groovy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-audit-handler-csv</artifactId>
+        </dependency>
 
         <!-- OpenICF -->
         <dependency>

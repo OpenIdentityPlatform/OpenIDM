@@ -79,7 +79,7 @@ class AuditLogFilterBuilder {
      * @return an AuditLogFilter
      */
     AuditLogFilter build(JsonValue config) {
-        List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
+        List<AuditLogFilter> filters = new ArrayList<>();
         for (Map.Entry<String, JsonValueObjectConverter<AuditLogFilter>> entry : auditLogFilterBuilder.entrySet()) {
             final String configPath = entry.getKey();
             final Function<JsonValue, AuditLogFilter, JsonValueException> builder = entry.getValue();

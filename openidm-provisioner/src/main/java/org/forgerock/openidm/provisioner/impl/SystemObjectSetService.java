@@ -32,6 +32,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -438,6 +439,18 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             // not a liveSync action, so no-op
         } catch (RuntimeException e) {
             throw new ExecutionException(e);
+        }
+    }
+
+    @Override
+    public void auditScheduledService(final ServerContext context, final AuditEvent auditEvent)
+            throws ExecutionException {
+        try {
+            connectionFactory.getConnection().create(
+                    context, Requests.newCreateRequest("audit/access", auditEvent.getValue()));
+        } catch (ResourceException e) {
+            logger.error("Unable to audit scheduled service {}", auditEvent.toString());
+            throw new ExecutionException("Unable to audit scheduled service", e);
         }
     }
 
