@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, require, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/settings/AuditEventsDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -32,7 +34,8 @@ define("org/forgerock/openidm/ui/admin/settings/AuditEventsDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "bootstrap-dialog",
     "bootstrap-tabdrop"
-], function(AdminAbstractView,
+], function($, _,
+            AdminAbstractView,
             uiUtils,
             conf,
             InlineScriptEditor,

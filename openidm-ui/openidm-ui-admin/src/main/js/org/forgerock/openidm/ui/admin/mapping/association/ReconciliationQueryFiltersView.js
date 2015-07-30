@@ -22,14 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/ReconciliationQueryFiltersView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor"
-], function(MappingAdminAbstractView,
+], function(_,
+            MappingAdminAbstractView,
             eventManager,
             constants,
             QueryFilterEditor) {

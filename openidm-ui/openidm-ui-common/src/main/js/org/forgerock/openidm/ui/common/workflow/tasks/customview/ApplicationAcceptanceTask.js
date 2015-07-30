@@ -22,36 +22,32 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/tasks/customview/ApplicationAcceptanceTask", [
+    "js2form",
     "org/forgerock/openidm/ui/common/workflow/tasks/AbstractTaskForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractTaskForm, DateUtil, userDelegate, conf) {
+], function(js2form, AbstractTaskForm, DateUtil, userDelegate, conf) {
     var ApplicationAcceptanceTask = AbstractTaskForm.extend({
         template: "templates/workflow/tasks/customview/ApplicationAcceptanceTemplate.html",
-        
+
         reloadData: function() {
             var self = this;
-            js2form(document.getElementById(this.$el.attr("id")), this.task);
+            js2form(this.$el[0], this.task);
             this.$el.find("input[name=taskName]").val(this.task.name);
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));
-            
+
             if(this.$el.find("input[name=assignee]").val() === "null") {
                 this.$el.find("input[name=assignee]").val("");
             }
-            
+
             this.$el.find("input[name=userData]").val(this.task.variables.user.givenName + " " + this.task.variables.user.familyName);
-            this.$el.find("input[name=requestedApplicationName]").val(this.task.variables.application.name);            
+            this.$el.find("input[name=requestedApplicationName]").val(this.task.variables.application.name);
         }
-    }); 
-    
+    });
+
     return new ApplicationAcceptanceTask();
 });
-
-

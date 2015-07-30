@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeView", [
     "org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView"
@@ -36,4 +36,3 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeView", [
 
     return new ConnectorTypeView();
 });
-

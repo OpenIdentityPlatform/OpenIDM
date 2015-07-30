@@ -23,13 +23,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window, $, _ , Handlebars*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
     "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
-], function (QueryFilterEditor,
+], function ($, _,
+             QueryFilterEditor,
              QueryFilterUtils,
              LinkQualifierUtils) {
 

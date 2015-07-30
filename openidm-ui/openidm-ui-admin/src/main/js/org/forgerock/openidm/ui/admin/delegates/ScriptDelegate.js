@@ -22,12 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/delegates/ScriptDelegate", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function(constants, AbstractDelegate) {
+], function(_, constants, AbstractDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/script");
 

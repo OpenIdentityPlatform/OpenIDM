@@ -22,16 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "bootstrap-dialog"
-], function(AbstractView, conf, uiUtils, validatorsManager, InlineScriptEditor,  BootstrapDialog) {
+], function($, _, AbstractView, conf, uiUtils, validatorsManager, InlineScriptEditor,  BootstrapDialog) {
     var ScriptDialog= AbstractView.extend({
         element: "#dialogs",
         events: {

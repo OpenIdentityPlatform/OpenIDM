@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define, window */
 
 define("org/forgerock/openidm/ui/admin/connector/oauth/SalesforceTypeView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView",
     "org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate",
     "org/forgerock/commons/ui/common/main/Router",
@@ -32,7 +34,7 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/SalesforceTypeView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
-], function(AbstractOAuthView, ExternalAccessDelegate, router, ConfigDelegate, eventManager, constants, ConnectorDelegate) {
+], function($, _, AbstractOAuthView, ExternalAccessDelegate, router, ConfigDelegate, eventManager, constants, ConnectorDelegate) {
 
     var SalesforceTypeView = AbstractOAuthView.extend({
         events: {

@@ -22,11 +22,10 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, window, JSONEditor */
+/*global require, define, window */
 
 require.config({
     paths: {
-        less: "libs/less-1.5.1-min",
         i18next: "libs/i18next-1.7.3-min",
         i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-1.1.2-min",
@@ -46,7 +45,7 @@ require.config({
         cron: "libs/jquery-cron-r2427",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-1.3.0-min",
+        handlebars: "libs/handlebars-3.0.3-min",
         "bootstrap-tabdrop": "libs/bootstrap-tabdrop-1.0",
         bootstrap: "libs/bootstrap-3.3.4-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
@@ -93,6 +92,11 @@ require.config({
             exports: "spin"
         },
         jsonEditor: {
+            deps: ["handlebars"],
+            init: function (Handlebars) {
+                window.Handlebars = Handlebars;
+                return this.JSONEditor;
+            },
             exports: "JSONEditor"
         },
         cron: {
@@ -102,8 +106,7 @@ require.config({
             deps: ["jquery"]
         },
         jqueryui: {
-            deps: ["jquery"],
-            exports: "jqueryui"
+            deps: ["jquery"]
         },
         i18nGrid: {
             deps: ["jquery"]
@@ -149,69 +152,34 @@ require.config({
     }
 });
 
-/**
- * Loads all application on start, so each module will be available to
- * required synchronously
- */
 require([
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "jsonEditor",
+
+    "org/forgerock/commons/ui/common/main",
+    "org/forgerock/openidm/ui/common/main",
+    "org/forgerock/openidm/ui/admin/main",
+    "config/main",
+
+    "UserDelegate",
+    "ThemeManager",
+    "AuthnDelegate",
+
     "jquery",
     "underscore",
     "backbone",
-    "less",
-    "form2js",
-    "js2form",
-    "spin",
-    "jqgrid",
-    "jqueryui",
-    "xdate",
-    "moment",
-    "doTimeout",
     "handlebars",
-    "placeholder",
     "i18next",
-    "jsonEditor",
-    "gentleSelect",
-    "cron",
-    "selectize",
-    "org/forgerock/commons/ui/common/main/i18nManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/main",
-    "org/forgerock/openidm/ui/admin/main",
-    "org/forgerock/commons/ui/common/main",
-    "AuthnDelegate",
-    "ThemeManager",
-    "config/main"
+    "spin",
+    "placeholder",
+    "selectize"
 ], function(
-    $,
-    _,
-    Backbone,
-    less,
-    form2js,
-    js2form,
-    spin,
-    jqgrid,
-    jqueryui,
-    xdate,
-    moment,
-    doTimeout,
-    handlebars,
-    placeholder,
-    i18next,
-    jsonEditor,
-    gentleSelect,
-    cron,
-    selectize,
-    i18n,
-    constants,
-    eventManager) {
+    Constants,
+    EventManager,
+    JSONEditor) {
 
-    // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:
-    window.$ = $;
-    window._ = _;
-    window.Backbone = Backbone;
-
-    eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+    EventManager.sendEvent(Constants.EVENT_DEPENDECIES_LOADED);
 
     JSONEditor.defaults.options.theme = 'bootstrap3';
     JSONEditor.defaults.options.iconlib = "fontawesome4";

@@ -22,12 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, JSONEditor */
+/*global define */
 
 define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
+    "jquery",
+    "underscore",
+    "jsonEditor",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
-], function(AbstractView, resourceDelegate) {
+], function($, _, JSONEditor, AbstractView, resourceDelegate) {
 
     var LinkedView = AbstractView.extend({
         template: "templates/admin/linkedView/LinkedView.html",
@@ -91,21 +94,21 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
         loadEditor: function(selection) {
             var linkToResource = "#resource/",
                 resourceId;
-            
+
             if(this.editor) {
                 this.editor.destroy();
             }
 
             if(this.data.linkedData.linkedTo.length > 0) {
-                
+
                 this.$el.closest(".container").find("#linkedSystemsTabHeader").show();
-                
+
                 if (this.data.linkedData.linkedTo[selection].content !== null) {
                     resourceId = _.last(this.data.linkedData.linkedTo[selection].resourceName.split("/"));
                     linkToResource += this.data.linkedData.linkedTo[selection].resourceName.replace(resourceId, "edit/" + resourceId);
-                    
+
                     this.$el.find("#linkToResource").attr("href",linkToResource);
-                    
+
                     resourceDelegate.getSchema(this.data.linkedData.linkedTo[selection].resourceName.split("/")).then(_.bind(function(schema) {
                         var propCount = 0;
                         if(schema.order) {
@@ -113,7 +116,7 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
                                 schema.properties[prop].propertyOrder = propCount++;
                             });
                         }
-                        
+
                         this.editor = new JSONEditor(
                                 this.$el.find("#linkedViewContent")[0],
                                 {

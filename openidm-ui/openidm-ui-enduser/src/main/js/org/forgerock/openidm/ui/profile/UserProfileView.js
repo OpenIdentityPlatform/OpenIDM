@@ -22,23 +22,22 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/profile/UserProfileView", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/user/profile/UserProfileView",
     "org/forgerock/openidm/ui/util/delegates/CountryStateDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function(commonProfileView, countryStateDelegate, conf, uiUtils, validatorsManager) {
-    
+], function($, _, commonProfileView, countryStateDelegate, conf, uiUtils, validatorsManager) {
+
     var obj = $.extend({}, commonProfileView);
-    
+
     obj.data.hasAddressDetails = true;
-    
+
     obj.render = function(args, callback) {
         if(conf.globalData.userComponent && conf.globalData.userComponent === "repo/internal/user"){
             obj.data.adminUser = true;
@@ -50,41 +49,41 @@ define("org/forgerock/openidm/ui/profile/UserProfileView", [
                 baseEntity = this.delegate.getUserResourceName(conf.loggedUser);
 
             validatorsManager.bindValidators(this.$el, baseEntity, _.bind(function () {
-                
+
                 countryStateDelegate.getAllCountries( function(countries) {
                     uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
                         if(conf.loggedUser.country) {
                             this.$el.find("select[name='country'] > option:first").text("");
                             this.$el.find("select[name='country']").val(conf.loggedUser.country);
-                            
+
                             this.changeCountry();
                             this.loadStates();
                         }
                     }, self));
                 });
-                
+
                 this.reloadData();
 
                 if(callback) {
                     callback();
                 }
-                
+
             }, this));
-            
-            
+
+
         });
     };
-    
+
     obj.events["change select[name='country']"] = function() {
         obj.changeCountry();
     };
-    
+
     obj.changeCountry = function() {
         var country = this.$el.find('select[name="country"]').val(), self = this;
-        
+
         if(country) {
             this.$el.find("select[name='country'] > option:first").text("");
-            
+
             countryStateDelegate.getAllStatesForCountry(country, function(states) {
                 uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
                     if(conf.loggedUser.stateProvince) {
@@ -99,22 +98,20 @@ define("org/forgerock/openidm/ui/profile/UserProfileView", [
             this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
         }
     };
-    
+
     obj.events["change select[name='stateProvince']"] = function() {
         obj.loadStates();
     };
-    
+
     obj.loadStates = function() {
         var state = $('#profile select[name="stateProvince"]').val();
-        
+
         if(state) {
             this.$el.find("select[name='stateProvince'] > option:first").text("");
         } else {
-            this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect")); 
+            this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
         }
     };
-    
+
     return obj;
 });
-
-

@@ -4,10 +4,11 @@
  * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  */
 
-/*global define, $, _, Handlebars, form2js, window */
-/*jslint evil: true */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -16,7 +17,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
     "bootstrap-dialog"
-], function(MappingAdminAbstractView,
+], function($, _,
+            MappingAdminAbstractView,
             conf,
             uiUtils,
             eventManager,

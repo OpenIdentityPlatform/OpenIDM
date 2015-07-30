@@ -22,12 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _, $, window */
+/*global define  */
 
 define("config/process/CommonIDMConfig", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, eventManager) {
+], function(_, constants, eventManager) {
     var ignorePassword = false,
         obj = [
             {

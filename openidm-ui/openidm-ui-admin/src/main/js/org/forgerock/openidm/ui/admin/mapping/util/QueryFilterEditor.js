@@ -22,12 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window, $, _ , Handlebars*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/FilterEditor",
     "org/forgerock/openidm/ui/admin/util/QueryFilterUtils"
-], function (FilterEditor, queryFitlerUtils) {
+], function ($, _, FilterEditor, queryFitlerUtils) {
     var tagMap = {
                     "equalityMatch" : "eq",
                     "greaterOrEqual" : "ge",

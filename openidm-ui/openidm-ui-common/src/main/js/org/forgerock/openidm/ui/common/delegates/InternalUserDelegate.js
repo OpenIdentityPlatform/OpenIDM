@@ -22,11 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/delegates/InternalUserDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
@@ -38,26 +35,23 @@ define("org/forgerock/openidm/ui/common/delegates/InternalUserDelegate", [
 
     obj.patchSelectedUserAttributes = function(id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         //PATCH for repo is unsupported
-        
+
         return obj.readEntity(id).then(function(user) {
             var i, v;
-            
+
             for(i = 0; i < patchDefinitionObject.length; i++) {
                 v = patchDefinitionObject[i];
 
-                // replace any leading slashes to translate basic JSON Pointer 
+                // replace any leading slashes to translate basic JSON Pointer
                 // back into regular JS object property references
                 v.field = v.field.replace(/^\//, '');
 
                 user[v.field] = v.value;
             }
-            
+
             return obj.updateEntity(id, user, successCallback, errorCallback);
         });
     };
 
     return obj;
 });
-
-
-

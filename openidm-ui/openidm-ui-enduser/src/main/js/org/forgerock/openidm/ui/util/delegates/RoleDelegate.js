@@ -22,25 +22,27 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/util/delegates/RoleDelegate", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function(constants, AbstractDelegate) {
+], function($, _, constants, AbstractDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/managed/role");
-    
+
     obj.getAllRoles = function () {
         var promise = $.Deferred();
         obj.serviceCall({
             "url": "?_queryId=query-all"
         }).then(
             function (qry) {
-                qry.result = _.map(qry.result, function (r) { 
+                qry.result = _.map(qry.result, function (r) {
                     r.name = r.name || r._id;
-                    r._id = "managed/role/" + r._id; 
-                    return r; 
+                    r._id = "managed/role/" + r._id;
+                    return r;
                 });
                 promise.resolve(qry);
             },
@@ -54,6 +56,3 @@ define("org/forgerock/openidm/ui/util/delegates/RoleDelegate", [
 
     return obj;
 });
-
-
-

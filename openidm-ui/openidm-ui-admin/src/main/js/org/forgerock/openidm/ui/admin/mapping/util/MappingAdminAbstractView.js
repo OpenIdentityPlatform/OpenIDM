@@ -22,14 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 
-], function(AdminAbstractView,
+], function(_,
+            AdminAbstractView,
             SyncDelegate,
             ConfigDelegate) {
 

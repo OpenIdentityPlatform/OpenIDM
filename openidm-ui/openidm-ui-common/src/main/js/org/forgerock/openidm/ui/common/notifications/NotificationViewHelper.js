@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define */
 
 define("org/forgerock/openidm/ui/common/notifications/NotificationViewHelper", [
     "org/forgerock/commons/ui/common/util/Constants",
@@ -36,7 +36,7 @@ define("org/forgerock/openidm/ui/common/notifications/NotificationViewHelper", [
         if(config.notificationTypes) {
             obj.notificationTypes = config.notificationTypes;
         }
-        
+
         if(config.defaultNotificationType) {
             obj.defaultType = config.defaultNotificationType;
         }

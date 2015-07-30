@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 /**
  *  This code is derivative of the java QueryFilter Class in Commons
  *
@@ -50,7 +50,8 @@
  *      Object {error: true, message: "Cannot convert badly structured query filter tree."}
  */
 define("org/forgerock/openidm/ui/admin/util/QueryFilterUtils", [
-], function() {
+    "underscore"
+], function(_) {
 
     var obj = {},
         VALUE_OF_MAX_DEPTH = 256;

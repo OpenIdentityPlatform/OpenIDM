@@ -22,17 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/components/Messages"
-], function(constants, AbstractDelegate, configDelegate, messagesManager) {
+], function(_, constants, AbstractDelegate, configDelegate, messagesManager) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/");
 
@@ -85,9 +83,9 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     };
     obj.deleteResource = function (serviceUrl, id, successCallback, errorCallback) {
         var callParams = {
-                serviceUrl: serviceUrl, url: "/" + id, 
-                type: "DELETE", 
-                success: successCallback, 
+                serviceUrl: serviceUrl, url: "/" + id,
+                type: "DELETE",
+                success: successCallback,
                 error: errorCallback,
                 errorsHandlers: {
                     "Conflict": {
@@ -98,7 +96,7 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
                     "If-Match": "*"
                 }
             };
-        
+
         return obj.serviceCall(callParams).fail(function(err){
             var response = err.responseJSON;
             if(response.code === 409) {
@@ -125,7 +123,7 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             url: serviceUrl +"?_queryFilter="+filter
         });
     };
-    
+
     obj.getProvisioner = function(objectType, objectName) {
         return obj.serviceCall({
             serviceUrl: obj.serviceUrl + objectType + "/" + objectName,
@@ -133,11 +131,11 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             type: "POST"
         }).then(function(connector) {
             var config = connector.config.replace("config/","");
-            
+
             return configDelegate.readEntity(config);
         });
     };
-    
+
     obj.linkedView = function(id, resourcePath) {
         return obj.serviceCall({
             serviceUrl: constants.host + "/openidm/endpoint/linkedView/" + resourcePath,

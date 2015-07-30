@@ -22,9 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, JSONEditor */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
+    "jquery",
+    "underscore",
+    "form2js",
+    "jsonEditor",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -34,7 +38,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/ScriptList",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function(AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, uiUtils, ScriptList, ModuleLoader) {
+], function($, _, form2js, JSONEditor, AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, uiUtils, ScriptList, ModuleLoader) {
 
     var AddEditManagedView = AdminAbstractView.extend({
         template: "templates/admin/managed/AddEditManagedTemplate.html",

@@ -22,21 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, JSONEditor */
+/*global define  */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/common/login/AuthenticationUnavailable", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, constants, eventManager, conf) {
     var AuthenticationUnavailableView = AbstractView.extend({
         template: "templates/admin/login/AuthenticationUnavailableTemplate.html",
         baseTemplate: "templates/common/LoginBaseTemplate.html",
-        
+
         events: {
             "click #loginLink":"login"
         },
@@ -49,14 +46,12 @@ define("org/forgerock/openidm/ui/common/login/AuthenticationUnavailable", [
         },
         login: function(e){
             e.preventDefault();
-            
+
             conf.globalData.authenticationUnavailable = false;
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "login", args: []});
             location.reload();
         }
-    }); 
-    
+    });
+
     return new AuthenticationUnavailableView();
 });
-
-

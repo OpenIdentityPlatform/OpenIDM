@@ -22,12 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, Backbone, moment */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
+    "jquery",
+    "underscore",
+    "backbone",
+    "moment",
     "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -36,7 +37,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
     "UserDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/components/popup/PopupCtrl"
-], function(workflowManager, eventManager, constants, conf, uiUtils, userDelegate, dateUtil, popupCtrl) {
+], function($, _, Backbone, moment, workflowManager, eventManager, constants, conf, uiUtils, userDelegate, dateUtil, popupCtrl) {
     var TasksMenuView = Backbone.View.extend({
 
         events: {

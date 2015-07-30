@@ -22,18 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author jfeasel
- */
 define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/SpinnerManager"
-], function(constants, AbstractDelegate, configuration, eventManager, spinner) {
+], function($, _, constants, AbstractDelegate, configuration, eventManager, spinner) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/recon");
 
@@ -41,7 +40,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
             var resultPromise = $.Deferred(),
                 completedRecons = [],
                 checkCompleted;
-            
+
             checkCompleted = function () {
 
                 obj.serviceCall({
@@ -72,7 +71,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
                         }
                         _.delay(checkCompleted, 1000);
                     }
-                    
+
 
                 }, function () {
                     // something went wrong with the read on /recon/_id, perhaps this recon was interrupted during a restart of the server?
@@ -100,7 +99,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
         };
 
 
-        
+
     obj.triggerRecons = function (mappings, suppressSpinner) {
         var reconIds = [],
             reconPromises = [];
@@ -110,7 +109,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
                     "suppressSpinner": suppressSpinner,
                     "url": "?_action=recon&mapping=" + m,
                     "type": "POST"
-                }).then(function (reconId) { 
+                }).then(function (reconId) {
                     reconIds.push(reconId._id);
                 }));
         });
@@ -118,15 +117,15 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
         return $.when.apply($, reconPromises);
 
     };
-        
+
     obj.triggerRecon = function (mapping, suppressSpinner, progressCallback) {
 
         return obj.serviceCall({
             "suppressSpinner": suppressSpinner,
             "url": "?_action=recon&mapping=" + mapping,
             "type": "POST"
-        }).then(function (reconId) { 
-            
+        }).then(function (reconId) {
+
             return obj.waitForAll([reconId._id], suppressSpinner, progressCallback)
                       .then(function (reconArray) {
                         return reconArray[0];
@@ -141,12 +140,12 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
             "suppressSpinner": suppressSpinner,
             "url": "?_action=reconById&mapping=" + mapping + "&ids=" + id,
             "type": "POST"
-        }).then(function (reconId) { 
+        }).then(function (reconId) {
             return obj.waitForAll([reconId._id], suppressSpinner);
         });
 
     };
-    
+
     obj.stopRecon = function (id, suppressSpinner) {
         return obj.serviceCall({
             "suppressSpinner": suppressSpinner,
@@ -165,23 +164,23 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
                 return this.serviceCall({
                     "type": "GET",
                     "serviceUrl": "/openidm/" + link.targetObjectId,
-                    "url":  "" 
+                    "url":  ""
                 }).then(function(targetObject){
                     newLinks.push({ sourceObjectId: link.sourceObjectId , targetObject: targetObject });
                     return;
                 });
             }, this);
-        
+
         this.serviceCall({
             "type": "GET",
             "serviceUrl": "/openidm/repo/audit/recon",
-            "url":  "?_queryFilter=" + encodeURIComponent(queryFilter) 
+            "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
         }).then(function(qry){
             if(qry.result.length){
                 _.each(qry.result, function(link){
                     linkPromArray.push(getTargetObj(link));
                 });
-                
+
                 $.when.apply($,linkPromArray).then(function(){
                     prom.resolve(newLinks);
                 });
@@ -189,7 +188,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
                 return prom.resolve(newLinks);
             }
         });
-        
+
         return prom;
     };
 
@@ -198,9 +197,9 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
         return obj.serviceCall({
             "type": "GET",
             "serviceUrl": "/openidm/repo/audit/recon",
-            "url":  "?_queryFilter=" + encodeURIComponent(queryFilter) 
+            "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
         });
     };
-    
+
     return obj;
 });

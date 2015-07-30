@@ -22,25 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, configuration, eventManager) {
+], function(_, constants, AbstractDelegate, configuration, eventManager) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/policy");
-    
+
     obj.validateProperty = function (baseEntity, args, callback) {
-        /* 
+        /*
          * We are calling the validateObject action here instead of validateProperty
          * because we need to pass in entire object context in order to support policies
-         * which may depend upon other properties.  From the response, we look to see if the 
+         * which may depend upon other properties.  From the response, we look to see if the
          * particular property we are attempting to validate was included in the list of those
          * with errors.
          */
@@ -69,19 +67,16 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
                     }
                 });
             }
-            
-            if (!haveWeFailed) { 
+
+            if (!haveWeFailed) {
                 if (callback) {
                     callback({"result": true });
                 }
                 return {"result": true };
             }
         });
-        
+
     };
-    
+
     return obj;
 });
-
-
-

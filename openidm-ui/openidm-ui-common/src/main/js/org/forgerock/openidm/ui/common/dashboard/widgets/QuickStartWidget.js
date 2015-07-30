@@ -22,14 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global _ define $ window, dimple*/
+/*global define */
 
 define("org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, eventManager, constants, conf) {
+], function($, _, AbstractView, eventManager, constants, conf) {
     var widgetInstance = {},
         Widget = AbstractView.extend({
             noBaseTemplate: true,

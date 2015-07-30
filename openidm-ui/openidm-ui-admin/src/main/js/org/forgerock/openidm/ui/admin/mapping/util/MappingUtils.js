@@ -22,12 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/util/MappingUtils", [
+        "jquery",
+        "underscore",
+        "handlebars",
         "org/forgerock/openidm/ui/common/delegates/SearchDelegate"
     ],
-    function(searchDelegate) {
+    function($, _, Handlebars, searchDelegate) {
 
         var obj = {};
 

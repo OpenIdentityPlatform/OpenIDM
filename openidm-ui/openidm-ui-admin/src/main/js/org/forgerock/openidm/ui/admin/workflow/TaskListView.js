@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/workflow/TaskListView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
@@ -37,7 +39,8 @@ define("org/forgerock/openidm/ui/admin/workflow/TaskListView", [
     "org/forgerock/openidm/ui/admin/util/WorkflowUtils",
     "backgrid"
 
-], function(AdminAbstractView,
+], function($, _,
+            AdminAbstractView,
             ModuleLoader,
             ResourceDelegate,
             AbstractModel,

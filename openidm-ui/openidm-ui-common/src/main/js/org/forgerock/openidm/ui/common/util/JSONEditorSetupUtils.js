@@ -22,14 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define , _, $*/
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/common/util/JSONEditorSetupUtils", [
+    "jquery",
     "jsonEditor"
-], function (JSONEditor) {
+], function ($, JSONEditor) {
     var JSONEditorPostBuild = JSONEditor.AbstractEditor.prototype.postBuild;
     JSONEditor.AbstractEditor.prototype.postBuild = function () {
         var ret = JSONEditorPostBuild.apply(this, arguments);

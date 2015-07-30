@@ -22,12 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, ContentFlow */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/registration/UserRegistrationView", [
+    "jquery",
+    "underscore",
+    "form2js",
+    "contentflow",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -37,7 +38,7 @@ define("org/forgerock/openidm/ui/registration/UserRegistrationView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/util/delegates/CountryStateDelegate",
     "org/forgerock/openidm/ui/util/delegates/SecurityQuestionDelegate"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate, securityQuestionDelegate) {
+], function($, _, form2js, ContentFlow, AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate, securityQuestionDelegate) {
     var UserRegistrationView = AbstractView.extend({
         template: "templates/registration/UserRegistrationTemplate.html",
         baseTemplate: "templates/common/MediumBaseTemplate.html",
@@ -48,53 +49,53 @@ define("org/forgerock/openidm/ui/registration/UserRegistrationView", [
             "click #passPhrasePictures img": "selectSiteImage",
             "click #frgtPasswrdSelfReg": "showForgottenPassword"
         },
-        
+
         showForgottenPassword: function(event) {
             event.preventDefault();
             conf.forgottenPasswordUserName = this.$el.find("input[name=email]").val();
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName : "forgottenPassword"});
         },
-        
+
         formSubmit: function(event) {
             event.preventDefault();
-            
+
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
-                
+
                 var data = form2js(this.$el.attr("id")), element;
-                
+
                 delete data.terms;
                 delete data.passwordConfirm;
                 //data.userName = data.email.toLowerCase();
-                
+
                 if (this.siteImageFlow) {
                     element = this.siteImageFlow.getActiveItem().element;
                     data.siteImage = $(element).children().attr("data-site-image");
                 }
-                
-                console.log("ADDING USER: " + JSON.stringify(data));                
+
+                console.log("ADDING USER: " + JSON.stringify(data));
                 this.delegate.createEntity(null, data, function(user) {
-                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, autoLogin: true });                    
+                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, autoLogin: true });
                 }, _.bind(function(response) {
                     console.warn(response);
                     if (response.error === 'Conflict') {
                         //TODO
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userAlreadyExists" );
-                    } 
-                    
+                    }
+
                     this.unlock();
                 }, this));
             }
         },
-        
+
         selectSiteImage: function(event) {
             $("#passPhrasePictures img").removeClass('pictureSelected').addClass('pictureNotSelected');
             $(event.target).removeClass('pictureNotSelected').addClass('pictureSelected');
         },
-        
+
         render: function(args, callback) {
             conf.setProperty("gotoURL", null);
-            
+
             this.parentRender(_.bind(function() {
 
                 if (conf.globalData.siteIdentification) {
@@ -110,13 +111,13 @@ define("org/forgerock/openidm/ui/registration/UserRegistrationView", [
                     }
 
                     this.unlock();
-                    
+
                     if (conf.globalData.securityQuestions) {
                         securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
                             uiUtils.loadSelectOptions(secquestions, $("select[name='securityQuestion']"));
                         });
                     }
-                                    
+
                     if(callback) {
                         callback();
                     }
@@ -125,26 +126,24 @@ define("org/forgerock/openidm/ui/registration/UserRegistrationView", [
 
             }, this));
         },
-        
+
         refreshFlow: function() {
             this.siteImageCounter++;
-            
+
             if( this.siteImageCounter === $("#siteImageFlow img").length ) {
                 console.log("Refreshing flow");
-                
+
                 this.siteImageFlow = new ContentFlow('siteImageFlow', { reflectionHeight: 0, circularFlow: false } );
                 this.siteImageFlow._init();
                 this.siteImageCounter = 0;
-                
+
                 this.siteImageFlow.conf.onclickActiveItem = function(){};
-                
+
                 this.siteImageFlow.moveTo(parseInt(Math.random() * $("#siteImageFlow img").length, 0));
                 $("#siteImageFlow img").show();
-            }  
+            }
         }
-    }); 
-    
+    });
+
     return new UserRegistrationView();
 });
-
-

@@ -22,33 +22,28 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, JSONEditor */
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/common/resource/EditResourceView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry"
-    
 ], function(AbstractView, ResourceEditViewRegistry) {
     var EditResourceView = AbstractView.extend({
         events: {},
         render: function(args, callback) {
             var view,
                 resource = args[1];
-            
+
             if (args[0] === "system") {
                 resource += "/" + args[2];
             }
-            
-            view = ResourceEditViewRegistry.getEditViewModule(resource);
-            
-            view.render(args, callback);
+
+            ResourceEditViewRegistry.getEditViewModule(resource).then(function (view) {
+                view.render(args, callback);
+            });
+
         }
-    }); 
-    
+    });
+
     return new EditResourceView();
 });
-
-

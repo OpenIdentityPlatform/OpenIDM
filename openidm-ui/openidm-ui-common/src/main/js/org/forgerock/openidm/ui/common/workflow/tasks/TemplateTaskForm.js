@@ -22,33 +22,29 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, Handlebars */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/tasks/TemplateTaskForm", [
+    "handlebars",
     "org/forgerock/openidm/ui/common/workflow/tasks/AbstractTaskForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractTaskForm, DateUtil, conf, uiUtils) {
-    
+], function(Handlebars, AbstractTaskForm, DateUtil, conf, uiUtils) {
+
     var TemplateTaskForm = AbstractTaskForm.extend({
-        
+
         template: "templates/common/EmptyTemplate.html",
-        
-        postRender: function(callback) {            
+
+        postRender: function(callback) {
             var t = Handlebars.compile(this.args)(this.task);
-            
+
             this.$el.html(t);
-            
+
             if (callback) {
                 callback();
             }
         }
-    }); 
-    
+    });
+
     return new TemplateTaskForm();
 });
-
-

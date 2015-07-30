@@ -25,52 +25,7 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/common/main", [
-    "./MandatoryPasswordChangeDialog",
-    
-    "./resource/ListResourceView",
-    "./resource/EditResourceView",
-    "./resource/GenericEditResourceView",
-    "./resource/ResourceEditViewRegistry",
-    "./resource/ResourceCollectionArrayView",
-    
-    "./delegates/ConfigDelegate",
-    "./delegates/InternalUserDelegate",
-    "./delegates/PolicyDelegate",
+    "./notifications/NotificationViewHelper", //needed here so that it can register its event in time
     "./delegates/SiteConfigurationDelegate",
-    "./delegates/OpenAMProxyDelegate",
-    "./delegates/ResourceDelegate",
-
-    "./login/InternalLoginHelper",
-    "./login/AuthenticationUnavailable",
-    
-    "./util/Constants",
-    "./util/AMLoginUtils",
-    "./util/JSONEditorSetupUtils",
-    
-    "./dashboard/DashboardWidgetLoader",
-    "./dashboard/widgets/MemoryUsageWidget",
-    "./dashboard/widgets/ReconProcessesWidget",
-    "./dashboard/widgets/CPUUsageWidget",
-
-    "./notifications/NotificationDelegate",
-    "./notifications/NotificationsView",
-    "./notifications/NotificationViewHelper",
-
-    "./workflow/FormManager",
-    "./workflow/WorkflowDelegate",
-
-    "./workflow/tasks/TaskDetailsView",
-    "./workflow/tasks/AbstractTaskForm",
-    "./workflow/tasks/customview/ApplicationAcceptanceTask",
-    "./workflow/tasks/TasksMenuView",
-    "./workflow/tasks/TasksDashboard",
-    "./workflow/tasks/TemplateTaskForm",
-
-    "./workflow/processes/AbstractProcessForm",
-    "./workflow/processes/StartProcessDashboardView",
-    "./workflow/processes/StartProcessView",
-    "./workflow/processes/TemplateStartProcessForm",
-    "./workflow/processes/customview/SendNotificationProcess",
-
-    "./linkedView/LinkedView"
+    "./login/InternalLoginHelper"
 ]);
