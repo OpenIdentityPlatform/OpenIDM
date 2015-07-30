@@ -3537,7 +3537,7 @@ xmlConnectorData.xml                     100% 1648     1.6KB/s   00:00</computer
      The XML connector runs as a <emphasis>remote connector</emphasis>, that is,
      on the remote host on which the Java Connector Server is installed. Copy
      the XML connector .jar from the OpenIDM installation to the
-     <literal>openicf/bundles</literal> directory on the remote host.
+     <literal>openicf/connectors</literal> directory on the remote host.
     </para>
     <screen><userinput>$ cd path/to/openidm
 $ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/connectors</userinput>
