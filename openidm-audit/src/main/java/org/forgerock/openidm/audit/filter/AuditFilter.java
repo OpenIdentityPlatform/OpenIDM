@@ -188,7 +188,7 @@ public class AuditFilter implements Filter {
                     Requests.newCreateRequest("audit/access", accessAuditEventBuilder.toEvent().getValue());
             connectionFactory.getConnection().create(new InternalServerContext(context), createRequest);
         } catch (ResourceException e) {
-            LOGGER.warn("Failed to log audit access entry", e);
+            LOGGER.error("Failed to log audit access entry", e);
         }
     }
 
