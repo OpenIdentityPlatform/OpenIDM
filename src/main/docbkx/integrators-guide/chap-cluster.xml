@@ -118,14 +118,15 @@
   <orderedlist>
    <listitem>
     <para>
-     Configure OpenIDM for a MySQL repository, as described in <link
+     Configure OpenIDM for a supported repository, as described in <link
      xlink:href="install-guide#chap-repository"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a
      Repository For Production</citetitle></link> in the
      <citetitle>Installation Guide</citetitle>.
     </para>
     <para>You need only import the data definition language script for OpenIDM
-     into MySQL once, not repeatedly for each OpenIDM instance.
+     into your selected repository once, not repeatedly for each OpenIDM
+     instance.
     </para>
    </listitem>
    <listitem>
