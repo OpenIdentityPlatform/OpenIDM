@@ -263,7 +263,7 @@
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.2-SNAPSHOT</provisioner.salesforcemodule.version>
 
         <!-- START Documentation properties -->
-        <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
+        <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
         <docTargetVersion>${project.version}</docTargetVersion>
         <frDocPluginVersion>3.0.0</frDocPluginVersion>
         <opendjPasswordPluginVersion>1.0.3</opendjPasswordPluginVersion>
