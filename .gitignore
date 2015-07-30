@@ -91,3 +91,6 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+# npm modules
+node_modules
