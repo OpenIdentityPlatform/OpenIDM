@@ -22,38 +22,37 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/common/workflow/processes/customview/SendNotificationProcess", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/common/workflow/processes/AbstractProcessForm",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/notifications/NotificationViewHelper"
-], function(AbstractProcessForm, userDelegate, conf, validatorsManager, notificationViewHelper) {
+], function($, _, AbstractProcessForm, userDelegate, conf, validatorsManager, notificationViewHelper) {
     var SendNotificationProcess = AbstractProcessForm.extend({
-        
+
         template: "templates/workflow/processes/customview/SendNotificationTemplate.html",
-        
+
         prepareData: function(callback) {
              var nTypes, notificationType;
              _.extend(this.data, this.processDefinition);
              this.data.loggedUser = conf.loggedUser;
-             
+
              nTypes = {};
              for (notificationType in notificationViewHelper.notificationTypes) {
                  nTypes[notificationType] = $.t(notificationViewHelper.notificationTypes[notificationType].name);
              }
              this.data.notificationTypes = nTypes;
              this.data.defaultNotificationType = notificationViewHelper.defaultType;
-             
+
             _.bind(function() {
-                
+
                 userDelegate.getAllUsers(_.bind(function(users) {
-                    
+
                     var resultMap = {},userPointer,user;
                     for (userPointer in users) {
                         user = users[userPointer];
@@ -61,20 +60,18 @@ define("org/forgerock/openidm/ui/common/workflow/processes/customview/SendNotifi
                     }
                     this.data.users = resultMap;
                     callback();
-                    
+
                 }, this));
-                
+
             }, this)();
         },
-        
+
         postRender: function() {
             validatorsManager.bindValidators(this.$el);
             validatorsManager.validateAllFields(this.$el);
         }
-        
-    }); 
-    
+
+    });
+
     return new SendNotificationProcess();
 });
-
-

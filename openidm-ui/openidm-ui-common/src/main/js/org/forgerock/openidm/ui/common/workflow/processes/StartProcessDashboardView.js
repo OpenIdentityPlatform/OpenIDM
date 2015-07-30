@@ -22,19 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _ */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboardView", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/workflow/processes/StartProcessView",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, workflowManager, eventManager, constants, startProcessView, conf) {
+], function($, _, AbstractView, workflowManager, eventManager, constants, startProcessView, conf) {
     var StartProcessDashboardView = AbstractView.extend({
 
         template: "templates/workflow/processes/StartProcessDashboardTemplate.html",
@@ -97,5 +96,3 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboard
 
     return new StartProcessDashboardView();
 });
-
-

@@ -22,15 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global window,define, $, _, form2js, require */
+/*global define, window */
 
 define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/components/Navigation",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
@@ -40,12 +43,14 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "bootstrap-tabdrop",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function(MappingAdminAbstractView,
+], function($, _,
+            MappingAdminAbstractView,
             eventManager,
             validatorsManager,
             configDelegate,
             router,
             constants,
+            ModuleLoader,
             nav,
             reconDelegate,
             dateUtil,
@@ -160,7 +165,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 this.$el.find("#" + route + "Tab").toggleClass("active", true);
             }
 
-            require(router.currentRoute.childView).render();
+            ModuleLoader.load(router.currentRoute.childView).then(function (child) {
+                child.render();
+            });
         },
 
         render: function(args, callback) {

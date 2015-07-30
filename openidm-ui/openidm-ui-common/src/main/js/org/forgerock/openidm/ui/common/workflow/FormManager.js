@@ -22,20 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, _, $ */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/FormManager", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
 ], function(AbstractConfigurationAware, eventManager) {
     var obj = new AbstractConfigurationAware();
-    
+
     obj.getViewForForm = function(name) {
         return obj.configuration.forms[name];
     };
 
     return obj;
-});    
-
+});

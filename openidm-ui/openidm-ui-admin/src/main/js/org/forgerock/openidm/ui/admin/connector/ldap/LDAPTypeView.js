@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog",
@@ -32,7 +34,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/delegates/SecurityDelegate",
     "bootstrap-dialog"
-], function(ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog, ConnectorDelegate, uiUtils, securityDelegate, BootstrapDialog) {
+], function($, _, ConnectorTypeAbstractView, validatorsManager, ldapFilterDialog, ConnectorDelegate, uiUtils, securityDelegate, BootstrapDialog) {
 
     var LDAPTypeView = ConnectorTypeAbstractView.extend({
         events: {

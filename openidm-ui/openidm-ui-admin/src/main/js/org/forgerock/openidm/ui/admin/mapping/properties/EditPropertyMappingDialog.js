@@ -4,10 +4,12 @@
  * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  */
 
-/*global define, $, _, Handlebars, form2js, window, JSON */
-/*jslint evil: true */
+/*global define, JSON */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog", [
+    "jquery",
+    "underscore",
+    "form2js",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -21,7 +23,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
     "org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor",
     "bootstrap-dialog",
     "bootstrap-tabdrop"
-], function(MappingAdminAbstractView,
+], function($, _, form2js,
+            MappingAdminAbstractView,
             syncDelegate,
             validatorsManager,
             conf,

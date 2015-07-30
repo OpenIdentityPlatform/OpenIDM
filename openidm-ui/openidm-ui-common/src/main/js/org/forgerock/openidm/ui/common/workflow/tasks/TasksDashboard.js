@@ -22,12 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _ */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -38,7 +37,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard", [
     "org/forgerock/openidm/ui/common/notifications/NotificationDelegate",
     "org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView",
     "org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboardView"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView,
+], function($, _, AbstractView, workflowManager, eventManager, constants, TasksMenuView,
             NotificationsView, conf, notificationDelegate, taskDetailsView, startProcessView) {
 
     var TasksDashboard = AbstractView.extend({

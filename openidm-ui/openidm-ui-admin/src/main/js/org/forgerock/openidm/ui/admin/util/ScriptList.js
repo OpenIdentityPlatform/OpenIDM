@@ -22,13 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/ScriptList", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/admin/util/ScriptDialog",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function(AbstractView, ScriptDialog, UIUtils) {
+], function($, _, AbstractView, ScriptDialog, UIUtils) {
     var scriptListInstance = {},
         ScriptList = AbstractView.extend({
             template: "templates/admin/util/ScriptList.html",
@@ -175,4 +177,3 @@ define("org/forgerock/openidm/ui/admin/util/ScriptList", [
 
     return scriptListInstance;
 });
-

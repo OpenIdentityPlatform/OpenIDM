@@ -22,14 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("config/validators/SelfServiceValidators", [
+    "jquery",
     "UserDelegate"
-], function(userDelegate) {
+], function($, userDelegate) {
     var obj = {
             "required_long": {
                 "name": "Not empty number",
@@ -130,6 +128,6 @@ define("config/validators/SelfServiceValidators", [
                 }
             }
     };
-    
+
     return obj;
 });

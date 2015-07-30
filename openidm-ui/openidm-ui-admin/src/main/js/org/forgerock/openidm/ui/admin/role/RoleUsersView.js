@@ -22,29 +22,30 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, Handlebars, sessionStorage */
+/*global define, sessionStorage */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
+    "jquery",
+    "underscore",
+    "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/common/util/JQGridUtil",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
-    "org/forgerock/commons/ui/common/components/Messages"
-], function(AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager) {
+    "org/forgerock/commons/ui/common/components/Messages",
+    "jqgrid"
+], function($, _, Handlebars, AbstractView, eventManager, constants, cookieHelper, JQGridUtil, resourceDelegate, messagesManager) {
     var RoleUsersView = AbstractView.extend({
         element: "#role-users",
         template: "templates/admin/role/RoleUsersViewTemplate.html",
         noBaseTemplate: true,
-        
+
         events: {
             "click .actionBtn": "performAction"
         },
-        
+
         reloadGrid: function(event){
             event.preventDefault();
             $(this.grid_id_selector).trigger('reloadGrid');
@@ -55,15 +56,15 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
         getCols: function(){
             var prom = $.Deferred(),
                 args = _.clone(this.data.args,true);
-            
+
             args[1] = "user";
-            
+
             this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
-            
+
             resourceDelegate.getSchema(args).then(_.bind(function(schema){
                 var cols = [],
                     unorderedCols = [];
-                
+
                 cols.push({
                     "name": "hasRole",
                     "label": "Has Role",
@@ -86,15 +87,15 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                             );
                         }
                     }, this));
-                    
+
                     _.each(schema.order,function(prop){
                         var col = _.findWhere(unorderedCols, { name : prop });
-                        
+
                         if(col){
                             cols.push(col);
                         }
                     });
-                    
+
                     if (cols.length === 1) {
                         prom.resolve(unorderedCols);
                     } else {
@@ -115,17 +116,17 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                                 }
                             });
                         }
-                        
+
                         prom.resolve(cols);
                     });
                 }
             },this));
-            
+
             return prom;
         },
         getTotal: function(){
             var prom = $.Deferred();
-            
+
             //$.get(this.getURL() + '?_queryId=get-users-of-direct-role&role=' + this.data.roleId).then(
             $.get(this.getURL() + '?_queryId=query-all-ids').then(
                 function(qry){
@@ -135,7 +136,7 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                     prom.resolve({ resultCount: 0 });
                 }
             );
-            
+
             return prom;
         },
         selectedRows: function() {
@@ -152,15 +153,15 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
             var action = $(e.target).attr("action"),
                 promArr = [],
                 successMsg;
-            
+
             e.preventDefault();
-            
+
             _.each(this.selectedRows(), _.bind(function(objectId) {
                 var rowdata = _.where(this.data.gridData.result,{ _id: objectId })[0],
                     currentRole = "managed/role/" + this.data.roleId,
                     hasRole = _.indexOf(rowdata.roles, currentRole) > -1,
                     doUpdate = false;
-                    
+
                 if(action === "remove") {
                     rowdata.roles = _.reject(rowdata.roles,function(role) { return role === currentRole; });
                     doUpdate = hasRole;
@@ -170,19 +171,19 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                     doUpdate = !hasRole;
                     successMsg = $.t("templates.admin.RoleUsersTemplate.addSelectedSuccess",{ roleId: this.data.role.properties.name });
                 }
-                
+
                 if(doUpdate) {
                     promArr.push(resourceDelegate.updateResource(this.data.serviceUrl, rowdata._id, rowdata));
                 }
             },this));
-            
+
             $.when.apply($,promArr).then(_.bind(function(){
                 this.render(this.data.args, this.data.role, _.bind(function() {
                     messagesManager.messages.addMessage({"message": successMsg});
                 },this));
             },this));
         },
-        
+
         render: function(args, role, callback) {
             var _this = this;
             this.data.args = args;
@@ -200,8 +201,8 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                         grid_id = this.grid_id_selector,
                         pager_id = grid_id + '_pager',
                         rowNum = sessionStorage.getItem(this.data.grid_id + "ViewGridRows");
-                        
-                        uiUtils.buildJQGrid(this, this.data.grid_id, {
+
+                        JQGridUtil.buildJQGrid(this, this.data.grid_id, {
                             url: this.getURL(),
                             width: 920,
                             shrinkToFit: true,
@@ -244,8 +245,8 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                             onSelectAll: _.bind(function() {
                                 this.toggleActions();
                             }, this)
-                        }, 
-                        { 
+                        },
+                        {
                             search: true,
                             searchOperator: "sw",
                             suppressColumnChooser: true,
@@ -255,7 +256,7 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                             },
                             columnChooserOptions: { height: "auto", width: "auto" }
                         });
-                        
+
                         if(callback) {
                             callback();
                         }
@@ -263,12 +264,10 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                 } else {
                     this.parentRender(callback);
                 }
-                
+
             },this));
-        }   
-    }); 
-    
+        }
+    });
+
     return new RoleUsersView();
 });
-
-

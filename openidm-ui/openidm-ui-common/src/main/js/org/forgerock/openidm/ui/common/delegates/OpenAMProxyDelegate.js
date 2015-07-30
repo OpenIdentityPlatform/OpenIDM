@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
@@ -32,10 +32,10 @@ define("org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate", [
 ], function(constants, AbstractDelegate, cookieHelper, conf) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/openam" );
-    
+
     obj.logout = function () {
         var headers = {};
-        
+
         headers[conf.globalData.auth.cookieName] = cookieHelper.getCookie(conf.globalData.auth.cookieName);
 
         return obj.serviceCall({
@@ -47,7 +47,7 @@ define("org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate", [
         });
 
     };
-    
+
     //this function will only be called from the admin ui using admin credentials
     obj.serverinfo = function (openamDeploymentUrl) {
         return obj.serviceCall({
@@ -64,6 +64,3 @@ define("org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate", [
 
     return obj;
 });
-
-
-

@@ -22,26 +22,24 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, window */
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/LoginView", [
+    "underscore",
     "org/forgerock/commons/ui/common/LoginView",
     "org/forgerock/openidm/ui/util/delegates/SiteIdentificationDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"
-], function(commonLoginView, siteIdentificationDelegate, conf, amLoginUtils) {
-    
+], function(_, commonLoginView, siteIdentificationDelegate, conf, amLoginUtils) {
+
     var handleLoginChange = function() {
             var login = this.$el.find("input[name=login]").val();
-            
+
             if(conf.globalData.siteIdentification) {
                 if (login.length) {
                     siteIdentificationDelegate.getSiteIdentificationForLogin(login, _.bind(function(data) {
                         this.$el.find("#siteImage").html('<img src="'+ encodeURI(data.siteImage) +'" />').show();
-                        
+
                         this.$el.find("#passPhrase").text(data.passPhrase).show();
                         this.$el.find("#identificationMessage").hide();
                     }, this));
@@ -56,7 +54,7 @@ define("org/forgerock/openidm/ui/LoginView", [
         obj;
 
     LoginView.prototype = commonLoginView;
-    
+
     obj = new LoginView();
 
     obj.render = function (args, callback) {
@@ -72,7 +70,7 @@ define("org/forgerock/openidm/ui/LoginView", [
             if (callback) {
                 callback();
             }
-            
+
             if(amCallback) {
                 amCallback();
             }
@@ -81,8 +79,6 @@ define("org/forgerock/openidm/ui/LoginView", [
     };
 
     obj.events["change input[name=login]"] = _.bind(handleLoginChange, obj);
-    
+
     return obj;
 });
-
-

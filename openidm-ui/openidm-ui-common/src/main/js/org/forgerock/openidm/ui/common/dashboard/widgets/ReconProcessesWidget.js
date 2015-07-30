@@ -22,16 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global _ define $ window, dimple*/
+/*global define, window*/
 
 define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget", [
+    "jquery",
+    "underscore",
+    "dimple",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function(AbstractView, eventManager, constants, conf, SystemHealthDelegate, ModuleLoader) {
+    "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate"
+], function($, _, dimple, AbstractView, eventManager, constants, conf, SystemHealthDelegate) {
     var widgetInstance = {},
         Widget = AbstractView.extend({
             noBaseTemplate: true,
@@ -57,15 +59,9 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
                 this.data.widgetType = args.type;
                 this.model.menu = args.menu;
 
-                ModuleLoader.load("dimple").then(_.bind(function(dimple){
-                    this.reconUsageWidget(dimple);
-
-                    if(callback) {
-                        callback();
-                    }
-                }, this));
+                this.reconUsageWidget(callback);
             },
-            reconUsageWidget: function(dimple) {
+            reconUsageWidget: function(callback) {
                 var areaSeries,
                     svg;
 
@@ -116,6 +112,10 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
                             this.model.reconChart.draw(0, true);
                         }
                     }, this);
+
+                    if (callback) {
+                        callback();
+                    }
                 }, this));
             },
 

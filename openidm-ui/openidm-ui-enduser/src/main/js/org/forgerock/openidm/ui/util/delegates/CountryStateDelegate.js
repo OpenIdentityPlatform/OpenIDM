@@ -22,11 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/util/delegates/CountryStateDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
@@ -38,12 +35,11 @@ define("org/forgerock/openidm/ui/util/delegates/CountryStateDelegate", [
 
     obj.getAllCountries = function(successCallback, errorCallback) {
         var i;
-        
+
         if (obj.pureCountries) {
             successCallback(obj.pureCountries);
         } else {
-            console.info("Getting all countries");
-            
+
             obj.serviceCall({url: "", success: function(data) {
                 if(successCallback) {
                     obj.pureCountries = data.countries;
@@ -51,17 +47,16 @@ define("org/forgerock/openidm/ui/util/delegates/CountryStateDelegate", [
                     for (i = 0; i < data.countries.length; i++) {
                         obj.countries[data.countries[i].key] = data.countries[i];
                     }
-               
+
                     successCallback(data.countries);
                 }
             }, error: errorCallback} );
         }
     };
-    
+
     obj.getAllStatesForCountry = function(countryKey, successCallback, errorCallback) {
         var i;
-        console.info("Getting states for country");
-        
+
         if (obj.countries) {
             successCallback(obj.countries[countryKey].states);
         } else {
@@ -70,9 +65,6 @@ define("org/forgerock/openidm/ui/util/delegates/CountryStateDelegate", [
             });
         }
     };
-    
+
     return obj;
 });
-
-
-

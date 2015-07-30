@@ -22,9 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define, window */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
+    "jquery",
+    "underscore",
+    "handlebars",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -40,8 +43,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
     "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
-    "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog"
-], function(MappingAdminAbstractView,
+    "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
+    "jqgrid"
+], function($, _, Handlebars,
+            MappingAdminAbstractView,
             eventManager,
             conf,
             UIUtils,

@@ -22,9 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, JSONEditor */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
+    "jquery",
+    "underscore",
+    "form2js",
+    "jsonEditor",
+    "handlebars",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -35,8 +40,9 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function(AdminAbstractView, eventManager, constants, router, ConfigDelegate, InlineScriptEditor, ConnectorDelegate, SiteConfigurationDelegate, conf, openamProxyDelegate, UIUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "jqueryui"
+], function($, _, form2js, JSONEditor, Handlebars, AdminAbstractView, eventManager, constants, router, ConfigDelegate, InlineScriptEditor, ConnectorDelegate, SiteConfigurationDelegate, conf, openamProxyDelegate, UIUtils) {
 
     var AuthenticationView = AdminAbstractView.extend({
         template: "templates/admin/settings/AuthenticationTemplate.html",

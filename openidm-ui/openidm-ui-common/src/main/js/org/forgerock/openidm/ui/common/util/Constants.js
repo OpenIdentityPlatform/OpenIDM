@@ -41,8 +41,8 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
     //Events
     commonConstants.EVENT_QUALIFIER_CHANGED = "mapping.properties.EVENT_QUALIFIER_CHANGED";
 
-    commonConstants.EVENT_UPDATE_NAVIGATION = "EVENT_UPDATE_NAVIGATION";
-    commonConstants.EVENT_SELF_SERVICE_CONTEXT = "EVENT_SELF_SERVICE_CONTEXT";
+    commonConstants.EVENT_UPDATE_NAVIGATION = "common.navigation.EVENT_UPDATE_NAVIGATION";
+    commonConstants.EVENT_SELF_SERVICE_CONTEXT = "common.navigation.EVENT_SELF_SERVICE_CONTEXT";
 
     return commonConstants;
 });

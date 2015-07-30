@@ -22,13 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window, $, _ , Handlebars*/
+/*global define  */
 
 define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
+    "jquery",
+    "underscore",
+    "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function (AbstractView, conf, uiUtils) {
+], function ($, _, Handlebars, AbstractView, conf, uiUtils) {
     var FilterEditor = AbstractView.extend({
             template: "templates/admin/util/SetupFilter.html",
             data: {

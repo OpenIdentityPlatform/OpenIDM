@@ -22,15 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define */
 
 define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
     "org/forgerock/openidm/ui/common/resource/GenericEditResourceView"
-], function(AbstractView, constants, resourceDelegate, resourceCollectionUtils) {
+], function($, _, AbstractView, constants, resourceDelegate, resourceCollectionUtils) {
     var ResourceCollectionArrayView = AbstractView.extend({
             template: "templates/admin/resource/ResourceCollectionArrayViewTemplate.html",
             noBaseTemplate: true,
@@ -44,21 +46,21 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                         this.parentRender(_.bind(function() {
                             this.setupAutocomplete(this.data.prop, this.onChange);
                             this.convertToHuman();
-                            
+
                             if(callback) {
                                 callback();
                             }
                         }, this));
                     }, this);
-                
+
                 if(args) {
                     this.element = args.element;
                     this.data.prop = args.prop;
                     this.onChange = args.onChange;
-                    
+
                     resourceDelegate.getSchema(this.data.prop.items.resourceCollection.path.split("/")).then(_.bind(function(schema) {
                         this.data.propTitle = schema.title || this.data.prop.title;
-                        
+
                         this.data.headerValues = resourceCollectionUtils.getHeaderValues(this.data.prop.items.resourceCollection.query.fields, schema.properties);
 
                         parentRender();
@@ -71,7 +73,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                 var autocompleteField = this.$el.parent().find("#autoCompleteResourceCollection_" + prop.propName),
                     onChange = _.bind(function(value) {
                         var newVal = this.data.prop.items.resourceCollection.path + "/" + value;
-                        
+
                         if(!_.contains(this.data.prop.value, newVal)) {
                             if(!this.data.prop.value) {
                                 this.data.prop.value = [];
@@ -79,12 +81,12 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                             this.data.prop.value.push(newVal);
                         }
                     }, this);
-                
+
                     resourceCollectionUtils.setupAutocompleteField(autocompleteField, prop, { onChange: onChange });
             },
             convertToHuman: function() {
                 var listElements = this.$el.find(".resourceListItem");
-                
+
                 _.each(listElements, _.bind(function(element) {
                     var path = $(element).attr("resourcePath"),
                         getRowContents = function(txt) {
@@ -110,19 +112,19 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                 if(e) {
                     e.preventDefault();
                 }
-                
+
                 this.render();
                 this.onChange();
             },
             removeArrayItem: function(e) {
                 var path = $(e.target).closest(".list-group-item").attr("resourcePath");
-                
+
                 if(e) {
                     e.preventDefault();
                 }
-                
+
                 this.data.prop.value = _.reject(this.data.prop.value, function(val) { return val === path; });
-                
+
                 this.render();
                 this.onChange();
             },

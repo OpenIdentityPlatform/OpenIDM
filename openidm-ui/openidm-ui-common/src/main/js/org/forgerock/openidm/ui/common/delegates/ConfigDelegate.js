@@ -22,20 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author jfeasel
- */
 define("org/forgerock/openidm/ui/common/delegates/ConfigDelegate", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, conf, eventManager) {
+], function($, _, constants, AbstractDelegate, conf, eventManager) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/config");
-
 
     obj.serviceCall = function (callParams) {
 

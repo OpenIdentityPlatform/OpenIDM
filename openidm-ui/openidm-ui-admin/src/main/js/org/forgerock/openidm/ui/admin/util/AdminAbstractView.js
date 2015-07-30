@@ -22,11 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/AdminAbstractView", [
+    "jquery",
     "org/forgerock/commons/ui/common/main/AbstractView"
-], function(AbstractView) {
+], function($, AbstractView) {
     var AdminAbstractView = AbstractView.extend({
 
         sectionHideShow: function(event) {

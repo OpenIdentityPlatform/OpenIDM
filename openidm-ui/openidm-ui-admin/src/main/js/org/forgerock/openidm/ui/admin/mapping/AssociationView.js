@@ -22,15 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/AssociationView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManagementView",
     "org/forgerock/openidm/ui/admin/mapping/association/IndividualRecordValidationView",
     "org/forgerock/openidm/ui/admin/mapping/association/ReconciliationQueryFiltersView",
     "org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView"
-], function(MappingAdminAbstractView,
+], function(_,
+            MappingAdminAbstractView,
             DataAssociationManagementView,
             IndividualRecordValidationView,
             ReconciliationQueryFiltersView,

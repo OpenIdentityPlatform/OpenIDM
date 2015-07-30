@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -35,7 +37,8 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/commons/ui/common/main/Router",
     "backgrid"
-], function(AdminAbstractView,
+], function($, _,
+            AdminAbstractView,
             ResourceDelegate,
             uiUtils,
             AbstractModel,

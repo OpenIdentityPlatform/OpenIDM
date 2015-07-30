@@ -22,16 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global _ define $ window, dimple*/
+/*global define, window */
 
 define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
+    "jquery",
+    "underscore",
+    "dimple",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function(AbstractView, eventManager, constants, conf, SystemHealthDelegate, ModuleLoader) {
+    "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate"
+], function($, _, dimple, AbstractView, eventManager, constants, conf, SystemHealthDelegate) {
     var widgetInstance = {},
         Widget = AbstractView.extend({
             noBaseTemplate: true,
@@ -62,19 +64,13 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                 this.data.widgetType = args.type;
                 this.model.menu = args.menu;
 
-                ModuleLoader.load("dimple").then(_.bind(function(dimple){
-                    if(args.type === "lifeCycleMemoryBoth") {
-                        this.template = "templates/dashboard/widget/DashboardDoubleWidgetTemplate.html";
-                    } else {
-                        this.template = "templates/dashboard/widget/DashboardSingleWidgetTemplate.html";
-                    }
+                if(args.type === "lifeCycleMemoryBoth") {
+                    this.template = "templates/dashboard/widget/DashboardDoubleWidgetTemplate.html";
+                } else {
+                    this.template = "templates/dashboard/widget/DashboardSingleWidgetTemplate.html";
+                }
 
-                    this.memoryUsageWidget(dimple);
-
-                    if(callback) {
-                        callback();
-                    }
-                }, this));
+                this.memoryUsageWidget(callback);
             },
             drawHeap: function(svg, data) {
                 var ring;
@@ -106,7 +102,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
 
                 this.model.nonHeapChart.draw();
             },
-            memoryUsageWidget: function(dimple) {
+            memoryUsageWidget: function(callback) {
                 this.model.currentData = [];
 
                 this.parentRender(_.bind(function() {
@@ -167,6 +163,10 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                                 this.model.heapChart.draw(0, true);
                             }
                         }, this);
+
+                        if (callback) {
+                            callback();
+                        }
                     }, this));
                 }, this));
             },

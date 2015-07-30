@@ -22,12 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, ContentFlow */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -38,7 +37,7 @@ define("org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/util/delegates/SecurityQuestionDelegate"
-], function(Dialog, validatorsManager, conf, userDelegate, authnDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
+], function($, _, Dialog, validatorsManager, conf, userDelegate, authnDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
     var ChangeSecurityDataDialog = Dialog.extend({
         contentTemplate: "templates/profile/ChangeSecurityDataDialogTemplate.html",
 

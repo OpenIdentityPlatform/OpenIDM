@@ -22,11 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document */
+/*global define  */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/tasks/AbstractTaskForm", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -38,36 +35,34 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/AbstractTaskForm", [
     var AbstractTaskForm = AbstractView.extend({
         template: "templates/common/EmptyTemplate.html",
         element: "#taskContent",
-        
+
         events: {
             "onValidate": "onValidate"
         },
-        
+
         postRender: function(callback) {
             if(callback) {
                 callback();
             }
         },
-        
-        render: function(task, category, args, callback) { 
+
+        render: function(task, category, args, callback) {
             this.setElement(this.element);
             this.$el.unbind();
             this.delegateEvents();
             this.task = task;
             this.category = category;
             this.args = args;
-            
-            this.parentRender(function() {      
+
+            this.parentRender(function() {
                 this.postRender(callback);
                 this.reloadData();
-            });            
+            });
         },
-        
+
         reloadData: function() {
         }
-    }); 
-    
+    });
+
     return AbstractTaskForm;
 });
-
-

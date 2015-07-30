@@ -22,12 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, ContentFlow */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/profile/ChangeSiteIdentificationDialog", [
+    "jquery",
+    "underscore",
+    "contentflow",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -36,17 +36,17 @@ define("org/forgerock/openidm/ui/profile/ChangeSiteIdentificationDialog", [
     "AuthnDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function(Dialog, validatorsManager, conf, router, userDelegate, authnDelegate, eventManager, constants) {
-    var ChangeSiteIdentificationDialog = Dialog.extend({    
+], function($, _, ContentFlow, Dialog, validatorsManager, conf, router, userDelegate, authnDelegate, eventManager, constants) {
+    var ChangeSiteIdentificationDialog = Dialog.extend({
         contentTemplate: "templates/profile/ChangeSiteIdentificationDialogTemplate.html",
-        
-        data: {         
+
+        data: {
             width: 800,
             height: 350
         },
-        
+
         siteImageFlow:{},
-        
+
         events: {
             "click input[type=submit]": "formSubmit",
             "click .dialogCloseCross img": "close",
@@ -54,21 +54,21 @@ define("org/forgerock/openidm/ui/profile/ChangeSiteIdentificationDialog", [
             "onValidate": "onValidate",
             "click .modal-content": "stop"
         },
-        
+
         formSubmit: function(event) {
             event.preventDefault();
             event.stopPropagation();
-            
+
             if(validatorsManager.formValidated(this.$el)) {
-                var self = this, 
+                var self = this,
                     patchDefinition = [
-                        {"operation": "replace", "field": "/siteImage", "value": this.$el.find("input[name='siteImage']").val()}, 
+                        {"operation": "replace", "field": "/siteImage", "value": this.$el.find("input[name='siteImage']").val()},
                         {"operation": "replace", "field": "/passPhrase", "value": this.$el.find("input[name=passPhrase]").val()}
                     ];
-                
+
                 userDelegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev,  patchDefinition, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "siteIdentificationChanged");
-                    
+
                     //updating in profile
                     conf.loggedUser.siteImage = self.$el.find("input[name='siteImage']").val();
                     conf.loggedUser.passPhrase = self.$el.find("input[name=passPhrase]").val();
@@ -79,11 +79,11 @@ define("org/forgerock/openidm/ui/profile/ChangeSiteIdentificationDialog", [
                             conf.loggedUser = user;
                             return user;
                         });
-                    
+
                 }, this));
             }
         },
-        
+
         render: function() {
             this.actions = [];
             this.addAction($.t("common.form.save"), "submit");
@@ -93,40 +93,40 @@ define("org/forgerock/openidm/ui/profile/ChangeSiteIdentificationDialog", [
                 this.siteImageCounter = 0;
                 $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));
                 validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
-                    
-                    this.$el.find("input[name=oldSiteImage]").val(conf.loggedUser.siteImage);                
+
+                    this.$el.find("input[name=oldSiteImage]").val(conf.loggedUser.siteImage);
                     this.$el.find("input[name=passPhrase]").val(conf.loggedUser.passPhrase);
                     this.$el.find("input[name=oldPassPhrase]").val(conf.loggedUser.passPhrase);
-                    
+
                     validatorsManager.validateAllFields(this.$el);
-                }, this)); 
-            }, this));            
+                }, this));
+            }, this));
         },
-        
+
         refreshFlow: function() {
             this.siteImageCounter++;
-            
+
             if( this.siteImageCounter === $("#siteImageFlow img").length ) {
                 console.log("Refreshing flow");
-                
+
                 this.siteImageFlow = new ContentFlow('siteImageFlow', { reflectionHeight: 0, circularFlow: false } );
                 this.siteImageFlow._init();
                 this.siteImageCounter = 0;
 
                 this.siteImageFlow.conf.onclickActiveItem = function(){};
                 this.siteImageFlow.conf.onMoveTo = _.bind(this.setImage, this);
-                
+
                 this.siteImageFlow.moveTo($("#siteImageFlow").find("[data-site-image='"+conf.loggedUser.siteImage+"']").parent().index());
                 $("#siteImageFlow img").show();
-            }  
+            }
         },
-        
+
         setImage: function(item) {
             this.siteImage = $(item.element).children().attr("data-site-image");
             this.$el.find("input[name='siteImage']").val(this.siteImage);
             this.$el.find("input[name='siteImage']").trigger("change");
         }
-    }); 
-    
+    });
+
     return new ChangeSiteIdentificationDialog();
 });

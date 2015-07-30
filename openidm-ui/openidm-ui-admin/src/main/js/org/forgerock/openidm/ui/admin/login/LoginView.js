@@ -22,40 +22,36 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, window */
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/admin/login/LoginView", [
+    "underscore",
     "org/forgerock/commons/ui/common/LoginView",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"
-], function(commonLoginView, amLoginUtils) {
-    
+], function(_, commonLoginView, amLoginUtils) {
+
     var LoginView = function () {},
         obj;
 
     LoginView.prototype = commonLoginView;
-    
+
     obj = new LoginView();
 
     obj.render = function (args, callback) {
         var amCallback = amLoginUtils.init(this,true);
-        
+
         commonLoginView.render.call(this, args, _.bind(function () {
 
             if (callback) {
                 callback();
             }
-            
+
             if(amCallback) {
                 amCallback();
             }
 
         }, this));
     };
-    
+
     return obj;
 });
-
-

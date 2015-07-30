@@ -22,106 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define */
 
 
 define("org/forgerock/openidm/ui/admin/main", [
-
-    "./components/Footer",
-
-    "./delegates/ConnectorDelegate",
-    "./delegates/SyncDelegate",
-    "./delegates/ExternalAccessDelegate",
-    "./delegates/ReconDelegate",
-    "./delegates/SecurityDelegate",
-    "./delegates/WorkflowDelegate",
-    "./delegates/ScriptDelegate",
-    "./delegates/SiteConfigurationDelegate",
-
-    "./MapResourceView",
-
-    "./connector/AbstractConnectorView",
-    "./connector/EditConnectorView",
-    "./connector/AddConnectorView",
-    "./connector/ConnectorTypeAbstractView",
-    "./connector/ConnectorTypeView",
+    "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
     "./connector/ConnectorRegistry",
-    "./connector/ConnectorListView",
-
-    "./managed/AddEditManagedView",
-    "./managed/ManagedListView",
-
-    "./util/ConnectorUtils",
-    "./util/LinkQualifierUtils",
-    "./util/ScriptList",
-    "./util/ScriptDialog",
-    "./util/AutoCompleteUtils",
-    "./util/Scheduler",
-    "./util/ReconDetailsView",
-    "./util/QueryFilterUtils",
-    "./util/AutoCompleteUtils",
-    "./util/SaveChangesView",
-    "./util/FilterEvaluator",
-    "./util/BackgridUtils",
-
-    "./objectTypes/ObjectTypesDialog",
-
-    "./mapping/AssociationView",
-    "./mapping/association/AssociationRuleView",
-    "./mapping/association/DataAssociationManagementView",
-    "./mapping/association/IndividualRecordValidationView",
-    "./mapping/association/ReconciliationQueryFiltersView",
-    "./mapping/association/correlationQuery/CorrelationQueryBuilderView",
-    "./mapping/association/correlationQuery/CorrelationQueryDialog",
-    "./mapping/association/dataAssociationManagement/ChangeAssociationDialog",
-    "./mapping/association/dataAssociationManagement/TestSyncDialog",
-
-    "./mapping/BehaviorsView",
-    "./mapping/behaviors/SingleRecordReconciliationGridView",
-    "./mapping/behaviors/SingleRecordReconciliationView",
-    "./mapping/behaviors/ReconciliationScriptView",
-    "./mapping/behaviors/SituationalEventScriptsView",
-    "./mapping/behaviors/PoliciesDialogView",
-    "./mapping/behaviors/PoliciesView",
-
-    "./mapping/PropertiesView",
-    "./mapping/properties/LinkQualifiersView",
-    "./mapping/properties/AttributesGridView",
-    "./mapping/properties/RoleEntitlementsView",
-    "./mapping/properties/AddPropertyMappingDialog",
-    "./mapping/properties/EditPropertyMappingDialog",
-
-    "./mapping/ScheduleView",
-    "./mapping/scheduling/SchedulerView",
-    "./mapping/scheduling/LiveSyncView",
-
-    "./mapping/MappingBaseView",
-    "./mapping/AddMappingView",
-    "./mapping/MappingListView",
-
-    "./mapping/util/MappingUtils",
-    "./mapping/util/MappingScriptsView",
-    "./mapping/util/QueryFilterEditor",
-    "./mapping/util/LinkQualifierFilterEditor",
-
+    "./components/Footer",
     "./login/LoginView",
-    
-    "./settings/SettingsView",
-    "./settings/AuthenticationView",
-    "./settings/AuditView",
-    "./settings/EmailConfigView",
-    "./settings/SelfServiceView",
-
-    "./role/EditRoleView",
-    "./role/RoleUsersView",
-    "./role/RoleEntitlementsListView",
-    "./role/RoleEntitlementsEditView",
-
-    "./workflow/ActiveProcessesView",
-    "./workflow/ProcessDefinitionsView",
-    "./workflow/ProcessListView",
-    "./workflow/ProcessInstanceView",
-    "./workflow/ProcessHistoryView",
-    "./workflow/TaskListView",
-    "./workflow/TaskInstanceView"
+    "./delegates/SiteConfigurationDelegate"
 ]);

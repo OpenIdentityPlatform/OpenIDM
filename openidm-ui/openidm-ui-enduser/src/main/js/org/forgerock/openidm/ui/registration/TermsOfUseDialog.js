@@ -22,18 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _*/
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/registration/TermsOfUseDialog", [
     "org/forgerock/commons/ui/common/components/Dialog"
 ], function(Dialog) {
-    var TermsOfUseDialog = Dialog.extend({    
+    var TermsOfUseDialog = Dialog.extend({
         contentTemplate: "templates/registration/TermsOfUseTemplate.html",
-        baseTemplate: "templates/common/MediumBaseTemplate.html"        
-    }); 
-    
+        baseTemplate: "templates/common/MediumBaseTemplate.html"
+    });
+
     return new TermsOfUseDialog();
 });

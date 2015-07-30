@@ -22,29 +22,31 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, Handlebars, sessionStorage */
+/*global define, sessionStorage */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
+    "jquery",
+    "underscore",
+    "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/common/util/JQGridUtil",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
-    "org/forgerock/commons/ui/common/components/Messages"
-], function(AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager) {
+    "org/forgerock/commons/ui/common/components/Messages",
+    "jqgrid"
+], function($, _, Handlebars, AbstractView, eventManager, constants, cookieHelper, uiUtils, JQGridUtil, resourceDelegate, messagesManager) {
     var ListResourceView = AbstractView.extend({
         template: "templates/admin/resource/ListResourceViewTemplate.html",
-        
+
         events: {
             "click #reloadGridBtn": "reloadGrid",
             "click #clearFiltersBtn": "clearFilters",
             "click #deleteSelected": "deleteSelected"
         },
-        
+
         hasFilters: function(){
             var search = false;
             $.each(this.$el.find('.ui-search-toolbar').find('input,select'),function(){
@@ -54,39 +56,39 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             });
             return search;
         },
-        
+
         select: function(event) {
             event.stopPropagation();
         },
-        
+
         reloadGrid: function(event){
             if(event) {
                 event.preventDefault();
             }
             $(this.grid_id_selector).trigger('reloadGrid');
         },
-        
+
         showObject: function(objectId) {
             var args = this.data.args,
                 routeName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
-            
+
             args.push(objectId);
-            
+
             if(objectId) {
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
             }
         },
-        
+
         clearFilters: function(event){
             var grid_id = this.grid_id_selector,
                 post_data = sessionStorage.getItem(this.objectNameClean() + "ViewGridParams_preTranslation");
-            
+
             if(post_data){
                 post_data = JSON.parse(post_data);
             }
-            
+
             event.preventDefault();
-            
+
             $(grid_id).jqGrid('setGridParam',{search:false});
 
             $.extend(post_data, { filters: "" });
@@ -114,11 +116,11 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         getCols: function(){
             var prom = $.Deferred(),
                 setCols;
-            
+
             $.when(resourceDelegate.getSchema(this.data.args)).then(_.bind(function(schema){
                 var cols = [],
                     unorderedCols = [];
-                
+
                 cols.push(
                         {
                             "name":"_id",
@@ -126,7 +128,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                             "key": true
                         }
                 );
-                    
+
                 if(schema !== "invalidObject"){
                     this.data.validObject = true;
                     if(schema){
@@ -134,7 +136,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         if (schema.title && !this.isSystemResource) {
                             this.data.pageTitle = schema.title;
                         }
-                        
+
                         setCols = _.bind(function(properties, parentProp) {
                             _.each(properties, _.bind(function(col,colName){
                                 if(col.type === "object") {
@@ -144,8 +146,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                         //if _id is in the schema properties and is searchable get rid of the default
                                         //_id col and replace it with a visible one
                                         if(colName === "_id") {
-                                            cols.splice(0,1); 
-                                            
+                                            cols.splice(0,1);
+
                                             unorderedCols.push(
                                                     {
                                                         "name":"_id",
@@ -170,21 +172,21 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                 }
                             }, this));
                         }, this);
-                        
+
                         setCols(schema.properties);
-                        
+
                         _.each(schema.order,function(prop){
                             var col = _.findWhere(unorderedCols, { name : prop });
-                            
+
                             if(col){
                                 cols.push(col);
                             }
                         });
-                        
+
                         _.each(_.difference(unorderedCols, cols), function(col) {
                             cols.push(col);
                         });
-                        
+
                         if (cols.length === 1) {
                             prom.resolve(unorderedCols);
                         } else {
@@ -206,7 +208,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                     }
                                 });
                             }
-                            
+
                             prom.resolve(cols);
                         });
                     }
@@ -215,12 +217,12 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                     prom.resolve(cols);
                 }
             },this));
-            
+
             return prom;
         },
         getTotal: function(){
             var prom = $.Deferred();
-            
+
             $.get(this.getURL() + '?_queryId=query-all-ids').then(
                 function(qry){
                     prom.resolve(qry);
@@ -229,7 +231,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                     prom.resolve({ resultCount: 0 });
                 }
             );
-            
+
             return prom;
         },
         objectNameClean: function() {
@@ -247,7 +249,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         },
         deleteSelected: function(e) {
             e.preventDefault();
-            
+
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDeleteSelected",{ objectTitle: this.data.objectName }), _.bind(function(){
                 var promArr = [];
                 _.each(this.selectedRows(), _.bind(function(objectId) {
@@ -262,7 +264,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 },this));
             }, this));
         },
-        
+
         render: function(args, callback) {
             this.data.args = args;
             this.data.addLinkHref = "#resource/" + args[0] + "/" + args[1] + "/add/";
@@ -272,7 +274,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             this.grid_id_selector = "#" + this.data.grid_id;
             this.isSystemResource = false;
             this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
-            
+
             if (this.data.objectType === "system") {
                 this.isSystemResource = true;
                 this.data.objectName += "/" + args[2];
@@ -288,8 +290,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         grid_id = this.grid_id_selector,
                         pager_id = grid_id + '_pager',
                         rowNum = sessionStorage.getItem(this.objectNameClean() + "ViewGridRows");
-                        
-                        uiUtils.buildJQGrid(this, this.data.grid_id, {
+
+                        JQGridUtil.buildJQGrid(this, this.data.grid_id, {
                             url: this.getURL(),
                             width: this.$el.find(".resourcesContainer").width() - 40,
                             shrinkToFit: cols.length <= 6 || false,
@@ -304,11 +306,11 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                 if(iCol !== 0) {
                                     var posted_data = $(grid_id).jqGrid('getGridParam','postData');
                                     sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams", JSON.stringify(posted_data));
-                                    
+
                                     if(_this.data.posted_data_preTranslation){
                                         sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams_preTranslation", JSON.stringify(_this.data.posted_data_preTranslation));
                                     }
-                                    
+
                                     _this.showObject(rowid);
                                 }
                             }, this),
@@ -332,11 +334,11 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                }
                                if(!this.hasFilters()){
                                    $('#clearFiltersBtn').prop('disabled', true);
-                               } 
+                               }
 
-                               
+
                                sessionStorage.removeItem(_this.objectNameClean() + "ViewGridParams_preTranslation");
-                               
+
                                sessionStorage.removeItem(_this.objectNameClean() + "ViewGridParams");
                             }, this),
                             beforeRequest: function(){
@@ -359,8 +361,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                             onSelectAll: _.bind(function() {
                                 this.toggleDeleteSelected();
                             }, this)
-                        }, 
-                        { 
+                        },
+                        {
                             search: true,
                             searchOperator: "sw",
                             suppressColumnChooser: true,
@@ -370,10 +372,10 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                     omittedFields = ["_pageSize","_pagedResultsOffset","_queryFilter","_sortKeys","page","sord"],
                                     searchFields = _.omit(posted_data,omittedFields),
                                     filterArray = [];
-                                
+
                                 //convert sortKeys to json pointer
                                 posted_data._sortKeys = posted_data._sortKeys.replace(".","/");
-                                
+
                                 if(cachedParams && JSON.parse(cachedParams)._queryFilter){
                                     return JSON.parse(cachedParams)._queryFilter;
                                 } else {
@@ -386,7 +388,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                                 delete posted_data[key];
                                             }
                                         });
-                                        
+
                                         return filterArray.join(" AND ");
                                     } else {
                                         if(_this.isSystemResource) {
@@ -395,11 +397,11 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                             return '/_id sw ""';
                                         }
                                     }
-                                } 
+                                }
                             },
                             columnChooserOptions: { height: "auto", width: "auto" }
                         });
-                        
+
                         if(callback) {
                             callback();
                         }
@@ -407,12 +409,10 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 } else {
                     this.parentRender();
                 }
-                
+
             },this));
-        }   
-    }); 
-    
+        }
+    });
+
     return new ListResourceView();
 });
-
-

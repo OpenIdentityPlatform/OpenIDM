@@ -22,12 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/IndividualRecordValidationView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView"
 
-], function(MappingScriptsView) {
+], function($, _, MappingScriptsView) {
     var IndividualRecordValidationView = MappingScriptsView.extend({
         element: "#objectFiltersView",
         noBaseTemplate: true,

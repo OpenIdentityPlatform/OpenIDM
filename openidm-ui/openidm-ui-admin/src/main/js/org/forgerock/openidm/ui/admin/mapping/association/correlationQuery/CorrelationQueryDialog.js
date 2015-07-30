@@ -22,15 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, require, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/CorrelationQueryDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/CorrelationQueryBuilderView",
     "bootstrap-dialog"
-], function(AbstractView,
+], function($, _,
+            AbstractView,
             conf,
             uiUtils,
             CorrelationQueryBuilderView,

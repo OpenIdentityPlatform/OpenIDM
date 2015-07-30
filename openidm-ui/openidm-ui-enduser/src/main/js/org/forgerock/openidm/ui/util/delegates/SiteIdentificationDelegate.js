@@ -22,11 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/util/delegates/SiteIdentificationDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
@@ -37,21 +34,18 @@ define("org/forgerock/openidm/ui/util/delegates/SiteIdentificationDelegate", [
     var endpointPath = constants.host + "/openidm/endpoint/siteIdentification",
         obj = new AbstractDelegate(endpointPath);
 
-    obj.getSiteIdentificationForLogin = function(login, successCallback, errorCallback) {            
+    obj.getSiteIdentificationForLogin = function(login, successCallback, errorCallback) {
         obj.serviceCall({
-            url: "?_queryId=siteIdentification&login=" + login,  
+            url: "?_queryId=siteIdentification&login=" + login,
             type: "GET",
             success: function(data) {
                 if(successCallback) {
                     successCallback(data.result[0]);
                 }
-            }, 
+            },
             error: errorCallback
         });
     };
-    
+
     return obj;
 });
-
-
-

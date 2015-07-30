@@ -22,11 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/common/notifications/NotificationDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
@@ -38,7 +35,7 @@ define("org/forgerock/openidm/ui/common/notifications/NotificationDelegate", [
 
     obj.getNotificationsForUser = function(successCallback, errorCallback) {
         obj.serviceCall({
-            url: "", 
+            url: "",
             success: function (data) {
                 if(successCallback) {
                     successCallback(data);
@@ -47,15 +44,11 @@ define("org/forgerock/openidm/ui/common/notifications/NotificationDelegate", [
             error: errorCallback
         });
     };
-    
+
     obj.deleteEntity = function(id, successCallback, errorCallback) {
-        console.debug("delete entity");
         var callParams = {url: "/" + id, type: "DELETE", success: successCallback, error: errorCallback };
         this.serviceCall(callParams);
     };
 
     return obj;
 });
-
-
-
