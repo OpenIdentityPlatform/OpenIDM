@@ -28,6 +28,7 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
@@ -138,7 +139,7 @@ public class RouterActivityLogger implements ActivityLogger {
                     .status(status)
                     .toEvent();
 
-            connectionFactory.getConnection().create(new ServerContext(context),
+            connectionFactory.getConnection().create(new InternalServerContext((context)),
                                                      Requests.newCreateRequest(AUDIT_ACTIVITY_PATH,
                                                                                auditEvent.getValue()));
         } catch (ResourceException ex) {
