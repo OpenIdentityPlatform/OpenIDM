@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
@@ -120,7 +121,7 @@ public class SchedulerServiceJob implements Job {
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
                 scheduledService.execute(serverContext, scheduledServiceContext);
                 scheduledService.auditScheduledService(
-                        serverContext,
+                        new InternalServerContext(serverContext),
                         createScheduledAuditEvent(serverContext, startTime, context, Status.SUCCESS, null));
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {

@@ -19,6 +19,7 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -201,7 +202,7 @@ public abstract class AbstractSyncAuditEventLogger<T extends AbstractSyncAuditEv
 
             AuditEvent auditEvent = applyCustomFields(eventBuilder).toEvent();
 
-            connectionFactory.getConnection().create(new ServerContext(context),
+            connectionFactory.getConnection().create(new InternalServerContext(context),
                     Requests.newCreateRequest(getAuditPath(), auditEvent.getValue()));
         } catch (ResourceException e) {
             throw e;

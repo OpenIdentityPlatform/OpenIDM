@@ -21,6 +21,7 @@ import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
 import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
@@ -76,7 +77,7 @@ public class JaspiAuditApi implements AuditApi {
                 // TODO We need Context!!!
                 CreateRequest createRequest = Requests.newCreateRequest("audit/authentication", auditEvent.getValue());
                 ServerContext ctx = authnFilterHelper.getRouter().createServerContext();
-                authnFilterHelper.getConnectionFactory().getConnection().create(ctx, createRequest);
+                authnFilterHelper.getConnectionFactory().getConnection().create(new InternalServerContext(ctx), createRequest);
             } else {
                 // Filter should have rejected request if router is not available
                 LOGGER.warn("Failed to log entry for {} as router is null.", username);
