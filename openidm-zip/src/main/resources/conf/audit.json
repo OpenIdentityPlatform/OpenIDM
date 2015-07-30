@@ -10,6 +10,12 @@
                 "logDirectory" : "audit"
             },
             "events" : [ "access", "activity", "recon", "sync", "authentication" ]
+        },
+        {
+            "name": "repo",
+            "class": "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+            "config": {},
+            "events": [ "access", "activity", "recon", "sync", "authentication" ]
         }
     ],
     "extendedEventTypes" : {
