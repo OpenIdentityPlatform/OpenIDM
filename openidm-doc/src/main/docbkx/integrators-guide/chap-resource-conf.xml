@@ -3540,7 +3540,7 @@ xmlConnectorData.xml                     100% 1648     1.6KB/s   00:00</computer
      <literal>openicf/bundles</literal> directory on the remote host.
     </para>
     <screen><userinput>$ cd path/to/openidm
-$ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/bundles</userinput>
+$ scp connectors/xml-connector-${openicf.xmlconnector.version}.jar testuser@remote-host:/path/to/openicf/connectors</userinput>
 <computeroutput>testuser@remote-host's password:
 xml-connector-${openicf.xmlconnector.version}.jar                100% 4379KB   4.3MB/s   00:00</computeroutput></screen>
 
@@ -3566,18 +3566,16 @@ $ cp provisioners/provisioner.openicf.connectorinfoprovider.json sample1/conf</s
       <para>
        Edit the remote connector configuration file
        (<literal>provisioner.openicf.connectorinfoprovider.json</literal>) to
-       match your network setup. Also, change the value of the
-       <literal>"connectorsLocation"</literal> property to
-       <literal>"bundles"</literal>, as this is where the connector will be
-       installed on the remote host.
+       match your network setup.
       </para>
       <para>
        The following example indicates that the remote Java Connector server is
-       running on the host <literal>remote-host</literal>, listening on the default
-       port, and configured with a secret key of <literal>Passw0rd</literal>.
+       running on the host <literal>remote-host</literal>, listening on the
+       default port, and configured with a secret key of
+       <literal>Passw0rd</literal>.
       </para>
       <programlisting>{
-    "connectorsLocation" : "bundles",
+    "connectorsLocation" : "connectors",
     "remoteConnectorServers" : [
         {
             "name" : "xml",
