@@ -441,12 +441,11 @@ script task using expression resolver: [
     <para>
      You can also schedule the workflow to be invoked repeatedly, or at a future
      time. For more information, see the <link
-     xlink:href="integrators-guide#appendix-scheduling"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler
-     Reference</citetitle></link>.
+     xlink:href="integrators-guide#chap-scheduler-conf"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
+     Tasks and Events</citetitle></link>.
     </para>
    </step>
-   <!--TODO Add a new section that specifically describes scheduling workflows -->
   </procedure>
  </section>
 
