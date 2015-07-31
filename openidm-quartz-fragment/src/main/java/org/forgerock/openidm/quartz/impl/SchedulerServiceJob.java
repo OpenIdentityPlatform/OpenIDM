@@ -98,9 +98,9 @@ public class SchedulerServiceJob implements Job {
 
         logger.debug("Job to invoke service with PID {} and invoke context {} with scheduler context {}",
                 new Object[] {invokeService, invokeContext, context});
-        logger.debug("Job to invoke service with PID {} with scheduler context {}", new Object[] {invokeService, context});
+        logger.debug("Job to invoke service with PID {} with scheduler context {}", invokeService, context);
 
-        Map<String,Object> scheduledServiceContext = new HashMap<String,Object>();
+        Map<String,Object> scheduledServiceContext = new HashMap<>();
         scheduledServiceContext.putAll(data);
 
         scheduledServiceContext.put(ScheduledService.INVOKER_NAME, "Scheduled " +
@@ -117,12 +117,14 @@ public class SchedulerServiceJob implements Job {
             final ServerContext serverContext =
                     newScheduledServerContext((String) scheduledServiceContext.get(ScheduledService.INVOKER_NAME));
             try {
-                LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
+                LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.",
+                        context.getJobDetail().getFullName());
                 scheduledService.execute(serverContext, scheduledServiceContext);
                 scheduledService.auditScheduledService(
                         serverContext,
                         createScheduledAuditEvent(serverContext, startTime, context, Status.SUCCESS, null));
-                LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
+                LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.",
+                        context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
                         new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
