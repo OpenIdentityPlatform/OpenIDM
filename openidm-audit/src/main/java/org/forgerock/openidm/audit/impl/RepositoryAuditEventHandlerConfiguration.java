@@ -21,5 +21,14 @@ package org.forgerock.openidm.audit.impl;
  * @see RepositoryAuditEventHandler
  */
 public class RepositoryAuditEventHandlerConfiguration {
+    private static final String REPO_AUDIT_PATH = "repo/audit";
+
+    /**
+     * Returns the fixed path to repository audits.
+     * @return #REPO_AUDIT_PATH
+     */
+    public String getResourcePath() {
+        return REPO_AUDIT_PATH;
+    }
 
 }
