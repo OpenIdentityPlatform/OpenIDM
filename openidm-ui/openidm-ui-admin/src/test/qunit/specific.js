@@ -39,6 +39,14 @@ define([
 
     return {
         executeAll: function (server) {
+
+            QUnit.testStart(function (testDetails) {
+                var lqu = require("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"),
+                    connectorDelegate = require("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate");
+                connectorDelegate.deleteCurrentConnectorsCache();
+                lqu.model.linkQualifier = [];
+            });
+
             QUnit.moduleDone(function() {
                 $(".bootstrap-dialog").remove();
             });
