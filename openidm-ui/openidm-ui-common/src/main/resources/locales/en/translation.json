@@ -374,7 +374,11 @@
             "cancelConfirmation": "Are you sure you want to cancel this Process?",
             "started": "Started",
             "startedBy": "Started By",
-            "cancelProcessSuccess": "Process successfully canceled"
+            "cancelProcessSuccess": "Process successfully canceled",
+            "tasks": "Tasks",
+            "definition": "Definition",
+            "by": "by",
+            "created": "Created"
         },
         "managed" : {
             "addManagedTitle" : "Add Managed Object",
@@ -546,11 +550,13 @@
                 "created": "Created",
                 "due": "Due",
                 "anyone": "Anyone",
-                "unassigned": "Unassigned"
+                "unassigned": "Unassigned",
+                "noActiveTasks": "No Active Tasks"
             },
             "processes" : {
                 "processInstance" : "Process Instance",
                 "processDefinitions" : "Process Definitions",
+                "processDefinition" : "Process Definition",
                 "created" : "Created",
                 "startedBy" : "Started By",
                 "processes" : "Workflow Processes",
