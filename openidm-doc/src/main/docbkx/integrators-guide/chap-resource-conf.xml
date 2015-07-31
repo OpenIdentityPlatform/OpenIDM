@@ -3145,7 +3145,7 @@ Properties:
     script, you can disable autocommit mode in the script or scripts for each
     action that requires a manual commit. For more information on disabling
     autocommit, see the corresponding <link xlink:show="new"
-    xlink:href="http://http://dev.mysql.com/doc/refman/5.6/en/commit.html">MySQL
+    xlink:href="http://dev.mysql.com/doc/refman/5.6/en/commit.html">MySQL
     documentation</link>.
    </para>
   </section>
