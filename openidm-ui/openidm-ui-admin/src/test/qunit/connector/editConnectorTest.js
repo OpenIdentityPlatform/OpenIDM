@@ -44,9 +44,9 @@ define([
                     //Base connector tests
                     QUnit.equal(editConnector.$el.find(".back-bar a").length, 1, "Return link loaded");
 
-                    QUnit.ok(editConnector.$el.find(".page-header .media .media-body .page-type").html() === "LDAP Connector - 1.4.0.0", "Connector type set");
+                    QUnit.ok(editConnector.$el.find(".page-header .page-type").html() === "LDAP Connector - 1.4.0.0", "Connector type set");
 
-                    QUnit.ok(editConnector.$el.find(".page-header .media .media-body h1").html() === "ldap", "Connector name set");
+                    QUnit.ok(editConnector.$el.find(".page-header h1").html() === "ldap", "Connector name set");
 
                     QUnit.equal(editConnector.$el.find(".nav-tabs li").length, 4, "Tabs detected and tabdrop prepared");
 

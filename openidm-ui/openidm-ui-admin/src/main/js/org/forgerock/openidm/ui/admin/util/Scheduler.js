@@ -32,7 +32,8 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "cron"
+    "cron",
+    "gentleSelect"
 ], function($, _, AbstractView, constants, SchedulerDelegate, uiUtils, eventManager) {
     var schedulerInstance = {},
         Scheduler = AbstractView.extend({

@@ -375,7 +375,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                 }, this);
 
             } else {
-                if(!details.schema.icon) {
+                if(!details.schema || !details.schema.icon) {
                     this.$el.find("#" + id + " .resource-small-icon").attr('class', "resource-small-icon " +details.iconClass);
                 } else {
                     this.$el.find("#" + id + " .resource-small-icon").attr('class','resource-small-icon fa ' +details.schema.icon);
