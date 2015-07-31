@@ -30,6 +30,7 @@
 define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/AbstractModel",
@@ -37,7 +38,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils"
-], function(AbstractView, eventManager, constants, UIUtils, AbstractModel, messagesManager, AbstractCollection, Backgrid, BackgridUtils) {
+], function(AbstractView, eventManager, router, constants, UIUtils, AbstractModel, messagesManager, AbstractCollection, Backgrid, BackgridUtils) {
     var ProcessInstanceModel = AbstractModel.extend({ url: "/openidm/workflow/processinstance" }),
         ProcessDefinitionModel = AbstractModel.extend({ url: "/openidm/workflow/processdefinition" }),
         UserModel = AbstractModel.extend({ url: "/openidm/managed/user" }),
@@ -89,6 +90,15 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
                     
                     this.data.processDefinition = processDefinition.toJSON();
                     this.data.startedBy = startedBy.toJSON();
+                    
+                    if (this.data.processDefinition.processDiagramResourceName) {
+                        this.data.showDiagram = true;
+                        if (!this.model.get("endTime")) {
+                            this.data.diagramUrl = "/openidm/workflow/processinstance/" + this.model.id + "?_fields=/diagram&_mimeType=image/png";
+                        } else {
+                            this.data.diagramUrl = "/openidm/workflow/processdefinition/" + this.data.processDefinition._id + "?_fields=/diagram&_mimeType=image/png";
+                        }
+                    }
 
                     this.parentRender(_.bind(function(){
                         
@@ -140,28 +150,25 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
                         editable: false,
                         cell: BackgridUtils.DateCell("endTime"),
                         sortable: false
-                    },
+                    }, 
                     {
-                        editable: false,
-                        cell: Backgrid.Cell.extend({
-                            events: {
-                                "click .editTask" : "editTask"
-                            },
-                            editTask: function () {
-                                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "taskInstanceView", args: [this.model.id]});
-                            },
-                            render: function () {
-                                if (!this.model.attributes.endTime) {
-                                    var html = '<i class="btn fa fa-pencil grid-icon editTask" title="Edit task"></i>';
-                                    this.$el.html(html);
-                                }
-                                return this;
+                        name: "",
+                        cell: BackgridUtils.ButtonCell([{
+                            className: "fa fa-pencil grid-icon",
+                            callback: function() {
+                                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.taskInstanceView, args: [this.model.id]});
                             }
-                        })
+                        }], function() {
+                            if (this.model.attributes.endTime) {
+                                this.$el.empty();
+                            }
+                        }),
+                        sortable: false,
+                        editable: false
                     }
                 ],
                 tasksGrid = new Backgrid.Grid({
-                    columns: cols,
+                    columns: BackgridUtils.addSmallScreenCell(cols),
                     collection: processTasks,
                     className: "table"
                 });

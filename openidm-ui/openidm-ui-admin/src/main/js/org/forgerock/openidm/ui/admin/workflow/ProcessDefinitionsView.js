@@ -22,17 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define, $, _ */
 
 define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/AbstractCollection",
-    "backgrid"
+    "backgrid",
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils"
 ], function(AdminAbstractView,
             AbstractModel,
             AbstractCollection,
-            Backgrid) {
+            Backgrid,
+            BackgridUtils) {
     var ProcessDefinitionsView = AdminAbstractView.extend({
         template: "templates/admin/workflow/ProcessDefinitionsViewTemplate.html",
         events: {
@@ -55,14 +57,21 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
                     processDefinitionGrid = new Backgrid.Grid({
                         className: "table",
                         emptyText: $.t("templates.workflows.processes.noProcessesDefinitions"),
-                        columns: [
+                        columns: BackgridUtils.addSmallScreenCell([
                         {
                             name: "name",
-                            label: $.t("templates.workflows.processes.processDefinitions"),
-                            cell: "string",
+                            label: $.t("templates.processInstance.definition"),
+                            cell: Backgrid.Cell.extend({
+                                render: function () {
+                                    this.$el.html('<a href="#workflow/processdefinition/' +this.model.id +'">' +this.model.get("name") +'<small class="text-muted"> (' +this.model.id +')</small></a>');
+
+                                    this.delegateEvents();
+                                    return this;
+                                }
+                            }),
                             sortable: true,
                             editable: false
-                        }],
+                        }], true),
                         collection: this.model.processes
                     });
 

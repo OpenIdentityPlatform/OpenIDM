@@ -154,11 +154,17 @@
 .table thead tr th{
   font-size:12px;
   text-transform: uppercase;
+  border-bottom: 2px solid #ddd;
+  letter-spacing: 1px;
 
   a {
     color: #2a2f32;
     cursor: pointer;
   }
+}
+
+.table tbody tr td{
+  padding: 12px 15px;
 }
 
 .table thead tr th a:hover {
@@ -167,6 +173,12 @@
 
 .table-responsive {
   border:none;
+}
+
+img.diagramImage {
+    max-width: 97%;
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 
@@ -182,6 +194,13 @@
 
   thead {
     display: none;
+  }
+  
+  td.smallScreenCell {
+    a {
+      color: #2a2f32;
+      cursor: pointer;
+    }
   }
 
   th:not(.smallScreenCell), td:not(.smallScreenCell) {
@@ -201,6 +220,11 @@
 
   th:not(.smallScreenCell), td:not(.smallScreenCell) {
     display: table-cell;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 1px solid #eee;
+    
+    a {
+      color: #2a2f32;
+      cursor: pointer;
+    }
   }
 }

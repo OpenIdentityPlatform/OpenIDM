@@ -118,6 +118,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./role/RoleEntitlementsEditView",
 
     "./workflow/ActiveProcessesView",
+    "./workflow/ProcessDefinitionView",
     "./workflow/ProcessDefinitionsView",
     "./workflow/ProcessListView",
     "./workflow/ProcessInstanceView",
