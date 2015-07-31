@@ -1312,7 +1312,7 @@
             "OAuth" : "OAuth",
             "createNewUser" : "Create New User",
             "password" : "Password",
-            "confirmPassword" : "ReType Password",
+            "confirmPassword" : "Retype Password",
             "newPassword" : "New password",
             "oldPassword" : "Old password",
             "confirmNewPassword" : "Confirm new password",

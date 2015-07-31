@@ -386,7 +386,7 @@ Configuration was found and read from: /path/to/openidm/temp/provisioner.openicf
    xlink:href="integrators-guide#connector-wiz"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
    Connector Configurations</citetitle></link> and <link
-   xlink:href="integrators-guide#ui-admin-connectors"
+   xlink:href="integrators-guide#connector-wiz-adminui"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Administering
    Connectors from the UI</citetitle></link>.
   </para>

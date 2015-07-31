@@ -175,8 +175,8 @@
    Password changes are subject to the default password policy. For details, see
    the following section:
    <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-         xlink:href="intergators-guide#enforce-password-policy">
-    <citetitle>Enforcing Password Policy</citetitle></link>.
+   xlink:href="integrators-guide#enforce-password-policy">
+   <citetitle>Enforcing Password Policy</citetitle></link>.
   </para>
 
  <section xml:id="ui-configuring">

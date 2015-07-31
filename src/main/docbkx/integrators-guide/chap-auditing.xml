@@ -1131,10 +1131,9 @@
      objects available to the script. Before the audit record is written, it can
      be accessed as a <literal>request.content</literal> object. For more
      information, see <link xlink:show="new"
-     xlink:href="integrators-guide#scripting-configuration"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
-     Configuration</citetitle></link> in the <citetitle>Scripting
-     Appendix</citetitle>.
+     xlink:href="integrators-guide#script-config"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Setting the
+     Script Configuration</citetitle></link>.
     </para>
     <para>
      For example, to set up a script to log just the summary records for mapping
