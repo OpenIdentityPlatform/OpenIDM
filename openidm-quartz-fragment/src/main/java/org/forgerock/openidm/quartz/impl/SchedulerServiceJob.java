@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
@@ -99,7 +98,8 @@ public class SchedulerServiceJob implements Job {
 
         logger.debug("Job to invoke service with PID {} and invoke context {} with scheduler context {}",
                 new Object[] {invokeService, invokeContext, context});
-        logger.debug("Job to invoke service with PID {} with scheduler context {}", new Object[] {invokeService, context});
+        logger.debug("Job to invoke service with PID {} with scheduler context {}",
+                new Object[] {invokeService, context});
 
         Map<String,Object> scheduledServiceContext = new HashMap<String,Object>();
         scheduledServiceContext.putAll(data);
@@ -121,7 +121,7 @@ public class SchedulerServiceJob implements Job {
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
                 scheduledService.execute(serverContext, scheduledServiceContext);
                 scheduledService.auditScheduledService(
-                        new InternalServerContext(serverContext),
+                        serverContext,
                         createScheduledAuditEvent(serverContext, startTime, context, Status.SUCCESS, null));
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
