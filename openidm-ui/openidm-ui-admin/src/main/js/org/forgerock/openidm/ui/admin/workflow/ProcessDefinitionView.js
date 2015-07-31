@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define, $, _ */
 
 define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
