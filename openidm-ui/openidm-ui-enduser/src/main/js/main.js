@@ -25,6 +25,18 @@
 /*global require, define, window */
 
 require.config({
+    map: {
+        "*" : {
+            "UserDelegate": "org/forgerock/openidm/ui/common/util/UserDelegate",
+            "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
+            "AuthnDelegate": "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
+            "LoginView": "org/forgerock/openidm/ui/LoginView",
+            "UserProfileView": "org/forgerock/openidm/ui/profile/UserProfileView",
+            "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
+            "RegisterView": "org/forgerock/openidm/ui/registration/UserRegistrationView",
+            "ChangeSecurityDataDialog": "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
+        }
+    },
     paths: {
         i18next: "libs/i18next-1.7.3-min",
         backbone: "libs/backbone-1.1.2-min",
@@ -45,9 +57,6 @@ require.config({
         selectize : "libs/selectize-0.12.1-min",
         d3 : "libs/d3-3.5.5-min",
         dimple : "libs/dimple-2.1.2-min",
-        AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
-        UserDelegate: "org/forgerock/openidm/ui/common/util/UserDelegate",
-        ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
         jsonEditor: "libs/jsoneditor-0.7.9-min"
     },
 
@@ -123,10 +132,6 @@ require([
     "org/forgerock/commons/ui/common/main",
     "org/forgerock/openidm/ui/main",
     "config/main",
-
-    "UserDelegate",
-    "ThemeManager",
-    "AuthnDelegate",
 
     "jquery",
     "underscore",

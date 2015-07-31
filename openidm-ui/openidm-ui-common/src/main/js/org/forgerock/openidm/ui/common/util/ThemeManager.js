@@ -24,7 +24,7 @@
 
 /*global define */
 
-define("ThemeManager", [
+define("org/forgerock/openidm/ui/common/util/ThemeManager", [
     "jquery",
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",

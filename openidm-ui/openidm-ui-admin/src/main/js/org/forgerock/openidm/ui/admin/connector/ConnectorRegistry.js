@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global define, require */
 
 define("org/forgerock/openidm/ui/admin/connector/ConnectorRegistry", [
     "underscore",
@@ -35,7 +35,11 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorRegistry", [
         this.configuration = conf;
 
         _.each(conf,function(val,key){
-            ModuleLoader.setAlias(key, val);
+            require.config({"map":
+                { "*":
+                    { key : val }
+                }
+            });
         });
     };
 

@@ -24,7 +24,7 @@
 
 /*global define */
 
-define("UserDelegate", [
+define("org/forgerock/openidm/ui/common/util/UserDelegate", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
