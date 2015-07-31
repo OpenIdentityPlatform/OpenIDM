@@ -186,6 +186,8 @@ public class AuditFilter implements Filter {
             //log the log entry
             final CreateRequest createRequest =
                     Requests.newCreateRequest("audit/access", accessAuditEventBuilder.toEvent().getValue());
+
+            //wrap the context in a new internal server context since we are using the external connection factory
             connectionFactory.getConnection().create(new InternalServerContext(context), createRequest);
         } catch (ResourceException e) {
             LOGGER.error("Failed to log audit access entry", e);

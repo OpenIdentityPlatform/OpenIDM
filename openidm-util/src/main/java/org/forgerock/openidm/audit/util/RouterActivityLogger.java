@@ -28,7 +28,6 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
@@ -38,7 +37,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,9 +137,9 @@ public class RouterActivityLogger implements ActivityLogger {
                     .status(status)
                     .toEvent();
 
-            connectionFactory.getConnection().create(new InternalServerContext((context)),
-                                                     Requests.newCreateRequest(AUDIT_ACTIVITY_PATH,
-                                                                               auditEvent.getValue()));
+            connectionFactory.getConnection().create(
+                    context,
+                    Requests.newCreateRequest(AUDIT_ACTIVITY_PATH, auditEvent.getValue()));
         } catch (ResourceException ex) {
             if (suspendException) {
                 // log on exception if we're suspending the exception-propagation
