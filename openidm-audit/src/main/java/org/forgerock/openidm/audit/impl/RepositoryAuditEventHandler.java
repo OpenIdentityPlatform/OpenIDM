@@ -1,3 +1,19 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015 ForgeRock AS.
+ */
+
 package org.forgerock.openidm.audit.impl;
 
 import org.forgerock.audit.DependencyProvider;
@@ -20,7 +36,7 @@ import org.forgerock.json.resource.ServerContext;
  * @see RouterAuditEventHandler
  */
 public class RepositoryAuditEventHandler extends AuditEventHandlerBase<RepositoryAuditEventHandlerConfiguration> {
-    public static final String REPO_AUDIT_PATH = "repo/audit";
+
     private RouterAuditEventHandler routerAuditEventHandler;
 
     /**
@@ -32,14 +48,11 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
 
     /**
      * Configures the decorated RouterAuditEventHandler with a fixed path of "repo/audit"
-     *
-     * @param config empty RepositoryAuditEventHandlerConfiguration
-     * @throws ResourceException
      */
     @Override
     public void configure(RepositoryAuditEventHandlerConfiguration config) throws ResourceException {
         RouterAuditEventHandlerConfiguration routerConfig = new RouterAuditEventHandlerConfiguration();
-        routerConfig.setResourcePath(REPO_AUDIT_PATH);
+        routerConfig.setResourcePath(config.getResourcePath());
         routerAuditEventHandler.configure(routerConfig);
     }
 
@@ -53,8 +66,6 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
 
     /**
      * {@inheritDoc}
-     *
-     * @throws ResourceException
      */
     @Override
     public void close() throws ResourceException {
@@ -63,10 +74,6 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
 
     /**
      * {@inheritDoc}
-     *
-     * @param serverContext
-     * @param actionRequest
-     * @param resultHandler
      */
     @Override
     public void actionCollection(ServerContext serverContext, ActionRequest actionRequest,
@@ -76,11 +83,6 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
 
     /**
      * {@inheritDoc}
-     *
-     * @param serverContext
-     * @param resourceId
-     * @param actionRequest
-     * @param resultHandler
      */
     @Override
     public void actionInstance(ServerContext serverContext, String resourceId, ActionRequest actionRequest,
@@ -90,10 +92,6 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
 
     /**
      * {@inheritDoc}
-     *
-     * @param serverContext
-     * @param createRequest
-     * @param resultHandler
      */
     @Override
     public void createInstance(ServerContext serverContext, CreateRequest createRequest,
@@ -103,10 +101,6 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
 
     /**
      * {@inheritDoc}
-     *
-     * @param serverContext
-     * @param queryRequest
-     * @param queryResultHandler
      */
     @Override
     public void queryCollection(ServerContext serverContext, QueryRequest queryRequest,
@@ -116,11 +110,6 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
 
     /**
      * {@inheritDoc}
-     *
-     * @param serverContext
-     * @param resourceId
-     * @param readRequest
-     * @param resultHandler
      */
     @Override
     public void readInstance(ServerContext serverContext, String resourceId, ReadRequest readRequest,
