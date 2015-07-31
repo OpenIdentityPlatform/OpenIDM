@@ -27,6 +27,7 @@
 define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
     "jquery",
     "underscore",
+    "jsonEditor",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",

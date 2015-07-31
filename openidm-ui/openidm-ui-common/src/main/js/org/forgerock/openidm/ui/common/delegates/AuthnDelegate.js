@@ -24,7 +24,7 @@
 
 /*global define */
 
-define("AuthnDelegate", [
+define("org/forgerock/openidm/ui/common/delegates/AuthnDelegate", [
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"

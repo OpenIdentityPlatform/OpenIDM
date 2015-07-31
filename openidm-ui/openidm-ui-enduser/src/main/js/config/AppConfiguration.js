@@ -25,7 +25,7 @@
 /*global define*/
 
 define("config/AppConfiguration", [
-    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = {
@@ -35,20 +35,6 @@ define("config/AppConfiguration", [
                 configuration: {
                     loginHelperClass: "org/forgerock/openidm/ui/common/login/InternalLoginHelper"
                 }
-            },
-            {
-                moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
-                configuration: {
-                    LoginView : "org/forgerock/openidm/ui/LoginView",
-                    UserProfileView : "org/forgerock/openidm/ui/profile/UserProfileView",
-                    LoginDialog : "org/forgerock/commons/ui/common/LoginDialog",
-                    RegisterView : "org/forgerock/openidm/ui/registration/UserRegistrationView",
-                    ChangeSecurityDataDialog : "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
-                }
-            },
-            {
-                moduleClass: "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
-                configuration: {}
             },
             {
                 moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",

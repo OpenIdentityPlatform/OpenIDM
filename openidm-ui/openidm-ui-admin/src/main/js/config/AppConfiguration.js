@@ -25,7 +25,7 @@
 /*global define */
 
 define("config/AppConfiguration", [
-    "org/forgerock/commons/ui/common/util/Constants"
+    "org/forgerock/openidm/ui/common/util/Constants"
 ], function(constants) {
     var obj = {
         moduleDefinition: [
@@ -33,13 +33,6 @@ define("config/AppConfiguration", [
                 moduleClass: "org/forgerock/commons/ui/common/main/SessionManager",
                 configuration: {
                     loginHelperClass: "org/forgerock/openidm/ui/common/login/InternalLoginHelper"
-                }
-            },
-            {
-                moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
-                configuration: {
-                    LoginView : "org/forgerock/openidm/ui/admin/login/LoginView",
-                    LoginDialog: "org/forgerock/commons/ui/common/LoginDialog"
                 }
             },
             {
