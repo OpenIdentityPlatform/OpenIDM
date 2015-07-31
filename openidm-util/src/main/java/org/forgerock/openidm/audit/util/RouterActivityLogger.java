@@ -137,8 +137,7 @@ public class RouterActivityLogger implements ActivityLogger {
                     .status(status)
                     .toEvent();
 
-            connectionFactory.getConnection().create(
-                    context,
+            connectionFactory.getConnection().create(context,
                     Requests.newCreateRequest(AUDIT_ACTIVITY_PATH, auditEvent.getValue()));
         } catch (ResourceException ex) {
             if (suspendException) {
