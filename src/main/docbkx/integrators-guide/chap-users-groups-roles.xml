@@ -484,12 +484,8 @@
      </mediaobject>
 
      <para>
-      If you do not see users in the Role screen, you may need to reconcile
-      users from a remote connected repository. For more information, see the
-      following section:
-      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
-            xlink:href="integrators-guide#admin-ui-sync"><citetitle>Configuring
-      Reconciliation from the UI</citetitle></link>.
+      If you do not see users in the Role screen, you might need to reconcile
+      users from a remote connected repository.
      </para>
 
      <para>
