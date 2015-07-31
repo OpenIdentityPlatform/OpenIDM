@@ -22,15 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, require, QUnit */
+/*global require */
 
 require.config({
     baseUrl: '../www',
     paths: {
-        text: "../test/text",
         jquery: "libs/jquery-2.1.1-min",
+        doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         underscore: "libs/lodash-2.4.1-min",
-        sinon: "libs/sinon-1.12.2"
+        sinon: "libs/sinon-1.15.4"
     },
     shim: {
         underscore: {
@@ -38,6 +38,10 @@ require.config({
         },
         sinon: {
             exports: "sinon"
+        },
+        doTimeout: {
+            deps: ["jquery"],
+            exports: "doTimeout"
         }
     }
 });
@@ -50,10 +54,6 @@ require([
 
     sinon.FakeXMLHttpRequest.useFilters = true;
     sinon.FakeXMLHttpRequest.addFilter(function (method, url, async, username, password) {
-        if (/((translation\.json)|(less-1\.5\.1-min\.js))$/.test(url)) {
-            return false;
-        }
-
         return /((\.html)|(\.css)|(\.less)|(\.json))$/.test(url);
     });
 
@@ -65,5 +65,4 @@ require([
         run(server);
     });
 
-    return server;
 });
