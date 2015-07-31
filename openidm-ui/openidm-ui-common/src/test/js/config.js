@@ -48,9 +48,10 @@ require.config({
 
 require([
     "../test/tests/mocks/systemInit",
+    "jquery",
     "underscore",
     "sinon"
-], function (systemInit, _, sinon) {
+], function (systemInit, $, _, sinon) {
 
     sinon.FakeXMLHttpRequest.useFilters = true;
     sinon.FakeXMLHttpRequest.addFilter(function (method, url, async, username, password) {
@@ -61,7 +62,9 @@ require([
     server.autoRespond = true;
     systemInit(server);
 
-    require(['../www/main','../test/run'], function (appMain, run) {
+    $("head", document).append("<base href='../www/' />");
+
+    require(['main','../test/run'], function (appMain, run) {
         run(server);
     });
 

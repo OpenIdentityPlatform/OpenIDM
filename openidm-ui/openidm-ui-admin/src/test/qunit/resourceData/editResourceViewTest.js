@@ -39,16 +39,16 @@ define([
     "../mocks/editRole",
     "../mocks/editResource"
 ], function (
-        constants, 
-        router, 
-        eventManager, 
+        constants,
+        router,
+        eventManager,
         conf,
-        editResourceView, 
-        resourceEditViewRegistry, 
-        editRoleView, 
-        roleEntitlementsListView, 
-        roleEntitlementsEditView, 
-        inlineScriptEditor, 
+        editResourceView,
+        resourceEditViewRegistry,
+        editRoleView,
+        roleEntitlementsListView,
+        roleEntitlementsEditView,
+        inlineScriptEditor,
         genericEditResourceView,
         editRoleMock,
         editResourceMock
@@ -62,7 +62,6 @@ define([
             QUnit.asyncTest("Edit Role View", function () {
                 var registrySpy = sinon.spy(resourceEditViewRegistry,"getEditViewModule"),
                     editRoleSpy = sinon.spy(editRoleView,"render"),
-                    childView,
                     args = ["managed","role"],
                     roleEntitlementsListRenderStub = sinon.stub(roleEntitlementsListView,"render", function() {
                         roleEntitlementsListRenderStub.restore();
@@ -81,118 +80,127 @@ define([
                             $(".bootstrap-dialog-footer-buttons").find(".btn-primary").click();
                         });
                     };
-                
+
                 editRoleMock(server);
-                
+
                 //managed/role is an example of an edit view override that allows custom editing of a specific managed object
                 editResourceView.render(args);
-                
+
                 //make sure that the ResourceEditViewRegistry is returning the proper view
                 QUnit.ok(registrySpy.calledWith("role"), "ResourceEditViewRegistry.getEditViewModule() called with the 'role' as the resource argument");
-                
-                childView = registrySpy.returnValues[0];
-                QUnit.equal(childView.template, "templates/admin/role/EditRoleViewTemplate.html", "The GenericEditResourceView is properly overridden by EditRoleView");
-                
-                resourceEditViewRegistry.getEditViewModule.restore();
-                
-                QUnit.ok(_.isEqual(editRoleSpy.args[0][0],args), "EditRoleView gets the correct arguments from resourceEditViewRegistry");
-                
-                QUnit.ok(childView.data.newRole,"Based on the args passed to the EditRoleView the 'newRole' variable was properly set to true");
-                
-                editRoleView.render.restore();
-                
-                editRoleView.render(args, _.bind(function() {
-                    QUnit.ok(!editRoleView.$el.find("[href=#role-entitlements]").is(":visible") && !editRoleView.$el.find("[href=#role-users]").is(":visible"), "Entitlements and Users tabs hidden");
-                    
-                    this.$el.find('[name="role[properties][name]"]').val("newRole");
-                    this.$el.find('[name="role[properties][description]"]').val("newRole description");
-                    this.saveRole(null, _.bind(function() {
-                        QUnit.ok(_.isEqual(editRoleView.data.args,this.args[0][0]), "New Role successfully saved");
-                        QUnit.equal(location.hash, "#resource/managed/role/edit/" +  _.last(editRoleView.data.args), "URL route changed to the correct value after save");
-                        QUnit.ok(editRoleView.$el.find("[href=#role-entitlements]").is(":visible") && editRoleView.$el.find("[href=#role-users]").is(":visible"), "Entitlements and Users tabs visible");
-                        
-                        
-                        roleEntitlementsListView.render(editRoleView.data.args, editRoleView.data.role, function() {
-                            editRoleView.$el.find(".add-assignment").click();
-                            
-                            QUnit.ok(_.isEqual(roleEntitlementsEditRenderStub.args[0], [editRoleView.data.args,editRoleView.data.role,null, roleEntitlementsListView]), "RoleEntitlementsEditView.render passed the correct arguments");
-                            
-                            roleEntitlementsEditView.render(editRoleView.data.args,editRoleView.data.role,null, roleEntitlementsListView, function() {
-                                QUnit.ok($(".bootstrap-dialog-title").text().indexOf("Add an Entitlement") > -1, "Add entitlement dialog opened");
-                                roleEntitlementsEditView.$el.find("input.assignment-name").val("myEntitlement");
-                                roleEntitlementsEditView.data.JSONEditors[0].setValue("myAttrVal");
-                                
-                                roleEntitlementsEditView.saveAssignment(function() {
-                                    roleEntitlementsEditView.bsDialog.close();
-                                    QUnit.ok(_.has(editRoleView.data.role.assignments,"myEntitlement"), "New Entitlement successfully saved")
-                                    deleteTest();
+
+                registrySpy.returnValues[0].then(function (childView) {
+
+                    QUnit.equal(childView.template, "templates/admin/role/EditRoleViewTemplate.html", "The GenericEditResourceView is properly overridden by EditRoleView");
+
+                    resourceEditViewRegistry.getEditViewModule.restore();
+
+                    QUnit.ok(_.isEqual(editRoleSpy.args[0][0],args), "EditRoleView gets the correct arguments from resourceEditViewRegistry");
+
+                    QUnit.ok(childView.data.newRole,"Based on the args passed to the EditRoleView the 'newRole' variable was properly set to true");
+
+                    editRoleView.render.restore();
+
+                    editRoleView.render(args, _.bind(function() {
+                        QUnit.ok(!editRoleView.$el.find("[href=#role-entitlements]").is(":visible") && !editRoleView.$el.find("[href=#role-users]").is(":visible"), "Entitlements and Users tabs hidden");
+
+                        this.$el.find('[name="role[properties][name]"]').val("newRole");
+                        this.$el.find('[name="role[properties][description]"]').val("newRole description");
+                        eventManager.whenComplete(constants.EVENT_CHANGE_VIEW).always(function () {
+
+                            QUnit.equal(location.hash, "#resource/managed/role/edit/" +  _.last(editRoleView.data.args), "URL route changed to the correct value after save");
+                            QUnit.ok(editRoleView.$el.find("[href=#role-entitlements]").is(":visible") && editRoleView.$el.find("[href=#role-users]").is(":visible"), "Entitlements and Users tabs visible");
+
+
+                            roleEntitlementsListView.render(editRoleView.data.args, editRoleView.data.role, function() {
+                                editRoleView.$el.find(".add-assignment").click();
+
+                                QUnit.ok(_.isEqual(roleEntitlementsEditRenderStub.args[0], [editRoleView.data.args,editRoleView.data.role,null, roleEntitlementsListView]), "RoleEntitlementsEditView.render passed the correct arguments");
+
+                                roleEntitlementsEditView.render(editRoleView.data.args,editRoleView.data.role,null, roleEntitlementsListView, function() {
+                                    QUnit.ok($(".bootstrap-dialog-title").text().indexOf("Add an Entitlement") > -1, "Add entitlement dialog opened");
+                                    roleEntitlementsEditView.$el.find("input.assignment-name").val("myEntitlement");
+                                    roleEntitlementsEditView.data.JSONEditors[0].setValue("myAttrVal");
+
+                                    roleEntitlementsEditView.saveAssignment(function() {
+                                        roleEntitlementsEditView.bsDialog.close();
+                                        QUnit.ok(_.has(editRoleView.data.role.assignments,"myEntitlement"), "New Entitlement successfully saved")
+                                        deleteTest();
+                                    });
                                 });
                             });
+
                         });
-                        
-                    }, editRoleSpy));
-                }, editRoleView));
+
+                        this.saveRole(null);
+
+                    }, editRoleView));
+
+                });
+
             });
 
             QUnit.asyncTest("Generic Edit Resource View", function () {
                 var registrySpy = sinon.spy(resourceEditViewRegistry,"getEditViewModule"),
                     editResourceSpy = sinon.spy(genericEditResourceView,"render"),
-                    childView,
                     args = ["managed","user"],
                     deleteTest = function() {
                         genericEditResourceView.deleteObject(null,function() {
                             QUnit.ok(true,"Successfully deleted user");
                             QUnit.start();
                         });
-                        
+
                         $("body").one("shown.bs.modal", function () {
                             QUnit.ok($(".bootstrap-dialog-title").text().indexOf("Confirm") > -1, "Delete confirmation dialog opened");
                             $(".bootstrap-dialog-footer-buttons").find(".btn-primary").click();
                         });
                     };
-                
+
                 editResourceMock(server);
-                
+
                 //managed/role is an example of an edit view override that allows custom editing of a specific managed object
                 editResourceView.render(args);
-                
-                childView = registrySpy.returnValues[0];
-                
-                QUnit.equal(childView.template, "templates/admin/resource/EditResourceViewTemplate.html", "The GenericEditResourceView loaded")
-                resourceEditViewRegistry.getEditViewModule.restore();
-                
-                QUnit.ok(_.isEqual(editResourceSpy.args[0][0],args), "GenericEditResourceView gets the correct arguments from resourceEditViewRegistry");
-                
-                QUnit.ok(childView.data.newObject,"Based on the args passed to the GenericEditResourceView the 'newObject' variable was properly set to true");
-                
-                genericEditResourceView.render.restore();
-                
-                genericEditResourceView.render(args, _.bind(function() {
-                    QUnit.ok(!editRoleView.$el.find("#linkedSystemsTabHeader").is(":visible"), "Linked Systems tab hidden");
-                    this.editor.editors["root.userName"].setValue("newUser");
-                    this.editor.editors["root.givenName"].setValue("New");
-                    this.editor.editors["root.sn"].setValue("User");
-                    this.editor.editors["root.mail"].setValue("newUser@newUserSite.com");
-                    
-                    conf.loggedUser = { roles: ["ui-admin"] };
-                    this.save(null, function() {
-                        QUnit.ok(_.isEqual(genericEditResourceView.data.args,editResourceSpy.args[0][0]), "New User successfully saved");
-                        QUnit.equal(location.hash, "#resource/managed/user/edit/" +  _.last(genericEditResourceView.data.args), "URL route changed to the correct value after save");
-                        
-                        //duplicated server calls giving me the already edited object
-                        //change the properties that we will test to the actual oldObject values
-                        genericEditResourceView.oldObject.manager = "";
-                        genericEditResourceView.oldObject.rev = "1";
-                        genericEditResourceView.oldObject.roles = ["openidm-authorized"];
-                        
-                        originalObject = $.extend(true,{},genericEditResourceView.oldObject);
-                        
-                        genericEditResourceView.save(null, function() {
-                            QUnit.ok(true,"Role and Manager values successfully edited and saved");
-                            deleteTest();
+
+                registrySpy.returnValues[0].then(function (childView) {
+
+                    QUnit.equal(childView.template, "templates/admin/resource/EditResourceViewTemplate.html", "The GenericEditResourceView loaded")
+                    resourceEditViewRegistry.getEditViewModule.restore();
+
+                    QUnit.ok(_.isEqual(editResourceSpy.args[0][0],args), "GenericEditResourceView gets the correct arguments from resourceEditViewRegistry");
+
+                    QUnit.ok(childView.data.newObject,"Based on the args passed to the GenericEditResourceView the 'newObject' variable was properly set to true");
+
+                    genericEditResourceView.render.restore();
+
+                    genericEditResourceView.render(args, _.bind(function() {
+                        QUnit.ok(!editRoleView.$el.find("#linkedSystemsTabHeader").is(":visible"), "Linked Systems tab hidden");
+                        this.editor.editors["root.userName"].setValue("newUser");
+                        this.editor.editors["root.givenName"].setValue("New");
+                        this.editor.editors["root.sn"].setValue("User");
+                        this.editor.editors["root.mail"].setValue("newUser@newUserSite.com");
+
+                        conf.loggedUser = { roles: ["ui-admin"] };
+                        this.save(null, function() {
+                            QUnit.ok(_.isEqual(genericEditResourceView.data.args,editResourceSpy.args[0][0]), "New User successfully saved");
+                            QUnit.equal(location.hash, "#resource/managed/user/edit/" +  _.last(genericEditResourceView.data.args), "URL route changed to the correct value after save");
+
+                            //duplicated server calls giving me the already edited object
+                            //change the properties that we will test to the actual oldObject values
+                            genericEditResourceView.oldObject.manager = "";
+                            genericEditResourceView.oldObject.rev = "1";
+                            genericEditResourceView.oldObject.roles = ["openidm-authorized"];
+
+                            originalObject = $.extend(true,{},genericEditResourceView.oldObject);
+
+                            genericEditResourceView.save(null, function() {
+                                QUnit.ok(true,"Role and Manager values successfully edited and saved");
+                                deleteTest();
+                            });
                         });
-                    });
-                }, genericEditResourceView));
+                    }, genericEditResourceView));
+
+
+                })
             });
         }
     };

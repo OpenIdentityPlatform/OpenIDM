@@ -29,8 +29,9 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/connector/ConnectorListView",
+    "org/forgerock/openidm/ui/admin/managed/ManagedListView",
     "../mocks/resourceDetails"
-], function (constants, router, eventManager, ConnectorListView, resourceDetails) {
+], function (constants, router, eventManager, ConnectorListView, ManagedListView, resourceDetails) {
 
     return {
         executeAll: function (server, callback) {
@@ -45,19 +46,33 @@ define([
 
                     QUnit.equal(ConnectorListView.$el.find("#resourceConnectorContainer .card-container").length, 1, "Connectors and add Connector successfully added");
 
-                    QUnit.equal(ConnectorListView.$el.find("#resourceManagedContainer .card-container").length, 4, "Managed Objects and add Managed Object successfully added");
-
-                    QUnit.equal(ConnectorListView.$el.find(".btn-toolbar .btn-group").length, 3, "Button bar with correct number of actions found");
-
-                    QUnit.equal(ConnectorListView.$el.find(".subtitle-bar a").length, 2, "Help successfully detected");
-
                     ConnectorListView.$el.find("#resourceConnectorContainer .card-container:first").find(".dropdown-toggle").trigger("click");
+
+                    QUnit.equal(ConnectorListView.$el.find(".subtitle-bar a").length, 1, "Help successfully detected");
 
                     QUnit.equal($(".btn-group.open").length, 1, "Drop down successfully open");
 
                     QUnit.start();
                 });
             });
+
+            QUnit.asyncTest("Managed Objects List View", function () {
+
+                resourceDetails(server);
+
+                ManagedListView.render([], function () {
+
+                    QUnit.equal(ManagedListView.$el.find("#resourceManagedContainer .card-container").length, 4, "Managed Objects and add Managed Object successfully added");
+
+                    QUnit.equal(ManagedListView.$el.find(".btn-toolbar .btn-group").length, 1, "Button bar with correct number of actions found");
+
+                    QUnit.equal(ManagedListView.$el.find(".subtitle-bar a").length, 1, "Help successfully detected");
+
+                    QUnit.start();
+                });
+            });
+
+
         }
     };
 });
