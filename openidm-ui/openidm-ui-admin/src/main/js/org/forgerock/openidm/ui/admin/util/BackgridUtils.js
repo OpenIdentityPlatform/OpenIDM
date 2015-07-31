@@ -161,50 +161,46 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
                 _.each(filteredCols, _.bind(function (col) {
                     var cellView,
                         label = "<span class='text-muted'>" + col.label + ":</span> ",
-                        actionCell = "";
+                        cellWrapper;
                     
                     if (_.isObject(col.cell)) {
-                        cellView = col.cell.prototype.render.apply(this);
+                        cellView = new col.cell({ model: this.model, column: col});
+                        cellView.$el = $("<span>");
+                        cellView.render();
                         
-                        /*
-                         * If the original cell has events we want to add them to the 
-                         * smallScreenCell's events. This will not work properly if two
-                         * or more of the original cells share the same event names.
-                         * 
-                        */
-                        _.extend(this.events, col.cell.prototype.events);
-                        
-                        if (!_.isEmpty(_.omit(col.cell.prototype.events, "click"))) {
-                            actionCell = "<p class='pull-right show'>";
+                        if (!_.isEmpty(_.omit(cellView.events, "click"))) {
+                            cellWrapper = $("<p class='pull-right show'></p>");
                             
                             if (cellView.$el.html().length && !hideColumnLabels && col.label) {
-                                actionCell += label;
+                                cellWrapper.append(label);
                             }
                             
-                            actionCell += cellView.$el.html() + "</p>";
+                            cellWrapper.append(cellView.$el);
                             
-                            html = actionCell + html;
+                            this.$el.prepend(cellWrapper);
                         } else {
-                            html += "<p>";
+                            cellWrapper = $("<p>");
                             
                             if (cellView.$el.html().length && !hideColumnLabels && col.label) {
-                                html += label;
+                                cellWrapper.append(label);
                             }
                             
-                            html += cellView.$el.html() + "</p>";
+                            cellWrapper.append(cellView.$el);
+                            
+                            this.$el.append(cellWrapper);
                         }
                     } else {
-                        html += "<p>";
+                        cellWrapper = $("<p>");
                         if (this.model.get(col.name) && this.model.get(col.name).length && !hideColumnLabels && col.label) {
-                            html += label;
+                            cellWrapper.append(label);
                         }
                         
-                        html += this.model.get(col.name) + "</p>";
+                        cellWrapper.append(this.model.get(col.name));
+                        
+                        this.$el.append(cellWrapper);
                     }
                 }, this));
 
-                this.$el.html(html);
-                this.delegateEvents();
                 return this;
             }
         }),
