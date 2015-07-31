@@ -27,13 +27,11 @@ package org.forgerock.openidm.audit.filter;
 import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.InternalServerContext;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
@@ -188,7 +186,9 @@ public class AuditFilter implements Filter {
             //log the log entry
             final CreateRequest createRequest =
                     Requests.newCreateRequest("audit/access", accessAuditEventBuilder.toEvent().getValue());
-            connectionFactory.getConnection().create(context, createRequest);
+
+            //wrap the context in a new internal server context since we are using the external connection factory
+            connectionFactory.getConnection().create(new InternalServerContext(context), createRequest);
         } catch (ResourceException e) {
             LOGGER.error("Failed to log audit access entry", e);
         }
