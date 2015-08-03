@@ -1090,7 +1090,7 @@ $ cp -R en/ fr/</screen>
    </para>
 
    <para>
-    If you want to change the labels for user accounts, click Configure &gt;
+    To change the labels for user accounts, click Configure &gt;
     Managed Objects &gt; User &gt; and scroll down to Schema.
    </para>
 
