@@ -108,6 +108,11 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
+    /** Binds the Connection Factory */
+    protected void bindConnectionFactory(ConnectionFactory connectionFactory) {
+    	this.connectionFactory = connectionFactory;
+    }
+    
     public ConnectionFactory getConnectionFactory() {
         return connectionFactory;
     }
