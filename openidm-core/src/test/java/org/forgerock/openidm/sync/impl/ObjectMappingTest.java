@@ -23,6 +23,10 @@
  */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.fluent.JsonValue.array;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -63,28 +67,35 @@ public class ObjectMappingTest {
     @Test
     public void testSourceCondition() throws Exception{
         SyncOperation testSyncOperation = testMapping.getSyncOperation();
-        String testString = "{ \"equalsKey\" : \"foo\", \"includesKey\" : [ \"1\", \"2\", \"3\" ], " +
-                "\"json\" : { \"pointer\" : { \"key\" : \"foo\" } } }";
-        JsonValue testValue = new JsonValue((new ObjectMapper()).readValue(testString.getBytes(), Map.class));
+        JsonValue testValue = json(
+                object(
+                        field("equalsKey", "foo"),
+                        field("includesKey", array("1", "2", "3")),
+                        field("json", object(
+                                field("pointer", object(
+                                        field("key", "foo")
+                                ))
+                        ))
+                ));
         testSyncOperation.sourceObjectAccessor = new LazyObjectAccessor(null, null, "test1", testValue);
         
         // Test passing of three conditions: equals, includes, jsonPointer-equals
-        assertTrue(testSyncOperation.checkSourceConditions());
+        assertTrue(testSyncOperation.checkSourceConditions("default"));
         
         // Test failing of equals condition
         testSyncOperation.sourceObjectAccessor.getObject().put("equalsKey", "bar");
-        assertFalse(testSyncOperation.checkSourceConditions());
+        assertFalse(testSyncOperation.checkSourceConditions("default"));
         
         // Test failing of includes condition
         testSyncOperation.sourceObjectAccessor.getObject().put("equalsKey", "foo");
         testSyncOperation.sourceObjectAccessor.getObject().get("includesKey").asList().remove("1");
-        assertFalse(testSyncOperation.checkSourceConditions());
+        assertFalse(testSyncOperation.checkSourceConditions("default"));
 
         // Test failing of equals condition (with jsonPointer key)
         testSyncOperation.sourceObjectAccessor.getObject().put("equalsKey", "foo");
         testSyncOperation.sourceObjectAccessor.getObject().get("includesKey").asList().add("1");
         testSyncOperation.sourceObjectAccessor.getObject().get("json").get("pointer").put("key", "bar");
-        assertFalse(testSyncOperation.checkSourceConditions());
+        assertFalse(testSyncOperation.checkSourceConditions("default"));
         
     }
     
