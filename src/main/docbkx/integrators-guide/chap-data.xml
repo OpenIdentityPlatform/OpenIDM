@@ -375,9 +375,8 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
      <para>
       You can also use the negation operator (<emphasis>!</emphasis>) to help
       construct a query. For example, a
-      <command>_queryFilter=!(userName+eq+"jdoe")</command>
-      query would return every <literal>userName</literal> except for
-      <literal>jdoe</literal>.
+      <command>_queryFilter=!(userName+eq+"jdoe")</command> query would return
+      every <literal>userName</literal> except for <literal>jdoe</literal>.
      </para>
     </note>
 
