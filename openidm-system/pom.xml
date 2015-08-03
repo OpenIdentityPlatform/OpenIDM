@@ -101,7 +101,7 @@
                             </targetMembers>
                         </bytecodeInjection>
                         <bytecodeInjection>
-                            <expression>${ci.svn.revision}</expression>
+                            <expression>${ci.scm.revision}</expression>
                             <targetMembers>
                                 <constant>
                                     <className>org.forgerock.openidm.core.ServerConstants</className>
