@@ -169,29 +169,47 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `openidm`.`auditauthentication`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `openidm`.`auditauthentication` (
+  `transactionid` VARCHAR(38) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `eventname` VARCHAR(50) NULL ,
+  `result` VARCHAR(255) NULL ,
+  `principal_items` TEXT ,
+  `context` TEXT ,
+  `sessionid` VARCHAR(255) ,
+  `entries` TEXT ,
+  PRIMARY KEY (`transactionid`)
+)
+  ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `openidm`.`auditrecon`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `entrytype` VARCHAR(7) NULL ,
-  `rootactionid` VARCHAR(255) NULL ,
-  `reconid` VARCHAR(36) NULL ,
-  `reconaction` VARCHAR(36) NULL ,
-  `reconciling` VARCHAR(12) NULL ,
-  `sourceobjectid` VARCHAR(511) NULL ,
-  `targetobjectid` VARCHAR(511) NULL ,
-  `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
+
+  `transactionid` VARCHAR(38) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `situation` VARCHAR(24) NULL ,
+  `eventname` VARCHAR(50) NULL ,
+  `userid` VARCHAR(255) NULL ,
   `activity` VARCHAR(24) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `message` TEXT NULL ,
-  `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
-  `mapping` VARCHAR(511) NULL ,
   `linkqualifier` VARCHAR(255) NULL ,
+  `mapping` VARCHAR(511) NULL ,
+  `message` TEXT NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
-  PRIMARY KEY (`objectid`),
+  `situation` VARCHAR(24) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `status` VARCHAR(7) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
+  `reconciling` VARCHAR(12) NULL ,
+  `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
+  `reconaction` VARCHAR(36) NULL ,
+  `entrytype` VARCHAR(7) NULL ,
+  `reconid` VARCHAR(36) NULL ,
+  PRIMARY KEY (`transactionid`) ,
   INDEX `idx_auditrecon_reconid` (`reconid` ASC),
   INDEX `idx_auditrecon_targetobjectid` (`targetobjectid`(28) ASC),
   INDEX `idx_auditrecon_sourceobjectid` (`sourceobjectid`(28) ASC),
@@ -207,21 +225,22 @@ ENGINE = InnoDB;
 -- Table `openidm`.`auditsync`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(255) NULL ,
-  `sourceobjectid` VARCHAR(511) NULL ,
-  `targetobjectid` VARCHAR(511) NULL ,
+  `transactionid` VARCHAR(38) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `eventname` VARCHAR(50) NULL ,
+  `userid` VARCHAR(255) NULL ,
   `activity` VARCHAR(24) NULL ,
-  `situation` VARCHAR(24) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `message` TEXT NULL ,
-  `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
-  `mapping` VARCHAR(511) NULL ,
   `linkqualifier` VARCHAR(255) NULL ,
+  `mapping` VARCHAR(511) NULL ,
+  `message` TEXT NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
-  PRIMARY KEY (`objectid`) )
+  `situation` VARCHAR(24) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `status` VARCHAR(7) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
+  PRIMARY KEY (`transactionid`)
+)
 ENGINE = InnoDB;
 
 
@@ -230,23 +249,24 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(255) NULL ,
-  `parentactionid` VARCHAR(255) NULL ,
-  `activityid` VARCHAR(255) NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `activity` VARCHAR(24) NULL ,
-  `message` TEXT NULL ,
-  `subjectid` VARCHAR(511) NULL ,
-  `subjectrev` VARCHAR(255) NULL ,
-  `requester` TEXT NULL ,
-  `approver` TEXT NULL ,
+  `activitydate` VARCHAR(29) NULL
+  COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `transactionid` VARCHAR(38) NULL ,
+  `eventname` VARCHAR(255) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `runas` VARCHAR(255) NULL ,
+  `resource_uri` VARCHAR(255) NULL ,
+  `resource_protocol` VARCHAR(10) NULL ,
+  `resource_method` VARCHAR(10) NULL ,
+  `resource_detail` VARCHAR(255) NULL ,
   `subjectbefore` MEDIUMTEXT NULL ,
   `subjectafter` MEDIUMTEXT NULL ,
-  `status` VARCHAR(7) NULL ,
   `changedfields` VARCHAR(255) NULL ,
-  `passwordchanged` VARCHAR(5) NULL ,
+  `subjectrev` VARCHAR(255) NULL ,
   PRIMARY KEY (`objectid`) ,
-  INDEX `idx_auditactivity_rootactionid` (`rootactionid` ASC) )
+  INDEX `idx_auditactivity_transactionid` (`transactionid` ASC)
+)
 ENGINE = InnoDB;
 
 
@@ -267,13 +287,30 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `activity` VARCHAR(24) NULL ,
-  `ip` VARCHAR(40) NULL ,
+  `activitydate` VARCHAR(29) NULL
+  COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `transactionid` VARCHAR(38) NULL ,
+  `eventname` VARCHAR(255) ,
+  `server_ip` VARCHAR(40) ,
+  `server_port` VARCHAR(5) ,
+  `client_host` VARCHAR(255) ,
+  `client_ip` VARCHAR(40) ,
+  `client_port` VARCHAR(5) ,
+  `userid` VARCHAR(255) NULL ,
   `principal` TEXT NULL ,
   `roles` VARCHAR(1024) NULL ,
+  `auth_component` VARCHAR(255) NULL ,
+  `resource_uri` VARCHAR(255) NULL ,
+  `resource_protocol` VARCHAR(10) NULL ,
+  `resource_method` VARCHAR(10) NULL ,
+  `resource_detail` VARCHAR(255) NULL ,
+  `http_method` VARCHAR(10) NULL ,
+  `http_path` VARCHAR(255) NULL ,
+  `http_querystring` VARCHAR(255) NULL ,
+  `http_headers` TEXT ,
   `status` VARCHAR(7) NULL ,
-  `userid` VARCHAR(24) NULL ,
+  `elapsedtime` VARCHAR(13) NULL ,
   PRIMARY KEY (`objectid`),
   INDEX `idx_auditaccess_status` (`status` ASC),
   INDEX `idx_auditaccess_principal` (`principal`(28) ASC) )
