@@ -187,7 +187,7 @@
                     "/resourceOperation/operation/detail" : "resource_detail",
                     "before" : "subjectbefore",
                     "after" : "subjectafter",
-                    "changedFields" : {"column" : "changedfield", "type" : "JSON_LIST"},
+                    "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"},
                     "revision" : "subjectrev"
                 }
             },
@@ -209,7 +209,7 @@
                     "status" : "status",
                     "targetObjectId" : "targetobjectid",
                     "reconciling" : "reconciling",
-                    "ambiguousTargetObjectIds" : "ambiguoustargetobjids",
+                    "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
                     "reconAction" : "reconaction",
                     "entryType" : "entrytype",
                     "reconId" : "reconid"

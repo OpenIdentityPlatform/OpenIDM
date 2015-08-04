@@ -209,7 +209,7 @@
                     "status" : "status",
                     "targetObjectId" : "targetobjectid",
                     "reconciling" : "reconciling",
-                    "ambiguousTargetObjectIds" : "ambiguoustargetobjids",
+                    "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
                     "reconAction" : "reconaction",
                     "entryType" : "entrytype",
                     "reconId" : "reconid"

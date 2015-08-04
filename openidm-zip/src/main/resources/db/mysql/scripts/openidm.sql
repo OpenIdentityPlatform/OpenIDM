@@ -202,7 +202,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `messagedetail` MEDIUMTEXT NULL ,
   `situation` VARCHAR(24) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
-  `status` VARCHAR(7) NULL ,
+  `status` VARCHAR(20) NULL ,
   `targetobjectid` VARCHAR(511) NULL ,
   `reconciling` VARCHAR(12) NULL ,
   `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
@@ -237,7 +237,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `messagedetail` MEDIUMTEXT NULL ,
   `situation` VARCHAR(24) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
-  `status` VARCHAR(7) NULL ,
+  `status` VARCHAR(20) NULL ,
   `targetobjectid` VARCHAR(511) NULL ,
   PRIMARY KEY (`transactionid`)
 )
@@ -250,8 +250,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,
   `activity` VARCHAR(24) NULL ,
-  `activitydate` VARCHAR(29) NULL
-  COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `transactionid` VARCHAR(38) NULL ,
   `eventname` VARCHAR(255) NULL ,
   `userid` VARCHAR(255) NULL ,
@@ -309,7 +308,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `http_path` VARCHAR(255) NULL ,
   `http_querystring` VARCHAR(255) NULL ,
   `http_headers` TEXT ,
-  `status` VARCHAR(7) NULL ,
+  `status` VARCHAR(20) NULL ,
   `elapsedtime` VARCHAR(13) NULL ,
   PRIMARY KEY (`objectid`),
   INDEX `idx_auditaccess_status` (`status` ASC),
