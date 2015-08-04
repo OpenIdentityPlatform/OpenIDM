@@ -1085,8 +1085,8 @@ $ cp -R en/ fr/</screen>
 
    <para>
     You can also change the labels for accounts in the UI. To do so,
-    navigate to the <literal>Schema Properties</literal> for the desired
-    managed object.
+    navigate to the <literal>Schema Properties</literal> for the managed object
+    to be changed.
    </para>
 
    <para>
@@ -1096,7 +1096,7 @@ $ cp -R en/ fr/</screen>
 
    <para>
     Under Schema Properties, select a property and modify the
-    <literal>Readable Title</literal> of your choice. For example, you can
+    <literal>Readable Title</literal>. For example, you can
     modify the <literal>Readable Title</literal> for <literal>userName</literal>
     to a label in another language, such as <literal>Nom d'utilisateur</literal>.
    </para>
