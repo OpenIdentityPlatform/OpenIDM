@@ -53,6 +53,21 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `openidm`.`relationships`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `openidm`.`relationships` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `objectid` VARCHAR(255) NOT NULL,
+  `rev` VARCHAR(30) NOT NULL,
+  `firstid` VARCHAR(255) NOT NULL,
+  `firstkey` VARCHAR(32) NOT NULL,
+  `secondid` VARCHAR(255) NOT NULL,
+  `fullobject` MEDIUMTEXT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_relationships_object` (`objectid` ASC)
+) ENGINE = InnoDB;
+
 
 -- -----------------------------------------------------
 -- Table `openidm`.`managedobjects`

@@ -130,6 +130,20 @@
                     "linkQualifier" : "linkqualifier"
                 }
             },
+            "relationship" : {
+                "table": "relationships",
+                "objectToColumn" : {
+                    "_id": "objectid",
+                    "_rev": "rev",
+                    "_properties": {
+                        "column": "fullobject",
+                        "type": "JSON_MAP"
+                    },
+                    "firstId": "firstid",
+                    "firstKey": "firstkey",
+                    "secondId": "secondid"
+                }
+            },
             "ui/notification" : {
                 "table" : "uinotification",
                 "objectToColumn" : {

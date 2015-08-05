@@ -122,7 +122,13 @@
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
-                        	    }
+                        	    },
+                                "_id": {
+                                    "type": "string"
+                                },
+                                "_properties": {
+                                    "type": "object"
+                                }
                             },
                             "resourceCollection" : {
                                 "path" : "managed/role",

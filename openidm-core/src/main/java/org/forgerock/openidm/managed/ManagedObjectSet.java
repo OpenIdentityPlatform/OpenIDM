@@ -164,6 +164,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /** reference to the sync service route; used to decided whether or not to perform a sync action */
     private final AtomicReference<RouteService> syncRoute;
 
+    /** Map of relationship property names and their accompanying sets */
+    private final Map<JsonPointer, ManagedObjectRelationshipSet> relationshipSets = new HashMap<>();
+
     /** Flag for indicating if policy enforcement is enabled */
     private final boolean enforcePolicies;
 
@@ -200,6 +203,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         this.managedObjectPath = new ResourcePath("managed").child(name);
 
         schema = new ManagedObjectSchema(config.get("schema").expect(Map.class));
+
+        for (JsonPointer relationship : schema.getRelationshipFields()) {
+            relationshipSets.put(relationship,
+                    new ManagedObjectRelationshipSet(connectionFactory, managedObjectPath, relationship));
+        }
         
         for (ScriptHook hook : ScriptHook.values()) {
             if (config.isDefined(hook.name())) {
@@ -433,19 +441,26 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     		JsonValue oldValue, JsonValue newValue)
             throws ResourceException {
 
+        // FIXME - need to detect changes to relationships
         if (newValue.asMap().equals(oldValue.asMap())) { // object hasn't changed
             return newResourceResponse(resourceId, rev, null);
         }
+
+        final JsonValue relationships = persistRelationships(context, resourceId, newValue);
+        newValue.asMap().putAll(relationships.asMap());
+
         // Execute the onUpdate script if configured
         execScript(context, ScriptHook.onUpdate, newValue,
                 prepareScriptBindings(context, request, resourceId, oldValue, newValue));
 
+        // Populate the virtual properties (so they are updated for sync-ing)
+        populateVirtualProperties(context, newValue);
+
+        newValue = purgeRelationships(newValue);
+
         // Perform pre-property encryption
         onStore(context, newValue); // performs per-property encryption
 
-        // Populate the virtual properties (so they are updated for sync-ing)
-        populateVirtualProperties(context, newValue);
-        
         // Perform update
         UpdateRequest updateRequest = Requests.newUpdateRequest(repoId(resourceId), newValue);
         updateRequest.setRevision(rev);
@@ -457,6 +472,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
                 oldValue, response.getContent());
+
+        // Put relationships back in before we respond
+        response.getContent().asMap().putAll(relationships.asMap());
 
         return response;
     }
@@ -485,7 +503,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
         final List<ResourceResponse> resources = new ArrayList<ResourceResponse>();
 
-        connectionFactory.getConnection().query(context, queryRequest, 
+        connectionFactory.getConnection().query(context, queryRequest,
         		new QueryResourceHandler() {
                     @Override
                     public boolean handleResource(ResourceResponse resource) {
@@ -523,11 +541,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         try {
             // decrypt any incoming encrypted properties
             JsonValue value = decrypt(content);
+            final JsonValue relationships = persistRelationships(context, resourceId, value);
+
+            value.asMap().putAll(relationships.asMap());
+
             execScript(context, ScriptHook.onCreate, value, null);
-            
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(context, value);
-            
+
+            // Remove relationships so they don't get persisted
+            value = purgeRelationships(value);
+
             // includes per-property encryption
             onStore(context, value);
 
@@ -551,13 +575,311 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             		SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), createResponse.getContent());
 
-            // TODO Check the relative id
+            // Place persisted relationships in content before sending to the handler
+            createResponse.getContent().asMap().putAll(relationships.asMap());
             return prepareResponse(context, createResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
+    }
+
+    /*
+     * The following classes are required to get a blocking get() implementation using
+     * ResultHandlers until we have a proper Promise<V, E> implementation from CREST3
+     */
+
+    protected final class BlockingResultHandler<T> implements ResultHandler<T> {
+        private T result = null;
+        private ResourceException exception = null;
+
+        @Override
+        public synchronized void handleError(ResourceException error) {
+            this.exception = error;
+            notify();
+        }
+
+        @Override
+        public synchronized void handleResult(T result) {
+            this.result = result;
+            notify();
+        }
+
+        public synchronized T get() throws ResourceException {
+            try {
+                // Wait if we don't have a result yet
+                if (exception == null && result == null) {
+                    wait();
+                }
+            } catch (InterruptedException e) {
+                throw new InternalServerErrorException(e.getMessage(), e);
+            }
+
+            if (exception != null) {
+                throw exception;
+            } else {
+                return result;
+            }
+        }
+    }
+
+    protected final class BlockingQueryResultHandler implements QueryResultHandler {
+        private List<Resource> results = new ArrayList<>();
+        private ResourceException exception = null;
+        private boolean done = false;
+
+        @Override
+        public synchronized void handleError(ResourceException error) {
+            this.exception = error;
+            done = true;
+            notify();
+        }
+
+        @Override
+        public synchronized boolean handleResource(Resource resource) {
+            results.add(resource);
+
+            /*
+             * TODO - this will go on forever so long as there are more results.
+             *        we may wish to constrain this by returning false eventually.
+             */
+
+            return true;
+        }
+
+        @Override
+        public synchronized void handleResult(QueryResult result) {
+            done = true;
+            notify();
+        }
+
+        public synchronized List<Resource> get() throws ResourceException {
+            try {
+                // Wait if we're not done
+                if (!done) {
+                    wait();
+                }
+            } catch (InterruptedException e) {
+                throw new InternalServerErrorException(e.getMessage(), e);
+            }
+
+            if (exception != null) {
+                throw exception;
+            } else {
+                return results;
+            }
+        }
+    }
+
+    /**
+     * Returns a deep copy of the supplied {@link JsonValue}.
+     * Used to remove special relation fields before persisting the
+     * value to the repository.
+     *
+     * @param value JsonValue we will create a deep copy of and remove relationships
+     *
+     * @return The value sans relation fields
+     */
+    private JsonValue purgeRelationships(JsonValue value) {
+        final JsonValue stripped = value.copy();
+
+        for (JsonPointer field : schema.getRelationshipFields()) {
+            stripped.remove(field);
+        }
+
+        return stripped;
+    }
+
+    /**
+     * Fetch a single relationship field for the given resource. Returns the relationship item(s) for the given field.
+     * If the field is a relationship array a list of relationships will be returned, otherwise a single relationship
+     * object.
+     *
+     * @param context Context of this request
+     * @param resourceId Id of resource to fetch relations on
+     * @param relationshipField Field of relationship we are fetching
+     *
+     * @return A JsonValue containing the relationship item(s). If no relations are found a JsonValue containing a null
+     * object or empty list will be returned.
+     *
+     * @throws ResourceException
+     */
+    private JsonValue fetchRelationship(final ServerContext context, final String resourceId, final JsonPointer relationshipField) throws ResourceException {
+        final QueryRequest queryRequest = Requests.newQueryRequest("");
+        queryRequest.setAdditionalParameter("firstId", resourceId);
+
+        final BlockingQueryResultHandler handler = new BlockingQueryResultHandler();
+
+        relationshipSets.get(relationshipField).queryCollection(context, queryRequest, handler);
+
+        if (schema.getField(relationshipField).isArray()) {
+            final JsonValue buf = new JsonValue(new ArrayList<>());
+
+            // FIXME - blocking for each relation sucks. CREST3 promises will solve this.
+            for (Resource resource : handler.get()) {
+                buf.add(resource.getContent().asMap());
+            }
+
+            return buf;
+        } else {
+            final List<Resource> results = handler.get();
+
+            if (results != null && !results.isEmpty()) {
+                return results.get(0).getContent();
+            } else {
+                return new JsonValue(null);
+            }
+        }
+    }
+
+    /**
+     * Fetch the relationships for the given resourceId. This will fetch all relationship fields.
+     *
+     * @param context Context to use for the request
+     * @param resourceId Id of the resource we are fetching relationships for
+     * @return A JsonValue containing all relationship fields and their entries
+     *
+     * @throws ResourceException If an error occured querying the relationships
+     */
+    private JsonValue fetchRelationships(final ServerContext context, final String resourceId) throws ResourceException {
+        final JsonValue relationships = new JsonValue(new HashMap<String, Object>());
+
+        for (JsonPointer relationshipField : schema.getRelationshipFields()) {
+            relationships.put(relationshipField, fetchRelationship(context, resourceId, relationshipField));
+
+        }
+
+        return relationships;
+    }
+
+    /**
+     * Delete all relationships on a given resource
+     *
+     * @param context Context of the request
+     * @param resourceId Id of resource to delete relations of
+     * @throws ResourceException
+     */
+    private void deleteRelationships(final ServerContext context, final String resourceId) throws ResourceException {
+        for (JsonPointer relationField : schema.getRelationshipFields()) {
+            deleteRelationships(context, resourceId, relationField);
+        }
+    }
+
+    /**
+     * Delete any relations for the given relationField.
+     *
+     * @param context Context of the request
+     * @param resourceId Id of resource to remove relationships on
+     * @param relationField Field to delete relationships associated with
+     *
+     * @throws ResourceException
+     */
+    private void deleteRelationships(final ServerContext context, final String resourceId, final JsonPointer relationField) throws ResourceException {
+        final boolean isArray = schema.getFields().get(relationField).isArray();
+        final JsonValue existingRelations = fetchRelationship(context, resourceId, relationField);
+
+        if (isArray) {
+            for (JsonValue relation : existingRelations) {
+                final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
+                final String id = relation.get("_id").asString();
+                final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
+                relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest, handler);
+
+                // FIXME - this is blocking. need crest3 promises.
+                handler.get();
+            }
+        } else {
+            if (!existingRelations.isNull()) {
+                final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
+                final String id = existingRelations.get("_id").asString();
+                final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
+                relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest, handler);
+
+                // FIXME - this is blocking. need crest3 promises.
+                handler.get();
+            }
+        }
+    }
+
+    /**
+     * Create or update relationship properties for the given resource
+     *
+     * @param context
+     * @param resourceId Id of the resource that needs relationships
+     * @param value Value containing resource fields to persist
+     */
+    private JsonValue persistRelationships(final ServerContext context, final String resourceId, final JsonValue value) throws ResourceException {
+        // create/update relationship references. Update if we have UUIDs
+        // delete all relationships not in this array
+
+        // Map to hold persisted results from create()
+        final JsonValue persisted = new JsonValue(new HashMap<String, Object>());
+
+        // List of Ids we have created/updated that should not be purged afterwards
+        final List<String> idsToKeep = new ArrayList<>();
+
+        for (Map.Entry<JsonPointer, ManagedObjectRelationshipSet> entry : relationshipSets.entrySet()) {
+            JsonPointer relationField = entry.getKey();
+            ManagedObjectRelationshipSet relations = entry.getValue();
+            final boolean isArray = schema.getFields().get(relationField).isArray();
+
+            /*
+             * Purge any existing relationships.
+             * TODO - add update support if we got an _id
+             */
+
+            deleteRelationships(context, resourceId, relationField);
+
+            /*
+             * Create the relations
+             */
+
+            final JsonValue fieldValue = value.get(relationField);
+
+            if (fieldValue != null && !fieldValue.isNull()) {
+                // Relation is an array of many relationships
+                if (isArray) {
+                    fieldValue.expect(List.class);
+                    final List<Map<String, Object>> buf = new ArrayList<>();
+
+                    for (JsonValue relationobject : fieldValue) {
+                        relationobject.put("firstId", resourceId);
+
+                        final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
+                        final CreateRequest createRequest = Requests.newCreateRequest("", relationobject);
+                        relations.createInstance(context, createRequest, handler);
+
+                        // FIXME - we should not be blocking on every create need to join() after all
+                        // need to call get() here in case we have an exception
+                        final Resource result = handler.get();
+                        idsToKeep.add(result.getId());
+
+                        buf.add(result.getContent().asMap());
+                    }
+
+                    persisted.put(relationField, buf);
+
+                } else { // only a single relationship
+                    fieldValue.put("firstId", resourceId);
+
+                    final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
+                    final CreateRequest createRequest = Requests.newCreateRequest("", fieldValue);
+                    relations.createInstance(context, createRequest, handler);
+
+                    // FIXME - we should not be blocking on every create need to join() after all
+                    final Resource _new = handler.get();
+                    idsToKeep.add(_new.getId());
+
+                    persisted.put(relationField, _new.getContent().asMap());
+                }
+            } else {
+                persisted.put(relationField, null);
+            }
+
+        }
+
+        return persisted;
     }
 
     @Override
@@ -568,6 +890,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
             ResourceResponse readResponse = connectionFactory.getConnection().read(context, readRequest);
+
+            final JsonValue relationships = fetchRelationships(context, resourceId);
+            readResponse.getContent().asMap().putAll(relationships.asMap());
 
             onRetrieve(context, request, resourceId, readResponse);
             execScript(context, onRead, readResponse.getContent(), null);
@@ -629,6 +954,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 deleteRequest.setRevision(resource.getRevision());
             }
             ResourceResponse deletedResource = connectionFactory.getConnection().delete(context, deleteRequest);
+
+            deleteRelationships(context, resourceId);
 
             activityLogger.log(context, request, "delete", managedId(resource.getId()).toString(),
                     resource.getContent(), null, Status.SUCCESS);
@@ -1008,7 +1335,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         
         return resource;
     }
-    
+
     /**
      * Expands the provided resource represented by a {@link JsonValue} relationship object.  A read request 
      * will be issued for the resource identified by the "_ref" field in the supplied relationship object. A

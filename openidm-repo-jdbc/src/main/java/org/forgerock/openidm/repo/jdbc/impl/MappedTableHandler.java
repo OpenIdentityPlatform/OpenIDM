@@ -143,12 +143,15 @@ public class MappedTableHandler implements TableHandler {
         queries = new TableQueries(this, tableName, null, dbSchemaName, 0, new ExplicitQueryResultMapper(explicitMapping));
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
-        String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
+        initializeQueries();
+    }
 
-        StringBuffer colNames = new StringBuffer();
-        StringBuffer tokenNames = new StringBuffer();
-        StringBuffer prepTokens = new StringBuffer();
-        StringBuffer updateAssign = new StringBuffer();
+    protected void initializeQueries() {
+        final String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
+        final StringBuffer colNames = new StringBuffer();
+        final StringBuffer tokenNames = new StringBuffer();
+        final StringBuffer prepTokens = new StringBuffer();
+        final StringBuffer updateAssign = new StringBuffer();
         boolean isFirst = true;
 
         for (ColumnMapping colMapping : explicitMapping.columnMappings) {

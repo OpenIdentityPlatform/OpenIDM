@@ -77,6 +77,25 @@ CREATE UNIQUE INDEX idx_genericobjects_object ON [openidm].[genericobjects] (obj
 CREATE INDEX fk_genericobjects_objecttypes ON [openidm].[genericobjects] (objecttypes_id ASC);
 END
 
+-- -----------------------------------------------------
+-- Table `openidm`.`relationships`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='relationships' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[relationsips]
+(
+  id NUMERIC(19,0) NOT NULL IDENTITY ,
+  objectid NVARCHAR(255) NOT NULL ,
+  firstid NVARCHAR(255) NOT NULL ,
+  firstkey NVARCHAR(32) NOT NULL ,
+  secondid NVARCHAR(255) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  fullobject NTEXT NULL ,
+  PRIMARY KEY CLUSTERED (id),
+);
+CREATE INDEX idx_relationships_first ON [openidm].[relationships] (firstid ASC, firstkey ASC);
+CREATE UNIQUE INDEX idx_relationships_objectid ON [openidm].[relationships] (objectid ASC);
+END
 
 -- -----------------------------------------------------
 -- Table `openidm`.`genericobjectproperties`

@@ -41,6 +41,18 @@ CREATE INDEX  IF NOT EXISTS  `openidm`.`fk_genericobjectproperties_genericobject
 
 CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_genericobjectproperties_prop` ON `openidm`.`genericobjectproperties` (`propkey` ASC, `propvalue` ASC);
 
+CREATE TABLE IF NOT EXISTS `openidm`.`relationships` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `objectid` VARCHAR(255) NOT NULL,
+  `rev` VARCHAR(30) NOT NULL,
+  `firstid` VARCHAR(255) NOT NULL,
+  `firstkey` VARCHAR(32) NOT NULL,
+  `secondid` VARCHAR(255) NOT NULL,
+  `fullobject` MEDIUMTEXT NULL,
+  PRIMARY KEY (`id`)
+);
+
+CREATE INDEX IF NOT EXISTS `openidm`.`fk_relationships_first` ON `openidm.relationships` (`firstid` ASC, `firstkey` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
