@@ -194,7 +194,8 @@
             "audit/recon" : {
                 "table" : "auditrecon",
                 "objectToColumn" : {
-                    "_id" : "transactionid",
+                    "_id" : "objectid",
+                    "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
                     "/authentication/id" : "userid",
@@ -218,7 +219,8 @@
             "audit/sync" : {
                 "table" : "auditsync",
                 "objectToColumn" : {
-                    "_id" : "transactionid",
+                    "_id" : "objectid",
+                    "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
                     "/authentication/id" : "userid",

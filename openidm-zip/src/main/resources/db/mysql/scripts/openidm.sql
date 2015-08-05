@@ -172,6 +172,7 @@ ENGINE = InnoDB;
 -- Table `openidm`.`auditauthentication`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `openidm`.`auditauthentication` (
+  `objectid` VARCHAR(38) NOT NULL ,
   `transactionid` VARCHAR(38) NULL ,
   `userid` VARCHAR(255) NULL ,
   `eventname` VARCHAR(50) NULL ,
@@ -180,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `openidm`.`auditauthentication` (
   `context` TEXT ,
   `sessionid` VARCHAR(255) ,
   `entries` TEXT ,
-  PRIMARY KEY (`transactionid`)
+  PRIMARY KEY (`objectid`)
 )
   ENGINE = InnoDB;
 
@@ -189,7 +190,7 @@ CREATE TABLE IF NOT EXISTS `openidm`.`auditauthentication` (
 -- Table `openidm`.`auditrecon`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
-
+  `objectid` VARCHAR(38) NOT NULL ,
   `transactionid` VARCHAR(38) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `eventname` VARCHAR(50) NULL ,
@@ -209,7 +210,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `reconaction` VARCHAR(36) NULL ,
   `entrytype` VARCHAR(7) NULL ,
   `reconid` VARCHAR(36) NULL ,
-  PRIMARY KEY (`transactionid`) ,
+  PRIMARY KEY (`objectid`) ,
   INDEX `idx_auditrecon_reconid` (`reconid` ASC),
   INDEX `idx_auditrecon_targetobjectid` (`targetobjectid`(28) ASC),
   INDEX `idx_auditrecon_sourceobjectid` (`sourceobjectid`(28) ASC),
@@ -225,6 +226,7 @@ ENGINE = InnoDB;
 -- Table `openidm`.`auditsync`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
+  `objectid` VARCHAR(38) NOT NULL ,
   `transactionid` VARCHAR(38) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `eventname` VARCHAR(50) NULL ,
@@ -239,7 +241,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `sourceobjectid` VARCHAR(511) NULL ,
   `status` VARCHAR(20) NULL ,
   `targetobjectid` VARCHAR(511) NULL ,
-  PRIMARY KEY (`transactionid`)
+  PRIMARY KEY (`objectid`)
 )
 ENGINE = InnoDB;
 
@@ -287,8 +289,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `objectid` VARCHAR(38) NOT NULL ,
   `activity` VARCHAR(24) NULL ,
-  `activitydate` VARCHAR(29) NULL
-  COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `transactionid` VARCHAR(38) NULL ,
   `eventname` VARCHAR(255) ,
   `server_ip` VARCHAR(40) ,
