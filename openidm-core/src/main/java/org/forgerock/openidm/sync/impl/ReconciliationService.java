@@ -24,6 +24,9 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.resource.QueryFilter.and;
+import static org.forgerock.json.resource.QueryFilter.equalTo;
+
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,6 +60,7 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
@@ -93,6 +97,8 @@ public class ReconciliationService
 
     public static final String PID = "org.forgerock.openidm.recon";
     private static final String MBEAN_NAME = "org.forgerock.openidm.recon:type=Reconciliation";
+    private static final String AUDIT_RECON = "audit/recon";
+    private static final String SUMMARY = "summary";
 
     public enum ReconAction {
         recon, reconByQuery, reconById;
@@ -155,11 +161,11 @@ public class ReconciliationService
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
             if (request.getResourceNameObject().isEmpty()) {
-                List<Map> runList = new ArrayList<Map>();
+                List<Map> runList = new ArrayList<>();
                 for (ReconciliationContext entry : reconRuns.values()) {
                     runList.add(entry.getSummary());
                 }
-                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                Map<String, Object> result = new LinkedHashMap<>();
                 result.put("reconciliations", runList);
                 handler.handleResult(new Resource("", null, new JsonValue(result)));
             } else {
@@ -169,14 +175,16 @@ public class ReconciliationService
                     handler.handleResult(new Resource(localId, null, new JsonValue(reconRuns.get(localId).getSummary())));
                 } else {
                     // Next, if not in memory, try and get it from audit log
-                    QueryRequest auditQuery = Requests.newQueryRequest("audit/recon");
-                    auditQuery.setQueryId("audit-by-recon-id-type");
-                    auditQuery.setAdditionalParameter("reconId", localId);
-                    auditQuery.setAdditionalParameter("entryType", "summary");
+                    final QueryFilter queryFilter =
+                            and(
+                                    equalTo(ReconAuditEventBuilder.RECON_ID, localId),
+                                    equalTo(ReconAuditEventBuilder.ENTRY_TYPE, SUMMARY))
+                            ;
+                    final QueryRequest auditQuery = Requests.newQueryRequest(AUDIT_RECON);
+                    auditQuery.setQueryFilter(queryFilter);
 
-                    ServerContext routerContext = context.asContext(RouterContext.class);
-                    Collection<Resource> queryResult = new ArrayList<Resource>();
-                    getConnectionFactory().getConnection().query(routerContext, auditQuery, queryResult);
+                    Collection<Resource> queryResult = new ArrayList<>();
+                    getConnectionFactory().getConnection().query(context, auditQuery, queryResult);
 
                     if (queryResult.isEmpty()) {
                         throw new NotFoundException("Reconciliation with id " + localId + " not found." );
