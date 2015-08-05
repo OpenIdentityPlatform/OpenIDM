@@ -44,7 +44,7 @@ if (effectiveRoles != null)  {
         var roleId = effectiveRoles[i];
 
         // Only try to retrieve role details for role ids in URL format
-        if (roleId !== null && roleId._ref !== null && roleId._ref.indexOf("managed/role") != -1) {
+        if (typeof roleId !== "undefined" && roleId !== null && typeof roleId._ref !== "undefined" && roleId._ref !== null && roleId._ref.indexOf("managed/role") != -1) {
             var roleInfo =  openidm.read(roleId._ref);
             logger.debug("Role info read: {}", roleInfo);
 

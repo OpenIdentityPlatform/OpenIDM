@@ -46,6 +46,24 @@ CREATE INDEX fk_genericobjectproperties_genericobjects ON openidm.genericobjectp
 CREATE INDEX idx_genericobjectproperties_prop ON openidm.genericobjectproperties (propkey,propvalue);
 
 
+-- -----------------------------------------------------
+-- Table openidm.relationships
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.relationships (
+  id BIGSERIAL NOT NULL,
+  objectid VARCHAR(255) NOT NULL,
+  rev VARCHAR(30) NOT NULL,
+  firstid VARCHAR(255) NOT NULL,
+  firstkey VARCHAR(32) NOT NULL,
+  secondid VARCHAR(255) NOT NULL,
+  fullobject JSON,
+  PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX idx_relationships_uniq ON openidm.relationships (firstid, firstkey, secondid);
+CREATE UNIQUE INDEX idx_relationships_objectid ON openidm.relationships (objectid);
+CREATE INDEX idx_relationships_first ON openidm.relationships (firstId,firstKey);
 
 -- -----------------------------------------------------
 -- Table openidm.managedobjects

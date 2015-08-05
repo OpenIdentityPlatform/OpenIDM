@@ -12,6 +12,13 @@ PROMPT Creating Sequence configobjects_id_SEQ ...
 CREATE SEQUENCE  configobjects_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
+-- DROP SEQUENCE relationships_id_SEQ;
+
+
+PROMPT Creating Sequence relationships_id_SEQ ...
+CREATE SEQUENCE  relationships_id_SEQ
+  MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
+
 -- DROP SEQUENCE managedobjects_id_SEQ;
 
 
@@ -421,6 +428,43 @@ PROMPT Creating Index fk_genericobjects_objecttypes on genericobjects ...
 CREATE INDEX fk_genericobjects_objecttypes ON genericobjects
 (
   objecttypes_id
+)
+;
+
+-- DROP TABLE relationships CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table relationships ...
+CREATE TABLE relationships (
+  id NUMBER(24,0) NOT NULL,
+  objectid VARCHAR2(255 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  firstid VARCHAR2(255 CHAR) NOT NULL,
+  firstkey VARCHAR2(32 CHAR) NOT NULL,
+  secondid VARCHAR2(255 CHAR) NOT NULL,
+  fullobject CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint pk_relationships on table relationships ...
+ALTER TABLE relationships
+ADD CONSTRAINT pk_relationships PRIMARY KEY
+(
+  id
+)
+ENABLE
+;
+PROMPT Creating Unique Index idx_relationships_first on relationships...
+CREATE UNIQUE INDEX idx_relationships_first ON relationships
+(
+  firstid,
+  firstkey
+)
+;
+PROMPT Creating Unique Index idx_relationships_objectid on relationships ...
+CREATE UNIQUE INDEX idx_relationships_objectid ON relationships
+(
+  objectid
 )
 ;
 

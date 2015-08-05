@@ -144,6 +144,20 @@
                     }
                 ]
             },
+            "relationship": {
+                "index": [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyNames" : [ "firstId", "firstKey", "secondId"],
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "synchronisation_pooledSyncStage" : {
                 "index" : [
                     {
