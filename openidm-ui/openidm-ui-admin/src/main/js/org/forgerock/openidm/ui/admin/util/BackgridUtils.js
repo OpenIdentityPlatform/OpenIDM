@@ -25,11 +25,12 @@
 /*global define */
 
 define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
+    "jquery",
     "underscore",
     "backgrid",
     "org/forgerock/commons/ui/common/util/DateUtil"
 
-], function (_, Backgrid, DateUtil) {
+], function ($, _, Backgrid, DateUtil) {
     var obj = {};
 
     obj.formatDate = function(date) {
@@ -56,6 +57,8 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
             render: function () {
                 if (this.model.get(dateProperty)) {
                     this.$el.html(_this.formatDate(this.model.get(dateProperty)));
+                } else {
+                    this.$el.html("");
                 }
                 return this;
             }
@@ -78,7 +81,7 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
      * @returns {Backgrid.Cell}
      * @constructor
      */
-    obj.ButtonCell = function (buttons) {
+    obj.ButtonCell = function (buttons, renderCallback) {
         var events = {},
             html = "";
 
@@ -97,6 +100,10 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
             render: function () {
                 this.$el.html(html);
                 this.delegateEvents();
+
+                if (renderCallback) {
+                    _.bind(renderCallback, this)();
+                }
                 return this;
             }
         });
@@ -123,6 +130,92 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
                 return this;
             }
         });
+    };
+
+    /**
+     * addSmallScreenCell creates a hidden column with a custom "smallScreenCell" that
+     * will be displayed as a replacement for the full grid on small screens. It takes
+     * an array of Backgrid column definitions, loops over them, adds a vertical
+     * representation of how the cell is rendered for the current column to the
+     * smallScreenCell's html, then adds the newly created column definition to the
+     * originally defined grid columns.
+     *
+     * the "hideColumnLabel" param can be passed in to display the cell with no label
+     * for the associated value
+     *
+     * @param cols {array}
+     * @param hideColumnLabels {boolean}
+     * @returns {array}
+     * @constructor
+     *
+     */
+
+    obj.addSmallScreenCell = function (cols, hideColumnLabels) {
+        var smallScreenCell = Backgrid.Cell.extend({
+            className: "smallScreenCell",
+            events: {},
+            render: function () {
+                var html = "",
+                    filteredCols = _.reject(cols, function (c) {
+                        return c.name === "smallScreenCell";
+                    });
+
+                _.each(filteredCols, _.bind(function (col) {
+                    var cellView,
+                        label = "<span class='text-muted'>" + col.label + ":</span> ",
+                        cellWrapper;
+
+                    if (_.isObject(col.cell)) {
+                        cellView = new col.cell({ model: this.model, column: col});
+                        cellView.$el = $("<span>");
+                        cellView.render();
+
+                        if (!_.isEmpty(_.omit(cellView.events, "click"))) {
+                            cellWrapper = $("<p class='pull-right show'></p>");
+
+                            if (cellView.$el.html().length && !hideColumnLabels && col.label) {
+                                cellWrapper.append(label);
+                            }
+
+                            cellWrapper.append(cellView.$el);
+
+                            this.$el.prepend(cellWrapper);
+                        } else {
+                            cellWrapper = $("<p>");
+
+                            if (cellView.$el.html().length && !hideColumnLabels && col.label) {
+                                cellWrapper.append(label);
+                            }
+
+                            cellWrapper.append(cellView.$el);
+
+                            this.$el.append(cellWrapper);
+                        }
+                    } else {
+                        cellWrapper = $("<p>");
+                        if (this.model.get(col.name) && this.model.get(col.name).length && !hideColumnLabels && col.label) {
+                            cellWrapper.append(label);
+                        }
+
+                        cellWrapper.append(this.model.get(col.name));
+
+                        this.$el.append(cellWrapper);
+                    }
+                }, this));
+
+                return this;
+            }
+        }),
+        newCol = {
+            name: "smallScreenCell",
+            editable: false,
+            sortable: false,
+            cell: smallScreenCell
+        };
+
+        cols.push(newCol);
+
+        return cols;
     };
 
     return obj;
