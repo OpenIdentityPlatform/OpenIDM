@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global _ define $ */
+/*global define */
 
 define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -34,7 +36,8 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
     "org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget"
-], function(AbstractView,
+], function($, _,
+            AbstractView,
             eventManager,
             constants,
             conf,

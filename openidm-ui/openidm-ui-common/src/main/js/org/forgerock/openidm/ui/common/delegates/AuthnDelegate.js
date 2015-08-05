@@ -22,15 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author yaromin
- */
-define("AuthnDelegate", [
+define("org/forgerock/openidm/ui/common/delegates/AuthnDelegate", [
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function(constants, AbstractDelegate) {
+], function(_, constants, AbstractDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/info/login");
 
@@ -50,7 +48,7 @@ define("AuthnDelegate", [
 
     obj.getUserById = function(id, component, errorsHandlers) {
         return this.serviceCall({
-            serviceUrl: constants.host + "/openidm/" + component, url: "/" + id, type: "GET", 
+            serviceUrl: constants.host + "/openidm/" + component, url: "/" + id, type: "GET",
             errorsHandlers: errorsHandlers})
         .then(function (user) {
             if (!_.has(user, 'uid')) {
@@ -69,7 +67,7 @@ define("AuthnDelegate", [
             "openidm-authorized": "ui-user",
             "openidm-admin": "ui-admin"
         };
-        
+
         return obj.serviceCall({
             serviceUrl: constants.host + "/openidm/info/login",
             url: "",
@@ -105,7 +103,7 @@ define("AuthnDelegate", [
                     if (!userData.userName) {
                         userData.userName = userData._id;
                     }
-                    return userData;    
+                    return userData;
                 });
         });
     };
@@ -113,6 +111,3 @@ define("AuthnDelegate", [
 
     return obj;
 });
-
-
-

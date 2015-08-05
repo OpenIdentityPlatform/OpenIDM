@@ -72,10 +72,10 @@ define([
                         stubConnectorChange.restore();
 
                         ValidatorsManager.validateAllFields(el);
-
-                        QUnit.ok(addConnector.$el.find("#submitConnector").is(':disabled'), "Connector submit button disabled after type change");
-
-                        QUnit.start();
+                        _.delay(function () {
+                            QUnit.ok(addConnector.$el.find("#submitConnector").is(':disabled'), "Connector submit button disabled after type change");
+                            QUnit.start();
+                        }, 10);
                     });
                 });
             });

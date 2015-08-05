@@ -22,30 +22,28 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate", [
-    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, configuration, eventManager) {
+], function(Constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/config/ui/configuration");
+    var obj = new AbstractDelegate(Constants.host + "/" + Constants.context + "/config/ui/configuration");
 
     obj.getConfiguration = function(successCallback, errorCallback) {
-        console.info("Getting configuration");
-        
-        return obj.serviceCall({url: "", headers: {
-            "X-OpenIDM-Password": "anonymous",
-            "X-OpenIDM-Username": "anonymous",
-            "X-OpenIDM-NoSession": "true"
-        }})
-        .then(function(data) {
-            if(successCallback) {                           
+        var headers = {};
+        headers[Constants.HEADER_PARAM_USERNAME] = "anonymous";
+        headers[Constants.HEADER_PARAM_PASSWORD] = "anonymous";
+        headers[Constants.HEADER_PARAM_NO_SESSION] = "true";
+
+        return obj.serviceCall({
+            url: "",
+            headers: headers
+        }).then(function(data) {
+            if(successCallback) {
                 successCallback(data.configuration);
             }
             return data.configuration;
@@ -53,6 +51,3 @@ define("org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate", [
     };
     return obj;
 });
-
-
-

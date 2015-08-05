@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "libs/codemirror/lib/codemirror",
@@ -33,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
     "libs/codemirror/addon/display/placeholder",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/WorkflowWidget"
-], function(AbstractView, validatorsManager, codeMirror, groovyMode, jsMode, placeHolder, ScriptDelegate, WorkflowWidget) {
+], function($, _, AbstractView, validatorsManager, codeMirror, groovyMode, jsMode, placeHolder, ScriptDelegate, WorkflowWidget) {
     var seInstance = {},
         InlineScriptEditor = AbstractView.extend({
             template: "templates/admin/util/ScriptEditorView.html",

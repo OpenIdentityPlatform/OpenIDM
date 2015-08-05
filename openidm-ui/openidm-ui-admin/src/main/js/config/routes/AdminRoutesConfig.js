@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define */
 define("config/routes/AdminRoutesConfig", [
     "config/routes/CommonRoutesConfig"
 ], function(commonRoutes) {

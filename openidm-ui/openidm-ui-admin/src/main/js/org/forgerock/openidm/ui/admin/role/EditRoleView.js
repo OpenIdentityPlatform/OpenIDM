@@ -22,12 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, JSONEditor, form2js */
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
+    "jquery",
+    "underscore",
+    "form2js",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -36,10 +36,10 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
     "org/forgerock/commons/ui/common/components/Messages",
     "org/forgerock/openidm/ui/admin/role/RoleUsersView",
     "org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView"
-], function(AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager, roleUsersView, roleEntitlementsListView) {
+], function($, _, form2js, AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager, roleUsersView, roleEntitlementsListView) {
     var EditRoleView = AbstractView.extend({
         template: "templates/admin/role/EditRoleViewTemplate.html",
-        
+
         events: {
             "click .saveRole": "saveRole",
             "click #deleteRole": "deleteRole",
@@ -50,10 +50,10 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 schemaPromise = resourceDelegate.getSchema(args),
                 roleId = args[2],
                 assignment = args[3];
-            
+
             this.data.args = args;
             this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
-    
+
             if(roleId){
                 rolePromise = resourceDelegate.readResource(this.data.serviceUrl, roleId);
                 this.data.newRole = false;
@@ -61,7 +61,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 rolePromise = $.Deferred().resolve({});
                 this.data.newRole = true;
             }
-            
+
             $.when(rolePromise, schemaPromise).then(_.bind(function(role, schema){
                 if(role.length && !role[0].assignments) {
                     role[0].assignments = {};
@@ -77,9 +77,9 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                             }
                         }, this));
                     }
-                    
+
                     this.$el.find(":input.form-control:first").focus();
-                    
+
                     if(callback) {
                         callback();
                     }
@@ -99,11 +99,11 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                     }
                     this.render(this.data.args, callback);
                 }, this);
-            
+
             if(e) {
                 e.preventDefault();
             }
-            
+
             if(this.data.newRole){
                 resourceDelegate.createResource(this.data.serviceUrl, null, formVal.role, successCallback);
             } else {
@@ -114,14 +114,14 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
             if(e){
                 e.preventDefault();
             }
-            
+
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminListManagedObjectView", args: this.data.args});
         },
         deleteRole: function(e, callback){
             if(e) {
                 e.preventDefault();
             }
-            
+
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }), _.bind(function(){
                 resourceDelegate.deleteResource(this.data.serviceUrl, this.data.role._id, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role.properties.name })});
@@ -132,9 +132,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 }, this));
             }, this));
         }
-    }); 
-    
+    });
+
     return new EditRoleView();
 });
-
-

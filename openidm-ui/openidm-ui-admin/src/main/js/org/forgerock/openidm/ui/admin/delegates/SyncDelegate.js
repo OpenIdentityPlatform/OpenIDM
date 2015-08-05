@@ -22,16 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 /*jslint evil: true */
 
 define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(constants, AbstractDelegate, configuration, eventManager, configDelegate) {
+], function($, _, constants, AbstractDelegate, configuration, eventManager, configDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/sync");
 
@@ -105,13 +107,13 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
                 typeof (p.condition.source) === "string") {
 
             object = sourceObject;
-            
+
             try {
                 result = (eval(p.condition.source) || p.condition.source.length === 0) ? "UPDATE": "DO NOT UPDATE"; // references to "object" variable expected within this string
             } catch (e) {
                 result = "ERROR WITH SCRIPT";
             }
-            
+
         }
 
         return result;
@@ -135,15 +137,15 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
             } catch (e) {
                 sampleData = "ERROR WITH SCRIPT";
             }
-            
+
         } else if (typeof(p.source) !== "undefined" && p.source.length) {
-            
+
             sampleData = sourceObject[p.source];
-            
+
         }
-        
+
         if (typeof(p["default"]) !== "undefined" && p["default"].length) {
-            
+
             if (sampleData === null || sampleData === undefined) {
                 sampleData = p["default"];
             }
@@ -160,10 +162,10 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
                     return obj.translatePropertyToTarget(sourceObject, p);
                 })
                 .object()
-                .value();            
+                .value();
 
     };
-    
+
     obj.mappingDetails = function(mapping){
         var promise = $.Deferred(),
             url = "",
@@ -182,11 +184,11 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
                     promise.resolve(mappingDetails);
                 });
             };
-        
+
         if(mapping){
             url = "?mapping=" + mapping;
         }
-        
+
         doServiceCall()
         .fail(function (xhr) {
                 if(xhr.status === 404){
@@ -199,7 +201,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
                         });
                 }
         });
-        
+
         return promise;
     };
 

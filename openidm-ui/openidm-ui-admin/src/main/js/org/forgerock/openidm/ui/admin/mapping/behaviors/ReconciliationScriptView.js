@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/behaviors/ReconciliationScriptView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView"

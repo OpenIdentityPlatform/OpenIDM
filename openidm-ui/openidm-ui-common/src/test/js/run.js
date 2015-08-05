@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, QUnit */
+/*global define, QUnit, localStorage, sessionStorage */
 
 
 define([
@@ -40,30 +40,18 @@ define([
     };
 
     return function (server) {
-        eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function () {
+        eventManager.registerListener(constants.EVENT_APP_INITIALIZED, function () {
             QUnit.testStart(function (testDetails) {
 
                 console.log("Starting " + testDetails.module + ":" + testDetails.name + "("+ testDetails.testNumber +")");
 
                 // every state needs to be reset at the starat of each test
                 var vm = require("org/forgerock/commons/ui/common/main/ViewManager"),
-                    lqu = require("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"),
-                    connectorDelegate = require("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"),
                     configDelegate = require("org/forgerock/openidm/ui/common/delegates/ConfigDelegate");
 
-                connectorDelegate.deleteCurrentConnectorsCache();
-                lqu.model.linkQualifier = [];
                 configDelegate.clearDelegateCache();
 
-                server.responses = _.filter(server.responses, function (resp) {
-                    return  typeof resp.url === "object" && (
-                                resp.url.test('locales/en/translation.json') ||
-                                resp.url.test('libs/less-1.5.1-min.js')
-                            ) ||
-                            typeof resp.url === "string" && (
-                                resp.url === '/openidm/config/ui/themeconfig'
-                            );
-                });
+                server.responses = [];
 
                 vm.currentView = null;
                 vm.currentDialog = null;

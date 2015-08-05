@@ -22,15 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define */
 /*jslint evil: true */
 
 define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView",
     "org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView",
     "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView"
-], function(MappingAdminAbstractView,
+], function(_,
+            MappingAdminAbstractView,
             LinkQualifiersView,
             RoleEntitlementsView,
             AttributesGridView) {

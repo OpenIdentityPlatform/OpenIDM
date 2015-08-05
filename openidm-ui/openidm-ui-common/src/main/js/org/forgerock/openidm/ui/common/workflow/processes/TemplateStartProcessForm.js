@@ -22,34 +22,30 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, Handlebars */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/processes/TemplateStartProcessForm", [
+    "handlebars",
     "org/forgerock/openidm/ui/common/workflow/processes/AbstractProcessForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractProcessForm, DateUtil, conf, uiUtils) {
-    
+], function(Handlebars, AbstractProcessForm, DateUtil, conf, uiUtils) {
+
     var TemplateStartProcessForm = AbstractProcessForm.extend({
-        
+
         template: "templates/common/EmptyTemplate.html",
-        
+
         postRender: function(callback) {
             var t = Handlebars.compile(this.args)(this.processDefinition);
-            
+
             this.$el.html(t);
-            
+
             if (callback) {
                 callback();
             }
         }
-        
-    }); 
-    
+
+    });
+
     return new TemplateStartProcessForm();
 });
-
-

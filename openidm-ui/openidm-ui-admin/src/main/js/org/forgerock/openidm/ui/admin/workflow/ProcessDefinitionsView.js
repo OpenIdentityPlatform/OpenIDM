@@ -22,14 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "backgrid"
-], function(AdminAbstractView,
+], function($, _,
+            AdminAbstractView,
             AbstractModel,
             AbstractCollection,
             Backgrid) {

@@ -22,17 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/settings/AuthenticationView",
     "org/forgerock/openidm/ui/admin/settings/AuditView",
     "org/forgerock/openidm/ui/admin/settings/SelfServiceView",
     "org/forgerock/openidm/ui/admin/settings/EmailConfigView",
     "bootstrap-tabdrop"
-
-], function(AdminAbstractView,
+], function(_,
+            AdminAbstractView,
             AuthenticationView,
             AuditView,
             SelfServiceView,

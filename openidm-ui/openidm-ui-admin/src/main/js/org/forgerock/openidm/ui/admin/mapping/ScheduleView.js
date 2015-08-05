@@ -22,15 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/ScheduleView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/mapping/scheduling/SchedulerView",
     "org/forgerock/openidm/ui/admin/mapping/scheduling/LiveSyncView",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate"
 
-], function(MappingAdminAbstractView,
+], function(_,
+            MappingAdminAbstractView,
             SchedulerView,
             LiveSyncView,
             SchedulerDelegate) {

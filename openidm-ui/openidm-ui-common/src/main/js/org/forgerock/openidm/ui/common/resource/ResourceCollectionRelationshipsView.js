@@ -22,15 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/common/resource/ResourceCollectionRelationshipsView", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function(AbstractView, constants, resourceDelegate, resourceCollectionUtils, ModuleLoader) {
+], function($, _, AbstractView, constants, resourceDelegate, resourceCollectionUtils, ModuleLoader) {
     var ResourceCollectionRelationshipsView = AbstractView.extend({
             template: "templates/admin/resource/ResourceCollectionRelationshipsViewTemplate.html",
             noBaseTemplate: true,
@@ -46,7 +48,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionRelationships
                 this.element = args.element;
                 this.data.prop = args.prop;
                 this.data.schema = args.schema;
-                
+
                 $.when(
                     resourceDelegate.searchResource(
                             args.prop.propName + ' eq "' + args.prop.parentId + '"&_pageSize=100&_sortKeys=' + args.prop.resourceCollection.query.fields[0],
@@ -55,14 +57,14 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionRelationships
                     ModuleLoader.load("d3")
                 ).then(_.bind(function(qry, d3) {
                     var schema = this.data.schema.properties;
-                    
+
                     this.d3 = d3;
                     this.data.headerValues = resourceCollectionUtils.getHeaderValues(this.data.prop.resourceCollection.query.fields, schema);
 
                     this.data.relatedTo = _.map(qry[0].result, _.bind(function(relationship) {
                         return _.pick(relationship, "_id", this.data.prop.resourceCollection.query.fields);
                     }, this));
-                    
+
                     this.parentRender(_.bind(function() {
                         if(this.data.relatedTo.length) {
                             this.parentRender(_.bind(function() {

@@ -22,15 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, JSONEditor */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
+    "jquery",
+    "underscore",
+    "jsonEditor",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants"
-], function(AbstractView, validatorsManager, ConnectorDelegate, UIUtils, constants) {
+], function($, _, JSONEditor, AbstractView, validatorsManager, ConnectorDelegate, UIUtils, constants) {
     var ConnectorTypeAbstractView = AbstractView.extend({
         element: "#connectorDetails",
         noBaseTemplate: true,

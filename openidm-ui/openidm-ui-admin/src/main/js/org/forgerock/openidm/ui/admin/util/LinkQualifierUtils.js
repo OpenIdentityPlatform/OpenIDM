@@ -22,11 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate"
-], function (ScriptDelegate) {
+], function ($, _, ScriptDelegate) {
     var obj = {};
 
     obj.model = {

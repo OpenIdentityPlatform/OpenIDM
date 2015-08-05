@@ -22,20 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $ */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/common/notifications/NotificationsView", [
+    "jquery",
     "org/forgerock/commons/ui/common/components/LineTableView",
     "org/forgerock/openidm/ui/common/notifications/NotificationViewHelper",
     "org/forgerock/openidm/ui/common/notifications/NotificationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/DateUtil"
-], function(LineTableView, notificationViewHelper, notificationDelegate, eventManager, constants, conf,dateUtil) {
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "jqueryui"
+], function($, LineTableView, notificationViewHelper, notificationDelegate, eventManager, constants, conf, dateUtil) {
     var NotificationsView = LineTableView.extend({
 
         typeToIconMapping: [],

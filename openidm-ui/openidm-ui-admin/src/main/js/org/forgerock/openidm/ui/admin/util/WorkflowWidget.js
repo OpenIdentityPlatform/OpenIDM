@@ -22,14 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/WorkflowWidget", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/admin/delegates/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
 
-], function(AbstractView, WorkflowDelegate, ValidatorsManager) {
+], function($, _, AbstractView, WorkflowDelegate, ValidatorsManager) {
 
     var workflowInstance = {},
         WorkflowWidget = AbstractView.extend({

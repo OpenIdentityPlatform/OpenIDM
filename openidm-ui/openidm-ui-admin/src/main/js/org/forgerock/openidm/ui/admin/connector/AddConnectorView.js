@@ -22,9 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
+    "jquery",
+    "underscore",
+    "form2js",
     "org/forgerock/openidm/ui/admin/connector/AbstractConnectorView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -36,7 +39,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 
-], function(AbstractConnectorView,
+], function($, _,
+            form2js,
+            AbstractConnectorView,
             eventManager,
             validatorsManager,
             constants,

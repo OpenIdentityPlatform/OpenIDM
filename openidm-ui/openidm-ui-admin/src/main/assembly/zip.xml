@@ -67,6 +67,8 @@
             </includes>
             <excludes>
                 <exclude>org.forgerock.commons.ui.libs:CodeMirror</exclude>
+                <exclude>org.forgerock.commons.ui.libs:less</exclude>
+                <exclude>org.forgerock.commons.ui.libs:r</exclude>
             </excludes>
             <outputDirectory>/libs</outputDirectory>
         </dependencySet>

@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define , _, $*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
+    "underscore",
     "backgrid",
     "org/forgerock/commons/ui/common/util/DateUtil"
 
-], function (Backgrid, DateUtil) {
+], function (_, Backgrid, DateUtil) {
     var obj = {};
 
     obj.formatDate = function(date) {

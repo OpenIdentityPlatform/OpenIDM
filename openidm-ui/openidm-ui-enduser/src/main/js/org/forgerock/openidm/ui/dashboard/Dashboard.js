@@ -22,9 +22,10 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define $ */
+/*global define */
 
 define("org/forgerock/openidm/ui/dashboard/Dashboard", [
+    "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -32,7 +33,7 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard",
     "org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader"
-], function(_, AbstractView, eventManager, constants, conf, tasksDashboard, DashboardWidgetLoader) {
+], function($, _, AbstractView, eventManager, constants, conf, tasksDashboard, DashboardWidgetLoader) {
     var Dashboard = AbstractView.extend({
         template: "templates/dashboard/DashboardTemplate.html",
         model: {

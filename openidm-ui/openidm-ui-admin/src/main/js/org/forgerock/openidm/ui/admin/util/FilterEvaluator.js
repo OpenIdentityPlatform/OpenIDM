@@ -22,10 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global, define, _*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/FilterEvaluator", [
-], function () {
+    "underscore"
+], function (_) {
     return {
         getValueFromJSONPointer: function (pointer, object) {
             var parts = pointer.split('/');

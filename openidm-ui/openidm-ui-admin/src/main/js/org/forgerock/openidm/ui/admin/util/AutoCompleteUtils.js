@@ -22,9 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-define("org/forgerock/openidm/ui/admin/util/AutoCompleteUtils", [], function() {
+define("org/forgerock/openidm/ui/admin/util/AutoCompleteUtils", [
+    "jquery",
+    "jqueryui"
+], function($) {
 
     var obj = {},
         createShowAllItemsButton = function(input){
@@ -60,15 +63,15 @@ define("org/forgerock/openidm/ui/admin/util/AutoCompleteUtils", [], function() {
                   if ( wasOpen ) {
                     return;
                   }
-        
+
                   // Pass empty string as value to search for, displaying all results
                   input.autocomplete( "search", "" );
                 });
             return showAllBtn;
         };
-    
+
     obj.selectionSetup = function(input,source,hideValue){
-            
+
         if (source.length && !input.data("uiAutocomplete")) {
             input.autocomplete({
                 minLength: 0,
@@ -88,13 +91,13 @@ define("org/forgerock/openidm/ui/admin/util/AutoCompleteUtils", [], function() {
                         return $( "<li>" ).append( display ).appendTo( ul );
                   };
               }
-              
-                
+
+
             var showAllBtn = createShowAllItemsButton(input);
-            
+
             input.after(showAllBtn);
         }
     };
-    
+
     return obj;
 });

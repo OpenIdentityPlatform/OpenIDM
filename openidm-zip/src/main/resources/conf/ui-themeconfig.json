@@ -1,5 +1,7 @@
 {
     "icon" : "favicon.ico",
+    "path" : "",
+    "stylesheet" : "css/styles.css",
     "settings" : {
         "logo" : {
             "src" : "images/logo-horizontal.png",

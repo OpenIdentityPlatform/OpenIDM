@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, JSONEditor */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/settings/AuditView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -32,7 +34,8 @@ define("org/forgerock/openidm/ui/admin/settings/AuditView", [
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/settings/AuditEventsDialog"
 
-], function(AdminAbstractView,
+], function($, _,
+            AdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,

@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/MapResourceView", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -32,7 +34,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "bootstrap-dialog"
 
-], function(AbstractView, eventManager, constants, router, ConfigDelegate, BootstrapDialog) {
+], function($, _, AbstractView, eventManager, constants, router, ConfigDelegate, BootstrapDialog) {
     var MapResourceView = AbstractView.extend({
         template: "templates/admin/MapResourceView.html",
         noBaseTemplate: true,
@@ -373,7 +375,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                 }, this);
 
             } else {
-                if(!details.schema.icon) {
+                if(!details.schema || !details.schema.icon) {
                     this.$el.find("#" + id + " .resource-small-icon").attr('class', "resource-small-icon " +details.iconClass);
                 } else {
                     this.$el.find("#" + id + " .resource-small-icon").attr('class','resource-small-icon fa ' +details.schema.icon);

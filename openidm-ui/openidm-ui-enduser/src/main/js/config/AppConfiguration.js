@@ -24,11 +24,8 @@
 
 /*global define*/
 
-/**
- * @author yaromin
- */
 define("config/AppConfiguration", [
-    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = {
@@ -38,20 +35,6 @@ define("config/AppConfiguration", [
                 configuration: {
                     loginHelperClass: "org/forgerock/openidm/ui/common/login/InternalLoginHelper"
                 }
-            },
-            {
-                moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
-                configuration: {
-                    LoginView : "org/forgerock/openidm/ui/LoginView",
-                    UserProfileView : "org/forgerock/openidm/ui/profile/UserProfileView",
-                    LoginDialog : "org/forgerock/commons/ui/common/LoginDialog",
-                    RegisterView : "org/forgerock/openidm/ui/registration/UserRegistrationView",
-                    ChangeSecurityDataDialog : "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
-                }
-            },
-            {
-                moduleClass: "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
-                configuration: {}
             },
             {
                 moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
@@ -143,21 +126,16 @@ define("config/AppConfiguration", [
                 }
             },
             {
-                moduleClass: "org/forgerock/openidm/ui/dashboard/workflow/FormManager",
+                moduleClass: "org/forgerock/openidm/ui/common/workflow/FormManager",
                 configuration: {
                     forms: { // Workflow User Task to View mapping
-                        "org.forgerock.applicationAcceptance": "org/forgerock/openidm/ui/dashboard/workflow/tasks/customview/ApplicationAcceptanceTask",
-                        "org.forgerock.sendNotificationInit": "org/forgerock/openidm/ui/dashboard/workflow/processes/customview/SendNotificationProcess"
                     }
                 }
             },
             {
                 moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                 configuration: {
-                    templateUrls: [ //preloaded templates
-                        "templates/workflow/tasks/ProcessUserTaskTableTemplate.html",
-                        "templates/workflow/tasks/ShowUserProfile.html"
-                    ]
+                    templateUrls: [ ]
                 }
             },
             {

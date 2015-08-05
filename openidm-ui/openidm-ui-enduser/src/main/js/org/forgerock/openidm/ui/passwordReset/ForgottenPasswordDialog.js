@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, _, define*/
+/*global define */
 
 define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "UserDelegate",
@@ -32,11 +34,11 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/util/delegates/SecurityQuestionDelegate"
-], function(Dialog, validatorsManager, userDelegate, eventManager, constants, conf, securityQuestionDelegate) {
-    var ForgottenPasswordDialog = Dialog.extend({    
+], function($, _, Dialog, validatorsManager, userDelegate, eventManager, constants, conf, securityQuestionDelegate) {
+    var ForgottenPasswordDialog = Dialog.extend({
         contentTemplate: "templates/passwordReset/ForgottenPasswordTemplate.html",
         baseTemplate: "templates/common/MediumBaseTemplate.html",
-        
+
         events: {
             "click .dialogActions input[type=submit]": "formSubmit",
             "click .dialogCloseCross": "close",
@@ -48,9 +50,9 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
             "userNameFound": "userNameFound",
             "userNameNotFound": "userNameNotFound"
         },
-        
+
         securityQuestions: {},
-        
+
         render: function() {
             var securityQuestionRef;
             this.securityQuestions = {};
@@ -59,7 +61,7 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
             this.addTitle($.t("templates.user.ForgottenPasswordTemplate.forgottenPasswordQuestion"));
 
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el); 
+                validatorsManager.bindValidators(this.$el);
                 this.$el.find(".dialogActions input[type=submit]").hide();
                 if (conf.forgottenPasswordUserName) {
                     this.$el.find("input[name=MresetUsername]").val(conf.forgottenPasswordUserName);
@@ -67,7 +69,7 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
                     delete conf.forgottenPasswordUserName;
                 }
             }, this));
-            
+
             securityQuestionRef = this.securityQuestions;
             securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
                 $.each(secquestions, function(i,item){
@@ -75,11 +77,11 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
                 });
             });
         },
-        
+
         formSubmit: function(event) {
             event.preventDefault();
             event.stopPropagation();
-            
+
             if (validatorsManager.formValidated(this.$el)) {
                 this.changePassword();
             } else {
@@ -108,7 +110,7 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
         changePassword: function() {
             var dialog = this, userName = this.$el.find("input[name=resetUsername]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
             console.log("changing password");
-            
+
             userDelegate.setNewPassword(userName, securityAnswer, newPassword, function(r) {
                 eventManager.sendEvent(constants.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY, { userName: userName, password: newPassword});
                 dialog.close();
@@ -116,7 +118,7 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
             function (r) {
                 console.log("Failed to set password for some reason....");
                 console.log(r);
-            } 
+            }
             );
         },
         submitAnswer : function () {
@@ -125,7 +127,7 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
         customValidate: function(event, input, msg, validatorType) {
 
             if (validatorType === "securityAnswer") {
-                
+
                 if (typeof(msg) === "undefined") {
                     validatorsManager.bindValidators(this.$el.find('#fgtnPasswordDiv'), userDelegate.baseEntity + "/" + this.$el.find("input[name=_id]").val(), _.bind(function () {
                         validatorsManager.validateAllFields(this.$el.find('#fgtnPasswordDiv'));
@@ -133,20 +135,19 @@ define("org/forgerock/openidm/ui/passwordReset/ForgottenPasswordDialog", [
                         this.$el.find(".dialogActions input[type=submit]").show();
                         this.$el.find("input[name=submitAnswer]").css('visibility','hidden');
                         this.$el.find("#fgtnSecurityAnswer").prop('readonly','true');
-                   
-                        
-                    }, this)); 
+
+
+                    }, this));
                 }
                 else {
                     this.$el.find("#fgtnPasswordDiv").slideUp();
                     this.$el.find("input[name=_id]").val("");
                 }
-                
+
             }
-            
+
         }
-    }); 
-    
+    });
+
     return new ForgottenPasswordDialog();
 });
-

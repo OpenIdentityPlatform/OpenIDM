@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, require */
+/*global define */
 
 define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/common/delegates/InternalUserDelegate",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -32,10 +34,11 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "AuthnDelegate",
     "bootstrap-dialog",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function(InternalUserDelegate, AbstractView, validatorsManager, conf, eventManager, constants, router, authnDelegate, BootstrapDialog, uiUtils) {
+], function($, _, InternalUserDelegate, AbstractView, validatorsManager, conf, eventManager, constants, router, ModuleLoader, authnDelegate, BootstrapDialog, uiUtils) {
     var MandatoryPasswordChangeDialog = AbstractView.extend({
         contentTemplate: "templates/admin/MandatoryPasswordChangeDialogTemplate.html",
         delegate: InternalUserDelegate,
@@ -48,71 +51,74 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
         },
 
         render: function(args, callback) {
-            var landingView = require(router.configuration.routes.landingPage.view),
-                _this = this,
-                currentDialog = $('<div id="mandatoryPasswordChangeDialog"></div>');
+            ModuleLoader.load(router.configuration.routes.landingPage.view).then(_.bind(function (landingView) {
+                var _this = this,
+                    currentDialog = $('<div id="mandatoryPasswordChangeDialog"></div>');
 
-            if (landingView.baseTemplate) {
-                this.baseTemplate = landingView.baseTemplate;
-            }
+                if (landingView.baseTemplate) {
+                    this.baseTemplate = landingView.baseTemplate;
+                }
 
-            this.setElement(currentDialog);
+                this.setElement(currentDialog);
 
-            uiUtils.renderTemplate(
-                _this.contentTemplate,
-                _this.$el,
-                _.extend({}, conf.globalData, _this.data),
-                _.bind(function() {
-                    this.model.dialog = BootstrapDialog.show({
-                        title: $.t("templates.MandatoryChangePassword.title"),
-                        type: BootstrapDialog.TYPE_DEFAULT,
-                        message: currentDialog,
-                        onshown : _.bind(function (dialogRef) {
-                            validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
-                                this.$el.find("[name=password]").focus();
+                uiUtils.renderTemplate(
+                    _this.contentTemplate,
+                    _this.$el,
+                    _.extend({}, conf.globalData, _this.data),
+                    _.bind(function() {
+                        this.model.dialog = BootstrapDialog.show({
+                            title: $.t("templates.MandatoryChangePassword.title"),
+                            type: BootstrapDialog.TYPE_DEFAULT,
+                            message: currentDialog,
+                            onshown : _.bind(function (dialogRef) {
+                                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
+                                    this.$el.find("[name=password]").focus();
 
-                                this.model.dialog.$modalFooter.find("#submitPasswordChange").prop('disabled', true);
+                                    this.model.dialog.$modalFooter.find("#submitPasswordChange").prop('disabled', true);
 
-                                if (callback) {
-                                    callback();
-                                }
-                            }, this));
-                        }, _this),
-                        onhide: _.bind(function(){
-                            eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
-                        }, this),
-                        buttons:
-                            [{
-                                label: $.t("common.form.submit"),
-                                id: "submitPasswordChange",
-                                cssClass: "btn-primary",
-                                action: _.bind(function(dialogRef) {
-                                    event.preventDefault();
-
-                                    var patchDefinitionObject = [], element;
-                                    if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
-                                        patchDefinitionObject.push({operation: "replace", field: "/password", value: this.$el.find("input[name=password]").val()});
+                                    if (callback) {
+                                        callback();
                                     }
+                                }, this));
+                            }, _this),
+                            onhide: _.bind(function(){
+                                eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
+                            }, this),
+                            buttons:
+                                [{
+                                    label: $.t("common.form.submit"),
+                                    id: "submitPasswordChange",
+                                    cssClass: "btn-primary",
+                                    action: _.bind(function(dialogRef) {
+                                        event.preventDefault();
 
-                                    this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
-                                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
-                                        delete conf.passwords;
+                                        var patchDefinitionObject = [], element;
+                                        if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
+                                            patchDefinitionObject.push({operation: "replace", field: "/password", value: this.$el.find("input[name=password]").val()});
+                                        }
 
-                                        dialogRef.close();
+                                        this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
+                                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
+                                            delete conf.passwords;
 
-                                        return authnDelegate.getProfile()
-                                            .then(function(user) {
-                                                conf.loggedUser = user;
-                                                return user;
-                                            });
+                                            dialogRef.close();
 
-                                    }, this));
+                                            return authnDelegate.getProfile()
+                                                .then(function(user) {
+                                                    conf.loggedUser = user;
+                                                    return user;
+                                                });
 
-                                }, this)
-                            }]
-                    });
-                }, _this),
-                "append");
+                                        }, this));
+
+                                    }, this)
+                                }]
+                        });
+                    }, _this),
+                    "append");
+
+            }, this));
+
         },
 
         close: function() {

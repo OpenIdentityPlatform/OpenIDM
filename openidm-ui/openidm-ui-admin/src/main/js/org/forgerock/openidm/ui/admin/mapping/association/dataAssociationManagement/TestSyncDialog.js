@@ -22,16 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, window*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/TestSyncDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/admin/mapping/behaviors/SingleRecordReconciliationGridView",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "bootstrap-dialog"
-], function (MappingAdminAbstractView,
+], function ($, _,
+             MappingAdminAbstractView,
              searchDelegate,
              conf,
              SingleRecordReconciliationGridView,
