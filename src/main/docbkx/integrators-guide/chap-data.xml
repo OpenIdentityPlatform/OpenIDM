@@ -399,14 +399,14 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
        <para>
         <link xlink:href="integrators-guide#query-comp-express-contains"
               xlink:role="http://docbook.org/xlink/role/olink">
-         <citetitle>Querying Resources That Contains the Value</citetitle></link>
+         <citetitle>Querying Resources That Contain the Value</citetitle></link>
        </para>
       </listitem>
       <listitem>
        <para>
         <link xlink:href="integrators-guide#query-comp-express-starts"
               xlink:role="http://docbook.org/xlink/role/olink">
-         <citetitle>Querying Resources That Starts With the Value</citetitle></link>
+         <citetitle>Querying Resources That Start With the Value</citetitle></link>
        </para>
       </listitem>
       <listitem>
@@ -488,7 +488,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
      </section>
 
      <section xml:id="query-comp-express-contains">
-      <title>Querying Resources That Contains the Value</title>
+      <title>Querying Resources That Contain the Value</title>
 
       <para>
        This is the associated JSON comparison expression:
@@ -547,7 +547,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
 
      </section>
      <section xml:id="query-comp-express-starts">
-      <title>Querying Resources That Starts With the Value</title>
+      <title>Querying Resources That Start With the Value</title>
 
       <para>
        This is the associated JSON comparison expression:
