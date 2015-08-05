@@ -941,8 +941,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                         Pair<JsonPointer, JsonPointer> expansionPair = schema.getResourceExpansionField(field);
                         if (expansionPair != null) {
                             JsonPointer relationshipField = expansionPair.getFirst();
+                            // Allow the field by removing it from the fieldsToRemove list (if there)
+                            fieldsToRemove.remove(relationshipField);
+                            // Add the field to the expansion map
                             if (!resourceExpansionMap.containsKey(relationshipField)) {
+                            	// Initialize the list of fields in the resource expansion map
                                 resourceExpansionMap.put(relationshipField, new ArrayList<JsonPointer>());
+                                // replace the field in the fields list with the relationship field
+                                fields.remove(field);
+                                fields.add(relationshipField);
                             }
                             resourceExpansionMap.get(relationshipField).add(expansionPair.getSecond());
                         }
@@ -1016,8 +1023,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             request.addField(fieldsList.toArray(new JsonPointer[fieldsList.size()]));
             ResourceResponse resource = connectionFactory.getConnection().read(context, request);
             
-            // Merge the result with the supplied relationship object
-            value.asMap().putAll(resource.getContent().asMap());
+            // Add the result to the supplied relationship object
+            value.put(SchemaField.FIELD_EXPANSION_VALUE, resource.getContent().asMap());
         } else {
             logger.warn("Cannot expand a null relationship object");
         }

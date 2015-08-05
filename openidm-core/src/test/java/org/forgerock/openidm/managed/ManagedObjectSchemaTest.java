@@ -55,10 +55,12 @@ public class ManagedObjectSchemaTest {
                             field("isVirtual", true),
                             field("returnByDefault", true))),
                     field("field5", object(
-                            field("type", "relationship"),
-                            field("properties", object(
-                                    field("_ref", object(
-                                            field("type", "string"))))))),
+                    		field("type", "array"),
+                    		field("items", object(
+                    				field("type", "relationship"),
+                    				field("properties", object(
+                    						field("_ref", object(
+                    								field("type", "string"))))))))),
                     field("field6", object(
                             field("type", "relationship"),
                             field("returnByDefault", true),
@@ -115,6 +117,12 @@ public class ManagedObjectSchemaTest {
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2")).getFirst(), new JsonPointer("field5"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2")).getSecond(), new JsonPointer("field2"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2/field3")).getFirst(), new JsonPointer("field5"));
-        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2/field3")).getSecond(), new JsonPointer("field2/field3"));     
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2/field3")).getSecond(), new JsonPointer("field2/field3"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/*")).getFirst(), new JsonPointer("field6"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/*")).getSecond(), new JsonPointer("*"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2")).getFirst(), new JsonPointer("field6"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2")).getSecond(), new JsonPointer("field2"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2/field3")).getFirst(), new JsonPointer("field6"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2/field3")).getSecond(), new JsonPointer("field2/field3"));     
     }
 }

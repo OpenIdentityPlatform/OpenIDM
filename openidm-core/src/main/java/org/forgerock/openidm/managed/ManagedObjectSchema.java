@@ -147,19 +147,29 @@ public class ManagedObjectSchema {
                 fieldToMatch = field.relativePointer();
             }
             if (matches) {
-                if (fieldToMatch.equals(new JsonPointer("*")) 
-                        || fieldToMatch.get(0).equals("*")) {
-                    if (fieldToMatch.toArray().length > 1) {
-                        // Return the remaining field name
-                        return Pair.of(relationshipField, fieldToMatch.relativePointer());
-                    } else if (fieldToMatch.toArray().length == 1) {
-                        // Return all fields "*"
-                        return Pair.of(relationshipField, fieldToMatch);
-                    } 
-                } else {
-                    // No expansion
-                    return null;
-                }
+            	if (fields.get(relationshipField).isArray()) {
+            		// The field is an Array, check if it is followed by an "*", to indicate field expansion
+            		if (fieldToMatch.get(0).equals("*")) {
+            			if (fieldToMatch.toArray().length > 1) {
+            				// Return the remaining field name
+            				return Pair.of(relationshipField, fieldToMatch.relativePointer());
+            			} else if (fieldToMatch.toArray().length == 1) {
+            				// Return all fields "*"
+            				return Pair.of(relationshipField, fieldToMatch);
+            			} 
+            		} else {
+            			// No expansion
+            			return null;
+            		}
+            	} else {
+            		// The field is not an array, check if it has any remaining field name to indicate field expansion
+            		if (fieldToMatch.toArray().length > 0) {
+        				return Pair.of(relationshipField, fieldToMatch);
+            		} else {
+            			// No expansion
+            			return null;
+            		}
+            	}
             }
         }
         return null;
