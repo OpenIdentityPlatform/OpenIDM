@@ -254,7 +254,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             attributesGrid = new Backgrid.Grid({
                 className: "table",
-                emptyText: $.t("templates.workflows.processes.noActiveProcesses"),
                 row: ClickableRow,
                 columns: BackgridUtils.addSmallScreenCell([
                     {
