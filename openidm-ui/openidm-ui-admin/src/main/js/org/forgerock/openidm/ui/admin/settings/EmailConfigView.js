@@ -22,16 +22,20 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, form2js */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
+    "jquery",
+    "underscore",
+    "form2js",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
 
-], function(AdminAbstractView,
+], function($, _, form2js,
+            AdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,
