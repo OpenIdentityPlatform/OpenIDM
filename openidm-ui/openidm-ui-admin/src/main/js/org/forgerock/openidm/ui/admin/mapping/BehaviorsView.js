@@ -22,9 +22,10 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/BehaviorsView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -37,7 +38,8 @@ define("org/forgerock/openidm/ui/admin/mapping/BehaviorsView", [
     "org/forgerock/openidm/ui/admin/mapping/behaviors/SingleRecordReconciliationView",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils"
 
-], function(MappingAdminAbstractView,
+], function(_,
+            MappingAdminAbstractView,
             eventManager,
             constants,
             ConfigDelegate,

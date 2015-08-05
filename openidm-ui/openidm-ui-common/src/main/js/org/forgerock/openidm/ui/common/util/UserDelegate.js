@@ -22,17 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author yaromin
- */
-define("UserDelegate", [
+define("org/forgerock/openidm/ui/common/util/UserDelegate", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, configuration, eventManager) {
+], function($, _, constants, AbstractDelegate, configuration, eventManager) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/managed/user");
 
@@ -57,7 +56,7 @@ define("UserDelegate", [
             }
         }, error: errorCallback} );
     };
-       
+
     /**
      * Check credentials method
      */
@@ -73,7 +72,7 @@ define("UserDelegate", [
             success: successCallback,
             error: errorCallback,
             errorsHandlers: {
-                "forbidden": { 
+                "forbidden": {
                     status: "403"
                 }
             }
@@ -83,7 +82,7 @@ define("UserDelegate", [
 
     obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
         return obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid}), 
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid}),
             type: "POST",
             url: "",
             success: function (data) {
@@ -101,7 +100,7 @@ define("UserDelegate", [
      */
     obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
         return obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid, securityAnswer: securityAnswer}), 
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid, securityAnswer: securityAnswer}),
             type: "POST",
             url: "",
             success: function (data) {
@@ -110,20 +109,20 @@ define("UserDelegate", [
                 } else if (data.result === "error" && errorCallback) {
                     errorCallback(data);
                 }
-                
+
             },
             error: errorCallback
         });
     };
 
-    
+
     /**
      * Setting new password for username if security answer is correct
      */
     obj.setNewPassword = function(userName, securityAnswer, newPassword, successCallback, errorCallback) {
         console.info("setting new password for user and security question");
         return obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=setNewPasswordForUserName&" + $.param({newPassword: newPassword, uid: userName, securityAnswer: securityAnswer}), 
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=setNewPasswordForUserName&" + $.param({newPassword: newPassword, uid: userName, securityAnswer: securityAnswer}),
             type: "POST",
             url: "",
             success: function (data) {
@@ -132,7 +131,7 @@ define("UserDelegate", [
                 } else if (data.result === "error") {
                     errorCallback(data);
                 }
-                
+
             },
             error: errorCallback
         });
@@ -140,7 +139,7 @@ define("UserDelegate", [
 
     obj.getForUserName = function(uid, successCallback, errorCallback) {
         return obj.serviceCall({
-            url: "?_queryId=for-userName&" + $.param({uid: uid}), 
+            url: "?_queryId=for-userName&" + $.param({uid: uid}),
             error: errorCallback
         }).then(function (data) {
             if(data.result.length !== 1) {
@@ -161,7 +160,7 @@ define("UserDelegate", [
             return data.result[0];
         });
     };
-    
+
     /**
      * See AbstractDelegate.patchEntityDifferences
      */
@@ -171,7 +170,7 @@ define("UserDelegate", [
         console.info("updating user");
         return obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, errorsHandlers);
     };
-    
+
     obj.updateUser = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
         delete oldUserData.uid;
         delete newUserData.uid;

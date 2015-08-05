@@ -22,32 +22,34 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, window, require */
+/*global define, require */
 
 define("org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry", [
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(AbstractConfigurationAware) {
+    "underscore",
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function(_, AbstractConfigurationAware, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
 
     obj.updateConfigurationCallback = function (conf) {
         this.configuration = conf;
 
         _.each(conf,function(val,key){
-            define(key, require[val]);
-
-            require([val]);
+            require.config({"map":
+                { "*":
+                    { key : val }
+                }
+            });
         });
     };
 
     obj.getEditViewModule = function (resource) {
         if(_.isUndefined(this.configuration["resource-" + resource])) {
-            return require("org/forgerock/openidm/ui/common/resource/GenericEditResourceView");
+            return ModuleLoader.load("org/forgerock/openidm/ui/common/resource/GenericEditResourceView");
         } else {
-            return require(this.configuration["resource-" + resource]);
+            return ModuleLoader.load(this.configuration["resource-" + resource]);
         }
     };
 
     return obj;
 });
-
-

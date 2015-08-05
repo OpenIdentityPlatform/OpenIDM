@@ -22,12 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, JSONEditor, form2js */
+/*global define */
 
 /**
  * @author huck.elliott
  */
 define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -37,16 +39,16 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils"
-], function(AbstractView, eventManager, constants, UIUtils, AbstractModel, messagesManager, AbstractCollection, Backgrid, BackgridUtils) {
+], function($, _, AbstractView, eventManager, constants, UIUtils, AbstractModel, messagesManager, AbstractCollection, Backgrid, BackgridUtils) {
     var ProcessInstanceModel = AbstractModel.extend({ url: "/openidm/workflow/processinstance" }),
         ProcessDefinitionModel = AbstractModel.extend({ url: "/openidm/workflow/processdefinition" }),
         UserModel = AbstractModel.extend({ url: "/openidm/managed/user" }),
-        TaskInstanceCollection = AbstractCollection.extend({ 
+        TaskInstanceCollection = AbstractCollection.extend({
             mode: "client"
         }),
         ProcessInstanceView = AbstractView.extend({
         template: "templates/admin/workflow/ProcessInstanceViewTemplate.html",
-        
+
         events: {
             "click #cancelProcessBtn" : "cancelProcess"
         },
@@ -54,7 +56,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
             if (e) {
                 e.preventDefault();
             }
-            
+
             UIUtils.jqConfirm($.t("templates.processInstance.cancelConfirmation"), _.bind(function() {
                 this.model.destroy({
                     success: function() {
@@ -68,39 +70,39 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
             var processDefinition = new ProcessDefinitionModel(),
                 startedBy = new UserModel(),
                 owner = new UserModel();
-            
+
             this.model = new ProcessInstanceModel();
-            
+
             this.model.id = args[0];
-            
+
             this.model.fetch().then(_.bind(function(){
                 var fetchArr = [];
                 this.data.processInstance = this.model.toJSON();
-                
+
                 if (this.data.processInstance.startUserId) {
                     startedBy.id = this.data.processInstance.startUserId;
                     fetchArr.push(startedBy.fetch());
                 }
-                
+
                 processDefinition.id = this.data.processInstance.processDefinitionId;
                 fetchArr.push(processDefinition.fetch());
-                
+
                 $.when.apply($, fetchArr).done(_.bind(function(){
-                    
+
                     this.data.processDefinition = processDefinition.toJSON();
                     this.data.startedBy = startedBy.toJSON();
 
                     this.parentRender(_.bind(function(){
-                        
+
                         this.buildTasksGrid();
-                        
+
                         if(callback) {
                             callback();
                         }
                     },this));
-                    
+
                 },this));
-                
+
             },this));
         },
         buildTasksGrid: function () {
@@ -165,13 +167,11 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
                     collection: processTasks,
                     className: "table"
                 });
-            
+
             this.$el.find("#tasksGrid").append(tasksGrid.render().el);
 
         }
-    }); 
-    
+    });
+
     return new ProcessInstanceView();
 });
-
-

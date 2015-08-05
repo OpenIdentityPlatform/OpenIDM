@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, window */
+/*global define, window */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManagementView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -35,8 +37,10 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils",
     "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/ChangeAssociationDialog",
-    "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/TestSyncDialog"
-], function(MappingAdminAbstractView,
+    "org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/TestSyncDialog",
+    "jqgrid"
+], function($, _,
+            MappingAdminAbstractView,
             conf,
             eventManager,
             constants,

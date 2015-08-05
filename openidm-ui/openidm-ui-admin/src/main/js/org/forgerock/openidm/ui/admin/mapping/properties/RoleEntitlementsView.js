@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, JSON */
+/*global define, JSON */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/RoleEntitlementsView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate"
-], function(MappingAdminAbstractView,
-            searchDelegate) {
+], function($, _, MappingAdminAbstractView, searchDelegate) {
 
     var RoleEntitlementsView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/RoleEntitlementsTemplate.html",

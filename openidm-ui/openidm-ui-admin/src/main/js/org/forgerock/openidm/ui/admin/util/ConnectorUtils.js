@@ -22,12 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function (ConnectorDelegate, ConfigDelegate) {
+], function ($, _, ConnectorDelegate, ConfigDelegate) {
 
     var obj = {};
 

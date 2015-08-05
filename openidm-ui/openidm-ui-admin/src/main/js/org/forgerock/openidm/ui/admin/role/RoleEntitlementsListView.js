@@ -22,12 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, Handlebars, sessionStorage */
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -37,7 +36,7 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView", [
     "org/forgerock/commons/ui/common/components/Messages",
     "org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager, roleEntitlementsEditView, configDelegate) {
+], function($, _, AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager, roleEntitlementsEditView, configDelegate) {
     var RoleEntitlementsListView = AbstractView.extend({
         element: "#role-entitlements",
         template: "templates/admin/role/RoleEntitlementsListViewTemplate.html",
@@ -49,25 +48,25 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView", [
         },
         addAssignment: function(e) {
             e.preventDefault();
-            
+
             roleEntitlementsEditView.render(this.data.args, this.data.role, null, this);
         },
         editAssignment: function(e) {
             var assignmentName = $(e.target).closest(".role-assignment-item").attr("assignmentName");
-            
+
             if(e) {
                 e.preventDefault();
             }
-            
+
             roleEntitlementsEditView.render(this.data.args, this.data.role, assignmentName, this);
         },
         deleteAssignment: function(e) {
             var assignmentName = $(e.target).closest(".role-assignment-item").attr("assignmentName");
-            
+
             e.preventDefault();
-            
+
             delete this.data.role.assignments[assignmentName];
-            
+
             uiUtils.jqConfirm($.t("templates.admin.RoleEntitlementsTemplate.deleteEntitlementConfirm",{ assignment: assignmentName }), _.bind(function() {
                 this.removeAssignmentsToMap(assignmentName).then(_.bind(function(){
                     resourceDelegate.updateResource(this.data.serviceUrl, this.data.role._id, this.data.role, _.bind(function() {
@@ -97,26 +96,24 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView", [
                         sync.mappings = _.map(sync.mappings,function(mapping) {
                             if(mapping.assignmentsToMap) {
                                 mapping.assignmentsToMap = _.reject(mapping.assignmentsToMap, function(assignment) { return assignment === assignmentName; });
-                                
+
                                 if(!mapping.assignmentsToMap.length) {
                                     delete mapping.assignmentsToMap;
                                 }
                             }
-                            
+
                             return mapping;
                         });
-                        
+
                         return configDelegate.updateEntity("sync", sync);
-                        
+
                     }, this));
                 } else {
                     return $.Deferred().resolve();
                 }
             },this));
         }
-    }); 
-    
+    });
+
     return new RoleEntitlementsListView();
 });
-
-

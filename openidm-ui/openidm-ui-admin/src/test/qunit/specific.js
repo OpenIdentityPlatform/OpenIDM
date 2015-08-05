@@ -25,6 +25,7 @@
 /*global require, define, QUnit, $ */
 
 define([
+    "org/forgerock/commons/ui/common/main/Configuration",
     "./managedobjects/managedObjectsTest",
     "./resources/resourceTest",
     "./mapping/addMappingTest",
@@ -35,10 +36,19 @@ define([
     "./connector/editConnectorTest",
     "./connector/addConnectorTest",
     "./resourceData/editResourceViewTest"
-], function (moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest, correlationTest, linkQualifierTest, editConnectorTest, addConnectorTest, editResourceViewTest) {
+], function (Configuration, moTest, resourceTest, addMappingTest, reconTests, propertyMappingTest, correlationTest, linkQualifierTest, editConnectorTest, addConnectorTest, editResourceViewTest) {
 
     return {
         executeAll: function (server) {
+
+            QUnit.testStart(function (testDetails) {
+                var lqu = require("org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"),
+                    connectorDelegate = require("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate");
+                connectorDelegate.deleteCurrentConnectorsCache();
+                lqu.model.linkQualifier = [];
+                Configuration.loggedUser = { "userName": "openidm-admin", "roles": ["ui-admin"] }
+            });
+
             QUnit.moduleDone(function() {
                 $(".bootstrap-dialog").remove();
             });

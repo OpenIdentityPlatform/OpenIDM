@@ -57,6 +57,9 @@
                 "id": "/",
                 "type": "object",
                 "properties": {
+                    "_id": {
+                        "type": "string"
+                    },
                     "transactionId": {
                         "type": "string"
                     },
@@ -129,6 +132,9 @@
                 "id": "/",
                 "type": "object",
                 "properties": {
+                    "_id": {
+                        "type": "string"
+                    },
                     "transactionId": {
                         "type": "string"
                     },

@@ -22,15 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global window,define, $, _, form2js, require */
+/*global define, window */
 
 define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/components/Navigation",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
@@ -40,12 +43,14 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "bootstrap-tabdrop",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function(MappingAdminAbstractView,
+], function($, _,
+            MappingAdminAbstractView,
             eventManager,
             validatorsManager,
             configDelegate,
             router,
             constants,
+            ModuleLoader,
             nav,
             reconDelegate,
             dateUtil,
@@ -148,8 +153,12 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
         reRoute: function(e) {
             var route = $(e.currentTarget).attr("data-route-name");
-            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes[route], args: [router.getCurrentHash().split("/")[1]]});
-            this.updateTab();
+            if (route) {
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {
+                    route: router.configuration.routes[route], args: [router.getCurrentHash().split("/")[1]],
+                    callback: _.bind(this.updateTab, this)
+                });
+            }
         },
 
         updateTab: function() {
@@ -160,18 +169,21 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 this.$el.find("#" + route + "Tab").toggleClass("active", true);
             }
 
-            require(router.currentRoute.childView).render();
+            ModuleLoader.load(router.currentRoute.childView).then(_.bind(function (child) {
+                child.render();
+                this.$el.find(".nav-tabs").tabdrop();
+            }, this));
         },
 
         render: function(args, callback) {
             var syncConfig,
                 cleanName;
 
-            if (args === "null"){
+            if (args === null){
                 args = router.getCurrentHash().split("/").slice(1);
             }
 
-            this.route = { url: window.location.hash.replace(/^#/, '') };
+            this.route = { url: router.getURIFragment() };
             this.data.docHelpUrl = constants.DOC_URL;
             this.setSyncNow(_.bind(this.syncNow, this));
 
@@ -190,8 +202,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                     onReady = _.bind(function(runningRecon){
                         this.parentRender(_.bind(function () {
                             this.updateTab();
-
-                            this.$el.find(".nav-tabs").tabdrop();
 
                             if (this.model.syncOpen) {
                                 $("#syncStatus").trigger("click");
@@ -286,11 +296,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
                 }, this));
             } else {
-                this.parentRender();
-
-                if(callback){
-                    callback();
-                }
+                this.parentRender(callback);
             }
         },
 

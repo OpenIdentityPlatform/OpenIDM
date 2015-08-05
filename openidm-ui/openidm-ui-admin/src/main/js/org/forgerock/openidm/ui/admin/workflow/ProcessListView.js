@@ -22,15 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/workflow/ProcessListView", [
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView",
     "org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView",
     "org/forgerock/openidm/ui/admin/workflow/ProcessHistoryView",
     "org/forgerock/commons/ui/common/main/AbstractCollection"
-], function(AdminAbstractView,
+], function(_,
+            AdminAbstractView,
             ActiveProcessesView,
             ProcessDefinitionsView,
             ProcessHistoryView,

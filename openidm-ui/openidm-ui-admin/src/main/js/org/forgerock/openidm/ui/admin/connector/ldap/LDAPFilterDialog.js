@@ -22,13 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window, $, _ , Handlebars*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/FilterEditor",
     "ldapjs-filter",
     "bootstrap-dialog"
-], function (FilterEditor, ldapjs, BootstrapDialog) {
+], function ($, _, FilterEditor, ldapjs, BootstrapDialog) {
     var LDAPFilterDialog = FilterEditor.extend({
         el: "#dialogs",
         getFilterString: function () {

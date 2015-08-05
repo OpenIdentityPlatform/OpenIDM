@@ -22,11 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/util/delegates/SecurityQuestionDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
@@ -42,7 +39,7 @@ define("org/forgerock/openidm/ui/util/delegates/SecurityQuestionDelegate", [
             successCallback(obj.pureSecurityQuestions);
         } else {
             console.info("Getting all security questions");
-            
+
             obj.serviceCall({url: "", success: function(data) {
                 if(successCallback) {
                     obj.pureSecurityQuestions = data.securityquestions;
@@ -50,15 +47,12 @@ define("org/forgerock/openidm/ui/util/delegates/SecurityQuestionDelegate", [
                     for (i = 0; i < data.securityquestions.length; i++) {
                         obj.securityQuestions[data.securityquestions[i].key] = data.securityquestions[i];
                     }
-               
+
                     successCallback(data.securityquestions);
                 }
             }, error: errorCallback} );
         }
     };
-    
+
     return obj;
 });
-
-
-

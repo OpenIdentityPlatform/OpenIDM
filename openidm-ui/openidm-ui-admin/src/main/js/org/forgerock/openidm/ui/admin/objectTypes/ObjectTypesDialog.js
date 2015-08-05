@@ -22,9 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, require, JSONEditor, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
+    "jquery",
+    "underscore",
+    "jsonEditor",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -33,7 +36,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "bootstrap-dialog"
-], function(AbstractView, validatorsManager, conf, eventManager, constants, uiUtils, ConnectorDelegate, BootstrapDialog) {
+], function($, _, JSONEditor, AbstractView, validatorsManager, conf, eventManager, constants, uiUtils, ConnectorDelegate, BootstrapDialog) {
     var ObjectTypesDialog = AbstractView.extend({
         template: "templates/admin/objectTypes/ObjectTypesTemplate.html",
         el: "#dialogs",

@@ -22,15 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, cron */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/Scheduler", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function(AbstractView, constants, SchedulerDelegate, uiUtils, eventManager) {
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "cron",
+    "gentleSelect"
+], function($, _, AbstractView, constants, SchedulerDelegate, uiUtils, eventManager) {
     var schedulerInstance = {},
         Scheduler = AbstractView.extend({
             template: "templates/admin/util/Scheduler.html",

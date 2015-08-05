@@ -22,13 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, eventManager) {
+], function($, _, constants, AbstractDelegate, eventManager) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/system");
 

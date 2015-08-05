@@ -362,7 +362,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Improving
     Search Performance for Generic Mappings</citetitle></link>.
    </para>
-   <variablelist>
+
    <para>
     The <replaceable>filter</replaceable> expression is constructed from the
     building blocks shown in this section. In these expressions the simplest
@@ -370,21 +370,88 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     such as <literal>userName</literal> or <literal>id</literal>. A json-pointer
     can, however, point to nested elements.
    </para>
-   <varlistentry>
-    <term>Comparison expressions</term>
-    <listitem>
+
+    <note>
      <para>
-      The following examples show how you can build filters using comparison
-      expressions.
+      You can also use the negation operator (<emphasis>!</emphasis>) to help
+      construct a query. For example, a
+      <command>_queryFilter=!(userName+eq+"jdoe")</command> query would return
+      every <literal>userName</literal> except for <literal>jdoe</literal>.
      </para>
+    </note>
 
-     <variablelist>
+    <para>
+     You can set up query filters with one of the following types of expressions:
+    </para>
 
-      <varlistentry>
-       <term><literal><replaceable>json-pointer</replaceable> eq <replaceable>json-value</replaceable></literal></term>
-       <listitem>
+    <section xml:id="query-comp-expression">
+     <title>Comparison Expressions</title>
+
+     <itemizedlist>
+      <listitem>
+       <para>
+        <link xlink:href="integrators-guide#query-comp-express-eq"
+              xlink:role="http://docbook.org/xlink/role/olink">
+         <citetitle>Querying Resources That Equal the Value</citetitle></link>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <link xlink:href="integrators-guide#query-comp-express-contains"
+              xlink:role="http://docbook.org/xlink/role/olink">
+         <citetitle>Querying Resources That Contains the Value</citetitle></link>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <link xlink:href="integrators-guide#query-comp-express-starts"
+              xlink:role="http://docbook.org/xlink/role/olink">
+         <citetitle>Querying Resources That Starts With the Value</citetitle></link>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <link xlink:href="integrators-guide#query-comp-express-lessthan"
+              xlink:role="http://docbook.org/xlink/role/olink">
+         <citetitle>Querying Resources That are Less Than the Value</citetitle></link>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <link xlink:href="integrators-guide#query-comp-express-lesseq"
+              xlink:role="http://docbook.org/xlink/role/olink">
+         <citetitle>Querying Resources That are Less Than or Equal to the
+          Value</citetitle></link>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <link xlink:href="integrators-guide#query-comp-express-gthan"
+              xlink:role="http://docbook.org/xlink/role/olink">
+         <citetitle>Querying Resources That are Greater Than the
+          Value</citetitle></link>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <link xlink:href="integrators-guide#query-comp-express-ge"
+              xlink:role="http://docbook.org/xlink/role/olink">
+         <citetitle>Querying Resources That are Greater Than or Equal to the
+          Value</citetitle></link>
+       </para>
+      </listitem>
+     </itemizedlist>
+
+     <section xml:id="query-comp-express-eq">
+      <title>Querying Resources That Equal the Value</title>
+
+      <para>This is the associated JSON comparison expression:
+       <literal><replaceable>json-pointer</replaceable> eq
+       <replaceable>json-value</replaceable></literal>
+      </para>
+
         <para>
-         Matches when the pointer equals the value, for example:
+         Review the following example:
         </para>
         <programlisting language="javascript">
 "_queryFilter" : '/givenName eq "Dan"'
@@ -417,24 +484,30 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
       "userName": "dlanoway"
     }
 }</computeroutput></screen>
-       </listitem>
-      </varlistentry>
 
-      <varlistentry>
-       <term><literal><replaceable>json-pointer</replaceable> co <replaceable>json-value</replaceable></literal></term>
-       <listitem>
-        <para>
-         Matches when the pointer contains the value, for example:
-        </para>
+     </section>
+
+     <section xml:id="query-comp-express-contains">
+      <title>Querying Resources That Contains the Value</title>
+
+      <para>
+       This is the associated JSON comparison expression:
+       <literal><replaceable>json-pointer</replaceable> co
+       <replaceable>json-value</replaceable></literal>
+      </para>
+
+      <para>
+       Review the following example:
+      </para>
         <programlisting language="javascript">
-"_queryFilter" : '/givenName co "smi"'
+"_queryFilter" : '/givenName co "Da"'
         </programlisting>
-        <para>
-         The following REST call returns the user name and given name of all
-         managed users whose first name (<literal>givenName</literal>) contains
-         "Da".
-        </para>
-        <screen>$ <userinput>curl \
+      <para>
+       The following REST call returns the user name and given name of all
+       managed users whose first name (<literal>givenName</literal>) contains
+       "Da".
+      </para>
+      <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -471,22 +544,27 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     },
 ...
 }</computeroutput></screen>
-       </listitem>
-      </varlistentry>
 
-      <varlistentry>
-       <term><literal><replaceable>json-pointer</replaceable> sw <replaceable>json-value</replaceable></literal></term>
-       <listitem>
-        <para>
-         Matches when the pointer starts with the value, for example:
-        </para>
+     </section>
+     <section xml:id="query-comp-express-starts">
+      <title>Querying Resources That Starts With the Value</title>
+
+      <para>
+       This is the associated JSON comparison expression:
+       <literal><replaceable>json-pointer</replaceable> sw
+       <replaceable>json-value</replaceable></literal>
+      </para>
+
+      <para>
+       Review the following example:
+      </para>
         <programlisting language="javascript">
 "_queryFilter" : '/sn sw "Jen"'
         </programlisting>
-        <para>
-         The following REST call returns the user names of all managed users
-         whose last name (<literal>sn</literal>) starts with "Jen".
-        </para>
+      <para>
+       The following REST call returns the user names of all managed users
+       whose last name (<literal>sn</literal>) starts with "Jen".
+      </para>
         <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -512,15 +590,20 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     }
   ]
 }</computeroutput></screen>
-      </listitem>
-     </varlistentry>
+      </section>
 
-      <varlistentry>
-       <term><literal><replaceable>json-pointer</replaceable> lt <replaceable>json-value</replaceable></literal></term>
-       <listitem>
-        <para>
-         Matches when the pointer is less than the value, for example:
-        </para>
+      <section xml:id="query-comp-express-lessthan">
+       <title>Querying Resources That are Less Than the Value</title>
+
+       <para>
+        This is the associated JSON comparison expression:
+        <literal><replaceable>json-pointer</replaceable> lt
+        <replaceable>json-value</replaceable></literal>
+       </para>
+
+       <para>
+        Review the following example:
+       </para>
        <programlisting language="javascript">
 "_queryFilter" : '/employeeNumber lt 5000'
        </programlisting>
@@ -562,15 +645,19 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
 ...
   ]
 }</computeroutput></screen>
-      </listitem>
-     </varlistentry>
+      </section>
 
-     <varlistentry>
-      <term><literal><replaceable>json-pointer</replaceable> le <replaceable>json-value</replaceable></literal></term>
-      <listitem>
+      <section xml:id="query-comp-express-lesseq">
+       <title>Querying Resources That are Less Than or Equal to the Value</title>
+
        <para>
-        Matches when the pointer is less than or equal to the value, for
-        example:
+        This is the associated JSON comparison expression:
+        <literal><replaceable>json-pointer</replaceable> le
+        <replaceable>json-value</replaceable></literal>
+       </para>
+
+       <para>
+        Review the following example:
        </para>
        <programlisting language="javascript">
 "_queryFilter" : '/employeeNumber le 5000'
@@ -613,14 +700,18 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
 ...
   ]
 }</computeroutput></screen>
-      </listitem>
-     </varlistentry>
+      </section>
+      <section xml:id="query-comp-express-gthan">
+       <title>Querying Resources That are Greater Than the Value</title>
 
-     <varlistentry>
-      <term><literal><replaceable>json-pointer</replaceable> gt <replaceable>json-value</replaceable></literal></term>
-      <listitem>
        <para>
-        Matches when the pointer is greater than the value, for example:
+        This is the associated JSON comparison expression:
+        <literal><replaceable>json-pointer</replaceable> gt
+        <replaceable>json-value</replaceable></literal>
+       </para>
+
+       <para>
+        Review the following example:
        </para>
        <programlisting language="javascript">
 "_queryFilter" : '/employeeNumber gt 5000'
@@ -663,15 +754,19 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
 ...
   ]
 }</computeroutput></screen>
-      </listitem>
-     </varlistentry>
+       </section>
 
-     <varlistentry>
-      <term><literal><replaceable>json-pointer</replaceable> ge <replaceable>json-value</replaceable></literal></term>
-      <listitem>
+     <section xml:id="query-comp-express-ge">
+      <title>Querying Resources That are Greater Than or Equal to the Value</title>
+
+      <para>
+       This is the associated JSON comparison expression:
+       <literal><replaceable>json-pointer</replaceable> ge
+       <replaceable>json-value</replaceable></literal>
+      </para>
+
        <para>
-        Matches when the pointer is greater than or equal to the value for
-        example:
+        Review the following example:
        </para>
        <programlisting language="javascript">
 "_queryFilter" : '/employeeNumber ge 5000'
@@ -714,21 +809,22 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
 ...
   ]
 }</computeroutput></screen>
-      </listitem>
-     </varlistentry>
-    </variablelist>
-   </listitem>
-   </varlistentry>
+     </section>
+    </section>
+   <section xml:id="query-presence">
+    <title>Presence Expressions</title>
 
-   <varlistentry>
-    <term>Presence expression</term>
-    <listitem>
-     <para>
-      Evaluates to <literal>true</literal> when a
-      <literal><replaceable>json-pointer</replaceable> pr</literal> matches any
-      object in which the <replaceable>json-pointer</replaceable> is present,
-      and contains a non-null value. For example, take the following query:
-     </para>
+    <para>
+     The following examples show how you can build filters using the following
+     types of presence expressions.
+    </para>
+
+    <para>
+     Evaluates to <literal>true</literal> when a
+     <literal><replaceable>json-pointer</replaceable> pr</literal> matches any
+     object in which the <replaceable>json-pointer</replaceable> is present,
+     and contains a non-null value. For example, take the following query:
+    </para>
      <programlisting language="javascript">
 "_queryFilter" : '/mail pr'
      </programlisting>
@@ -782,27 +878,30 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     }
   ]
 }</computeroutput></screen>
-     <para>
-      Evaluates to <literal>false</literal> for elements that are present with
-      a <literal>null</literal> value, and for elements that are missing.
-     </para>
-    </listitem>
-   </varlistentry>
 
-   <varlistentry>
-    <term>Literal expressions</term>
-    <listitem>
-     <para>
-      <literal>true</literal> matches any object in the resource.
-     </para>
-     <para>
-      <literal>false</literal> matches no object in the resource.
-     </para>
-     <para>
-      For example, you can list the <literal>_id</literal> of all managed
-      objects as follows:
-     </para>
-     <screen>$ <userinput>curl \
+    <para>
+     Evaluates to <literal>false</literal> for elements that are present with
+     a <literal>null</literal> value, and for elements that are missing.
+    </para>
+   </section>
+
+   <section xml:id="query-literal">
+    <title>Literal Expressions</title>
+
+    <para>
+     A literal expression is a boolean:
+    </para>
+
+    <simplelist>
+     <member><literal>true</literal> matches any object in the resource.</member>
+     <member><literal>false</literal> matches no object in the resource.</member>
+    </simplelist>
+
+    <para>
+     For example, you can list the <literal>_id</literal> of all managed
+     objects as follows:
+    </para>
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -821,9 +920,9 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     }
   ]
 }</computeroutput>
-     </screen>
-     <note>
-      <para>
+    </screen>
+    <note>
+     <para>
        Literal expressions (<literal>true</literal> and
        <literal>false</literal>) can be used only in queries on managed objects.
        Queries on system objects cannot use literal expressions. To replicate
@@ -831,20 +930,18 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
        resource, you can use the <literal>sw</literal> filter, with a value of
        <literal>""</literal>. For example, the following query returns all user
        accounts in an LDAP system:
-      </para>
-      <screen>$ <userinput>curl \
+     </para>
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  'https://localhost:8443/openidm/system/ldap/account?_queryFilter=sn+sw+""'</userinput></screen>
      </note>
-    </listitem>
-   </varlistentry>
+    </section>
 
-   <varlistentry>
-    <term>Complex expressions</term>
-    <listitem>
+    <section xml:id="query-complex">
+     <title>Complex Expressions</title>
      <para>
       You can combine expressions using the boolean operators
       <literal>and</literal>, <literal>or</literal>, and <literal>!</literal>
@@ -879,9 +976,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     }
   ]
 }</computeroutput></screen>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+    </section>
   </section>
 
   <section xml:id="paging-query-results">

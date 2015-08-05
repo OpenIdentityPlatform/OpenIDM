@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/delegates/InfoDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",

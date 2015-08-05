@@ -56,8 +56,8 @@ define([
 
                 $("#qunit-fixture").append("<div id='analysisView'></div>")
 
-                MappingBaseView.data.recon = reconDetails;
-                MappingBaseView.data.syncCanceled = false;
+                MappingBaseView.setRecon(reconDetails);
+                MappingBaseView.setSyncCancelled(false);
                 DataAssociationManagementView.setCurrentMapping(mappingDetails.sync.mappings[0]);
                 DataAssociationManagementView.setSyncConfig(mappingDetails);
 

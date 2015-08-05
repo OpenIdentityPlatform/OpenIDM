@@ -24,16 +24,21 @@
 
 /*global require, define, window */
 
-
-/**
- * @author yaromin
- */
-
 require.config({
+    map: {
+        "*" : {
+            "UserDelegate": "org/forgerock/openidm/ui/common/util/UserDelegate",
+            "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
+            "AuthnDelegate": "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
+            "LoginView": "org/forgerock/openidm/ui/LoginView",
+            "UserProfileView": "org/forgerock/openidm/ui/profile/UserProfileView",
+            "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
+            "RegisterView": "org/forgerock/openidm/ui/registration/UserRegistrationView",
+            "ChangeSecurityDataDialog": "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
+        }
+    },
     paths: {
-        less: "libs/less-1.5.1-min",
         i18next: "libs/i18next-1.7.3-min",
-        i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-1.1.2-min",
         underscore: "libs/lodash-2.4.1-min",
         js2form: "libs/js2form-2.0",
@@ -41,11 +46,10 @@ require.config({
         spin: "libs/spin-2.0.1-min",
         jquery: "libs/jquery-2.1.1-min",
         jqueryui: "libs/jquery-ui-1.11.1-min",
-        jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-1.3.0-min",
-        bootstrap: "libs/bootstrap-3.3.4-custom",
+        handlebars: "libs/handlebars-3.0.3-min",
+        bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
         moment: "libs/moment-2.8.1-min",
@@ -53,9 +57,6 @@ require.config({
         selectize : "libs/selectize-0.12.1-min",
         d3 : "libs/d3-3.5.5-min",
         dimple : "libs/dimple-2.1.2-min",
-        AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
-        UserDelegate: "org/forgerock/openidm/ui/common/util/UserDelegate",
-        ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
         jsonEditor: "libs/jsoneditor-0.7.9-min"
     },
 
@@ -82,16 +83,6 @@ require.config({
         spin: {
             exports: "spin"
         },
-        jqueryui: {
-            deps: ["jquery"],
-            exports: "jqueryui"
-        },
-        i18nGrid: {
-            deps: ["jquery"]
-        },
-        jqgrid: {
-            deps: ["jqueryui", "i18nGrid"]
-        },
         xdate: {
             exports: "xdate"
         },
@@ -116,6 +107,9 @@ require.config({
         d3: {
             exports: "d3"
         },
+        jqueryui: {
+            deps: ["jquery"]
+        },
         selectize: {
             deps: ["jquery"]
         },
@@ -131,73 +125,21 @@ require.config({
     }
 });
 
-/**
- * Loads all application on start, so each module will be available to
- * required synchronously
- */
 require([
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
+
+    "org/forgerock/commons/ui/common/main",
+    "org/forgerock/openidm/ui/main",
+    "config/main",
+
     "jquery",
     "underscore",
     "backbone",
-    "less",
-    "form2js",
-    "js2form",
-    "spin",
-    "jqgrid",
-    "jqueryui",
-    "xdate",
-    "moment",
-    "doTimeout",
     "handlebars",
-    "placeholder",
     "i18next",
-    "jsonEditor",
-    "contentflow",
-    "selectize",
-    "d3",
-    "org/forgerock/commons/ui/common/main/i18nManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/main",
-    "org/forgerock/openidm/ui/dashboard/main",
-    "org/forgerock/openidm/ui/passwordReset/main",
-    "org/forgerock/openidm/ui/profile/main",
-    "org/forgerock/openidm/ui/registration/main",
-    "org/forgerock/openidm/ui/util/main",
-    "org/forgerock/commons/ui/common/main",
-    "org/forgerock/openidm/ui/LoginView",
-    "AuthnDelegate",
-    "UserDelegate",
-    "ThemeManager",
-    "config/main"
-], function(
-    $,
-    _,
-    Backbone,
-    less,
-    form2js,
-    js2form,
-    spin,
-    jqgrid,
-    jqueryui,
-    xdate,
-    moment,
-    doTimeout,
-    handlebars,
-    placeholder,
-    i18next,
-    jsonEditor,
-    contentflow,
-    selectize,
-    d3,
-    i18n,
-    constants,
-    eventManager) {
-
-    // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:
-    window.$ = $;
-    window._ = _;
-    window.Backbone = Backbone;
-
-    eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+    "spin",
+    "placeholder"
+], function (Constants, EventManager) {
+    EventManager.sendEvent(Constants.EVENT_DEPENDECIES_LOADED);
 });

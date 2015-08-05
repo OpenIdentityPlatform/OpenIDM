@@ -1078,10 +1078,28 @@ $ cp -R en/ fr/</screen>
     </step>
     <step>
      <para>
-      Refresh your browser window for the modification to be applied.
+      Refresh your browser window, and OpenIDM applies your change.
      </para>
     </step>
    </procedure>
+
+   <para>
+    You can also change the labels for accounts in the UI. To do so,
+    navigate to the <literal>Schema Properties</literal> for the managed object
+    to be changed.
+   </para>
+
+   <para>
+    To change the labels for user accounts, click Configure &gt;
+    Managed Objects &gt; User &gt; and scroll down to Schema.
+   </para>
+
+   <para>
+    Under Schema Properties, select a property and modify the
+    <literal>Readable Title</literal>. For example, you can
+    modify the <literal>Readable Title</literal> for <literal>userName</literal>
+    to a label in another language, such as <literal>Nom d'utilisateur</literal>.
+   </para>
   </section>
 
   <section xml:id="ui-project-config">

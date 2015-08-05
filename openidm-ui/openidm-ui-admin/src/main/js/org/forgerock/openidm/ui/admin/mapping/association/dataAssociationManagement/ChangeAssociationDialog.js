@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, require, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManagement/ChangeAssociationDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -33,7 +35,8 @@ define("org/forgerock/openidm/ui/admin/mapping/association/dataAssociationManage
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "bootstrap-dialog",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
-], function(MappingAdminAbstractView,
+], function($, _,
+            MappingAdminAbstractView,
             conf,
             uiUtils,
             searchDelegate,

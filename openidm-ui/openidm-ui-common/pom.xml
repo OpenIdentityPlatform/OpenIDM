@@ -42,7 +42,7 @@
     <dependency>
         <groupId>org.forgerock.commons.ui.libs</groupId>
         <artifactId>sinon</artifactId>
-        <version>1.12.2</version>
+        <version>1.15.4</version>
         <type>js</type>
     </dependency>
     <dependency>
@@ -50,6 +50,12 @@
         <artifactId>qunit</artifactId>
         <version>1.15.0</version>
         <type>js</type>
+    </dependency>
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>qunit</artifactId>
+        <version>1.15.0</version>
+        <type>css</type>
     </dependency>
   </dependencies>
 
@@ -85,7 +91,7 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>   
+          </plugin>
 
           <plugin>
             <artifactId>maven-resources-plugin</artifactId>
@@ -143,4 +149,3 @@
       </build>
 
 </project>
-

@@ -22,12 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/CorrelationQueryBuilderView", [
+    "jquery",
+    "underscore",
+    "handlebars",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
-], function(AdminAbstractView, InlineScriptEditor) {
+], function($, _, Handlebars, AdminAbstractView, InlineScriptEditor) {
 
     var CorrelationQueryBuilderView = AdminAbstractView.extend({
         template: "templates/admin/mapping/association/correlationQuery/CorrelationQueryBuilderTemplate.html",

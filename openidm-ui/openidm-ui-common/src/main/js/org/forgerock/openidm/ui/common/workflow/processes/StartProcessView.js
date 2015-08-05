@@ -22,12 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document, require */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
+    "underscore",
+    "form2js",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -36,13 +35,14 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
     "org/forgerock/openidm/ui/common/workflow/FormManager",
     "org/forgerock/openidm/ui/common/workflow/processes/TemplateStartProcessForm",
     "org/forgerock/commons/ui/common/util/FormGenerationUtils",
-    "org/forgerock/commons/ui/common/util/DateUtil"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm, formGenerationUtils, dateUtil) {
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function(_, form2js, AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm, formGenerationUtils, dateUtil, ModuleLoader) {
     var StartProcessView = AbstractView.extend({
         template: "templates/workflow/processes/StartProcessTemplate.html",
 
         element: "#processDetails",
-        
+
         events: {
             "click input[name=startProcessButton]": "formSubmit",
             "onValidate": "onValidate",
@@ -56,11 +56,11 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
 
             this.$el.empty();
         },
-        
-        
+
+
         formSubmit: function(event) {
             event.preventDefault();
-            
+
             if(validatorsManager.formNotInvalid(this.$el)) {
                 var params = form2js(this.$el.attr("id"), '.', false), param, typeName, paramValue, date, dateFormat;
                 delete params.startProcessButton;
@@ -69,11 +69,11 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
                         delete params[param];
                     }
                 }
-                
+
                 if (this.definitionFormPropertyMap) {
                     formGenerationUtils.changeParamsToMeetTheirTypes(params, this.definitionFormPropertyMap);
                 }
-                
+
                 workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
                     //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
@@ -81,30 +81,24 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
                 }, this));
             }
         },
-        
-        render: function(id, category, callback) { 
+
+        render: function(id, category, callback) {
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
                     workflowManager.getProcessDefinition(id, _.bind(function(definition) {
                         var template = this.getGenerationTemplate(definition), view, passJSLint;
                         this.processDefinition = definition;
                         delete this.definitionFormPropertyMap;
-                        
+
                         if(template === false && definition.formResourceKey) {
-                            view = require(formManager.getViewForForm(definition.formResourceKey));
-                            if (view.render) {
+                            ModuleLoader.load(formManager.getViewForForm(definition.formResourceKey)).then(function (view) {
                                 view.render(definition, {}, {}, callback);
-                                return;
-                            } else {
-                                console.log("There is no view defined for " + definition.formResourceKey);
-                            }
-                        } 
-                        
-                        if(template !== false) {
+                            });
+                        } else if(template !== false) {
                             templateStartProcessForm.render(definition, {}, template, _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
                                 validatorsManager.validateAllFields(this.$el);
-                                
+
                                 if(callback) {
                                     callback();
                                 }
@@ -115,17 +109,17 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
                             templateStartProcessForm.render({"formProperties": definition.formProperties.formPropertyHandlers}, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
                                 validatorsManager.validateAllFields(this.$el);
-                                
+
                                 if(callback) {
                                     callback();
                                 }
                             }, this));
                             return;
                         }
-                    }, this));                  
-            });            
+                    }, this));
+            });
         },
-        
+
         getGenerationTemplate: function(definition) {
             var property, i;
             if (typeof definition.formGenerationTemplate === "string") {
@@ -139,10 +133,8 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
             }
             return false;
         }
-        
-    }); 
-    
+
+    });
+
     return new StartProcessView();
 });
-
-

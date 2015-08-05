@@ -22,11 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _, $, window */
+/*global define */
 
 define("config/process/AdminIDMConfig", [
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(constants) {
+    "underscore",
+    "org/forgerock/openidm/ui/common/util/Constants"
+], function(_, constants) {
     var obj = [
             {
                 startEvent: constants.EVENT_QUALIFIER_CHANGED,
@@ -49,6 +50,12 @@ define("config/process/AdminIDMConfig", [
                     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
                 ],
                 processDescription: function(event, Navigation, ConfigDelegate) {
+                    var completedCallback;
+
+                    if (event) {
+                        completedCallback = event.callback;
+                    }
+
                     ConfigDelegate.readEntity("managed").then(function(managedConfig){
                         Navigation.configuration.links.admin.urls.managed.urls = [];
 
@@ -98,7 +105,11 @@ define("config/process/AdminIDMConfig", [
                         });
 
                         return Navigation.reload();
-                    }).then(event ? event.callback : $.noop);
+                    }).then(function () {
+                        if (completedCallback) {
+                            completedCallback();
+                        }
+                    });
                 }
             },
             {
@@ -107,16 +118,12 @@ define("config/process/AdminIDMConfig", [
                 override: true,
                 dependencies: [
                     "org/forgerock/commons/ui/common/components/Navigation",
-                    "org/forgerock/commons/ui/common/components/popup/PopupCtrl",
-                    "org/forgerock/commons/ui/common/components/Breadcrumbs",
                     "org/forgerock/commons/ui/common/main/Configuration",
                     "org/forgerock/openidm/ui/admin/components/Footer"
                 ],
-                processDescription: function(event, navigation, popupCtrl, breadcrumbs, conf,footer) {
+                processDescription: function(event, navigation, conf,footer) {
                     navigation.init();
-                    popupCtrl.init();
 
-                    breadcrumbs.buildByUrl();
                     footer.render();
                 }
             },
@@ -129,7 +136,7 @@ define("config/process/AdminIDMConfig", [
                     "org/forgerock/commons/ui/common/main/Router"
                 ],
                 processDescription: function(event, configDelegate, router) {
-                    configDelegate.readEntity("ui.context/enduser").then(_.bind(function (data) {
+                    configDelegate.readEntity("ui.context/selfservice").then(_.bind(function (data) {
                         location.href = router.getCurrentUrlBasePart() + data.urlContextRoot;
                     }, this));
                 }

@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, window */
+/*global define, window */
 
 define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(AbstractView, validatorsManager, ConfigDelegate) {
+], function(_, AbstractView, validatorsManager, ConfigDelegate) {
     var AbstractOAuthView = AbstractView.extend({
         element: "#connectorDetails",
         noBaseTemplate: true,

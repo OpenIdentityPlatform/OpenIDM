@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -33,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(AdminAbstractView, eventManager, constants, router, ConnectorDelegate, uiUtils, connectorUtils, ConfigDelegate) {
+], function($, _, AdminAbstractView, eventManager, constants, router, ConnectorDelegate, uiUtils, connectorUtils, ConfigDelegate) {
     var ManagedListView = AdminAbstractView.extend({
         template: "templates/admin/managed/ManagedListViewTemplate.html",
         events: {

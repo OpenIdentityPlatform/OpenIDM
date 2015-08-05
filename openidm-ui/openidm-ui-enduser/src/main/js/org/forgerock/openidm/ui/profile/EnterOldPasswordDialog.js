@@ -22,27 +22,26 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _ */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/profile/EnterOldPasswordDialog", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function(Dialog, validatorsManager, validatorsUtils, conf, eventManager, constants) {
+], function($, _, Dialog, validatorsManager, validatorsUtils, conf, eventManager, constants) {
     var EnterOldPasswordDialog = Dialog.extend({
         contentTemplate: "templates/profile/EnterOldPasswordDialog.html",
-        
+
         data: {
             width: 800,
             height: 200
         },
-        
+
         events: {
             "click input[type=submit]": "formSubmit",
             "click .dialogCloseCross img": "close",
@@ -50,7 +49,7 @@ define("org/forgerock/openidm/ui/profile/EnterOldPasswordDialog", [
             "onValidate": "onValidate",
             "click .modal-content": "stop"
         },
-        
+
         formSubmit: function(event) {
             if(event) {
                 event.preventDefault();
@@ -65,12 +64,12 @@ define("org/forgerock/openidm/ui/profile/EnterOldPasswordDialog", [
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "changeSecurityData"});
             }
         },
-        
+
         render: function(args, callback) {
             this.actions = [];
             this.addAction($.t("common.form.continue"), "submit");
             this.addTitle($.t("templates.user.EnterOldPasswordDialog.passwordAndSecurityQuestionChange"));
-            
+
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el);
                 if (callback) {
@@ -95,10 +94,10 @@ define("org/forgerock/openidm/ui/profile/EnterOldPasswordDialog", [
                 input.parents('.separate-message').removeClass('invalid');
                 input.removeClass('invalid');
             }
-            
+
             input.parents('.separate-message').children("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
         }
-    }); 
-    
+    });
+
     return new EnterOldPasswordDialog();
 });

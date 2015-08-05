@@ -22,13 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _ */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/components/Footer", [
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/admin/delegates/InfoDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, InfoDelegate, conf) {
+], function(_, AbstractView, InfoDelegate, conf) {
 
     var Footer = AbstractView.extend({
 

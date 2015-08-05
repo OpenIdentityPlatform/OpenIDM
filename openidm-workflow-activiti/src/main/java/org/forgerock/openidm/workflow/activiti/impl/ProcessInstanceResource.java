@@ -225,17 +225,14 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                     final ProcessDefinitionEntity def =
                             (ProcessDefinitionEntity) repositoryService.getDeployedProcessDefinition(
                                     executionEntity.getProcessDefinitionId());
-                    if (def == null || !def.isGraphicalNotationDefined()) {
-                        throw new ActivitiException(
-                                "Process instance with id " + resourceId + " has no graphic description");
-                    }
-
-                    final BpmnModel model = repositoryService.getBpmnModel(def.getId());
-                    try (final InputStream is = ProcessDiagramGenerator.generateDiagram(model, "png",
-                            runtimeService.getActiveActivityIds(resourceId))) {
-                        final byte[] data = new byte[is.available()];
-                        is.read(data);
-                        content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(data));
+                    if (def != null && def.isGraphicalNotationDefined()) {
+                        final BpmnModel model = repositoryService.getBpmnModel(def.getId());
+                        try (final InputStream is = ProcessDiagramGenerator.generateDiagram(model, "png",
+                                runtimeService.getActiveActivityIds(resourceId))) {
+                            final byte[] data = new byte[is.available()];
+                            is.read(data);
+                            content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(data));
+                        }
                     }
                 }
 

@@ -22,18 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _ */
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
+    "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/components/Navigation"
-], function(conf, commonSiteConfigurationDelegate, eventManager, constants, Navigation) {
+], function($, _, conf, commonSiteConfigurationDelegate, eventManager, constants, Navigation) {
 
     var obj = commonSiteConfigurationDelegate;
 

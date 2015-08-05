@@ -22,58 +22,54 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document */
+/*global define */
 
-/**
- * @author jdabrowski
- */
 define("org/forgerock/openidm/ui/common/workflow/processes/AbstractProcessForm", [
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
+], function(_, AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
     var AbstractProcessForm = AbstractView.extend({
         template: "templates/common/EmptyTemplate.html",
         element: "#processContent",
-        
+
         events: {
             "onValidate": "onValidate"
         },
-        
+
         postRender: function() {
-            
+
         },
-        
+
         prepareData: function(callback) {
             callback();
         },
-        
-        render: function(processDefinition, category, args, callback) { 
+
+        render: function(processDefinition, category, args, callback) {
             this.setElement(this.element);
             this.$el.unbind();
             this.delegateEvents();
             this.processDefinition = processDefinition;
             this.category = category;
             this.args = args;
-            
+
             this.prepareData(_.bind(function() {
-                this.parentRender(function() {  
+                this.parentRender(function() {
                     this.postRender(callback);
                     this.reloadData();
-                }); 
+                });
             }, this));
-                       
+
         },
-        
+
         reloadData: function() {
         }
-        
-    }); 
-    
+
+    });
+
     return AbstractProcessForm;
 });
-
-

@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,51 +22,41 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define, $, _, less*/
+/*global define */
 
-/**
- * @author huck.elliott
- */
-define("ThemeManager", [
+define("org/forgerock/openidm/ui/common/util/ThemeManager", [
+    "jquery",
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(constants,conf,configDelegate) {
-    
+], function($, constants,conf,configDelegate) {
+
     var obj = {},
         themePromise;
 
-    obj.loadThemeCSS = function(theme){
-        $('head').find('link[href*=less]').remove();
+    obj.loadThemeCSS = function (theme) {
         $('head').find('link[href*=favicon]').remove();
-        
-        $("<link/>", {
-            rel: "stylesheet/less",
-            type: "text/css",
-            href: theme.path + "css/styles.less"
-         }).appendTo("head");
 
         $("<link/>", {
             rel: "icon",
             type: "image/x-icon",
             href: theme.path + theme.icon
-         }).appendTo("head");
-        
+        }).appendTo("head");
+
         $("<link/>", {
             rel: "shortcut icon",
             type: "image/x-icon",
             href: theme.path + theme.icon
-         }).appendTo("head");
-        
-        return $.ajax({
-            url: constants.LESS_VERSION,
-            cache:true,
-            error: function (request, status, error) {
-                console.log(request.responseText);
-            }
-          });
+        }).appendTo("head");
+
+        $("<link/>", {
+            rel: "stylesheet",
+            type: "text/css",
+            href: theme.stylesheet
+        }).appendTo("head");
     };
-    
+
+
     obj.loadThemeConfig = function(){
         var prom = $.Deferred();
         //check to see if the config file has been loaded already
@@ -79,28 +69,18 @@ define("ThemeManager", [
             return configDelegate.readEntity("ui/themeconfig");
         }
     };
-    
-    obj.getTheme = function(){
-        if (themePromise === undefined) {
-            themePromise = obj.loadThemeConfig().then(function(themeConfig){
-                var newLessVars = {};
 
+    obj.getTheme = function () {
+        if (themePromise === undefined) {
+            themePromise = obj.loadThemeConfig().then(function (themeConfig) {
                 conf.globalData.theme = themeConfig;
-                //the following line is needed to align commons code with idm
-                themeConfig.path = "";
-                return obj.loadThemeCSS(themeConfig).then(function(){
-                    _.each(themeConfig.settings.lessVars, function (value, key) {
-                        newLessVars['@' + key] = value;
-                    });
-                    less.modifyVars(newLessVars);
-                    
-                    return themeConfig;
-                });
+                obj.loadThemeCSS(themeConfig);
+                return themeConfig;
             });
         }
         return themePromise;
     };
-    
-    
+
+
     return obj;
 });

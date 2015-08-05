@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
@@ -33,8 +35,10 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
-    "org/forgerock/openidm/ui/admin/util/ConnectorUtils"
-], function(AdminAbstractView,
+    "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
+    "jqueryui"
+], function($, _,
+            AdminAbstractView,
             eventManager,
             configDelegate,
             constants,

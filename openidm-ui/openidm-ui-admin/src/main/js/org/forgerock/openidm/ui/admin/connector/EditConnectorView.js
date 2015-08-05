@@ -22,9 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, window */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
+    "jquery",
+    "underscore",
+    "form2js",
     "org/forgerock/openidm/ui/admin/connector/AbstractConnectorView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -41,7 +44,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/commons/ui/common/util/UIUtils"
 
-], function(AbstractConnectorView,
+], function($, _, form2js,
+            AbstractConnectorView,
             eventManager,
             validatorsManager,
             constants,
@@ -217,9 +221,11 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                     if (urlArgs.params && urlArgs.params.code) {
                         this.oAuthCode = urlArgs.params.code;
 
-                        this.connectorTypeRef = ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" +this.data.currentMainVersion);
-                        this.connectorTypeRef.getToken(data, this.oAuthCode).then(_.bind(function(tokenDetails) {
-                            this.connectorTypeRef.setToken(tokenDetails, data, this.data.systemType + "/" +this.data.connectorId, urlArgs);
+                        ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" +this.data.currentMainVersion).then(_.bind(function (connectorTypeRef) {
+                            this.connectorTypeRef = connectorTypeRef;
+                            this.connectorTypeRef.getToken(data, this.oAuthCode).then(_.bind(function(tokenDetails) {
+                                this.connectorTypeRef.setToken(tokenDetails, data, this.data.systemType + "/" +this.data.connectorId, urlArgs);
+                            }, this));
                         }, this));
                     } else {
                         this.parentRender(_.bind(function () {
@@ -266,35 +272,38 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                             }
 
                             //Get connector template
-                            this.connectorTypeRef = ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" + this.data.currentMainVersion);
+                            ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" + this.data.currentMainVersion).then(_.bind(function (connectorTypeRef) {
+                                this.connectorTypeRef = connectorTypeRef;
 
-                            //Determine if the template is OAuth
-                            if (this.connectorTypeRef.oAuthConnector) {
-                                this.oAuthConnector = true;
-                            } else {
-                                this.oAuthConnector = false;
-                            }
+                                //Determine if the template is OAuth
+                                if (this.connectorTypeRef.oAuthConnector) {
+                                    this.oAuthConnector = true;
+                                } else {
+                                    this.oAuthConnector = false;
+                                }
 
-                            //Render the connector template / details
-                            this.connectorTypeRef.render({"connectorType": this.data.connectorTypeName + "_" + this.data.currentMainVersion,
-                                    "animate": true,
-                                    "connectorDefaults": data,
-                                    "editState": this.data.editState,
-                                    "systemType": this.data.systemType },
-                                _.bind(function () {
-                                    validatorsManager.validateAllFields(this.$el);
+                                //Render the connector template / details
+                                this.connectorTypeRef.render({"connectorType": this.data.connectorTypeName + "_" + this.data.currentMainVersion,
+                                        "animate": true,
+                                        "connectorDefaults": data,
+                                        "editState": this.data.editState,
+                                        "systemType": this.data.systemType },
+                                    _.bind(function () {
+                                        validatorsManager.validateAllFields(this.$el);
 
-                                    //Set the current newest version incase there is a range
-                                    this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
+                                        //Set the current newest version incase there is a range
+                                        this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
 
-                                    this.setSubmitFlow();
+                                        this.setSubmitFlow();
 
-                                    if (callback) {
-                                        callback();
-                                    }
-                                }, this));
+                                        if (callback) {
+                                            callback();
+                                        }
+                                    }, this));
 
-                            this.setupLiveSync();
+                                this.setupLiveSync();
+                            }, this));
+
                         }, this));
                     }
                 }, this));

@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
@@ -22,15 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _, $*/
+/*global define */
 
-/**
- * @author huck.elliott
- */
 define("config/process/IDMConfig", [
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "jquery",
+    "underscore",
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, eventManager) {
+], function($, _, constants, eventManager) {
     var obj = [
         {
             startEvent: constants.EVENT_PROFILE_DELETE_USER_REQUEST,
@@ -46,9 +45,9 @@ define("config/process/IDMConfig", [
                     if(event.errorCallback) { event.errorCallback(); }
                     return;
                 }
-                
+
                 userDelegate.deleteEntity(event.userId, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleted");                    
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleted");
                     router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
                 }, function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleteError");
@@ -69,10 +68,10 @@ define("config/process/IDMConfig", [
                     if(event.errorCallback) { event.errorCallback();}
                     return;
                 }
-                
+
                 userDelegate.deleteEntity(event.userId, function() {
                     if(event.successCallback) { event.successCallback(); }
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleted");                    
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleted");
                 }, function() {
                     if(event.errorCallback) { event.errorCallback(); }
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleteError");
@@ -104,19 +103,19 @@ define("config/process/IDMConfig", [
                     failedProperties,
                     errors = "Unknown";
 
-                if (typeof response === "object" && response !== null && 
+                if (typeof response === "object" && response !== null &&
                     typeof response.detail === "object" && response.message === "Failed policy validation") {
 
                     errors = _.chain(response.detail.failedPolicyRequirements)
                                 .groupBy('property')
                                 .pairs()
                                 .map(function (a) {
-                                    return a[0] + ": " + 
+                                    return a[0] + ": " +
                                         _.chain(a[1])
                                             .pluck('policyRequirements')
                                             .map(function (pr) {
                                                 return _.map(pr, function (p) {
-                                                    return $.t("common.form.validation." + p.policyRequirement, p.params); 
+                                                    return $.t("common.form.validation." + p.policyRequirement, p.params);
                                                 });
                                             })
                                             .value()
@@ -130,6 +129,6 @@ define("config/process/IDMConfig", [
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, {key: "userValidationError", validationErrors: errors});
             }
         }];
-    
+
     return obj;
 });

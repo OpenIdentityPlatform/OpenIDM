@@ -22,12 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document, require */
+/*global define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
+    "underscore",
+    "form2js",
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -37,17 +37,17 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
     "org/forgerock/openidm/ui/common/workflow/tasks/TemplateTaskForm",
     "org/forgerock/commons/ui/common/util/FormGenerationUtils",
     "UserDelegate"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm, formGenerationUtils, userDelegate) {
+], function(_, form2js, ModuleLoader, AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm, formGenerationUtils, userDelegate) {
     var TaskDetailsView = AbstractView.extend({
         template: "templates/workflow/tasks/TaskDetailsTemplate.html",
 
         element: "#taskDetails",
-        
+
         events: {
             "onValidate": "onValidate",
             "click input[name=saveButton]": "formSubmit"
         },
-        
+
         formSubmit: function(event) {
             event.preventDefault();
             if(validatorsManager.formNotInvalid(this.$el)) {
@@ -59,11 +59,11 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
                         delete params[param];
                     }
                 }
-                
+
                 if (this.definitionFormPropertyMap) {
                     formGenerationUtils.changeParamsToMeetTheirTypes(params, this.definitionFormPropertyMap);
                 }
-                
+
                 workflowManager.completeTask(this.task._id, params, _.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
                     //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
@@ -71,53 +71,44 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
                 }, this));
             }
         },
-        
-        render: function(task, definition, category, callback) { 
+
+        render: function(task, definition, category, callback) {
             this.data = _.extend(this.data, {category: category});
             this.data.showRequeue = (definition.taskCandidateGroup.length || definition.taskCandidateUser.length);
-           
+
             this.parentRender(function() {
                 this.task = task;
 
                 var template = this.getGenerationTemplate(definition, task), view, passJSLint;
                 delete this.definitionFormPropertyMap;
-                
+
                 if(template === false && definition.formResourceKey) {
-                    view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
-                    if (view.render) {
+                    ModuleLoader.load(tasksFormManager.getViewForForm(definition.formResourceKey)).then(function (view) {
                         view.render(task, category, null, callback);
-                        return;
-                    } else {
-                        console.log("There is no view defined for " + definition.formResourceKey);
-                    }
-                } 
-                
-                if(template !== false) {
+                    });
+                } else if(template !== false) {
                     templateTaskForm.render(task, category, template, _.bind(function() {
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
-                        
+
                         if(callback) {
                             callback();
                         }
                     }, this));
-                    return;
                 } else {
                     this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties.formPropertyHandlers);
                     templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties({"formProperties": definition.formProperties.formPropertyHandlers}, task.formProperties), _.bind(function() {
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
-                        
+
                         if(callback) {
                             callback();
                         }
                     }, this));
-                    
-                    return;
                 }
-            });            
+            });
         },
-        
+
         getGenerationTemplate: function(definition, task) {
             var formPropertyHandlers = definition.formProperties.formPropertyHandlers, property, i;
             if (typeof definition.formGenerationTemplate === "string") {
@@ -131,9 +122,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
             }
             return false;
         }
-    }); 
-    
+    });
+
     return new TaskDetailsView();
 });
-
-

@@ -50,7 +50,19 @@ module.exports = function(grunt) {
                     'openidm-ui-enduser/src/main/resources/**',
                     'openidm-ui-enduser/src/test/qunit/**',
                 ],
-                tasks: [ 'sync:target', 'sync:zip' ]
+                tasks: [ 'sync:target', 'less', 'sync:zip' ]
+            }
+        },
+        less: {
+            admin: {
+                files: {
+                    "openidm-ui-admin/target/www/css/styles.css": "openidm-ui-admin/target/www/css/styles.less"
+                }
+            },
+            enduser: {
+                files: {
+                    "openidm-ui-enduser/target/www/css/styles.css": "openidm-ui-enduser/target/www/css/styles.less"
+                }
             }
         },
         sync: {
@@ -209,7 +221,7 @@ module.exports = function(grunt) {
                     {
                         cwd     : 'openidm-ui-enduser/target/www',
                         src     : ['**'],
-                        dest    : '../openidm-zip/target/openidm/ui/default/enduser/public'
+                        dest    : '../openidm-zip/target/openidm/ui/default/selfservice/public'
                     }
                 ]
             }
@@ -228,12 +240,11 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-watch');
-
     grunt.loadNpmTasks('grunt-notify');
-
     grunt.loadNpmTasks('grunt-sync');
+    grunt.loadNpmTasks('grunt-contrib-less');
 
     grunt.task.run('notify_hooks');
-    grunt.registerTask('default', ['sync:target', 'sync:zip', 'watch']);
+    grunt.registerTask('default', ['sync:target', 'less', 'sync:zip', 'watch']);
 
 };
