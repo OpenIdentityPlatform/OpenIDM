@@ -89,14 +89,6 @@ import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter
 public class AuditServiceImpl implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditServiceImpl.class);
 
-    //TODO ADD SUPPORT FOR KNOWN QUERIES
-    // Recognized queries
-    //public static final String QUERY_BY_RECON_ID = "audit-by-recon-id";
-    //public static final String QUERY_BY_MAPPING = "audit-by-mapping";
-    //public static final String QUERY_BY_RECON_ID_AND_SITUATION = "audit-by-recon-id-situation";
-    //public static final String QUERY_BY_RECON_ID_AND_TYPE = "audit-by-recon-id-type";
-    //public static final String QUERY_BY_ACTIVITY_PARENT_ACTION = "audit-by-activity-parent-action";
-
     // ----- Declarative Service Implementation
 
     /** The connection factory */
