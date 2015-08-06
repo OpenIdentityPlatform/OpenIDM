@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,13 +27,37 @@ package org.forgerock.openidm.audit.util;
 /**
  * Audit logging constants.
  */
-public final class AuditConstants {
+public interface AuditConstants {
 
     /** entryType for a "start" recon audit log entry */
-    public final static String RECON_LOG_ENTRY_TYPE_RECON_START = "start";
+    String RECON_LOG_ENTRY_TYPE_RECON_START = "start";
     /** entryType for a "summary" recon audit log entry */
-    public final static String RECON_LOG_ENTRY_TYPE_RECON_END = "summary";
+    String RECON_LOG_ENTRY_TYPE_RECON_END = "summary";
     /** entryType for an "entry" recon audit log entry */
-    public final static String RECON_LOG_ENTRY_TYPE_RECON_ENTRY = "entry";
+    String RECON_LOG_ENTRY_TYPE_RECON_ENTRY = "entry";
+
+    enum ActivityAction {
+        GET_CHANGED_WATCHED_FIELDS("getChangedWatchedFields"),
+        GET_CHANGED_PASSWORD_FIELDS("getChangedPasswordFields");
+
+        private String actionName;
+
+        ActivityAction(String actionName) {
+            this.actionName = actionName;
+        }
+
+        public String getActionName() {
+            return actionName;
+        }
+
+        public static ActivityAction find(String actionName) {
+            for (ActivityAction activityAction : ActivityAction.values()) {
+                if (activityAction.getActionName().equals(actionName)) {
+                    return activityAction;
+                }
+            }
+            return null;
+        }
+    }
 
 }

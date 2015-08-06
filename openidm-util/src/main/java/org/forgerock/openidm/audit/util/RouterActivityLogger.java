@@ -24,8 +24,16 @@
 
 package org.forgerock.openidm.audit.util;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
+import java.util.List;
+
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -36,6 +44,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.audit.util.AuditConstants.ActivityAction;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,9 +121,12 @@ public class RouterActivityLogger implements ActivityLogger {
 
             String revision = getRevision(before, after);
 
-            boolean passwordChanged = false;   //todo needs OPENIDM-3575
+            //will be true if any of the watched password fields have changed.
+            boolean passwordChanged =
+                    getChangedFields(ActivityAction.GET_CHANGED_PASSWORD_FIELDS, before, after, context).length > 0;
 
-            String[] changedFields = new String[0]; //todo needs OPENIDM-3575
+            String[] changedFields =
+                    getChangedFields(ActivityAction.GET_CHANGED_WATCHED_FIELDS, before, after, context);
 
             RequestType requestType = request.getRequestType();
             String beforeValue = getJsonForLog(before, requestType);
@@ -156,6 +168,31 @@ public class RouterActivityLogger implements ActivityLogger {
                 throw new InternalServerErrorException(ex.getMessage(), ex);
             }
         }
+    }
+
+    /**
+     * This calls Audit service to utilize its get changed field abilities.
+     * Determining the changed fields is left to the AuditService since it has the ability to utilize the CryptoService.
+     *
+     * @param activityAction The action that determines which watch filter to apply to the fields.
+     * @param before The object before changes.
+     * @param after The object after changes.
+     * @param context passed to the action call on audit service.
+     * @return fields that have changes.
+     * @throws ResourceException
+     */
+    private String[] getChangedFields(ActivityAction activityAction, JsonValue before, JsonValue after,
+            ServerContext context) throws ResourceException {
+        ActionRequest actionRequest = Requests.newActionRequest("audit", activityAction.getActionName());
+        actionRequest.setContent(
+                json(object(
+                        field("before", before),
+                        field("after", after)
+                )));
+        Connection connection = connectionFactory.getConnection();
+        JsonValue action = connection.action(context, actionRequest);
+        List<String> changes = action.asList(String.class);
+        return changes.toArray(new String[changes.size()]);
     }
 
     /**

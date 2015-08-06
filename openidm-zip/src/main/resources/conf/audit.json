@@ -47,7 +47,9 @@
                     "patch",
                     "action"
                 ]
-            }
+            },
+            "watchedFields" : [ "email" ],
+            "passwordFields" : [ "password" ]
         }
     },
     "customEventTypes" : {

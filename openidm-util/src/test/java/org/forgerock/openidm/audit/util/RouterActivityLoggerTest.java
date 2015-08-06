@@ -16,7 +16,8 @@
 
 package org.forgerock.openidm.audit.util;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
@@ -25,8 +26,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
@@ -44,8 +48,11 @@ import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Map;
-
+/**
+ * Tests Router Activity Logger
+ *
+ * @see RouterActivityLogger
+ */
 public class RouterActivityLoggerTest {
 
     public static final String TEST_MESSAGE = "test message";
@@ -83,6 +90,7 @@ public class RouterActivityLoggerTest {
         Connection connection = mock(Connection.class);
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), any(CreateRequest.class))).thenReturn(new Resource("ba", "1", null));
+        when(connection.action(any(Context.class), any(ActionRequest.class))).thenReturn(json(array("test")));
         ArgumentCaptor<CreateRequest> createRequestArgumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
         // when
@@ -127,6 +135,7 @@ public class RouterActivityLoggerTest {
         Connection connection = mock(Connection.class);
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), any(CreateRequest.class))).thenReturn(new Resource("bl", "1", null));
+        when(connection.action(any(Context.class), any(ActionRequest.class))).thenReturn(json(array("test")));
         ArgumentCaptor<CreateRequest> createRequestArgumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
         // when
@@ -155,6 +164,7 @@ public class RouterActivityLoggerTest {
         Connection connection = mock(Connection.class);
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), any(CreateRequest.class))).thenReturn(new Resource("bl", "1", null));
+        when(connection.action(any(Context.class), any(ActionRequest.class))).thenReturn(json(array("test")));
         ArgumentCaptor<CreateRequest> createRequestArgumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
         // when
@@ -184,7 +194,7 @@ public class RouterActivityLoggerTest {
         Connection connection = mock(Connection.class);
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), any(CreateRequest.class))).thenReturn(new Resource("bl", "1", null));
-
+        when(connection.action(any(Context.class), any(ActionRequest.class))).thenReturn(json(array("test")));
         ArgumentCaptor<CreateRequest> createRequestArgumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
         // given
