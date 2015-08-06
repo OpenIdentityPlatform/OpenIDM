@@ -264,6 +264,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `subjectbefore` MEDIUMTEXT NULL ,
   `subjectafter` MEDIUMTEXT NULL ,
   `changedfields` VARCHAR(255) NULL ,
+  `passwordchanged` VARCHAR(5) NULL ,
   `subjectrev` VARCHAR(255) NULL ,
   PRIMARY KEY (`objectid`) ,
   INDEX `idx_auditactivity_transactionid` (`transactionid` ASC)

@@ -189,6 +189,7 @@
                     "before" : "subjectbefore",
                     "after" : "subjectafter",
                     "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"},
+                    "passwordChanged" : "passwordchanged",
                     "revision" : "subjectrev"
                 }
             },
