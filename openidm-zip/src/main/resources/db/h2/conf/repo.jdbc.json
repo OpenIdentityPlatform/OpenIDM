@@ -44,15 +44,7 @@
             "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
-            "audit-by-mapping" : "select * FROM ${_dbSchema}.auditrecon WHERE mapping = ${mappingName}",
-            "audit-by-recon-id" : "select * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId}",
-            "audit-by-mapping-and-started" : "select * FROM ${_dbSchema}.auditrecon WHERE mapping = ${mappingName} AND entryType = 'start' AND timestamp = ${started}",
-            "audit-by-recon-id-type" : "select * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND entryType = ${entryType}",
-            "audit-by-recon-id-situation" : "select * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND situation = ${situation}",
-            "audit-by-recon-id-situations" : "select * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND situation IN [${unquoted:situations}]",
-            "audit-by-activity-parent-action" : "select * FROM ${_dbSchema}.auditrecon WHERE parentactionid = ${parentActionId}",
-            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
-            "get-recons" : "SELECT reconid, activitydate, mapping, message FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entrytype = 'summary' ORDER BY activitydate DESC"
+            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}"
         }
     },
     "commands" : {
