@@ -317,6 +317,7 @@
                     }
                 ]
             },
+            "audit_authentication" : {},
             "audit_activity" : {},
             "audit_access" : {
                 "index" : [
