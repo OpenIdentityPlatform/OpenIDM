@@ -169,7 +169,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
                 tasksGrid = new Backgrid.Grid({
                     columns: BackgridUtils.addSmallScreenCell(cols),
                     collection: processTasks,
-                    className: "table"
+                    className: "table backgrid-table"
                 });
 
             this.$el.find("#tasksGrid").append(tasksGrid.render().el);

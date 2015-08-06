@@ -1,22 +1,23 @@
 <section>
     <div class="container">
-
         <div class="page-header">
-            <h1>{{t "config.AppConfiguration.Navigation.links.connectors"}}</h1>
+            <h1>{{t "config.AppConfiguration.Navigation.links.connectors"}}
+                <div  class="pull-right help-link">
+                    <a href="{{docHelpUrl}}integrators-guide/index.html#openidm-openicf" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                </div>
+            </h1>
         </div>
-
-        <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
-            <div class="btn-group" role="group" aria-label="add connector">
+        <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
+            <div class="btn-group" role="group" aria-label="...">
                 <a href="#connectors/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
             </div>
         </div>
+    </div>
+</section>
 
+<section>
+    <div class="container">
         <div class="section-header">
-            <div class="subtitle-bar">
-                <h2>{{t "templates.connector.connectorTitle"}}</h2>
-                <a target="_blank" href="http://openidm.forgerock.org/doc/integrators-guide/index.html#openidm-openicf">Help <i class="fa fa-question-circle"></i></a>
-            </div>
-            <div class="clearfix"></div>
             <div class="help-body">
                 <p>{{t "templates.connector.whatIsAConnector"}}</p>
             </div>

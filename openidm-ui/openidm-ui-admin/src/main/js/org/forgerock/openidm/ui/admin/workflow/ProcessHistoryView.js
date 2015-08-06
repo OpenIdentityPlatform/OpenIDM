@@ -84,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessHistoryView", [
                 this.model.processes.state.sortKey = "-startTime";
 
                 processGrid = new Backgrid.Grid({
-                    className: "table",
+                    className: "table backgrid-table",
                     emptyText: $.t("templates.workflows.processes.noCompletedProcesses"),
                     columns: BackgridUtils.addSmallScreenCell([
                         {
