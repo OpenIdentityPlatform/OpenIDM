@@ -161,6 +161,7 @@
             "audit/authentication" : {
                 "table" : "auditauthentication",
                 "objectToColumn" : {
+                    "_id" : "objectid",
                     "transactionId" : "transactionid",
                     "/authentication/id" : "userid",
                     "eventName" : "eventname",
