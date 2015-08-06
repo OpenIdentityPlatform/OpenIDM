@@ -22,12 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window */
+/*global define, $, _, Handlebars, form2js, window */
 
 define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "jquery",
     "underscore",
     "handlebars",
+    "backbone",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -44,8 +45,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
     "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
-    "jqgrid"
-], function($, _, Handlebars,
+    "org/forgerock/commons/ui/common/main/AbstractModel",
+    "org/forgerock/commons/ui/common/main/AbstractCollection",
+    "backgrid",
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils"
+], function($, _, Handlebars, Backbone,
             MappingAdminAbstractView,
             eventManager,
             conf,
@@ -61,7 +65,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             QueryFilterUtils,
             QueryFilterEditor,
             AddPropertyMappingDialog,
-            EditPropertyMappingDialog) {
+            EditPropertyMappingDialog,
+            AbstractModel,
+            AbstractCollection,
+            Backgrid,
+            BackgridUtils) {
 
     var AttributesGridView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/AttributesGridTemplate.html",
@@ -69,8 +77,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         noBaseTemplate: true,
         events: {
             "click .addProperty": "addProperty",
-            "click .removePropertyBtn": "removeProperty",
-            "keyup #numRepresentativeProps": "resetNumRepresentativeProps",
             "click #updateMappingButton": "saveMapping",
             "click #clearChanges": "clearChanges",
             "click #missingRequiredPropertiesButton": "addRequiredProperties"
@@ -83,13 +89,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         sampleDisplay: [],
 
         render: function (args, callback) {
-
-            $(window).resize(function () {
-                $("#mappingTable").setGridWidth( $('.jqgrid-container').width());
-            });
-
             this.mapping = this.getCurrentMapping();
-            this.data.numRepresentativeProps = this.getNumRepresentativeProps;
             this.data.requiredProperties = [];
             this.data.missingRequiredProperties = [];
 
@@ -109,8 +109,23 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             this.buildAvailableObjectsMap().then(_.bind(function(availableObjects) {
                 this.model.availableObjects = availableObjects;
                 this.checkMissingRequiredProperties();
+
                 this.parentRender(_.bind(function () {
-                    this.loadMappingPropertiesGrid();
+                    var mapProps = this.model.mappingProperties || this.getCurrentMapping().properties,
+                        sampleSource = conf.globalData.sampleSource || {},
+                        autocompleteProps = _.pluck(this.mapping.properties,"source").slice(0,this.getNumRepresentativeProps());
+
+                    this.data.mapProps = mapProps;
+
+                    this.gridFromMapProps(mapProps);
+
+                    mappingUtils.setupSampleSearch($("#findSampleSource",this.$el), this.mapping, autocompleteProps, _.bind(function(item) {
+                        conf.globalData.sampleSource = item;
+                        sampleSource = item;
+
+                        this.gridFromMapProps(mapProps);
+                    }, this));
+
                     this.checkAvailableProperties();
                     this.checkChanges();
 
@@ -136,7 +151,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                 this.$el.find("#clearChanges").prop('disabled', true);
                 this.$el.find(".changesPending").hide();
             }
-
         },
 
         addProperty: function (e) {
@@ -154,33 +168,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             e.preventDefault();
             this.model.mappingProperties = null;
             this.render();
-        },
-
-        removeProperty: function (e) {
-            e.preventDefault();
-
-            UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: $(e.target).attr('target')}),_.bind(function(){
-                var mapProps = this.model.mappingProperties || this.data.mapProps;
-
-                //This is removing the correct row from the stored array
-                mapProps.splice(($(e.target).parents("tr")[0].rowIndex - 1), 1);
-
-                this.model.mappingProperties = mapProps;
-                this.checkChanges();
-
-                this.render();
-            }, this));
-        },
-
-        resetNumRepresentativeProps: function(e) {
-            var num = parseInt($(e.target).val(), 10);
-
-            e.preventDefault();
-
-            if (num && num <= this.mapping.properties.length) {
-                this.setNumRepresentativeProps(num);
-                this.render();
-            }
         },
 
         checkMissingRequiredProperties: function() {
@@ -211,6 +198,287 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         setMappingProperties: function(mappingProperties) {
             this.model.mappingProperties = mappingProperties;
             this.render();
+        },
+
+        loadGrid: function(evalResults, attributes) {
+            var attributesGrid,
+                AttributesModel = Backbone.Model.extend({}),
+                Attributes = Backbone.Collection.extend({ model: AttributesModel }),
+                evalCounter = 0,
+                tempResults = null,
+                tempSample = null,
+                _this = this,
+                ClickableRow = Backgrid.Row.extend({
+                    events: {
+                        "click": "rowClick"
+                    },
+                    rowClick: function (event) {
+                        if(!$(event.target).hasClass("fa-times")) {
+                            EditPropertyMappingDialog.render({
+                                id: this.model.attributes.id,
+                                mappingProperties: _this.model.mappingProperties,
+                                availProperties: _this.model.availableObjects.target.properties,
+                                saveCallback: function(props) {
+                                    _this.setMappingProperties(props);
+                                }
+                            });
+                        }
+                    }
+                });
+
+            this.model.mappingProperties = attributes;
+            this.model.attributes = new Attributes();
+
+            _.each(attributes, function(attribute) {
+                if(evalResults !== null) {
+                    tempResults = evalResults[evalCounter];
+                } else {
+                    tempResults = null;
+                }
+
+                if(conf.globalData.sampleSource !== undefined && conf.globalData.sampleSource[attribute.source]) {
+                    tempSample = conf.globalData.sampleSource[attribute.source];
+                } else {
+                    tempSample = null;
+                }
+
+                this.model.attributes.add({
+                    "attribute": attribute,
+                    "evalResult" : tempResults,
+                    "sample" : tempSample,
+                    "id" : evalCounter + 1
+                });
+
+                evalCounter++;
+            }, this);
+
+            attributesGrid = new Backgrid.Grid({
+                className: "table",
+                row: ClickableRow,
+                columns: BackgridUtils.addSmallScreenCell([
+                    {
+                        name: "source",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            render: function () {
+                                var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
+
+                                if(this.model.attributes.attribute.source) {
+                                    previewElement.find(".property-container").append('<div class="title">' + this.model.attributes.attribute.source + '</div>');
+                                } else {
+                                    previewElement.find(".property-container").append('<div class="title"></div>');
+                                }
+
+                                if (this.model.attributes.sample !== null) {
+                                    previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.sample + ')</div>');
+                                }
+
+                                this.$el.html(previewElement);
+
+                                this.delegateEvents();
+
+                                return this;
+                            }
+                        })
+                    },
+                    {
+                        name: "",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            className: "properties-icon-container-parent",
+                            render: function () {
+                                var iconElement = $('<div class="properties-icon-container"></div>'),
+                                    conditionIcon = "";
+
+                                if(this.model.attributes.attribute.condition) {
+                                    if(_.isObject(this.model.attributes.attribute.condition)) {
+                                        if(this.model.attributes.attribute.condition.source) {
+                                            conditionIcon = this.model.attributes.attribute.condition.source;
+                                        } else {
+                                            conditionIcon = "File: " + this.model.attributes.attribute.condition.file;
+                                        }
+                                    } else {
+                                        conditionIcon = this.model.attributes.attribute.condition;
+                                    }
+
+                                    iconElement.append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-filter"></i>'
+                                        +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +conditionIcon +'</pre></div></span>');
+                                }
+
+                                if(this.model.attributes.attribute.transform) {
+                                    iconElement.append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
+                                        +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +this.model.attributes.attribute.transform.source +'</pre></div></span>');
+                                }
+
+                                this.$el.html(iconElement);
+
+                                this.delegateEvents();
+
+                                return this;
+                            }
+                        })
+                    },
+                    {
+                        name: "target",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            render: function () {
+                                var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
+
+                                if(this.model.attributes.attribute.target) {
+                                    previewElement.find(".property-container").append('<div class="title">' + this.model.attributes.attribute.target + '</div>');
+                                } else {
+                                    previewElement.find(".property-container").append('<div class="title"></div>');
+                                }
+
+
+                                if(this.model.attributes.evalResult && this.model.attributes.evalResult.conditionResults && !this.model.attributes.evalResult.conditionResults.result) {
+                                    previewElement.find(".property-container").append('<div class="text-muted"></div>');
+                                } else {
+                                    if (this.model.attributes.sample !== null) {
+                                        if(this.model.attributes.evalResult && this.model.attributes.evalResult.transformResults) {
+                                            previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.evalResult.transformResults + ')</div>');
+                                        } else {
+                                            previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.sample + ')</div>');
+                                        }
+                                    } else if (this.model.attributes.attribute["default"]) {
+                                        previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.attribute["default"] + ')</div>');
+                                    }
+                                }
+
+
+                                this.$el.html(previewElement);
+
+                                this.delegateEvents();
+                                return this;
+                            }
+                        })
+                    },
+                    {
+                        name: "",
+                        cell: BackgridUtils.ButtonCell([
+                            {
+                                className: "fa fa-times grid-icon",
+                                callback: function(event){
+                                    event.preventDefault();
+
+                                    UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: this.model.attributes.attribute.target}),_.bind(function(){
+                                        _this.model.mappingProperties.splice(($(event.target).parents("tr")[0].rowIndex - 1), 1);
+
+                                        _this.checkChanges();
+
+                                        _this.render();
+                                    }, this));
+                                }
+                            }
+                        ]),
+                        sortable: false,
+                        editable: false
+                    }]),
+                collection: this.model.attributes
+            });
+
+            this.$el.find("#attributesGridHolder").empty();
+
+            this.$el.find("#attributesGridHolder").append(attributesGrid.render().el);
+
+            this.$el.find(".properties-badge").popover({
+                content: function () { return $(this).find(".tooltip-details").clone().show();},
+                trigger:'hover',
+                placement:'top',
+                container: 'body',
+                html: 'true',
+                template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+            });
+
+            this.$el.find("#linkQualifierSelect").change(_.bind(function(event) {
+                var element = event.target;
+                event.preventDefault();
+
+                if ($(element).val().length > 0) {
+                    this.currentLinkQualifier = $(element).val();
+                }
+
+                this.gridFromMapProps(this.model.mappingProperties);
+
+            }, this));
+
+            this.$el.find("#linkQualifierSelect").selectize({
+                placeholder: $.t("templates.mapping.linkQualifier"),
+                create: false,
+                sortField: 'text'
+            });
+        },
+
+        gridFromMapProps : function (props) {
+            var propertyDetails = _.clone(props),
+                evalPromises = [],
+                globals = {
+                    source : {}
+                },
+                evalCheck,
+                tempDetails = {},
+                sampleSource = conf.globalData.sampleSource || {};
+
+            this.sampleDisplay = [];
+
+            if (!_.isEmpty(sampleSource)) {
+                _.each(propertyDetails, function (item) {
+
+                    globals = {
+                        source: {}
+                    };
+
+                    tempDetails = {};
+
+                    if (item.condition || item.transform) {
+                        globals.linkQualifier = this.currentLinkQualifier;
+
+                        if (sampleSource[item.source]) {
+                            globals.source = sampleSource[item.source];
+                        } else {
+                            globals.source = sampleSource;
+                        }
+                    }
+
+                    if (item.condition) {
+                        tempDetails.hasCondition = true;
+                        tempDetails.condition = item.condition;
+                    } else {
+                        tempDetails.hasCondition = false;
+                    }
+
+                    if (item.transform) {
+                        tempDetails.hasTransform = true;
+                        tempDetails.transform = item.transform;
+                    } else {
+                        tempDetails.hasTransform = false;
+                    }
+
+                    evalCheck = this.sampleEvalCheck(tempDetails, globals);
+
+                    tempDetails.results = evalCheck;
+
+                    this.sampleDisplay.push(tempDetails);
+
+                    evalPromises.push(evalCheck);
+                }, this);
+            }
+
+            if (evalPromises.length > 0) {
+                $.when.apply($, evalPromises).then(_.bind(function() {
+                    this.loadGrid(arguments, props);
+                }, this), function(e) {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                });
+            } else {
+                this.loadGrid(null, props);
+            }
+
+            return evalPromises;
         },
 
         //Returns a promise and determines if a transform and/or conditional needs to be eval
@@ -291,384 +559,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             return samplePromise;
         },
 
-        loadMappingPropertiesGrid: function() {
-            var _this = this,
-                mapProps = this.model.mappingProperties || this.getCurrentMapping().properties,
-                sampleSource = conf.globalData.sampleSource || {},
-                autocompleteProps = _.pluck(this.mapping.properties,"source").slice(0,this.getNumRepresentativeProps()),
-                processDisplayDetails = function(evalResults, gridDetailsPromise, props) {
-                    var propCounter = 0;
-
-                    gridDetailsPromise.resolve(
-                        _.chain(props)
-                            .map(function (prop) {
-                                var sampleData = null,
-                                    sourceProp = " ",
-                                    hasConditionScript = false,
-                                    conditionScript = null,
-                                    hasTransformScript = false,
-                                    transformScript = null,
-                                    cleanData = "";
-
-                                //Sets has condition icon and tooltip
-                                if (_.has(prop, "condition")) {
-                                    hasConditionScript = true;
-                                    conditionScript = prop.condition;
-                                }
-
-                                //Logic to find and display source sample
-                                if (!_.isEmpty(sampleSource)) {
-                                    if(sampleSource[prop.source]){
-                                        cleanData = sampleSource[prop.source];
-                                    } else if (_.isUndefined(prop.source)){
-                                        cleanData = "Object";
-                                    } else {
-                                        if(prop.source.length === 0) {
-                                            cleanData = "Object";
-                                        } else {
-                                            cleanData = "Null";
-                                        }
-                                    }
-                                } else {
-                                    cleanData = "";
-                                }
-
-                                //Sets transform icon and tooltip
-                                if (_.has(prop, "transform")) {
-                                    hasTransformScript = true;
-
-                                    if (prop.transform.source) {
-                                        transformScript = prop.transform.source;
-                                    } else {
-                                        transformScript = "File: " + prop.transform.file;
-                                    }
-                                }
-
-                                if (typeof(prop.source) !== "undefined" && prop.source.length) {
-                                    sourceProp = prop.source;
-                                }
-
-                                //Display eval results for transform and conditional
-                                if (evalResults !== null && evalResults[propCounter] !== null) {
-                                    if (_.isObject(evalResults[propCounter].conditionResults)) {
-                                        if (evalResults[propCounter].conditionResults.result === true) {
-                                            if (evalResults[propCounter].transformResults) {
-                                                sampleData = evalResults[propCounter].transformResults;
-                                            } else {
-                                                sampleData = sampleSource[prop.source];
-                                            }
-                                        } else {
-                                            sampleData = "";
-                                        }
-                                    } else {
-                                        if (evalResults[propCounter].transformResults) {
-                                            sampleData = evalResults[propCounter].transformResults;
-                                        } else {
-                                            if(prop["default"]) {
-                                                sampleData = prop["default"];
-                                            } else {
-                                                sampleData = sampleSource[prop.source];
-                                            }
-                                        }
-                                    }
-                                } else if (typeof(prop.source) !== "undefined" && prop.source.length) {
-                                    if (_.isEmpty(sampleSource)) {
-                                        sampleData = "";
-                                    } else {
-                                        if (sampleSource[prop.source] === null || sampleSource[prop.source] === undefined) {
-                                            if (!_.isUndefined(prop["default"])) {
-                                                sampleData = prop["default"];
-                                            } else {
-                                                sampleData = "Null";
-                                            }
-                                        } else {
-                                            sampleData = sampleSource[prop.source];
-                                        }
-                                    }
-                                } else if (!_.isEmpty(sampleSource)) {
-                                    if (!_.isUndefined(prop["default"])) {
-                                        sampleData = prop["default"];
-                                    } else {
-                                        sampleData = "Null";
-                                    }
-                                } else if (evalResults === null || evalResults === undefined) {
-                                    if (!_.isUndefined(prop["default"])) {
-                                        sampleData = prop["default"];
-                                    } else {
-                                        sampleData = "Null";
-                                    }
-                                }
-
-                                propCounter++;
-
-                                return {
-                                    "target": {
-                                        "property" : Handlebars.Utils.escapeExpression(prop.target),
-                                        "sample" : Handlebars.Utils.escapeExpression(decodeURIComponent((sampleData || "")))
-                                    },
-                                    "source": {
-                                        "property" : Handlebars.Utils.escapeExpression(sourceProp),
-                                        "sample" : Handlebars.Utils.escapeExpression(decodeURIComponent((cleanData)))
-                                    },
-                                    "iconDisplay": {
-                                        "hasCondition": hasConditionScript,
-                                        "conditionScript" : conditionScript,
-                                        "hasTransform" : hasTransformScript,
-                                        "transformScript" : transformScript
-                                    }
-                                };
-
-                            }).value()
-                    );
-                },
-
-                gridFromMapProps = function (props) {
-                    var propertyDetails = _.clone(props),
-                        gridDetailsPromise = $.Deferred(),
-                        evalPromises = [],
-                        globals = {
-                            source : {}
-                        },
-                        evalCheck,
-                        tempDetails = {};
-
-                    _this.sampleDisplay = [];
-
-                    if (!_.isEmpty(sampleSource)) {
-                        _.each(propertyDetails, function (item) {
-
-                            globals = {
-                                source: {}
-                            };
-
-                            tempDetails = {};
-
-                            if (item.condition || item.transform) {
-                                globals.linkQualifier = _this.currentLinkQualifier;
-
-                                if (sampleSource[item.source]) {
-                                    globals.source = sampleSource[item.source];
-                                } else {
-                                    globals.source = sampleSource;
-                                }
-                            }
-
-                            if (item.condition) {
-                                tempDetails.hasCondition = true;
-                                tempDetails.condition = item.condition;
-                            } else {
-                                tempDetails.hasCondition = false;
-                            }
-
-                            if (item.transform) {
-                                tempDetails.hasTransform = true;
-                                tempDetails.transform = item.transform;
-                            } else {
-                                tempDetails.hasTransform = false;
-                            }
-
-                            evalCheck = _this.sampleEvalCheck(tempDetails, globals);
-
-                            tempDetails.results = evalCheck;
-
-                            _this.sampleDisplay.push(tempDetails);
-
-                            evalPromises.push(evalCheck);
-                        });
-                    }
-
-                    if (evalPromises.length > 0) {
-                        $.when.apply($, evalPromises).then(function() {
-                            processDisplayDetails(arguments, gridDetailsPromise, props);
-                        }, function(e) {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
-                        });
-                    } else {
-                        processDisplayDetails(null, gridDetailsPromise, props);
-                    }
-
-                    return gridDetailsPromise;
-                },
-                cols = [
-                    {
-                        "name": "source",
-                        "label": $.t("templates.mapping.source"),
-                        "width": "125px",
-                        "formatter": function(data, opt, row) {
-                            var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
-
-                            if(data !== undefined) {
-                                previewElement.find(".property-container").append('<div class="title">' + data.property + '</div>');
-
-                                if (data.sample.length > 0) {
-                                    previewElement.find(".property-container").append('<div class="text-muted">(' + data.sample + ')</div>');
-                                }
-                            }
-
-                            return previewElement.html();
-                        }
-                    },
-                    {
-                        "name": "iconDisplay",
-                        "label": "&nbsp;",
-                        "width": "30px",
-                        "align": "center",
-                        "title": false,
-                        "formatter": function(iconDisplay,opt,row) {
-                            var iconElement = $('<div class="properties-icon-container-parent"><div class="properties-icon-container"></div></div>');
-
-                            if (iconDisplay !== undefined && iconDisplay.hasCondition) {
-
-                                if(_.isObject(iconDisplay.conditionScript)) {
-                                    if(iconDisplay.conditionScript.source) {
-                                        iconDisplay.conditionScript = iconDisplay.conditionScript.source;
-                                    } else {
-                                        iconDisplay.conditionScript = "File: " + iconDisplay.conditionScript.file;
-                                    }
-                                }
-
-                                iconElement.find(".properties-icon-container").append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-filter"></i>'
-                                +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +iconDisplay.conditionScript +'</pre></div></span>');
-                            }
-
-                            if (iconDisplay !== undefined && iconDisplay.hasTransform) {
-                                iconElement.find(".properties-icon-container").append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
-                                +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +iconDisplay.transformScript +'</pre></div></span>');
-                            }
-
-                            return iconElement.html();
-                        }
-                    },
-                    {
-                        "name": "target",
-                        "label": $.t("templates.mapping.target"),
-                        "width": "125px",
-                        "formatter" : function(data, opt, row) {
-                            var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
-
-                            previewElement.find(".property-container").append('<div class="title">' +data.property +'</div>');
-
-                            if (_.isString(data) !== true && data.sample.length > 0) {
-                                previewElement.find(".property-container").append('<div class="text-muted">(' +data.sample +')</div>');
-                            } else if (_.isString(data) === true ) {
-                                previewElement.find(".property-container").html(data);
-                            }
-
-                            return previewElement.html();
-                        }
-                    },
-                    {
-                        "name": "required",
-                        "label": "&nbsp;",
-                        "width": "25px",
-                        "align": "center",
-                        "title": false,
-                        "formatter": function(required,opt,row) {
-                            return (!required) ? '<i target="' + row.target.property + '" title="' + $.t("common.form.removeAttribute") + ': ' + row.target.property + '" class="fa fa-times removePropertyBtn" style="margin-top:4px;"></i>' : '';
-                        }
-                    }
-                ];
-
-            this.data.mapProps = mapProps;
-
-            mappingUtils.setupSampleSearch($("#findSampleSource",this.$el), this.mapping, autocompleteProps, _.bind(function(item) {
-                conf.globalData.sampleSource = item;
-                sampleSource = item;
-
-                gridFromMapProps(mapProps).then(function(gridResults) {
-                    $('#mappingTable',this.$el).jqGrid('setGridParam', {
-                        datatype: 'local',
-                        data: gridResults
-                    }).trigger('reloadGrid');
-                });
-            }, this));
-
-            gridFromMapProps(mapProps).then(_.bind(function(gridResults) {
-                $('#mappingTable').jqGrid({
-                    datatype: "local",
-                    data: gridResults,
-                    height: 'auto',
-                    autowidth: true,
-                    shrinkToFit: true,
-                    rowNum: mapProps.length,
-                    pager: 'mappingTable_pager',
-                    hidegrid: false,
-                    colModel: cols,
-                    cmTemplate: {sortable: false},
-                    onSelectRow: function(id) {
-                        if (id !== "blankRow") {
-                            EditPropertyMappingDialog.render({
-                                id: id,
-                                mappingProperties: _this.model.mappingProperties,
-                                availProperties: _this.model.availableObjects.target.properties,
-                                saveCallback: function(props) {
-                                    _this.setMappingProperties(props);
-                                }
-                            });
-                        }
-                    },
-                    loadComplete: function (data) {
-                        if (!data.rows.length) {
-                            $('#mappingTable').addRowData("blankRow", {"required": true, "target": $.t("templates.mapping.noPropertiesMapped"), "default": "", "script": "", "hasConditionScript": false});
-                            _this.$el.find("#findSampleSource").parent().hide();
-                        }
-
-                        _this.setNumRepresentativePropsLine();
-
-                        _this.$el.find(".properties-badge").popover({
-                            content: function () { return $(this).find(".tooltip-details").clone().show();},
-                            trigger:'hover',
-                            placement:'top',
-                            container: 'body',
-                            html: 'true',
-                            template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
-                        });
-
-                        _this.$el.find("#linkQualifierSelect").change(function(event) {
-                            var element = event.target;
-                            event.preventDefault();
-
-                            if ($(element).val().length > 0) {
-                                _this.currentLinkQualifier = $(element).val();
-                            }
-
-                            gridFromMapProps(mapProps).then(function(gridResults) {
-                                _this.$el.find('#mappingTable').jqGrid('setGridParam', {
-                                    datatype: 'local',
-                                    data: gridResults
-                                }).trigger('reloadGrid');
-                            });
-                        });
-
-                        _this.$el.find("#linkQualifierSelect").selectize({
-                            placeholder: $.t("templates.mapping.linkQualifier"),
-                            create: false,
-                            sortField: 'text'
-                        });
-                    }
-                }).jqGrid('sortableRows', {
-                    update: function (ev, ui) {
-                        var item = ui.item[0];
-
-                        mapProps.splice((item.rowIndex - 1), 0, _this.draggedRow);
-
-                        _this.model.mappingProperties = mapProps;
-
-                        _this.setNumRepresentativePropsLine();
-                        _this.checkChanges();
-                    },
-
-                    start: function (ev, ui) {
-                        _this.draggedRow = mapProps[(ui.item[0].rowIndex - 1)];
-
-                        mapProps.splice((ui.item[0].rowIndex - 1), 1);
-
-                        $("#mappingTable", _this.$el).find("tr td").css("border-bottom-width", "");
-                    }
-                });
-            }, this));
-        },
-
         checkAvailableProperties: function(){
             var availableProps;
 
@@ -681,10 +571,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                 this.$el.find('.addProperty').prop('disabled',true);
                 this.$el.find('#allPropertiesMapped').show();
             }
-        },
-
-        setNumRepresentativePropsLine: function() {
-            $("#mappingTable", this.$el).find("tr:eq(" + this.getNumRepresentativeProps() + ") td").css("border-bottom-width","5px");
         },
 
         buildAvailableObjectsMap: function() {

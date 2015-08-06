@@ -44,13 +44,14 @@ define("org/forgerock/openidm/ui/admin/workflow/TaskInstanceView", [
             events: {
                 "click .assignTask" : "showCandidateUserSelection"
             },
-            data: {
-                showForm: false,
-                canAssign: false
-            },
             render: function(args, callback) {
                 var process = new ProcessModel(),
                     assignee = new UserModel();
+
+                this.data = {
+                    showForm: false,
+                    canAssign: false
+                };
 
                 this.model = new TaskModel();
 
