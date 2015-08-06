@@ -75,7 +75,7 @@ define("org/forgerock/openidm/ui/admin/workflow/TaskListView", [
                 Tasks.state.pageSize = null;
 
                 tasksGrid = new Backgrid.Grid({
-                    className: "table",
+                    className: "table backgrid-table",
                     emptyText: $.t("templates.workflows.tasks.noActiveTasks"),
                     columns: CustomCells.addSmallScreenCell([{
                         label: $.t("templates.workflows.tasks.task"),

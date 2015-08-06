@@ -58,7 +58,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
                     this.model.processes.state.pageSize = null;
 
                     processDefinitionGrid = new Backgrid.Grid({
-                        className: "table",
+                        className: "table backgrid-table",
                         emptyText: $.t("templates.workflows.processes.noProcessesDefinitions"),
                         columns: BackgridUtils.addSmallScreenCell([
                         {
