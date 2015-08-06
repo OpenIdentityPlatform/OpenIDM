@@ -23,9 +23,16 @@
  */
 package org.forgerock.openidm.audit.impl;
 
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newEventTypeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -60,26 +67,19 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
+import org.forgerock.openidm.audit.util.AuditConstants.ActivityAction;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.patch.JsonPatch;
 import org.forgerock.openidm.router.RouteService;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newEventTypeFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
 
 /**
  * This audit service is the entry point for audit logging on the router.
@@ -126,8 +126,8 @@ public class AuditServiceImpl implements AuditService {
 
     private AuditLogFilter auditFilter = AuditLogFilters.NEVER;
 
-    private final List<JsonPointer> watchFieldFilters = new ArrayList<>();
-    private final List<JsonPointer> passwordFieldFilters = new ArrayList<>();
+    private List<JsonPointer> watchFieldFilters = new ArrayList<>();
+    private List<JsonPointer> passwordFieldFilters = new ArrayList<>();
 
     private static final String AUDIT_SERVICE_CONFIG = "auditServiceConfig";
     private static final String EVENT_HANDLERS = "eventHandlers";
@@ -268,11 +268,37 @@ public class AuditServiceImpl implements AuditService {
             if (!config.get(EXCEPTION_FORMATTER).isNull()) {
                 exceptionFormatterScript =  scriptRegistry.takeScript(config.get(EXCEPTION_FORMATTER));
             }
+
+            JsonValue watchedFieldsValue = config.get(
+                    new JsonPointer(EXTENDED_EVENT_TYPES + "/activity/watchedFields"));
+            if (null != watchedFieldsValue) {
+                watchFieldFilters = getJsonPointers(watchedFieldsValue.asList(String.class));
+            }
+
+            JsonValue passwordFieldsValue = config.get(
+                    new JsonPointer(EXTENDED_EVENT_TYPES + "/activity/passwordFields"));
+            if (null != passwordFieldsValue) {
+                passwordFieldFilters = getJsonPointers(passwordFieldsValue.asList(String.class));
+            }
+
         } catch (Exception ex) {
             LOGGER.warn("Configuration invalid, can not start Audit service.", ex);
             throw ex;
         }
         LOGGER.info("Audit service started.");
+    }
+
+    /**
+     * Converts the list of strings into a list of JsonPointers
+     * @param pointerStrings strings to get converted.
+     * @return converted list of pointers.
+     */
+    private List<JsonPointer> getJsonPointers(List<String> pointerStrings) {
+        List<JsonPointer> pointers = new ArrayList<>();
+        for (String pointerString : pointerStrings) {
+            pointers.add(new JsonPointer(pointerString));
+        }
+        return pointers;
     }
 
     /**
@@ -435,14 +461,42 @@ public class AuditServiceImpl implements AuditService {
     }
 
     /**
-     * Audit service does not support actions on audit entries.
+     * Audit service action handles the actions defined in #ActivityAction.
      *
      * {@inheritDoc}
+     * @see ActivityAction
      */
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+
+        String actionValue = request.getAction();
+        LOGGER.debug("Audit handleAction called with action={}", actionValue);
+        ActivityAction requestAction = ActivityAction.find(actionValue);
+        if (null == requestAction) {
+            handler.handleError(new BadRequestException(
+                    "unknown action or no action supplied: audit action=" + actionValue));
+            return;
+        }
+
+        JsonValue content = request.getContent();
+
+        switch (requestAction) {
+            case GET_CHANGED_WATCHED_FIELDS:
+                List<String> changedFields =
+                        checkForFields(watchFieldFilters, content.get("before"), content.get("after"));
+                handler.handleResult(new JsonValue(changedFields));
+                return;
+            case GET_CHANGED_PASSWORD_FIELDS:
+                List<String> changedPasswordFields =
+                        checkForFields(passwordFieldFilters, content.get("before"), content.get("after"));
+                handler.handleResult(new JsonValue(changedPasswordFields));
+                return;
+            default:
+                handler.handleError(new BadRequestException(
+                        "unknown action or no action supplied: audit action=" + requestAction));
+        }
+
     }
 
     /**

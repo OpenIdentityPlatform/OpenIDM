@@ -16,11 +16,27 @@
 
 package org.forgerock.openidm.audit.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.openidm.audit.util.AuditTestUtils.mockResultHandler;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -37,27 +53,15 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.util.AuditConstants.ActivityAction;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
-import org.forgerock.openidm.sync.impl.Scripts;
+import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.script.Script;
 import org.mockito.ArgumentCaptor;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.openidm.audit.util.AuditTestUtils.mockResultHandler;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Test the audit service.
@@ -207,7 +211,7 @@ public class AuditServiceImplTest {
     }
 
     @Test
-    public void testAuditServiceAction() throws Exception {
+    public void testAuditServiceActionForBadAction() throws Exception {
         //given
         AuditServiceImpl auditService = createAuditService("/audit.json");
 
@@ -225,7 +229,73 @@ public class AuditServiceImplTest {
         verify(jsonValueResultHandler, never()).handleResult(resourceCaptor.capture());
         verify(jsonValueResultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
+
+    }
+
+    @Test
+    public void testActionForChangedFields() throws Exception {
+
+        //given
+        AuditServiceImpl auditService = createAuditService("/audit.json");
+        JsonValue testContent = json(
+                object(
+                        field("before", object(
+                                field("email", "a@b.com"),
+                                field("sn", "Blow")
+                        )),
+                        field("after", object(
+                                field("email", "x@y.z"),
+                                field("sn", "Doe")
+                        ))
+                )
+        );
+        ActionRequest changedFieldsRequest = Requests.newActionRequest("test", "id",
+                ActivityAction.GET_CHANGED_WATCHED_FIELDS.getActionName());
+        changedFieldsRequest.setContent(testContent);
+        final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
+        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
+
+        // when
+        auditService.handleAction(new ServerContext(new RootContext()), changedFieldsRequest, jsonValueResultHandler);
+
+        // then
+        verify(jsonValueResultHandler).handleResult(resourceCaptor.capture());
+        List<String> changedFields = resourceCaptor.getValue().asList(String.class);
+        assertThat(changedFields.size()).isEqualTo(1);
+        assertThat(changedFields.get(0)).isEqualTo("/email");
+
+    }
+
+    @Test
+    public void testActionForChangedPassword() throws Exception {
+        // given
+        AuditServiceImpl auditService = createAuditService("/audit.json");
+        JsonValue testContent = json(
+                object(
+                        field("before", object(
+                                field("password", "pass1")
+                        )),
+                        field("after", object(
+                                field("password", "pass2")
+                        ))
+                )
+        );
+
+        ActionRequest changedPasswordRequest = Requests.newActionRequest("test", "id",
+                ActivityAction.GET_CHANGED_PASSWORD_FIELDS.getActionName());
+        changedPasswordRequest.setContent(testContent);
+        final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
+        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
+
+        //when
+        auditService.handleAction(new ServerContext(new RootContext()), changedPasswordRequest, jsonValueResultHandler);
+
+        //then
+        verify(jsonValueResultHandler).handleResult(resourceCaptor.capture());
+        List<String> changedPasswords = resourceCaptor.getValue().asList(String.class);
+        assertThat(changedPasswords.size()).isEqualTo(1);
+        assertThat(changedPasswords.get(0)).isEqualTo("/password");
     }
 
     @Test
