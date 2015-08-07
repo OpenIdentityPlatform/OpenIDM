@@ -67,7 +67,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
-import org.forgerock.openidm.audit.util.AuditConstants.ActivityAction;
+import org.forgerock.openidm.audit.util.AuditConstants.AuditAction;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -132,6 +132,10 @@ public class AuditServiceImpl implements AuditService {
     private static final String AUDIT_SERVICE_CONFIG = "auditServiceConfig";
     private static final String EVENT_HANDLERS = "eventHandlers";
     private static final String EXTENDED_EVENT_TYPES = "extendedEventTypes";
+    private static final JsonPointer WATCHED_PASSWORDS_CONFIG_POINTER = new JsonPointer(
+            EXTENDED_EVENT_TYPES + "/activity/passwordFields");
+    private static final JsonPointer WATCHED_FIELDS_CONFIG_POINTER = new JsonPointer(
+            EXTENDED_EVENT_TYPES + "/activity/watchedFields");
     private static final String CUSTOM_EVENT_TYPES = "customEventTypes";
 
     private final AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
@@ -269,14 +273,12 @@ public class AuditServiceImpl implements AuditService {
                 exceptionFormatterScript =  scriptRegistry.takeScript(config.get(EXCEPTION_FORMATTER));
             }
 
-            JsonValue watchedFieldsValue = config.get(
-                    new JsonPointer(EXTENDED_EVENT_TYPES + "/activity/watchedFields"));
+            JsonValue watchedFieldsValue = config.get(WATCHED_FIELDS_CONFIG_POINTER);
             if (null != watchedFieldsValue) {
                 watchFieldFilters = getJsonPointers(watchedFieldsValue.asList(String.class));
             }
 
-            JsonValue passwordFieldsValue = config.get(
-                    new JsonPointer(EXTENDED_EVENT_TYPES + "/activity/passwordFields"));
+            JsonValue passwordFieldsValue = config.get(WATCHED_PASSWORDS_CONFIG_POINTER);
             if (null != passwordFieldsValue) {
                 passwordFieldFilters = getJsonPointers(passwordFieldsValue.asList(String.class));
             }
@@ -464,7 +466,7 @@ public class AuditServiceImpl implements AuditService {
      * Audit service action handles the actions defined in #ActivityAction.
      *
      * {@inheritDoc}
-     * @see ActivityAction
+     * @see AuditAction
      */
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
@@ -472,7 +474,7 @@ public class AuditServiceImpl implements AuditService {
 
         String actionValue = request.getAction();
         LOGGER.debug("Audit handleAction called with action={}", actionValue);
-        ActivityAction requestAction = ActivityAction.find(actionValue);
+        AuditAction requestAction = AuditAction.find(actionValue);
         if (null == requestAction) {
             handler.handleError(new BadRequestException(
                     "unknown action or no action supplied: audit action=" + actionValue));

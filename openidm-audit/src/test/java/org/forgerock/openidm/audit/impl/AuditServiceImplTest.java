@@ -53,7 +53,7 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.util.AuditConstants.ActivityAction;
+import org.forgerock.openidm.audit.util.AuditConstants.AuditAction;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.script.Script;
@@ -251,7 +251,7 @@ public class AuditServiceImplTest {
                 )
         );
         ActionRequest changedFieldsRequest = Requests.newActionRequest("test", "id",
-                ActivityAction.GET_CHANGED_WATCHED_FIELDS.getActionName());
+                AuditAction.GET_CHANGED_WATCHED_FIELDS.getActionName());
         changedFieldsRequest.setContent(testContent);
         final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
@@ -283,7 +283,7 @@ public class AuditServiceImplTest {
         );
 
         ActionRequest changedPasswordRequest = Requests.newActionRequest("test", "id",
-                ActivityAction.GET_CHANGED_PASSWORD_FIELDS.getActionName());
+                AuditAction.GET_CHANGED_PASSWORD_FIELDS.getActionName());
         changedPasswordRequest.setContent(testContent);
         final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);

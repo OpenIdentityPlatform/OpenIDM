@@ -44,7 +44,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.audit.util.AuditConstants.ActivityAction;
+import org.forgerock.openidm.audit.util.AuditConstants.AuditAction;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,10 +123,10 @@ public class RouterActivityLogger implements ActivityLogger {
 
             //will be true if any of the watched password fields have changed.
             boolean passwordChanged =
-                    getChangedFields(ActivityAction.GET_CHANGED_PASSWORD_FIELDS, before, after, context).length > 0;
+                    getChangedFields(AuditAction.GET_CHANGED_PASSWORD_FIELDS, before, after, context).length > 0;
 
             String[] changedFields =
-                    getChangedFields(ActivityAction.GET_CHANGED_WATCHED_FIELDS, before, after, context);
+                    getChangedFields(AuditAction.GET_CHANGED_WATCHED_FIELDS, before, after, context);
 
             RequestType requestType = request.getRequestType();
             String beforeValue = getJsonForLog(before, requestType);
@@ -174,16 +174,16 @@ public class RouterActivityLogger implements ActivityLogger {
      * This calls Audit service to utilize its get changed field abilities.
      * Determining the changed fields is left to the AuditService since it has the ability to utilize the CryptoService.
      *
-     * @param activityAction The action that determines which watch filter to apply to the fields.
+     * @param auditAction The action that determines which watch filter to apply to the fields.
      * @param before The object before changes.
      * @param after The object after changes.
      * @param context passed to the action call on audit service.
      * @return fields that have changes.
      * @throws ResourceException
      */
-    private String[] getChangedFields(ActivityAction activityAction, JsonValue before, JsonValue after,
+    private String[] getChangedFields(AuditAction auditAction, JsonValue before, JsonValue after,
             ServerContext context) throws ResourceException {
-        ActionRequest actionRequest = Requests.newActionRequest("audit", activityAction.getActionName());
+        ActionRequest actionRequest = Requests.newActionRequest("audit", auditAction.getActionName());
         actionRequest.setContent(
                 json(object(
                         field("before", before),

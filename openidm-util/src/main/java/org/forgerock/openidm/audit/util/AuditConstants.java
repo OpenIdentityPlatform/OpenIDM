@@ -36,13 +36,13 @@ public interface AuditConstants {
     /** entryType for an "entry" recon audit log entry */
     String RECON_LOG_ENTRY_TYPE_RECON_ENTRY = "entry";
 
-    enum ActivityAction {
+    enum AuditAction {
         GET_CHANGED_WATCHED_FIELDS("getChangedWatchedFields"),
         GET_CHANGED_PASSWORD_FIELDS("getChangedPasswordFields");
 
         private String actionName;
 
-        ActivityAction(String actionName) {
+        AuditAction(String actionName) {
             this.actionName = actionName;
         }
 
@@ -50,10 +50,10 @@ public interface AuditConstants {
             return actionName;
         }
 
-        public static ActivityAction find(String actionName) {
-            for (ActivityAction activityAction : ActivityAction.values()) {
-                if (activityAction.getActionName().equals(actionName)) {
-                    return activityAction;
+        public static AuditAction find(String actionName) {
+            for (AuditAction auditAction : AuditAction.values()) {
+                if (auditAction.getActionName().equals(actionName)) {
+                    return auditAction;
                 }
             }
             return null;
