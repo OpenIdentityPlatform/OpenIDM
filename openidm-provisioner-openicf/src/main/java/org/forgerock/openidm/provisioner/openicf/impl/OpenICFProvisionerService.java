@@ -85,6 +85,7 @@ import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
@@ -94,7 +95,6 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -1412,12 +1412,22 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 Resource before = getCurrentResource(facade, _uid, null);
                 beforeValue = before.getContent();
                 
-                final Set<Attribute> patchedAttributes =
-                        objectClassInfoHelper.getPatchAttributes(request, beforeValue, cryptoService);
-                
-                Set<String> patchedAttributeNames = new HashSet<String>(patchedAttributes.size());
-                for (Attribute attribute : patchedAttributes) {
-                    patchedAttributeNames.add(attribute.getName());
+                final Set<String> attributeNames = new HashSet<String>();
+                final Set<Attribute> addedAttributes = new HashSet<Attribute>();
+                final Set<Attribute> removedAttributes = new HashSet<Attribute>();
+                final Set<Attribute> updatedAttributes = new HashSet<Attribute>();
+                for (PatchOperation operation : request.getPatchOperations()) {
+                	Attribute attribute = objectClassInfoHelper.getPatchAttribute(operation, beforeValue, cryptoService);	
+                	if (attribute != null) {
+						if (operation.isAdd()) {
+							addedAttributes.add(attribute);
+						} else if (operation.isRemove()) {
+							removedAttributes.add(attribute);
+						} else {
+							updatedAttributes.add(attribute);
+						}
+						attributeNames.add(attribute.getName());
+					}
                 }
 
                 OperationOptions operationOptions;
@@ -1427,7 +1437,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 final String reauthPassword = getReauthPassword(context);
 
                 // if reauth and updating attribute requiring user credentials
-                if (runAsUser(patchedAttributeNames, reauthPassword)) {
+                if (runAsUser(attributeNames, reauthPassword)) {
                     // get username attribute
                     final List<String> usernameAttrs =
                             jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
@@ -1443,9 +1453,23 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
                 operationOptions = operationOptionsBuilder.build();
 
-                Uid uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid,
-                        AttributeUtil.filterUid(patchedAttributes), operationOptions);
-
+                Uid uid = _uid;
+                if (addedAttributes.size() > 0) {
+                	// Perform any add operations
+                	uid = facade.addAttributeValues(objectClassInfoHelper.getObjectClass(), uid, 
+                			AttributeUtil.filterUid(addedAttributes), operationOptions);
+                }
+                if (removedAttributes.size() > 0) {
+                	// Perform any remove operations
+                	uid = facade.removeAttributeValues(objectClassInfoHelper.getObjectClass(), uid, 
+                			AttributeUtil.filterUid(removedAttributes), operationOptions);
+                }
+                if (updatedAttributes.size() > 0) {
+                	// Perform any increment or replace operations
+                	uid = facade.update(objectClassInfoHelper.getObjectClass(), uid, 
+                			AttributeUtil.filterUid(updatedAttributes), operationOptions);
+                }
+                
                 Resource resource = getCurrentResource(facade, uid, null);
                 activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()), beforeValue, resource.getContent(), Status.SUCCESS);
                 handler.handleResult(resource);

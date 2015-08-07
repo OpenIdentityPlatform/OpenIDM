@@ -276,90 +276,86 @@ public class ObjectClassInfoHelper {
     }
 
     /**
-     * Get the attributes are that are writable on a patch.
+     * Gets an attribute that is writable on a patch.
      * 
-     * @param request PatchRequest
+     * @param patchOperation the {@link PatchOperation}
      * @param before the before value
      * @param cryptoService encryption and decryption service
-     * @return Set of attributes to that are writable on update
+     * @return an Attributes that is writable on patch
      * @throws ResourceException if and error is encountered
      */
-    public Set<Attribute> getPatchAttributes(final PatchRequest request, final JsonValue before, 
+    public Attribute getPatchAttribute(final PatchOperation patchOperation, final JsonValue before, 
             final CryptoService cryptoService) throws ResourceException {
+        Attribute result = null;
         
         // A Map to hold the attributes being patched
-        JsonValue attributesToPatch = json(object());
-        
-        // A Set of attributes that will be removed
-        Set<JsonPointer> attributesToRemove = new HashSet<JsonPointer>();
-        
-        // Loop through the patch operations building up the map of attributes to map with their existing values
-        for (PatchOperation patchOperation : request.getPatchOperations()) {
-            JsonPointer field = patchOperation.getField();
-            JsonValue beforeValue = before.get(field);
-            if (patchOperation.isRemove()) {
-                // Keep track of the attributes that will be removed so we can set to null below
-                attributesToRemove.add(field);
-            }
-            
-            if (beforeValue != null && !beforeValue.isNull()) {
-                attributesToPatch.put(field, before.get(field).getObject());
-            }
-        }
-        
-        // Apply the patch operations to an object which contains only the attributes being patched
-        ResourceUtil.applyPatchOperations(request.getPatchOperations(), attributesToPatch);
+        JsonValue patchedContent = json(object());
+        // The field to patch
+    	JsonPointer field = patchOperation.getField();
+    	// The patched value
+    	Object value = null;
 
-        // Set any removed values to null
-        for (JsonPointer removedAttribute : attributesToRemove) {
-            attributesToPatch.put(removedAttribute, null);
+    	if (patchOperation.isAdd()) {
+    		value = patchOperation.getValue().getObject();
+    	} else if (patchOperation.isRemove()) {
+    		value = before.get(field).getObject();
+    	} else {
+        	// If the patch operation is replace or increment, update the value
+        	JsonValue beforeValue = before.get(field);
+        	if (beforeValue != null && !beforeValue.isNull()) {
+        		patchedContent.put(field, before.get(field).getObject());
+        	}
+        	// Apply the patch operations to an object which contains only the attributes being patched
+        	ResourceUtil.applyPatchOperation(patchOperation, patchedContent);
+    		value = patchedContent.get(field).getObject();
         }
         
-        Set<String> attributeKeys = attributesToPatch.keys();
-        Map<String, Attribute> result = new HashMap<String, Attribute>(attributeKeys.size());
-        
+    	// The String representation of the field, with the leading slash trimmed
+    	String fieldName = field.toString().substring(1);
+    	
         // Build up the map of patched Attributes
         for (AttributeInfoHelper attributeInfo : attributes) {
             // Get the attribute's nativeName and check if it is on of the attributes to patch
             String attributeName = attributeInfo.getAttributeInfo().getName();
-            if (attributesToPatch.keys().contains(attributeName)) {
-                Object value = attributesToPatch.get(attributeName).getObject();
-                Attribute attribute = attributeInfo.build(value, cryptoService);
-                if (null != attribute) {
-                    result.put(attributeName, attribute);
-                }
+            if (fieldName.equals(attributeName)) {
+            	result = attributeInfo.build(value, cryptoService);
             }
         }
 
         // Check if any of the attributes to patch are invalid/unsupported
-        checkForInvalidAttributes(attributeKeys);
+        checkForInvalidAttribute(fieldName);
 
         if (logger.isTraceEnabled()) {
-            ConnectorObjectBuilder builder = new ConnectorObjectBuilder().addAttributes(result.values());
+            ConnectorObjectBuilder builder = new ConnectorObjectBuilder().addAttribute(result);
             builder.setName("***");
             builder.setUid("***");
             logger.trace("Patch ConnectorObject: {}", SerializerUtil.serializeXmlObject(builder.build(), false));
         }
         
-        return new HashSet<Attribute>(result.values());
+        return result;
     }
 
     // ensure all attributes specified in the data are present in the target schema
     private void checkForInvalidAttributes(Set<String> keys) throws BadRequestException {
         for (String requestKey : keys) {
-            if (!requestKey.startsWith("_")) {
-                boolean found = false;
-                for (AttributeInfoHelper attributeInfo : attributes) {
-                    if (attributeInfo.getName().equals(requestKey)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    throw new BadRequestException("Target does not support attribute " + requestKey);
-                }
-            }
+        	checkForInvalidAttribute(requestKey);
         }
+    }
+
+    // ensure all attributes specified in the data are present in the target schema
+    private void checkForInvalidAttribute(String key) throws BadRequestException {
+    	if (!key.startsWith("_")) {
+    		boolean found = false;
+    		for (AttributeInfoHelper attributeInfo : attributes) {
+    			if (attributeInfo.getName().equals(key)) {
+    				found = true;
+    				break;
+    			}
+    		}
+    		if (!found) {
+    			throw new BadRequestException("Target does not support attribute " + key);
+    		}
+    	}
     }
 
     /**
