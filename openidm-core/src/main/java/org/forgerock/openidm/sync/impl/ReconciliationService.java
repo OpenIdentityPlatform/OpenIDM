@@ -24,6 +24,9 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.resource.QueryFilter.and;
+import static org.forgerock.json.resource.QueryFilter.equalTo;
+
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +50,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -65,7 +69,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
@@ -93,6 +96,8 @@ public class ReconciliationService
 
     public static final String PID = "org.forgerock.openidm.recon";
     private static final String MBEAN_NAME = "org.forgerock.openidm.recon:type=Reconciliation";
+    private static final String AUDIT_RECON = "audit/recon";
+    private static final String SUMMARY = "summary";
 
     public enum ReconAction {
         recon, reconByQuery, reconById;
@@ -155,11 +160,11 @@ public class ReconciliationService
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
             if (request.getResourceNameObject().isEmpty()) {
-                List<Map> runList = new ArrayList<Map>();
+                List<Map> runList = new ArrayList<>();
                 for (ReconciliationContext entry : reconRuns.values()) {
                     runList.add(entry.getSummary());
                 }
-                Map<String, Object> result = new LinkedHashMap<String, Object>();
+                Map<String, Object> result = new LinkedHashMap<>();
                 result.put("reconciliations", runList);
                 handler.handleResult(new Resource("", null, new JsonValue(result)));
             } else {
@@ -169,14 +174,16 @@ public class ReconciliationService
                     handler.handleResult(new Resource(localId, null, new JsonValue(reconRuns.get(localId).getSummary())));
                 } else {
                     // Next, if not in memory, try and get it from audit log
-                    QueryRequest auditQuery = Requests.newQueryRequest("audit/recon");
-                    auditQuery.setQueryId("audit-by-recon-id-type");
-                    auditQuery.setAdditionalParameter("reconId", localId);
-                    auditQuery.setAdditionalParameter("entryType", "summary");
-
-                    ServerContext routerContext = context.asContext(RouterContext.class);
-                    Collection<Resource> queryResult = new ArrayList<Resource>();
-                    getConnectionFactory().getConnection().query(routerContext, auditQuery, queryResult);
+                    final Collection<Resource> queryResult = new ArrayList<>();
+                    getConnectionFactory().getConnection().query(
+                            context,
+                            Requests.newQueryRequest(AUDIT_RECON).setQueryFilter(
+                                    and(
+                                            equalTo(jsonPointerSyntax(ReconAuditEventBuilder.RECON_ID), localId),
+                                            equalTo(jsonPointerSyntax(ReconAuditEventBuilder.RECON_ID), SUMMARY)
+                                    )
+                            ),
+                            queryResult);
 
                     if (queryResult.isEmpty()) {
                         throw new NotFoundException("Reconciliation with id " + localId + " not found." );
@@ -565,6 +572,10 @@ public class ReconciliationService
             logger.error("Unable to get the maximum pool size in recon thread pool");
             throw new InternalServerErrorException("Unable to get the maximum pool size in recon thread pool");
         }
+    }
+
+    private String jsonPointerSyntax(final String value) {
+        return new JsonPointer(value).toString();
     }
 
 }

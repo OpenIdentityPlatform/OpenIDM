@@ -51,12 +51,7 @@
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
 
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
-            
-            "audit-by-mapping" : "SELECT * FROM ${_dbSchema}.${_table} WHERE mapping = ${mappingName}",
-            "audit-by-recon-id" : "SELECT * FROM ${_dbSchema}.${_table} WHERE reconId = ${reconId}",
-            "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.${_table} WHERE reconId = ${reconId} AND entryType = ${entryType}",
-            "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.${_table} WHERE reconId = ${reconId} AND situation = ${situation}",
-            "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.${_table} WHERE parentactionid = ${parentActionId}",
+
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",            
             
             "get-managed-users" : "call ${_dbSchema}.getAllFromTable('${_dbSchema}','${_table}',${orderBy},${orderByDir},${int:_pageSize},${int:_pagedResultsOffset},'userName,givenName,sn,mail,accountStatus')",
