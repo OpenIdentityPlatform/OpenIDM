@@ -489,6 +489,7 @@ class ObjectMapping {
             SourceSyncOperation op = new SourceSyncOperation();
             op.oldValue = oldValue;
             op.setLinkQualifier(linkQualifier);
+            op.sourceObjectAccessor = sourceObjectAccessor;
 
             SyncAuditEventLogger syncAuditEvent = new SyncAuditEventLogger(op, name, context);
             syncAuditEvent.setSourceObjectId(LazyObjectAccessor.qualifiedId(sourceObjectSet, resourceId));
