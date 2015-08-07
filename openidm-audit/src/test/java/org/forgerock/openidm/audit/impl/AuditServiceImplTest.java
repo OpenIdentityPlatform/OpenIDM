@@ -241,11 +241,11 @@ public class AuditServiceImplTest {
         JsonValue testContent = json(
                 object(
                         field("before", object(
-                                field("email", "a@b.com"),
+                                field("mail", "a@b.com"),
                                 field("sn", "Blow")
                         )),
                         field("after", object(
-                                field("email", "x@y.z"),
+                                field("mail", "x@y.z"),
                                 field("sn", "Doe")
                         ))
                 )
@@ -263,7 +263,7 @@ public class AuditServiceImplTest {
         verify(jsonValueResultHandler).handleResult(resourceCaptor.capture());
         List<String> changedFields = resourceCaptor.getValue().asList(String.class);
         assertThat(changedFields.size()).isEqualTo(1);
-        assertThat(changedFields.get(0)).isEqualTo("/email");
+        assertThat(changedFields.get(0)).isEqualTo("/mail");
 
     }
 
