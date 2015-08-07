@@ -1001,7 +1001,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             }
         }
         
-        return Resources.filterResource(resource, fields);
+        // Update the list of fields in the response
+        if (fields != null && fields.size() > 0) {
+        	resource.addField(fields.toArray(new JsonPointer[fields.size()]));
+        }
+        
+        return resource;
     }
     
     /**
