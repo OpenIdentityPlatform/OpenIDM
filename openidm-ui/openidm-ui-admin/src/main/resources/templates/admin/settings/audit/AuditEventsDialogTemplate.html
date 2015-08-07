@@ -1,0 +1,122 @@
+<form id="auditEventsForm">
+    <div class="form-group">
+        <label class="control-label">{{t "templates.audit.events.dialog.name"}}: </label>
+        <input type="text"
+               class="form-control"
+               id="eventName"
+               autocomplete="off"
+               placeholder='{{t "templates.audit.events.dialog.exampleName"}}'
+               data-unique-list="{{stringify usedNames}}"
+               value="{{defaults.eventName}}"
+               {{#if defaults.newEvent}}
+               data-validator="unique"
+               data-validator-event="keyup blur"
+               {{else}}
+               disabled
+               {{/if}}/>
+        <div class="validation-message"></div>
+        <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+    </div>
+
+    <div id="policySettingsTabs" class="tab-menu">
+        <ul class="nav nav-tabs">
+            <li class="{{#if schemaTab}}active{{/if}}" id="schemaTab"><a data-toggle="tab" href="#schemaPane">{{t "templates.audit.events.dialog.schema"}}</a></li>
+            <li class="{{#if actionsTab}}active{{/if}}" id="actionsTab"><a data-toggle="tab" href="#filterActionsPane">{{t "templates.audit.events.dialog.filterActions"}}</a></li>
+            <li class="{{#if fieldsTab}}active{{/if}}" id="fieldsTab"><a data-toggle="tab" href="#filterFieldsPane">{{t "templates.audit.events.dialog.filterFields"}}</a></li>
+            <li class="{{#if scriptTab}}active{{/if}}" id="scriptTab"><a data-toggle="tab" href="#filterScriptPane">{{t "templates.audit.events.dialog.filterScript"}}</a></li>
+            {{#if defaults.triggers}}
+            <li class="{{#if triggerTab}}active{{/if}}" id="triggerTab"><a data-toggle="tab" href="#filterTriggersPane">{{t "templates.audit.events.dialog.filterTriggers"}}</a></li>
+            {{/if}}
+            <li class="{{#if watchedTab}}active{{/if}}" id="watchedFieldsTab"><a data-toggle="tab" href="#watchedFieldsPane">{{t "templates.audit.events.dialog.watchedFields"}}</a></li>
+            <li class="{{#if passwordTab}}active{{/if}}" id="passwordFieldsTab"><a data-toggle="tab" href="#passwordFieldsPane">{{t "templates.audit.events.dialog.passwordFields"}}</a></li>
+        </ul>
+    </div>
+
+    <div class="tab-content no-border panel-body">
+        <div id="schemaPane" class="tab-pane{{#if schemaTab}} active{{/if}}" role="tabpanel">
+            <div class="jsonEditorContainer"></div>
+        </div>
+
+        <div id="filterActionsPane" class="tab-pane{{#if actionsTab}} active{{/if}}" role="tabpanel">
+            <p class="panel-description">{{t "templates.audit.events.dialog.filterActionsDesc"}}</p>
+
+            {{#if defaults.eventDeclarativeActions.length}}
+            <select class="filterActions" multiple="multiple">
+                {{#each defaults.eventDeclarativeActions}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+            {{else}}
+            <div role="alert" class="alert alert-info" style="display: block;">
+                <i class="fa fa-exclamation-circle"></i><strong> {{t "templates.audit.notice"}}</strong>
+                <span class="message">
+                    {{t "templates.audit.events.dialog.noActions"}}
+                </span>
+            </div>
+            {{/if}}
+        </div>
+
+        <div id="filterFieldsPane" class="tab-pane{{#if fieldsTab}} active{{/if}}" role="tabpanel">
+            <p class="panel-description">{{t "templates.audit.events.dialog.filterFieldsDesc"}}</p>
+
+            {{#each defaults.event.filter.fields}}
+            <div class="well" data-filter-name="{{this.name}}">
+                <span class="headerItem">
+                    <label class="form-inline"><input type="text" {{#if this.name}} disabled{{/if}} placeholder="Field Name" class="form-control filterFieldName" value="{{this.name}}"/><span class="uniqueName" style="padding-left:10px; display: none;">Field name must be unique.</span></span></label>
+                <button class="btn btn-link deleteFilterField" type="button">{{t "templates.audit.events.dialog.filterFieldDelete"}}</button>
+                </span>
+
+                <select class="filterFieldValues filterFieldValues-{{this.name}} " multiple="multiple" style="{{#if this.collapsed}}display:none;{{/if}}">
+                    {{#each this.values}}
+                    <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
+
+            </div>
+            {{/each}}
+
+            <button class="btn btn-default addFilterField blockButton" id="addFilterField"><i class="fa fa-plus"></i>{{t "templates.audit.events.dialog.filterFieldAddField"}}</button>
+        </div>
+
+        <div id="filterScriptPane" class="tab-pane{{#if scriptTab}} active{{/if}}" role="tabpanel">
+            <p class="panel-description">{{t "templates.audit.events.dialog.filterScriptDesc"}}</p>
+
+            <div id="filterScript"></div>
+        </div>
+
+        {{#if defaults.triggers}}
+        <div id="filterTriggersPane" class="tab-pane{{#if triggerTab}} active{{/if}}" role="tabpanel">
+            <p class="panel-description">{{t "templates.audit.events.dialog.triggerDesc"}}</p>
+            {{#each defaults.triggers}}
+            <p>Trigger: {{@key}}</p>
+            <select class="triggerActions trigger-{{@key}}" multiple="multiple" data-event="{{@key}}">
+                {{#each this}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+            {{/each}}
+        </div>
+        {{/if}}
+
+        <div id="watchedFieldsPane" class="tab-pane{{#if watchedTab}} active{{/if}}" role="tabpanel">
+            <p class="panel-description">{{t "templates.audit.events.dialog.watchedFieldsDesc"}}</p>
+
+            <select class="watchedFields" multiple="multiple">
+                {{#each defaults.event.watchedFields}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+
+        <div id="passwordFieldsPane" class="tab-pane{{#if passwordTab}} active{{/if}}" role="tabpanel">
+            <p class="panel-description">{{t "templates.audit.events.dialog.passwordFieldsDesc"}}</p>
+
+            <select class="passwordFields" multiple="multiple">
+                {{#each defaults.event.passwordFields}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+
+    </div>
+</form>

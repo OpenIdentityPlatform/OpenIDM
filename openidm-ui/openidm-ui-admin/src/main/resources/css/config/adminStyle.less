@@ -26,6 +26,14 @@
   Base Page Styles
 */
 
+.add-item-inline {
+  .form-group {
+    float: left;
+    padding-right: 5px;
+    width: auto;
+  }
+}
+
 .ui-jqgrid {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
@@ -86,6 +94,10 @@
 }
 .panel-body {
   padding: 30px;
+}
+
+.collapse > .panel-body {
+  padding: 0 30px 30px;
 }
 
 .panel-collapse-group .panel {
@@ -285,6 +297,11 @@
   }
 }
 
+.tab-content {
+  background-color: #fff;
+  margin-bottom: 50px;
+}
+
 .editResourceViewContainer {
   .resource-avatar {
     display: table;
@@ -329,11 +346,6 @@
     font-weight: 400;
     display: inline-block;
     margin-bottom: 0;
-  }
-
-  .tab-content {
-    background-color: #fff;
-    margin-bottom: 50px;
   }
 
   .fa-search {
