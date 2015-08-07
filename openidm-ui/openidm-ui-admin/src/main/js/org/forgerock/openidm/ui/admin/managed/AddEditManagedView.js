@@ -45,7 +45,6 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
-            "click #managedObjectForm fieldset legend" : "sectionHideShow",
             "click #addManagedProperties": "addProperty",
             "click .property-remove" : "removeProperty",
             "click #deleteManaged": "deleteManaged"
