@@ -43,7 +43,7 @@
           "action"
         ]
       },
-      "watchedFields" : [ "email" ],
+      "watchedFields" : [ "mail" ],
       "passwordFields" : [ "password" ]
     }
   },
