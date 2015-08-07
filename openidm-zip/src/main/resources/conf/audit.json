@@ -48,7 +48,7 @@
                     "action"
                 ]
             },
-            "watchedFields" : [ "mail" ],
+            "watchedFields" : [ ],
             "passwordFields" : [ "password" ]
         }
     },
