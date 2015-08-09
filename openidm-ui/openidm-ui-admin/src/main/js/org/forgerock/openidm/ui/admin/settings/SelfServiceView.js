@@ -57,7 +57,7 @@ define("org/forgerock/openidm/ui/admin/settings/SelfServiceView", [
         render: function (args, callback) {
             this.data.docHelpUrl = constants.DOC_URL;
 
-            ConfigDelegate.readEntity("ui.context/enduser"). then(_.bind(function(data) {
+            ConfigDelegate.readEntity("ui.context/selfservice"). then(_.bind(function(data) {
                 this.model.uiContextObject = data;
                 this.data.selfServiceURL = data.urlContextRoot;
 
@@ -72,7 +72,7 @@ define("org/forgerock/openidm/ui/admin/settings/SelfServiceView", [
             e.preventDefault();
             this.model.uiContextObject.urlContextRoot = this.$el.find("#selfServiceURL").val();
 
-            ConfigDelegate.updateEntity("ui.context/enduser", this.model.uiContextObject).then(_.bind(function () {
+            ConfigDelegate.updateEntity("ui.context/selfservice", this.model.uiContextObject).then(_.bind(function () {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "selfServiceSaveSuccess");
             }, this));
         },

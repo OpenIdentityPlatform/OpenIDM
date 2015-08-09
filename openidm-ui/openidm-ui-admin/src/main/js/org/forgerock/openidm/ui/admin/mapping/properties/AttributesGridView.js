@@ -253,7 +253,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             }, this);
 
             attributesGrid = new Backgrid.Grid({
-                className: "table",
+                className: "table backgrid-table",
                 row: ClickableRow,
                 columns: BackgridUtils.addSmallScreenCell([
                     {
