@@ -25,12 +25,13 @@
 /*global define */
 
 define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
+    "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/components/Messages"
-], function(_, constants, AbstractDelegate, configDelegate, messagesManager) {
+], function($, _, constants, AbstractDelegate, configDelegate, messagesManager) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/");
 
