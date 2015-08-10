@@ -41,9 +41,16 @@
                 "type": "string"
               }
             }
+          },
+          "exception": {
+            "type": "string"
           }
         }
       }
     }
+  },
+  "exceptionFormatter" : {
+    "type" : "text/javascript",
+    "file" : "stacktraceFormatter.js"
   }
 }
