@@ -47,12 +47,15 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
@@ -64,6 +67,8 @@ import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.patch.JsonPatch;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.script.Script;
+import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -88,6 +93,8 @@ import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter
 })
 public class AuditServiceImpl implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditServiceImpl.class);
+    public static final String EXCEPTION_FORMATTER = "exceptionFormatter";
+    public static final String EXCEPTION = "exception";
 
     //TODO ADD SUPPORT FOR KNOWN QUERIES
     // Recognized queries
@@ -123,7 +130,7 @@ public class AuditServiceImpl implements AuditService {
     private EnhancedConfig enhancedConfig;
 
     /** the script to execute to format exceptions */
-    //private static ScriptEntry exceptionFormatterScript = null;
+    private static ScriptEntry exceptionFormatterScript = null;
 
     private AuditLogFilter auditFilter = AuditLogFilters.NEVER;
 
@@ -265,6 +272,10 @@ public class AuditServiceImpl implements AuditService {
             for (final JsonValue handlerConfig : eventHandlers) {
                 AuditJsonConfig.registerHandlerToService(handlerConfig, auditService, this.getClass().getClassLoader());
             }
+
+            if (!config.get(EXCEPTION_FORMATTER).isNull()) {
+                exceptionFormatterScript =  scriptRegistry.takeScript(config.get(EXCEPTION_FORMATTER));
+            }
         } catch (Exception ex) {
             LOGGER.warn("Configuration invalid, can not start Audit service.", ex);
             throw ex;
@@ -335,44 +346,43 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public void handleCreate(final ServerContext context, final CreateRequest request,
                              final ResultHandler<Resource> handler) {
-        if (request.getResourceName() == null) {
-            //TODO IGNORE FAILURE PER AUDIT LOGGER?
-            handler.handleError(
-                    new BadRequestException(
-                            "Audit service called without specifying which audit log in the identifier"));
-            return;
-        }
-
-        Map<String, Object> obj = request.getContent().asMap();
-
-        // TODO pretty sure this is in CAUD now
-        // Don't audit the audit log
-        if (context.containsContext(AuditContext.class)) {
-            handler.handleResult(new Resource(null, null, new JsonValue(obj)));
-            return;
-        }
-
-        // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z,
-        // principal=openidm-admin, status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate,
-        // userid=openidm-admin, ip=127.0.0.1}
-        LOGGER.debug("Audit create called for {} with {}", request.getResourceName(), obj);
-
-        String type = request.getResourceNameObject().head(1).toString();
-
-        if (auditFilter.isFiltered(context, request)) {
-            LOGGER.debug("Request filtered by filter for {}/{} using method {}",
-                    request.getResourceName(),
-                    request.getNewResourceId(),
-                    request.getContent().get(new JsonPointer("resourceOperation/operation/method")));
-            handler.handleResult(new Resource(null, null, new JsonValue(obj)));
-            return;
-        }
-
         try {
+            if (request.getResourceName() == null) {
+                //TODO IGNORE FAILURE PER AUDIT LOGGER?
+                throw new BadRequestException(
+                                "Audit service called without specifying which audit log in the identifier");
+            }
+
+            try {
+                formatException(request.getContent());
+            } catch (Exception e) {
+                LOGGER.error("Failed to format audit entry exception", e);
+                throw new InternalServerErrorException("Failed to format audit entry exception", e);
+            }
+
+            // Don't audit the audit log
+            if (context.containsContext(AuditContext.class)) {
+                handler.handleResult(new Resource(null, null, request.getContent()));
+                return;
+            }
+
+            LOGGER.debug("Audit create called for {} with {}", request.getResourceName(), request.getContent().asMap());
+
+            if (auditFilter.isFiltered(context, request)) {
+                LOGGER.debug("Request filtered by filter for {}/{} using method {}",
+                        request.getResourceName(),
+                        request.getNewResourceId(),
+                        request.getContent().get(new JsonPointer("resourceOperation/operation/method")));
+                handler.handleResult(new Resource(null, null, request.getContent()));
+                return;
+            }
+
+
             auditService.handleCreate(context, request, handler);
-        } catch (RuntimeException ex) {
-            LOGGER.warn("Failure writing audit log: {}/ with exception: {}", new Object[]{type, ex});
-            //TODO IGNORE FAILURE PER AUDIT LOGGER?
+        } catch (ResourceException ex) {
+            LOGGER.warn("Failure writing audit log: {}/ with exception: {}",
+                    request.getResourceNameObject().head(1).toString(), ex);
+            handler.handleError(ex);
         }
     }
 
@@ -505,5 +515,21 @@ public class AuditServiceImpl implements AuditService {
             fieldList.add(field.asPointer());
         }
         return fieldList;
+    }
+
+    private void formatException(final JsonValue entry) throws Exception {
+        if (!entry.isDefined(EXCEPTION)
+                || entry.get(EXCEPTION).isNull()
+                || exceptionFormatterScript == null) {
+            return;
+        }
+
+        final Object exception = entry.get(EXCEPTION).getObject();
+
+        if (exception instanceof Exception) {
+            final Script s = exceptionFormatterScript.getScript(new RootContext());
+            s.put(EXCEPTION, exception);
+            entry.put(EXCEPTION, s.eval());
+        }
     }
 }
