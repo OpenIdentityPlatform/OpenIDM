@@ -163,10 +163,11 @@
                 "objectToColumn" : {
                     "_id" : "objectid",
                     "transactionId" : "transactionid",
+                    "timestamp" : "activitydate",
                     "authentication/id" : "userid",
                     "eventName" : "eventname",
                     "result" : "result",
-                    "principal/items" : {"column" : "principal_items", "type" : "JSON_LIST"},
+                    "principal" : {"column" : "principals", "type" : "JSON_LIST"},
                     "context" : {"column" : "context", "type" : "JSON_MAP"},
                     "sessionId" : "sessionid",
                     "entries" : {"column" : "entries", "type" : "JSON_LIST"}
@@ -190,7 +191,10 @@
                     "after" : "subjectafter",
                     "changedFields" : {"column" : "changedfield", "type" : "JSON_LIST"},
                     "passwordChanged" : "passwordchanged",
-                    "revision" : "subjectrev"
+                    "revision" : "subjectrev",
+                    "message" : "message",
+                    "objectId" : "activityobjectid",
+                    "status" : "status"
                 }
             },
             "audit/recon" : {
