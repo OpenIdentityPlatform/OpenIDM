@@ -35,8 +35,7 @@ public class SchemaField {
 
     public static JsonPointer FIELD_ALL_RELATIONSHIPS = new JsonPointer("*_ref");
     public static JsonPointer FIELD_REFERENCE = new JsonPointer("_ref");
-    public static JsonPointer FIELD_PROPERTIES = new JsonPointer("_properties");
-    public static JsonPointer FIELD_EXPANSION_VALUE = new JsonPointer("_value");
+    public static JsonPointer FIELD_PROPERTIES = new JsonPointer("_refProperties");
 
     /** Schema field types */
     enum SchemaFieldType {
