@@ -4,14 +4,6 @@
     },
     "eventHandlers" : [
         {
-            "name" : "csv",
-            "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
-            "config" : {
-                "logDirectory" : "audit"
-            },
-            "events" : [ "access", "activity", "recon", "sync", "authentication" ]
-        },
-        {
             "name": "repo",
             "class": "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
             "config": {},
