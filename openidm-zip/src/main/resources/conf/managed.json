@@ -126,7 +126,7 @@
                                 "_id": {
                                     "type": "string"
                                 },
-                                "_properties": {
+                                "_refProperties": {
                                     "type": "object"
                                 }
                             },

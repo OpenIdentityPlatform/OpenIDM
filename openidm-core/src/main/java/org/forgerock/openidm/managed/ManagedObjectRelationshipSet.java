@@ -25,6 +25,7 @@ import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
@@ -36,7 +37,12 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * Set of relationships for a given managed resource's property
@@ -97,16 +103,38 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
      * @param object
      * @return A new JsonValue containing the converted object
      */
-    private JsonValue convertToRepoObject(JsonValue object) {
-        final Map<String, Object> forRepo = new HashMap<>();
-        final Map<String, Object> fromRequest = object.copy().asMap();
+    private JsonValue convertToRepoObject(final JsonValue object) {
+        return json(object(
+                field("firstId", resourceName.child(object.get("firstId").asString()).toString()),
+                field("firstKey", propertyName.toString()),
+                field("secondId", object.get(SchemaField.FIELD_REFERENCE)),
+                field("_properties", object.get(SchemaField.FIELD_PROPERTIES))
+        ));
+    }
 
-        forRepo.put("firstId", resourceName.child(fromRequest.get("firstId")).toString());
-        forRepo.put("firstKey", propertyName.toString());
-        forRepo.put("secondId", fromRequest.get("_ref"));
-        forRepo.put("_properties", fromRequest.get("_properties"));
+    /**
+     * Format a repository Resource to a value used by the response handlers
+     *
+     * @param fromRepo
+     *
+     * @return
+     */
+    private Resource formatResponse(final Resource fromRepo) {
+        final JsonValue converted = json(object());
+        final Map<String, Object> properties = new LinkedHashMap<>();
+        final Map<String, Object> repoProperties = fromRepo.getContent().get("_properties").asMap();
 
-        return new JsonValue(forRepo);
+        if (repoProperties != null) {
+            properties.putAll(repoProperties);
+        }
+
+        properties.put("_id", fromRepo.getId());
+        properties.put("_rev", fromRepo.getRevision());
+
+        converted.put(SchemaField.FIELD_REFERENCE, fromRepo.getContent().get("secondId").asString());
+        converted.put(SchemaField.FIELD_PROPERTIES, properties);
+
+        return new Resource(fromRepo.getId(), fromRepo.getRevision(), converted);
     }
 
     @Override
@@ -117,7 +145,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 
         try {
             final Resource resource = connectionFactory.getConnection().create(context, createRequest);
-            handler.handleResult(resource);
+            handler.handleResult(formatResponse(resource));
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -138,7 +166,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 
             final Resource deletedResource = connectionFactory.getConnection().delete(context, deleteRequest);
 
-            handler.handleResult(deletedResource);
+            handler.handleResult(formatResponse(deletedResource));
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -163,7 +191,22 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         ));
 
         try {
-            connectionFactory.getConnection().query(context, _request, handler);
+            connectionFactory.getConnection().query(context, _request, new QueryResultHandler() {
+                @Override
+                public void handleError(ResourceException e) {
+                    handler.handleError(e);
+                }
+
+                @Override
+                public boolean handleResource(Resource resource) {
+                    return handler.handleResource(formatResponse(resource));
+                }
+
+                @Override
+                public void handleResult(QueryResult queryResult) {
+                    handler.handleResult(queryResult);
+                }
+            });
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -174,7 +217,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(resourceId));
             Resource resource = connectionFactory.getConnection().read(context, readRequest);
-            handler.handleResult(resource);
+            handler.handleResult(formatResponse(resource));
         } catch (ResourceException e) {
             handler.handleError(e);
         }
@@ -198,7 +241,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 
                 final Resource response = connectionFactory.getConnection().update(context, updateRequest);
 
-                handler.handleResult(response);
+                handler.handleResult(formatResponse(response));
             }
         } catch (ResourceException e) {
             handler.handleError(e);
