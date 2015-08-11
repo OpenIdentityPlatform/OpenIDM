@@ -174,10 +174,11 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `openidm`.`auditauthentication` (
   `objectid` VARCHAR(38) NOT NULL ,
   `transactionid` VARCHAR(38) NULL ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `userid` VARCHAR(255) NULL ,
   `eventname` VARCHAR(50) NULL ,
   `result` VARCHAR(255) NULL ,
-  `principal_items` TEXT ,
+  `principals` TEXT ,
   `context` TEXT ,
   `sessionid` VARCHAR(255) ,
   `entries` TEXT ,
@@ -266,6 +267,9 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `changedfields` VARCHAR(255) NULL ,
   `passwordchanged` VARCHAR(5) NULL ,
   `subjectrev` VARCHAR(255) NULL ,
+  `message` TEXT NULL,
+  `activityobjectid` VARCHAR(255) ,
+  `status` VARCHAR(20) ,
   PRIMARY KEY (`objectid`) ,
   INDEX `idx_auditactivity_transactionid` (`transactionid` ASC)
 )
