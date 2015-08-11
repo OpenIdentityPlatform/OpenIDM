@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.script.ScriptException;
+import javax.xml.validation.Schema;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.Context;
@@ -782,7 +783,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         if (isArray) {
             for (JsonValue relation : existingRelations) {
                 final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
-                final String id = relation.get("_id").asString();
+                final String id = relation.get(SchemaField.FIELD_PROPERTIES).get("_id").asString();
                 final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
                 relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest, handler);
 
@@ -792,7 +793,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         } else {
             if (!existingRelations.isNull()) {
                 final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
-                final String id = existingRelations.get("_id").asString();
+                final String id = existingRelations.get(SchemaField.FIELD_PROPERTIES).get("_id").asString();
                 final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
                 relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest, handler);
 
