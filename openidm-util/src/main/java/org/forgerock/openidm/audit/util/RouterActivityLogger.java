@@ -44,7 +44,6 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.audit.util.AuditConstants.AuditAction;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,11 +121,10 @@ public class RouterActivityLogger implements ActivityLogger {
             String revision = getRevision(before, after);
 
             //will be true if any of the watched password fields have changed.
-            boolean passwordChanged =
-                    getChangedFields(AuditAction.GET_CHANGED_PASSWORD_FIELDS, before, after, context).length > 0;
+            //TODO once dependency is resolved, get action from AuditService.AuditAction rather than these strings.
+            boolean passwordChanged = getChangedFields("getChangedPasswordFields", before, after, context).length > 0;
 
-            String[] changedFields =
-                    getChangedFields(AuditAction.GET_CHANGED_WATCHED_FIELDS, before, after, context);
+            String[] changedFields = getChangedFields("getChangedWatchedFields", before, after, context);
 
             RequestType requestType = request.getRequestType();
             String beforeValue = getJsonForLog(before, requestType);
@@ -181,9 +179,10 @@ public class RouterActivityLogger implements ActivityLogger {
      * @return fields that have changes.
      * @throws ResourceException
      */
-    private String[] getChangedFields(AuditAction auditAction, JsonValue before, JsonValue after,
+    //TODO once dependency is resolved, first param should be AuditService.AuditAction rather than string.
+    private String[] getChangedFields(String auditAction, JsonValue before, JsonValue after,
             ServerContext context) throws ResourceException {
-        ActionRequest actionRequest = Requests.newActionRequest("audit", auditAction.getActionName());
+        ActionRequest actionRequest = Requests.newActionRequest("audit", auditAction);
         actionRequest.setContent(
                 json(object(
                         field("before", before),

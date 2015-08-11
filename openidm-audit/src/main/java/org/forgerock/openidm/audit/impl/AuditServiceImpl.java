@@ -67,7 +67,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
-import org.forgerock.openidm.audit.util.AuditConstants.AuditAction;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -466,7 +465,6 @@ public class AuditServiceImpl implements AuditService {
      * Audit service action handles the actions defined in #ActivityAction.
      *
      * {@inheritDoc}
-     * @see AuditAction
      */
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
@@ -474,22 +472,24 @@ public class AuditServiceImpl implements AuditService {
 
         String actionValue = request.getAction();
         LOGGER.debug("Audit handleAction called with action={}", actionValue);
-        AuditAction requestAction = AuditAction.find(actionValue);
-        if (null == requestAction) {
+        AuditAction requestAction;
+        try {
+            requestAction = request.getActionAsEnum(AuditAction.class);
+        } catch (Exception e) {
             handler.handleError(new BadRequestException(
-                    "unknown action or no action supplied: audit action=" + actionValue));
+                    "unknown action or no action supplied: audit action=" + actionValue, e));
             return;
         }
 
         JsonValue content = request.getContent();
 
         switch (requestAction) {
-            case GET_CHANGED_WATCHED_FIELDS:
+            case getChangedWatchedFields:
                 List<String> changedFields =
                         checkForFields(watchFieldFilters, content.get("before"), content.get("after"));
                 handler.handleResult(new JsonValue(changedFields));
                 return;
-            case GET_CHANGED_PASSWORD_FIELDS:
+            case getChangedPasswordFields:
                 List<String> changedPasswordFields =
                         checkForFields(passwordFieldFilters, content.get("before"), content.get("after"));
                 handler.handleResult(new JsonValue(changedPasswordFields));

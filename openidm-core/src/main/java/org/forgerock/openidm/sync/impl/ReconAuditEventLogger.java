@@ -18,7 +18,6 @@ package org.forgerock.openidm.sync.impl;
 import java.util.List;
 
 import org.forgerock.json.resource.Context;
-import org.forgerock.openidm.audit.util.AuditConstants;
 
 /**
  * A recon audit log entry representation.  Contains additional fields
@@ -30,8 +29,21 @@ class ReconAuditEventLogger extends AbstractSyncAuditEventLogger {
     public static final String RECON_AUDIT_PATH = "audit/recon";
     public static final String RECON_AUDIT_EVENT_NAME = "recon";
 
+    /**
+     * entryType for a "start" recon audit log entry
+     */
+    public static final String RECON_LOG_ENTRY_TYPE_RECON_START = "start";
+    /**
+     * entryType for a "summary" recon audit log entry
+     */
+    public static final String RECON_LOG_ENTRY_TYPE_RECON_END = "summary";
+    /**
+     * entryType for an "entry" recon audit log entry
+     */
+    public static final String RECON_LOG_ENTRY_TYPE_RECON_ENTRY = "entry";
+
     private String reconId;
-    private String entryType = AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY;
+    private String entryType = RECON_LOG_ENTRY_TYPE_RECON_ENTRY;
     private String reconciling;
     private String ambiguousTargetIds;
     private ReconciliationService.ReconAction reconciliationServiceReconAction;

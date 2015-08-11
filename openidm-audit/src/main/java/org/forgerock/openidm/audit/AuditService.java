@@ -31,5 +31,11 @@ import org.forgerock.json.resource.RequestHandler;
  */
 public interface AuditService extends RequestHandler {
     /** the AuditService is "registered" on /audit */
-    public final static String ROUTER_PREFIX = "/audit";
+    String ROUTER_PREFIX = "/audit";
+
+    enum AuditAction {
+        getChangedWatchedFields,
+        getChangedPasswordFields;
+    }
+
 }

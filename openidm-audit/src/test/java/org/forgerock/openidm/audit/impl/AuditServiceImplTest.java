@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.openidm.audit.AuditService.AuditAction.getChangedPasswordFields;
+import static org.forgerock.openidm.audit.AuditService.AuditAction.getChangedWatchedFields;
 import static org.forgerock.openidm.audit.util.AuditTestUtils.mockResultHandler;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -53,7 +55,6 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.util.AuditConstants.AuditAction;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.script.Script;
@@ -250,8 +251,7 @@ public class AuditServiceImplTest {
                         ))
                 )
         );
-        ActionRequest changedFieldsRequest = Requests.newActionRequest("test", "id",
-                AuditAction.GET_CHANGED_WATCHED_FIELDS.getActionName());
+        ActionRequest changedFieldsRequest = Requests.newActionRequest("test", "id", getChangedWatchedFields.name());
         changedFieldsRequest.setContent(testContent);
         final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
@@ -264,7 +264,6 @@ public class AuditServiceImplTest {
         List<String> changedFields = resourceCaptor.getValue().asList(String.class);
         assertThat(changedFields.size()).isEqualTo(1);
         assertThat(changedFields.get(0)).isEqualTo("/mail");
-
     }
 
     @Test
@@ -282,8 +281,7 @@ public class AuditServiceImplTest {
                 )
         );
 
-        ActionRequest changedPasswordRequest = Requests.newActionRequest("test", "id",
-                AuditAction.GET_CHANGED_PASSWORD_FIELDS.getActionName());
+        ActionRequest changedPasswordRequest = Requests.newActionRequest("test", "id", getChangedPasswordFields.name());
         changedPasswordRequest.setContent(testContent);
         final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
