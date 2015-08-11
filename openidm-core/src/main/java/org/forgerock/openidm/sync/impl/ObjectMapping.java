@@ -201,7 +201,7 @@ class ObjectMapping {
     private Script resultScript;
 
     /** an additional set of key-value conditions to be met for a source object to be valid to be mapped */
-    private JsonValue sourceCondition;
+    private Condition sourceCondition;
 
     /**
      * Whether existing links should be fetched in one go along with the source and target id lists.
@@ -249,7 +249,7 @@ class ObjectMapping {
         targetIdsCaseSensitive = config.get("targetIdsCaseSensitive").defaultTo(Boolean.TRUE).asBoolean();
         validSource = Scripts.newInstance(config.get("validSource"));
         validTarget = Scripts.newInstance(config.get("validTarget"));
-        sourceCondition = config.get("sourceCondition").expect(Map.class);
+        sourceCondition = new Condition(config.get("sourceCondition"));
         correlation = new Correlation(config);
         JsonValue linkQualifiersValue = config.get("linkQualifiers");
         if (linkQualifiersValue.isNull()) {
@@ -1873,36 +1873,17 @@ class ObjectMapping {
         }
         
         /**
-         * Checks any declared source conditions on the source object
+         * Evaluates the source condition on the source object
          * 
+         * @param linkQualifier the link qualifier for the current sync operation.
          * @return true if the conditions pass, false otherwise
          * @throws SynchronizationException
          */
-        protected boolean checkSourceConditions() throws SynchronizationException {
-            if (!sourceCondition.isNull()) {
-                for (String key : sourceCondition.keys()) {
-                    JsonPointer pointer = new JsonPointer(key);
-                    JsonValue source = sourceObjectAccessor.getObject();
-                    if (!source.isNull() && source.get(pointer) != null) {
-                        JsonValue valueToTest = source.get(pointer);
-                        Object sourceConditionValue = sourceCondition.get(key).getObject();
-                        if (valueToTest.isList()) {
-                            if (!valueToTest.asList().contains(sourceConditionValue)) {
-                                return false;
-                            }
-                        } else if (valueToTest.isMap()) {
-                            if (!valueToTest.asMap().containsKey(sourceConditionValue)) {
-                                return false;
-                            }                            
-                        } else if (!valueToTest.getObject().equals(sourceConditionValue)) {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-            }
-            return true;
+        protected boolean checkSourceConditions(String linkQualifier) throws SynchronizationException {
+        	JsonValue params = json(object(
+        			field("source", sourceObjectAccessor.getObject()), 
+        			field("linkQualifier", linkQualifier)));
+        	return sourceCondition.evaluate(params);
         }
 
         /**
@@ -2288,7 +2269,7 @@ class ObjectMapping {
                         }
                     }
                 }
-            } else if (isSourceValid() && checkSourceConditions()) { // source is valid for mapping
+            } else if (isSourceValid() && checkSourceConditions(getLinkQualifier())) { // source is valid for mapping
                 if (linkObject._id != null) { // source object linked to target
                     if (hasTargetObject()) {
                         situation = Situation.CONFIRMED;
