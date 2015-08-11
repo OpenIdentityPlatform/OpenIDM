@@ -21,6 +21,7 @@ import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
@@ -38,6 +39,10 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.sync.impl.Scripts;
+import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.ScriptRegistry;
+import org.forgerock.script.Script;
 import org.mockito.ArgumentCaptor;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.Test;
@@ -65,10 +70,16 @@ public class AuditServiceImplTest {
     public void testAuditServiceActivation() throws Exception {
         //given
         final JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
-        final AuditServiceImpl auditService = new AuditServiceImpl();
-        auditService.bindEnhancedConfig(jsonEnhancedConfig);
+        final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
+        final ScriptEntry scriptEntry = mock(ScriptEntry.class);
         final JsonValue config = AuditTestUtils.getJson(getResource("/audit.json"));
+        final AuditServiceImpl auditService = new AuditServiceImpl();
+
+        auditService.bindEnhancedConfig(jsonEnhancedConfig);
+        auditService.bindScriptRegistry(scriptRegistry);
+
         when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(config);
+        when(scriptRegistry.takeScript(any(JsonValue.class))).thenReturn(scriptEntry);
 
         //when
         auditService.activate(mock(ComponentContext.class));
@@ -237,6 +248,39 @@ public class AuditServiceImplTest {
         verify(queryResultHandler).handleError(resourceExceptionCaptor.capture());
 
         assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+    }
+
+    @Test
+    public void testExceptionFormmatter() throws Exception {
+        //given
+        AuditServiceImpl auditService = createAuditService("/audit.json");
+
+        final AuditEvent auditEvent = TestAuditEventBuilder.testAuditEventBuilder()
+                .transactionId("transactionId")
+                .eventName("eventName")
+                .timestamp(System.currentTimeMillis())
+                .authentication("testuser@forgerock.com")
+                .exception(new Exception("Test Exception"))
+                .toEvent();
+
+        final CreateRequest createRequest = Requests.newCreateRequest("test", auditEvent.getValue());
+        final ResultHandler<Resource> resourceResultHandler = mockResultHandler(Resource.class);
+        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
+                ArgumentCaptor.forClass(ResourceException.class);
+
+        //when
+        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resourceResultHandler);
+
+        //then
+        verify(resourceResultHandler).handleResult(resourceCaptor.capture());
+        verify(resourceResultHandler, never()).handleError(resourceExceptionCaptor.capture());
+
+        final JsonValue expectedResource = createRequest.getContent();
+        expectedResource.put("exception", "Exception Formatted");
+
+        assertThat(resourceCaptor.getValue()).isNotNull();
+        assertThat(resourceCaptor.getValue().getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
 
     /*
@@ -587,11 +631,22 @@ public class AuditServiceImplTest {
     }
 
     private AuditServiceImpl createAuditService(final String configFile) throws Exception {
-        JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
+        final JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
+        final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
+        final ScriptEntry scriptEntry = mock(ScriptEntry.class);
+        final Script script = mock(Script.class);
         final AuditServiceImpl auditService = new AuditServiceImpl();
+
         auditService.bindEnhancedConfig(jsonEnhancedConfig);
+        auditService.bindScriptRegistry(scriptRegistry);
+
         final JsonValue config = AuditTestUtils.getJson(getResource(configFile));
+
         when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(config);
+        when(scriptRegistry.takeScript(any(JsonValue.class))).thenReturn(scriptEntry);
+        when(scriptEntry.getScript(any(Context.class))).thenReturn(script);
+        when(script.eval()).thenReturn("Exception Formatted");
+
         auditService.activate(mock(ComponentContext.class));
         return auditService;
     }
@@ -602,6 +657,11 @@ public class AuditServiceImplTest {
         @SuppressWarnings("rawtypes")
         public static TestAuditEventBuilder<?> testAuditEventBuilder() {
             return new TestAuditEventBuilder();
+        }
+
+        public T exception(Exception e) {
+            this.jsonValue.put("exception", e);
+            return self();
         }
     }
 
