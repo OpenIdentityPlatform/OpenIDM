@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -324,7 +324,7 @@
         <dependency>
             <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-lang</artifactId>
-            <version>1.4.0</version>
+            <version>1.5.0</version>
         </dependency>
 
         <!--
@@ -427,6 +427,17 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.swissbox</groupId>
+            <artifactId>pax-swissbox-extender</artifactId>
+            <version>1.8.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>pax-swissbox-optional-jcl</artifactId>
+                    <groupId>org.ops4j.pax.swissbox</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- OpenICF Connectors -->
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
@@ -464,6 +475,13 @@
             <artifactId>juli</artifactId>
             <version>7.0.39.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.2</version>
+        </dependency>
+
         <!-- google connector dependencies -->
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -659,14 +677,6 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
                     <execution>
                         <id>zip-workflow-files</id>
                         <phase>prepare-package</phase>
