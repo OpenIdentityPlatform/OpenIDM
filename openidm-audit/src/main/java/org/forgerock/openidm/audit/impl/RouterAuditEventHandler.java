@@ -171,4 +171,12 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<RouterAuditEventHandlerConfiguration> getConfigurationClass() {
+        return RouterAuditEventHandlerConfiguration.class;
+    }
+
 }

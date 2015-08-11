@@ -90,8 +90,6 @@ define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
                                     id: "submitPasswordChange",
                                     cssClass: "btn-primary",
                                     action: _.bind(function(dialogRef) {
-                                        event.preventDefault();
-
                                         var patchDefinitionObject = [], element;
                                         if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
                                             patchDefinitionObject.push({operation: "replace", field: "/password", value: this.$el.find("input[name=password]").val()});

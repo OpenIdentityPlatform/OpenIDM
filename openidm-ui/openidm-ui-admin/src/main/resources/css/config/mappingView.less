@@ -1,3 +1,17 @@
+#attributesGridHolder .table tbody tr {
+  height:65px;
+}
+
+#attributesGridHolder tr:hover {
+  background: #f3f3f3;
+  cursor: pointer;
+}
+
+#attributesGridHolder .smallScreenCell .properties-badge {
+  top: 0px;
+  margin-left: 10px;
+}
+
 #subNavHolder {
   display:none;
 }
@@ -31,9 +45,6 @@
 
         .resource-given-name {
           font-size: 16px;
-        }
-        .resource-type-name {
-
         }
       }
     }
@@ -770,15 +781,6 @@ h4.connector-role {
     padding: 5px 7px;
   }
 
-  .ui-jqgrid-hbox {
-    height:55px;
-    padding-top:25px;
-  }
-
-  .ui-jqgrid-hdiv {
-    border-bottom: 1px solid #cccccc !important;
-  }
-
   tr th {
     border-right:0px;
     height:35px;
@@ -788,27 +790,24 @@ h4.connector-role {
   }
 
   .properties-badge {
-    margin-right:6px;
     position:relative;
     top:19px;
+    margin-right: auto;
+    margin-left: 5px;
+    display: inline-block;
   }
 
-  .properties-icon-container {
+  .properties-icon-container-parent {
     background-color:#f3f3f3;
     height:60px;
+    width:95px;
+    padding-top:0px;
+    padding-bottom:0px;
+    text-align:center;
   }
 
   td[aria-describedby="mappingTable_iconDisplay"] {
     padding:0px;
-  }
-
-  .jqgrid-container {
-    margin-top: 20px;
-  }
-
-  .removePropertyBtn {
-    cursor:pointer;
-    color: #777;
   }
 
   .property-container {
@@ -818,10 +817,6 @@ h4.connector-role {
       margin-bottom:5px;
     }
 
-  }
-
-  .removePropertyBtn:hover {
-    color:@base-theme-color;
   }
 }
 
@@ -855,11 +850,6 @@ h4.connector-role {
 
 #numRepresentativeProps {
   margin-right:10px;
-}
-
-#attributesBody .ui-jqgrid-hdiv,
-#mappingTable_preview {
-  overflow:visible;
 }
 
 #gbox_mappingTable {

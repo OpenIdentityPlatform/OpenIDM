@@ -15,13 +15,7 @@
         "for-userName":"SELECT * FROM ${_resource} WHERE userName = :uid",
         "get-notifications-for-user":"select * FROM ${_resource} WHERE receiverId = :userId order by createDate desc",
         "scan-tasks":"SELECT * FROM ${_resource} WHERE ${dotnotation:property} < :condition.before AND ${taskState.completed} is NULL",
-        "query-cluster-instances":"SELECT * FROM cluster_states WHERE timestamp <= :timestamp AND (state = '1' OR state = '2')",
-        "audit-by-mapping":"select * FROM audit_recon WHERE mapping = ${mappingName}",
-        "audit-by-recon-id":"select * FROM audit_recon WHERE reconId = ${reconId}",
-        "audit-by-recon-id-type":"select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
-        "audit-by-recon-id-situation":"select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
-        "audit-by-activity-parent-action":"select * FROM audit_activity WHERE parentActionId = ${parentActionId}",
-        "audit-last-recon-for-all-mappings":"SELECT max(messageDetail.started) AS last_started,  max(messageDetail.ended) AS last_ended, mapping from audit_recon where entryType='summary' group by mapping"
+        "query-cluster-instances":"SELECT * FROM cluster_states WHERE timestamp <= :timestamp AND (state = '1' OR state = '2')"
     },
     "dbStructure":{
         "orientdbClass":{

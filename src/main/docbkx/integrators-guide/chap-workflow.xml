@@ -484,7 +484,7 @@ openidm.create('workflow/processinstance', null, params);
    You can invoke the same workflow from the REST interface by sending the
    following REST call to OpenIDM:
   </para>
-  <screen><userinput>$ curl \
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -554,7 +554,7 @@ openidm.create('workflow/processinstance', null, params);
    <literal>"newOrder"</literal>. This business key can later be used to query
    "newOrder" processes.
   </para>
-  <screen><userinput>$ curl \
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -586,7 +586,7 @@ openidm.create('workflow/processinstance', null, params);
    with the business key <literal>"newOrder"</literal>, as invoked in the
    previous example.
   </para>
-  <screen><userinput>$ curl \
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -600,7 +600,7 @@ openidm.create('workflow/processinstance', null, params);
    The following query returns all process instances that were started by the
    user <literal>openidm-admin</literal>:
   </para>
-  <screen><userinput>$ curl \
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -683,7 +683,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      List the available workflow definitions:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -730,7 +730,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      List the workflow definitions, based on certain filter criteria:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -761,7 +761,7 @@ openidm.create('workflow/processinstance', null, params);
      can determine the ID by querying all the available process definitions, as
      described in the first example in this section.
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -884,7 +884,7 @@ openidm.create('workflow/processinstance', null, params);
      definitions, delete the definition over REST, <emphasis>making sure that
      you do not delete the latest version</emphasis>.
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -904,7 +904,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      Start a workflow process instance. For example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -926,7 +926,7 @@ openidm.create('workflow/processinstance', null, params);
      Obtain the list of running workflows (process instances). The query returns
      a list of IDs. For example:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -962,7 +962,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      Obtain the list of running workflows based on specific filter criteria.
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -978,7 +978,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      Obtain the details of the specified process instance. For example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1008,7 +1008,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      Stop the specified process instance. For example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1048,7 +1048,7 @@ openidm.create('workflow/processinstance', null, params);
      (<literal>"endActivityId": "end"</literal>) and one that is still running
      (<literal>"endActivityId": null</literal>):
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1243,7 +1243,7 @@ openidm.create('workflow/processinstance', null, params);
      Query the list of tasks defined for a specific process definition. For
      example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1315,7 +1315,7 @@ openidm.create('workflow/processinstance', null, params);
      Query a task definition based on the process definition ID and the task
      name (<literal>taskDefinitionKey</literal>). For example:
     </para>
-    <screen width="105"><userinput>$ curl \
+    <screen width="105">$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1385,7 +1385,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      Query all running task instances. For example:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1434,7 +1434,7 @@ openidm.create('workflow/processinstance', null, params);
      Query task instances based on candidate users or candidate groups. For
      example:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1445,7 +1445,7 @@ openidm.create('workflow/processinstance', null, params);
     <para>
      or
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1466,7 +1466,7 @@ openidm.create('workflow/processinstance', null, params);
      Obtain detailed information for a running task, based on the task ID. For
      example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1487,7 +1487,7 @@ openidm.create('workflow/processinstance', null, params);
      Update task-related data stored in the Activiti workflow engine. For
      example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -1503,7 +1503,7 @@ openidm.create('workflow/processinstance', null, params);
      Complete the specified task. The variables required by the task are
      provided in the request body. For example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -1518,7 +1518,7 @@ openidm.create('workflow/processinstance', null, params);
      into his list of pending tasks. The ID of the user who claims the task is
      provided in the request body. For example:
     </para>
-    <screen><userinput>$ curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -1905,7 +1905,7 @@ $ ./startup.sh -p samples/workflow</screen>
        in the repository. You can check the new account by running the following
        REST command:
       </para>
-      <screen><?dbfo pgwide="1"?><userinput>$ curl \
+      <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1932,7 +1932,7 @@ $ ./startup.sh -p samples/workflow</screen>
        Display the details of the new user, by running a REST query on the user
        ID, as follows:
       </para>
-      <screen><?dbfo pgwide="1"?><userinput>$ curl \
+      <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1980,8 +1980,8 @@ $ ./startup.sh -p samples/workflow</screen>
        If you specified that the new user should be added to the original data
        source, you will see that the account was added to the XML file:
       </para>
-      <screen><userinput>$ cd /path/to/openidm
-$ cat samples/workflow/data/xmlConnectorData.xml </userinput>
+      <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>cat samples/workflow/data/xmlConnectorData.xml </userinput>
 <computeroutput>...
    &lt;ri:__ACCOUNT__&gt;
       &lt;icf:__DESCRIPTION__&gt;Accountant&lt;/icf:__DESCRIPTION__&gt;
@@ -2466,9 +2466,8 @@ $ ./startup.sh -p samples/usecase/usecase2
       <filename>/path/to/openidm/samples/usecase/usecase2/conf/external.email.json</filename>
       to match the settings of your mail server. For example:
      </para>
-     <screen><userinput>$ cd /path/to/openidm
-$ more samples/usecase/usecase2/conf/external.email.json
-     </userinput>
+     <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>more samples/usecase/usecase2/conf/external.email.json</userinput>
 <computeroutput>{
     "host" : "smtp.example.com",
     "port" : "587",
@@ -2503,7 +2502,7 @@ $ more samples/usecase/usecase2/conf/external.email.json
         (<filename>newUserCreate.bpmn20.xml</filename>) and two xhtml templates
         required by the workflow.
        </para>
-       <screen><userinput>$ unzip newUserCreate.bar</userinput>
+       <screen>$ <userinput>unzip newUserCreate.bar</userinput>
 <computeroutput>Archive:  newUserCreate.bar
   inflating: nUCDecideApprovalForm.xhtml
   inflating: nUCStartForm.xhtml
@@ -2515,8 +2514,8 @@ $ more samples/usecase/usecase2/conf/external.email.json
         (<filename>newUserCreate.bpmn20.xml</filename>). The email parameters
         are towards the end of this file:
        </para>
-       <screen><userinput>$ cd /path/to/openidm/samples/usecase/usecase2/workflow
-$ grep emailParams newUserCreate.bpmn20.xml</userinput>
+       <screen>$ <userinput>cd /path/to/openidm/samples/usecase/usecase2/workflow</userinput>
+$ <userinput>grep emailParams newUserCreate.bpmn20.xml</userinput>
 <computeroutput>emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com',
 ...</computeroutput></screen>
        <para>
@@ -2564,7 +2563,7 @@ updating: newUserCreate.bpmn20.xml (deflated 85%)</computeroutput></screen>
       (<filename>samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json</filename>),
       setting the <literal>"enabled"</literal> property to <literal>true</literal>.
      </para>
-     <screen><userinput>$ cd /path/to/openidm
+     <screen>$ <userinput>cd /path/to/openidm
 $ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json</userinput>
 <computeroutput>"enabled" : true,</computeroutput></screen>
      <para>
@@ -2613,7 +2612,7 @@ $ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json</u
       (<filename>samples/usecase/usecase2/conf/schedule-taskscan_sunset.json</filename>),
       setting the <literal>"enabled"</literal> property to <literal>true</literal>.
      </para>
-     <screen><userinput>$ cd /path/to/openidm
+     <screen>$ <userinput>cd /path/to/openidm
 $ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunset.json
      </userinput>
 <computeroutput>"enabled" : true,</computeroutput></screen>
@@ -2660,8 +2659,8 @@ $ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunset.json
      <para>
       Shut down OpenIDM before you proceed with the next use case.
      </para>
-     <screen>$ cd /path/to/openidm
-$ ./shutdown.sh
+     <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>./shutdown.sh</userinput>
      </screen>
     </step>
    </procedure>
@@ -2686,8 +2685,8 @@ $ ./shutdown.sh
      <para>
       Start OpenIDM with the configuration for use case 3.
      </para>
-     <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/usecase/usecase3
+     <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>./startup.sh -p samples/usecase/usecase3</userinput>
      </screen>
     </step>
     <step>
@@ -2967,13 +2966,13 @@ $ ./startup.sh -p samples/usecase/usecase4
       Run a reconciliation operation, according to the mapping defined in
       <filename>sync.json</filename>.
      </para>
-     <screen>$ curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=recon_managedUser_systemBusiness"</screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=recon_managedUser_systemBusiness"</userinput></screen>
      <para>
       When the reconciliation operation finds the ambiguous entry
       (<literal>user.3</literal>) and the orphan entry (<literal>user.50</literal>)
@@ -3079,7 +3078,7 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
       Define the four managed roles over the REST interface, by sending the
       following PUT requests to the <literal>managed/role</literal> endpoint.
      </para>
-     <screen><userinput>$ curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3107,7 +3106,7 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
   "name": "Human Resources"
 }' \
  "https://localhost:8443/openidm/managed/role/human-resources"</userinput></screen>
-<screen><userinput>$ curl \
+<screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3137,7 +3136,7 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
   "name": "Production Planning"
 }' \
  "https://localhost:8443/openidm/managed/role/production-planning"</userinput></screen>
-<screen><userinput>$ curl \
+<screen>$<userinput> curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3166,7 +3165,7 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
   "name": "Sales and Distribution"
 }' \
  "https://localhost:8443/openidm/managed/role/sales-distribution"</userinput></screen>
-<screen><userinput>$ curl \
+<screen>$<userinput> curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3201,7 +3200,7 @@ $ ./startup.sh -p samples/usecase/usecase5</screen>
       the schedule configuration file
       (<filename>schedule-certification.json</filename>).
      </para>
-     <screen><userinput>$ cd /path/to/openidm/samples/usecase/usecase5/conf/
+     <screen>$ <userinput>cd /path/to/openidm/samples/usecase/usecase5/conf/
 $ more schedule-certification.json</userinput>
 <computeroutput>{
     "enabled" : true,
@@ -3311,8 +3310,8 @@ $ more schedule-certification.json</userinput>
       the schedule configuration file
       (<filename>schedule-certificationEntitlements.json</filename>).
      </para>
-     <screen><userinput>$ cd /path/to/openidm/samples/usecase/usecase5/conf/
-$ more schedule-certificationEntitlements.json</userinput>
+     <screen>$ <userinput>cd /path/to/openidm/samples/usecase/usecase5/conf/</userinput>
+$ <userinput>more schedule-certificationEntitlements.json</userinput>
 <computeroutput>{
     "enabled" : true,
     "type" : "cron",
@@ -3434,8 +3433,8 @@ $ ./shutdown.sh</screen>
     the schedule configuration file
     (<filename>schedule-taskscan_passwordchange.json</filename>):
    </para>
-   <screen><userinput>$ cd /path/to/openidm
-$ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</userinput>
+   <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</userinput>
 <computeroutput>
 ...
 "condition" : {
@@ -3462,8 +3461,8 @@ $ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</user
       <filename>/path/to/openidm/samples/usecase/usecase6/conf/external.email.json</filename>
       to match the settings of your mail server. For example:
      </para>
-     <screen><userinput>$ cd /path/to/openidm
-$ more samples/usecase/usecase6/conf/external.email.json</userinput>
+     <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>more samples/usecase/usecase6/conf/external.email.json</userinput>
 <computeroutput>{
     "host" : "smtp.example.com",
     "port" : "587",
@@ -3485,8 +3484,8 @@ $ more samples/usecase/usecase6/conf/external.email.json</userinput>
       (<filename>samples/usecase/usecase6/script/passwordchange.js</filename>).
       For example:
      </para>
-     <screen><userinput>$ cd /path/to/openidm
-$ more samples/usecase/usecase6/script/passwordchange.js</userinput>
+     <screen>$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>more samples/usecase/usecase6/script/passwordchange.js</userinput>
 <computeroutput>
 /*global  objectID*/
 
@@ -3516,7 +3515,7 @@ $ more samples/usecase/usecase6/script/passwordchange.js</userinput>
       <literal>true</literal> in the schedule configuration file
       (<filename>schedule-taskscan_passwordchange.json</filename>).
      </para>
-     <screen><userinput>$ cd /path/to/openidm
+     <screen>$ <userinput>cd /path/to/openidm
 $ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</userinput>
 <computeroutput>{
     "enabled" : true,

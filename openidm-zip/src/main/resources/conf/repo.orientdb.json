@@ -33,12 +33,6 @@
         "query-cluster-instances" : "SELECT * FROM cluster_states",
         "query-cluster-events" : "SELECT * FROM cluster_events WHERE instanceId = ${instanceId}",
 
-        "audit-by-mapping" : "select * FROM audit_recon WHERE mapping = ${mappingName}",
-        "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
-        "audit-by-recon-id-type" : "select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
-        "audit-by-recon-id-situation" : "select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
-        "audit-by-activity-parent-action" : "select * FROM audit_activity WHERE parentActionId = ${parentActionId}",
-
         "get-managed-users" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "get-managed-users-filtered" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user LET $userNameLike = if((\"${unquoted:userName}\" = ''), '%%', \"${unquoted:userName}%\"), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((\"${unquoted:sn}\" = ''), '%%', \"${unquoted:sn}%\"), $givenNameLike = if((\"${unquoted:givenName}\" = ''), '%%', \"${unquoted:givenName}%\") WHERE userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '') ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "get-managed-users-count" : "SELECT COUNT(*) AS total FROM managed_user",
@@ -317,6 +311,7 @@
                     }
                 ]
             },
+            "audit_authentication" : {},
             "audit_activity" : {},
             "audit_access" : {
                 "index" : [

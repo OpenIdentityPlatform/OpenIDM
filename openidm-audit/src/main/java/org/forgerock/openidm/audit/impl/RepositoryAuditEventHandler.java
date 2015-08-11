@@ -116,4 +116,12 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
             ResultHandler<Resource> resultHandler) {
         routerAuditEventHandler.readInstance(serverContext, resourceId, readRequest, resultHandler);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<RepositoryAuditEventHandlerConfiguration> getConfigurationClass() {
+        return RepositoryAuditEventHandlerConfiguration.class;
+    }
 }
