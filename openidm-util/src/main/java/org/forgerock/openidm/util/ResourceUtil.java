@@ -77,71 +77,77 @@ public class ResourceUtil {
         }
         return null;
     }
+    
+    public static boolean applyPatchOperation(final PatchOperation operation, final JsonValue newContent) throws ResourceException {
+    	boolean isModified = false;
+    	try {
+            if (operation.isAdd()) {
+                newContent.putPermissive(operation.getField(), operation.getValue()
+                        .getObject());
+            } else if (operation.isRemove()) {
+                if (operation.getValue().isNull()) {
+                    // Remove entire value.
+                    newContent.remove(operation.getField());
+                } else {
+                    // Find matching value(s) and remove (assumes
+                    // reference to array).
+                    final JsonValue value = newContent.get(operation.getField());
+                    if (value != null) {
+                        if (value.isList()) {
+                            final Object valueToBeRemoved =
+                                    operation.getValue().getObject();
+                            final Iterator<Object> iterator = value.asList().iterator();
+                            while (iterator.hasNext()) {
+                                if (valueToBeRemoved.equals(iterator.next())) {
+                                    iterator.remove();
+                                }
+                            }
+                        } else {
+                            // Single valued field.
+                            final Object valueToBeRemoved =
+                                    operation.getValue().getObject();
+                            if (valueToBeRemoved.equals(value.getObject())) {
+                                newContent.remove(operation.getField());
+                            }
+                        }
+                    }
+                }
+            } else if (operation.isReplace()) {
+                newContent.remove(operation.getField());
+                if (!operation.getValue().isNull()) {
+                    newContent.putPermissive(operation.getField(), operation.getValue()
+                            .getObject());
+                }
+            } else if (operation.isIncrement()) {
+                final JsonValue value = newContent.get(operation.getField());
+                final Number amount = operation.getValue().asNumber();
+                if (value == null) {
+                    throw new BadRequestException("The field '" + operation.getField()
+                            + "' does not exist");
+                } else if (value.isList()) {
+                    final List<Object> elements = value.asList();
+                    for (int i = 0; i < elements.size(); i++) {
+                        elements.set(i, increment(operation, elements.get(i), amount));
+                    }
+                } else {
+                    newContent.put(operation.getField(), increment(operation, value
+                            .getObject(), amount));
+                }
+            }
+            isModified = true;
+        } catch (final JsonValueException e) {
+            throw new ConflictException("The field '" + operation.getField()
+                    + "' does not exist");
+        }
+    	return isModified;
+    }
 
     public static boolean applyPatchOperations(final List<PatchOperation> operations,
             final JsonValue newContent) throws ResourceException {
         boolean isModified = false;
         if (null != operations) {
             for (final PatchOperation operation : operations) {
-                try {
-                    if (operation.isAdd()) {
-                        newContent.putPermissive(operation.getField(), operation.getValue()
-                                .getObject());
-                    } else if (operation.isRemove()) {
-                        if (operation.getValue().isNull()) {
-                            // Remove entire value.
-                            newContent.remove(operation.getField());
-                        } else {
-                            // Find matching value(s) and remove (assumes
-                            // reference to array).
-                            final JsonValue value = newContent.get(operation.getField());
-                            if (value != null) {
-                                if (value.isList()) {
-                                    final Object valueToBeRemoved =
-                                            operation.getValue().getObject();
-                                    final Iterator<Object> iterator = value.asList().iterator();
-                                    while (iterator.hasNext()) {
-                                        if (valueToBeRemoved.equals(iterator.next())) {
-                                            iterator.remove();
-                                        }
-                                    }
-                                } else {
-                                    // Single valued field.
-                                    final Object valueToBeRemoved =
-                                            operation.getValue().getObject();
-                                    if (valueToBeRemoved.equals(value.getObject())) {
-                                        newContent.remove(operation.getField());
-                                    }
-                                }
-                            }
-                        }
-                    } else if (operation.isReplace()) {
-                        newContent.remove(operation.getField());
-                        if (!operation.getValue().isNull()) {
-                            newContent.putPermissive(operation.getField(), operation.getValue()
-                                    .getObject());
-                        }
-                    } else if (operation.isIncrement()) {
-                        final JsonValue value = newContent.get(operation.getField());
-                        final Number amount = operation.getValue().asNumber();
-                        if (value == null) {
-                            throw new BadRequestException("The field '" + operation.getField()
-                                    + "' does not exist");
-                        } else if (value.isList()) {
-                            final List<Object> elements = value.asList();
-                            for (int i = 0; i < elements.size(); i++) {
-                                elements.set(i, increment(operation, elements.get(i), amount));
-                            }
-                        } else {
-                            newContent.put(operation.getField(), increment(operation, value
-                                    .getObject(), amount));
-                        }
-                    }
-                    isModified = true;
-                } catch (final JsonValueException e) {
-                    throw new ConflictException("The field '" + operation.getField()
-                            + "' does not exist");
-                }
+                isModified = applyPatchOperation(operation, newContent);
             }
         }
         return isModified;
