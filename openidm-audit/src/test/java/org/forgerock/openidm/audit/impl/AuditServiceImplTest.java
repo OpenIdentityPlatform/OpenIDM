@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.openidm.audit.AuditService.AuditAction.availableHandlers;
 import static org.forgerock.openidm.audit.AuditService.AuditAction.getChangedPasswordFields;
 import static org.forgerock.openidm.audit.AuditService.AuditAction.getChangedWatchedFields;
 import static org.forgerock.openidm.audit.util.AuditTestUtils.mockResultHandler;
@@ -212,11 +213,11 @@ public class AuditServiceImplTest {
     }
 
     @Test
-    public void testAuditServiceActionForBadAction() throws Exception {
+    public void testAuditServiceUnknownAction() throws Exception {
         //given
         AuditServiceImpl auditService = createAuditService("/audit.json");
 
-        final ActionRequest actionRequest = Requests.newActionRequest("test", "id", "actionId");
+        final ActionRequest actionRequest = Requests.newActionRequest("test", "id", "unknownAction");
 
         final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
         final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
@@ -349,6 +350,43 @@ public class AuditServiceImplTest {
 
         assertThat(resourceCaptor.getValue()).isNotNull();
         assertThat(resourceCaptor.getValue().getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+    }
+
+    @Test
+    public void testAvailableHandlersAction() throws Exception {
+        final AuditServiceImpl auditService = createAuditService("/audit.json");
+        final ResultHandler<JsonValue> resultHandler = mockResultHandler(JsonValue.class);
+        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
+        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
+                ArgumentCaptor.forClass(ResourceException.class);
+
+        //when
+        auditService.handleAction(
+                new ServerContext(new RootContext()),
+                Requests.newActionRequest("", availableHandlers.name()),
+                resultHandler
+        );
+
+        //then
+        verify(resultHandler).handleResult(resourceCaptor.capture());
+        verify(resultHandler, never()).handleError(resourceExceptionCaptor.capture());
+
+        final JsonValue result = resourceCaptor.getValue();
+        assertThat(result.keys().size()).isEqualTo(1);
+        assertThat(result.get(0).get("class").asString())
+                .isEqualTo("org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler");
+
+        // { "type": "object", "properties": { "message": { "type": "string" } } }
+        final JsonValue expectedConfig = json(object(
+                field("type", "object"),
+                field("id", "/"),
+                field("properties", object(
+                        field("message", object(
+                                field("type", "string")
+                        ))
+                ))
+        ));
+        assertThat(result.get(0).get("config").asMap()).isEqualTo(expectedConfig.asMap());
     }
 
     /*
