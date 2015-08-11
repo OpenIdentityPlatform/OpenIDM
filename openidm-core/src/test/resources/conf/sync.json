@@ -3,11 +3,7 @@
         {
             "name" : "testMapping",
             "source" : "managed/user",
-            "sourceCondition" : {
-                "equalsKey" : "foo",
-                "includesKey" : "1",
-                "json/pointer/key" : "foo"
-            },
+            "sourceCondition" : "/source/equalsKey eq \"foo\" and /source/includesKey eq \"1\" and /source/json/pointer/key eq \"foo\"",
             "target" : "system/ldap/account",
             "correlationQuery" : [
                 {
