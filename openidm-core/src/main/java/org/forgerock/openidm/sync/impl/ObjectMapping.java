@@ -56,7 +56,6 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.util.AuditConstants;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.patch.JsonPatch;
@@ -1329,7 +1328,7 @@ class ObjectMapping {
     private void logReconStart(ReconciliationContext reconContext, ServerContext context)
             throws SynchronizationException {
         ReconAuditEventLogger reconStartEntry = new ReconAuditEventLogger(null, name, context);
-        reconStartEntry.setEntryType(AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START);
+        reconStartEntry.setEntryType(ReconAuditEventLogger.RECON_LOG_ENTRY_TYPE_RECON_START);
         reconStartEntry.setReconciliationServiceReconAction(reconContext.getReconAction());
         reconStartEntry.setReconId(reconContext.getReconId());
         reconStartEntry.setMessage("Reconciliation initiated by "
@@ -1375,7 +1374,7 @@ class ObjectMapping {
             String loggerMessage) throws SynchronizationException {
 
         ReconAuditEventLogger reconAuditEvent = new ReconAuditEventLogger(null, name, rootContext);
-        reconAuditEvent.setEntryType(AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END);
+        reconAuditEvent.setEntryType(ReconAuditEventLogger.RECON_LOG_ENTRY_TYPE_RECON_END);
         reconAuditEvent.setReconciliationServiceReconAction(reconContext.getReconAction());
         reconAuditEvent.setStatus(status);
         reconAuditEvent.setReconId(reconContext.getReconId());
