@@ -35,7 +35,8 @@ public interface AuditService extends RequestHandler {
 
     enum AuditAction {
         getChangedWatchedFields,
-        getChangedPasswordFields;
+        getChangedPasswordFields,
+        availableHandlers;
     }
 
 }

@@ -32,6 +32,7 @@ import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFil
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -44,8 +45,10 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.DependencyProviderBase;
+import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -79,6 +82,10 @@ import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * This audit service is the entry point for audit logging on the router.
@@ -469,36 +476,47 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-
-        String actionValue = request.getAction();
-        LOGGER.debug("Audit handleAction called with action={}", actionValue);
-        AuditAction requestAction;
+        AuditAction requestAction = null;
         try {
-            requestAction = request.getActionAsEnum(AuditAction.class);
-        } catch (Exception e) {
-            handler.handleError(new BadRequestException(
-                    "unknown action or no action supplied: audit action=" + actionValue, e));
+            String actionValue = request.getAction();
+            LOGGER.debug("Audit handleAction called with action={}", actionValue);
+            try {
+                requestAction = request.getActionAsEnum(AuditAction.class);
+            } catch (Exception e) {
+                LOGGER.debug("Action is not a OpenIDM action delegating to CAUD", e);
+            }
+
+            JsonValue content = request.getContent();
+
+            if (requestAction == null) {
+                //if action unknown in openidm delegate it caud
+                auditService.handleAction(context, request, handler);
+                return;
+            }
+
+            switch (requestAction) {
+                case getChangedWatchedFields:
+                    List<String> changedFields =
+                            checkForFields(watchFieldFilters, content.get("before"), content.get("after"));
+                    handler.handleResult(new JsonValue(changedFields));
+                    return;
+                case getChangedPasswordFields:
+                    List<String> changedPasswordFields =
+                            checkForFields(passwordFieldFilters, content.get("before"), content.get("after"));
+                    handler.handleResult(new JsonValue(changedPasswordFields));
+                    return;
+                case availableHandlers:
+                    handler.handleResult(getAvailableAuditEventHandlersWithConfigSchema());
+                    return;
+                default:
+            }
+        } catch (ResourceException e) {
+            final String error = String.format("Unable to handle action: %s",
+                    requestAction == null ? null : requestAction.name());
+            LOGGER.error(error);
+            handler.handleError(new InternalServerErrorException(error, e));
             return;
         }
-
-        JsonValue content = request.getContent();
-
-        switch (requestAction) {
-            case getChangedWatchedFields:
-                List<String> changedFields =
-                        checkForFields(watchFieldFilters, content.get("before"), content.get("after"));
-                handler.handleResult(new JsonValue(changedFields));
-                return;
-            case getChangedPasswordFields:
-                List<String> changedPasswordFields =
-                        checkForFields(passwordFieldFilters, content.get("before"), content.get("after"));
-                handler.handleResult(new JsonValue(changedPasswordFields));
-                return;
-            default:
-                handler.handleError(new BadRequestException(
-                        "unknown action or no action supplied: audit action=" + requestAction));
-        }
-
     }
 
     /**
@@ -578,6 +596,65 @@ public class AuditServiceImpl implements AuditService {
             final Script s = exceptionFormatterScript.getScript(new RootContext());
             s.put(EXCEPTION, exception);
             entry.put(EXCEPTION, s.eval());
+        }
+    }
+
+    /**
+     * Gets the available audit event handlers from the audit service and the config schema.
+     *
+     * Should return a json object similar to this:
+     * <pre>
+     *      [{
+     *          "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+     *          "config" : {
+     *              "type" : "object",
+     *              "properties" : {
+     *                  "logDirectory" : {
+     *                      "type" : "string"
+     *                  },
+     *                  ....
+     *              }
+     *          }
+     *      },
+     *      {
+     *          "class" : "org.forgerock.audit.events.handlers.impl.AnotherAuditEventHandler",
+     *          "config" : {
+     *              "type" : "object",
+     *              "properties" : {
+     *                  "configKey" : {
+     *                      "type" : "string"
+     *                  },
+     *                  ....
+     *              }
+     *          }
+     *      }]
+     * </pre>
+     * @return A json object containing the available audit event handlers and their config schema.
+     * @throws AuditException If an error occurs instantiating one of the audit event handlers
+     */
+    private JsonValue getAvailableAuditEventHandlersWithConfigSchema() throws ResourceException {
+        try {
+            final List<String> availableAuditEventHandlers = auditService.getConfig().getAvailableAuditEventHandlers();
+            final JsonValue result = new JsonValue(new LinkedList<>());
+
+            for (final String auditEventHandler : availableAuditEventHandlers) {
+                try {
+                    AuditEventHandler eventHandler =
+                            (AuditEventHandler) Class.forName(auditEventHandler).newInstance();
+                    final JsonValue entry = json(object(
+                            field("class", auditEventHandler),
+                            field("config", AuditJsonConfig.getAuditEventHandlerConfigurationSchema(eventHandler).getObject())
+                    ));
+                    result.add(entry.getObject());
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                    throw new InternalServerErrorException(String.format("An error occurred while trying to instantiate class "
+                            + "for the handler '%s' or its configuration", auditEventHandler), e);
+                }
+            }
+            return result;
+        } catch (AuditException e) {
+            throw new InternalServerErrorException(
+                    "Unable to get available audit event handlers and their config schema", e);
         }
     }
 }

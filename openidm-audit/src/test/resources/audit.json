@@ -1,6 +1,7 @@
 {
   "auditServiceConfig" : {
-    "handlerForQueries" : "passthrough"
+    "handlerForQueries" : "passthrough",
+    "availableAuditEventHandlers" : ["org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler"]
   },
   "eventHandlers" : [
     {
