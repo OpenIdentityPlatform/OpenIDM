@@ -1858,13 +1858,13 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --request GET \
  "https://localhost:8443/openidm/audit/recon?_queryFilter=true"</userinput></screen>
   <para>
-   The following code sample shows the reconciliation audit log after the first
+   The following code extract shows the reconciliation audit log after the first
    reconciliation operation in Sample 1.
   </para>
   <programlisting language="javascript">{
   "result": [
     {
-      "_id": "88cb68ef-d274-4107-a6e9-54aa10996e6d",
+      "_id": "119cfb75-bd67-4767-9dcd-c358fca8e5b5",
       "action": null,
       "ambiguousTargetObjectIds": "null",
       "authentication": {
@@ -1878,30 +1878,79 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
       "message": "Reconciliation initiated by openidm-admin",
       "messageDetail": null,
       "reconAction": "recon",
-      "reconId": "baac4c08-7fe6-4c8a-82c1-014eded68c2e",
+      "reconId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
       "reconciling": "null",
       "situation": null,
       "sourceObjectId": "null",
       "status": null,
       "targetObjectId": "null",
-      "timestamp": "2015-08-06T14:54:16.033Z",
-      "transactionId": "baac4c08-7fe6-4c8a-82c1-014eded68c2e"
+      "timestamp": "2015-08-11T08:45:23.324Z",
+      "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
     },
     {
-      "_id": "618b68dc-da7f-4fb7-b8f4-571dc7a60112",
-      "action": null,
-      "ambiguousTargetObjectIds": "null",
+      "_id": "77515527-b88e-477d-a9aa-0c7d994da95a",
+      "action": "CREATE",
+      "ambiguousTargetObjectIds": null,
       "authentication": {
         "id": "openidm-admin"
       },
       "entryType": "entry",
       "eventName": "recon",
       "exception": "null",
+      "linkQualifier": "default",
+      "mapping": "systemXmlfileAccounts_managedUser",
+      "message": "null",
+      "messageDetail": null,
+      "reconAction": null,
+      "reconId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
+      "reconciling": "source",
+      "situation": "ABSENT",
+      "sourceObjectId": "system/xmlfile/account/bjensen",
+      "status": "SUCCESS",
+      "targetObjectId": "managed/user/bjensen",
+      "timestamp": "2015-08-11T08:45:23.516Z",
+      "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
+    },
+    {
+      "_id": "3a51ae9c-a6e5-4388-95c9-da55c7c5f903",
+      "action": "CREATE",
+      "ambiguousTargetObjectIds": null,
+      "authentication": {
+        "id": "openidm-admin"
+      },
+      "entryType": "entry",
+      "eventName": "recon",
+      "exception": "null",
+      "linkQualifier": "default",
+      "mapping": "systemXmlfileAccounts_managedUser",
+      "message": "null",
+      "messageDetail": null,
+      "reconAction": null,
+      "reconId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
+      "reconciling": "source",
+      "situation": "ABSENT",
+      "sourceObjectId": "system/xmlfile/account/scarter",
+      "status": "SUCCESS",
+      "targetObjectId": "managed/user/scarter",
+      "timestamp": "2015-08-11T08:45:23.516Z",
+      "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
+    },
+    {
+      "_id": "d9113086-4df1-42a9-a6ae-d56e0f76e5b3",
+      "action": null,
+      "ambiguousTargetObjectIds": "null",
+      "authentication": {
+        "id": "openidm-admin"
+      },
+      "entryType": "summary",
+      "eventName": "recon",
+      "exception": "null",
       "linkQualifier": "null",
       "mapping": "systemXmlfileAccounts_managedUser",
-      "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0 CONFIRMED: 0 SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 FOUND_ALREADY_LINKED: 0 ",
+      "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0 CONFIRMED: 0
+             SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 FOUND_ALREADY_LINKED: 0 ",
       "messageDetail": {
-        "_id": "baac4c08-7fe6-4c8a-82c1-014eded68c2e",
+        "_id": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
         "mapping": "systemXmlfileAccounts_managedUser",
         "state": "SUCCESS",
         "stage": "COMPLETED_SUCCESS",
@@ -1955,67 +2004,19 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
             "_queryId": "query-all-ids"
           }
         },
-        "started": "2015-08-06T14:54:16.032Z",
-        "ended": "2015-08-06T14:54:16.231Z",
-        "duration": 199
+        "started": "2015-08-11T08:45:23.323Z",
+        "ended": "2015-08-11T08:45:23.525Z",
+        "duration": 202
       },
       "reconAction": "recon",
-      "reconId": "null",
+      "reconId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
       "reconciling": "null",
       "situation": null,
       "sourceObjectId": "null",
       "status": "SUCCESS",
       "targetObjectId": "null",
-      "timestamp": "2015-08-06T14:54:16.233Z",
-      "transactionId": "baac4c08-7fe6-4c8a-82c1-014eded68c2e"
-    },
-    {
-      "_id": "798a829d-4a3a-456f-9d5e-3f5fd7e9817c",
-      "action": "CREATE",
-      "ambiguousTargetObjectIds": null,
-      "authentication": {
-        "id": "openidm-admin"
-      },
-      "entryType": "entry",
-      "eventName": "recon",
-      "exception": "null",
-      "linkQualifier": "default",
-      "mapping": "systemXmlfileAccounts_managedUser",
-      "message": "null",
-      "messageDetail": null,
-      "reconAction": null,
-      "reconId": "null",
-      "reconciling": "source",
-      "situation": "ABSENT",
-      "sourceObjectId": "system/xmlfile/account/bjensen",
-      "status": "SUCCESS",
-      "targetObjectId": "managed/user/bjensen",
-      "timestamp": "2015-08-06T14:54:16.222Z",
-      "transactionId": "baac4c08-7fe6-4c8a-82c1-014eded68c2e"
-    },
-    {
-      "_id": "242134c1-8ebf-4140-b018-adc97424c7e9",
-      "action": "CREATE",
-      "ambiguousTargetObjectIds": null,
-      "authentication": {
-        "id": "openidm-admin"
-      },
-      "entryType": "entry",
-      "eventName": "recon",
-      "exception": "null",
-      "linkQualifier": "default",
-      "mapping": "systemXmlfileAccounts_managedUser",
-      "message": "null",
-      "messageDetail": null,
-      "reconAction": null,
-      "reconId": "null",
-      "reconciling": "source",
-      "situation": "ABSENT",
-      "sourceObjectId": "system/xmlfile/account/scarter",
-      "status": "SUCCESS",
-      "targetObjectId": "managed/user/scarter",
-      "timestamp": "2015-08-06T14:54:16.222Z",
-      "transactionId": "baac4c08-7fe6-4c8a-82c1-014eded68c2e"
+      "timestamp": "2015-08-11T08:45:23.527Z",
+      "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
     }
   ],
   "resultCount": 4,
@@ -2040,13 +2041,15 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/recon/798a829d-4a3a-456f-9d5e-3f5fd7e9817c"</screen>
+ "https://localhost:8443/openidm/audit/recon/77515527-b88e-477d-a9aa-0c7d994da95a"</screen>
   <para>
    The following sample output shows the results of a read operation on a
-   specific reconciliation audit entry.
+   specific reconciliation audit entry. The entry shows the creation of
+   bjensen's account in the managed user repository, as the result of a
+   reconciliation operation.
   </para>
   <programlisting language="javascript">{
-  "_id": "798a829d-4a3a-456f-9d5e-3f5fd7e9817c",
+  "_id": "77515527-b88e-477d-a9aa-0c7d994da95a",
   "action": "CREATE",
   "ambiguousTargetObjectIds": null,
   "authentication": {
@@ -2060,14 +2063,14 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
   "message": "null",
   "messageDetail": null,
   "reconAction": null,
-  "reconId": "null",
+  "reconId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
   "reconciling": "source",
   "situation": "ABSENT",
   "sourceObjectId": "system/xmlfile/account/bjensen",
   "status": "SUCCESS",
   "targetObjectId": "managed/user/bjensen",
-  "timestamp": "2015-08-06T14:54:16.222Z",
-  "transactionId": "baac4c08-7fe6-4c8a-82c1-014eded68c2e"
+  "timestamp": "2015-08-11T08:45:23.516Z",
+  "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
 } </programlisting>
   <para>
    To obtain information for a specific reconciliation operation, include the
@@ -2077,36 +2080,36 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
   </para>
   <para>
    The following query returns the <literal>"mapping"</literal>,
-   <literal>"timestamp"</literal>, and  <literal>"status"</literal> fields for a
-   specific reconciliation operation.
-  </para><!--TODO this query actually used the transactionId because I could get nothing with reconId -->
+   <literal>"timestamp"</literal>, and  <literal>"entryType"</literal> fields
+   for a specific reconciliation operation.
+  </para>
   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/recon?_queryFilter=reconId+eq+"189770b6-e7f7-4219-b261-65acf0a60dd5"&amp;_fields=mapping,timestamp,status'</userinput>
+ 'https://localhost:8443/openidm/audit/recon?_queryFilter=reconId+eq+"4261227f-1d44-4042-ba7e-1dcbc6ac96b8"&amp;_fields=mapping,timestamp,entryType'</userinput>
 <computeroutput>{
   "result": [
     {
       "mapping": "systemXmlfileAccounts_managedUser",
-      "timestamp": "2015-08-07T12:26:59.320Z",
-      "status": "SUCCESS"
+      "timestamp": "2015-08-11T08:45:23.527Z",
+      "entryType": "summary"
     },
     {
       "mapping": "systemXmlfileAccounts_managedUser",
-      "timestamp": "2015-08-07T12:26:58.908Z",
-      "status": null
+      "timestamp": "2015-08-11T08:45:23.516Z",
+      "entryType": "entry"
     },
     {
       "mapping": "systemXmlfileAccounts_managedUser",
-      "timestamp": "2015-08-07T12:26:59.338Z",
-      "status": "SUCCESS"
+      "timestamp": "2015-08-11T08:45:23.324Z",
+      "entryType": "start"
     },
     {
       "mapping": "systemXmlfileAccounts_managedUser",
-      "timestamp": "2015-08-07T12:26:59.320Z",
-      "status": "SUCCESS"
+      "timestamp": "2015-08-11T08:45:23.516Z",
+      "entryType": "entry"
     }
   ],
   "resultCount": 4,
@@ -2117,19 +2120,19 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
    To query the reconciliation audit log for a particular reconciliation
    situation, include the <literal>reconId</literal> and the
    <literal>situation</literal> in the query. For example, the following query
-   returns all ABSENT records found during the specified reconciliation
-   operation:<!--TODO again, gymmied this one with the transactionId -->
+   returns all ABSENT records that were found during the specified
+   reconciliation operation:
   </para>
   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/recon?_queryFilter=transactionId+eq+"189770b6-e7f7-4219-b261-65acf0a60dd5"+and+situation+eq+"ABSENT"'</userinput>
+ 'https://localhost:8443/openidm/audit/recon?_queryFilter=reconId+eq+"4261227f-1d44-4042-ba7e-1dcbc6ac96b8"+and+situation+eq+"ABSENT"'</userinput>
 <computeroutput>{
   "result": [
     {
-      "_id": "3f6ce68c-e8df-4d31-9522-234e4c8486d4",
+      "_id": "77515527-b88e-477d-a9aa-0c7d994da95a",
       "action": "CREATE",
       "ambiguousTargetObjectIds": null,
       "authentication": {
@@ -2143,45 +2146,44 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
       "message": "null",
       "messageDetail": null,
       "reconAction": null,
-      "reconId": "189770b6-e7f7-4219-b261-65acf0a60dd5",
-      "reconciling": "source",
-      "situation": "ABSENT",
-      "sourceObjectId": "system/xmlfile/account/scarter",
-      "status": "SUCCESS",
-      "targetObjectId": "managed/user/scarter",
-      "timestamp": "2015-08-07T12:26:59.320Z",
-      "transactionId": "189770b6-e7f7-4219-b261-65acf0a60dd5"
-    },
-    {
-      "_id": "e9089917-e2cd-4f57-a5a7-b7ea21de8f10",
-      "action": "CREATE",
-      "ambiguousTargetObjectIds": null,
-      "authentication": {
-        "id": "openidm-admin"
-      },
-      "entryType": "entry",
-      "eventName": "recon",
-      "exception": "null",
-      "linkQualifier": "default",
-      "mapping": "systemXmlfileAccounts_managedUser",
-      "message": "null",
-      "messageDetail": null,
-      "reconAction": null,
-      "reconId": "189770b6-e7f7-4219-b261-65acf0a60dd5",
+      "reconId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
       "reconciling": "source",
       "situation": "ABSENT",
       "sourceObjectId": "system/xmlfile/account/bjensen",
       "status": "SUCCESS",
       "targetObjectId": "managed/user/bjensen",
-      "timestamp": "2015-08-07T12:26:59.320Z",
-      "transactionId": "189770b6-e7f7-4219-b261-65acf0a60dd5"
+      "timestamp": "2015-08-11T08:45:23.516Z",
+      "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
+    },
+    {
+      "_id": "3a51ae9c-a6e5-4388-95c9-da55c7c5f903",
+      "action": "CREATE",
+      "ambiguousTargetObjectIds": null,
+      "authentication": {
+        "id": "openidm-admin"
+      },
+      "entryType": "entry",
+      "eventName": "recon",
+      "exception": "null",
+      "linkQualifier": "default",
+      "mapping": "systemXmlfileAccounts_managedUser",
+      "message": "null",
+      "messageDetail": null,
+      "reconAction": null,
+      "reconId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8",
+      "reconciling": "source",
+      "situation": "ABSENT",
+      "sourceObjectId": "system/xmlfile/account/scarter",
+      "status": "SUCCESS",
+      "targetObjectId": "managed/user/scarter",
+      "timestamp": "2015-08-11T08:45:23.516Z",
+      "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
     }
   ],
   "resultCount": 2,
   "pagedResultsCookie": null,
   "remainingPagedResults": -1
-}
-</computeroutput></screen>
+} </computeroutput></screen>
  </section>
 
  <section xml:id="querying-activity-logs">
@@ -2202,43 +2204,38 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --request GET \
  "https://localhost:8443/openidm/audit/activity?_queryFilter=true"</screen>
   <para>
-   The following extract of the activity log shows the last entry in the log,
-   which was a change of the <literal>telephoneNumber</literal> for user bjensen.
+   The following extract of the activity log shows one log entry that was a
+   change of the <literal>telephoneNumber</literal> for user bjensen.
   </para>
   <informalexample><?dbfo pgwide="1"?>
   <programlisting language="javascript">{
-  "result": [
-    {
-      "_id": "4b1fa580-3126-4984-afed-5767eb17c6e1",
-      "after": "{ \"mail\": \"bjensen@example.com\", \"givenName\": \"Barbara\",
-                  \"sn\": \"Jensen\", \"description\": \"Created By XML1\",
-                  \"_id\": \"bjensen\", \"_rev\": \"2\", \"userName\": \"bjensen@example.com\",
-                  \"password\": { \"$crypto\": { \"value\": { \"iv\": \"7vs+/FvwrZHOr/eZGnfMhg==\",
-                  \"data\": \"wCgyNTdrqScwIaWM1J0PgQ==\", \"cipher\": \"AES/CBC/PKCS5Padding\",
-                  \"key\": \"openidm-sym-default\" }, \"type\": \"x-simple-encryption\" } },
-                  \"roles\": [ \"openidm-authorized\" ], \"accountStatus\": \"active\",
-                  \"lastPasswordSet\": \"\", \"postalCode\": \"\", \"stateProvince\": \"\",
-                  \"passwordAttempts\": \"0\", \"lastPasswordAttempt\":
-                  \"Fri Aug 07 2015 14:26:59 GMT+0200 (SAST)\", \"postalAddress\": \"\",
-                  \"address2\": \"\", \"country\": \"\", \"city\": \"\", \"effectiveRoles\": [ \"openidm-authorized\" ],
-                  \"effectiveAssignments\": [  ], \"telephoneNumber\": \"+44637829382\" }",
+      "_id": "6d8563ca-709c-4fa6-b143-9ac93b77659e",
+      "after": "{ \"mail\": \"bjensen@example.com\", \"givenName\": \"Barbara\", \"sn\": \"Jensen\",
+         \"description\": \"Created By XML1\", \"_id\": \"bjensen\", \"_rev\": \"2\",
+         \"userName\": \"bjensen@example.com\", \"password\": { \"$crypto\": { \"value\":
+         { \"iv\": \"htWJ8PP/puFWXBk6nIkKyw==\", \"data\": \"uZD8TuMEA3pAoj8tnVBEUQ==\",
+         \"cipher\": \"AES/CBC/PKCS5Padding\", \"key\": \"openidm-sym-default\" },
+         \"type\": \"x-simple-encryption\" } }, \"roles\": [ \"openidm-authorized\" ], \"accountStatus\": \"active\",
+         \"lastPasswordSet\": \"\", \"postalCode\": \"\", \"stateProvince\": \"\", \"passwordAttempts\": \"0\",
+         \"lastPasswordAttempt\": \"Tue Aug 11 2015 10:45:23 GMT+0200 (SAST)\", \"postalAddress\": \"\",
+         \"address2\": \"\", \"country\": \"\", \"city\": \"\", \"effectiveRoles\": [ \"openidm-authorized\" ],
+         \"effectiveAssignments\": [  ], \"telephoneNumber\": \"+44987584736\" }",
       "authentication": {
         "id": "openidm-admin"
       },
-      "before": "{ \"mail\": \"bjensen@example.com\", \"givenName\": \"Barbara\",
-                   \"sn\": \"Jensen\", \"description\": \"Created By XML1\", \"_id\": \"bjensen\",
-                   \"_rev\": \"1\", \"userName\": \"bjensen@example.com\", \"password\": { \"$crypto\":
-                   { \"value\": { \"iv\": \"oXucAy5D1z/L+RRDIFpVkg==\", \"data\": \"zSVXIAhltiatk8s+dbA6uQ==\",
-                   \"cipher\": \"AES/CBC/PKCS5Padding\", \"key\": \"openidm-sym-default\" }, \"type\":
-                   \"x-simple-encryption\" } }, \"telephoneNumber\": \"1234567\", \"roles\":
-                   [ \"openidm-authorized\" ], \"accountStatus\": \"active\", \"lastPasswordSet\": \"\",
-                   \"postalCode\": \"\", \"stateProvince\": \"\", \"passwordAttempts\": \"0\",
-                   \"lastPasswordAttempt\": \"Fri Aug 07 2015 14:26:59 GMT+0200 (SAST)\", \"postalAddress\":
-                   \"\", \"address2\": \"\", \"country\": \"\", \"city\": \"\", \"effectiveRoles\":
-                   [ \"openidm-authorized\" ], \"effectiveAssignments\": [  ] }",
+      "before": "{ \"mail\": \"bjensen@example.com\", \"givenName\": \"Barbara\", \"sn\": \"Jensen\",
+         \"description\": \"Created By XML1\", \"_id\": \"bjensen\", \"_rev\": \"1\",
+         \"userName\": \"bjensen@example.com\", \"password\": { \"$crypto\": { \"value\":
+         { \"iv\": \"iKzufAq4XvT/y7jKNzoVBQ==\", \"data\": \"jkNUa49Nmi1cG+JRyLsT1w==\",
+         \"cipher\": \"AES/CBC/PKCS5Padding\", \"key\": \"openidm-sym-default\" },
+         \"type\": \"x-simple-encryption\" } }, \"telephoneNumber\": \"1234567\", \"roles\": [ \"openidm-authorized\" ],
+         \"accountStatus\": \"active\", \"lastPasswordSet\": \"\", \"postalCode\": \"\", \"stateProvince\": \"\",
+         \"passwordAttempts\": \"0\", \"lastPasswordAttempt\": \"Tue Aug 11 2015 10:45:23 GMT+0200 (SAST)\",
+         \"postalAddress\": \"\", \"address2\": \"\", \"country\": \"\", \"city\": \"\", \"effectiveRoles\":
+         [ \"openidm-authorized\" ], \"effectiveAssignments\": [  ] }",
       "changedFields": [],
       "eventName": "activity",
-      "message": "Patch [{ \"operation\": \"replace\", \"field\": \"/telephoneNumber\", \"value\": \"+44637829382\" }]",
+      "message": null,
       "objectId": "managed/user/bjensen",
       "passwordChanged": "false",
       "resourceOperation": {
@@ -2252,14 +2249,14 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
       "revision": "2",
       "runAs": "openidm-admin",
       "status": "SUCCESS",
-      "timestamp": "2015-08-07T14:32:03.090Z",
-      "transactionId": "5b9fa836-fcfd-41b4-8013-dec4903e7c3c"
+      "timestamp": "2015-08-11T09:50:46.237Z",
+      "transactionId": "af9c961c-a7c5-49a2-8bb7-a43b5b177a7c"
     },
    ...</programlisting>
   </informalexample>
   <para>
-   To return the activity information for a specific action, query the action
-   <literal>_id</literal>, for example:
+   To return the activity information for a specific action, query the
+   <literal>_id</literal> of the action, for example:
   </para>
   <informalexample><?dbfo pgwide="1"?>
    <screen>$ <userinput>curl \
@@ -2267,23 +2264,20 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/activity?_queryFilter=_id+eq+"d894e8c5-f440-4b61-ac75-c1e605a3cea7"'</userinput>
+ 'https://localhost:8443/openidm/audit/activity?_queryFilter=_id+eq+"594dee73-d6a5-41cd-a332-1e9127c9b704"'</userinput>
 <computeroutput>{
   "result": [
     {
-      "_id": "d894e8c5-f440-4b61-ac75-c1e605a3cea7",
+      "_id": "594dee73-d6a5-41cd-a332-1e9127c9b704",
       "after": "{ \"mail\": \"bjensen@example.com\", \"givenName\": \"Barbara\", \"sn\": \"Jensen\",
-                  \"description\": \"Created By XML1\", \"_id\": \"bjensen\",
-                  \"userName\": \"bjensen@example.com\", \"password\": { \"$crypto\": { \"value\":
-                  { \"iv\": \"oXucAy5D1z/L+RRDIFpVkg==\", \"data\": \"zSVXIAhltiatk8s+dbA6uQ==\",
-                  \"cipher\": \"AES/CBC/PKCS5Padding\", \"key\": \"openidm-sym-default\" },
-                  \"type\": \"x-simple-encryption\" } }, \"telephoneNumber\": \"1234567\", \"roles\":
-                  [ \"openidm-authorized\" ], \"accountStatus\": \"active\", \"lastPasswordSet\": \"\",
-                  \"postalCode\": \"\", \"stateProvince\": \"\", \"passwordAttempts\": \"0\",
-                  \"lastPasswordAttempt\": \"Fri Aug 07 2015 14:26:59 GMT+0200 (SAST)\",
-                  \"postalAddress\": \"\", \"address2\": \"\", \"country\": \"\", \"city\": \"\",
-                  \"effectiveRoles\": [ \"openidm-authorized\" ], \"effectiveAssignments\": [  ],
-                  \"_rev\": \"1\" }",
+        \"description\": \"Created By XML1\", \"_id\": \"bjensen\", \"userName\": \"bjensen@example.com\",
+        \"password\": { \"$crypto\": { \"value\": { \"iv\": \"iKzufAq4XvT/y7jKNzoVBQ==\", \"data\":
+        \"jkNUa49Nmi1cG+JRyLsT1w==\", \"cipher\": \"AES/CBC/PKCS5Padding\", \"key\": \"openidm-sym-default\" },
+        \"type\": \"x-simple-encryption\" } }, \"telephoneNumber\": \"1234567\", \"roles\": [ \"openidm-authorized\" ],
+        \"accountStatus\": \"active\", \"lastPasswordSet\": \"\", \"postalCode\": \"\", \"stateProvince\": \"\",
+        \"passwordAttempts\": \"0\", \"lastPasswordAttempt\": \"Tue Aug 11 2015 10:45:23 GMT+0200 (SAST)\",
+        \"postalAddress\": \"\", \"address2\": \"\", \"country\": \"\", \"city\": \"\", \"effectiveRoles\":
+        [ \"openidm-authorized\" ], \"effectiveAssignments\": [  ], \"_rev\": \"1\" }",
       "authentication": {
         "id": "openidm-admin"
       },
@@ -2304,148 +2298,94 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
       "revision": "1",
       "runAs": "openidm-admin",
       "status": "SUCCESS",
-      "timestamp": "2015-08-07T12:26:59.301Z",
-      "transactionId": "189770b6-e7f7-4219-b261-65acf0a60dd5"
+      "timestamp": "2015-08-11T08:45:23.506Z",
+      "transactionId": "4261227f-1d44-4042-ba7e-1dcbc6ac96b8"
     }
   ],
   "resultCount": 1,
   "pagedResultsCookie": null,
   "remainingPagedResults": -1
-}</computeroutput>
-   </screen></informalexample>
+}}</computeroutput></screen></informalexample>
   <para>
    Each action in the activity log has a <literal>transactionId</literal> that
    is the same as the <literal>transactionId</literal> that was assigned to the
    incoming or initiating request. So, for example, if an HTTP request invokes a
    script that changes a user's password, the HTTP request is assigned a
    <literal>transactionId</literal>. The action taken by the script is assigned
-   the same <literal>transactionId</literal>, which enables you to track
+   the same <literal>transactionId</literal>, which enables you to track the
    complete set of changes resulting from a single action. You can query the
-   activity log for the details of a particular action by including the
-   <literal>transactionId</literal> in the query. For example:
+   activity log for all actions that resulted from a specific transaction, by
+   including the <literal>transactionId</literal> in the query.
+  </para>
+  <para>
+   The following command returns all actions in the activity log that happened
+   as a result of a reconciliation, with a specific <literal>transactionId</literal>.
+   The results of the query are restricted to only the <literal>objectId</literal>
+   and the <literal>resourceOperation</literal>. You can see from the output
+   that the reconciliation with this <literal>transactionId</literal> resulted
+   in two CREATEs and two UPDATEs in the managed repository.
   </para>
   <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/activity?_queryFilter=transactionId+eq+0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</userinput></screen>
+ 'https://localhost:8443/openidm/audit/activity?_queryFilter=transactionId+eq+"f4bd1af8-999d-48e6-ae89-6e9f2f601bb3"&amp;_fields=objectId,resourceOperation'</userinput></screen>
   <para>
    The following sample output shows the result of a query that requests details
    of the password change for bjensen.
   </para>
   <programlisting language="javascript">{
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 2,
   "result": [
     {
-      "rootActionId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
-      "changedFields": [
-        "/password"
-    ],
-      "action": "UPDATE",
       "objectId": "managed/user/bjensen",
-      "before": {
-        "securityAnswer": "Some security answer",
-        "userName": "bjensen@example.com",
-        "stateProvince": "",
-        "postalAddress": "",
-        "roles": "openidm-authorized",
-        "telephoneNumber": "1234567",
-        "password": "CAngetin1",
-        "securityQuestion": "1",
-        "givenName": "Barbara",
-        "address2": "",
-        "lastPasswordAttempt": "Thu Mar 13 2014 07:23:12 GMT-0800 (GMT-08:00)",
-        "passwordAttempts": "0",
-        "sn": "Jensen",
-        "mail": "bjensen@example.com",
-        "country": "",
-        "city": "",
-        "_rev": "7",
-        "lastPasswordSet": "",
-        "postalCode": "",
-        "_id": "bjensen",
-        "description": "Created By XML1",
-        "accountStatus": "active"
-      },
-      "status": "SUCCESS",
-      "_rev": "1",
-      "_id": "ee88adb8-3329-4f81-a8f2-d9c8e0fbf72b",
-      "parentActionId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
-      "timestamp": "2014-03-13T16:21:27.086Z",
-      "message": "update",
-      "activityId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
-      "after": {
-        "securityAnswer": {
-          "$crypto": {
-            "value": {
-              "key": "openidm-sym-default",
-              "iv": "HpsyTtTXc2pfNrXlYbro7Q==",
-              "cipher": "AES/CBC/PKCS5Padding",
-              "data": "0M6O7geNjalJ7e0EGSG9B90eaeF8zJuogdL74hcAIRg="
-            },
-            "type": "x-simple-encryption"
-          }
+      "resourceOperation": {
+        "operation": {
+          "detail": null,
+          "method": "UPDATE"
         },
-        "userName": "bjensen@example.com",
-        "stateProvince": "",
-        "postalAddress": "",
-        "effectiveAssignments": {},
-        "roles": "openidm-authorized",
-        "telephoneNumber": "1234567",
-        "accountStatus": "active",
-        "password": {
-          "$crypto": {
-            "value": {
-              "key": "openidm-sym-default",
-              "iv": "dkRjURz761HaObBuLl+EkA==",
-              "cipher": "AES/CBC/PKCS5Padding",
-              "data": "9chNPUlXotHy195ERj6vlg=="
-          },
-        "type": "x-simple-encryption"
+        "protocol": "CREST",
+        "uri": null
       }
     },
-    "effectiveRoles": [
-       "openidm-authorized"
-    ],
-    "givenName": "Barbara",
-    "lastPasswordAttempt": "Thu Mar 13 2014 07:23:12 GMT-0800 (GMT-08:00)",
-    "address2": "",
-    "passwordAttempts": "0",
-    "sn": "Jensen",
-    "mail": "bjensen@example.com",
-    "securityQuestion": "1",
-    "city": "",
-    "country": "",
-    "_rev": "7",
-    "lastPasswordSet": "",
-    "postalCode": "",
-    "_id": "bjensen",
-    "description": "Created By XML1"
-  },
-  "rev": "7",
-  "requester": "openidm-admin",
-  "passwordChanged": true
-  }
- ]
+    {
+      "objectId": "managed/user/scarter",
+      "resourceOperation": {
+        "operation": {
+          "detail": null,
+          "method": "UPDATE"
+        },
+        "protocol": "CREST",
+        "uri": null
+      }
+    },
+    {
+      "objectId": "managed/user/tmorris",
+      "resourceOperation": {
+        "operation": {
+          "detail": null,
+          "method": "CREATE"
+        },
+        "protocol": "CREST",
+        "uri": null
+      }
+    },
+    {
+      "objectId": "managed/user/lvosloo",
+      "resourceOperation": {
+        "operation": {
+          "detail": null,
+          "method": "CREATE"
+        },
+        "protocol": "CREST",
+        "uri": null
+      }
+    }
+  ],
+  "resultCount": 4,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
 } </programlisting>
-  <note>
-   <para>
-    For audit logs in the repository, you can define custom queries using the
-    parameterized query mechanism. For more information, see the section on
-    <link xlink:href="integrators-guide#parameterized-queries"
-          xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Parameterized
-    Queries</citetitle></link>.
-   </para>
-  </note>
-  <para>
-   For more information about the entries in these logs, see the chapter that
-   covers <link xlink:href="integrators-guide#chap-auditing"
-                xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Audit
-   Logs</citetitle></link>.
-  </para>
  </section>
 
  <section xml:id="querying-sync-logs">
@@ -2457,84 +2397,221 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
    outlined in the following examples.
   </para>
   <para>
-   To return all synchronization operations logged in the audit log, run a
-   RESTful GET on the <literal>audit/sync</literal> endpoint. For example:
+   To return all operations logged in the synchronization audit log, query the
+   <literal>audit/sync</literal> endpoint, as follows:
   </para>
   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/sync"</userinput></screen>
+ "https://localhost:8443/openidm/audit/sync?_queryFilter=true"</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "_id": "87373c88-ce43-4cfa-a66e-c4ba469c41de",
+      "action": "UPDATE",
+      "authentication": {
+        "id": "openidm-admin"
+      },
+      "eventName": "sync",
+      "exception": "null",
+      "linkQualifier": "default",
+      "mapping": "managedUser_systemLdapAccounts",
+      "message": "null",
+      "messageDetail": null,
+      "situation": "CONFIRMED",
+      "sourceObjectId": "managed/user/4dc5975c-2084-47a5-9441-d255c45b9991",
+      "status": "SUCCESS",
+      "targetObjectId": "uid=superadmin,ou=People,dc=example,dc=com",
+      "timestamp": "2015-08-11T13:04:55.715Z",
+      "transactionId": "cb6ef219-e6ee-457f-a8d5-00281013f3f2"
+    },
+    {
+      "_id": "c5e8af01-7d55-4b01-a327-7a019732d0ed",
+      "action": "UPDATE",
+      "authentication": {
+        "id": "openidm-admin"
+      },
+      "eventName": "sync",
+      "exception": "null",
+      "linkQualifier": "default",
+      "mapping": "managedUser_systemLdapAccounts",
+      "message": "null",
+      "messageDetail": null,
+      "situation": "CONFIRMED",
+      "sourceObjectId": "managed/user/1625fe94-0d6d-4f1a-bb74-863ef5c40df8",
+      "status": "SUCCESS",
+      "targetObjectId": "uid=user.8,ou=People,dc=example,dc=com",
+      "timestamp": "2015-08-11T13:04:55.413Z",
+      "transactionId": "cb6ef219-e6ee-457f-a8d5-00281013f3f2"
+    },
+...</computeroutput></screen>
   <para>
    Most of the fields in the synchronization audit log are self-explanatory.
-   Each distinct synchronization operation is identified by its
-   <literal>actionId</literal>. The <literal>rootActionId</literal> is the ID
-   that was assigned to the incoming or initiating request - so if a
-   modification to a user entry triggers an implicit synchronization operation,
-   the sync operation is assigned an <literal>actionId</literal> and
-   <literal>rootActionId</literal> refers to the
-   original change operation. Each entry in the log is identified by a unique
-   <literal>_id</literal>.
+   Each entry in the log synchronization operation is identified by a unique
+   <literal>_id</literal>. Each <emphasis>synchronization operation</emphasis>
+   is identified with a <literal>transactionId</literal>. The same
+   <literal>transactionId</literal> is assigned to the incoming or initiating
+   request - so if a modification to a user entry triggers an implicit
+   synchronization operation, both the sync operation and the original change
+   operation have the same <literal>transactionId</literal>. You can query the
+   sync log for all actions that resulted from a specific transaction, by
+   including the <literal>transactionId</literal> in the query.
   </para>
   <para>
-   To obtain information on a specific audit log entry, include its entry
+   To obtain information on a specific sync audit log entry, include its entry
    <literal>_id</literal> in the URL. For example:
   </para>
-  <screen>$ curl \
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/sync/a311b656-508c-4f56-9df4-f907364184f1"</screen>
-  <para>
-   The following sample output shows the results of a read operation on a
-   specific synchronization audit entry.
-  </para>
-  <programlisting language="javascript">{
-  "entries": [
+ "https://localhost:8443/openidm/audit/sync/c5e8af01-7d55-4b01-a327-7a019732d0ed"</userinput>
+<computeroutput>{
+  "_id": "c5e8af01-7d55-4b01-a327-7a019732d0ed",
+  "action": "UPDATE",
+  "authentication": {
+    "id": "openidm-admin"
+  },
+  "eventName": "sync",
+  "exception": "null",
+  "linkQualifier": "default",
+  "mapping": "managedUser_systemLdapAccounts",
+  "message": "null",
+  "messageDetail": null,
+  "situation": "CONFIRMED",
+  "sourceObjectId": "managed/user/1625fe94-0d6d-4f1a-bb74-863ef5c40df8",
+  "status": "SUCCESS",
+  "targetObjectId": "uid=user.8,ou=People,dc=example,dc=com",
+  "timestamp": "2015-08-11T13:04:55.413Z",
+  "transactionId": "cb6ef219-e6ee-457f-a8d5-00281013f3f2"
+}</computeroutput>  </screen>
+ </section>
+  <section xml:id="querying-auth-log">
+   <title>Querying the Authentication Audit Log</title>
+   <para>
+    The authentication log includes details of all successful and failed
+    authentication attempts. To obtain the complete audit log over REST, use
+    the following query:
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/authentication?_queryFilter=true"</userinput>
+<computeroutput>{
+  "result": [
     {
-      "mapping": "systemAdAccounts_managedUser",
-      "targetObjectId": "7e5eb90b-f643-4858-803e-a01931f9c12e",
-      "sourceObjectId": "system/ad/account/rheath",
-      "situation": "CONFIRMED",
-      "actionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
-      "_id": "b3e3190c-9e9d-4cd1-8fec-01705ad54109",
-      "timestamp": "2014-10-30T14:48:58.415Z",
-      "rootActionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
-      "status": "SUCCESS",
-      "message": null,
-      "messageDetail": null,
-      "exception": "",
-      "action": "UPDATE"
+      "_id": "9b4fa228-b35e-45a0-bab1-ffacdbfc7ebe",
+      "authentication": {
+        "id": "openidm-admin"
+      },
+      "context": {
+        "id": "openidm-admin",
+        "component": "repo/internal/user",
+        "roles": [
+          "openidm-admin",
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "entries": [
+        {
+          "moduleId": "Session-IDMJaspiModuleWrapper",
+          "result": "SUCCESSFUL",
+          "info": {
+            "org.forgerock.authentication.principal": "openidm-admin"
+          }
+        }
+      ],
+      "eventName": "authentication",
+      "principal": [
+        "openidm-admin"
+      ],
+      "result": "SUCCESSFUL",
+      "sessionId": "bf663ed1-9ba1-4882-8622-71d9745ee11e",
+      "transactionId": "956e1e48-ef64-409d-8d48-adb03a8ff30e"
+    },
+...
+  ],
+  "resultCount": 131,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}</computeroutput></screen>
+   <para>
+    You can filter the results to return only those records that you are
+    interested in. For example, the following query returns all authentication
+    attempts made by a specific user (<literal>user.0</literal>) but displays
+    only the security context and the result of the authentication attempt.
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/audit/authentication?_queryFilter=principal+eq+"user.0"&amp;_fields=context,result'</userinput>
+<computeroutput>{
+  "result": [
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
     },
     {
-      "mapping": "managedUser_systemLdapAccounts",
-      "targetObjectId": "uid=rheath,ou=People,dc=example,dc=com",
-      "sourceObjectId": "managed/user/7e5eb90b-f643-4858-803e-a01931f9c12e",
-      "situation": "CONFIRMED",
-      "actionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
-      "_id": "105a39f7-f071-481a-ae82-e233e556cc5a",
-      "timestamp": "2014-10-30T14:48:58.402Z",
-      "rootActionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
-      "status": "SUCCESS",
-      "message": null,
-      "messageDetail": null,
-      "exception": "",
-      "action": "UPDATE"
-    }
-  ]
-} </programlisting>
-  <para>
-   The output shows two records that originated from the same LiveSync action.
-   The first record indicates a change on the <literal>system/ad</literal>
-   entry, which triggered a LiveSync to update the corresponding
-   <literal>managed/user</literal> entry. The second record indicates an
-   implicit sync from <literal>managed/user</literal> to the corresponding
-   entry in <literal>system/ldap</literal>. Note that the
-   <literal>rootActionId</literal> is the same for both these records.
-  </para>
- </section>
-
+      "context": {
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "FAILED"
+    },
+    {
+      "context": {
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "FAILED"
+    },
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
+    },
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
+    },
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
+    },
+...</computeroutput>   </screen>
+  </section>
  </section>
 </chapter>
