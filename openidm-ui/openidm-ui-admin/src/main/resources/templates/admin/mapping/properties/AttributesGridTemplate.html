@@ -13,11 +13,6 @@
         <div class="tool-group-right">
             <form class="form-inline" role="form">
                 <div class="form-group">
-                    <label for="numRepresentativeProps" class="inline">{{t "templates.mapping.numRepresentativeProps"}}:</label>
-                    <input type="text" class="form-control" id="numRepresentativeProps" value="{{numRepresentativeProps}}">
-                </div>
-
-                <div class="form-group">
                     <label for="findSampleSource" class="inline">{{t "templates.mapping.sampleSource"}}:</label>
                     <input type="text" placeholder="Search to see preview" id="findSampleSource" class="form-control" value="{{sampleSource_txt}}">
                 </div>
@@ -34,17 +29,17 @@
             </form>
         </div>
     </div>
-    <div class="jqgrid-container">
+    <div>
         <span id="allPropertiesMapped" style="display:none;">{{t "templates.mapping.allPropertiesMapped"}}</span>
-        <table class="table" id="mappingTable"></table>
+        <div id="attributesGridHolder"></div>
     </div>
-</div>
-<div class="panel-footer clearfix">
-    <div class="pull-right">
-        {{#if missingRequiredProperties}}
-        <button type="button" id="missingRequiredPropertiesButton" class="btn btn-primary">{{t "common.form.add"}} {{t "templates.mapping.missingRequiredProperties"}} ({{missingRequiredProperties.length}})</button>
-        {{/if}}
-        <button type="button" id="clearChanges" class="btn btn-default">{{t "templates.mapping.undoAllChanges"}}</button>
-        <button type="button" id="updateMappingButton" class="btn btn-primary">{{t "templates.mapping.saveProperties"}}</button>
+    <div class="panel-footer clearfix">
+        <div class="pull-right">
+            {{#if missingRequiredProperties}}
+            <button type="button" id="missingRequiredPropertiesButton" class="btn btn-primary">{{t "common.form.add"}} {{t "templates.mapping.missingRequiredProperties"}} ({{missingRequiredProperties.length}})</button>
+            {{/if}}
+            <button type="button" id="clearChanges" class="btn btn-default">{{t "templates.mapping.undoAllChanges"}}</button>
+            <button type="button" id="updateMappingButton" class="btn btn-primary">{{t "templates.mapping.saveProperties"}}</button>
+        </div>
     </div>
 </div>

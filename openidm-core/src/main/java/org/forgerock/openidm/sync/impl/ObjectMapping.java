@@ -489,6 +489,7 @@ class ObjectMapping {
             SourceSyncOperation op = new SourceSyncOperation();
             op.oldValue = oldValue;
             op.setLinkQualifier(linkQualifier);
+            op.sourceObjectAccessor = sourceObjectAccessor;
 
             SyncAuditEventLogger syncAuditEvent = new SyncAuditEventLogger(op, name, context);
             syncAuditEvent.setSourceObjectId(LazyObjectAccessor.qualifiedId(sourceObjectSet, resourceId));
@@ -1169,6 +1170,7 @@ class ObjectMapping {
                     }
                     auditEvent.setStatus(status);
                     auditEvent.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
+                    auditEvent.setReconId(reconContext.getReconId());
                     logEntry(auditEvent);
                 }
             }
@@ -1224,6 +1226,7 @@ class ObjectMapping {
                                 LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId()));
                     }
                     event.setStatus(status);
+                    event.setReconId(reconContext.getReconId());
                     logEntry(event);
                 }
             }
@@ -1372,8 +1375,10 @@ class ObjectMapping {
             String loggerMessage) throws SynchronizationException {
 
         ReconAuditEventLogger reconAuditEvent = new ReconAuditEventLogger(null, name, rootContext);
+        reconAuditEvent.setEntryType(AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END);
         reconAuditEvent.setReconciliationServiceReconAction(reconContext.getReconAction());
         reconAuditEvent.setStatus(status);
+        reconAuditEvent.setReconId(reconContext.getReconId());
         String simpleSummary = reconContext.getStatistics().simpleSummary();
         reconAuditEvent.setMessage(simpleSummary);
         reconAuditEvent.setMessageDetail(json(reconContext.getSummary()));
