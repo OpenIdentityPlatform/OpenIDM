@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -290,12 +290,8 @@ public class ServletRegistrationSingleton implements ServletRegistration {
                         }
                     }
                 }
-                // need to compare proxy objects equality to the first argument,
-                // otherwise it would compare the filter to the first argument
-                if (m.getName().equals("equals") && args != null && args.length == 1) {
-                    return proxy == args[0];
-                }
-                return m.invoke(filter, args);
+                Object val = m.invoke(filter, args);
+                return val;
             } catch (InvocationTargetException e) {
                 logger.debug("Filter invocation InvocationTargetException", e.getTargetException());
                 throw e.getTargetException();

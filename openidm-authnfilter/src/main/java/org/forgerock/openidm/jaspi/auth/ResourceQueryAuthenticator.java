@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.jaspi.auth;
 
-import org.eclipse.jetty.jaas.spi.UserInfo;
+import org.eclipse.jetty.plus.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.security.Password;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;

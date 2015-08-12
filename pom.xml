@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -225,7 +225,6 @@
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <authnfilter.commons.version>1.6.0-SNAPSHOT</authnfilter.commons.version>
-        <paxweb.version>4.1.1</paxweb.version>
 
         <!-- Commons JSON versions -->
         <commons.forgerock-util.version>2.0.0-SNAPSHOT</commons.forgerock-util.version>
@@ -843,17 +842,17 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-api</artifactId>
-                <version>${paxweb.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>${paxweb.version}</version>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty-bundle</artifactId>
-                <version>${paxweb.version}</version>
+                <version>3.0.0</version>
             </dependency>
         
             <!-- H2 Database -->
