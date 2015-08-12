@@ -169,7 +169,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
             ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (testResult) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
-                    mergedResult.objectTypes = testResult.objectTypes;
+                    if(!mergedResult.objectTypes) {
+                        mergedResult.objectTypes = testResult.objectTypes;
+                    }
 
                     ConfigDelegate.createEntity(this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.editConnectorView, args: [this.data.systemType +"_" +urlName,""]});
