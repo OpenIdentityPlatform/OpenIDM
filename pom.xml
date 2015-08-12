@@ -215,25 +215,19 @@
     </ciManagement>
 
     <properties>
+        <!-- Version management -->
+        <commons.forgerock-bom.version>1.0.0-SNAPSHOT</commons.forgerock-bom.version>
 
-        <!-- version management -->
-        <slf4j.version>1.7.5</slf4j.version>
+        <!-- Commons versions -->
+        <commons.forgerock-script.version>2.0.0-SNAPSHOT</commons.forgerock-script.version>
+        <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
+        <commons.forgerock-audit.version>0.3.0-SNAPSHOT</commons.forgerock-audit.version>
+
         <orientdb.version>1.7.10</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
-        <jackson.version>1.9.12</jackson.version>
-        <fasterxml.jackson.version>2.5.0</fasterxml.jackson.version>
-        <!--fasterxml.jackson.version>2.2.1</fasterxml.jackson.version-->
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
-        <authnfilter.commons.version>1.6.0-SNAPSHOT</authnfilter.commons.version>
 
-        <!-- Commons JSON versions -->
-        <commons.forgerock-util.version>2.0.0-SNAPSHOT</commons.forgerock-util.version>
-        <commons.forgerock-rest.version>2.5.0-SNAPSHOT</commons.forgerock-rest.version>
-        <commons.forgerock-script.version>1.5.0-SNAPSHOT</commons.forgerock-script.version>
-        <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
-        <commons.forgerock-guava.version>18.0.1</commons.forgerock-guava.version>
-        <commons.forgerock-audit.version>0.2.0-SNAPSHOT</commons.forgerock-audit.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
@@ -433,36 +427,6 @@
             <!-- ForgeRock Commons -->
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-fluent</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-web-token</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-crypto</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-schema</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource-servlet</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
                 <artifactId>script-common</artifactId>
                 <version>${commons.forgerock-script.version}</version>
             </dependency>
@@ -485,41 +449,6 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>i18n-core</artifactId>
                 <version>${commons.forgerock-i18n.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons.guava</groupId>
-                <artifactId>forgerock-guava-collect</artifactId>
-                <version>${commons.forgerock-guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-runtime</artifactId>
-                <version>${authnfilter.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
-                <version>${authnfilter.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-openam-session-module</artifactId>
-                <version>${authnfilter.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-iwa-module</artifactId>
-                <version>${authnfilter.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-openid-connect-module</artifactId>
-                <version>${authnfilter.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-util</artifactId>
-                <version>${commons.forgerock-util.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -557,13 +486,6 @@
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
                 <version>1.3</version>
-            </dependency>
-
-            <!-- SLF4J -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
             </dependency>
 
             <!-- Java EE -->
@@ -790,33 +712,7 @@
                 <version>2.2.2</version>
             </dependency>
 
-            <!-- Jackson JSON parser -->
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-core-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${fasterxml.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${fasterxml.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${fasterxml.jackson.version}</version>
-            </dependency>
+            <!-- Jackson dependencies not covered in forgerock-bom -->
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-csv</artifactId>
@@ -865,27 +761,9 @@
 
             <!-- Test Dependencies -->
             <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>6.8.5</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.easytesting</groupId>
                 <artifactId>fest-assert-core</artifactId>
                 <version>2.0M10</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>2.1.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>1.9.5</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
