@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,26 +24,23 @@
 
 package org.forgerock.openidm.router;
 
-import org.forgerock.json.resource.Context;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 
-/**
- * A NAME does ...
- * 
- */
+// TODO : refactor this interface into oblivion
 public interface RouteService {
 
     /**
      * @throws ResourceException If the connection request failed for some
      * reason.
      */
-    public ServerContext createServerContext() throws ResourceException;
+    // TODO : rename to createContext
+    public Context createServerContext() throws ResourceException;
 
     /**
      * @throws ResourceException If the connection request failed for some
      * reason.
      */
-    public ServerContext createServerContext(Context parentContext) throws ResourceException;
-
+    // TODO : rename to createContext
+    public Context createServerContext(Context parentContext) throws ResourceException;
 }
