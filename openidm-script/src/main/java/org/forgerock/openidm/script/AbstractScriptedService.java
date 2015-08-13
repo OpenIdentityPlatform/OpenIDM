@@ -32,22 +32,20 @@ import javax.script.ScriptException;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.script.Scope;
@@ -85,18 +83,6 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     protected void unbindScriptRegistry(final ScriptRegistry service) {
         scriptRegistry = null;
-    }
-
-    /** PersistenceConfig service. */
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
-    private PersistenceConfig persistenceConfig;
-
-    protected void bindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = service;
-    }
-
-    protected void unbindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = null;
     }
 
     private ScriptedRequestHandler embeddedHandler = null;
@@ -258,67 +244,67 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     // ----- Implementation of ScriptCustomizer interface
 
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final Bindings bindings) throws ResourceException {
+    public void handleAction(final Context context, final ActionRequest request, final Bindings bindings)
+            throws ResourceException {
         if (!mask.contains(RequestType.ACTION)) {
             throw new NotSupportedException("Actions are not supported for resource instances");
         }
         handleRequest(context, request, bindings);
     }
 
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final Bindings bindings) throws ResourceException {
+    public void handleCreate(final Context context, final CreateRequest request, final Bindings bindings)
+            throws ResourceException {
         if (!mask.contains(RequestType.CREATE)) {
             throw new NotSupportedException("Create operations are not supported");
         }
         handleRequest(context, request, bindings);
     }
 
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final Bindings bindings) throws ResourceException {
+    public void handleDelete(final Context context, final DeleteRequest request, final Bindings bindings)
+            throws ResourceException {
         if (!mask.contains(RequestType.DELETE)) {
             throw new NotSupportedException("Delete operations are not supported");
         }
         handleRequest(context, request, bindings);
     }
 
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final Bindings bindings) throws ResourceException {
+    public void handlePatch(final Context context, final PatchRequest request, final Bindings bindings)
+            throws ResourceException {
         if (!mask.contains(RequestType.PATCH)) {
             throw new NotSupportedException("Patch operations are not supported");
         }
         handleRequest(context, request, bindings);
     }
 
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final Bindings bindings) throws ResourceException {
+    public void handleQuery(final Context context, final QueryRequest request, final Bindings bindings)
+            throws ResourceException {
         if (!mask.contains(RequestType.QUERY)) {
             throw new NotSupportedException("Query operations are not supported");
         }
         handleRequest(context, request, bindings);
     }
 
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final Bindings bindings) throws ResourceException {
-
+    public void handleRead(final Context context, final ReadRequest request, final Bindings bindings)
+            throws ResourceException {
         if (!mask.contains(RequestType.READ)) {
             throw new NotSupportedException("Read operations are not supported");
         }
         handleRequest(context, request, bindings);
     }
 
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final Bindings bindings) throws ResourceException {
+    public void handleUpdate(final Context context, final UpdateRequest request, final Bindings bindings)
+            throws ResourceException {
         if (!mask.contains(RequestType.UPDATE)) {
             throw new NotSupportedException("Update operations are not supported");
         }
         handleRequest(context, request, bindings);
     }
 
-    protected void handleRequest(final ServerContext context, final Request request,
-            final Bindings bindings) {
+    protected void handleRequest(final Context context, final Request request, final Bindings bindings) {
         bindings.put("request", request);
-        bindings.put("resourceName", request.getResourceNameObject());
+        // TODO-crest3 deprecate legacy scripts that use resourceName
+        bindings.put("resourceName", request.getResourcePathObject());
+        bindings.put("resourcePath", request.getResourcePathObject());
         bindings.put("context", context);
     }
 }

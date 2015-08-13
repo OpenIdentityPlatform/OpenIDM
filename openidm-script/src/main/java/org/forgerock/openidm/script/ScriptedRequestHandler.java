@@ -24,6 +24,13 @@
 
 package org.forgerock.openidm.script;
 
+import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,22 +38,23 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.script.Scope;
@@ -56,12 +64,12 @@ import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.scope.Function;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.scope.Parameter;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A ScriptedRequestHandler
- * 
+ * A ScriptedRequestHandler implements a RequestHandler using a script.
  */
 public class ScriptedRequestHandler implements Scope, RequestHandler {
 
@@ -138,8 +146,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
 
     // ----- Implementation of RequestHandler interface
 
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -150,27 +157,26 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handleAction(context, request, script.getBindings());
             Object result = script.eval();
             if (null == result) {
-                handler.handleResult(new JsonValue(null));
+                return newResultPromise(newActionResponse(new JsonValue(null)));
             } else if (result instanceof JsonValue) {
-                handler.handleResult((JsonValue) result);
+                return newResultPromise(newActionResponse((JsonValue) result));
             } else if (result instanceof Map) {
-                handler.handleResult(new JsonValue((result)));
+                return newResultPromise(newActionResponse(new JsonValue(result)));
             } else {
                 JsonValue resource = new JsonValue(new HashMap<String, Object>(1));
                 resource.put("result", result);
-                handler.handleResult(resource);
+                return newResultPromise(newActionResponse(new JsonValue(result)));
             }
         } catch (ScriptException e) {
-            handleScriptException(handler, e);
+            return newExceptionPromise(convertScriptException(e));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
-    public void handleCreate(ServerContext context, CreateRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -179,18 +185,17 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             final Script script = _scriptEntry.getScript(context);
             script.setBindings(script.createBindings());
             customizer.handleCreate(context, request, script.getBindings());
-            evaluate(request, handler, script);
+            return evaluate(request, script);
         } catch (ScriptException e) {
-            handleScriptException(handler, e);
+            return newExceptionPromise(convertScriptException(e));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
-    public void handleDelete(ServerContext context, DeleteRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -199,18 +204,17 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             final Script script = _scriptEntry.getScript(context);
             script.setBindings(script.createBindings());
             customizer.handleDelete(context, request, script.getBindings());
-            evaluate(request, handler, script);
+            return evaluate(request, script);
         } catch (ScriptException e) {
-            handleScriptException(handler, e);
+            return newExceptionPromise(convertScriptException(e));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
-    public void handlePatch(ServerContext context, PatchRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -219,13 +223,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             final Script script = _scriptEntry.getScript(context);
             script.setBindings(script.createBindings());
             customizer.handlePatch(context, request, script.getBindings());
-            evaluate(request, handler, script);
+            return evaluate(request, script);
         } catch (ScriptException e) {
-            handleScriptException(handler, e);
+            return newExceptionPromise(convertScriptException(e));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
@@ -234,8 +238,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
      * 
      * {@inheritDoc}
      */
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
+            final QueryResourceHandler handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -294,7 +298,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             } else {
                 result = new JsonValue(rawResult);
             }
-            QueryResult queryResult = new QueryResult();
+            QueryResponse queryResponse = newQueryResponse();
             // Script can either
             // - return null and instead use callback hook to call
             //   handleResource, handleResult, handleError
@@ -310,27 +314,29 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 } else {
                     // Or script may return a full query response structure,
                     // with meta-data and results field
-                    if (result.isDefined(QueryResult.FIELD_RESULT)) {
-                        handleQueryResultList(result.get(QueryResult.FIELD_RESULT), handler);
-                        queryResult = new QueryResult(
-                                result.get(QueryResult.FIELD_PAGED_RESULTS_COOKIE).asString(),
-                                result.get(QueryResult.FIELD_REMAINING_PAGED_RESULTS).asInteger());
+                    if (result.isDefined(QueryResponse.FIELD_RESULT)) {
+                        handleQueryResultList(result.get(QueryResponse.FIELD_RESULT), handler);
+                        queryResponse = newQueryResponse(
+                                result.get(QueryResponse.FIELD_PAGED_RESULTS_COOKIE).asString(),
+                                result.get(QueryResponse.FIELD_TOTAL_PAGED_RESULTS_POLICY).asEnum(CountPolicy.class),
+                                result.get(QueryResponse.FIELD_TOTAL_PAGED_RESULTS).asInteger());
                     } else {
                         logger.debug("Script returned unexpected query result structure: ",
                                  result.getObject());
-                        handler.handleError(new InternalServerErrorException(
-                                "Script returned unexpected query result structure of type "
-                                + result.getObject().getClass()));
+                        return newExceptionPromise(
+                                newInternalServerErrorException(
+                                        "Script returned unexpected query result structure of type "
+                                                + result.getObject().getClass()));
                     }
                 }
             }
-            handler.handleResult(queryResult);
+            return newResultPromise(queryResponse);
         } catch (ScriptException e) {
-            handleScriptException(handler, e);
+            return newExceptionPromise(convertScriptException(e));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
     
@@ -340,22 +346,21 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
      * @param resultList the list of results, possibly with id and rev entries
      * @param handler the handle to set the results on
      */
-    private void handleQueryResultList(JsonValue resultList, QueryResultHandler handler) {
+    private void handleQueryResultList(JsonValue resultList, QueryResourceHandler handler) {
         for (JsonValue entry : resultList) {
             // These can end up null
             String id = null;
             String rev = null;
             if (entry.isMap()) {
-                id = entry.get(Resource.FIELD_ID).asString();
-                rev = entry.get(Resource.FIELD_REVISION).asString();
+                id = entry.get(ResourceResponse.FIELD_ID).asString();
+                rev = entry.get(ResourceResponse.FIELD_REVISION).asString();
             }
-            handler.handleResource(new Resource(id, rev, entry));
+            handler.handleResource(newResourceResponse(id, rev, entry));
         }
     }
     
 
-    public void handleRead(ServerContext context, ReadRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -364,18 +369,17 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             final Script script = _scriptEntry.getScript(context);
             script.setBindings(script.createBindings());
             customizer.handleRead(context, request, script.getBindings());
-            evaluate(request, handler, script);
+            return evaluate(request, script);
         } catch (ScriptException e) {
-            handleScriptException(handler, e);
+            return newExceptionPromise(convertScriptException(e));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
-    public void handleUpdate(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -384,17 +388,17 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             final Script script = _scriptEntry.getScript(context);
             script.setBindings(script.createBindings());
             customizer.handleUpdate(context, request, script.getBindings());
-            evaluate(request, handler, script);
+            return evaluate(request, script);
         } catch (ScriptException e) {
-            handleScriptException(handler, e);
+            return newExceptionPromise(convertScriptException(e));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
-    protected void handleScriptException(final ResultHandler<?> handler, final ScriptException scriptException) {
+    protected ResourceException convertScriptException(final ScriptException scriptException) {
 
         ResourceException convertedError;
         try {
@@ -416,21 +420,20 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             detail.put("columnNumber", scriptException.getColumnNumber());
         }
 
-        handler.handleError(convertedError);
+        return convertedError;
     }
 
-    private void evaluate(final Request request, final ResultHandler<Resource> handler,
-            final Script script) throws ScriptException {
+    private Promise<ResourceResponse, ResourceException> evaluate(final Request request, final Script script)
+            throws ScriptException {
         Object result = script.eval();
         if (null == result) {
-            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(null)));
+            return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(null)));
         } else if (result instanceof JsonValue) {
-            handler.handleResult(new Resource(request.getResourceName(), null, (JsonValue) result));
+            return newResultPromise(newResourceResponse(request.getResourcePath(), null, (JsonValue) result));
         } else if (result instanceof Map) {
-            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(result)));
+            return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(result)));
         } else {
-            JsonValue resource = new JsonValue(result);
-            handler.handleResult(new Resource(request.getResourceName(), null, resource));
+            return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(result)));
         }
     }
 }
