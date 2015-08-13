@@ -1035,22 +1035,23 @@ class ObjectMapping {
             reconContext.setStage(ReconStage.COMPLETED_SUCCESS);
             logReconEndSuccess(reconContext, context);
         } catch (InterruptedException ex) {
+            SynchronizationException syncException;
             if (reconContext.isCanceled()) {
                 reconContext.setStage(ReconStage.COMPLETED_CANCELED);
-                doResults(reconContext);
-                throw new SynchronizationException("Reconciliation canceled: " + reconContext.getReconId());
+                syncException = new SynchronizationException("Reconciliation canceled: " + reconContext.getReconId());
             }
-            reconContext.setStage(ReconStage.COMPLETED_CANCELED);
+            else {
+                reconContext.setStage(ReconStage.COMPLETED_FAILED);
+                syncException = new SynchronizationException("Interrupted execution of reconciliation", ex);
+            }
             doResults(reconContext);
-            throw new SynchronizationException("Interrupted execution of reconciliation", ex);
+            throw syncException;
         } catch (SynchronizationException e) {
             // Make sure that the error did not occur within doResults or last logging for completed success case
+            reconContext.setStage(ReconStage.COMPLETED_FAILED);
             if ( reconContext.getStage() != ReconStage.ACTIVE_PROCESSING_RESULTS
                     && reconContext.getStage() != ReconStage.COMPLETED_SUCCESS ) {
-                reconContext.setStage(ReconStage.COMPLETED_FAILED);
                 doResults(reconContext);
-            } else {
-                reconContext.setStage(ReconStage.COMPLETED_FAILED);;
             }
             reconContext.getStatistics().reconEnd();
             logReconEndFailure(reconContext, context);
