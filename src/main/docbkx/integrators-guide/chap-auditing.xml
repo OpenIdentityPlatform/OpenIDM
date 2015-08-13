@@ -2088,7 +2088,7 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/recon?_queryFilter=reconId+eq+"4261227f-1d44-4042-ba7e-1dcbc6ac96b8"&amp;_fields=mapping,timestamp,entryType'</userinput>
+ 'https://localhost:8443/openidm/audit/recon?_queryFilter=/reconId+eq+"4261227f-1d44-4042-ba7e-1dcbc6ac96b8"&amp;_fields=mapping,timestamp,entryType'</userinput>
 <computeroutput>{
   "result": [
     {
@@ -2128,7 +2128,7 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/recon?_queryFilter=reconId+eq+"4261227f-1d44-4042-ba7e-1dcbc6ac96b8"+and+situation+eq+"ABSENT"'</userinput>
+ 'https://localhost:8443/openidm/audit/recon?_queryFilter=/reconId+eq+"4261227f-1d44-4042-ba7e-1dcbc6ac96b8"+and+situation+eq+"ABSENT"'</userinput>
 <computeroutput>{
   "result": [
     {
@@ -2255,8 +2255,8 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
    ...</programlisting>
   </informalexample>
   <para>
-   To return the activity information for a specific action, query the
-   <literal>_id</literal> of the action, for example:
+   To return the activity information for a specific action, include the
+   <literal>_id</literal> of the action in the URL, for example:
   </para>
   <informalexample><?dbfo pgwide="1"?>
    <screen>$ <userinput>curl \
@@ -2264,7 +2264,7 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/activity?_queryFilter=_id+eq+"594dee73-d6a5-41cd-a332-1e9127c9b704"'</userinput>
+ 'https://localhost:8443/openidm/audit/activity/594dee73-d6a5-41cd-a332-1e9127c9b704'</userinput>
 <computeroutput>{
   "result": [
     {
@@ -2325,12 +2325,12 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
    that the reconciliation with this <literal>transactionId</literal> resulted
    in two CREATEs and two UPDATEs in the managed repository.
   </para>
-  <screen><userinput>$ curl \
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/activity?_queryFilter=transactionId+eq+"f4bd1af8-999d-48e6-ae89-6e9f2f601bb3"&amp;_fields=objectId,resourceOperation'</userinput></screen>
+ 'https://localhost:8443/openidm/audit/activity?_queryFilter=/transactionId+eq+"f4bd1af8-999d-48e6-ae89-6e9f2f601bb3"&amp;_fields=objectId,resourceOperation'</userinput></screen>
   <para>
    The following sample output shows the result of a query that requests details
    of the password change for bjensen.
@@ -2552,7 +2552,7 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- 'https://localhost:8443/openidm/audit/authentication?_queryFilter=principal+eq+"user.0"&amp;_fields=context,result'</userinput>
+ 'https://localhost:8443/openidm/audit/authentication?_queryFilter=/principal+eq+"user.0"&amp;_fields=context,result'</userinput>
 <computeroutput>{
   "result": [
     {
