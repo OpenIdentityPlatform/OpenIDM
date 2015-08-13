@@ -29,8 +29,8 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 
 /**
@@ -53,7 +53,7 @@ public interface RepositoryService {
      * @throws ResourceException
      *             if an error was encountered during creation
      */
-    public Resource create(CreateRequest request) throws ResourceException;
+    public ResourceResponse create(CreateRequest request) throws ResourceException;
     
     /**
      * Reads a resource from the repository based on the supplied read request.
@@ -64,7 +64,7 @@ public interface RepositoryService {
      * @throws ResourceException
      *             if an error was encountered during the read.
      */
-    public Resource read(ReadRequest request) throws ResourceException;
+    public ResourceResponse read(ReadRequest request) throws ResourceException;
     
     /**
      * Updates a resource in the repository
@@ -82,7 +82,7 @@ public interface RepositoryService {
      * @throws ResourceException
      *             if an error was encountered while updating
      */
-    public Resource update(UpdateRequest request) throws ResourceException;
+    public ResourceResponse update(UpdateRequest request) throws ResourceException;
     
     /**
      * Deletes a new resource in the repository.
@@ -93,7 +93,7 @@ public interface RepositoryService {
      * @throws ResourceException
      *             if an error was encountered during the delete
      */
-    public Resource delete(DeleteRequest request) throws ResourceException;
+    public ResourceResponse delete(DeleteRequest request) throws ResourceException;
     
     /**
      * Queries resources in the repository.  Must provide built in query support 
@@ -105,5 +105,5 @@ public interface RepositoryService {
      * @throws ResourceException
      *             if an error was encountered during query
      */
-    public List<Resource> query(QueryRequest request) throws ResourceException;
+    public List<ResourceResponse> query(QueryRequest request) throws ResourceException;
 }
