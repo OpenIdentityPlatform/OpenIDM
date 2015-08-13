@@ -86,7 +86,7 @@ public class EmailServiceImplTest {
                 emailService.actionInstance(mock(Context.class), actionRequest);
 
         // then
-        assertThat(promise).succeeded().isInstanceOf(BadRequestException.class);
+        assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class EmailServiceImplTest {
                 emailService.patchInstance(mock(Context.class), mock(PatchRequest.class));
 
         // then
-        assertThat(promise).succeeded().isInstanceOf(ForbiddenException.class);
+        assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class EmailServiceImplTest {
                 emailService.readInstance(mock(Context.class), mock(ReadRequest.class));
 
         // then
-        assertThat(promise).succeeded().isInstanceOf(ForbiddenException.class);
+        assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -125,6 +125,6 @@ public class EmailServiceImplTest {
                 emailService.updateInstance(mock(Context.class), mock(UpdateRequest.class));
 
         // then
-        assertThat(promise).succeeded().isInstanceOf(ForbiddenException.class);
+        assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
     }
 }
