@@ -36,19 +36,22 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -75,36 +78,32 @@ public class EmailServiceImpl implements SingletonResourceProvider {
     EmailClient emailClient;
 
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler) {
-        Map<String, Object> result = new HashMap<String, Object>();
-        logger.debug("External Email service action called for {} with {}", request
-                .getResourceName(), request.getContent());
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        logger.debug("External Email service action called for {} with {}",
+                request.getResourcePath(), request.getContent());
         try {
             emailClient.send(request.getContent());
         } catch (ResourceException e) {
-           handler.handleError(e);
+            return Promises.newExceptionPromise(e);
         }
         result.put("status", "OK");
-        handler.handleResult(new JsonValue(result));
+        return Promises.newResultPromise(Responses.newActionResponse(new JsonValue(result)));
     }
 
     @Override
-    public void patchInstance(ServerContext context, PatchRequest request,
-            ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
+        return Promises.newExceptionPromise((ResourceException)new ForbiddenException("Operation is not implemented"));
     }
 
     @Override
-    public void readInstance(ServerContext context, ReadRequest request,
-            ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
+        return Promises.newExceptionPromise((ResourceException)new ForbiddenException("Operation is not implemented"));
     }
 
     @Override
-    public void updateInstance(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
+        return Promises.newExceptionPromise((ResourceException) new ForbiddenException("Operation is not implemented"));
     }
 
     @Activate

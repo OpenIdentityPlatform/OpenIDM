@@ -35,11 +35,24 @@
     <description>This bundle allows to send email via /external/email</description>
 
     <dependencies>
+        <!-- OpenIDM dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Forgerock commons dependencies -->
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+        </dependency>
+
+        <!-- Third party dependencies -->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
@@ -51,6 +64,10 @@
                     <artifactId>activation</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <!-- Provided OSGi Dependencies -->
@@ -87,6 +104,22 @@
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

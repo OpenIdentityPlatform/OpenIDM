@@ -23,8 +23,8 @@
  */
 package org.forgerock.openidm.external.email.metadata;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.external.email.impl.EmailServiceImpl;
 import org.forgerock.openidm.external.email.impl.EmailClient;
 import org.forgerock.openidm.metadata.MetaDataProvider;
@@ -49,8 +49,8 @@ public class ConfigMeta implements MetaDataProvider {
     private MetaDataProviderCallback callback = null;
 
     public ConfigMeta() {
-        propertiesToEncrypt = new HashMap<String, List<JsonPointer>>();
-        List<JsonPointer> props = new ArrayList<JsonPointer>();
+        propertiesToEncrypt = new HashMap<>();
+        List<JsonPointer> props = new ArrayList<>();
         props.add(new JsonPointer(EmailClient.CONFIG_MAIL_SMTP_AUTH).child(EmailClient.CONFIG_MAIL_SMTP_AUTH_PASSWORD));
         propertiesToEncrypt.put(EmailServiceImpl.PID, props);
     }
