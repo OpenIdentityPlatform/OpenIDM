@@ -164,9 +164,9 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</computeroutp
       </para>
       <listitem>
        <para>
-        <link xlink:show="new" xlink:href="https://backstage.forgerock.com">
-        Forgerock Backstage</link> has the latest stable, supported release of
-        OpenIDM Enterprise, along with the other products in the ForgeRock
+        The <link xlink:show="new" xlink:href="https://backstage.forgerock.com">
+        ForgeRock Backstage</link> site has the latest stable, supported release
+        of OpenIDM Enterprise, along with the other products in the ForgeRock
         Identity Platform.
        </para>
       </listitem>
