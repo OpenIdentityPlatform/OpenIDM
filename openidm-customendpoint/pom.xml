@@ -35,6 +35,16 @@
     <description>This bundle allow to start custom scripted endpoints accessed under /endpoint/</description>
 
     <dependencies>
+        <!-- ForgeRock Commons  -->
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-http-core</artifactId>
+        </dependency>
+        <!-- OpenDIM Dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-script</artifactId>
