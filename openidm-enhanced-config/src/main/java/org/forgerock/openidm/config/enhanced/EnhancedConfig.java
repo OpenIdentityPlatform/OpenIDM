@@ -27,7 +27,7 @@ package org.forgerock.openidm.config.enhanced;
 import java.util.Dictionary;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 

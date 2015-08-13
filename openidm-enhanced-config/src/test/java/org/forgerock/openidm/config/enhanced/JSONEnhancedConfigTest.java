@@ -1,7 +1,7 @@
 /*
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock Inc. All rights reserved.
+ * Copyright (c) 2012-2015 ForgeRock Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,8 +31,7 @@ import java.net.URLDecoder;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.SystemPropertyAccessor;
