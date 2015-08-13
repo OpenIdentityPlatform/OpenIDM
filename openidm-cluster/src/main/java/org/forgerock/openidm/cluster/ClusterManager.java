@@ -24,9 +24,9 @@
  */
 package org.forgerock.openidm.cluster;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.util.promise.Promises.*;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -48,30 +48,31 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -100,32 +101,32 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     /**
      * Query ID for querying failed instances
      */
-    private static final String QUERY_FAILED_INSTANCE = "query-cluster-failed-instances";
+    public static final String QUERY_FAILED_INSTANCE = "query-cluster-failed-instances";
     
     /**
      * Query ID for querying all instances
      */
-    private static final String QUERY_INSTANCES = "query-cluster-instances";
+    public static final String QUERY_INSTANCES = "query-cluster-instances";
     
     /**
      * Query ID for getting pending cluster events
      */
-    private static final String QUERY_EVENTS = "query-cluster-events";
+    public static final String QUERY_EVENTS = "query-cluster-events";
 
     /**
      * Resource name when issuing requests over the router
      */
-    private static final ResourceName REPO_RESOURCE_CONTAINER = new ResourceName("repo", "cluster", "states");     
+    private static final ResourcePath REPO_RESOURCE_CONTAINER = new ResourcePath("repo", "cluster", "states");     
     
     /**
      * Resource name when issuing cluster state requests directly with the Repository Service
      */
-    private static final ResourceName STATES_RESOURCE_CONTAINER = new ResourceName("cluster", "states");    
+    private static final ResourcePath STATES_RESOURCE_CONTAINER = new ResourcePath("cluster", "states");    
     
     /**
      * Resource name when issuing cluster event requests directly with the Repository Service
      */
-    private static final ResourceName EVENTS_RESOURCE_CONTAINER = new ResourceName("cluster", "events"); 
+    private static final ResourcePath EVENTS_RESOURCE_CONTAINER = new ResourcePath("cluster", "events"); 
 
     /**
      * The instance ID
@@ -183,18 +184,25 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     @Activate
     void activate(ComponentContext compContext) throws ParseException {
-        logger.debug("Activating Cluster Management Service with configuration {}", compContext
-                .getProperties());
+        logger.debug("Activating Cluster Management Service with configuration {}", compContext.getProperties());
         JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
+        init(config);
+    }
+    
+    /**
+     * Initializes the Cluster Manager configuration
+     * 
+     * @param config an {@link JsonValue} object representing the configuration
+     */
+    protected void init(JsonValue config) {
         ClusterConfig clstrCfg = new ClusterConfig(config);
         clusterConfig = clstrCfg;
         instanceId = clusterConfig.getInstanceId();
 
         if (clusterConfig.isEnabled()) {
             enabled = true;
-            clusterManagerThread =
-                    new ClusterManagerThread(clusterConfig.getInstanceCheckInInterval(),
-                            clusterConfig.getInstanceCheckInOffset());
+            clusterManagerThread = new ClusterManagerThread(clusterConfig.getInstanceCheckInInterval(), 
+            		clusterConfig.getInstanceCheckInOffset());
         }
     }
 
@@ -255,51 +263,43 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     }
 
     @Override
-    public void handleRead(ServerContext context, ReadRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             try {
                 Map<String, Object> resultMap = new HashMap<String, Object>();
-                logger.debug("Resource Name: " + request.getResourceName());
-                if (request.getResourceName().isEmpty()) {
+                String resourcePath = request.getResourcePath();
+                logger.debug("Resource Name: " + request.getResourcePath()); 
+                JsonValue result = null; 
+                if (resourcePath.isEmpty()) {
                     // Return a list of all nodes in the cluster
                     QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_CONTAINER.toString());
                     queryRequest.setQueryId(QUERY_INSTANCES);
                     queryRequest.setAdditionalParameter("fields", "*");
                     logger.debug("Attempt query {}", QUERY_INSTANCES);
                     final List<Object> list = new ArrayList<Object>();
-                    connectionFactory.getConnection().query(context, queryRequest, new QueryResultHandler() {
-                        @Override
-                        public void handleError(ResourceException error) {
-                            // ignore
-                        }
-
-                        @Override
-                        public boolean handleResource(Resource resource) {
+                    connectionFactory.getConnection().query(context, queryRequest, new QueryResourceHandler() {
+                    	
+						@Override
+						public boolean handleResource(ResourceResponse resource) {
                             list.add(getInstanceMap(resource.getContent()));
                             return true;
-                        }
-
-                        @Override
-                        public void handleResult(QueryResult result) {
-                            // Ignore
-                        }
+						}
+						
                     });
                     resultMap.put("results", list);
-                    handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(resultMap)));
+                    result = new JsonValue(resultMap);
                 } else {
-                    String id = request.getResourceName();
-                    logger.debug("Attempting to read instance {} from the database", id);
-                    ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(id).toString());
-                    Resource instanceValue = connectionFactory.getConnection().read(context, readRequest);
-                    JsonValue result = new JsonValue(getInstanceMap(instanceValue.getContent()));
-                    handler.handleResult(new Resource(request.getResourceName(), null, result));
+                    logger.debug("Attempting to read instance {} from the database", resourcePath);
+                    ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(resourcePath).toString());
+                    ResourceResponse instanceValue = connectionFactory.getConnection().read(context, readRequest);
+                    result = new JsonValue(getInstanceMap(instanceValue.getContent()));
                 }
+                return newResultPromise(newResourceResponse(request.getResourcePath(), null, result));
             } catch (ResourceException e) {
-                handler.handleError(e);
+                return newExceptionPromise(e);
             }
         } catch (Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+        	return newExceptionPromise(ResourceUtil.adapt(t));
         }
     }
 
@@ -399,7 +399,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private void updateInstanceState(String instanceId, InstanceState instanceState)
             throws ResourceException {
         synchronized (repoLock) {
-            ResourceName resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
+            ResourcePath resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
             UpdateRequest updateRequest = Requests.newUpdateRequest(resourceName.toString(), new JsonValue(instanceState.toMap()));
             updateRequest.setRevision(instanceState.getRevision());
             repoService.update(updateRequest);
@@ -416,8 +416,8 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         List<Map<String, Object>> instanceList = new ArrayList<Map<String, Object>>();
         QueryRequest queryRequest = Requests.newQueryRequest(STATES_RESOURCE_CONTAINER.toString())
                 .setQueryId(QUERY_INSTANCES);
-        List<Resource> results = repoService.query(queryRequest);
-        for (Resource resource : results) {
+        List<ResourceResponse> results = repoService.query(queryRequest);
+        for (ResourceResponse resource : results) {
             instanceList.add(getInstanceMap(resource.getContent()));
         }
         return instanceList;
@@ -425,7 +425,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     private InstanceState getInstanceState(String instanceId) throws ResourceException {
         synchronized (repoLock) {
-            ResourceName resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
+            ResourcePath resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
             return new InstanceState(instanceId, getOrCreateRepo(resourceName.toString()));
         }
     }
@@ -442,7 +442,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 logger.debug("Creating resource {}", resourceName);
                 container = resourceName.substring(0, resourceName.lastIndexOf("/"));
                 id = resourceName.substring(resourceName.lastIndexOf("/") + 1);
-                Resource resource = null;
+                ResourceResponse resource = null;
                 CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
                 resource = repoService.create(createRequest);
                 map = resource.getContent().asMap();
@@ -454,7 +454,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private JsonValue readFromRepo(String resourceName) throws ResourceException {
         try {
             logger.debug("Reading resource {}", resourceName);
-            Resource resource = null;
+            ResourceResponse resource = null;
             ReadRequest readRequest = Requests.newReadRequest(resourceName);
             resource = repoService.read(readRequest);
             resource.getContent().put("_id", resource.getId());
@@ -563,8 +563,8 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             String time = InstanceState.pad(System.currentTimeMillis() - clusterConfig.getInstanceTimeout());
             queryRequest.setAdditionalParameter(InstanceState.PROP_TIMESTAMP_LEASE, time);
             logger.debug("Attempt query {} for failed instances", QUERY_FAILED_INSTANCE);
-            List<Resource> resultList = repoService.query(queryRequest);
-            for (Resource resource : resultList) {
+            List<ResourceResponse> resultList = repoService.query(queryRequest);
+            for (ResourceResponse resource : resultList) {
                 Map<String, Object> valueMap = resource.getContent().asMap();
                 String id = (String) valueMap.get("instanceId");
                 InstanceState state = new InstanceState(id, valueMap);
@@ -679,7 +679,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                             field("instanceId", instanceId),
                             field("event", event.toJsonValue().getObject())));
                     CreateRequest createRequest = Requests.newCreateRequest(EVENTS_RESOURCE_CONTAINER.toString(), newEvent);
-                    Resource result = repoService.create(createRequest);
+                    ResourceResponse result = repoService.create(createRequest);
                     logger.debug("Creating cluster event {}", result.getId());
                 }
             }
@@ -699,9 +699,9 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             QueryRequest queryRequest = Requests.newQueryRequest(EVENTS_RESOURCE_CONTAINER.toString());
             queryRequest.setQueryId(QUERY_EVENTS);
             queryRequest.setAdditionalParameter("instanceId", instanceId);
-            List<Resource> results = repoService.query(queryRequest);
+            List<ResourceResponse> results = repoService.query(queryRequest);
             // Loop through results, processing each event
-            for (Resource resource : results) {
+            for (ResourceResponse resource : results) {
                 logger.debug("Found pending cluster event {}", resource.getId());
                 JsonValue eventMap = resource.getContent().get("event");
                 ClusterEvent event = new ClusterEvent(eventMap);
@@ -837,37 +837,32 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     }
 
     @Override
-    public void handleAction(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ActionResponse, ResourceException>  handleAction(Context context, ActionRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request,
-            ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request,
-            ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request,
-            ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     @Override
-    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request, QueryResourceHandler handler) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 }
