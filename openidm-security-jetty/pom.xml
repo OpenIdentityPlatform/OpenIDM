@@ -35,6 +35,7 @@
     <packaging>bundle</packaging>
 
     <dependencies>
+        <!-- OpenIDM Dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
@@ -45,9 +46,15 @@
             <artifactId>openidm-jetty-fragment</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Third party Dependencies -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-jetty-bundle</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <!-- Provided OSGi Dependencies -->
@@ -56,7 +63,6 @@
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
