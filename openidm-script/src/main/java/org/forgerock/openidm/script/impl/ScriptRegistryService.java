@@ -24,6 +24,12 @@
 
 package org.forgerock.openidm.script.impl;
 
+import static org.forgerock.json.resource.ResourceException.newBadRequestException;
+import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import java.io.File;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -56,30 +62,29 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
@@ -100,6 +105,7 @@ import org.forgerock.script.scope.Parameter;
 import org.forgerock.script.scope.ResourceFunctions;
 import org.forgerock.script.source.DirectoryContainer;
 import org.forgerock.script.source.SourceUnit;
+import org.forgerock.util.promise.Promise;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.swissbox.extender.ManifestEntry;
 import org.osgi.framework.Constants;
@@ -121,9 +127,6 @@ import org.slf4j.LoggerFactory;
 @References({
     @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
             bind = "bindCryptoService", unbind = "unbindCryptoService",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "PersistenceConfigReference", referenceInterface = PersistenceConfig.class,
-            bind = "setPersistenceConfig", unbind = "unsetPersistenceConfig",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "ConnectionFactoryReference", referenceInterface = ConnectionFactory.class,
             bind = "setConnectionFactory", unbind = "unsetConnectionFactory",
@@ -343,15 +346,6 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         openidm.remove("action");
         this.connectionFactory = null;
         logger.info("Resource functions are disabled");
-    }
-
-    @Override
-    public void setPersistenceConfig(PersistenceConfig persistenceConfig) {
-        super.setPersistenceConfig(persistenceConfig);
-    }
-
-    public void unsetPersistenceConfig(PersistenceConfig persistenceConfig) {
-        super.setPersistenceConfig(null);
     }
 
     protected void bindCryptoService(final CryptoService cryptoService) {
@@ -595,15 +589,14 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     // ----- Implementation of RequestHandler interface
 
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        String resourceName = request.getResourceName();
+    public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
+        String resourcePath = request.getResourcePath();
         JsonValue content = request.getContent();
         Map<String, Object> bindings = new HashMap<String, Object>();
         JsonValue config = new JsonValue(new HashMap<String, Object>());
         ScriptEntry scriptEntry = null;
         try {
-            if (resourceName == null || "".equals(resourceName)) {
+            if (resourcePath == null || "".equals(resourcePath)) {
                 for (String key : content.keys()) {
                     if (isSourceUnit(key)) {
                         config.put(key, content.get(key).getObject());
@@ -623,7 +616,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     if (scriptEntry.isActive()) {
                         // just get the script - compilation technically happened above in takeScript
                         scriptEntry.getScript(context);
-                        handler.handleResult(new JsonValue(true));
+                        return newResultPromise(newActionResponse(new JsonValue(true)));
                     } else {
                         throw new ServiceUnavailableException();
                     }
@@ -631,7 +624,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 case eval:
                     if (scriptEntry.isActive()) {
                         Script script = scriptEntry.getScript(context);
-                        handler.handleResult(new JsonValue(script.eval(new SimpleBindings(bindings))));
+                        return newResultPromise(newActionResponse(
+                                new JsonValue(script.eval(new SimpleBindings(bindings)))));
                     } else {
                         throw new ServiceUnavailableException();
                     }
@@ -640,54 +634,49 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     throw new BadRequestException("Unrecognized action ID " + request.getAction());
             }
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (ScriptCompilationException e) {
-            handler.handleError(new BadRequestException(e.getMessage(), e));
+            return newExceptionPromise(newBadRequestException(e.getMessage(), e));
         } catch (IllegalArgumentException e) { // from getActionAsEnum
-            handler.handleError(new BadRequestException(e.getMessage(), e));
+            return newExceptionPromise(newBadRequestException(e.getMessage(), e));
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
+            final QueryResourceHandler handler) {
         final ResourceException e = new NotSupportedException("Query operations are not supported");
-        handler.handleError(e);
+        return newExceptionPromise(e);
     }
 
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
         final ResourceException e = new NotSupportedException("Read operations are not supported");
-        handler.handleError(e);
+        return newExceptionPromise(e);
     }
 
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(final Context context, final CreateRequest request) {
         final ResourceException e = new NotSupportedException("Create operations are not supported");
-        handler.handleError(e);
+        return newExceptionPromise(e);
     }
 
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(final Context context, final DeleteRequest request) {
         final ResourceException e = new NotSupportedException("Delete operations are not supported");
-        handler.handleError(e);
+        return newExceptionPromise(e);
     }
 
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
         final ResourceException e = new NotSupportedException("Patch operations are not supported");
-        handler.handleError(e);
+        return newExceptionPromise(e);
     }
 
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, final UpdateRequest request) {
         final ResourceException e = new NotSupportedException("Update operations are not supported");
-        handler.handleError(e);
+        return newExceptionPromise(e);
     }
     
     @Override
-    public void execute(ServerContext context, Map<String, Object> scheduledContext) throws ExecutionException {
+    public void execute(Context context, Map<String, Object> scheduledContext) throws ExecutionException {
         
         try {
             String scriptName = (String) scheduledContext.get(CONFIG_NAME);
@@ -717,7 +706,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     }
 
     @Override
-    public void auditScheduledService(final ServerContext context, final AuditEvent auditEvent)
+    public void auditScheduledService(final Context context, final AuditEvent auditEvent)
             throws ExecutionException {
         try {
             if (connectionFactory != null) {
@@ -730,7 +719,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
     }
 
-    private void execScript(Context context, ScriptEntry script, JsonValue value) throws ForbiddenException, InternalServerErrorException {
+    private void execScript(Context context, ScriptEntry script, JsonValue value)
+            throws ForbiddenException, InternalServerErrorException {
         if (null != script && script.isActive()) {
             Script executable = script.getScript(context);
             executable.put("object", value.getObject());
