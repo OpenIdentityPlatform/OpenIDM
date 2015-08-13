@@ -32,13 +32,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.util.Accessor;
+import org.forgerock.util.query.QueryFilter;
 
 public class OracleMappedTableHandler extends MappedTableHandler {
 
@@ -49,7 +50,7 @@ public class OracleMappedTableHandler extends MappedTableHandler {
     }    
     
     @Override
-    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String)params.get(PAGED_RESULTS_OFFSET));
         final int pageSizeParam = Integer.parseInt((String)params.get(PAGE_SIZE));
         String filterString = getFilterString(filter, replacementTokens);

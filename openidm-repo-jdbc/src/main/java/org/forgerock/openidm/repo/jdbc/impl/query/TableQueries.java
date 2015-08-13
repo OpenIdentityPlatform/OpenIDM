@@ -24,8 +24,8 @@
 
 package org.forgerock.openidm.repo.jdbc.impl.query;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
@@ -46,10 +46,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
@@ -59,6 +59,7 @@ import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -305,7 +306,7 @@ public class TableQueries {
 
         params.put(PAGED_RESULTS_OFFSET, offsetParam);
         params.put(PAGE_SIZE, pageSizeParam);
-        QueryFilter queryFilter = (QueryFilter) params.get(QUERY_FILTER);
+        QueryFilter<JsonPointer> queryFilter = (QueryFilter) params.get(QUERY_FILTER);
         String queryExpression = (String) params.get(QUERY_EXPRESSION);
         String queryId = (String) params.get(QUERY_ID);
         if (queryId == null && queryExpression == null && queryFilter == null) {
@@ -441,7 +442,7 @@ public class TableQueries {
      *            the query filter to parse
      * @return A resolved statement
      */
-    PreparedStatement parseQueryFilter(Connection con, QueryFilter filter, Map<String, Object> params)
+    PreparedStatement parseQueryFilter(Connection con, QueryFilter<JsonPointer> filter, Map<String, Object> params)
             throws SQLException, ResourceException {
         Map<String, Object> replacementTokens = new LinkedHashMap<String, Object>();
 

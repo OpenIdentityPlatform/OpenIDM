@@ -38,11 +38,12 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.util.Clause;
+import org.forgerock.util.query.QueryFilter;
 
 /**
  * TableHandler appropriate for MSSQL-specific query syntax.
@@ -171,7 +172,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
      * @inheritDoc
      */
     @Override
-    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String) params.get(PAGED_RESULTS_OFFSET));
         final int pageSizeParam = Integer.parseInt((String) params.get(PAGE_SIZE));
 

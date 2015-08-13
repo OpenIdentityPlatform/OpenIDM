@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
@@ -44,23 +45,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
+import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,10 +213,10 @@ public class GenericTableHandler implements TableHandler {
     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#read(java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
     */
     @Override
-    public Resource read(String fullId, String type, String localId, Connection connection)
+    public ResourceResponse read(String fullId, String type, String localId, Connection connection)
             throws ResourceException, SQLException, IOException {
 
-        Resource result = null;
+        ResourceResponse result = null;
         Map<String, Object> resultMap = null;
         PreparedStatement readStatement = null;
         ResultSet rs = null;
@@ -232,7 +234,7 @@ public class GenericTableHandler implements TableHandler {
                 resultMap = mapper.readValue(objString, typeRef);
                 resultMap.put("_rev", rev);
                 logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, resultMap);
-                result = new Resource(localId, rev, new JsonValue(resultMap));
+                return newResourceResponse(localId, rev, new JsonValue(resultMap));
             } else {
                 throw ResourceException.getException(ResourceException.NOT_FOUND,
                         "Object " + fullId + " not found in " + type);
@@ -241,8 +243,6 @@ public class GenericTableHandler implements TableHandler {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readStatement);
         }
-
-        return result;
     }
 
     /* (non-Javadoc)
@@ -676,7 +676,7 @@ public class GenericTableHandler implements TableHandler {
      * @return an SQL SELECT statement
      */
     @Override
-    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String) params.get(PAGED_RESULTS_OFFSET));
         final int pageSizeParam = Integer.parseInt((String) params.get(PAGE_SIZE));
 

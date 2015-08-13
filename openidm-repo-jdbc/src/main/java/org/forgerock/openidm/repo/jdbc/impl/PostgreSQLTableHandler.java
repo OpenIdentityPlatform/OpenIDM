@@ -36,14 +36,14 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
 import org.forgerock.openidm.repo.util.StringSQLRenderer;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.query.QueryFilter;
 
 /**
  * Postgres-specific generic table handler.
@@ -143,7 +143,7 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
     }
     
     @Override
-    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final String offsetParam = (String) params.get(PAGED_RESULTS_OFFSET);
         final String pageSizeParam = (String) params.get(PAGE_SIZE);
         String pageClause = " LIMIT " + pageSizeParam + " OFFSET " + offsetParam;

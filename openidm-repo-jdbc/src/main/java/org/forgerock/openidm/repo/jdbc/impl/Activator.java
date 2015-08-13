@@ -25,7 +25,7 @@ package org.forgerock.openidm.repo.jdbc.impl;
 
 import java.util.Hashtable;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.osgi.framework.BundleActivator;

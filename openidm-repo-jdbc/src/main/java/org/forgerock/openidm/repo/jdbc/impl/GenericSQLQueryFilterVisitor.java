@@ -23,10 +23,10 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.openidm.repo.util.Clauses.not;
 import static org.forgerock.openidm.repo.util.Clauses.where;
 import static org.forgerock.openidm.repo.util.Clauses.and;
 import static org.forgerock.openidm.repo.util.Clauses.or;
-import static org.forgerock.openidm.repo.util.Clauses.not;
 
 import java.util.List;
 import java.util.Map;
@@ -34,11 +34,11 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.openidm.repo.util.AbstractSQLQueryFilterVisitor;
 import org.forgerock.openidm.repo.util.Clause;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.query.QueryFilter;
 
 /**
  * QueryFilterVisitor for generating WHERE clause SQL queries against generic table schema.
@@ -157,11 +157,11 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
      * {@inheritDoc}
      */
     @Override
-    public Clause visitAndFilter(final Map<String, Object> parameters, List<QueryFilter> subfilters) {
+    public Clause visitAndFilter(final Map<String, Object> parameters, List<QueryFilter<JsonPointer>> subfilters) {
         return and(FluentIterable.from(subfilters).transform(
-                new Function<QueryFilter, Clause>() {
+                new Function<QueryFilter<JsonPointer>, Clause>() {
                     @Override
-                    public Clause apply(QueryFilter filter) {
+                    public Clause apply(QueryFilter<JsonPointer> filter) {
                         return filter.accept(GenericSQLQueryFilterVisitor.this, parameters);
                     }
                 }));
@@ -171,11 +171,11 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
      * {@inheritDoc}
      */
     @Override
-    public Clause visitOrFilter(final Map<String, Object> parameters, List<QueryFilter> subfilters) {
+    public Clause visitOrFilter(final Map<String, Object> parameters, List<QueryFilter<JsonPointer>> subfilters) {
         return or(FluentIterable.from(subfilters).transform(
-                new Function<QueryFilter, Clause>() {
+                new Function<QueryFilter<JsonPointer>, Clause>() {
                     @Override
-                    public Clause apply(QueryFilter filter) {
+                    public Clause apply(QueryFilter<JsonPointer> filter) {
                         return filter.accept(GenericSQLQueryFilterVisitor.this, parameters);
                     }
                 }));
@@ -213,7 +213,7 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
      * {@inheritDoc}
      */
     @Override
-    public Clause visitNotFilter(Map<String, Object> parameters, QueryFilter subFilter) {
+    public Clause visitNotFilter(Map<String, Object> parameters, QueryFilter<JsonPointer> subFilter) {
         return not(subFilter.accept(this, parameters));
     }
 

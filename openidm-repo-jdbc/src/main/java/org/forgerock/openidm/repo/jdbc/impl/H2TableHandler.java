@@ -28,10 +28,11 @@ import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import org.forgerock.util.query.QueryFilter;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public class H2TableHandler extends GenericTableHandler {
      * @inheritDoc
      */
     @Override
-    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
+    public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String) params.get(PAGED_RESULTS_OFFSET));
         final int pageSizeParam = Integer.parseInt((String) params.get(PAGE_SIZE));
 
