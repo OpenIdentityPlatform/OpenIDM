@@ -57,6 +57,7 @@
   "source"           : <replaceable>string</replaceable>,
   "target"           : <replaceable>string</replaceable>,
   "links"            : <replaceable>string</replaceable>,
+  "oldTarget"        : <replaceable>script object</replaceable>,
   "validSource"      : <replaceable>script object</replaceable>,
   "validTarget"      : <replaceable>script object</replaceable>,
   "sourceCondition"  : <replaceable>key:value pair</replaceable>,
@@ -107,6 +108,16 @@
       Example: <literal>"systemLdapAccounts_managedUser"</literal> reuses the 
       links created by a previous mapping whose <literal>name</literal> is 
       <literal>"systemLdapAccounts_managedUser"</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>oldTarget</term>
+    <listitem>
+     <para>object, optional</para>
+     <para>
+      An optional old target object, which contains the value of the target
+      before any mappings were applied.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
