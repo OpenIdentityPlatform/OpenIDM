@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -33,17 +33,14 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.FutureResult;
-import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.openidm.core.ServerConstants;
-
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -103,8 +100,8 @@ public class JsonResourceRouterService implements ConnectionFactory {
     }
 
     @Override
-    public FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler) {
-        return internal.getConnectionAsync(handler);
+    public Promise<Connection, ResourceException> getConnectionAsync() {
+        return internal.getConnectionAsync();
     }
     @Override
     public void close() {
@@ -123,22 +120,17 @@ public class JsonResourceRouterService implements ConnectionFactory {
                 return new AbstractConnectionWrapper<Connection>(connectionFactory.getConnection()) {
                     @Override
                     protected Context transform(Context context) {
-                        return new InternalServerContext(context);
+                        return context;
                     }
                 };
             }
 
             @Override
-            public FutureResult<Connection> getConnectionAsync(final ResultHandler<? super Connection> handler) {
+            public Promise<Connection, ResourceException> getConnectionAsync() {
                 try {
-                    final Connection connection = getConnection();
-                    final FutureResult<Connection> future = Resources.newCompletedFutureResult(connection);
-                    if (handler != null) {
-                        handler.handleResult(connection);
-                    }
-                    return future;
+                    return Promises.newResultPromise(getConnection());
                 } catch (ResourceException e) {
-                    throw new RuntimeException("Can't obtain connection", e);
+                    return Promises.newExceptionPromise(e);
                 }
             }
         };
