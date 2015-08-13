@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +24,10 @@
 
 package org.forgerock.openidm.router;
 
+/**
+ * A NAME does ...
+ * 
+ */
 public interface RouteEntry extends RouteService {
 
     /**
