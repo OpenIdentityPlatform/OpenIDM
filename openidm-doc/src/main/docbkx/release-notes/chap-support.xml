@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012-2013 ForgeRock AS
+  !      Copyright 2012-2015 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-support'
@@ -31,10 +31,12 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Support</title>
 
- <para>You can purchase OpenIDM support subscriptions and training courses
- from ForgeRock and from consulting partners around the world and in your
- area. To contact ForgeRock, send mail to <link
- xlink:href='mailto:info@forgerock.com'>info@forgerock.com</link>. To find a
- partner in your area, see <link xlink:show="new"
- xlink:href="http://forgerock.com/partners/find-a-partner/" />.</para>
+ <para>
+  You can purchase OpenIDM support subscriptions and training courses from
+  ForgeRock and from consulting partners around the world and in your area. To
+  contact ForgeRock, send mail to
+  <link xlink:href='mailto:info@forgerock.com'>info@forgerock.com</link>. To
+  find a partner in your area, use the <link xlink:href="https://forgerock.com/"
+  xlink:show="new">ForgeRock website</link>.
+ </para>
 </chapter>
