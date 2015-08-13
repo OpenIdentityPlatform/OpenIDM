@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,8 +24,11 @@
 
 package org.forgerock.openidm.router.metadata;
 
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
+import java.util.Collections;
+import java.util.List;
+
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
@@ -33,9 +36,6 @@ import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.router.impl.JsonResourceRouterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  */
@@ -49,8 +49,8 @@ public class ConfigMeta implements MetaDataProvider {
     /**
      * @inheritDoc
      */
-    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config)
-            throws WaitForMetaData, NotConfiguration {
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
+            JsonValue config) throws WaitForMetaData, NotConfiguration {
         if (JsonResourceRouterService.PID.equalsIgnoreCase(pidOrFactory)) {
             logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
             return Collections.emptyList();

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,21 +24,21 @@
 
 package org.forgerock.openidm.router;
 
-import org.forgerock.http.routing.RouteMatcher;
-import org.forgerock.http.routing.RoutingMode;
-import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.Router.UriTemplate;
-import org.forgerock.json.resource.SingletonResourceProvider;
-import org.forgerock.openidm.core.ServerConstants;
-import org.osgi.framework.Constants;
-
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Route;
+import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.RoutingMode;
+import org.forgerock.json.resource.SingletonResourceProvider;
+import org.forgerock.openidm.core.ServerConstants;
+import org.osgi.framework.Constants;
 
 /**
  * A RouteBuilder does ...
@@ -52,10 +52,10 @@ public final class RouteBuilder {
     private SingletonResourceProvider singleton;
     private RequestHandler handler;
     private RoutingMode mode = RoutingMode.EQUALS;
-    private UriTemplate uriTemplate;
+    private String uriTemplate;
 
     private RouteBuilder() {
-        this.routes = new HashSet<>();
+        this.routes = new HashSet<RouteItem>();
     }
 
     private RouteBuilder(Set<RouteItem> initial) {
@@ -102,12 +102,12 @@ public final class RouteBuilder {
     }
 
     public RouteBuilder withTemplate(String uriTemplate) {
-        if (uriTemplate != null && uriTemplate.length() > 0) {
+        if (StringUtils.isNotBlank(uriTemplate)) {
             if ('*' == uriTemplate.charAt(uriTemplate.length() - 1)) {
                 withModeStartsWith().withTemplate(
                         uriTemplate.substring(0, uriTemplate.length() - 1));
             } else {
-                this.uriTemplate = Router.uriTemplate(uriTemplate);
+                this.uriTemplate = uriTemplate;
             }
         }
         return this;
@@ -117,7 +117,7 @@ public final class RouteBuilder {
         if ((null == collection) && (null == singleton) && (null == handler)) {
             throw new NullPointerException("Failed because the service is not set");
         }
-        if (uriTemplate != null && uriTemplate.toString().length() > 0) {
+        if (StringUtils.isBlank(uriTemplate)) {
             throw new NullPointerException("Failed because the uriTemplate is not set");
         }
         return this;
@@ -160,10 +160,10 @@ public final class RouteBuilder {
             return null;
         }
         StringBuilder sb = new StringBuilder("Route group of {");
-        Dictionary<String, Object> properties = new Hashtable<>(5);
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
         properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
         if (routes.size() == 1) {
-            UriTemplate template = routes.iterator().next().uriTemplate;
+            String template = routes.iterator().next().uriTemplate;
             sb.append(template);
             properties.put(ServerConstants.ROUTER_PREFIX, template);
         } else if (routes.size() > 1) {
@@ -202,18 +202,18 @@ public final class RouteBuilder {
         return this;
     }
 
-    public RouteMatcher[] register(Router router) {
+    public Route[] register(Router router) {
         if (routes.isEmpty()) {
-            return new RouteMatcher[0];
+            return new Route[0];
         }
-        Set<RouteMatcher> registered = new HashSet<>();
+        Set<Route> registered = new HashSet<Route>();
         for (RouteItem r : routes) {
-            RouteMatcher o = r.register(router);
+            Route o = r.register(router);
             if (null != o) {
                 registered.add(o);
             }
         }
-        return registered.toArray(new RouteMatcher[registered.size()]);
+        return registered.toArray(new Route[registered.size()]);
     }
 
     private static class RouteItem {
@@ -221,11 +221,11 @@ public final class RouteBuilder {
         private final SingletonResourceProvider singleton;
         private final RequestHandler handler;
         private final RoutingMode mode;
-        private final UriTemplate uriTemplate;
+        private final String uriTemplate;
 
         private RouteItem(CollectionResourceProvider collection,
                 SingletonResourceProvider singleton, RequestHandler handler, RoutingMode mode,
-                UriTemplate uriTemplate) {
+                String uriTemplate) {
             this.collection = collection;
             this.singleton = singleton;
             this.handler = handler;
@@ -233,7 +233,7 @@ public final class RouteBuilder {
             this.uriTemplate = uriTemplate;
         }
 
-        private RouteMatcher register(Router router) {
+        private Route register(Router router) {
             if (null != router) {
                 if (null != collection) {
                     return router.addRoute(uriTemplate, collection);
