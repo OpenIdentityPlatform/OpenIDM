@@ -16,8 +16,8 @@
 
 package org.forgerock.openidm.patch;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 /**
  * RFC6902 expects the patch value to be a predetermined, static value to be used in the

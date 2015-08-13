@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,18 +29,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.http.Context;
+import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RouterContext;
+import org.forgerock.json.resource.ResourceResponse;
 
 /**
  * Resource utilities.
@@ -48,7 +48,7 @@ import org.forgerock.json.resource.RouterContext;
 public class ResourceUtil {
 
     /** The name of the field in the resource content which contains the resource ID as a JsonPointer. */
-    public static JsonPointer RESOURCE_FIELD_CONTENT_ID_POINTER = new JsonPointer(Resource.FIELD_CONTENT_ID);
+    public static JsonPointer RESOURCE_FIELD_CONTENT_ID_POINTER = new JsonPointer(ResourceResponse.FIELD_CONTENT_ID);
 
     /**
      * {@code ResourceUtil} instances should NOT be constructed in standard
@@ -66,12 +66,12 @@ public class ResourceUtil {
      * @param context
      *
      * @return an unmodifiableMap or null if the {@code context} does not
-     *         contains {@link RouterContext}
+     *         contains {@link UriRouterContext}
      */
     public static Map<String, String> getUriTemplateVariables(Context context) {
-        RouterContext routerContext =
-                context.containsContext(RouterContext.class) ? context
-                        .asContext(RouterContext.class) : null;
+        UriRouterContext routerContext =
+                context.containsContext(UriRouterContext.class) ? context
+                        .asContext(UriRouterContext.class) : null;
         if (null != routerContext) {
             return Collections.unmodifiableMap(routerContext.getUriTemplateVariables());
         }

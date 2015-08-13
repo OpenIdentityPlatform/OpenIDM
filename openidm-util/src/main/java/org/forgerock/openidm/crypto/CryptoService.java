@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,9 +28,9 @@ import java.util.List;
 
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonTransformer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonTransformer;
+import org.forgerock.json.JsonValue;
 
 /**
  * Provides encryption and decryption services to OpenIDM components.

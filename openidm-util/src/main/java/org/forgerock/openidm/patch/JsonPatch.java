@@ -23,10 +23,10 @@ import java.util.Iterator;
 import java.util.List;
 
 // JSON Fluent
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 /**
  * Processes partial modifications to JSON values. Implements
