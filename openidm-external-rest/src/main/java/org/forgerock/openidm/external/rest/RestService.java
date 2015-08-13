@@ -137,25 +137,25 @@ public class RestService implements SingletonResourceProvider {
     }
 
     @Override
-    public Promise<ResourceResponse,ResourceException> patchInstance(Context context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
         return Promises.newExceptionPromise(
                 ResourceException.newNotSupportedException("Patch operations are not supported"));
     }
 
     @Override
-    public Promise<ResourceResponse,ResourceException> readInstance(Context context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         return Promises.newExceptionPromise(
                 ResourceException.newNotSupportedException("Read operations are not supported"));
     }
 
     @Override
-    public Promise<ResourceResponse,ResourceException> updateInstance(Context context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
         return Promises.newExceptionPromise(
                 ResourceException.newNotSupportedException("Update operations are not supported"));
     }
 
     @Override
-    public Promise<ActionResponse,ResourceException> actionInstance(Context context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {
             logger.debug("Action invoked on {} with {}", request.getAction(), request);
 
@@ -278,7 +278,7 @@ public class RestService implements SingletonResourceProvider {
                                     "Unable to parse url argument " + url));
                         }
                     } catch (Exception ex) {
-                        return Promises.newExceptionPromise((ResourceException) new InternalServerErrorException(
+                        return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(
                                 "Failure in parsing the response as JSON: " + text
                                         + " Reported failure: " + ex.getMessage(), ex));
                     }
@@ -302,13 +302,13 @@ public class RestService implements SingletonResourceProvider {
                         return Promises.newResultPromise(
                                 Responses.newActionResponse(result));
                     } catch (Exception ex) {
-                        return Promises.newExceptionPromise((ResourceException) new InternalServerErrorException(
+                        return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(
                                 "Failure in parsing the response: " + text
                                         + " Reported failure: " + ex.getMessage(), ex));
                     }
                 }
             } catch (java.io.IOException ex) {
-                return Promises.newExceptionPromise((ResourceException) new InternalServerErrorException(
+                return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(
                         "Failed to invoke " + content, ex));
             } finally {
                 if (null != cr) {
@@ -316,7 +316,7 @@ public class RestService implements SingletonResourceProvider {
                 }
             }
         } catch (Exception e) {
-            return Promises.newExceptionPromise((ResourceException) new InternalServerErrorException(e));
+            return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(e));
         }
     }
 
@@ -671,9 +671,10 @@ public class RestService implements SingletonResourceProvider {
         // TODO use the
         // https://wikis.forgerock.org/confluence/display/json/http-request
         String url = params.get(ARG_URL).required().asString();
-        ClientResource cr = new ClientResource(url);
-        cr.addQueryParameter("maxTotalConnections", "16");
-        cr.addQueryParameter("maxConnectionsPerHost", "8");
+        org.restlet.Context context = new org.restlet.Context();
+        context.getParameters().add("maxTotalConnections", "16");
+        context.getParameters().add("maxConnectionsPerHost", "8");
+        ClientResource cr = new ClientResource(context, url);
         JsonValue _authenticate = params.get(ARG_AUTHENTICATE);
 
         if (!_authenticate.isNull()) {
