@@ -37,6 +37,7 @@ import org.forgerock.http.Context;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalContext;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.util.promise.Promise;
@@ -120,7 +121,7 @@ public class JsonResourceRouterService implements ConnectionFactory {
                 return new AbstractConnectionWrapper<Connection>(connectionFactory.getConnection()) {
                     @Override
                     protected Context transform(Context context) {
-                        return context;
+                        return new InternalContext(context);
                     }
                 };
             }
