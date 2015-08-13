@@ -434,7 +434,7 @@
             </dependency>
 
             <!-- ForgeRock Commons -->
-            <dependency>
+<!--            <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>script-common</artifactId>
                 <version>${commons.forgerock-script.version}</version>
@@ -449,7 +449,7 @@
                 <artifactId>script-javascript</artifactId>
                 <version>${commons.forgerock-script.version}</version>
             </dependency>
-            <dependency>
+-->            <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>i18n-slf4j</artifactId>
                 <version>${commons.forgerock-i18n.version}</version>
