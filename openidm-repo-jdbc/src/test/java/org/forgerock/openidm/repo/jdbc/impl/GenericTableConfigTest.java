@@ -19,8 +19,8 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import java.io.IOException;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

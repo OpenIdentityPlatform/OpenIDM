@@ -23,7 +23,7 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 
 import java.sql.Connection;

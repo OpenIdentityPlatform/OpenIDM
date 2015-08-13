@@ -29,15 +29,16 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.util.query.QueryFilter;
 
 public interface TableHandler {
 
@@ -58,7 +59,7 @@ public interface TableHandler {
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      * @return the requested object.
      */
-    public abstract Resource read(String fullId, String type,
+    public abstract ResourceResponse read(String fullId, String type,
             String localId, Connection connection) 
             throws SQLException, IOException, ResourceException;
 
@@ -193,7 +194,7 @@ public interface TableHandler {
      * @param params a map containing query parameters
      * @return the raw query String
      */
-    public String renderQueryFilter(QueryFilter filter, Map<String, Object> replacementTokens, Map<String, Object> params);
+    public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params);
     
     /**
      * Query if a given exception signifies a well known error type

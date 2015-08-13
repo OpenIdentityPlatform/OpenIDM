@@ -23,10 +23,11 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl.pool;
 
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jolbox.bonecp.BoneCPDataSource;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class DataSourceFactory {
     public static DataSource newInstance(JsonValue config) {
         //TODO Make CP implementation independent
         ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         BoneCPDataSource ds = mapper.convertValue(config.asMap(), BoneCPDataSource.class);
         ds.setConnectionHook(new DatabaseShutdownHook());
         ds.setTransactionRecoveryEnabled(true);// Important: This should be enabled
