@@ -424,6 +424,15 @@
                     mvn versions:use-latest-versions
             -->
 
+            <!-- Main ForgeRock Bill of Materials pom -->
+            <dependency>
+              <groupId>org.forgerock.commons</groupId>
+              <artifactId>forgerock-bom</artifactId>
+              <version>1.0.0-SNAPSHOT</version>
+              <scope>import</scope>
+              <type>pom</type>
+            </dependency>
+
             <!-- ForgeRock Commons -->
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
