@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -39,15 +39,15 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-audit-core</artifactId>
+            <artifactId>json-resource-http</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-crypto</artifactId>
+            <artifactId>forgerock-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-fluent</artifactId>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-http-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
@@ -55,8 +55,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource-servlet</artifactId>
+            <artifactId>forgerock-audit-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-crypto</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>i18n-slf4j</artifactId>
@@ -76,10 +81,6 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-afterburner</artifactId>
         </dependency>
 
         <!-- Provided OSGi Dependencies -->

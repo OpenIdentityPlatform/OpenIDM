@@ -24,10 +24,10 @@
 
 package org.forgerock.openidm.audit.util;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 
 /**
  * Create an audit activity log for a request result.
@@ -47,6 +47,6 @@ public interface ActivityLogger {
      * @param status the status of the operation
      * @throws ResourceException on failure to write to audit log unless suppressed.
      */
-    void log(ServerContext context, Request request, String message, String objectId,
+    void log(Context context, Request request, String message, String objectId,
              JsonValue before, JsonValue after, Status status) throws ResourceException;
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,17 +28,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 
-import org.forgerock.json.crypto.JsonCrypto;
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonTransformer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.core.PropertyAccessor;
-import org.forgerock.openidm.core.PropertyUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -50,6 +39,16 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonTransformer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.json.crypto.JsonCrypto;
+import org.forgerock.openidm.core.PropertyAccessor;
+import org.forgerock.openidm.core.PropertyUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class JsonUtil {
 

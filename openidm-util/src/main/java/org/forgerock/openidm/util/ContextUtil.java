@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2014 ForgeRock AS. All rights reserved.
+ * Copyright © 2014-2015 ForgeRock AS. All rights reserved.
  */
 package org.forgerock.openidm.util;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ClientContext;
-import org.forgerock.json.resource.Context;
 
 /**
  */

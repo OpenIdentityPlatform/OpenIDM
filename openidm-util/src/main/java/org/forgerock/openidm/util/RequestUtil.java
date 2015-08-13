@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,21 +23,20 @@
  */
 package org.forgerock.openidm.util;
 
-import java.util.Map;
-
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.Requests;
-
 import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_EXPRESSION;
 import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_FILTER;
 import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_ID;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_FILTER;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_ID;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
+import java.util.Map;
+
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.QueryFilters;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.Requests;
 
 
 /**
@@ -65,7 +64,7 @@ public class RequestUtil {
             } else if (PARAM_QUERY_EXPRESSION.equals(e.getKey()) || FIELD_QUERY_EXPRESSION.equals(e.getKey())) {
                 request.setQueryExpression(String.valueOf(e.getValue()));
             } else if (PARAM_QUERY_FILTER.equals(e.getKey()) || FIELD_QUERY_FILTER.equals(e.getKey())) {
-                request.setQueryFilter(QueryFilter.valueOf(String.valueOf(e.getValue())));
+                request.setQueryFilter(QueryFilters.parse(String.valueOf(e.getValue())));
             } else {
                 request.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
