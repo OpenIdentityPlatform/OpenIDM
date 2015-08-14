@@ -23,22 +23,24 @@
  */
 package org.forgerock.openidm.config.manage;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.ResourceName;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
+import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -71,15 +73,17 @@ import static org.forgerock.openidm.config.manage.ConfigObjectService.*;
  */
 public class ConfigObjectServiceTest {
 
-    private Dictionary properties = null;
+    @SuppressWarnings("rawtypes")
+	private Dictionary properties = null;
     private ConfigObjectService configObjectService;
 
-    private ResourceName rname;
+    private ResourcePath rname;
     private String id;
     private Map<String,Object> config;
     private ConfigurationAdmin configAdmin;
 
-    @BeforeTest
+    @SuppressWarnings("unchecked")
+	@BeforeTest
     public void beforeTest() throws Exception {
         properties = new Hashtable<String, Object>();
         properties.put(ComponentConstants.COMPONENT_NAME, getClass().getName());
@@ -106,16 +110,16 @@ public class ConfigObjectServiceTest {
         when(bundleContext.getBundles()).thenReturn(new Bundle[0]);
 
         // Init the ConfigCrypto instance used by ConfigObjectService
-        ConfigCrypto configCrypto = ConfigCrypto.getInstance(bundleContext, mock(ProviderListener.class));
+        ConfigCrypto.getInstance(bundleContext, mock(ProviderListener.class));
 
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         when(connectionFactory.getConnection()).thenReturn(mock(Connection.class));
-        configObjectService.bindEnhancedConfig(mock(EnhancedConfig.class));
-        configObjectService.bindConnectionFactory(connectionFactory);
+        configObjectService.enhancedConfig = mock(EnhancedConfig.class);
+        configObjectService.connectionFactory = connectionFactory;
 
         configObjectService.activate(context);
 
-        rname = new ResourceName("testobject");
+        rname = new ResourcePath("testobject");
         id = "testid";
         config = new HashMap<String,Object>();
     }
@@ -142,11 +146,11 @@ public class ConfigObjectServiceTest {
         String queryString5 = "true";
         
         // QueryFilters
-        QueryFilter filter1 = QueryFilter.valueOf(queryString1);
-        QueryFilter filter2 = QueryFilter.valueOf(queryString2);
-        QueryFilter filter3 = QueryFilter.valueOf(queryString3);
-        QueryFilter filter4 = QueryFilter.valueOf(queryString4);
-        QueryFilter filter5 = QueryFilter.valueOf(queryString5);
+        QueryFilter<JsonPointer> filter1 = QueryFilters.parse(queryString1);
+        QueryFilter<JsonPointer> filter2 = QueryFilters.parse(queryString2);
+        QueryFilter<JsonPointer> filter3 = QueryFilters.parse(queryString3);
+        QueryFilter<JsonPointer> filter4 = QueryFilters.parse(queryString4);
+        QueryFilter<JsonPointer> filter5 = QueryFilters.parse(queryString5);
         
         // Assertions
         Assert.assertEquals(asConfigQueryFilter(filter1).toString(), "/jsonconfig/field1 eq \"value1\"");
@@ -195,7 +199,8 @@ public class ConfigObjectServiceTest {
 
     }
 
-    @Test(priority=3)
+    @SuppressWarnings("rawtypes")
+	@Test(priority=3)
     public void testCreateNew() throws Exception {
         config.put("property1", "value1");
         config.put("property2", "value2");
@@ -230,7 +235,8 @@ public class ConfigObjectServiceTest {
         Assert.assertNotNull(config.getProperties());
     }
 
-    @Test(priority=6)
+    @SuppressWarnings("rawtypes")
+	@Test(priority=6)
     public void testUpdate() throws Exception {
         config.put("property1", "newvalue1");
         config.put("property2", "newvalue2");
@@ -251,8 +257,8 @@ public class ConfigObjectServiceTest {
 
     @Test(priority=7)
     public void testQuery() throws Exception {
-        configObjectService.handleQuery(mock(ServerContext.class),
-                mock(QueryRequest.class), mock(QueryResultHandler.class));
+        configObjectService.handleQuery(mock(Context.class),
+                mock(QueryRequest.class), mock(QueryResourceHandler.class));
     }
 
     @Test(priority=8)
@@ -323,9 +329,10 @@ public class ConfigObjectServiceTest {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private class MockConfiguration implements Configuration {
         String pid = "pid";
-        Dictionary dictionary = null;
+		Dictionary dictionary = null;
         Boolean deleted = false;
 
         String bundleLocation = "root";
