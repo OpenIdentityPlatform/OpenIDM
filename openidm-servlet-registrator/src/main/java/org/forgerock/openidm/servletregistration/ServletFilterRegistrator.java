@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,7 @@
 
 package org.forgerock.openidm.servletregistration;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * Interface for servlet filter registration services

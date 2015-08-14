@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+* Copyright 2013-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import javax.servlet.Filter;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 
 /**
