@@ -222,7 +222,10 @@ class ObjectMapping {
     private final Boolean linkingEnabled;
 
     /** The number of processing threads to use in reconciliation */
-    int taskThreads = 10; // TODO: make configurable
+    private int taskThreads;
+
+    /** The number of initial tasks the ReconFeeder should submit to executors */
+    private int feedSize;
 
     /** a reference to the {@link SynchronizationService} */
     private final SynchronizationService service;
@@ -285,10 +288,8 @@ class ObjectMapping {
         onUnlinkScript = Scripts.newInstance(config.get("onUnlink"));
         resultScript = Scripts.newInstance(config.get("result"));
         prefetchLinks = config.get("prefetchLinks").defaultTo(Boolean.TRUE).asBoolean();
-        Integer confTaskThreads = config.get("taskThreads").asInteger();
-        if (confTaskThreads != null) {
-            taskThreads = confTaskThreads.intValue();
-        }
+        taskThreads = config.get("taskThreads").defaultTo(10).asInteger();
+        feedSize = config.get("feedSize").defaultTo(1000).asInteger();
         correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
         syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
         linkingEnabled = config.get("enableLinking").defaultTo(Boolean.TRUE).asBoolean();
@@ -1008,6 +1009,7 @@ class ObjectMapping {
                 // Perform source recon phase on current set of source ids
                 ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context, allLinks,
                         remainingTargetIds, sourceRecon);
+                sourcePhase.setFeedSize(feedSize);
                 sourcePhase.execute();
                 queryNextPage = true;
             } while (reconSourceQueryPaging && sourceQueryResult.getPagingCookie() != null); // If paging, loop through next pages
@@ -1024,6 +1026,7 @@ class ObjectMapping {
                 reconContext.getStatistics().targetPhaseStart();
                 ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context,
                         allLinks, null, targetRecon);
+                targetPhase.setFeedSize(feedSize);
                 targetPhase.execute();
                 reconContext.getStatistics().targetPhaseEnd();
                 measureTarget.end();
