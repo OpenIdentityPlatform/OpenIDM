@@ -23,9 +23,14 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,26 +44,23 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -181,26 +183,22 @@ public class MaintenanceService implements RequestHandler {
      * Maintenance action support
      */
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         try {
             switch (request.getActionAsEnum(Action.class)) {
                 case status:
-                    handleMaintenanceStatus(handler);
-                    break;
+                    return handleMaintenanceStatus();
                 case enable:
                     enableMaintenanceMode();
-                    handleMaintenanceStatus(handler);
-                    break;
+                    return handleMaintenanceStatus();
                 case disable:
                     disableMaintenanceMode();
-                    handleMaintenanceStatus(handler);
-                    break;
+                    return handleMaintenanceStatus();
                 default:
-                    handler.handleError(new NotSupportedException(request.getAction() + " is not supported"));
-                    break;
+                    return newExceptionPromise(newNotSupportedException(request.getAction() + " is not supported"));
             }
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(newInternalServerErrorException("Error processing Action request", e));
         }
     }
 
@@ -270,49 +268,49 @@ public class MaintenanceService implements RequestHandler {
 
     }
 
-    private void handleMaintenanceStatus(ResultHandler<JsonValue> handler) {
-        handler.handleResult(json(object(field("maintenanceEnabled", maintenanceEnabled))));
+    private Promise<ActionResponse, ResourceException> handleMaintenanceStatus() {
+        return newResultPromise(newActionResponse(json(object(field("maintenanceEnabled", maintenanceEnabled)))));
     }
 
     /**
      * Service does not allow creating entries.
      */
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Not allowed on maintenance service"));
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
+        return newExceptionPromise(newNotSupportedException("Not allowed on maintenance service"));
     }
-
 
     /**
      * Service does not support deleting entries..
      */
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Not allowed on maintenance service"));
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
+        return newExceptionPromise(newNotSupportedException("Not allowed on maintenance service"));
     }
 
     /**
      * Service does not support changing entries.
      */
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Not allowed on maintenance service"));
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        return newExceptionPromise(newNotSupportedException("Not allowed on maintenance service"));
     }
 
     /**
      * Service does not support querying entries yet.
      */
     @Override
-    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
-        handler.handleError(new ForbiddenException("Not allowed on maintenance service"));
+    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
+            QueryResourceHandler handler) {
+        return newExceptionPromise(newNotSupportedException("Not allowed on maintenance service"));
     }
 
     /**
      * Service does not support reading entries yet.
      */
     @Override
-    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Not allowed on maintenance service"));
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
+        return newExceptionPromise(newNotSupportedException("Not allowed on maintenance service"));
     }
 
 
@@ -320,8 +318,7 @@ public class MaintenanceService implements RequestHandler {
      * Service does not support changing entries.
      */
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new ForbiddenException("Not allowed on maintenance service"));
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
+        return newExceptionPromise(newNotSupportedException("Not allowed on maintenance service"));
     }
-
 }

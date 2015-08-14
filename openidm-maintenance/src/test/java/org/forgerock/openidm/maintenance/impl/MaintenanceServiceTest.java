@@ -24,6 +24,7 @@
 package org.forgerock.openidm.maintenance.impl;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.forgerock.json.resource.Router.uriTemplate;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -36,9 +37,9 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.RoutingMode;
+import org.forgerock.http.routing.RoutingMode;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentInstance;
 import org.testng.annotations.BeforeMethod;
@@ -65,19 +66,21 @@ public class MaintenanceServiceTest {
                 "test.component.one",
                 "test.component.two"
         });
-        router.addRoute(RoutingMode.EQUALS, "maintenance", maintenanceService);
+        router.addRoute(RoutingMode.EQUALS, uriTemplate("maintenance"), maintenanceService);
     }
     
     @Test
     public void testMaintenanceMode() throws Exception {
         ActionRequest enableAction = Requests.newActionRequest("maintenance", "enable");
-        assertThat(connection.action(new RootContext(), enableAction).get("maintenanceEnabled").asBoolean());
+        assertThat(connection.action(new RootContext(), enableAction).getJsonContent()
+                .get("maintenanceEnabled").asBoolean());
         assertThat(maintenanceService.scrService.getComponent(1).getState() == Component.STATE_DISABLED);
         assertThat(maintenanceService.scrService.getComponent(2).getState() == Component.STATE_DISABLED);
         assertThat(maintenanceService.scrService.getComponent(3).getState() == Component.STATE_ACTIVE);
         
         ActionRequest disableAction = Requests.newActionRequest("maintenance", "disable");
-        assertThat(!connection.action(new RootContext(), disableAction).get("maintenanceEnabled").asBoolean());
+        assertThat(!connection.action(new RootContext(), disableAction).getJsonContent()
+                .get("maintenanceEnabled").asBoolean());
         assertThat(maintenanceService.scrService.getComponent(1).getState() == Component.STATE_ACTIVE);
         assertThat(maintenanceService.scrService.getComponent(2).getState() == Component.STATE_ACTIVE);
         assertThat(maintenanceService.scrService.getComponent(3).getState() == Component.STATE_ACTIVE);
