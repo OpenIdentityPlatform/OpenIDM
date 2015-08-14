@@ -399,8 +399,8 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private void updateInstanceState(String instanceId, InstanceState instanceState)
             throws ResourceException {
         synchronized (repoLock) {
-            ResourcePath resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
-            UpdateRequest updateRequest = Requests.newUpdateRequest(resourceName.toString(), new JsonValue(instanceState.toMap()));
+            ResourcePath resourcePath = STATES_RESOURCE_CONTAINER.child(instanceId);
+            UpdateRequest updateRequest = Requests.newUpdateRequest(resourcePath.toString(), new JsonValue(instanceState.toMap()));
             updateRequest.setRevision(instanceState.getRevision());
             repoService.update(updateRequest);
         }
@@ -425,23 +425,23 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     private InstanceState getInstanceState(String instanceId) throws ResourceException {
         synchronized (repoLock) {
-            ResourcePath resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
-            return new InstanceState(instanceId, getOrCreateRepo(resourceName.toString()));
+            ResourcePath resourcePath = STATES_RESOURCE_CONTAINER.child(instanceId);
+            return new InstanceState(instanceId, getOrCreateRepo(resourcePath.toString()));
         }
     }
 
-    private Map<String, Object> getOrCreateRepo(String resourceName) throws ResourceException {
+    private Map<String, Object> getOrCreateRepo(String resourcePath) throws ResourceException {
         synchronized (repoLock) {
             String container, id;
             Map<String, Object> map;
 
-            map = readFromRepo(resourceName).asMap();
+            map = readFromRepo(resourcePath).asMap();
             if (map == null) {
                 map = new HashMap<String, Object>();
                 // create resource
-                logger.debug("Creating resource {}", resourceName);
-                container = resourceName.substring(0, resourceName.lastIndexOf("/"));
-                id = resourceName.substring(resourceName.lastIndexOf("/") + 1);
+                logger.debug("Creating resource {}", resourcePath);
+                container = resourcePath.substring(0, resourcePath.lastIndexOf("/"));
+                id = resourcePath.substring(resourcePath.lastIndexOf("/") + 1);
                 ResourceResponse resource = null;
                 CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
                 resource = repoService.create(createRequest);
@@ -451,11 +451,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         }
     }
 
-    private JsonValue readFromRepo(String resourceName) throws ResourceException {
+    private JsonValue readFromRepo(String resourcePath) throws ResourceException {
         try {
-            logger.debug("Reading resource {}", resourceName);
+            logger.debug("Reading resource {}", resourcePath);
             ResourceResponse resource = null;
-            ReadRequest readRequest = Requests.newReadRequest(resourceName);
+            ReadRequest readRequest = Requests.newReadRequest(resourcePath);
             resource = repoService.read(readRequest);
             resource.getContent().put("_id", resource.getId());
             resource.getContent().put("_rev", resource.getRevision());

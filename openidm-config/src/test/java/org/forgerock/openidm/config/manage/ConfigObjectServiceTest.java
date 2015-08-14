@@ -114,8 +114,8 @@ public class ConfigObjectServiceTest {
 
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         when(connectionFactory.getConnection()).thenReturn(mock(Connection.class));
-        configObjectService.enhancedConfig = mock(EnhancedConfig.class);
-        configObjectService.connectionFactory = connectionFactory;
+        configObjectService.bindEnhancedConfig(mock(EnhancedConfig.class));
+        configObjectService.bindConnectionFactory(connectionFactory);
 
         configObjectService.activate(context);
 
