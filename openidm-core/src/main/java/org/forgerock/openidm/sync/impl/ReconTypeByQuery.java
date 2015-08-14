@@ -24,9 +24,8 @@
 */
 package org.forgerock.openidm.sync.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -77,7 +76,7 @@ public class ReconTypeByQuery extends ReconTypeBase {
         return query(sourceQuery.get("resourceName").asString(), 
                 sourceQuery, 
                 reconContext, 
-                ((Collection<String>) Collections.synchronizedList(new ArrayList<String>())), 
+                Collections.synchronizedSet(new HashSet<String>()), 
                 true, 
                 QuerySide.SOURCE,
                 pageSize,
@@ -90,7 +89,7 @@ public class ReconTypeByQuery extends ReconTypeBase {
     @Override
     public ResultIterable queryTarget() throws SynchronizationException {
         return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
-                Collections.synchronizedList(new ArrayList<String>()), 
+                Collections.synchronizedSet(new HashSet<String>()), 
                 reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), QuerySide.TARGET,
                 0, null).getResultIterable();                
     }
