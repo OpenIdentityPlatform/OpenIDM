@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-fluent</artifactId>
+            <artifactId>json-resource</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
