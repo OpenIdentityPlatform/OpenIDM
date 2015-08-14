@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+* Copyright 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -22,13 +22,12 @@
 * "Portions Copyrighted [year] [name of copyright owner]"
 *
 */
-
 package org.forgerock.openidm.quartz.impl;
 
 import java.util.Map;
 
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 
 /**
  * OSGi services wanting to be schedulable via the Scheduler service must
@@ -51,18 +50,18 @@ public interface ScheduledService {
     /**
      * Invoked by the scheduler when the scheduler triggers.
      *
-     * @param context the ServerContext to use for the request
+     * @param context the Context to use for the request
      * @param scheduledContext Context information passed by the scheduler service
      * @throws ExecutionException if execution of the scheduled work failed.
      * Implementations can also throw RuntimeExceptions which will get logged.
      */
-    void execute(ServerContext context, Map<String, Object> scheduledContext) throws ExecutionException;
+    void execute(Context context, Map<String, Object> scheduledContext) throws ExecutionException;
 
     /**
      * Invoked by the scheduler to audit the scheduled event.
-     * @param context the server context to use to audit the event
+     * @param context the context to use to audit the event
      * @param auditEvent the event to audit
      * @throws ExecutionException if the audit event fails
      */
-    void auditScheduledService(final ServerContext context, final AuditEvent auditEvent) throws ExecutionException;
+    void auditScheduledService(final Context context, final AuditEvent auditEvent) throws ExecutionException;
 }

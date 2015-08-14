@@ -28,7 +28,7 @@ package org.forgerock.openidm.quartz.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.quartz.JobPersistenceException;
 import org.quartz.Trigger;
 

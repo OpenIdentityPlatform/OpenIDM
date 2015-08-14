@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -28,35 +28,35 @@ package org.forgerock.openidm.quartz.impl;
 import java.util.Date;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
-import org.forgerock.json.resource.MemoryBackend;
-import org.forgerock.json.resource.Resources;
+import org.assertj.core.api.Assertions;
 import org.quartz.JobDetail;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 /**
- * Test class that contains unit tests for the RepoJobStore class.
- *
- *
+ * Tests {@link RepoJobStore}
  */
-public class TestRepoJobstore extends TestCase {
+public class TestRepoJobstore {
 
     private RepoJobStore jobStore;
     private SimpleSignaler signaler;
 
+    @BeforeMethod
     public void setUp() {
         signaler = new SimpleSignaler();
         jobStore = new RepoJobStore();
-        jobStore.setRepositoryService(Resources.newCollection(new MemoryBackend()));
+        //jobStore.setRepositoryService(Resources.newCollection(new MemoryBackend()));
         jobStore.setSchedulerSignaler(signaler);
     }
 
+    @AfterMethod
     public void tearDown() {
         jobStore = null;
     }
 
+    @SuppressWarnings("unchecked")
     public void disabletestStoreRetrieveRemoveTrigger() throws Exception {
         Trigger trigger = new SimpleTrigger("trigger1", "group1", new Date());
         Trigger retrievedTrigger1 = null;
@@ -67,8 +67,8 @@ public class TestRepoJobstore extends TestCase {
         jobStore.removeTrigger(null, trigger.getName(), trigger.getGroup());
         retrievedTrigger2 = jobStore.retrieveTrigger(null, trigger.getName(), trigger.getGroup());
 
-        assertEquals(trigger, retrievedTrigger1);
-        assertNull(retrievedTrigger2);
+        Assertions.assertThat(trigger).isEqualTo(retrievedTrigger1);
+        Assertions.assertThat(retrievedTrigger2).isNotNull();
     }
 
     public void disabletestStoreRetrieveRemoveJob() throws Exception {
@@ -81,11 +81,12 @@ public class TestRepoJobstore extends TestCase {
         jobStore.removeJob(null, job.getName(), job.getGroup());
         retrievedJob2 = jobStore.retrieveJob(null, job.getName(), job.getGroup());
 
-        assertEquals(job, retrievedJob1);
-        assertNull(retrievedJob2);
+        Assertions.assertThat(job).isEqualTo(retrievedJob1);
+        Assertions.assertThat(retrievedJob2).isNotNull();
     }
 
-    public void disabletestStoreJobAndTrigger() throws Exception {
+    @SuppressWarnings("unchecked")
+	public void disabletestStoreJobAndTrigger() throws Exception {
         Trigger trigger = new SimpleTrigger("trigger1", "group1", new Date());
         JobDetail job = new JobDetail("job1", "group1", SimpleJob.class);
         Trigger retrievedTrigger1 = null;
@@ -97,10 +98,10 @@ public class TestRepoJobstore extends TestCase {
         jobStore.removeTrigger(null, trigger.getName(), trigger.getGroup());
         jobStore.removeJob(null, job.getName(), job.getGroup());
 
-        assertEquals(job, retrievedJob);
-        assertEquals(trigger, retrievedTrigger1);
-        assertNull(jobStore.retrieveTrigger(null, trigger.getName(), trigger.getGroup()));
-        assertNull(jobStore.retrieveJob(null, job.getName(), job.getGroup()));
+        Assertions.assertThat(job).isEqualTo(retrievedJob);
+        Assertions.assertThat(trigger).isEqualTo(retrievedTrigger1);
+        Assertions.assertThat(jobStore.retrieveTrigger(null, trigger.getName(), trigger.getGroup())).isNull();
+        Assertions.assertThat(jobStore.retrieveJob(null, job.getName(), job.getGroup())).isNull();
     }
 
     public void disabletestJobState() throws Exception {
@@ -109,17 +110,17 @@ public class TestRepoJobstore extends TestCase {
 
         jobStore.storeJobAndTrigger(null, job, trigger);
 
-        assertEquals(0, jobStore.getPausedTriggerGroups(null).size());
+        Assertions.assertThat(0).isEqualTo(jobStore.getPausedTriggerGroups(null).size());
 
         jobStore.pauseTriggerGroup(null, "group1");
         Set<String> paused = jobStore.getPausedTriggerGroups(null);
-        assertEquals(1, paused.size());
+        Assertions.assertThat(1).isEqualTo(paused.size());
 
         String pausedGroup = paused.iterator().next();
-        assertEquals("group1", pausedGroup);
+        Assertions.assertThat("group1").isEqualTo(pausedGroup);
 
         jobStore.resumeAll(null);
-        assertEquals(0, jobStore.getPausedTriggerGroups(null).size());
+        Assertions.assertThat(0).isEqualTo(jobStore.getPausedTriggerGroups(null).size());
     }
 
     /*public void disabletestAcquireNextTrigger() throws Exception {
