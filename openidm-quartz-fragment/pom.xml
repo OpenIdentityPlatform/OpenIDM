@@ -34,6 +34,25 @@
     <packaging>bundle</packaging>
 
     <dependencies>
+        <!-- ForgeRock Commons Dependencies -->
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-http-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-audit-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-util</artifactId>
+        </dependency>
+        
+        <!-- OpenIDM Dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
@@ -45,9 +64,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-audit-core</artifactId>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-util</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
@@ -84,8 +110,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert-core</artifactId>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

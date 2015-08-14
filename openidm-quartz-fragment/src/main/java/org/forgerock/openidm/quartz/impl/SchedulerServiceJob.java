@@ -29,11 +29,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
@@ -70,20 +71,19 @@ public class SchedulerServiceJob implements Job {
     }
 
     /**
-     * Builds the ServerContext
+     * Builds the Context
      * 
      * @param id  The authentication id
      * @return the new ServerContext
      */
-    private ServerContext newScheduledServerContext(String id) {
+    private Context newScheduledContext(String id) {
         final Map<String, Object> authzid = new HashMap<String, Object>();
         authzid.put(SecurityContext.AUTHZID_ID, id);
         List<String> roles = new ArrayList<String>();
         roles.add("system");
         authzid.put(SecurityContext.AUTHZID_ROLES, roles);
         authzid.put(SecurityContext.AUTHZID_COMPONENT, "scheduler");
-        SecurityContext securityContext = new SecurityContext(new RootContext(), id, authzid);
-        return new ServerContext(securityContext);
+        return new SecurityContext(new RootContext(), id, authzid);
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -114,15 +114,15 @@ public class SchedulerServiceJob implements Job {
             logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
         } else {
             final long startTime = System.currentTimeMillis();
-            final ServerContext serverContext =
-                    newScheduledServerContext((String) scheduledServiceContext.get(ScheduledService.INVOKER_NAME));
+            final Context scheduledContext =
+                    newScheduledContext((String) scheduledServiceContext.get(ScheduledService.INVOKER_NAME));
             try {
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.",
                         context.getJobDetail().getFullName());
-                scheduledService.execute(serverContext, scheduledServiceContext);
+                scheduledService.execute(scheduledContext, scheduledServiceContext);
                 scheduledService.auditScheduledService(
-                        serverContext,
-                        createScheduledAuditEvent(serverContext, startTime, context, Status.SUCCESS, null));
+                        scheduledContext,
+                        createScheduledAuditEvent(scheduledContext, startTime, context, Status.SUCCESS, null));
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.",
                         context.getJobDetail().getFullName());
             } catch (Exception ex) {
@@ -130,8 +130,8 @@ public class SchedulerServiceJob implements Job {
                         new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
                 try {
                     scheduledService.auditScheduledService(
-                            serverContext,
-                            createScheduledAuditEvent(serverContext, startTime, context, Status.FAILURE, ex));
+                            scheduledContext,
+                            createScheduledAuditEvent(scheduledContext, startTime, context, Status.FAILURE, ex));
                 } catch (ExecutionException exception) {
                     logger.error("Unable to audit scheduled task {}", context.getJobDetail().getFullName(), exception);
                 }
@@ -157,7 +157,7 @@ public class SchedulerServiceJob implements Job {
         return serviceTracker;
     }
 
-    private AuditEvent createScheduledAuditEvent(final ServerContext context, final long startTime,
+    private AuditEvent createScheduledAuditEvent(final Context context, final long startTime,
                                                  final JobExecutionContext jobContext, final Status status,
                                                  final Exception e) {
         final AccessAuditEventBuilder auditEventBuilder = new AccessAuditEventBuilder();

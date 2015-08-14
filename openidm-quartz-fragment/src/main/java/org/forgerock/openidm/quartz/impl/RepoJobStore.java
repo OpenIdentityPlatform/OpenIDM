@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+* Copyright 2012-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -22,7 +22,6 @@
 * "Portions Copyrighted [year] [name of copyright owner]"
 *
 */
-
 package org.forgerock.openidm.quartz.impl;
 
 import java.util.ArrayList;
@@ -38,8 +37,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -48,8 +49,6 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
@@ -77,8 +76,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A JobStore implementation used for persistence with the OpenIdm Repository Service.
- *
- *
  */
 public class RepoJobStore implements JobStore, ClusterEventListener {
 
@@ -144,7 +141,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * The Repository Service Accessor
      */
-    private static ServerContext serverContext = null;
+    private static Context context = null;
 
     /**
      * Boolean indicating if the scheduler has called shutdown()
@@ -178,8 +175,8 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      *
      * @return  true if successful, false otherwise
      */
-    public ServerContext getServerContext() throws JobPersistenceException {
-        if (serverContext == null) {
+    public Context getContext() throws JobPersistenceException {
+        if (context == null) {
             BundleContext ctx = FrameworkUtil.getBundle(RouteService.class).getBundleContext();
             ServiceReference serviceReference = null;
             try {
@@ -190,20 +187,20 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             RouteService repoService = RouteService.class.cast(ctx.getService(serviceReference));
             if (repoService != null) {
                 try {
-                    serverContext = repoService.createServerContext();
+                	context = repoService.createServerContext();
                 } catch (ResourceException e) {
                     /* ignore */
                 }
             }
-            if (serverContext == null) {
+            if (context == null) {
                 throw new JobPersistenceException("Repo router is null");
             }
         }
-        return serverContext;
+        return context;
     }
 
-    public static void setServerContext(ServerContext serverContext) {
-        RepoJobStore.serverContext = serverContext;
+    public static void setServerContext(Context context) {
+        RepoJobStore.context = context;
     }
 
     public boolean setClusterService() {
@@ -214,24 +211,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             return !(clusterManager == null);
         }
         return true;
-    }
-
-    /**
-     * An external method for setting the router (used in test cases).
-     *
-     * @param router the router to set
-     */
-    public void setRepositoryService(RequestHandler service) {
-        serverContext = new ServerContext(new RootContext());
-    }
-
-    /**
-     * An external method for setting the router (used in test cases).
-     *
-     * @param router the router to set
-     */
-    public static void setService(RequestHandler service) {
-        serverContext = new ServerContext(new RootContext());
     }
 
     private ConnectionFactory connectionFactory;
@@ -481,7 +460,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 if (retrieveCalendar(context, name) == null) {
                     // Create Calendar
                     logger.debug("Creating Calendar: {}", name);
-                    getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(getCalendarsRepoId(name), cw.getValue().asMap()));
+                    getConnectionFactory().getConnection().create(getContext(), getCreateRequest(getCalendarsRepoId(name), cw.getValue().asMap()));
                 } else {
                     if (!replaceExisting) {
                         throw new ObjectAlreadyExistsException(name);
@@ -491,7 +470,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     logger.debug("Updating Calendar: {}", name);
                     UpdateRequest r = Requests.newUpdateRequest(getCalendarsRepoId(name), cw.getValue());
                     r.setRevision(oldCw.getRevision());
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
                 }
 
                 if (updateTriggers) {
@@ -545,18 +524,18 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     logger.debug("Updating Job {} in group {}", jobName, jobGroup);
                     UpdateRequest r = Requests.newUpdateRequest(jobId, jw.getValue());
                     r.setRevision(oldJw.getRevision());
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
                 } else {
                     // Add job name to list
                     jgw.addJob(jobName);
                     // Update job group
                     UpdateRequest r = Requests.newUpdateRequest(getJobGroupsRepoId(jobGroup), jgw.getValue());
                     r.setRevision(jgw.getRevision());
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
 
                     // Create job
                     logger.debug("Creating Job {} in group {}", jobName, jobGroup);
-                    getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(jobId, jw.getValue().asMap()));
+                    getConnectionFactory().getConnection().create(getContext(), getCreateRequest(jobId, jw.getValue().asMap()));
                 }
             } catch (ResourceException e) {
                 logger.warn("Error storing job", e);
@@ -608,18 +587,18 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     logger.debug("Updating Trigger {}", triggerId);
                     UpdateRequest r = Requests.newUpdateRequest(triggerId, tw.getValue());
                     r.setRevision(oldTw.getRevision());
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
                 } else {
                     // Add trigger name to list
                     tgw.addTrigger(triggerName);
                     // Update trigger group
                     UpdateRequest r = Requests.newUpdateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue());
                     r.setRevision(tgw.getRevision());
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
 
                     // Create trigger
                     logger.debug("Creating Trigger {}", triggerId);
-                    getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(triggerId, tw.getValue().asMap()));
+                    getConnectionFactory().getConnection().create(getContext(), getCreateRequest(triggerId, tw.getValue().asMap()));
                 }
             } catch (ResourceException e) {
                 logger.warn("Error storing trigger", e);
@@ -954,7 +933,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 jgw.pause();
                 UpdateRequest r = Requests.newUpdateRequest(getJobGroupsRepoId(groupName), jgw.getValue());
                 r.setRevision(jgw.getRevision());
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 // Get list of paused groups, add this group (if already paused, return), and update
                 Map<String, Object> pauseMap = getOrCreateRepo(getPausedJobGroupNamesRepoId());
@@ -969,7 +948,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 String rev = (String)pauseMap.get("_rev");
                 r = Requests.newUpdateRequest(getPausedJobGroupNamesRepoId(), new JsonValue(pauseMap));
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 List<String> jobNames = jgw.getJobNames();
                 for (String jobName : jobNames) {
@@ -1019,7 +998,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 tgw.pause();
                 UpdateRequest r = Requests.newUpdateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue());
                 r.setRevision(tgw.getRevision());
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 // Get list of paused groups, add this group (if already paused, return), and update
                 Map<String, Object> pauseMap = getOrCreateRepo(getPausedTriggerGroupNamesRepoId());
@@ -1034,7 +1013,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 String rev = (String)pauseMap.get("_rev");
                 r = Requests.newUpdateRequest(getPausedTriggerGroupNamesRepoId(), new JsonValue(pauseMap));
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 List<String> triggerNames = tgw.getTriggerNames();
                 for (String triggerName : triggerNames) {
@@ -1065,7 +1044,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 if (cw != null) {
                     DeleteRequest r = Requests.newDeleteRequest(getCalendarsRepoId(name));
                     r.setRevision(cw.getRevision());
-                    getConnectionFactory().getConnection().delete(getServerContext(), r);
+                    getConnectionFactory().getConnection().delete(getContext(), r);
                     return true;
                 } else {
                     return false;
@@ -1096,7 +1075,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     // Update job group
                     UpdateRequest r = Requests.newUpdateRequest(getJobGroupsRepoId(groupName), jgw.getValue());
                     r.setRevision(jgw.getRevision());
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
                 }
                 // Delete job
                 JobWrapper oldJw = getJobWrapper(groupName, jobName);
@@ -1106,7 +1085,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 logger.debug("Deleting job {} in group {}", jobName, groupName);
                 DeleteRequest r = Requests.newDeleteRequest(jobId);
                 r.setRevision(oldJw.getRevision());
-                getConnectionFactory().getConnection().delete(getServerContext(), r);
+                getConnectionFactory().getConnection().delete(getContext(), r);
                 return true;
             } catch (ResourceException e) {
                 logger.warn("Error removing job {} ", jobName, e);
@@ -1135,7 +1114,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     // Update trigger group
                     UpdateRequest r = Requests.newUpdateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue());
                     r.setRevision(tgw.getRevision());
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
                 }
                 // Attempt to remove from waiting triggers
                 TriggerWrapper tw = getTriggerWrapper(groupName, triggerName);
@@ -1148,7 +1127,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     logger.debug("Deleting trigger {} in group {}", triggerName, groupName);
                     DeleteRequest r = Requests.newDeleteRequest(triggerId);
                     r.setRevision(rev);
-                    getConnectionFactory().getConnection().delete(getServerContext(), r);
+                    getConnectionFactory().getConnection().delete(getContext(), r);
 
                     String jobName = tw.getTrigger().getJobName();
                     JobWrapper jw = getJobWrapper(groupName, jobName);
@@ -1165,13 +1144,13 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                                 // Update job group
                                 UpdateRequest ru = Requests.newUpdateRequest(getJobGroupsRepoId(groupName), jgw.getValue());
                                 ru.setRevision(jgw.getRevision());
-                                getConnectionFactory().getConnection().update(getServerContext(), ru);
+                                getConnectionFactory().getConnection().update(getContext(), ru);
                             }
                             // Delete job
                             logger.debug("Deleting job {} in group {}", jobName, groupName);
                             r = Requests.newDeleteRequest(jobId);
                             r.setRevision(jw.getRevision());
-                            getConnectionFactory().getConnection().delete(getServerContext(), r);
+                            getConnectionFactory().getConnection().delete(getContext(), r);
                         }
                     }
                     return true;
@@ -1245,7 +1224,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 String rev = jgw.getRevision();
                 UpdateRequest r = Requests.newUpdateRequest(getJobGroupsRepoId(groupName), jgw.getValue());
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 // Get list of paused groups, remove this group (if not paused, return), and update
                 Map<String, Object> pauseMap = getOrCreateRepo(getPausedJobGroupNamesRepoId());
@@ -1257,7 +1236,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 rev = (String)pauseMap.get("_rev");
                 r = Requests.newUpdateRequest(getPausedJobGroupNamesRepoId(), new JsonValue(pauseMap));
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 List<String> jobNames = jgw.getJobNames();
                 for (String jobName : jobNames) {
@@ -1308,7 +1287,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 String rev = tgw.getRevision();
                 UpdateRequest r = Requests.newUpdateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue());
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 // Get list of paused groups, remove this group (if not present, return), and update
                 Map<String, Object> pauseMap = getOrCreateRepo(getPausedTriggerGroupNamesRepoId());
@@ -1322,7 +1301,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 rev = (String)pauseMap.get("_rev");
                 r = Requests.newUpdateRequest(getPausedTriggerGroupNamesRepoId(), new JsonValue(pauseMap));
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
 
                 List<String> triggerNames = tgw.getTriggerNames();
                 for (String triggerName : triggerNames) {
@@ -1613,7 +1592,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
     private JsonValue readFromRepo(String repoId) throws ResourceException {
         try {
-            return getConnectionFactory().getConnection().read(getServerContext(), Requests.newReadRequest(repoId)).getContent();
+            return getConnectionFactory().getConnection().read(getContext(), Requests.newReadRequest(repoId)).getContent();
         } catch (JobPersistenceException e) {
             return new JsonValue(null);
         } catch (NotFoundException e) {
@@ -1682,7 +1661,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 // create if null
                 tgw = new TriggerGroupWrapper(groupName);
                 // create in repo
-                JsonValue newValue = getConnectionFactory().getConnection().create(getServerContext(),
+                JsonValue newValue = getConnectionFactory().getConnection().create(getContext(),
                         getCreateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue().asMap())).getContent();
                 tgw = new TriggerGroupWrapper(newValue);
                 // Add to list of group names
@@ -1715,7 +1694,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 // create if null
                 jgw = new JobGroupWrapper(groupName);
                 // create in repo
-                JsonValue newValue = getConnectionFactory().getConnection().create(getServerContext(),
+                JsonValue newValue = getConnectionFactory().getConnection().create(getContext(),
                         getCreateRequest(getJobGroupsRepoId(groupName), jgw.getValue().asMap())).getContent();
                 jgw = new JobGroupWrapper(newValue);
                 // Add to list of group names
@@ -1860,7 +1839,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         Map<String, Object> map;
         try {
             try {
-                map = getConnectionFactory().getConnection().read(getServerContext(), Requests.newReadRequest(repoId)).getContent().asMap();
+                map = getConnectionFactory().getConnection().read(getContext(), Requests.newReadRequest(repoId)).getContent().asMap();
             } catch (NotFoundException e) {
                 logger.trace("repo list {} not found, lets create it", "names");
                 map = null;
@@ -1869,7 +1848,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 map = new HashMap<String, Object>();
                 map.put(instanceId, acquiredTriggerIds);
                 // create in repo
-                map = getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(repoId, map)).getContent().asMap();
+                map = getConnectionFactory().getConnection().create(getContext(), getCreateRequest(repoId, map)).getContent().asMap();
                 revision = (String)map.get("_rev");
             } else {
                 // else check if list exists in map
@@ -1880,7 +1859,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     map.put(instanceId, acquiredTriggerIds);
                     UpdateRequest r = Requests.newUpdateRequest(repoId, new JsonValue(map));
                     r.setRevision(revision);
-                    JsonValue updatedValue = getConnectionFactory().getConnection().update(getServerContext(), r).getContent();;
+                    JsonValue updatedValue = getConnectionFactory().getConnection().update(getContext(), r).getContent();;
                     revision = (String) updatedValue.asMap().get("_rev");
                 }
             }
@@ -1914,7 +1893,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         Map<String, Object> map;
         try {
             try {
-                map = getConnectionFactory().getConnection().read(getServerContext(), Requests.newReadRequest(repoId)).getContent().asMap();
+                map = getConnectionFactory().getConnection().read(getContext(), Requests.newReadRequest(repoId)).getContent().asMap();
             } catch (NotFoundException e) {
                 logger.debug("repo list {} not found, lets create it", "names");
                 map = null;
@@ -1924,7 +1903,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 waitingTriggersRepoList = new ArrayList<String>();
                 map.put("names", waitingTriggersRepoList);
                 // create in repo
-                map = getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(repoId, map)).getContent().asMap();
+                map = getConnectionFactory().getConnection().create(getContext(), getCreateRequest(repoId, map)).getContent().asMap();
                 revision = (String)map.get("_rev");
             } else {
                 // else check if list exists in map
@@ -1935,7 +1914,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     map.put("names", waitingTriggersRepoList);
                     UpdateRequest r = Requests.newUpdateRequest(repoId, new JsonValue(map));
                     r.setRevision(revision);
-                    JsonValue updatedValue = getConnectionFactory().getConnection().update(getServerContext(), r).getContent();
+                    JsonValue updatedValue = getConnectionFactory().getConnection().update(getContext(), r).getContent();
                     revision = (String) updatedValue.asMap().get("_rev");
                 }
             }
@@ -2005,7 +1984,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             // update repo
             UpdateRequest r = Requests.newUpdateRequest(id, new JsonValue(map));
             r.setRevision(rev);
-            getConnectionFactory().getConnection().update(getServerContext(), r);
+            getConnectionFactory().getConnection().update(getContext(), r);
         }
 
     }
@@ -2036,7 +2015,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 // update repo
                 UpdateRequest r = Requests.newUpdateRequest(id, new JsonValue(map));
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
             }
             return result;
         }
@@ -2055,7 +2034,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 map = new HashMap<String, Object>();
                 // create in repo
                 logger.debug("Creating repo {}", repoId);
-                map = getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(repoId, map)).getContent().asMap();
+                map = getConnectionFactory().getConnection().create(getContext(), getCreateRequest(repoId, map)).getContent().asMap();
             }
             return map;
         }
@@ -2068,7 +2047,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             Map<String, Object> map;
             String revision = null;
             try {
-                map = getConnectionFactory().getConnection().read(getServerContext(), Requests.newReadRequest(repoId)).getContent().asMap();
+                map = getConnectionFactory().getConnection().read(getContext(), Requests.newReadRequest(repoId)).getContent().asMap();
             } catch (NotFoundException e) {
                 logger.debug("repo list {} not found, lets create it", listId);
                 map = null;
@@ -2078,7 +2057,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 list = new ArrayList<String>();
                 map.put(listId, list);
                 // create in repo
-                map = getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(repoId, map)).getContent().asMap();
+                map = getConnectionFactory().getConnection().create(getContext(), getCreateRequest(repoId, map)).getContent().asMap();
             } else {
                 // else check if list exists in map
                 list = (List<String>) map.get(listId);
@@ -2088,7 +2067,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     revision = (String)map.get("_rev");
                     UpdateRequest r = Requests.newUpdateRequest(repoId, new JsonValue(map));
                     r.setRevision(revision);
-                    getConnectionFactory().getConnection().update(getServerContext(), r);
+                    getConnectionFactory().getConnection().update(getContext(), r);
                 }
             }
             return list;
@@ -2134,7 +2113,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 String repoId = getTriggersRepoId(group, name);
                 UpdateRequest r = Requests.newUpdateRequest(repoId, tw.getValue());
                 r.setRevision(rev);
-                getConnectionFactory().getConnection().update(getServerContext(), r);
+                getConnectionFactory().getConnection().update(getContext(), r);
             } catch (ResourceException e) {
                 logger.warn("Error updating trigger in repo", e);
                 throw new JobPersistenceException("Error updating trigger in repo", e);
