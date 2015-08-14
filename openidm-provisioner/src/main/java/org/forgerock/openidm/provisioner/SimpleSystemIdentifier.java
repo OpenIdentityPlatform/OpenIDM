@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,8 +27,8 @@
 package org.forgerock.openidm.provisioner;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 /**
  * SimpleSystemIdentifier class helps to match the id against the name of the

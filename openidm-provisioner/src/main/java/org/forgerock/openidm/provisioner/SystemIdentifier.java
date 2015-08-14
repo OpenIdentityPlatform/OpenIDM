@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-15 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -39,7 +39,7 @@ public interface SystemIdentifier {
      * @param other
      * @return
      */
-    public boolean is(SystemIdentifier other);
+    boolean is(SystemIdentifier other);
 
     /**
      * Checks the {@code uri} and return true if the {@link ProvisionerService} instance is responsible to handle
@@ -48,5 +48,5 @@ public interface SystemIdentifier {
      * @param id
      * @return
      */
-    public boolean is(Id id);
+    boolean is(Id id);
 }
