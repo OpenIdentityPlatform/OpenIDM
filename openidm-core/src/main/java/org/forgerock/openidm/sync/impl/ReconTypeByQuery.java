@@ -91,7 +91,8 @@ public class ReconTypeByQuery extends ReconTypeBase {
         return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
                 Collections.synchronizedSet(new HashSet<String>()), 
                 reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), QuerySide.TARGET,
-                0, null).getResultIterable();                
+                0, null
+        ).getResultIterable();                
     }
 
     /**
