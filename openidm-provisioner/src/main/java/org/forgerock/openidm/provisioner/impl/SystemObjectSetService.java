@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,6 +23,20 @@
  */
 package org.forgerock.openidm.provisioner.impl;
 
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.newBadRequestException;
+import static org.forgerock.json.resource.ResourceException.newNotFoundException;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_NAME;
+import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_REF;
+import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONFIGURATION_PROPERTIES;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
@@ -33,22 +47,19 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
@@ -60,6 +71,7 @@ import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,14 +82,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_NAME;
-import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_REF;
-import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONFIGURATION_PROPERTIES;
 
 
 /**
@@ -193,10 +197,11 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
-    ServerContext routerContext = null;
+    Context routerContext = null;
 
     private void bindRouteService(final RouteService service) throws ResourceException {
         routeService = service;
+        // TODO-crest3
         routerContext = service.createServerContext();
     }
 
@@ -229,7 +234,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     }
 
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {
             final ProvisionerService ps;
             final JsonValue content = request.getContent();
@@ -241,11 +246,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             if (action.requiresConnectorConfigurationHelper(content)) {
                 final String connectorName = content.get(CONNECTOR_REF).get(CONNECTOR_NAME).asString();
                 if (connectorName == null) {
-                    throw new NotFoundException("No connector name provided");
+                    return newExceptionPromise(newNotFoundException("No connector name provided"));
                 }
                 provisionerType = getProvisionerType(connectorName);
                 if (provisionerType == null || !connectorConfigurationHelpers.containsKey(provisionerType)) {
-                    throw new ServiceUnavailableException("The required service is not available");
+                    // TODO-crest3
+                    return newExceptionPromise((ResourceException)
+                            new ServiceUnavailableException("The required service is not available"));
                 }
             }
 
@@ -256,86 +263,84 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 //  Multi phase configuration event calls this to generate the response for the next phase.
                 if (content.size() == 0) {
                     // Stage 1 : list available connectors
-                    handler.handleResult(getAvailableConnectors());
+                    return newResultPromise(newActionResponse(getAvailableConnectors()));
                 } else if (isGenerateConnectorCoreConfig(content)) {
                     // Stage 2: generate basic configuration
-                    handler.handleResult(helper.generateConnectorCoreConfig(content));
+                    return newResultPromise(newActionResponse(helper.generateConnectorCoreConfig(content)));
                 } else if (isGenerateFullConfig(content)) {
                     // Stage 3: generate/validate full configuration
-                    handler.handleResult(helper.generateConnectorFullConfig(content));
+                    return newResultPromise(newActionResponse(helper.generateConnectorFullConfig(content)));
                 } else {
                     // illegal request ??
-                    handler.handleResult(json(object()));
+                    return newResultPromise(newActionResponse(json(object())));
                 }
-                break;
             case testConfig:
                 JsonValue config = content;
                 if (!id.isNull()) {
-                    throw new BadRequestException("A system ID must not be specified in the request");
+                    return newExceptionPromise(
+                            newBadRequestException("A system ID must not be specified in the request"));
                 }
                 if (name.isNull()) {
-                    throw new BadRequestException("Invalid configuration to test: no 'name' specified");
+                    return newExceptionPromise(
+                            newBadRequestException("Invalid configuration to test: no 'name' specified"));
                 }
                 ps = locateServiceForTest(name);
                 if (ps != null) {
-                    handler.handleResult(new JsonValue(ps.testConfig(config)));
+                    return newResultPromise(newActionResponse(new JsonValue(ps.testConfig(config))));
                 } else {
                     // service for config-name doesn't exist; test it using the ConnectorConfigurationHelper
-                    handler.handleResult(new JsonValue(helper.test(config)));
+                    return newResultPromise(newActionResponse(new JsonValue(helper.test(config))));
                 }
-                break;
             case test:
                 if (id.isNull()) {
                     List<Object> list = new ArrayList<Object>();
                     for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
                         list.add(entry.getValue().getStatus(context));
                     }
-                    handler.handleResult(new JsonValue(list));
+                    return newResultPromise(newActionResponse(new JsonValue(list)));
                 } else {
                     ps = locateServiceForTest(id);
                     if (ps == null) {
-                        throw new NotFoundException("System: " + id.asString() + " is not available.");
+                        return newExceptionPromise(
+                                newNotFoundException("System: " + id.asString() + " is not available."));
                     } else {
-                        handler.handleResult(new JsonValue(ps.getStatus(context)));
+                        return newResultPromise(newActionResponse(new JsonValue(ps.getStatus(context))));
                     }
                 }
-                break;
             case activeSync:
             case liveSync:
                 JsonValue params = new JsonValue(request.getAdditionalParameters());
                 String source = params.get("source").asString();
                 if (source == null) {
                     logger.debug("liveSync requires an explicit source parameter, source is : {}", source );
-                    throw new BadRequestException("liveSync action requires either an explicit source parameter, "
-                            + "or needs to be called on a specific provisioner URI");
+                    return newExceptionPromise(
+                            newBadRequestException("liveSync action requires either an explicit source parameter, "
+                            + "or needs to be called on a specific provisioner URI"));
                 } else {
                     logger.debug("liveSync called with explicit source parameter {}", source);
                 }
-                handler.handleResult(liveSync(source, Boolean.valueOf(params.get("detailedFailure").asString())));
-                break;
+                return newResultPromise(newActionResponse(
+                        liveSync(source, Boolean.valueOf(params.get("detailedFailure").asString()))));
             case availableConnectors:
                 // stage 1 - direct action to get available connectors
-                handler.handleResult(getAvailableConnectors());
-                break;
+                return newResultPromise(newActionResponse(getAvailableConnectors()));
             case createCoreConfig:
                 // stage 2 - direct action to create core configuration
-                handler.handleResult(helper.generateConnectorCoreConfig(content));
-                break;
+                return newResultPromise(newActionResponse(helper.generateConnectorCoreConfig(content)));
             case createFullConfig:
                 // stage 3 - direct action to create full configuration
-                handler.handleResult(helper.generateConnectorFullConfig(content));
-                break;
+                return newResultPromise(newActionResponse(helper.generateConnectorFullConfig(content)));
             default:
-                handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
-                return;
+                return newExceptionPromise(newBadRequestException("Unsupported actionId: " + request.getAction()));
             }
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (IllegalArgumentException e) {
             // from getActionAsEnum
-            handler.handleError(new BadRequestException(e.getMessage(), e));
+            return newExceptionPromise(newBadRequestException(e.getMessage(), e));
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+            // TODO-crest3 ResourceException doesn't have InternalServerErrorException
+            return newExceptionPromise((ResourceException) new InternalServerErrorException(e));
         }
     }
 
@@ -396,24 +401,21 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     }
 
     @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Read are not supported for resource instances");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
+        return newExceptionPromise(
+                newNotSupportedException("Read are not supported for resource instances"));
     }
 
     @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Patch are not supported for resource instances");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
+        return newExceptionPromise(
+                newNotSupportedException("Patch are not supported for resource instances"));
     }
 
     @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Update are not supported for resource instances");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
+        return newExceptionPromise(
+                newNotSupportedException("Update are not supported for resource instances"));
     }
 
     /**
@@ -424,7 +426,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
      *          if execution of the scheduled work failed.
      *          Implementations can also throw RuntimeExceptions which will get logged.
      */
-    public void execute(ServerContext context, Map<String, Object> schedulerContext) throws ExecutionException {
+    public void execute(Context context, Map<String, Object> schedulerContext) throws ExecutionException {
         try {
             JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
             if (params.get("action").asEnum(SystemAction.class).isLiveSync()) {
@@ -443,7 +445,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     }
 
     @Override
-    public void auditScheduledService(final ServerContext context, final AuditEvent auditEvent)
+    public void auditScheduledService(final Context context, final AuditEvent auditEvent)
             throws ExecutionException {
         try {
             connectionFactory.getConnection().create(
@@ -465,7 +467,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         Id id = new Id(source);
         String previousStageResourceContainer = "repo/synchronisation/pooledSyncStage";
         String previousStageId = id.toString().replace("/", "").toUpperCase();
-        Resource previousStage = null;
+        ResourceResponse previousStage = null;
         try {
             ReadRequest readRequest = Requests.newReadRequest(previousStageResourceContainer, previousStageId);
             previousStage = connectionFactory.getConnection().read(routerContext, readRequest);

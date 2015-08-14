@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,7 @@
  */
 package org.forgerock.openidm.provisioner;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 
 import java.util.Map;
@@ -38,20 +38,20 @@ import java.util.Map;
 public interface ConnectorConfigurationHelper {
 
     /** configuration property that describes the connector's meta-data */
-    static final String CONNECTOR_REF = "connectorRef";
+    String CONNECTOR_REF = "connectorRef";
     /** configuration property that holds the actual connector configuration (passed to the connector) */
-    static final String CONFIGURATION_PROPERTIES = "configurationProperties";
+    String CONFIGURATION_PROPERTIES = "configurationProperties";
     /** the connector name (within connectorRef) */
-    static final String CONNECTOR_NAME = "connectorName";
+    String CONNECTOR_NAME = "connectorName";
     /** configuration property that holds the connector object type detail */
-    static final String OBJECT_TYPES = "objectTypes";
+    String OBJECT_TYPES = "objectTypes";
 
     /**
      * Return the provisioner type that is used to manage configuration/connectors created by this configuration helper.
      *
      * @return the configuration system type.
      */
-    public String getProvisionerType();
+    String getProvisionerType();
 
     /**
      * Test the given configuration.
@@ -63,7 +63,7 @@ public interface ConnectorConfigurationHelper {
      *             when the test fails the {@link ResourceException#getDetail()}
      *             contains the detailed information.
      */
-    public Map<String, Object> test(JsonValue params) throws ResourceException;
+    Map<String, Object> test(JsonValue params) throws ResourceException;
 
     /**
      * Get available connectors from an installation
@@ -71,7 +71,7 @@ public interface ConnectorConfigurationHelper {
      * @return {@code JsonValue} containing all available connectors
      * @throws ResourceException
      */
-    public JsonValue getAvailableConnectors() throws ResourceException;
+    JsonValue getAvailableConnectors() throws ResourceException;
 
     /**
      * Generate the core configuration
@@ -83,7 +83,7 @@ public interface ConnectorConfigurationHelper {
      * @return core connector configuration
      * @throws ResourceException
      */
-    public JsonValue generateConnectorCoreConfig(JsonValue params) throws ResourceException;
+    JsonValue generateConnectorCoreConfig(JsonValue params) throws ResourceException;
 
     /**
      * Generate the full configuration
@@ -95,7 +95,7 @@ public interface ConnectorConfigurationHelper {
      * @return full connector configuration
      * @throws ResourceException
      */
-    public JsonValue generateConnectorFullConfig(JsonValue params) throws ResourceException;
+    JsonValue generateConnectorFullConfig(JsonValue params) throws ResourceException;
 
 
 }
