@@ -27,8 +27,8 @@ package org.forgerock.openidm.info.metadata;
 import java.util.Collections;
 import java.util.List;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.info.impl.HealthService;
 import org.forgerock.openidm.info.impl.InfoService;
 import org.forgerock.openidm.metadata.MetaDataProvider;

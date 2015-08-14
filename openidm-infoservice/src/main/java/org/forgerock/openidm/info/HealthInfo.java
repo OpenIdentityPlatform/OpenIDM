@@ -23,7 +23,7 @@
  */
 package org.forgerock.openidm.info;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * Access to application health status
