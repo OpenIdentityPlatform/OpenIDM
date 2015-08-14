@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+* Copyright 2013-2015 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import javax.servlet.Filter;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * A registered servlet script and it's associated configuration, order number, and ID.
@@ -37,34 +37,34 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public interface RegisteredFilter extends Comparable<RegisteredFilter> {
 
-    public static final String FILTER_ORDER = "order";
+    String FILTER_ORDER = "order";
 
     /**
      * Returns the registered filter's underlying javax.servlet.Filter object
      * 
      * @return the Filter object
      */
-    public Filter getFilter();
+    Filter getFilter();
     
     /**
      * Returns the registered filter's configuration.
      * 
      * @return the configuration.
      */
-    public JsonValue getConfig();
+    JsonValue getConfig();
 
     /**
      * Returns the registered filter's order number
      * 
      * @return the order number
      */
-    public Integer getOrder();
+    Integer getOrder();
 
     /**
      * Returns the registered filter's unique identifier
      * 
      * @return the UUID
      */
-    public UUID getId();
+    UUID getId();
     
 }

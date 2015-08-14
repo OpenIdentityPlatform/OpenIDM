@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.servletregistration;
@@ -19,7 +19,7 @@ package org.forgerock.openidm.servletregistration;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.osgi.service.http.NamespaceException;
 
 import java.util.Dictionary;
@@ -31,31 +31,31 @@ import java.util.Dictionary;
 public interface ServletRegistration {
 
     /** The canonical class name for the Filter class. */
-    public static final String SERVLET_FILTER_CLASS = "filterClass";
+    String SERVLET_FILTER_CLASS = "filterClass";
 
     /** Classpath URLs to use for the servlet filter's classloader. */
-    public static final String SERVLET_FILTER_CLASS_PATH_URLS = "classPathURLs";
+    String SERVLET_FILTER_CLASS_PATH_URLS = "classPathURLs";
 
     /** Request attributes to set before the servlet filter's doFilter method is invoked */
-    public static final String SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES = "requestAttributes";
+    String SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES = "requestAttributes";
 
     /** Servlet names, or aliases, to which the servlet filter applies. */
-    public static final String SERVLET_FILTER_SERVLET_NAMES = "servletNames";
+    String SERVLET_FILTER_SERVLET_NAMES = "servletNames";
 
     /** URL patterns to which the servlet filter applies. */
-    public static final String SERVLET_FILTER_URL_PATTERNS = "urlPatterns";
+    String SERVLET_FILTER_URL_PATTERNS = "urlPatterns";
 
     /** Initialization arguments for the filter. */
-    public static final String SERVLET_FILTER_INIT_PARAMETERS = "initParams";
+    String SERVLET_FILTER_INIT_PARAMETERS = "initParams";
 
     /** System properties required by the filter. */
-    public static final String SERVLET_FILTER_SYSTEM_PROPERTIES = "systemProperties";
+    String SERVLET_FILTER_SYSTEM_PROPERTIES = "systemProperties";
 
     /** Script extensions supported/requested by the filter */
-    public static final String SERVLET_FILTER_SCRIPT_EXTENSIONS = "scriptExtensions";
+    String SERVLET_FILTER_SCRIPT_EXTENSIONS = "scriptExtensions";
 
     /** Script extension to augment security context */
-    public static final String SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT = "augmentSecurityContext";
+    String SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT = "augmentSecurityContext";
 
     /**
      * Parses the given servlet filter configuration and registers a servlet filter in OSGi.
