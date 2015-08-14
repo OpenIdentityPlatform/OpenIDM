@@ -19,6 +19,7 @@ package org.forgerock.openidm.info.health;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
@@ -57,7 +58,7 @@ public class ReconInfoResourceProvider extends AbstractInfoResourceProvider {
                     field("maximumPoolSize", mBeanServer.getAttribute(objectName, "MaximumPoolSize")),
                     field("currentPoolSize", mBeanServer.getAttribute(objectName, "PoolSize"))
             ));
-            return newResultPromise(Responses.newResourceResponse("", "", result));
+            return newResultPromise(newResourceResponse("", "", result));
         } catch (Exception e) {
             logger.error("Unable to get reconciliation mbean");
             return newExceptionPromise(newInternalServerErrorException("Unable to get reconciliation mbean", e));

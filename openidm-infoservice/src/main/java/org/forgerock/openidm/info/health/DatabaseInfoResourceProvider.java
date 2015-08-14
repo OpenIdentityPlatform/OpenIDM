@@ -20,6 +20,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -28,7 +29,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
@@ -89,7 +89,7 @@ public class DatabaseInfoResourceProvider extends AbstractInfoResourceProvider {
                 ));
                 results.put(name.getCanonicalName(), singleResult.getObject());
             }
-            return newResultPromise(Responses.newResourceResponse("", "", results));
+            return newResultPromise(newResourceResponse("", "", results));
         } catch (Exception e) {
             logger.error("Unable to get BoneCP statistics mbean");
             return newExceptionPromise(newInternalServerErrorException("Unable to get BoneCP statistics mbean", e));
