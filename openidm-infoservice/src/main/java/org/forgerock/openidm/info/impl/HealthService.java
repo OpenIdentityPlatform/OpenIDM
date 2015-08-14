@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.forgerock.json.resource.Router.uriTemplate;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -342,10 +344,10 @@ public class HealthService
         context.getBundleContext().addBundleListener(bundleListener);
         context.getBundleContext().addFrameworkListener(frameworkListener);
 
-        router.addRoute(Router.uriTemplate("os"), new OsInfoResourceProvider());
-        router.addRoute(Router.uriTemplate("memory"), new MemoryInfoResourceProvider());
-        router.addRoute(Router.uriTemplate("recon"), new ReconInfoResourceProvider());
-        router.addRoute(Router.uriTemplate("jdbc"), new DatabaseInfoResourceProvider());
+        router.addRoute(uriTemplate("os"), new OsInfoResourceProvider());
+        router.addRoute(uriTemplate("memory"), new MemoryInfoResourceProvider());
+        router.addRoute(uriTemplate("recon"), new ReconInfoResourceProvider());
+        router.addRoute(uriTemplate("jdbc"), new DatabaseInfoResourceProvider());
 
         logger.info("OpenIDM Health Service component is activated.");
     }
@@ -761,7 +763,7 @@ public class HealthService
      */
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
-                                                                 QueryResourceHandler handler) {
+            QueryResourceHandler handler) {
         return router.handleQuery(context, request, handler);
     }
 

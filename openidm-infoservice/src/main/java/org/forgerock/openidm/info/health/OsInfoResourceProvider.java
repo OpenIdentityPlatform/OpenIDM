@@ -20,13 +20,13 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
 
 import java.lang.management.ManagementFactory;
@@ -52,6 +52,6 @@ public class OsInfoResourceProvider extends AbstractInfoResourceProvider {
                 field("operatingSystemVersion", operatingSystemMXBean.getVersion())
         ));
 
-        return newResultPromise(Responses.newResourceResponse("", "", result));
+        return newResultPromise(newResourceResponse("", "", result));
     }
 }
