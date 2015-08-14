@@ -25,9 +25,9 @@ package org.forgerock.openidm.repo.util;
 
 import java.util.List;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.query.QueryFilterVisitor;
 
 /**
  * An abstract {@link QueryFilterVisitor} to produce SQL via an {@link SQLRenderer}.
@@ -50,9 +50,9 @@ import org.forgerock.json.resource.QueryFilterVisitor;
  * <p>
  * The implementer is responsible for implementing
  * <ul>
- *     <li>{@link #visitValueAssertion(Object, String, org.forgerock.json.fluent.JsonPointer, Object)} which
+ *     <li>{@link #visitValueAssertion(Object, String, org.forgerock.json.JsonPointer, Object)} which
  *     handles the value assertions - x operand y for the standard operands</li>
- *     <li>{@link #visitPresentFilter(Object, org.forgerock.json.fluent.JsonPointer)} as "field present" can
+ *     <li>{@link #visitPresentFilter(Object, org.forgerock.json.JsonPointer)} as "field present" can
  *     vary by database implementation (though typically "field IS NOT NULL" is chosen)</li>
  *     <li>@{link #visitBooleanLiteralFilter(Object, boolean)} to express a boolean true or false in whatever
  *     SQL dialect is being used</li>
@@ -62,7 +62,7 @@ import org.forgerock.json.resource.QueryFilterVisitor;
  *     <li>@{link #visitOrFilter(Object, List&lt;QueryFilter&gt;, Object)} to dictate how the composite
  *     function OR behaves</li>
  */
-public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer, P> implements QueryFilterVisitor<R, P> {
+public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer, P> implements QueryFilterVisitor<R, P, JsonPointer> {
 
     /**
      * A templating method that will generate the actual value assertion.
@@ -93,27 +93,32 @@ public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer, P> im
     /*
      * {@inheritDoc}
      */
+    @Override
     public abstract R visitPresentFilter(P parameters, JsonPointer field);
 
     /*
      * {@inheritDoc}
      */
+    @Override
     public abstract R visitBooleanLiteralFilter(P parameters, boolean value);
 
     /*
      * {@inheritDoc}
      */
-    public abstract R visitNotFilter(P parameters, QueryFilter subFilter);
+    @Override
+    public abstract R visitNotFilter(P parameters, QueryFilter<JsonPointer> subFilter);
 
     /*
      * {@inheritDoc}
      */
-    public abstract R visitAndFilter(final P parameters, List<QueryFilter> subFilters);
+    @Override
+    public abstract R visitAndFilter(P parameters, List<QueryFilter<JsonPointer>> subFilters);
 
     /*
      * {@inheritDoc}
      */
-    public abstract R visitOrFilter(final P parameters, List<QueryFilter> subFilters);
+    @Override
+    public abstract R visitOrFilter(P parameters, List<QueryFilter<JsonPointer>> subFilters);
 
     @Override
     public R visitContainsFilter(P parameters, JsonPointer field, Object valueAssertion) {
