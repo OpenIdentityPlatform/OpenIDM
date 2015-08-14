@@ -223,10 +223,12 @@
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
         <commons.forgerock-audit.version>0.3.0-SNAPSHOT</commons.forgerock-audit.version>
 
+        <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
+        <joda-time.version>2.1</joda-time.version>
 
 
         <!-- OSGi bundles properties -->
@@ -798,6 +800,12 @@
                 <artifactId>logback-classic</artifactId>
                 <version>1.0.13</version>
                 <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda-time.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

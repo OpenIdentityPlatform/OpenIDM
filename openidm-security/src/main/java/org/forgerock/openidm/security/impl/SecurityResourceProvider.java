@@ -64,12 +64,13 @@ import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterUtils;
 import org.forgerock.openidm.core.IdentityServer;
@@ -133,14 +134,16 @@ public class SecurityResourceProvider {
     
     private String cryptoCipher;
 
-    public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
+    public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager,
+            RepositoryService repoService) {
         this.store = store;
         this.resourceName = resourceName;
         this.manager = manager;
         this.repoService = repoService;
         this.cryptoAlias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
         this.cryptoCipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
-        this.instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+        this.instanceType = IdentityServer.getInstance().getProperty(
+                "openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
     }
     /**
      * Returns a PEM String representation of a object.
@@ -216,12 +219,12 @@ public class SecurityResourceProvider {
      */
     protected JsonValue returnCertificate(String alias, Certificate cert) throws Exception {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-        content.put(Resource.FIELD_CONTENT_ID, alias);
+        content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
         content.put("type", cert.getType());
         content.put("cert", getCertString(cert));
         content.put("publicKey", getKeyMap(cert.getPublicKey()));
         if (cert instanceof X509Certificate) {
-            Map<String, Object> issuer = new HashMap<String, Object>();
+            Map<String, Object> issuer = new HashMap<>();
             X500Name name = X500Name.getInstance(PrincipalUtil.getIssuerX509Principal((X509Certificate)cert));
             addAttributeToIssuer(issuer, name, "C", BCStyle.C);
             addAttributeToIssuer(issuer, name, "ST", BCStyle.ST);
@@ -246,7 +249,7 @@ public class SecurityResourceProvider {
      */
     protected JsonValue returnCertificateRequest(String alias, PKCS10CertificationRequest csr) throws Exception {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-        content.put(Resource.FIELD_CONTENT_ID, alias);
+        content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
         content.put("csr", getCertString(csr));
         content.put("publicKey", getKeyMap(csr.getPublicKey()));
         return content;
@@ -262,7 +265,7 @@ public class SecurityResourceProvider {
      */
     protected JsonValue returnKey(String alias, Key key) throws Exception {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-        content.put(Resource.FIELD_CONTENT_ID, alias);
+        content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
         if (key instanceof PrivateKey) {
             content.put("privateKey", getKeyMap(key));
         } else if (key instanceof SecretKey) {
@@ -279,7 +282,7 @@ public class SecurityResourceProvider {
      * @throws Exception
      */
     protected Map<String, Object> getKeyMap(Key key) throws Exception {
-        Map<String, Object> keyMap = new HashMap<String, Object>();
+        Map<String, Object> keyMap = new HashMap<>();
         keyMap.put("algorithm", key.getAlgorithm());
         keyMap.put("format", key.getFormat());
         keyMap.put("encoded", toPem(key));
@@ -393,9 +396,11 @@ public class SecurityResourceProvider {
         X509v3CertificateBuilder v3CertGen = new JcaX509v3CertificateBuilder(builder.build(), serial, 
                 notBefore, notAfter, builder.build(), keyPair.getPublic());
 
-        ContentSigner sigGen = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(BC).build(keyPair.getPrivate());
+        ContentSigner sigGen =
+                new JcaContentSignerBuilder(signatureAlgorithm).setProvider(BC).build(keyPair.getPrivate());
 
-        X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(v3CertGen.build(sigGen));
+        X509Certificate cert =
+                new JcaX509CertificateConverter().setProvider(BC).getCertificate(v3CertGen.build(sigGen));
         cert.checkValidity(new Date());
         cert.verify(cert.getPublicKey());
 
@@ -413,8 +418,8 @@ public class SecurityResourceProvider {
      * @return
      * @throws Exception
      */
-    protected Pair<PKCS10CertificationRequest, PrivateKey> generateCSR(String alias, String algorithm, String signatureAlgorithm, int keySize, 
-            JsonValue params) throws Exception {
+    protected Pair<PKCS10CertificationRequest, PrivateKey> generateCSR(String alias, String algorithm,
+            String signatureAlgorithm, int keySize, JsonValue params) throws Exception {
 
         // Construct the distinguished name
         StringBuilder sb = new StringBuilder(); 
@@ -438,7 +443,8 @@ public class SecurityResourceProvider {
         PrivateKey privateKey = keyPair.getPrivate();
         
         // Generate the certificate request
-        PKCS10CertificationRequest cr = new PKCS10CertificationRequest(signatureAlgorithm, subjectName, publicKey, null, privateKey);
+        PKCS10CertificationRequest cr = new PKCS10CertificationRequest(signatureAlgorithm, subjectName, publicKey,
+                null, privateKey);
         
         // Store the private key to use when the signed cert is return and updated
         logger.debug("Storing private key with alias {}", alias);
@@ -452,7 +458,7 @@ public class SecurityResourceProvider {
      * 
      * @param alias the alias from the CSR
      * @param keyPair the KeyPair object
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     protected void storeKeyPair(String alias, KeyPair keyPair) throws ResourceException {
         try {
@@ -463,7 +469,7 @@ public class SecurityResourceProvider {
             keyMap.put("keyPair", encrypted.getObject());
             storeInRepo(KEYS_CONTAINER, alias, keyMap);
         } catch (Exception e) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+            throw new InternalServerErrorException(e.getMessage(), e);
         }
         
     }
@@ -472,7 +478,7 @@ public class SecurityResourceProvider {
      * Reads an object from the repository
      * @param id the object's id
      * @return the object
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     protected JsonValue readFromRepo(String id) throws ResourceException {
         JsonValue keyMap = new JsonValue(repoService.read(Requests.newReadRequest(id)).getContent());
@@ -483,10 +489,10 @@ public class SecurityResourceProvider {
      * Stores an object in the repository
      * @param id the object's id
      * @param value the value of the object to store
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     protected void storeInRepo(String container, String id, JsonValue value) throws ResourceException {
-        Resource oldResource;
+        ResourceResponse oldResource;
         try {
             oldResource = repoService.read(Requests.newReadRequest(container, id));
         } catch (NotFoundException e) {
@@ -504,21 +510,20 @@ public class SecurityResourceProvider {
      * 
      * @param alias the alias from the CSR
      * @return the KeyPair
-     * @throws JsonResourceException
+     * @throws ResourceException
      */
     protected KeyPair getKeyPair(String alias) throws ResourceException {
         String id = KEYS_CONTAINER + "/" + alias;
-        Resource keyResource = repoService.read(Requests.newReadRequest(id));
+        ResourceResponse keyResource = repoService.read(Requests.newReadRequest(id));
         if (keyResource.getContent().isNull()) {
-            throw ResourceException.getException(ResourceException.NOT_FOUND, 
-                    "Cannot find stored key for alias " + alias);
+            throw new NotFoundException("Cannot find stored key for alias " + alias);
         }
         try {
             JsonValue encrypted = keyResource.getContent().get("keyPair");
             JsonValue keyPairValue = getCryptoService().decrypt(encrypted);
             return fromPem(keyPairValue.get("value").asString());
         } catch (Exception e) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+            throw new InternalServerErrorException(e.getMessage(), e);
         }
     }
     
@@ -527,7 +532,7 @@ public class SecurityResourceProvider {
      * 
      * @param privateKey A private key
      * @param publicKey A public key
-     * @throws JsonResourceException if the verification fails, or an error is encountered.
+     * @throws ResourceException if the verification fails, or an error is encountered.
      */
     protected void verify(PrivateKey privateKey, Certificate cert) throws ResourceException {
         PublicKey publicKey = cert.getPublicKey();
@@ -543,12 +548,10 @@ public class SecurityResourceProvider {
             verifier.update(data);
             verified = verifier.verify(signed);
         } catch (Exception e) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
-                    "Error verifying private key and signed certificate", e);
+            throw new InternalServerErrorException("Error verifying private key and signed certificate", e);
         }
         if (!verified) {
-            throw ResourceException.getException(ResourceException.BAD_REQUEST, 
-                    "Private key does not match signed certificate");
+            throw new BadRequestException("Private key does not match signed certificate");
         }
     }
     
@@ -583,7 +586,7 @@ public class SecurityResourceProvider {
             }
             store.setStore(keystore);
         } catch (Exception e) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Error creating keystore from store bytes", e);
+            throw new InternalServerErrorException("Error creating keystore from store bytes", e);
         }
     }
     
@@ -606,7 +609,7 @@ public class SecurityResourceProvider {
                 fin.close();
             }
         } catch (Exception e) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+            throw new InternalServerErrorException(e.getMessage(), e);
         }
         
         String keystoreString = new String(Base64.encode(keystoreBytes));
@@ -633,7 +636,8 @@ public class SecurityResourceProvider {
      * @param oid the ASN1ObjectIdentifier corresponding to the attribute
      * @throws Exception
      */
-    private void addAttributeToIssuer(Map<String, Object> issuer, X500Name name, String attribute, ASN1ObjectIdentifier oid) throws Exception {
+    private void addAttributeToIssuer(Map<String, Object> issuer, X500Name name, String attribute,
+            ASN1ObjectIdentifier oid) throws Exception {
         RDN [] rdns = name.getRDNs(oid);
         if (rdns != null && rdns.length > 0) {
             issuer.put(attribute, rdns[0].getFirst().getValue().toString());

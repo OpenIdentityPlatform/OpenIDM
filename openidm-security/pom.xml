@@ -35,6 +35,7 @@
     <description>This bundle is a simple CA to manage certificates and key in JKS</description>
 
     <dependencies>
+        <!-- OpenIDM dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-router</artifactId>
@@ -51,10 +52,20 @@
             <artifactId>openidm-repo</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Third party dependencies -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk16</artifactId>
             <version>1.46</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <!-- Provided OSGi Dependencies -->
@@ -96,6 +107,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
