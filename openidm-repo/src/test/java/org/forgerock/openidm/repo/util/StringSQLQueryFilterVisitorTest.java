@@ -23,15 +23,14 @@
  */
 package org.forgerock.openidm.repo.util;
 
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.util.query.QueryFilter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.json.resource.QueryFilter.*;
-
+import static org.forgerock.util.query.QueryFilter.*;
 
 /**
  * Tests basic QueryFilter-to-SQL-Where-Clause creation using a basic SQL syntax.
@@ -98,7 +97,7 @@ public class StringSQLQueryFilterVisitorTest {
     }
 
     @Test(dataProvider = "sqlData")
-    public void testToString(QueryFilter filter, String whereClause) {
+    public void testToString(QueryFilter<JsonPointer> filter, String whereClause) {
         assertThat(filter.accept(visitor, null).toSQL()).isEqualTo(whereClause);
     }
 

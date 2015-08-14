@@ -29,9 +29,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.query.QueryFilterVisitor;
 
 /**
  * An abstract {@link QueryFilterVisitor} to produce SQL using an {@link StringSQLRenderer}.
@@ -57,9 +57,9 @@ import org.forgerock.json.resource.QueryFilterVisitor;
  * <p>
  * This implementation does not support extended-match.
  * <p>
- * The implementer is responsible for implementing {@link #visitValueAssertion(Object, String, org.forgerock.json.fluent.JsonPointer, Object)}
+ * The implementer is responsible for implementing {@link #visitValueAssertion(Object, String, org.forgerock.json.JsonPointer, Object)}
  * which handles the value assertions - x operand y for the standard operands.  The implementer is also responsible for
- * implementing {@link #visitPresentFilter(Object, org.forgerock.json.fluent.JsonPointer)} as "field present" can vary
+ * implementing {@link #visitPresentFilter(Object, org.forgerock.json.JsonPointer)} as "field present" can vary
  * by database implementation (though typically "field IS NOT NULL" is chosen).
  */
 public abstract class StringSQLQueryFilterVisitor<P> extends AbstractSQLQueryFilterVisitor<StringSQLRenderer, P> {
@@ -90,14 +90,14 @@ public abstract class StringSQLQueryFilterVisitor<P> extends AbstractSQLQueryFil
      */
     public abstract StringSQLRenderer visitValueAssertion(P parameters, String operand, JsonPointer field, Object valueAssertion);
 
-    public StringSQLRenderer visitCompositeFilter(final P parameters, List<QueryFilter> subFilters, String operand) {
+    public StringSQLRenderer visitCompositeFilter(final P parameters, List<QueryFilter<JsonPointer>> subFilters, String operand) {
         final String operandDelimiter = new StringBuilder(" ").append(operand).append(" ").toString();
         return new StringSQLRenderer("(")
                 .append(StringUtils.join(
                         FluentIterable.from(subFilters)
-                            .transform(new Function<QueryFilter, String>() {
+                            .transform(new Function<QueryFilter<JsonPointer>, String>() {
                                 @Override
-                                public String apply(QueryFilter filter) {
+                                public String apply(QueryFilter<JsonPointer> filter) {
                                     return filter.accept(StringSQLQueryFilterVisitor.this, parameters).toSQL();
                                 }
                             }),
@@ -106,12 +106,12 @@ public abstract class StringSQLQueryFilterVisitor<P> extends AbstractSQLQueryFil
     }
 
     @Override
-    public StringSQLRenderer visitAndFilter(P parameters, List<QueryFilter> subFilters) {
+    public StringSQLRenderer visitAndFilter(P parameters, List<QueryFilter<JsonPointer>> subFilters) {
         return visitCompositeFilter(parameters, subFilters, "AND");
     }
 
     @Override
-    public StringSQLRenderer visitOrFilter(P parameters, List<QueryFilter> subFilters) {
+    public StringSQLRenderer visitOrFilter(P parameters, List<QueryFilter<JsonPointer>> subFilters) {
         return visitCompositeFilter(parameters, subFilters, "OR");
     }
     @Override
@@ -120,7 +120,7 @@ public abstract class StringSQLQueryFilterVisitor<P> extends AbstractSQLQueryFil
     }
 
     @Override
-    public StringSQLRenderer visitNotFilter(P parameters, QueryFilter subFilter) {
+    public StringSQLRenderer visitNotFilter(P parameters, QueryFilter<JsonPointer> subFilter) {
         return new StringSQLRenderer("NOT ")
                 .append(subFilter.accept(this, parameters).toSQL());
     }
