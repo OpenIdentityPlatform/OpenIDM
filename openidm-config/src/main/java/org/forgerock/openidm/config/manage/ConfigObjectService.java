@@ -120,7 +120,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     final static String CONFIG_KEY = "jsonconfig";
 
     final static String EVENT_LISTENER_ID = "config";
-    final static String EVENT_RESOURCE_NAME = "resourceName";
+    final static String EVENT_RESOURCE_PATH = "resourcePath";
     final static String EVENT_RESOURCE_ID = "resourceId";
     final static String EVENT_RESOURCE_OBJECT = "obj";
     final static String EVENT_RESOURCE_ACTION = "action";
@@ -150,12 +150,20 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    private ConnectionFactory connectionFactory;
+
+    protected void bindConnectionFactory(ConnectionFactory connectionFactory) {
+    	this.connectionFactory = connectionFactory;
+    }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
+    protected void bindEnhancedConfig(EnhancedConfig enhancedConfig) {
+    	this.enhancedConfig = enhancedConfig;
+    }
+    
     private ConfigCrypto configCrypto;
 
     @Override
@@ -175,20 +183,20 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * The object may contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency supported by OpenIDM.
      *
-     * @param resourceName the identifier of the resource to retrieve from the object set.
+     * @param resourcePath the identifier of the resource to retrieve from the object set.
      * @return the requested object.
      * @throws NotFoundException   if the specified object could not be found.
      * @throws ForbiddenException  if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
      */
     @SuppressWarnings("rawtypes")
-    public JsonValue read(ResourcePath resourceName) throws ResourceException {
-        logger.debug("Invoking read {}", resourceName.toString());
+    public JsonValue read(ResourcePath resourcePath) throws ResourceException {
+        logger.debug("Invoking read {}", resourcePath.toString());
         JsonValue result = null;
 
         try {
 
-            if (resourceName.isEmpty()) {
+            if (resourcePath.isEmpty()) {
                 // List all configurations
                 result = new JsonValue(new HashMap<String, Object>());
                 Configuration[] rawConfigs = configAdmin.listConfigurations(null);
@@ -218,20 +226,20 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                 result.put("configurations", configList);
                 logger.debug("Read list of configurations with {} entries", configList.size());
             } else {
-                Configuration config = findExistingConfiguration(new ParsedId(resourceName));
+                Configuration config = findExistingConfiguration(new ParsedId(resourcePath));
                 if (config == null) {
-                    throw new NotFoundException("No configuration exists for id " + resourceName.toString());
+                    throw new NotFoundException("No configuration exists for id " + resourcePath.toString());
                 }
                 Dictionary props = config.getProperties();
-                result =  enhancedConfig.getConfiguration(props, resourceName.toString(), false);
-                result.put("_id", resourceName.toString());
-                logger.debug("Read configuration for service {}", resourceName);
+                result =  enhancedConfig.getConfiguration(props, resourcePath.toString(), false);
+                result.put("_id", resourcePath.toString());
+                logger.debug("Read configuration for service {}", resourcePath);
             }
         } catch (ResourceException ex) {
             throw ex;
         } catch (Exception ex) {
-            logger.warn("Failure to load configuration for {}", resourceName, ex);
-            throw new InternalServerErrorException("Failure to load configuration for " + resourceName + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to load configuration for {}", resourcePath, ex);
+            throw new InternalServerErrorException("Failure to load configuration for " + resourcePath + ": " + ex.getMessage(), ex);
         }
         return result;
     }
@@ -257,7 +265,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param resourceName for multi-instance config, the factory pid to use
+     * @param resourcePath for multi-instance config, the factory pid to use
      * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
      * @param obj    the contents of the object to create in the object set.
      * @throws NotFoundException           if the specified id could not be resolved.
@@ -266,12 +274,12 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @throws BadRequestException         if the passed identifier is invalid
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void create(ResourcePath resourceName, String id, Map<String, Object> obj, boolean allowExisting) throws ResourceException {
-        logger.debug("Invoking create configuration {} {} {}", new Object[] { resourceName.toString(), id, obj });
+    public void create(ResourcePath resourcePath, String id, Map<String, Object> obj, boolean allowExisting) throws ResourceException {
+        logger.debug("Invoking create configuration {} {} {}", new Object[] { resourcePath.toString(), id, obj });
         if (id == null || id.length() == 0) {
             throw new BadRequestException("The passed identifier to create is null");
         }
-        ParsedId parsedId = new ParsedId(resourceName, id);
+        ParsedId parsedId = new ParsedId(resourcePath, id);
         try {
             Configuration config = null;
             if (parsedId.isFactoryConfig()) {
@@ -303,8 +311,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         } catch (ResourceException ex) {
             throw ex;
         } catch (JsonValueException ex) {
-            logger.warn("Invalid configuration provided for {}:" + ex.getMessage(), resourceName.toString(), ex);
-            throw new BadRequestException("Invalid configuration provided for " + resourceName.toString() + ": " + ex.getMessage(), ex);
+            logger.warn("Invalid configuration provided for {}:" + ex.getMessage(), resourcePath.toString(), ex);
+            throw new BadRequestException("Invalid configuration provided for " + resourcePath.toString() + ": " + ex.getMessage(), ex);
         } catch (WaitForMetaData ex) {
             logger.info("No meta-data provider available yet to create and encrypt configuration for {}, retry later.", parsedId.toString(), ex);
             throw new InternalServerErrorException("No meta-data provider available yet to create and encrypt configuration for "
@@ -340,7 +348,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param resourceName the identifier of the resource to be updated
+     * @param resourcePath the identifier of the resource to be updated
      * @param rev    the version of the object to update; or {@code null} if not provided.
      * @param obj    the contents of the object to put in the object set.
      * @throws ConflictException           if version is required but is {@code null}.
@@ -350,39 +358,39 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @throws BadRequestException         if the passed identifier is invalid
      */
     @SuppressWarnings("rawtypes")
-	public void update(ResourcePath resourceName, String rev, Map<String, Object> obj) throws ResourceException {
-        logger.debug("Invoking update configuration {} {}", resourceName.toString(), rev);
-        if (resourceName.isEmpty()) {
+	public void update(ResourcePath resourcePath, String rev, Map<String, Object> obj) throws ResourceException {
+        logger.debug("Invoking update configuration {} {}", resourcePath.toString(), rev);
+        if (resourcePath.isEmpty()) {
             throw new BadRequestException("The passed identifier to update is empty");
         }
-        else if (resourceName.size() > 2) {
+        else if (resourcePath.size() > 2) {
             throw new BadRequestException("The passed identifier to update has more than two parts");
         }
         
-        ParsedId parsedId = new ParsedId(resourceName);
+        ParsedId parsedId = new ParsedId(resourcePath);
         try {    
             Configuration config = findExistingConfiguration(parsedId);
 
             Dictionary existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
-                throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not update the configuration.");
+                throw new NotFoundException("No existing configuration found for " + resourcePath.toString() + ", can not update the configuration.");
             }
             
             existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, new JsonValue(obj));
             config.update(existingConfig);
-            logger.debug("Updated existing configuration for {} with {}", resourceName.toString(), existingConfig);
+            logger.debug("Updated existing configuration for {} with {}", resourcePath.toString(), existingConfig);
         } catch (ResourceException ex) {
             throw ex;
         } catch (JsonValueException ex) {
-            logger.warn("Invalid configuration provided for {}:" + ex.getMessage(), resourceName.toString(), ex);
-            throw new BadRequestException("Invalid configuration provided for " + resourceName.toString() + ": " + ex.getMessage(), ex);
+            logger.warn("Invalid configuration provided for {}:" + ex.getMessage(), resourcePath.toString(), ex);
+            throw new BadRequestException("Invalid configuration provided for " + resourcePath.toString() + ": " + ex.getMessage(), ex);
         } catch (WaitForMetaData ex) {
             logger.info("No meta-data provider available yet to update and encrypt configuration for {}, retry later.", parsedId.toString(), ex);
             throw new InternalServerErrorException("No meta-data provider available yet to create and encrypt configuration for "
                     + parsedId.toString() + ", retry later.", ex);
         } catch (Exception ex) {
-            logger.warn("Failure to update configuration for {}", resourceName.toString(), ex);
-            throw new InternalServerErrorException("Failure to update configuration for " + resourceName.toString() + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to update configuration for {}", resourcePath.toString(), ex);
+            throw new InternalServerErrorException("Failure to update configuration for " + resourcePath.toString() + ": " + ex.getMessage(), ex);
         }
     }
 
@@ -404,7 +412,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     /**
      * Deletes the specified object from the object set.
      *
-     * @param resourceName the identifier of the resource to be deleted.
+     * @param resourcePath the identifier of the resource to be deleted.
      * @param rev    the version of the object to delete or {@code null} if not provided.
      * @return the deleted object.
      * @throws NotFoundException           if the specified object could not be found.
@@ -413,33 +421,33 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */
     @SuppressWarnings("rawtypes")
-	public JsonValue delete(ResourcePath resourceName, String rev) throws ResourceException {
-        logger.debug("Invoking delete configuration {} {}", resourceName.toString(), rev);
-        if (resourceName.isEmpty()) {
+	public JsonValue delete(ResourcePath resourcePath, String rev) throws ResourceException {
+        logger.debug("Invoking delete configuration {} {}", resourcePath.toString(), rev);
+        if (resourcePath.isEmpty()) {
             throw new BadRequestException("The passed identifier to delete is null");
         }
         try {
-            ParsedId parsedId = new ParsedId(resourceName);
+            ParsedId parsedId = new ParsedId(resourcePath);
             Configuration config = findExistingConfiguration(parsedId);
             if (config == null) {
-                throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not delete the configuration.");
+                throw new NotFoundException("No existing configuration found for " + resourcePath.toString() + ", can not delete the configuration.");
             }
             
             Dictionary existingConfig = config.getProperties();
-            JsonValue value = enhancedConfig.getConfiguration(existingConfig, resourceName.toString(), false);
+            JsonValue value = enhancedConfig.getConfiguration(existingConfig, resourcePath.toString(), false);
 
             if (existingConfig == null) {
-                throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not delete the configuration.");
+                throw new NotFoundException("No existing configuration found for " + resourcePath.toString() + ", can not delete the configuration.");
             }
             config.delete();
-            logger.debug("Deleted configuration for {}", resourceName.toString());
+            logger.debug("Deleted configuration for {}", resourcePath.toString());
             
             return value;
         } catch (ResourceException ex) {
             throw ex;
         } catch (Exception ex) {
-            logger.warn("Failure to delete configuration for {}", resourceName.toString(), ex);
-            throw new InternalServerErrorException("Failure to delete configuration for " + resourceName.toString() + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to delete configuration for {}", resourcePath.toString(), ex);
+            throw new InternalServerErrorException("Failure to delete configuration for " + resourcePath.toString() + ": " + ex.getMessage(), ex);
         }
     }
 
@@ -460,7 +468,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         }
 
         try {
-            QueryResponse response = connectionFactory.getConnection().query(context, queryRequest, new QueryResourceHandler() {
+        	return newResultPromise(connectionFactory.getConnection().query(context, queryRequest, new QueryResourceHandler() {
 				@Override
 				public boolean handleResource(ResourceResponse resource) {
                     JsonValue content = resource.getContent();
@@ -472,8 +480,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     return true;
 				}
                 
-            });
-            return newResultPromise(response);
+            }));
         } catch (ResourceException e) {
         	return newExceptionPromise(e);
         }
@@ -532,18 +539,18 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             try {
                 JsonValue details = event.getDetails();
                 ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
-                ResourcePath resourceName = ResourcePath.valueOf(details.get(EVENT_RESOURCE_NAME).asString());
+                ResourcePath resourcePath = ResourcePath.valueOf(details.get(EVENT_RESOURCE_PATH).asString());
                 String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
                 Map<String, Object> obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT).asMap();
                 switch (action) {
                 case CREATE:
-                    create(resourceName, id, obj, true);
+                    create(resourcePath, id, obj, true);
                     break;
                 case UPDATE:
-                    update(resourceName, null, obj);
+                    update(resourcePath, null, obj);
                     break;
                 case DELETE:
-                    delete(resourceName, null);
+                    delete(resourcePath, null);
                     break;
                 }
             } catch (Exception e) {
@@ -567,7 +574,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         if (clusterManagementService != null && clusterManagementService.isEnabled()) {
             JsonValue details = json(object(
                     field(EVENT_RESOURCE_ACTION, action.toString()),
-                    field(EVENT_RESOURCE_NAME, name.toString()),
+                    field(EVENT_RESOURCE_PATH, name.toString()),
                     field(EVENT_RESOURCE_ID, id),
                     field(EVENT_RESOURCE_OBJECT, obj)));
             ClusterEvent event = new ClusterEvent(
@@ -579,12 +586,12 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         }
     }
     
-    String getParsedId(String resourceName) throws ResourceException {
-        return new ParsedId(ResourcePath.valueOf(resourceName)).toString();
+    String getParsedId(String resourcePath) throws ResourceException {
+        return new ParsedId(ResourcePath.valueOf(resourcePath)).toString();
     }
     
-    boolean isFactoryConfig(String resourceName) throws ResourceException {
-        return new ParsedId(ResourcePath.valueOf(resourceName)).isFactoryConfig();
+    boolean isFactoryConfig(String resourcePath) throws ResourceException {
+        return new ParsedId(ResourcePath.valueOf(resourcePath)).isFactoryConfig();
     }
     
     static QueryFilter<JsonPointer> asConfigQueryFilter(QueryFilter<JsonPointer> filter) {
@@ -720,11 +727,11 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         public String factoryPid;
         public String instanceAlias;
 
-        public ParsedId(ResourcePath resourceName) throws BadRequestException {
+        public ParsedId(ResourcePath resourcePath) throws BadRequestException {
             // OSGi pid with spaces is disallowed; replace any spaces we get to be kind
-            ResourcePath stripped = resourceName.toString().contains(" ")
-                    ? ResourcePath.valueOf(resourceName.toString().replaceAll(" ", "_"))
-                    : resourceName;
+            ResourcePath stripped = resourcePath.toString().contains(" ")
+                    ? ResourcePath.valueOf(resourcePath.toString().replaceAll(" ", "_"))
+                    : resourcePath;
 
             switch (stripped.size()) {
                 case 2:
@@ -737,7 +744,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     break;
 
                 default:
-                    throw new BadRequestException("The passed resourceName has more than two parts");
+                    throw new BadRequestException("The passed resourcePath has more than two parts");
             }
 
             if (null != factoryPid) {
@@ -747,13 +754,13 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             }
         }
 
-        public ParsedId(ResourcePath resourceName, String id) throws BadRequestException {
-            if (resourceName.isEmpty()) {
+        public ParsedId(ResourcePath resourcePath, String id) throws BadRequestException {
+            if (resourcePath.isEmpty()) {
                 // single-instance config
                 pid = id;
             } else {
                 // multi-instance config
-                factoryPid = resourceName.toString();
+                factoryPid = resourcePath.toString();
                 instanceAlias = id;
             }
         }
