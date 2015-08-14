@@ -24,9 +24,11 @@
 
 package org.forgerock.openidm.config.manage;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.ResourceException.*;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,10 +47,13 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -60,19 +65,17 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.query.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
@@ -84,6 +87,7 @@ import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -111,7 +115,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
     
-    final static QueryFilterVisitor<QueryFilter, Object> VISITOR = new ConfigQueryFilterVisitor<Object>();
+    final static QueryFilterVisitor<QueryFilter<JsonPointer>, Object, JsonPointer> VISITOR = new ConfigQueryFilterVisitor<Object>();
 
     final static String CONFIG_KEY = "jsonconfig";
 
@@ -150,20 +154,18 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    protected EnhancedConfig enhancedConfig;
 
     private ConfigCrypto configCrypto;
 
     @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException>  handleRead(final Context context, final ReadRequest request) {
         try {
-            Resource resource = new Resource(request.getResourceName(), null, new JsonValue(read(request.getResourceNameObject())));
-            handler.handleResult(resource);
+        	return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(read(request.getResourcePathObject()))));
         } catch (ResourceException e) {
-            handler.handleError(e);
+        	return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
     
@@ -179,7 +181,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @throws ForbiddenException  if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
      */
-    public JsonValue read(ResourceName resourceName) throws ResourceException {
+    @SuppressWarnings("rawtypes")
+    public JsonValue read(ResourcePath resourceName) throws ResourceException {
         logger.debug("Invoking read {}", resourceName.toString());
         JsonValue result = null;
 
@@ -189,13 +192,13 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                 // List all configurations
                 result = new JsonValue(new HashMap<String, Object>());
                 Configuration[] rawConfigs = configAdmin.listConfigurations(null);
-                List configList = new ArrayList();
+                List<Map<String, Object>> configList = new ArrayList<Map<String, Object>>();
                 if (null != rawConfigs) {
                     for (Configuration conf : rawConfigs) {
                         Map<String, Object> configEntry = new LinkedHashMap<String, Object>();
 
                         String alias = null;
-                        Dictionary properties = conf.getProperties();
+						Dictionary properties = conf.getProperties();
                         if (properties != null) {
                             alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
                         }
@@ -234,19 +237,17 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         try {
             JsonValue content = request.getContent();
-            create(request.getResourceNameObject(), request.getNewResourceId(), content.asMap(), false);
+            create(request.getResourcePathObject(), request.getNewResourceId(), content.asMap(), false);
             // Create and send the ClusterEvent for the created configuration 
-            sendClusterEvent(ConfigAction.CREATE, request.getResourceNameObject(), request.getNewResourceId(), content.asMap());
-            Resource resource = new Resource(request.getNewResourceId(), null, content);
-            handler.handleResult(resource);
+            sendClusterEvent(ConfigAction.CREATE, request.getResourcePathObject(), request.getNewResourceId(), content.asMap());
+            return newResultPromise(newResourceResponse(request.getNewResourceId(), null, content));
         } catch (ResourceException e) {
-            handler.handleError(e);
+        	return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
@@ -264,7 +265,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @throws PreconditionFailedException if an object with the same ID already exists.
      * @throws BadRequestException         if the passed identifier is invalid
      */
-    public void create(ResourceName resourceName, String id, Map<String, Object> obj, boolean allowExisting) throws ResourceException {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void create(ResourcePath resourceName, String id, Map<String, Object> obj, boolean allowExisting) throws ResourceException {
         logger.debug("Invoking create configuration {} {} {}", new Object[] { resourceName.toString(), id, obj });
         if (id == null || id.length() == 0) {
             throw new BadRequestException("The passed identifier to create is null");
@@ -314,20 +316,18 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         try {
             String rev = request.getRevision();
             JsonValue content = request.getContent();
-            update(request.getResourceNameObject(), rev, content.asMap());
+            update(request.getResourcePathObject(), rev, content.asMap());
             // Create and send the ClusterEvent for the updated configuration 
-            sendClusterEvent(ConfigAction.UPDATE, request.getResourceNameObject(), null, content.asMap());
-            Resource resource = new Resource(request.getResourceName(), null, content);
-            handler.handleResult(resource);
+            sendClusterEvent(ConfigAction.UPDATE, request.getResourcePathObject(), null, content.asMap());
+            return newResultPromise(newResourceResponse(request.getResourcePath(), null, content));
         } catch (ResourceException e) {
-            handler.handleError(e);
+        	return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
@@ -349,7 +349,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      * @throws BadRequestException         if the passed identifier is invalid
      */
-    public void update(ResourceName resourceName, String rev, Map<String, Object> obj) throws ResourceException {
+    @SuppressWarnings("rawtypes")
+	public void update(ResourcePath resourceName, String rev, Map<String, Object> obj) throws ResourceException {
         logger.debug("Invoking update configuration {} {}", resourceName.toString(), rev);
         if (resourceName.isEmpty()) {
             throw new BadRequestException("The passed identifier to update is empty");
@@ -386,19 +387,17 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException>  handleDelete(Context context, DeleteRequest request) {
         try {
             String rev = request.getRevision();
-            JsonValue result = delete(request.getResourceNameObject(), rev);
+            JsonValue result = delete(request.getResourcePathObject(), rev);
             // Create and send the ClusterEvent for the deleted configuration 
-            sendClusterEvent(ConfigAction.DELETE, request.getResourceNameObject(), null, null);
-            Resource resource = new Resource(request.getResourceName(), null, result);
-            handler.handleResult(resource);
+            sendClusterEvent(ConfigAction.DELETE, request.getResourcePathObject(), null, null);
+            return newResultPromise(newResourceResponse(request.getResourcePath(), null, result));
         } catch (ResourceException e) {
-            handler.handleError(e);
+        	return newExceptionPromise(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
@@ -413,7 +412,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @throws ConflictException           if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */
-    public JsonValue delete(ResourceName resourceName, String rev) throws ResourceException {
+    @SuppressWarnings("rawtypes")
+	public JsonValue delete(ResourcePath resourceName, String rev) throws ResourceException {
         logger.debug("Invoking delete configuration {} {}", resourceName.toString(), rev);
         if (resourceName.isEmpty()) {
             throw new BadRequestException("The passed identifier to delete is null");
@@ -444,57 +444,44 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request,
-            ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Patch operations are not supported");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
         logger.debug("Invoking query");
         QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
-        QueryFilter filter = request.getQueryFilter();
+        QueryFilter<JsonPointer> filter = request.getQueryFilter();
 
-        queryRequest.setResourceName("repo/config");
+        queryRequest.setResourcePath("repo/config");
         if (filter != null) {
             queryRequest.setQueryFilter(asConfigQueryFilter(filter));
         }
 
         try {
-            connectionFactory.getConnection().query(context, queryRequest, new QueryResultHandler() {
-                
-                @Override
-                public void handleError(ResourceException error) {
-                    handler.handleError(error);
-                }
-
-                @Override
-                public boolean handleResource(Resource resource) {
+            QueryResponse response = connectionFactory.getConnection().query(context, queryRequest, new QueryResourceHandler() {
+				@Override
+				public boolean handleResource(ResourceResponse resource) {
                     JsonValue content = resource.getContent();
                     JsonValue config = content.get(CONFIG_KEY).copy();
                     String id = ConfigBootstrapHelper.getId(content.get(ConfigBootstrapHelper.CONFIG_ALIAS).asString(), 
                             content.get(ConfigBootstrapHelper.SERVICE_PID).asString(), 
                             content.get(ConfigBootstrapHelper.SERVICE_FACTORY_PID).asString());
-                    handler.handleResource(new Resource(id, null, config));
+                    handler.handleResource(newResourceResponse(id, null, config));
                     return true;
-                }
-
-                @Override
-                public void handleResult(QueryResult result) {
-                    handler.handleResult(result);
-                }
+				}
                 
             });
+            return newResultPromise(response);
         } catch (ResourceException e) {
-            handler.handleError(e);
+        	return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        final ResourceException e = new NotSupportedException("Action operations are not supported");
-        handler.handleError(e);
+    public Promise<ActionResponse, ResourceException>  handleAction(Context context, ActionRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     /**
@@ -545,7 +532,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             try {
                 JsonValue details = event.getDetails();
                 ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
-                ResourceName resourceName = ResourceName.valueOf(details.get(EVENT_RESOURCE_NAME).asString());
+                ResourcePath resourceName = ResourcePath.valueOf(details.get(EVENT_RESOURCE_NAME).asString());
                 String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
                 Map<String, Object> obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT).asMap();
                 switch (action) {
@@ -576,7 +563,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @param id The new resource id (used for create)
      * @param obj The resource object (used for create and update)
      */
-    private void sendClusterEvent(ConfigAction action, ResourceName name, String id, Map<String, Object> obj) {
+    private void sendClusterEvent(ConfigAction action, ResourcePath name, String id, Map<String, Object> obj) {
         if (clusterManagementService != null && clusterManagementService.isEnabled()) {
             JsonValue details = json(object(
                     field(EVENT_RESOURCE_ACTION, action.toString()),
@@ -593,14 +580,14 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
     
     String getParsedId(String resourceName) throws ResourceException {
-        return new ParsedId(ResourceName.valueOf(resourceName)).toString();
+        return new ParsedId(ResourcePath.valueOf(resourceName)).toString();
     }
     
     boolean isFactoryConfig(String resourceName) throws ResourceException {
-        return new ParsedId(ResourceName.valueOf(resourceName)).isFactoryConfig();
+        return new ParsedId(ResourcePath.valueOf(resourceName)).isFactoryConfig();
     }
     
-    static QueryFilter asConfigQueryFilter(QueryFilter filter) {
+    static QueryFilter<JsonPointer> asConfigQueryFilter(QueryFilter<JsonPointer> filter) {
         return filter.accept(VISITOR, null);
     }
     
@@ -608,74 +595,74 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * A {@link QueryFilterVisitor} implementation which modifies the {@link JsonPointer} fields by prepending them
      * with the appropriate key where the full config object is located.
      */
-    private static class ConfigQueryFilterVisitor<P> implements QueryFilterVisitor<QueryFilter, P> {
+    private static class ConfigQueryFilterVisitor<P> implements QueryFilterVisitor<QueryFilter<JsonPointer>, P, JsonPointer> {
 
         private final static String CONFIG_FACTORY_PID = "/" + ConfigBootstrapHelper.CONFIG_ALIAS;
         private final static String SERVICE_FACTORY_PID = "/" + ConfigBootstrapHelper.SERVICE_FACTORY_PID;
         private final static String SERVICE_PID = "/" + ConfigBootstrapHelper.SERVICE_PID;
 
         @Override
-        public QueryFilter visitAndFilter(P parameter, List<QueryFilter> subFilters) {
+        public QueryFilter<JsonPointer> visitAndFilter(P parameter, List<QueryFilter<JsonPointer>> subFilters) {
             return QueryFilter.and(visitQueryFilters(subFilters));
         }
 
         @Override
-        public QueryFilter visitBooleanLiteralFilter(P parameter, boolean value) {
-            return value ? QueryFilter.alwaysTrue() : QueryFilter.alwaysFalse();
+        public QueryFilter<JsonPointer> visitBooleanLiteralFilter(P parameter, boolean value) {
+            return value ? QueryFilter.<JsonPointer>alwaysTrue() : QueryFilter.<JsonPointer>alwaysFalse();
         }
 
         @Override
-        public QueryFilter visitContainsFilter(P parameter, JsonPointer field, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitContainsFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.contains(getConfigPointer(field), valueAssertion);
         }
 
         @Override
-        public QueryFilter visitEqualsFilter(P parameter, JsonPointer field, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitEqualsFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.equalTo(getConfigPointer(field), valueAssertion);
         }
 
         @Override
-        public QueryFilter visitExtendedMatchFilter(P parameter, JsonPointer field, String operator, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitExtendedMatchFilter(P parameter, JsonPointer field, String operator, Object valueAssertion) {
             return QueryFilter.comparisonFilter(getConfigPointer(field), operator, valueAssertion);
         }
 
         @Override
-        public QueryFilter visitGreaterThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitGreaterThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.greaterThan(getConfigPointer(field), valueAssertion);
         }
 
         @Override
-        public QueryFilter visitGreaterThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitGreaterThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.greaterThanOrEqualTo(getConfigPointer(field), valueAssertion);
         }
 
         @Override
-        public QueryFilter visitLessThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitLessThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.lessThan(getConfigPointer(field), valueAssertion);
         }
 
         @Override
-        public QueryFilter visitLessThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitLessThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.lessThanOrEqualTo(getConfigPointer(field), valueAssertion);
         }
 
         @Override
-        public QueryFilter visitNotFilter(P parameter, QueryFilter subFilter) {
+        public QueryFilter<JsonPointer> visitNotFilter(P parameter, QueryFilter<JsonPointer> subFilter) {
             return QueryFilter.not(subFilter.accept(new ConfigQueryFilterVisitor<Object>(), null));
         }
 
         @Override
-        public QueryFilter visitOrFilter(P parameter, List<QueryFilter> subFilters) {
+        public QueryFilter<JsonPointer> visitOrFilter(P parameter, List<QueryFilter<JsonPointer>> subFilters) {
             return QueryFilter.or(visitQueryFilters(subFilters));
         }
 
         @Override
-        public QueryFilter visitPresentFilter(P parameter, JsonPointer field) {
+        public QueryFilter<JsonPointer> visitPresentFilter(P parameter, JsonPointer field) {
             return QueryFilter.present(getConfigPointer(field));
         }
 
         @Override
-        public QueryFilter visitStartsWithFilter(P parameter, JsonPointer field, Object valueAssertion) {
+        public QueryFilter<JsonPointer> visitStartsWithFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.startsWith(getConfigPointer(field), valueAssertion);
         }
         
@@ -686,9 +673,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
          * @param subFilters a list of the filters to visit
          * @return a list of visited filters
          */
-        private List<QueryFilter> visitQueryFilters(List<QueryFilter> subFilters) {
-            List<QueryFilter> visitedFilters = new ArrayList<QueryFilter>();
-            for (QueryFilter filter : subFilters) {
+        private List<QueryFilter<JsonPointer>> visitQueryFilters(List<QueryFilter<JsonPointer>> subFilters) {
+            List<QueryFilter<JsonPointer>> visitedFilters = new ArrayList<QueryFilter<JsonPointer>>();
+            for (QueryFilter<JsonPointer> filter : subFilters) {
                 visitedFilters.add(asConfigQueryFilter(filter));
             }
             return visitedFilters;
@@ -720,7 +707,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @return
      * @throws BadRequestException
      */
-    ParsedId getParsedId(ResourceName name, String id) throws BadRequestException {
+    ParsedId getParsedId(ResourcePath name, String id) throws BadRequestException {
         return new ParsedId(name, id);
     }
 
@@ -733,10 +720,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         public String factoryPid;
         public String instanceAlias;
 
-        public ParsedId(ResourceName resourceName) throws BadRequestException {
+        public ParsedId(ResourcePath resourceName) throws BadRequestException {
             // OSGi pid with spaces is disallowed; replace any spaces we get to be kind
-            ResourceName stripped = resourceName.toString().contains(" ")
-                    ? ResourceName.valueOf(resourceName.toString().replaceAll(" ", "_"))
+            ResourcePath stripped = resourceName.toString().contains(" ")
+                    ? ResourcePath.valueOf(resourceName.toString().replaceAll(" ", "_"))
                     : resourceName;
 
             switch (stripped.size()) {
@@ -760,7 +747,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             }
         }
 
-        public ParsedId(ResourceName resourceName, String id) throws BadRequestException {
+        public ParsedId(ResourcePath resourceName, String id) throws BadRequestException {
             if (resourceName.isEmpty()) {
                 // single-instance config
                 pid = id;

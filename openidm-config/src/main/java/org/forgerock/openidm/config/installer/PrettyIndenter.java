@@ -29,9 +29,10 @@ package org.forgerock.openidm.config.installer;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.codehaus.jackson.impl.Indenter;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter.Indenter;
+
 
 /**
  * Indenter, part of formatting Jackson output in pretty print

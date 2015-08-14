@@ -36,9 +36,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.felix.cm.PersistenceManager;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
@@ -46,7 +44,7 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
@@ -61,6 +59,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class RepoPersistenceManager implements PersistenceManager, ConfigPersisterMarker {
 
@@ -157,7 +158,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             String id = pidToId(pid);
             try {
                 ReadRequest readRequest = Requests.newReadRequest(id);
-                Resource existing = repo.read(readRequest);
+                ResourceResponse existing = repo.read(readRequest);
                 exists = (existing != null);
             } catch (NotFoundException ex) {
                 exists = false;
@@ -200,7 +201,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
                 ReadRequest readRequest = Requests.newReadRequest(id);
-                Resource existing = repo.read(readRequest);
+                ResourceResponse existing = repo.read(readRequest);
                 Map<String, Object> existingConfig = existing.getContent().asMap();
                 Object configMap = existingConfig.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
                 String configString = serializeConfig(configMap);
@@ -263,8 +264,8 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                             r.setQueryId("query-all-ids");
                             logger.debug("Attempt query query-all-ids");
                             final List<Map<String, Object>> queryResult = new ArrayList<Map<String, Object>>();
-                            List<Resource> results = repo.query(r);
-                            for (Resource resource : results) {
+                            List<ResourceResponse> results = repo.query(r);
+                            for (ResourceResponse resource : results) {
                                 queryResult.add(resource.getContent().asMap());
                             }
                             dbIter = queryResult.iterator();
