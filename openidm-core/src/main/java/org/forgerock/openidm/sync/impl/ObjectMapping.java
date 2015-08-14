@@ -102,6 +102,9 @@ class ObjectMapping {
     public static final Name EVENT_RECON_TARGET = Name.get(
             "openidm/internal/discovery-engine/reconciliation/target-phase");
 
+    //** Default number of executor threads to process ReconTasks */
+    private static final int DEFAULT_TASK_THREADS = 10;
+
     /** Logger */
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
 
@@ -288,8 +291,8 @@ class ObjectMapping {
         onUnlinkScript = Scripts.newInstance(config.get("onUnlink"));
         resultScript = Scripts.newInstance(config.get("result"));
         prefetchLinks = config.get("prefetchLinks").defaultTo(Boolean.TRUE).asBoolean();
-        taskThreads = config.get("taskThreads").defaultTo(10).asInteger();
-        feedSize = config.get("feedSize").defaultTo(1000).asInteger();
+        taskThreads = config.get("taskThreads").defaultTo(DEFAULT_TASK_THREADS).asInteger();
+        feedSize = config.get("feedSize").defaultTo(ReconFeeder.DEFAULT_FEED_SIZE).asInteger();
         correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
         syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
         linkingEnabled = config.get("enableLinking").defaultTo(Boolean.TRUE).asBoolean();
