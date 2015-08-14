@@ -38,19 +38,21 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
@@ -64,6 +66,7 @@ import org.forgerock.openidm.info.health.MemoryInfoResourceProvider;
 import org.forgerock.openidm.info.health.ReconInfoResourceProvider;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -72,7 +75,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
@@ -340,10 +342,10 @@ public class HealthService
         context.getBundleContext().addBundleListener(bundleListener);
         context.getBundleContext().addFrameworkListener(frameworkListener);
 
-        router.addRoute("os", new OsInfoResourceProvider());
-        router.addRoute("memory", new MemoryInfoResourceProvider());
-        router.addRoute("recon", new ReconInfoResourceProvider());
-        router.addRoute("jdbc", new DatabaseInfoResourceProvider());
+        router.addRoute(Router.uriTemplate("os"), new OsInfoResourceProvider());
+        router.addRoute(Router.uriTemplate("memory"), new MemoryInfoResourceProvider());
+        router.addRoute(Router.uriTemplate("recon"), new ReconInfoResourceProvider());
+        router.addRoute(Router.uriTemplate("jdbc"), new DatabaseInfoResourceProvider());
 
         logger.info("OpenIDM Health Service component is activated.");
     }
@@ -726,56 +728,57 @@ public class HealthService
      * {@inheritDoc}
      */
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        router.handleAction(context, request, handler);
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
+        return router.handleAction(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        router.handleCreate(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
+        return router.handleCreate(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
-        router.handleDelete(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
+        return router.handleDelete(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        router.handlePatch(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        return router.handlePatch(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
-        router.handleQuery(context, request, handler);
+    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
+                                                                 QueryResourceHandler handler) {
+        return router.handleQuery(context, request, handler);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        router.handleRead(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
+        return router.handleRead(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        router.handleUpdate(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
+        return router.handleUpdate(context, request);
     }
 
 }

@@ -16,20 +16,18 @@
 
 package org.forgerock.openidm.info.health;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.SingletonResourceProvider;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
+import org.forgerock.util.promise.Promise;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -37,19 +35,9 @@ import java.lang.management.MemoryMXBean;
 /**
  * Gets Memory usage data from the {@link java.lang.management.MemoryMXBean MemoryMXBean}.
  */
-public class MemoryInfoResourceProvider implements SingletonResourceProvider {
+public class MemoryInfoResourceProvider extends AbstractInfoResourceProvider {
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
-    }
-
-    @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
-    }
-
-    @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         final MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
         final JsonValue result = json(object(
@@ -68,11 +56,6 @@ public class MemoryInfoResourceProvider implements SingletonResourceProvider {
                 ))
         ));
 
-        handler.handleResult(new Resource("", "", result));
-    }
-
-    @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+        return newResultPromise(Responses.newResourceResponse("", "", result));
     }
 }

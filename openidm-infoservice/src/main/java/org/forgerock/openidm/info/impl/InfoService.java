@@ -23,8 +23,8 @@
  */
 package org.forgerock.openidm.info.impl;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.object;
 
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -40,10 +40,10 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
@@ -122,7 +122,7 @@ public class InfoService extends AbstractScriptedService {
     }
 
     @Override
-    protected void handleRequest(final ServerContext context, final Request request,
+    protected void handleRequest(final Context context, final Request request,
             final Bindings handler) {
         super.handleRequest(context, request, handler);
         handler.put("healthinfo", healthInfoSvc.getHealthInfo().asMap());

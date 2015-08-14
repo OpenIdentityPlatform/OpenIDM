@@ -16,20 +16,18 @@
 
 package org.forgerock.openidm.info.health;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.SingletonResourceProvider;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
+import org.forgerock.util.promise.Promise;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -38,29 +36,12 @@ import java.lang.management.OperatingSystemMXBean;
 /**
  * Gets Operating System data from the {@link java.lang.management.OperatingSystemMXBean OperatingSystemMXBean}.
  */
-public class OsInfoResourceProvider implements SingletonResourceProvider {
-
+public class OsInfoResourceProvider extends AbstractInfoResourceProvider {
     /**
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
 
         final JsonValue result = json(object(
@@ -71,14 +52,6 @@ public class OsInfoResourceProvider implements SingletonResourceProvider {
                 field("operatingSystemVersion", operatingSystemMXBean.getVersion())
         ));
 
-        handler.handleResult(new Resource("", "", result));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+        return newResultPromise(Responses.newResourceResponse("", "", result));
     }
 }

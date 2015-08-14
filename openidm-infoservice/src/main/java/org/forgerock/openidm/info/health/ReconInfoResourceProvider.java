@@ -16,21 +16,20 @@
 
 package org.forgerock.openidm.info.health;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.SingletonResourceProvider;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.http.Context;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,22 +40,12 @@ import java.lang.management.ManagementFactory;
 /**
  * Gets Recon Health Info.
  */
-public class ReconInfoResourceProvider implements SingletonResourceProvider {
+public class ReconInfoResourceProvider extends AbstractInfoResourceProvider {
 
     final static Logger logger = LoggerFactory.getLogger(ReconInfoResourceProvider.class);
 
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
-    }
-
-    @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
-    }
-
-    @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         try {
             final ObjectName objectName = new ObjectName("org.forgerock.openidm.recon:type=Reconciliation");
             final MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -68,15 +57,10 @@ public class ReconInfoResourceProvider implements SingletonResourceProvider {
                     field("maximumPoolSize", mBeanServer.getAttribute(objectName, "MaximumPoolSize")),
                     field("currentPoolSize", mBeanServer.getAttribute(objectName, "PoolSize"))
             ));
-            handler.handleResult(new Resource("", "", result));
+            return newResultPromise(Responses.newResourceResponse("", "", result));
         } catch (Exception e) {
             logger.error("Unable to get reconciliation mbean");
-            handler.handleError(new InternalServerErrorException("Unable to get reconciliation mbean", e));
+            return newExceptionPromise(newInternalServerErrorException("Unable to get reconciliation mbean", e));
         }
-    }
-
-    @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
     }
 }
