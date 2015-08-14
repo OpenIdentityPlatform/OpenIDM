@@ -25,7 +25,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.smartevent.core.StatisticsHandler;
