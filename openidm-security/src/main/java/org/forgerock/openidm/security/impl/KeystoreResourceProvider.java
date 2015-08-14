@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,14 @@
 
 package org.forgerock.openidm.security.impl;
 
+import static org.forgerock.json.resource.ResourceException.newBadRequestException;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -35,23 +42,23 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,19 +72,21 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
      */
     private final static Logger logger = LoggerFactory.getLogger(KeystoreResourceProvider.class);
 
-    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
+    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager,
+            RepositoryService repoService) {
         super(resourceName, store, manager, repoService);
     }
 
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {
             String alias = request.getContent().get("alias").asString();
-            if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction()) || 
+            if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction()) ||
                     ACTION_GENERATE_CSR.equalsIgnoreCase(request.getAction())) {
                 if (alias == null) {
-                    throw ResourceException.getException(ResourceException.BAD_REQUEST, 
-                            "A valid resource ID must be specified in the request");
+                    return newExceptionPromise(
+                            newBadRequestException(
+                                    "A valid resource ID must be specified in the request"));
                 }
                 String algorithm = request.getContent().get("algorithm").defaultTo(DEFAULT_ALGORITHM).asString();
                 String signatureAlgorithm = request.getContent().get("signatureAlgorithm")
@@ -87,8 +96,10 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                 if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction())) {
                     // Generate self-signed certificate
                     if (store.getStore().containsAlias(alias)) {
-                        handler.handleError(new ConflictException("The resource with ID '" + alias 
-                                + "' could not be created because there is already another resource with the same ID"));
+                        // TODO-crest3 remove the cast
+                        return newExceptionPromise((ResourceException) new ConflictException(
+                                "The resource with ID '" + alias + "' could not be created because there is already " +
+                                        "another resource with the same ID"));
                     } else {
                         logger.info("Generating a new self-signed certificate with the alias {}", alias);
                         String domainName = request.getContent().get("domainName").required().asString();
@@ -96,7 +107,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                         String validTo = request.getContent().get("validTo").asString();
 
                         // Generate the cert
-                        Pair<X509Certificate, PrivateKey> pair = generateCertificate(domainName, algorithm, 
+                        Pair<X509Certificate, PrivateKey> pair = generateCertificate(domainName, algorithm,
                                 keySize, signatureAlgorithm, validFrom, validTo);
                         Certificate cert = pair.getKey();
                         PrivateKey key = pair.getValue();
@@ -117,53 +128,47 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                     }
                 } else {
                     // Generate CSR
-                    Pair<PKCS10CertificationRequest, PrivateKey> csr = generateCSR(alias, algorithm, 
+                    Pair<PKCS10CertificationRequest, PrivateKey> csr = generateCSR(alias, algorithm,
                             signatureAlgorithm, keySize, request.getContent());
                     result = returnCertificateRequest(alias, csr.getKey());
                     if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
                         result.put("privateKey", getKeyMap(csr.getRight()));
                     }
                 }
-                handler.handleResult(result);
+                return newResultPromise(Responses.newActionResponse(result));
             } else {
-                handler.handleError(new BadRequestException("Unsupported action " + request.getAction()));
+                return newExceptionPromise(newBadRequestException("Unsupported action " + request.getAction()));
             }
-            
-        } catch (Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+        } catch (Exception e) {
+            return newExceptionPromise(ResourceUtil.adapt(e));
         }
     }
 
     @Override
-    public void patchInstance(ServerContext context, PatchRequest request,
-            ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Patch operations are not supported");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
+        return newExceptionPromise(newNotSupportedException("Patch operations are not supported"));
     }
 
     @Override
-    public void readInstance(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final ReadRequest request) {
         try {
             JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(5));
             content.put("type", store.getStore().getType());
             content.put("provider", store.getStore().getProvider());
             Enumeration<String> aliases = store.getStore().aliases();
-            List<String> aliasList = new ArrayList<String>();
+            List<String> aliasList = new ArrayList<>();
             while (aliases.hasMoreElements()) {
                 aliasList.add(aliases.nextElement());
             }
             content.put("aliases", aliasList);
-            handler.handleResult(new Resource(resourceName, null, content));
-        } catch (Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+            return newResultPromise(newResourceResponse(resourceName, null, content));
+        } catch (KeyStoreException e) {
+            return newExceptionPromise(ResourceUtil.adapt(e));
         }
     }
 
     @Override
-    public void updateInstance(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Update operations are not supported");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
+        return newExceptionPromise(newNotSupportedException("Update operations are not supported"));
     }
 }

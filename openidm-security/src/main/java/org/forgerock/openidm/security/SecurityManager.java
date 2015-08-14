@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.security;
 
+import static org.forgerock.json.resource.Router.uriTemplate;
+
 import java.security.Security;
 
 import javax.net.ssl.KeyManager;
@@ -41,23 +43,23 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterUtils;
 import org.forgerock.openidm.core.IdentityServer;
@@ -71,6 +73,7 @@ import org.forgerock.openidm.security.impl.EntryResourceProvider;
 import org.forgerock.openidm.security.impl.JcaKeyStoreHandler;
 import org.forgerock.openidm.security.impl.KeystoreResourceProvider;
 import org.forgerock.openidm.security.impl.PrivateKeyResourceProvider;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -134,22 +137,28 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         }
         
         keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
-        KeystoreResourceProvider keystoreProvider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, repoService);
-        EntryResourceProvider keystoreCertProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, repoService);
-        EntryResourceProvider privateKeyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, repoService);
+        KeystoreResourceProvider keystoreProvider =
+                new KeystoreResourceProvider("keystore", keyStoreHandler, this, repoService);
+        EntryResourceProvider keystoreCertProvider =
+                new CertificateResourceProvider("keystore", keyStoreHandler, this, repoService);
+        EntryResourceProvider privateKeyProvider =
+                new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, repoService);
 
-        router.addRoute("/keystore", keystoreProvider);
-        router.addRoute("/keystore/cert", keystoreCertProvider);
-        router.addRoute("/keystore/privatekey", privateKeyProvider);
+        router.addRoute(uriTemplate("/keystore"), keystoreProvider);
+        router.addRoute(uriTemplate("/keystore/cert"), keystoreCertProvider);
+        router.addRoute(uriTemplate("/keystore/privatekey"), privateKeyProvider);
 
         trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
-        KeystoreResourceProvider truststoreProvider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, repoService);
-        EntryResourceProvider truststoreCertProvider = new CertificateResourceProvider("truststore", trustStoreHandler, this, repoService);
+        KeystoreResourceProvider truststoreProvider =
+                new KeystoreResourceProvider("truststore", trustStoreHandler, this, repoService);
+        EntryResourceProvider truststoreCertProvider =
+                new CertificateResourceProvider("truststore", trustStoreHandler, this, repoService);
 
-        router.addRoute("/truststore", truststoreProvider);
-        router.addRoute("/truststore/cert", truststoreCertProvider);
+        router.addRoute(uriTemplate("/truststore"), truststoreProvider);
+        router.addRoute(uriTemplate("/truststore/cert"), truststoreCertProvider);
         
-        String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+        String instanceType =
+                IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
         
         String propValue = Param.getProperty("openidm.https.keystore.cert.alias");
         String privateKeyAlias = (propValue == null) ? "openidm-localhost" : propValue;
@@ -235,45 +244,42 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
     // ----- Implementation of RequestHandler interface
 
     @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        router.handleAction(context, request, handler);
+    public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
+        return router.handleAction(context, request);
     }
 
     @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
-        router.handleCreate(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
+            final CreateRequest request) {
+        return router.handleCreate(context, request);
     }
 
     @Override
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
-        router.handleDelete(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
+            final DeleteRequest request) {
+        return router.handleDelete(context, request);
     }
 
     @Override
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
-        router.handlePatch(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
+        return router.handlePatch(context, request);
     }
 
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
-        router.handleQuery(context, request, handler);
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
+            QueryResourceHandler queryResourceHandler) {
+        return router.handleQuery(context, request, queryResourceHandler);
     }
 
     @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
-        router.handleRead(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
+        return router.handleRead(context, request);
     }
 
     @Override
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
-        router.handleUpdate(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
+            final UpdateRequest request) {
+        return router.handleUpdate(context, request);
     }
 
     private void createDefaultKeystoreAndTruststoreEntries(final String alias,
@@ -285,34 +291,15 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         //create the keystore default entry
         privateKeyProvider.createDefaultEntry(alias);
 
-        final DefaultEntriesResultHandler defaultEntriesResultHandler = new DefaultEntriesResultHandler();
-
         //get the keystore default entry cert
         final ReadRequest readRequest = Requests.newReadRequest("/keystore/cert");
-        keystoreCertProvider.readInstance(
-            new ServerContext(new RootContext()), alias, readRequest, defaultEntriesResultHandler);
+        Promise<ResourceResponse, ResourceException> result =
+                keystoreCertProvider.readInstance(new RootContext(), alias, readRequest);
 
         //add the keystore default entry cert to the truststore
         final CreateRequest createRequest = Requests.newCreateRequest("/truststore/cert", alias,
-                defaultEntriesResultHandler.result.getContent());
-        truststoreCertProvider.createInstance(
-                new ServerContext(new RootContext()), createRequest, defaultEntriesResultHandler);
-
-    }
-
-    private final static class DefaultEntriesResultHandler implements ResultHandler<Resource> {
-
-        private Resource result;
-
-        @Override
-        public void handleError(ResourceException e) {
-            logger.error("Unable to create default keystore/truststore entries", e);
-            throw new RuntimeException("Unable to create default keystore/truststore entries", e);
-        }
-
-        @Override
-        public void handleResult(Resource resource) {
-            result = resource;
-        }
+                result.getOrThrow().getContent());
+        result = truststoreCertProvider.createInstance(new RootContext(), createRequest);
+        result.getOrThrow();
     }
 }

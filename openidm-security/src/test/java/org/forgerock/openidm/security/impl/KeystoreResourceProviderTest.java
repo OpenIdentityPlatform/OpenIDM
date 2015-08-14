@@ -11,19 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.security.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
@@ -53,6 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.mockito.Mockito.mock;
 
 public class KeystoreResourceProviderTest {
@@ -100,7 +102,7 @@ public class KeystoreResourceProviderTest {
         repositoryService = mock(RepositoryService.class);
         keystoreResourceProvider =
                 new KeystoreResourceProvider(KEYSTORE, keyStoreHandler, keyStoreManager, repositoryService);
-        router.addRoute(KEYSTORE_ROUTE, keystoreResourceProvider);
+        router.addRoute(uriTemplate(KEYSTORE_ROUTE), keystoreResourceProvider);
     }
 
     @AfterMethod
@@ -141,12 +143,13 @@ public class KeystoreResourceProviderTest {
         actionRequest.setContent(createGenerateCertActionContent(true));
 
         //when
-        final JsonValue result = connection.action(new RootContext(), actionRequest);
+        final ActionResponse result = connection.action(new RootContext(), actionRequest);
 
         //then
-        assertThat(!result.get("privateKey").isNull());
-        checkResultForRequiredFields(result);
-        checkKeyStoreEntry(result);
+        // TODO-crest3 replace with AssertJActionResponseAssert
+        assertThat(!result.getJsonContent().get("privateKey").isNull());
+        checkResultForRequiredFields(result.getJsonContent());
+        checkKeyStoreEntry(result.getJsonContent());
     }
 
     @Test
@@ -159,12 +162,13 @@ public class KeystoreResourceProviderTest {
         actionRequest.setContent(createGenerateCertActionContent(true));
 
         //when
-        final JsonValue result = connection.action(new RootContext(), actionRequest);
+        final ActionResponse result = connection.action(new RootContext(), actionRequest);
 
         //then
-        assertThat(result.get("privateKey").isNull());
-        checkResultForRequiredFields(result);
-        checkKeyStoreEntry(result);
+        // TODO-crest3 replace with AssertJActionResponseAssert
+        assertThat(result.getJsonContent().get("privateKey").isNull());
+        checkResultForRequiredFields(result.getJsonContent());
+        checkKeyStoreEntry(result.getJsonContent());
     }
 
     @Test(expectedExceptions = ResourceException.class)
@@ -198,7 +202,7 @@ public class KeystoreResourceProviderTest {
 
     private JsonValue createGenerateCertActionContent(final boolean returnPrivateKey) {
         final DateUtil dateUtil = DateUtil.getDateUtil();
-        final Map<String,Object> content = new HashMap<String, Object>();
+        final Map<String,Object> content = new HashMap<>();
         content.put("alias", TEST_CERT_ALIAS);
         content.put("algorithm", keystoreResourceProvider.DEFAULT_ALGORITHM);
         content.put("signatureAlgorithm", keystoreResourceProvider.DEFAULT_SIGNATURE_ALGORITHM);
