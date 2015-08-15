@@ -102,7 +102,7 @@ class ObjectMapping {
     public static final Name EVENT_RECON_TARGET = Name.get(
             "openidm/internal/discovery-engine/reconciliation/target-phase");
 
-    //** Default number of executor threads to process ReconTasks */
+    /** Default number of executor threads to process ReconTasks */
     private static final int DEFAULT_TASK_THREADS = 10;
 
     /** Logger */
