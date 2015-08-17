@@ -210,8 +210,6 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                 }, this);
 
                 url = selectedItem.attr("data-connector-title").split("_");
-                console.log(selectedItem);
-                console.log(alternateItem);
 
                 ConfigDelegate.deleteEntity(url[0] +"/" +url[1]).then(function(){
                         ConnectorDelegate.deleteCurrentConnectorsCache();
