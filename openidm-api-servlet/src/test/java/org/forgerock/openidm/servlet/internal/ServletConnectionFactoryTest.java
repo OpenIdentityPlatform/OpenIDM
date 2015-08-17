@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.servlet.internal;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,27 +41,22 @@ import java.util.ServiceLoader;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ConnectionProvider;
 import org.forgerock.json.resource.MemoryBackend;
-import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.source.DirectoryContainer;
 import org.osgi.service.component.ComponentContext;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -77,16 +74,16 @@ public class ServletConnectionFactoryTest {
     public void BeforeClass() throws Exception {
 
         URL config = ServletConnectionFactoryTest.class.getResource("/conf/router.json");
-        Assert.assertNotNull(config, "router configuration is not found");
+        assertThat(config).isNotNull().overridingErrorMessage("router configuration is not found");
 
         JsonValue configuration =
                 new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
 
         final Router requestHandler = new Router();
-        requestHandler.addRoute("/audit/recon", new MemoryBackend());
-        requestHandler.addRoute("/managed/user", new MemoryBackend());
-        requestHandler.addRoute("/system/OpenDJ/account", new MemoryBackend());
-        requestHandler.addRoute("/system/AD/account", new MemoryBackend());
+        requestHandler.addRoute(uriTemplate("/audit/recon"), new MemoryBackend());
+        requestHandler.addRoute(uriTemplate("/managed/user"), new MemoryBackend());
+        requestHandler.addRoute(uriTemplate("/system/OpenDJ/account"), new MemoryBackend());
+        requestHandler.addRoute(uriTemplate("/system/AD/account"), new MemoryBackend());
 
         final ConnectionFactory connectionFactory = Resources.newInternalConnectionFactory(requestHandler);
         Bindings globalScope = new SimpleBindings();
@@ -95,21 +92,9 @@ public class ServletConnectionFactoryTest {
         ScriptRegistryImpl sr =
                 new ScriptRegistryImpl(new HashMap<String, Object>(), ServiceLoader
                         .load(ScriptEngineFactory.class), globalScope);
-        sr.setPersistenceConfig(PersistenceConfig.builder().connectionProvider(
-                new ConnectionProvider() {
-                    @Override
-                    public Connection getConnection(String connectionId) throws ResourceException {
-                        return connectionFactory.getConnection();
-                    }
-
-                    @Override
-                    public String getConnectionId(Connection connection) throws ResourceException {
-                        return "DEFAULT";
-                    }
-                }).build());
 
         URL script = ServletConnectionFactoryTest.class.getResource("/script/");
-        Assert.assertNotNull(script, "Failed to find /recon/script folder in test");
+        assertThat(script).isNotNull().overridingErrorMessage("Failed to find /recon/script folder in test");
         sr.addSourceUnit(new DirectoryContainer("script", script));
 
         final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
@@ -129,17 +114,16 @@ public class ServletConnectionFactoryTest {
     @Test
     public void testActivate() throws Exception {
         JsonValue content = new JsonValue(new HashMap<String, Object>());
-        Resource user1 = testable.create(createContext("admin"), Requests.newCreateRequest("/managed/user", content));
+        testable.create(createContext("admin"), Requests.newCreateRequest("/managed/user", content))
     }
 
-    private ServerContext createContext(String id) {
+    private Context createContext(String id) {
         final Map<String, Object> authzid = new HashMap<>();
         authzid.put(SecurityContext.AUTHZID_ID, id);
         List<String> roles = new ArrayList<String>();
         roles.add("system");
         authzid.put(SecurityContext.AUTHZID_ROLES, roles);
         authzid.put(SecurityContext.AUTHZID_COMPONENT, "managed");
-        SecurityContext securityContext = new SecurityContext(new RootContext(), id, authzid);
-        return new ServerContext(securityContext);
+        return new SecurityContext(new RootContext(), id, authzid);
     }
 }

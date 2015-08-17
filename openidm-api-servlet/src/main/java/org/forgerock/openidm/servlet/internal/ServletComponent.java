@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.script.ScriptException;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -44,9 +45,14 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Handler;
+import org.forgerock.http.HttpApplication;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.io.Buffer;
+import org.forgerock.http.servlet.HttpFrameworkServlet;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.servlet.HttpServlet;
+import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
@@ -55,6 +61,7 @@ import static org.forgerock.openidm.servletregistration.ServletRegistration.SERV
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.util.Factory;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -123,7 +130,7 @@ public class ServletComponent implements EventHandler {
                 augmentSecurityScripts.add(augmentScript);
                 logger.debug("Registered script {}", augmentScript);
             } catch (ScriptException e) {
-                logger.debug("{} when attempting to registered script {}", new Object[] { e.toString(), scriptConfig, e});
+                logger.debug("{} when attempting to registered script {}", e.toString(), scriptConfig, e);
             }
         }
     }
@@ -141,7 +148,23 @@ public class ServletComponent implements EventHandler {
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         logger.debug("Try registering servlet at {}", SERVLET_ALIAS);
-        servlet = new HttpServlet(connectionFactory, new IDMSecurityContextFactory(augmentSecurityScripts));
+        servlet = new HttpFrameworkServlet(
+                new HttpApplication() {
+                    @Override
+                    public Handler start() throws HttpApplicationException {
+                        return CrestHttp.newHttpHandler(
+                                connectionFactory, new IDMSecurityContextFactory(augmentSecurityScripts));
+                    }
+
+                    @Override
+                    public Factory<Buffer> getBufferFactory() {
+                        return null;
+                    }
+
+                    @Override
+                    public void stop() {
+                    }
+                });
 
         servletRegistration.registerServlet(SERVLET_ALIAS, servlet, new Hashtable());
         logger.info("Registered servlet at {}", SERVLET_ALIAS);
