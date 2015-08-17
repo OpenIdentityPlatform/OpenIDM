@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,10 +23,16 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,40 +55,38 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.http.routing.RouteMatcher;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PermanentException;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.PreconditionRequiredException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.Route;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.SortKey;
@@ -99,10 +103,13 @@ import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.NullSyncFailureHandler;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandler;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory;
+import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.util.FileUtil;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.logging.impl.NoOpLogger;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -129,7 +136,6 @@ import org.identityconnectors.framework.spi.PoolableConnector;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -210,8 +216,8 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
                     return null;
                 }
             });
-            router.addRoute("repo/synchronisation/pooledSyncStage", new MemoryBackend());
-            router.addRoute("audit/activity", new MemoryBackend());
+            router.addRoute(uriTemplate("repo/synchronisation/pooledSyncStage"), new MemoryBackend());
+            router.addRoute(uriTemplate("audit/activity"), new MemoryBackend());
         } catch (IllegalStateException e) {
             /* ignore */
         }
@@ -222,8 +228,8 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
     @Override
     public RouteEntry addRoute(RouteBuilder routeBuilder) {
 
-        final Route[] routes = routeBuilder.register(router);
-
+        final RouteMatcher[] routes = routeBuilder.register(router);
+        // TODO-crest3
         return new RouteEntry() {
             @Override
             public boolean removeRoute() {
@@ -231,14 +237,14 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             }
 
             @Override
-            public ServerContext createServerContext() throws ResourceException {
-                return createServerContext(new RootContext());
+            public Context createServerContext() throws ResourceException {
+                return new RootContext();
             }
 
             @Override
-            public ServerContext createServerContext(Context parentContext)
+            public Context createServerContext(Context parentContext)
                     throws ResourceException {
-                return new ServerContext(parentContext);
+                return parentContext;
             }
         };
     }
@@ -355,13 +361,15 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             }
         });
 
-        Assert.assertNotNull(connectors, "You must copy the connectors first");
+        assertThat(connectors).isNotNull().overridingErrorMessage("You must copy the connectors first");
 
         for (File connector : connectors) {
             bundleURLs.add(connector.toURI().toURL());
         }
 
-        Assert.assertFalse(bundleURLs.isEmpty(), "No Connectors were found!");
+        // No Connectors were found!
+        assertThat(bundleURLs.isEmpty()).isFalse();
+
         connectorServer.setBundleURLs(bundleURLs);
         connectorServer.setKeyHash("xOS4IeeE6eb/AhMbhxZEC37PgtE=");
         connectorServer.setIfAddress(InetAddress.getByName("127.0.0.1"));
@@ -388,7 +396,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             }
         });
 
-        Assert.assertNotNull(configJsons, "You must copy the configurations first");
+        assertThat(configJsons).isNotNull().overridingErrorMessage("You must copy the configurations first");
 
         for (File configJson : configJsons) {
             // Start OpenICFProvisionerService Service
@@ -443,7 +451,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
                     }
                 }};
 
-        router.addRoute("system", systemObjectSetService);
+        router.addRoute(uriTemplate("system"), systemObjectSetService);
 
         connection = Resources.newInternalConnection(router);
     }
@@ -533,103 +541,110 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
         final public ArrayList<ActionRequest> requests = new ArrayList<ActionRequest>();
 
-        public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
             requests.add(request);
-            handler.handleResult(new JsonValue(true));
+            return newResultPromise(newActionResponse(new JsonValue(true)));
         }
 
-        public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-            handler.handleError(new NotSupportedException());
+        public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
+            return newExceptionPromise(newNotSupportedException());
         }
 
-        public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-            handler.handleError(new NotSupportedException());
+        public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
+            return newExceptionPromise(newNotSupportedException());
         }
 
-        public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-            handler.handleError(new NotSupportedException());
+        public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
+            return newExceptionPromise(newNotSupportedException());
         }
     }
 
     @Test(dataProvider = "groovy-only", enabled = true)
     public void testSync(String systemName) throws Exception {
-            JsonValue stage = new JsonValue(new LinkedHashMap<String, Object>());
-            stage.put("connectorData", ConnectorUtil.convertFromSyncToken(new SyncToken(0)));
-            CreateRequest createRequest = Requests
-                    .newCreateRequest("repo/synchronisation/pooledSyncStage",
-                            ("system" + systemName + "account").toUpperCase(),
-                            stage);
-            connection.create(new RootContext(), createRequest);
+        JsonValue stage = new JsonValue(new LinkedHashMap<String, Object>());
+        stage.put("connectorData", ConnectorUtil.convertFromSyncToken(new SyncToken(0)));
+        CreateRequest createRequest = Requests
+                .newCreateRequest("repo/synchronisation/pooledSyncStage",
+                        ("system" + systemName + "account").toUpperCase(),
+                        stage);
+        connection.create(new RootContext(), createRequest);
 
-            SyncStub sync = new SyncStub();
-            Route r = router.addRoute("sync", sync);
-
-
-            ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/account",
-                    SystemObjectSetService.SystemAction.liveSync.toString());
-
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 1);
-            Assert.assertEquals(sync.requests.size(), 1);
-            ActionRequest delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "notifyCreate");
+        SyncStub sync = new SyncStub();
+        RouteMatcher r = router.addRoute(uriTemplate("sync"), sync);
 
 
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 2);
-            Assert.assertEquals(sync.requests.size(), 1);
-            delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "notifyUpdate");
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/account",
+                SystemObjectSetService.SystemAction.liveSync.toString());
+
+        ActionResponse response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(1);
+        assertThat(sync.requests.size()).isEqualTo( 1);
+        ActionRequest delta = sync.requests.remove(0);
+        assertThat(delta.getAction()).isEqualTo("notifyCreate");
 
 
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 3);
-            Assert.assertEquals(sync.requests.size(), 1);
-            delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "notifyUpdate");
+        response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(2);
+        assertThat(sync.requests.size()).isEqualTo( 1);
+        delta = sync.requests.remove(0);
+        assertThat(delta.getAction()).isEqualTo("notifyUpdate");
 
 
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 4);
-            Assert.assertEquals(sync.requests.size(), 1);
-            delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "notifyUpdate");
-            Assert.assertEquals(delta.getContent().get("newValue").get("_previous-id").asString(), "001");
+        response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(3);
+        assertThat(sync.requests.size()).isEqualTo( 1);
+        delta = sync.requests.remove(0);
+        assertThat(delta.getAction()).isEqualTo("notifyUpdate");
 
 
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 5);
-            Assert.assertEquals(sync.requests.size(), 1);
-            delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "notifyDelete");
+        response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(4);
+        assertThat(sync.requests.size()).isEqualTo(1);
+        delta = sync.requests.remove(0);
+        assertThat(delta.getAction()).isEqualTo("notifyUpdate");
+        assertThat(delta.getContent().get("newValue").get("_previous-id").asString()).isEqualTo("001");
 
 
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 10);
-            Assert.assertTrue(sync.requests.isEmpty());
+        response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(5);
+        assertThat(sync.requests.size()).isEqualTo(1);
+        delta = sync.requests.remove(0);
+        assertThat(delta.getAction()).isEqualTo("notifyDelete");
 
 
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 17);
-            Assert.assertEquals(sync.requests.size(), 4);
-            sync.requests.clear();
+        response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(10);
+        assertThat(sync.requests.isEmpty()).isTrue();
+
+        response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(17);
+        assertThat(sync.requests.size()).isEqualTo(4);
+        sync.requests.clear();
 
 
-            stage = new JsonValue(new LinkedHashMap<String, Object>());
-            stage.put("connectorData", ConnectorUtil.convertFromSyncToken(new SyncToken(10)));
-            createRequest = Requests
-                    .newCreateRequest("repo/synchronisation/pooledSyncStage",
-                            ("system" + systemName + "group").toUpperCase(),
-                            stage);
-            connection.create(new RootContext(), createRequest);
-            actionRequest = Requests.newActionRequest("system/" + systemName + "/group",
-                    SystemObjectSetService.SystemAction.liveSync.toString());
+        stage = new JsonValue(new LinkedHashMap<String, Object>());
+        stage.put("connectorData", ConnectorUtil.convertFromSyncToken(new SyncToken(10)));
+        createRequest = Requests
+                .newCreateRequest("repo/synchronisation/pooledSyncStage",
+                        ("system" + systemName + "group").toUpperCase(),
+                        stage);
+        connection.create(new RootContext(), createRequest);
+        actionRequest = Requests.newActionRequest("system/" + systemName + "/group",
+                SystemObjectSetService.SystemAction.liveSync.toString());
 
-            stage = connection.action(new RootContext(), actionRequest);
-            Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 16);
-            Assert.assertEquals(sync.requests.size(), 3);
+        response = connection.action(new RootContext(), actionRequest);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(16);
+        assertThat(sync.requests.size()).isEqualTo(3);
 
-            router.removeRoute(r);
+        router.removeRoute(r);
     }
 
 
@@ -647,38 +662,34 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         QueryRequest queryRequest = Requests.newQueryRequest("system/" + systemName + "/account");
         queryRequest.setPageSize(10);
         queryRequest.addSortKey(SortKey.descendingOrder("sortKey"));
-        queryRequest.setQueryFilter(QueryFilter.startsWith("__NAME__", "TEST"));
+        queryRequest.setQueryFilter(QueryFilter.<JsonPointer>startsWith(new JsonPointer("__NAME__"), "TEST"));
 
-        QueryResult result = null;
+        QueryResponse result = null;
 
-        final Set<Resource> resultSet = new HashSet<Resource>();
+        final Set<ResourceResponse> resultSet = new HashSet<ResourceResponse>();
         int pageIndex = 0;
 
-        while ((result = connection.query(new RootContext(), queryRequest, new QueryResultHandler() {
+        try {
+            while ((result = connection.query(new RootContext(), queryRequest, new QueryResourceHandler() {
 
-            private int index = 101;
+                private int index = 101;
 
-            public void handleError(ResourceException error) {
-                Assert.fail(error.getMessage(), error);
+                public boolean handleResource(ResourceResponse resource) {
+                    Integer idx = resource.getContent().get("sortKey").asInteger();
+                    assertThat(idx < index).isTrue();
+                    index = idx;
+                    return resultSet.add(resource);
+                }
+            })).getPagedResultsCookie() != null) {
+
+                queryRequest.setPagedResultsCookie(result.getPagedResultsCookie());
+                assertThat(resultSet.size()).isEqualTo(10 * ++pageIndex);
             }
-
-            public boolean handleResource(Resource resource) {
-                Integer idx = resource.getContent().get("sortKey").asInteger();
-                Assert.assertTrue(idx < index);
-                index = idx;
-                return resultSet.add(resource);
-            }
-
-            public void handleResult(QueryResult result) {
-
-            }
-        })).getPagedResultsCookie() != null) {
-
-            queryRequest.setPagedResultsCookie(result.getPagedResultsCookie());
-            Assert.assertEquals(resultSet.size(), 10 * ++pageIndex);
+        } catch (ResourceException e) {
+            fail(e.getMessage());
         }
-        Assert.assertEquals(pageIndex, 9);
-        Assert.assertEquals(resultSet.size(), 100);
+        assertThat(pageIndex).isEqualTo(9);
+        assertThat(resultSet.size()).isEqualTo(100);
     }
 
     @Test(dataProvider = "dp", enabled = true)
@@ -689,8 +700,8 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             ActionRequest actionRequest = Requests.newActionRequest("/system/Test", "script");
             actionRequest.setAdditionalParameter(SystemAction.SCRIPT_ID, "ConnectorScript#1");
 
-            JsonValue result = connection.action(new RootContext(), actionRequest);
-            assertThat(result.get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(
+            ActionResponse result = connection.action(new RootContext(), actionRequest);
+            assertThat(result.getJsonContent().get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(
                     "Arthur Dent");
 
             //Request#2
@@ -701,7 +712,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             actionRequest.setContent(content);
 
             result = connection.action(new RootContext(), actionRequest);
-            assertThat(result.get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(
+            assertThat(result.getJsonContent().get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(
                     "Zaphod Beeblebrox");
 
             //Request#3
@@ -712,14 +723,14 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             actionRequest.setContent(content);
 
             result = connection.action(new RootContext(), actionRequest);
-            assertThat(result.get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(2);
+            assertThat(result.getJsonContent().get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(2);
 
 
             //Request#4
             actionRequest = Requests.newActionRequest("/system/Test", "script");
             actionRequest.setAdditionalParameter(SystemAction.SCRIPT_ID, "ConnectorScript#4");
             result = connection.action(new RootContext(), actionRequest);
-            assertThat(result.get(new JsonPointer("actions/0/error")).getObject()).isEqualTo(
+            assertThat(result.getJsonContent().get(new JsonPointer("actions/0/error")).getObject()).isEqualTo(
                     "Marvin");
         }
     }
@@ -909,15 +920,16 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         connection.create(new RootContext(), createRequest);
 
         SyncStub sync = new SyncStub();
-        Route r = router.addRoute("sync", sync);
+        RouteMatcher r = router.addRoute(uriTemplate("sync"), sync);
 
         ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName,
                 SystemObjectSetService.SystemAction.liveSync.toString());
 
-        stage = connection.action(new RootContext(), actionRequest);
+        ActionResponse response = connection.action(new RootContext(), actionRequest);
 
-        Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 17);
-        Assert.assertEquals(sync.requests.size(), 0);
+        assertThat(ConnectorUtil.convertToSyncToken(
+                response.getJsonContent().get("connectorData")).getValue()).isEqualTo(17);
+        assertThat(sync.requests.size()).isEqualTo(0);
 
         router.removeRoute(r);
     }

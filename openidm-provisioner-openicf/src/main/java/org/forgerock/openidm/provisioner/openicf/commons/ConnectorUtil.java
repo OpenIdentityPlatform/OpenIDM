@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,9 +24,12 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.schema.validator.Constants.*;
+
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.core.IdentityServer;
@@ -55,8 +58,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
  * Contains openicf connector utilities for the OpenICF provisioner.

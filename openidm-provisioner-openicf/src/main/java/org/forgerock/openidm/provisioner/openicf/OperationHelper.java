@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,7 +26,7 @@
 
 package org.forgerock.openidm.provisioner.openicf;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
@@ -43,7 +43,7 @@ public interface OperationHelper {
      *
      * @return
      */
-    public ObjectClass getObjectClass();
+    ObjectClass getObjectClass();
 
     /**
      * Checks the {@code operation} permission before execution.
@@ -55,7 +55,7 @@ public interface OperationHelper {
      * @throws ResourceException if {@code denied} is true and the {@code onDeny} equals
      *                            {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#THROW_EXCEPTION}
      */
-    public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ResourceException;
+    boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ResourceException;
 
     /**
      * Gets a new instance of {@link OperationOptionsBuilder} filled with {@link OperationOptions}.
@@ -66,7 +66,7 @@ public interface OperationHelper {
      * @return
      * @throws Exception
      */
-    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception;
+    OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception;
 
     /**
      * Resets the {@code _id} attribute in the {@code target} object to the new {@code uid} value.
@@ -84,7 +84,7 @@ public interface OperationHelper {
      * @param uid original un escaped unique identifier of the object
      * @return
      */
-    public URI resolveQualifiedId(Uid uid);
+    URI resolveQualifiedId(Uid uid);
 
 
     /**
@@ -104,7 +104,7 @@ public interface OperationHelper {
      */
 //    public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception;
 
-    public ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception;
+    ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception;
 
 //    public ConnectorObject build(Class<? extends APIOperation> operation, String id, JsonValue source) throws Exception;
 
@@ -117,5 +117,5 @@ public interface OperationHelper {
      * @return
      * @throws Exception
      */
-    public JsonValue build(ConnectorObject source) throws Exception;
+    JsonValue build(ConnectorObject source) throws Exception;
 }

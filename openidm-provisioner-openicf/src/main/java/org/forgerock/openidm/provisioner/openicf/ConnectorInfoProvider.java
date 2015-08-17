@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,7 +25,7 @@ package org.forgerock.openidm.provisioner.openicf;
 
 import java.util.List;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -43,7 +43,7 @@ public interface ConnectorInfoProvider {
      * @param connectorReference
      * @return null if there is no {@link ConnectorInfo} available.
      */
-    public ConnectorInfo findConnectorInfo(ConnectorReference connectorReference);
+    ConnectorInfo findConnectorInfo(ConnectorReference connectorReference);
 
     /**
      * Adds a {@code ConnectorListener}
@@ -51,13 +51,13 @@ public interface ConnectorInfoProvider {
      * @param connectorReference
      * @param handler
      */
-    public void addConnectorFacadeCallback(ConnectorReference connectorReference, ConnectorFacadeCallback handler);
+    void addConnectorFacadeCallback(ConnectorReference connectorReference, ConnectorFacadeCallback handler);
 
     /**
      *
      * @param handler
      */
-    public void deleteConnectorFacadeCallback(ConnectorFacadeCallback handler);
+    void deleteConnectorFacadeCallback(ConnectorFacadeCallback handler);
 
     /**
      * Get all available {@link ConnectorInfo} from the local and the remote
@@ -65,7 +65,7 @@ public interface ConnectorInfoProvider {
      *
      * @return list of all available {@link ConnectorInfo}s
      */
-    public List<ConnectorInfo> getAllConnectorInfo();
+    List<ConnectorInfo> getAllConnectorInfo();
 
     /**
      * Tests the {@link APIConfiguration Configuration} with the connector.
@@ -73,7 +73,7 @@ public interface ConnectorInfoProvider {
      * @param configuration
      * @throws RuntimeException if the configuration is not valid or the test failed.
      */
-    public void testConnector(APIConfiguration configuration) throws ResourceException;
+    void testConnector(APIConfiguration configuration) throws ResourceException;
 
     /**
      * Create a new configuration object from the {@code configuration}
@@ -84,5 +84,5 @@ public interface ConnectorInfoProvider {
      * @param validate
      * @return
      */
-    public JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate) throws ResourceException;
+    JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate) throws ResourceException;
 }

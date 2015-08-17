@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 ForgeRock, AS.
+ * Copyright 2013-2015 ForgeRock, AS.
  *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -20,10 +20,10 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.Accessor;
@@ -69,7 +69,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     /** the router */
     @Reference(target = "("+ ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
-    ServerContext routerContext = null;
+    Context routerContext = null;
 
     private void bindRouteService(final RouteService service) throws ResourceException {
         routeService = service;
@@ -132,8 +132,8 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
         if (config.isString()) {
             if (CONFIG_DEAD_LETTER.equals(config.asString())) {
                 return new DeadLetterQueueHandler(
-                        connectionFactory, new Accessor<ServerContext>() {
-                            public ServerContext access() {
+                        connectionFactory, new Accessor<Context>() {
+                            public Context access() {
                                 return routerContext;
                             }
                         });
@@ -149,8 +149,8 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
                         // pass internal handlers so a script can call them if desired
                         new LoggedIgnoreHandler(),
                         new DeadLetterQueueHandler(
-                                connectionFactory, new Accessor<ServerContext>() {
-                                    public ServerContext access() {
+                                connectionFactory, new Accessor<Context>() {
+                                    public Context access() {
                                         return routerContext;
                                     }
                                 }));
