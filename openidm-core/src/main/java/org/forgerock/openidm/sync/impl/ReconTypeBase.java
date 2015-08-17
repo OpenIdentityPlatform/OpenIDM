@@ -24,9 +24,9 @@
 */
 package org.forgerock.openidm.sync.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -220,7 +220,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             final Collection<String> collectionToPopulate, final boolean caseSensitive, final QuerySide querySide,
             int pageSize, String pagingCookie) throws SynchronizationException {
         final Collection<String> ids = collectionToPopulate;
-        final JsonValue objList = new JsonValue(new ArrayList());
+        final JsonValue objList = new JsonValue(new LinkedList());
         final ReconQueryResult reconQueryResult = new ReconQueryResult();
         try {
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(objectSet, query.asMap());
