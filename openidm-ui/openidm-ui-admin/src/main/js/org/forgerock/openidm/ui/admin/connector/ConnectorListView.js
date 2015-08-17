@@ -68,12 +68,12 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                 ConnectorModel = Backbone.Model.extend({}),
                 Connectors = Backbone.Collection.extend({ model: ConnectorModel }),
                 connectorGrid,
-                ClickableRow = null,
+                RenderRow = null,
                 _this = this;
 
-            ClickableRow = Backgrid.Row.extend({
+            RenderRow = Backgrid.Row.extend({
                 render: function () {
-                    ClickableRow.__super__.render.apply(this, arguments);
+                    RenderRow.__super__.render.apply(this, arguments);
 
                     this.$el.attr('data-name', this.model.attributes.name);
                     this.$el.attr('data-type', this.model.attributes.displayName);
@@ -111,7 +111,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                 this.parentRender(_.bind(function(){
                     connectorGrid = new Backgrid.Grid({
                         className: "table backgrid-table",
-                        row: ClickableRow,
+                        row: RenderRow,
                         columns: BackgridUtils.addSmallScreenCell([
                             {
                                 name: "source",
