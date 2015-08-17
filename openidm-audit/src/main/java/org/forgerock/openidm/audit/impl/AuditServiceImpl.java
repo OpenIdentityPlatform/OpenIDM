@@ -23,6 +23,11 @@
  */
 package org.forgerock.openidm.audit.impl;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
@@ -30,6 +35,8 @@ import static org.forgerock.openidm.audit.impl.AuditLogFilters.newEventTypeFilte
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -50,9 +57,12 @@ import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.json.AuditJsonConfig;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
@@ -60,13 +70,11 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
@@ -79,13 +87,10 @@ import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * This audit service is the entry point for audit logging on the router.
@@ -355,10 +360,9 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-                           final ResultHandler<Resource> handler) {
-            LOGGER.debug("Audit read called for {}", request.getResourceName());
-            auditService.handleRead(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
+        LOGGER.debug("Audit read called for {}", request.getResourcePath());
+        return auditService.handleRead(context, request);
     }
 
     /**
@@ -370,55 +374,46 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-                             final ResultHandler<Resource> handler) {
-        try {
-            if (request.getResourceName() == null) {
-                //TODO IGNORE FAILURE PER AUDIT LOGGER?
-                throw new BadRequestException(
-                                "Audit service called without specifying which audit log in the identifier");
-            }
-
-            try {
-                formatException(request.getContent());
-            } catch (Exception e) {
-                LOGGER.error("Failed to format audit entry exception", e);
-                throw new InternalServerErrorException("Failed to format audit entry exception", e);
-            }
-
-            // Don't audit the audit log
-            if (context.containsContext(AuditContext.class)) {
-                handler.handleResult(new Resource(null, null, request.getContent()));
-                return;
-            }
-
-            LOGGER.debug("Audit create called for {} with {}", request.getResourceName(), request.getContent().asMap());
-
-            if (auditFilter.isFiltered(context, request)) {
-                LOGGER.debug("Request filtered by filter for {}/{} using method {}",
-                        request.getResourceName(),
-                        request.getNewResourceId(),
-                        request.getContent().get(new JsonPointer("resourceOperation/operation/method")));
-                handler.handleResult(new Resource(null, null, request.getContent()));
-                return;
-            }
-
-
-            auditService.handleCreate(context, request, handler);
-        } catch (ResourceException ex) {
-            LOGGER.warn("Failure writing audit log: {}/ with exception: {}",
-                    request.getResourceNameObject().head(1).toString(), ex);
-            handler.handleError(ex);
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
+        if (request.getResourcePath() == null) {
+            //TODO IGNORE FAILURE PER AUDIT LOGGER?
+            return newExceptionPromise(ResourceException.cast(new BadRequestException(
+                    "Audit service called without specifying which audit log in the identifier")));
         }
+
+        try {
+            formatException(request.getContent());
+        } catch (Exception e) {
+            LOGGER.error("Failed to format audit entry exception", e);
+            return newExceptionPromise(ResourceException.cast(
+                    new InternalServerErrorException("Failed to format audit entry exception", e)));
+        }
+
+        // Don't audit the audit log
+        if (context.containsContext(AuditContext.class)) {
+            return newResultPromise(newResourceResponse(null, null, request.getContent()));
+        }
+
+        LOGGER.debug("Audit create called for {} with {}", request.getResourcePath(), request.getContent().asMap());
+
+        if (auditFilter.isFiltered(context, request)) {
+            LOGGER.debug("Request filtered by filter for {}/{} using method {}",
+                    request.getResourcePath(),
+                    request.getNewResourceId(),
+                    request.getContent().get(new JsonPointer("resourceOperation/operation/method")));
+            return newResultPromise(newResourceResponse(null, null, request.getContent()));
+        }
+
+        return auditService.handleCreate(context, request);
+
     }
 
     /**
      * Audit service does not support changing audit entries.
      */
     @Override
-    public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
-        auditService.handleUpdate(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
+        return auditService.handleUpdate(context, request);
     }
 
     /**
@@ -429,9 +424,8 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request,
-            ResultHandler<Resource> handler) {
-        auditService.handleDelete(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
+        return auditService.handleDelete(context, request);
     }
 
     /**
@@ -440,9 +434,8 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
-        auditService.handlePatch(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        return auditService.handlePatch(context, request);
     }
 
     /**
@@ -460,12 +453,12 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
-        LOGGER.debug("Audit query called for {} with {}", request.getResourceName(), request.getAdditionalParameters());
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
+            final QueryResourceHandler handler) {
 
-        //TODO DO WE CARE ABOUT THE FORMATTED KEYWORD
-        //final boolean formatted = getFormattedValue(request.getAdditionalParameter("formatted"));
-        auditService.handleQuery(context, request, handler);
+        LOGGER.debug("Audit query called for {} with {}", request.getResourcePath(), request.getAdditionalParameters());
+
+        return auditService.handleQuery(context, request, handler);
     }
 
     /**
@@ -474,49 +467,48 @@ public class AuditServiceImpl implements AuditService {
      * {@inheritDoc}
      */
     @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
+
+        LOGGER.debug("Audit handleAction called with action={}", request.getAction());
+
         AuditAction requestAction = null;
         try {
-            String actionValue = request.getAction();
-            LOGGER.debug("Audit handleAction called with action={}", actionValue);
-            try {
-                requestAction = request.getActionAsEnum(AuditAction.class);
-            } catch (Exception e) {
-                LOGGER.debug("Action is not a OpenIDM action delegating to CAUD", e);
-            }
+            requestAction = request.getActionAsEnum(AuditAction.class);
+        } catch (Exception e) {
+            // this will leave requestAction as null.
+            LOGGER.debug("Action is not a OpenIDM action delegating to CAUD", e);
+        }
 
-            JsonValue content = request.getContent();
+        JsonValue content = request.getContent();
 
-            if (requestAction == null) {
-                //if action unknown in openidm delegate it caud
-                auditService.handleAction(context, request, handler);
-                return;
-            }
+        if (requestAction != null) {
 
             switch (requestAction) {
                 case getChangedWatchedFields:
                     List<String> changedFields =
                             checkForFields(watchFieldFilters, content.get("before"), content.get("after"));
-                    handler.handleResult(new JsonValue(changedFields));
-                    return;
+
+                    return newResultPromise(newActionResponse(new JsonValue(changedFields)));
+
                 case getChangedPasswordFields:
                     List<String> changedPasswordFields =
                             checkForFields(passwordFieldFilters, content.get("before"), content.get("after"));
-                    handler.handleResult(new JsonValue(changedPasswordFields));
-                    return;
+
+                    return newResultPromise(newActionResponse(new JsonValue(changedPasswordFields)));
+
                 case availableHandlers:
-                    handler.handleResult(getAvailableAuditEventHandlersWithConfigSchema());
-                    return;
+                    try {
+                        return newResultPromise(newActionResponse(getAvailableAuditEventHandlersWithConfigSchema()));
+                    } catch (ResourceException e) {
+                        return newExceptionPromise(e);
+                    }
+
                 default:
+                    //allow to fall to caud
             }
-        } catch (ResourceException e) {
-            final String error = String.format("Unable to handle action: %s",
-                    requestAction == null ? null : requestAction.name());
-            LOGGER.error(error);
-            handler.handleError(new InternalServerErrorException(error, e));
-            return;
         }
+        //if action unknown in openidm, delegate it caud
+        return auditService.handleAction(context, request);
     }
 
     /**

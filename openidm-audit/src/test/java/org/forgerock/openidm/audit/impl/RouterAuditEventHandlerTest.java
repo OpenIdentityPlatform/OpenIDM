@@ -16,43 +16,39 @@
 
 package org.forgerock.openidm.audit.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.forgerock.audit.DependencyProviderBase;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.RoutingMode;
-import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.audit.mocks.*;
+import org.forgerock.openidm.audit.mocks.MockRequestHandler;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.openidm.audit.util.AuditTestUtils.mockResultHandler;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class RouterAuditEventHandlerTest {
 
@@ -65,7 +61,7 @@ public class RouterAuditEventHandlerTest {
     public void setUp() throws ResourceException {
         requestHandler = new MockRequestHandler();
         Router router = new Router();
-        router.addRoute(RoutingMode.STARTS_WITH, "audit/db", requestHandler);
+        router.addRoute(RoutingMode.STARTS_WITH, Router.uriTemplate("audit/db"), requestHandler);
         connectionFactory = Resources.newInternalConnectionFactory(router);
 
         routerAuditEventHandler = new RouterAuditEventHandler();
@@ -92,59 +88,56 @@ public class RouterAuditEventHandlerTest {
 
 
     @Test
-    public void testReadEntry() throws ResourceException, IOException {
+    public void testReadEntry() throws Exception {
         //given
         final JsonValue content = json(object(field("somedata", "foo")));
-        requestHandler.addResource(new Resource(Resource.FIELD_ID, Resource.FIELD_REVISION, content));
-        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+        requestHandler.addResource(
+                Responses.newResourceResponse(ResourceResponse.FIELD_ID, ResourceResponse.FIELD_REVISION, content));
 
         //when
-        routerAuditEventHandler.readInstance(new ServerContext(new RootContext()), Resource.FIELD_ID,
-                Requests.newReadRequest("access"), resultHandler);
+        Promise<ResourceResponse, ResourceException> promise = routerAuditEventHandler.readInstance(new RootContext(),
+                ResourceResponse.FIELD_ID, Requests.newReadRequest("access"));
 
         //then
         assertThat(requestHandler.getRequests().size()).isEqualTo(1);
         final Request request = requestHandler.getRequests().get(0);
         assertThat(request).isInstanceOf(ReadRequest.class);
-        assertThat(request.getResourceName()).isEqualTo("access/" + Resource.FIELD_ID);
+        assertThat(request.getResourcePath()).isEqualTo("access/" + ResourceResponse.FIELD_ID);
 
-        verify(resultHandler, never()).handleError(any(ResourceException.class));
-        verify(resultHandler, times(1)).handleResult(resourceCaptor.capture());
-        Resource resource = resourceCaptor.getValue();
-        assertThat(resource).isNotNull();
-        assertThat(resource.getContent().asMap()).isEqualTo(content.asMap());
+        ResourceResponse response = promise.getOrThrowUninterruptibly();
+
+        assertThat(response).isNotNull();
+        assertThat(response.getContent().asMap()).isEqualTo(content.asMap());
 
         requestHandler.getRequests().clear();
     }
 
     @Test
-    public void testQueryEntries() throws ResourceException, IOException {
+    public void testQueryEntries() throws Exception {
         //given
         final JsonValue content = json(object(field("somedata", "foo")));
-        requestHandler.addResource(new Resource(Resource.FIELD_ID, Resource.FIELD_REVISION, content));
+        requestHandler.addResource(
+                Responses.newResourceResponse(ResourceResponse.FIELD_ID, ResourceResponse.FIELD_REVISION, content));
 
-        final QueryResultHandler queryResultHandler = mock(QueryResultHandler.class);
-        final ArgumentCaptor<QueryResult> queryResultCaptor = ArgumentCaptor.forClass(QueryResult.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor = ArgumentCaptor.forClass(ResourceException.class);
+        final QueryResourceHandler queryResultHandler = mock(QueryResourceHandler.class);
+        final ArgumentCaptor<ResourceResponse> resourceCaptor = ArgumentCaptor.forClass(ResourceResponse.class);
+
 
         //when
-        routerAuditEventHandler.queryCollection(
-                new ServerContext(new RootContext()),
-                Requests.newQueryRequest("access").setQueryFilter(QueryFilter.valueOf("/_id eq \"_id\"")),
+        Promise<QueryResponse, ResourceException> promise = routerAuditEventHandler.queryCollection(new RootContext(),
+                Requests.newQueryRequest("access").setQueryFilter(QueryFilters.parse("/_id eq \"_id\"")),
                 queryResultHandler);
 
         //then
         assertThat(requestHandler.getRequests().size() == 1);
         final Request request = requestHandler.getRequests().get(0);
         assertThat(request).isInstanceOf(QueryRequest.class);
-        assertThat(request.getResourceName()).isEqualTo("access");
+        assertThat(request.getResourcePath()).isEqualTo("access");
 
-        verify(queryResultHandler, never()).handleError(resourceExceptionCaptor.capture());
+        AssertJPromiseAssert.assertThat(promise).succeeded();
+
         verify(queryResultHandler, times(1)).handleResource(resourceCaptor.capture());
-        verify(queryResultHandler).handleResult(queryResultCaptor.capture());
-        final Resource resource = resourceCaptor.getValue();
+        final ResourceResponse resource = resourceCaptor.getValue();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(content.asMap());
 
@@ -152,26 +145,23 @@ public class RouterAuditEventHandlerTest {
     }
 
     @Test
-    public void testCreateEntry() throws ResourceException, IOException {
+    public void testCreateEntry() throws Exception {
         //given
         final JsonValue content = json(object(field("somedata", "foo")));
-        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
 
         //when
-        routerAuditEventHandler.createInstance(new ServerContext(new RootContext()),
-                Requests.newCreateRequest("access", Resource.FIELD_ID, content), resultHandler);
+        Promise<ResourceResponse, ResourceException> promise = routerAuditEventHandler.createInstance(
+                new RootContext(), Requests.newCreateRequest("access", ResourceResponse.FIELD_ID, content));
 
         //then
+        ResourceResponse resource = promise.getOrThrow();
+
         assertThat(requestHandler.getRequests().size() == 1);
         final Request request = requestHandler.getRequests().get(0);
         assertThat(request).isInstanceOf(CreateRequest.class);
-        assertThat(request.getResourceName()).isEqualTo("access");
-        assertThat(((CreateRequest) request).getNewResourceId()).isEqualTo(Resource.FIELD_ID);
+        assertThat(request.getResourcePath()).isEqualTo("access");
+        assertThat(((CreateRequest) request).getNewResourceId()).isEqualTo(ResourceResponse.FIELD_ID);
 
-        verify(resultHandler, times(1)).handleResult(resourceCaptor.capture());
-        verify(resultHandler, never()).handleError(any(ResourceException.class));
-        Resource resource = resourceCaptor.getValue();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(content.asMap());
 

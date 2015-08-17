@@ -16,19 +16,19 @@
 
 package org.forgerock.openidm.audit.impl;
 
+import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.Context;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.RequestType;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.script.Script;
@@ -36,8 +36,6 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.util.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptException;
 
 
 /**
@@ -102,7 +100,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             return !values.contains(asValue.apply(request.getContent().get(field)));
         }
     }
@@ -126,7 +124,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             // don't filter requests that do not specify an action
             if (request.getContent().get(field).isNull()) {
                 return false;
@@ -160,7 +158,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             // don't filter requests that do not specify an action
             if (request.getContent().get(field).isNull()) {
                 return false;
@@ -188,7 +186,7 @@ public class AuditLogFilters {
         }
 
         private String getEventType(CreateRequest request) {
-            return request.getResourceNameObject().head(1).toString();
+            return request.getResourcePathObject().head(1).toString();
         }
 
         private boolean isEventType(CreateRequest request) {
@@ -196,7 +194,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             return isEventType(request) && filter.isFiltered(context, request);
         }
     }
@@ -227,7 +225,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             return trigger.equals(getTrigger(context)) && filter.isFiltered(context, request);
         }
     }
@@ -243,7 +241,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             if (!scriptEntry.isActive()) {
                 // do not filter if script has become inactive
                 return false;
@@ -280,7 +278,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public abstract boolean isFiltered(ServerContext context, CreateRequest request);
+        public abstract boolean isFiltered(Context context, CreateRequest request);
     }
 
     /**
@@ -298,7 +296,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             for (AuditLogFilter filter : filters) {
                 if (filter.isFiltered(context, request)) {
                     return true;
@@ -323,7 +321,7 @@ public class AuditLogFilters {
         }
 
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             for (AuditLogFilter filter : filters) {
                 if (!filter.isFiltered(context, request)) {
                     // short-circuit on a single filter that does not filter

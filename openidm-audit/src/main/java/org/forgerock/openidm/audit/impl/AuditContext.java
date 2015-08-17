@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Copyright 2014-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,25 +23,15 @@
  */
 package org.forgerock.openidm.audit.impl;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.PersistenceConfig;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.AbstractContext;
 
 /**
  * A ServerContext used when auditing over the router.
  */
-class AuditContext extends ServerContext {
+class AuditContext extends AbstractContext {
     public AuditContext(Context parent) {
-        super(parent);
+        super(parent, "AuditContext");
     }
 
-    public AuditContext(String id, Context parent) {
-        super(id, parent);
-    }
-
-    public AuditContext(JsonValue savedContext, PersistenceConfig config) throws ResourceException {
-        super(savedContext, config);
-    }
 }

@@ -11,13 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.ServerContext;
 
 /**
  * An audit log filter.
@@ -32,5 +32,5 @@ interface AuditLogFilter {
      *                examine request.getContent()
      * @return true if the log message should be dropped, false if it should be logged
      */
-    boolean isFiltered(ServerContext context, CreateRequest request);
+    boolean isFiltered(Context context, CreateRequest request);
 }

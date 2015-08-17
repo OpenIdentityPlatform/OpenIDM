@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,27 +25,28 @@
 package org.forgerock.openidm.audit.filter;
 
 import org.forgerock.audit.events.AccessAuditEventBuilder;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.Filter;
-import org.forgerock.json.resource.InternalServerContext;
+import org.forgerock.json.resource.InternalContext;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.servlet.HttpContext;
+import org.forgerock.json.resource.http.HttpContext;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,87 +79,116 @@ public class AuditFilter implements Filter {
      * {@inheritDoc}
      */
     @Override
-    public void filterAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler,
+    public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest request,
             RequestHandler next) {
+
         AuditState state = new AuditState(request);
-        next.handleAction(context, request, wrap(context, state, handler));
+        Promise<ActionResponse, ResourceException> promise = next.handleAction(context, request);
+        logAuditAccessEntry(context, state, promise);
+
+        return promise;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void filterCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler,
+    public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest request,
             RequestHandler next) {
+
         AuditState state = new AuditState(request);
-        next.handleCreate(context, request, wrap(context, state, handler));
+        Promise<ResourceResponse, ResourceException> promise = next.handleCreate(context, request);
+        logAuditAccessEntry(context, state, promise);
+
+        return promise;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void filterDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler,
+    public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest request,
             RequestHandler next) {
+
         AuditState state = new AuditState(request);
-        next.handleDelete(context, request, wrap(context, state, handler));
+        Promise<ResourceResponse, ResourceException> promise = next.handleDelete(context, request);
+        logAuditAccessEntry(context, state, promise);
+
+        return promise;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void filterPatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler,
+    public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest request,
             RequestHandler next) {
+
         AuditState state = new AuditState(request);
-        next.handlePatch(context, request, wrap(context, state, handler));
+        Promise<ResourceResponse, ResourceException> promise = next.handlePatch(context, request);
+        logAuditAccessEntry(context, state, promise);
+
+        return promise;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void filterQuery(ServerContext context, QueryRequest request, QueryResultHandler handler,
-            RequestHandler next) {
+    public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest request,
+            QueryResourceHandler handler, RequestHandler next) {
+
         AuditState state = new AuditState(request);
-        next.handleQuery(context, request, wrap(context, state, handler));
+        Promise<QueryResponse, ResourceException> promise = next.handleQuery(context, request, handler);
+        logAuditAccessEntry(context, state, promise);
+
+        return promise;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void filterRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler,
+    public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest request,
             RequestHandler next) {
+
         AuditState state = new AuditState(request);
-        next.handleRead(context, request, wrap(context, state, handler));
+        Promise<ResourceResponse, ResourceException> promise = next.handleRead(context, request);
+        logAuditAccessEntry(context, state, promise);
+
+        return promise;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void filterUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler,
+    public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest request,
             RequestHandler next) {
+
         AuditState state = new AuditState(request);
-        next.handleUpdate(context, request, wrap(context, state, handler));
+        Promise<ResourceResponse, ResourceException> promise = next.handleUpdate(context, request);
+        logAuditAccessEntry(context, state, promise);
+
+        return promise;
     }
 
-    private <V> ResultHandler<V> wrap(ServerContext context, AuditState state, ResultHandler<V> handler) {
-        return new AuditingResultHandler<>(context, state, handler);
-    }
-
-    private QueryResultHandler wrap(ServerContext context, AuditState state, QueryResultHandler handler) {
-        return new AuditingQueryResultHandler(context, state, handler);
-    }
-
-    private void logAuditAccessEntry(final ServerContext context, final AuditState state,
-                                     final ResourceException resourceException) {
+    private void logAuditAccessEntry(final Context context, final AuditState state,
+            final Promise<? extends Response, ResourceException> promise) {
 
         if (!context.containsContext(HttpContext.class)
-                || context.containsContext(InternalServerContext.class)) {
+                || context.containsContext(InternalContext.class)) {
             // don't log internal requests
             return;
+        }
+
+        ResourceException resourceException = null;
+        try {
+            promise.getOrThrow();
+        } catch (ResourceException e) {
+            resourceException = e;
+        } catch (InterruptedException e) {
+            LOGGER.error("Failed to log audit access entry", e);
         }
 
         final long elapsedTime = System.currentTimeMillis() - state.actionTime;
@@ -187,69 +217,10 @@ public class AuditFilter implements Filter {
             final CreateRequest createRequest =
                     Requests.newCreateRequest("audit/access", accessAuditEventBuilder.toEvent().getValue());
 
-            //wrap the context in a new internal server context since we are using the external connection factory
-            connectionFactory.getConnection().create(new InternalServerContext(context), createRequest);
+            //wrap the context in a new internal context since we are using the external connection factory
+            connectionFactory.getConnection().create(new InternalContext(context), createRequest);
         } catch (ResourceException e) {
             LOGGER.error("Failed to log audit access entry", e);
-        }
-    }
-
-    private class AuditingResultHandler<V> implements ResultHandler<V> {
-
-        private final ServerContext context;
-        private final AuditState state;
-        private final ResultHandler<V> handler;
-
-        private AuditingResultHandler(ServerContext context, AuditState state, ResultHandler<V> handler) {
-            this.context = context;
-            this.state = state;
-            this.handler = handler;
-        }
-
-        ServerContext getContext() {
-            return context;
-        }
-
-        AuditState getState() {
-            return state;
-        }
-
-        @Override
-        public void handleError(ResourceException error) {
-            try {
-                logAuditAccessEntry(getContext(), getState(), error);
-            } finally {
-                handler.handleError(error);
-            }
-        }
-
-        @Override
-        public void handleResult(V result) {
-            try {
-                logAuditAccessEntry(getContext(), getState(), null);
-            } finally {
-                handler.handleResult(result);
-            }
-        }
-    }
-
-    private final class AuditingQueryResultHandler extends AuditingResultHandler<QueryResult>
-            implements QueryResultHandler {
-
-        private final QueryResultHandler handler;
-
-        private AuditingQueryResultHandler(ServerContext context, AuditState state, QueryResultHandler handler) {
-            super(context, state, handler);
-            this.handler = handler;
-        }
-
-        @Override
-        public boolean handleResource(Resource resource) {
-            try {
-                logAuditAccessEntry(getContext(), getState(), null);
-            } finally {
-                return handler.handleResource(resource);
-            }
         }
     }
 

@@ -17,17 +17,15 @@
 package org.forgerock.openidm.audit.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.assertj.core.api.Assertions.fail;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.openidm.audit.AuditService.AuditAction.availableHandlers;
 import static org.forgerock.openidm.audit.AuditService.AuditAction.getChangedPasswordFields;
 import static org.forgerock.openidm.audit.AuditService.AuditAction.getChangedWatchedFields;
-import static org.forgerock.openidm.audit.util.AuditTestUtils.mockResultHandler;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
@@ -36,32 +34,33 @@ import java.util.List;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
-import org.mockito.ArgumentCaptor;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.Test;
 
@@ -106,20 +105,15 @@ public class AuditServiceImplTest {
                 .toEvent();
 
         final CreateRequest createRequest = Requests.newCreateRequest("test", auditEvent.getValue());
-        final ResultHandler<Resource> resourceResultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
 
         //when
-        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resourceResultHandler);
+        Promise<ResourceResponse, ResourceException> promise = auditService.handleCreate(
+                new RootContext(), createRequest);
 
         //then
-        verify(resourceResultHandler).handleResult(resourceCaptor.capture());
-        verify(resourceResultHandler, never()).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceCaptor.getValue()).isNotNull();
-        assertThat(resourceCaptor.getValue().getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+        AssertJPromiseAssert.assertThat(promise).isNotNull().succeeded();
+        ResourceResponse resourceResponse = promise.getOrThrow();
+        AssertJJsonValueAssert.assertThat(resourceResponse.getContent()).isEqualTo(createRequest.getContent());
     }
 
     @Test
@@ -129,19 +123,11 @@ public class AuditServiceImplTest {
 
         final ReadRequest readRequest = Requests.newReadRequest("test", "id");
 
-        final ResultHandler<Resource> resourceResultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
-
         //when
-        auditService.handleRead(new ServerContext(new RootContext()), readRequest, resourceResultHandler);
+        Promise<ResourceResponse, ResourceException> promise = auditService.handleRead(new RootContext(), readRequest);
 
         //then
-        verify(resourceResultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(resourceResultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
     }
 
     @Test
@@ -152,19 +138,12 @@ public class AuditServiceImplTest {
         final UpdateRequest updateRequest =
                 Requests.newUpdateRequest("test", "id", new JsonValue(new LinkedHashMap<String, Object>()));
 
-        final ResultHandler<Resource> resourceResultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
-
         //when
-        auditService.handleUpdate(new ServerContext(new RootContext()), updateRequest, resourceResultHandler);
+        Promise<ResourceResponse, ResourceException> promise = auditService.handleUpdate(
+                new RootContext(), updateRequest);
 
         //then
-        verify(resourceResultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(resourceResultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
     }
 
     @Test
@@ -174,19 +153,12 @@ public class AuditServiceImplTest {
 
         final DeleteRequest deleteRequest = Requests.newDeleteRequest("test", "id");
 
-        final ResultHandler<Resource> resourceResultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
-
         //when
-        auditService.handleDelete(new ServerContext(new RootContext()), deleteRequest, resourceResultHandler);
+        Promise<ResourceResponse, ResourceException> promise = auditService.handleDelete(
+                new RootContext(), deleteRequest);
 
         //then
-        verify(resourceResultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(resourceResultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
     }
 
     @Test
@@ -197,19 +169,12 @@ public class AuditServiceImplTest {
         final PatchRequest patchRequest =
                 Requests.newPatchRequest("test", "id", PatchOperation.remove(new JsonPointer("/test")));
 
-        final ResultHandler<Resource> resourceResultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
-
         //when
-        auditService.handlePatch(new ServerContext(new RootContext()), patchRequest, resourceResultHandler);
+        Promise<ResourceResponse, ResourceException> promise = auditService.handlePatch(
+                new RootContext(), patchRequest);
 
         //then
-        verify(resourceResultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(resourceResultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
     }
 
     @Test
@@ -219,26 +184,26 @@ public class AuditServiceImplTest {
 
         final ActionRequest actionRequest = Requests.newActionRequest("test", "id", "unknownAction");
 
-        final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
-        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
-
         //when
-        auditService.handleAction(new ServerContext(new RootContext()), actionRequest, jsonValueResultHandler);
+        Promise<ActionResponse, ResourceException> promise = auditService.handleAction(new RootContext(),
+                actionRequest);
 
         //then
-        verify(jsonValueResultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(jsonValueResultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
-
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
+        try {
+            promise.getOrThrow();
+            fail("expected to get BadRequestException");
+        } catch (BadRequestException e) {
+            // we're all good, this is what we expected.
+        } catch (InterruptedException | ResourceException e) {
+            fail("expected to get BadRequestException");
+        }
     }
 
     @Test
     public void testActionForChangedFields() throws Exception {
 
-        //given
+        //given - depends on 'mail' being configured as a watched field.
         AuditServiceImpl auditService = createAuditService("/audit.json");
         JsonValue testContent = json(
                 object(
@@ -254,15 +219,14 @@ public class AuditServiceImplTest {
         );
         ActionRequest changedFieldsRequest = Requests.newActionRequest("test", "id", getChangedWatchedFields.name());
         changedFieldsRequest.setContent(testContent);
-        final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
-        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
 
         // when
-        auditService.handleAction(new ServerContext(new RootContext()), changedFieldsRequest, jsonValueResultHandler);
+        Promise<ActionResponse, ResourceException> promise = auditService.handleAction(new RootContext(),
+                changedFieldsRequest);
 
         // then
-        verify(jsonValueResultHandler).handleResult(resourceCaptor.capture());
-        List<String> changedFields = resourceCaptor.getValue().asList(String.class);
+        ActionResponse actionResponse = promise.getOrThrow();
+        List<String> changedFields = actionResponse.getJsonContent().asList(String.class);
         assertThat(changedFields.size()).isEqualTo(1);
         assertThat(changedFields.get(0)).isEqualTo("/mail");
     }
@@ -284,15 +248,15 @@ public class AuditServiceImplTest {
 
         ActionRequest changedPasswordRequest = Requests.newActionRequest("test", "id", getChangedPasswordFields.name());
         changedPasswordRequest.setContent(testContent);
-        final ResultHandler<JsonValue> jsonValueResultHandler = mockResultHandler(JsonValue.class);
-        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
 
         //when
-        auditService.handleAction(new ServerContext(new RootContext()), changedPasswordRequest, jsonValueResultHandler);
+        Promise<ActionResponse, ResourceException> promise = auditService.handleAction(new RootContext(),
+                changedPasswordRequest);
 
         //then
-        verify(jsonValueResultHandler).handleResult(resourceCaptor.capture());
-        List<String> changedPasswords = resourceCaptor.getValue().asList(String.class);
+        ActionResponse response = promise.getOrThrow();
+        List<String> changedPasswords = response.getJsonContent().asList(String.class);
+
         assertThat(changedPasswords.size()).isEqualTo(1);
         assertThat(changedPasswords.get(0)).isEqualTo("/password");
     }
@@ -304,19 +268,14 @@ public class AuditServiceImplTest {
 
         final QueryRequest queryRequest = Requests.newQueryRequest("test");
 
-        final QueryResultHandler queryResultHandler = mock(QueryResultHandler.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
+        final QueryResourceHandler queryResultHandler = mock(QueryResourceHandler.class);
 
         //when
-        auditService.handleQuery(new ServerContext(new RootContext()), queryRequest, queryResultHandler);
+        Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(new RootContext(), queryRequest,
+                queryResultHandler);
 
         //then
-        verify(queryResultHandler, never()).handleResource(resourceCaptor.capture());
-        verify(queryResultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
     }
 
     @Test
@@ -333,45 +292,34 @@ public class AuditServiceImplTest {
                 .toEvent();
 
         final CreateRequest createRequest = Requests.newCreateRequest("test", auditEvent.getValue());
-        final ResultHandler<Resource> resourceResultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
 
         //when
-        auditService.handleCreate(new ServerContext(new RootContext()), createRequest, resourceResultHandler);
+        Promise<ResourceResponse, ResourceException> promise = auditService.handleCreate(
+                new RootContext(), createRequest);
 
         //then
-        verify(resourceResultHandler).handleResult(resourceCaptor.capture());
-        verify(resourceResultHandler, never()).handleError(resourceExceptionCaptor.capture());
+        ResourceResponse response = promise.getOrThrow();
+        JsonValue content = response.getContent();
 
         final JsonValue expectedResource = createRequest.getContent();
         expectedResource.put("exception", "Exception Formatted");
 
-        assertThat(resourceCaptor.getValue()).isNotNull();
-        assertThat(resourceCaptor.getValue().getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+        assertThat(content).isNotNull();
+        assertThat(content.asMap()).isEqualTo(createRequest.getContent().asMap());
     }
 
     @Test
     public void testAvailableHandlersAction() throws Exception {
         final AuditServiceImpl auditService = createAuditService("/audit.json");
-        final ResultHandler<JsonValue> resultHandler = mockResultHandler(JsonValue.class);
-        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
 
         //when
-        auditService.handleAction(
-                new ServerContext(new RootContext()),
-                Requests.newActionRequest("", availableHandlers.name()),
-                resultHandler
-        );
+        Promise<ActionResponse, ResourceException> promise = auditService.handleAction(
+                new RootContext(), Requests.newActionRequest("", availableHandlers.name()));
 
         //then
-        verify(resultHandler).handleResult(resourceCaptor.capture());
-        verify(resultHandler, never()).handleError(resourceExceptionCaptor.capture());
+        ActionResponse actionResponse = promise.getOrThrow();
 
-        final JsonValue result = resourceCaptor.getValue();
+        final JsonValue result = actionResponse.getJsonContent();
         assertThat(result.keys().size()).isEqualTo(1);
         assertThat(result.get(0).get("class").asString())
                 .isEqualTo("org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler");
@@ -388,349 +336,6 @@ public class AuditServiceImplTest {
         ));
         assertThat(result.get(0).get("config").asMap()).isEqualTo(expectedConfig.asMap());
     }
-
-    /*
-    @Test(enabled = false)
-    public void testFilterActivityAuditContext() throws Exception {
-
-        //Given
-        AuditContext auditContext = new AuditContext(new RootContext());
-        ServerContext context = new ServerContext(auditContext);
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        //When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "create");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        //Then
-        assertEquals(memory.size(), 0);
-    }
-
-    @Test(enabled = false)
-    public void testFilterActivityNone() throws Exception {
-
-        //Given
-        ServerContext context = mock(ServerContext.class);
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        //When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "create");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        //Then
-        assertEquals(memory.size(), 1);
-    }
-
-    @Test(enabled = false)
-    public void testFilterActivityExplicitlyIncluded() throws Exception {
-
-        //Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("actions", array("create"))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = mock(ServerContext.class);
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        //When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "create");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        //Then
-        assertEquals(memory.size(), 1);
-    }
-
-    @Test(enabled = false)
-    public void testFilterActivityAllExcluded() throws Exception {
-
-        //Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("actions", array())
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = mock(ServerContext.class);
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        //When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "create");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        //Then
-        assertEquals(memory.size(), 0);
-    }
-
-    @Test(enabled = false)
-    public void testFilterActivityUnknownAction() throws Exception {
-
-        //Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("actions", array("create"))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = mock(ServerContext.class);
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        //When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "unknown");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        //Then
-        assertEquals(memory.size(), 1);
-    }
-
-    @Test(enabled = false)
-    public void testFilterTriggerActivityExplicitlyIncluded() throws Exception {
-
-        // Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("triggers", object(
-                                        field("sometrigger", array("create"))
-                                ))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        TriggerContext triggerContext = new TriggerContext(new RootContext(), "sometrigger");
-        ServerContext context = new ServerContext(triggerContext);
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        // When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "create");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        // Then
-        assertEquals(memory.size(), 1);
-    }
-
-    @Test(enabled = false)
-    public void testFilterTriggerActivityAllExcluded() throws Exception {
-
-        //Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("triggers", object(
-                                    field("sometrigger", array())
-                                ))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        //When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "create");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        //Then
-        assertEquals(memory.size(), 0);
-    }
-
-    @Test(enabled = false)
-    public void testFilterTriggerActivityUnknownAction() throws Exception {
-
-        // Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("triggers", object(
-                                    field("sometrigger", array("create"))
-                                ))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        // When
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        content.put("_id", 1);
-        content.put("data", "hello world");
-        content.put("action", "unknown");
-        auditService.handleCreate(context, Requests.newCreateRequest("activity", null, content), handler);
-
-        // Then
-        assertEquals(memory.size(), 1);
-    }
-
-
-    @Test(enabled = false)
-    public void testFilterTriggerReconLinkAction() throws Exception {
-
-        // Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("triggers", object(
-                                    field("recon", array("link"))
-                                ))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        // based on ObjectMapping.ReconEntry which uses action from SyncOperation.action which is an
-        // org.forgerock.openidm.core.sync.impl.Action value
-        JsonValue reconEntry = new JsonValue(new HashMap<String, Object>());
-        reconEntry.put("_id", 1);
-        reconEntry.put("data", "hello world");
-        reconEntry.put("action", "LINK");
-
-        // When
-        auditService.handleCreate(context, Requests.newCreateRequest("recon", null, reconEntry), handler);
-
-        // Then
-        assertEquals(memory.size(), 1);
-    }
-
-    @Test(enabled = false)
-    public void testFilterTriggerReconUnknownAction() throws Exception {
-
-        // Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("recon", object(
-                            field("filter", object(
-                                field("triggers", object(
-                                    // create is an unknown action for recon, as it is not in Action - it should be ignored
-                                    field("recon", array("create"))
-                                ))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        // based on ObjectMapping.ReconEntry which uses action from SyncOperation.action which is an
-        // org.forgerock.openidm.core.sync.impl.Action value
-        JsonValue reconEntry = new JsonValue(new HashMap<String, Object>());
-        reconEntry.put("_id", 1);
-        reconEntry.put("data", "hello world");
-        reconEntry.put("action", "LINK");
-
-        // When
-        auditService.handleCreate(context, Requests.newCreateRequest("recon", null, reconEntry), handler);
-
-        // Then
-        assertEquals(memory.size(), 0);
-    }
-
-    @Test(enabled = false)
-    public void testFilterTriggerReconWithNoAction() throws Exception {
-
-        // Given
-        JsonValue config = json(
-                object(
-                    field("eventTypes", object(
-                        field("activity", object(
-                            field("filter", object(
-                                field("triggers", object(
-                                    // filter to log link and unlink only
-                                    field("recon", array("link", "unlink"))
-                                ))
-                            ))
-                        ))
-                    ))
-                ));
-
-        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
-        ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
-        @SuppressWarnings("unchecked")
-        ResultHandler<Resource> handler = mock(ResultHandler.class);
-
-        // based on ObjectMapping.ReconEntry which uses action from SyncOperation.action which is an
-        // org.forgerock.openidm.core.sync.impl.Action value
-        // start/summary records log with action of null
-        CreateRequest request = Requests.newCreateRequest("recon", null, json(object(field("action", null))));
-
-        // When
-        auditService.handleCreate(context, request, handler);
-
-        // Then
-        assertEquals(memory.size(), 1); // always log nulls
-    }
-    */
 
     private InputStream getResource(final String resourceName) {
         return getClass().getResourceAsStream(resourceName);

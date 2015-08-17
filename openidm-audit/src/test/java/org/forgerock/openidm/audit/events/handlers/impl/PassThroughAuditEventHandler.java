@@ -16,18 +16,24 @@
 
 package org.forgerock.openidm.audit.events.handlers.impl;
 
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,11 +64,8 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void actionCollection(
-            final ServerContext context,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(actionRequest));
     }
 
     /**
@@ -70,12 +73,9 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(
-            final ServerContext context,
-            final String resourceId,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
+            ActionRequest actionRequest) {
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(actionRequest));
     }
 
     /**
@@ -83,14 +83,13 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void createInstance(
-            final ServerContext context,
-            final CreateRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest createRequest) {
         logger.info("Added an entry. Message: " + message);
-        handler.handleResult(new Resource(request.getContent().get(Resource.FIELD_CONTENT_ID).asString(),
-                null,
-                new JsonValue(request.getContent())));
+
+        ResourceResponse resourceResponse = newResourceResponse(
+                createRequest.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
+                new JsonValue(createRequest.getContent()));
+        return newResultPromise(resourceResponse);
     }
 
     /**
@@ -98,11 +97,9 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void queryCollection(
-            final ServerContext context,
-            final QueryRequest request,
-            final QueryResultHandler handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest queryRequest,
+            QueryResourceHandler queryResourceHandler) {
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(queryRequest));
     }
 
     /**
@@ -110,12 +107,9 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(
-            final ServerContext context,
-            final String resourceId,
-            final ReadRequest request,
-            final ResultHandler<Resource> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
+            ReadRequest readRequest) {
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(readRequest));
     }
 
     /**
