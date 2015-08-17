@@ -26,6 +26,10 @@
   Base Page Styles
 */
 
+.backgrid-table thead {
+  border-bottom: 2px solid #ddd;
+}
+
 .ui-jqgrid {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
@@ -106,6 +110,50 @@
 
 .validation-message {
   color: @failure-color;
+}
+
+.tab-content.tab-content-transparent {
+  background-color:transparent;
+}
+
+.has-feedback-left .form-control-feedback {
+  left:0px;
+}
+
+.has-feedback-left .form-control {
+  padding-right:12px;
+  padding-left:34px;
+}
+
+/*
+  Toolbar
+*/
+
+.toolbar .toolbar-search {
+  display:inline-block;
+  margin-left:5px;
+}
+
+.btn-group-dark {
+  .btn-default {
+    color: #333;
+    border-color: #ccc;
+    background-color:transparent;
+
+    .fa {
+      width:14px;
+    }
+  }
+
+  .btn-default:hover,
+  .btn-default:focus,
+  .btn-default.focus,
+  .btn-default:active,
+  .btn-default.active {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+  }
 }
 
 /*
