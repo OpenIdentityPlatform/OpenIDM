@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -53,7 +53,6 @@ import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.ConnectorKey;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
-import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -74,7 +73,7 @@ public class ConnectorInfoProviderServiceTest {
         InputStream inputStream =
                 ConnectorInfoProviderServiceTest.class
                         .getResourceAsStream("/config/provisioner.openicf.connectorinfoprovider.json");
-        Assert.assertNotNull(inputStream);
+        assertThat(inputStream).isNotNull();
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         byte[] temp = new byte[1024];
         int read;
@@ -91,7 +90,7 @@ public class ConnectorInfoProviderServiceTest {
 
         // Set root
         URL root = ConnectorInfoProviderServiceTest.class.getResource("/");
-        Assert.assertNotNull(root);
+        assertThat(root).isNotNull();
         String rootPath = URLDecoder.decode(root.getPath(), "UTF-8");
         System.setProperty(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
 
@@ -131,8 +130,9 @@ public class ConnectorInfoProviderServiceTest {
                 new ConnectorReference(new ConnectorKey(
                         "org.forgerock.openicf.connectors.xml-connector", "1.1.0.2",
                         "org.forgerock.openicf.connectors.xml.XMLConnector"));
-        Assert.assertNotNull(testableConnectorInfoProvider.findConnectorInfo(ref),
-                "XML Connector is missing");
+        assertThat(testableConnectorInfoProvider.findConnectorInfo(ref))
+                .isNotNull()
+                .overridingErrorMessage("XML Connector is missing");
 
     }
 
@@ -148,10 +148,11 @@ public class ConnectorInfoProviderServiceTest {
                 break;
             }
         }
-        Assert.assertNotNull(xmlConnectorInfo);
+
+        assertThat(xmlConnectorInfo).isNotNull();
         APIConfiguration configuration = xmlConnectorInfo.createDefaultAPIConfiguration();
         URL xmlRoot = ConnectorInfoProviderServiceTest.class.getResource("/xml/");
-        Assert.assertNotNull(xmlRoot);
+        assertThat(xmlRoot).isNotNull();
         URI xsdIcfFilePath = xmlRoot.toURI().resolve("resource-schema-1.xsd");
         configuration.getConfigurationProperties().setPropertyValue("xsdIcfFilePath",
                 new File(xsdIcfFilePath));
@@ -186,7 +187,7 @@ public class ConnectorInfoProviderServiceTest {
         InputStream inputStream =
                 ConnectorInfoProviderServiceTest.class
                         .getResourceAsStream("/config/org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerServiceSolarisConnectorTest.json");
-        Assert.assertNotNull(inputStream);
+        assertThat(inputStream).isNotNull();
         Map config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
         List<JsonPointer> result =
@@ -203,7 +204,7 @@ public class ConnectorInfoProviderServiceTest {
         inputStream =
                 ConnectorInfoProviderServiceTest.class
                         .getResourceAsStream("/config/provisioner.openicf-xml.json");
-        Assert.assertNotNull(inputStream);
+        assertThat(inputStream).isNotNull();
         config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
         result =
@@ -216,6 +217,6 @@ public class ConnectorInfoProviderServiceTest {
                         ConnectorInfoProviderService.PID, null,
                         connectorInfoProviderServiceConfiguration);
         assertThat(result).hasSize(1);
-        Assert.assertEquals(result.get(0).toString(), "/remoteConnectorServers/0/key");
+        assertThat(result.get(0).toString()).isEqualTo("/remoteConnectorServers/0/key");
     }
 }

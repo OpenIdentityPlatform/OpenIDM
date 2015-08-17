@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 ForgeRock, AS.
+ * Copyright 2013-2015 ForgeRock, AS.
  *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * A factory interface to create a {@link SyncFailureHandler}.
@@ -29,6 +29,6 @@ public interface SyncFailureHandlerFactory {
      * @param config the config for the SyncFailureHandler
      * @return the SyncFailureHandler
      */
-    public SyncFailureHandler create(JsonValue config) throws Exception;
+    SyncFailureHandler create(JsonValue config) throws Exception;
 }
 

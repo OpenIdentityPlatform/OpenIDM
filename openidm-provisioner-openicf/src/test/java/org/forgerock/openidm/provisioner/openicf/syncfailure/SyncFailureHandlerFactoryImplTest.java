@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 ForgeRock, AS.
+ * Copyright 2013-2015 ForgeRock, AS.
  *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -15,20 +15,20 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * Config tests for SyncFailureHandlerFactoryImpl factor method.
@@ -85,73 +85,73 @@ public class SyncFailureHandlerFactoryImplTest {
     @Test
     public void testCreateNoConfig() throws Exception {
         SyncFailureHandler handler = factory.create(null);
-        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
+        assertThat(handler).isInstanceOf(InfiniteRetrySyncFailureHandler.class);
     }
 
     @Test
     public void testCreateNullConfig() throws Exception {
         SyncFailureHandler handler = factory.create(new JsonValue(null));
-        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
+        assertThat(handler).isInstanceOf(InfiniteRetrySyncFailureHandler.class);
     }
 
     @Test
     public void testCreateEmptyConfig() throws Exception {
         SyncFailureHandler handler = factory.create(new JsonValue(new HashMap<String,Object>()));
-        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
+        assertThat(handler).isInstanceOf(InfiniteRetrySyncFailureHandler.class);
     }
 
     @Test
     public void testCreateInfiniteRetry() throws Exception {
         JsonValue config = parseJsonString("{\"maxRetries\":-1}");
         SyncFailureHandler handler = factory.create(config);
-        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
+        assertThat(handler).isInstanceOf(InfiniteRetrySyncFailureHandler.class);
     }
 
     @Test
     public void testCreateLoggedIgnore() throws Exception {
         JsonValue config = parseJsonString("{\"maxRetries\":0,\"postRetryAction\":\"logged-ignore\"}");
         SyncFailureHandler handler = factory.create(config);
-        Assert.assertTrue(handler instanceof LoggedIgnoreHandler);
+        assertThat(handler).isInstanceOf(LoggedIgnoreHandler.class);
     }
 
     @Test
     public void testCreateDeadLetterQueue() throws Exception {
         JsonValue config = parseJsonString("{\"maxRetries\":0,\"postRetryAction\":\"dead-letter-queue\"}");
         SyncFailureHandler handler = factory.create(config);
-        Assert.assertTrue(handler instanceof DeadLetterQueueHandler);
+        assertThat(handler).isInstanceOf(DeadLetterQueueHandler.class);
     }
 
     @Test
     public void testCreateScript() throws Exception {
         JsonValue config = parseJsonString("{\"maxRetries\":0,\"postRetryAction\":{\"script\":{\"type\":\"text/javascript\",\"file\":\"script/onSyncFailure.js\"}}}");
         SyncFailureHandler handler = factory.create(config);
-        Assert.assertTrue(handler instanceof ScriptedSyncFailureHandler);
+        assertThat(handler).isInstanceOf(ScriptedSyncFailureHandler.class);
     }
 
     @Test
     public void testCreateRetryOnly() throws Exception {
         JsonValue config = parseJsonString("{\"maxRetries\":3}");
         SyncFailureHandler handler = factory.create(config);
-        Assert.assertTrue(handler instanceof SimpleRetrySyncFailureHandler);
-        Assert.assertEquals(3, getRetries(handler));
-        Assert.assertTrue(getPostRetryHandler(handler) instanceof NullSyncFailureHandler);
+        assertThat(handler).isInstanceOf(SimpleRetrySyncFailureHandler.class);
+        assertThat(3).isEqualTo(getRetries(handler));
+        assertThat(getPostRetryHandler(handler)).isInstanceOf(NullSyncFailureHandler.class);
     }
 
     @Test
     public void testCreateRetryWithDeadLetterQueue() throws Exception {
         JsonValue config = parseJsonString("{\"maxRetries\":4,\"postRetryAction\":\"dead-letter-queue\"}");
         SyncFailureHandler handler = factory.create(config);
-        Assert.assertTrue(handler instanceof SimpleRetrySyncFailureHandler);
-        Assert.assertEquals(4, getRetries(handler));
-        Assert.assertTrue(getPostRetryHandler(handler) instanceof DeadLetterQueueHandler);
+        assertThat(handler).isInstanceOf(SimpleRetrySyncFailureHandler.class);
+        assertThat(4).isEqualTo(getRetries(handler));
+        assertThat(getPostRetryHandler(handler)).isInstanceOf(DeadLetterQueueHandler.class);
     }
 
     @Test
     public void testCreateRetryWithScript() throws Exception {
         JsonValue config = parseJsonString("{\"maxRetries\":5,\"postRetryAction\":{\"script\":{\"type\":\"text/javascript\",\"file\":\"script/onSyncFailure.js\"}}}");
         SyncFailureHandler handler = factory.create(config);
-        Assert.assertTrue(handler instanceof SimpleRetrySyncFailureHandler);
-        Assert.assertEquals(5, getRetries(handler));
-        Assert.assertTrue(getPostRetryHandler(handler) instanceof ScriptedSyncFailureHandler);
+        assertThat(handler).isInstanceOf(SimpleRetrySyncFailureHandler.class);
+        assertThat(5).isEqualTo(getRetries(handler));
+        assertThat(getPostRetryHandler(handler)).isInstanceOf(ScriptedSyncFailureHandler.class);
     }
 }

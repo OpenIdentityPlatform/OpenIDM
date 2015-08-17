@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +24,9 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,14 +38,14 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.PatchOperation;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.Id;
@@ -63,8 +66,6 @@ import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 public class ObjectClassInfoHelper {
 
@@ -122,7 +123,10 @@ public class ObjectClassInfoHelper {
         if (null != fieldFilters) {
             Set<String> attrsToGet = new HashSet();
             for (JsonPointer field : fieldFilters) {
-                if (field.isEmpty() || returnResource || !Resource.FIELD_CONTENT_ID.equals(field.leaf()) || !Resource.FIELD_CONTENT_REVISION.equals(field.leaf())){
+                if (field.isEmpty()
+                        || returnResource
+                        || !ResourceResponse.FIELD_CONTENT_ID.equals(field.leaf())
+                        || !ResourceResponse.FIELD_CONTENT_REVISION.equals(field.leaf())){
                     returnResource = true;
                 }
                 
@@ -146,7 +150,7 @@ public class ObjectClassInfoHelper {
         String attributeName = field.leaf();
 
         // OPENIDM-2385 - map _id to the Uid attribute containing valueAssertion
-        if (Resource.FIELD_CONTENT_ID.equals(attributeName)) {
+        if (ResourceResponse.FIELD_CONTENT_ID.equals(attributeName)) {
             return new Uid(String.valueOf(valueAssertion));
         }
 
@@ -170,7 +174,7 @@ public class ObjectClassInfoHelper {
         if (null == nameValue) {
             JsonValue o = request.getContent().get(nameAttribute);
             if (o.isNull()) {
-                o = request.getContent().get(Resource.FIELD_CONTENT_ID);
+                o = request.getContent().get(ResourceResponse.FIELD_CONTENT_ID);
             }
             if (o.isString()) {
                 nameValue = o.asString();
@@ -370,7 +374,7 @@ public class ObjectClassInfoHelper {
         String nameValue = name;
 
         if (null == nameValue) {
-            JsonValue o = source.get(Resource.FIELD_CONTENT_ID);
+            JsonValue o = source.get(ResourceResponse.FIELD_CONTENT_ID);
             if (o.isNull()) {
                 o = source.get(nameAttribute);
             }
@@ -433,7 +437,7 @@ public class ObjectClassInfoHelper {
         return result;
     }
 
-    public Resource build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
+    public ResourceResponse build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
         if (null == source) {
             return null;
         }
@@ -449,12 +453,12 @@ public class ObjectClassInfoHelper {
         }
         Uid uid = source.getUid();
         // TODO are we going to escape ids?
-        result.put(Resource.FIELD_CONTENT_ID, /*Id.escapeUid(*/uid.getUidValue()/*)*/);
+        result.put(ResourceResponse.FIELD_CONTENT_ID, /*Id.escapeUid(*/uid.getUidValue()/*)*/);
         if (null != uid.getRevision()) {
             //System supports Revision
-            result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
+            result.put(ResourceResponse.FIELD_CONTENT_REVISION, uid.getRevision());
         }
-        return new Resource(uid.getUidValue(), uid.getRevision(), result );
+        return Responses.newResourceResponse(uid.getUidValue(), uid.getRevision(), result);
     }
 
     public Attribute build(String attributeName, Object source, CryptoService cryptoService) throws Exception {

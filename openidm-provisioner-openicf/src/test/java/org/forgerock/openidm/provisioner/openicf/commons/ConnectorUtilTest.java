@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,7 +26,7 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
@@ -43,7 +43,6 @@ import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.test.common.TestHelpers;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -57,9 +56,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -89,7 +88,7 @@ public class ConnectorUtilTest {
                 inputStream.close();
             }
         }
-        Assert.assertNotNull(jsonConfiguration);
+        assertThat(jsonConfiguration).isNotNull();
     }
 
     protected ConnectorFacade getFacade() {
@@ -162,14 +161,15 @@ public class ConnectorUtilTest {
     public void testGetAPIConfiguration() throws Exception {
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
         ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, clonedConfiguration, null);
-        Assert.assertFalse(clonedConfiguration.getResultsHandlerConfiguration().isEnableFilteredResultsHandler(), "\"enableFilteredResultsHandler\":false");
+        // "enableFilteredResultsHandler":false"
+        assertThat(clonedConfiguration.getResultsHandlerConfiguration().isEnableFilteredResultsHandler()).isFalse();
     }
 
     @Test
     public void testGetSchema() {
         ConnectorFacade connectorFacade = getFacade();
         Schema schema = connectorFacade.schema();
-        Assert.assertNotNull(schema);
+        assertThat(schema).isNotNull();
         JsonValue schemaMAP = new JsonValue(new LinkedHashMap<String, Object>(2));
         ConnectorUtil.setObjectAndOperationConfiguration(schema, schemaMAP);
         try {
@@ -246,49 +246,49 @@ public class ConnectorUtilTest {
     @Test
     public void testCoercedTypeCasting() throws Exception {
         BigInteger bigInteger = ConnectorUtil.coercedTypeCasting(new Integer(20), BigInteger.class);
-        Assert.assertEquals(bigInteger.intValue(), 20);
+        assertThat(bigInteger.intValue()).isEqualTo(20);
         Boolean booleanValue = ConnectorUtil.coercedTypeCasting("true",boolean.class);
-        Assert.assertTrue(booleanValue);
+        assertThat(booleanValue).isTrue();
         Integer integerValue = ConnectorUtil.coercedTypeCasting("636",int.class);
-        Assert.assertEquals(integerValue, (Integer)636);
+        assertThat(integerValue).isEqualTo((Integer) 636);
         float floatValue = ConnectorUtil.coercedTypeCasting("636",float.class);
-        Assert.assertEquals(floatValue, 636.0f);
+        assertThat(floatValue).isEqualTo(636.0f);
     }
 
     @Test void testCoercedTypeCastingForByte() {
         // String -> Byte
         Byte byteValueFromString = ConnectorUtil.coercedTypeCasting("100", Byte.class);
-        Assert.assertEquals(byteValueFromString.byteValue(), 100);
+        assertThat(byteValueFromString.byteValue()).isEqualTo(100);
         // Integer -> Byte
         Byte byteValueFromNumber = ConnectorUtil.coercedTypeCasting(10, Byte.class);
-        Assert.assertEquals(byteValueFromNumber.byteValue(), 10);
+        assertThat(byteValueFromNumber.byteValue()).isEqualTo(10);
         // Byte -> Byte
         Byte byteValueFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("124"), Byte.class);
-        Assert.assertEquals(byteValueFromBoxedByte.byteValue(), 124);
+        assertThat(byteValueFromBoxedByte.byteValue()).isEqualTo(124);
         // byte -> Byte
         Byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.class);
-        Assert.assertEquals(byteValueFromPrimitiveByte.byteValue(), 10);
+        assertThat(byteValueFromPrimitiveByte.byteValue()).isEqualTo(10);
         // Byte -> String
         String stringFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("10"), String.class);
-        Assert.assertEquals(stringFromBoxedByte, Base64.encode(new byte[] {new Byte("10")}));
+        assertThat(stringFromBoxedByte).isEqualTo(Base64.encode(new byte[] {new Byte("10")}));
         // byte -> String
         String stringFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, String.class);
-        Assert.assertEquals(stringFromPrimitiveByte, Base64.encode(new byte[] {(byte)10}));
+        assertThat(stringFromPrimitiveByte).isEqualTo(Base64.encode(new byte[] {(byte)10}));
     }
 
     @Test void testCoercedTypeCastingForByteType() {
         // String -> byte
         byte byteValueFromString = ConnectorUtil.coercedTypeCasting("100", Byte.TYPE);
-        Assert.assertEquals(byteValueFromString, 100);
+        assertThat(byteValueFromString).isEqualTo(100);
         //Integer -> byte
         byte byteValueFromNumber = ConnectorUtil.coercedTypeCasting(10, Byte.TYPE);
-        Assert.assertEquals(byteValueFromNumber, 10);
+        assertThat(byteValueFromNumber).isEqualTo(10);
         // Byte -> byte
         byte byteValueFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("124"), Byte.TYPE);
-        Assert.assertEquals(byteValueFromBoxedByte, 124);
+        assertThat(byteValueFromBoxedByte).isEqualTo(124);
         // byte -> byte
         byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.TYPE);
-        Assert.assertEquals(byteValueFromPrimitiveByte, 10);
+        assertThat(byteValueFromPrimitiveByte).isEqualTo(10);
     }
 
     public APIConfiguration getRuntimeAPIConfiguration() {

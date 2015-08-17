@@ -26,8 +26,8 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.crypto.CryptoService;

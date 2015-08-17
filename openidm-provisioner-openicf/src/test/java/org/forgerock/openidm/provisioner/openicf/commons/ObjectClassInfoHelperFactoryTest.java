@@ -11,17 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.util.FileUtil;
 import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -30,6 +29,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ObjectClassInfoHelperFactoryTest {
 
@@ -51,7 +52,7 @@ public class ObjectClassInfoHelperFactoryTest {
         ObjectClassInfoHelper objectClassInfoHelper =
             ObjectClassInfoHelperFactory.createObjectClassInfoHelper(
                 schema.get(OBJECT_TYPES).get(ObjectClass.ACCOUNT_NAME));
-        Assert.assertTrue(objectClassInfoHelper.getObjectClass().equals(ObjectClass.ACCOUNT));
+        assertThat(objectClassInfoHelper.getObjectClass().equals(ObjectClass.ACCOUNT)).isTrue();
     }
 
     @Test
@@ -59,7 +60,7 @@ public class ObjectClassInfoHelperFactoryTest {
         ObjectClassInfoHelper objectClassInfoHelper =
             ObjectClassInfoHelperFactory.createObjectClassInfoHelper(
                     schema.get(OBJECT_TYPES).get(ObjectClass.GROUP_NAME));
-        Assert.assertTrue(objectClassInfoHelper.getObjectClass().equals(ObjectClass.GROUP));
+        assertThat(objectClassInfoHelper.getObjectClass().equals(ObjectClass.GROUP)).isTrue();
     }
 
     @Test
@@ -67,7 +68,7 @@ public class ObjectClassInfoHelperFactoryTest {
         ObjectClassInfoHelper objectClassInfoHelper =
             ObjectClassInfoHelperFactory.createObjectClassInfoHelper(
                 schema.get(OBJECT_TYPES).get(ObjectClass.ALL_NAME));
-        Assert.assertTrue(objectClassInfoHelper.getObjectClass().equals(ObjectClass.ALL));
+        assertThat(objectClassInfoHelper.getObjectClass().equals(ObjectClass.ALL)).isTrue();
     }
 
     @Test
@@ -75,7 +76,7 @@ public class ObjectClassInfoHelperFactoryTest {
         ObjectClassInfoHelper objectClassInfoHelper =
             ObjectClassInfoHelperFactory.createObjectClassInfoHelper(
                 schema.get(OBJECT_TYPES).get("__TEST__"));
-        Assert.assertTrue(objectClassInfoHelper.getObjectClass().equals(TEST_OBJECT_CLASS));
+        assertThat(objectClassInfoHelper.getObjectClass().equals(TEST_OBJECT_CLASS)).isTrue();
     }
 
     @Test
@@ -83,7 +84,7 @@ public class ObjectClassInfoHelperFactoryTest {
         ObjectClassInfoHelper objectClassInfoHelper =
                 ObjectClassInfoHelperFactory.createObjectClassInfoHelper(
                         schema.get(OBJECT_TYPES).get("CUSTOM"));
-        Assert.assertTrue(objectClassInfoHelper.getObjectClass().equals(CUSTOM_OBJECT_CLASS));
+        assertThat(objectClassInfoHelper.getObjectClass().equals(CUSTOM_OBJECT_CLASS)).isTrue();
     }
 
     @Test(expectedExceptions = SchemaException.class)

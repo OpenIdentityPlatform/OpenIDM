@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,19 +24,18 @@
 
 package org.forgerock.openidm.provisioner.openicf.internal;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-import org.testng.Assert;
+import org.forgerock.json.JsonValue;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * A NAME does ...
- *
- */
+
 public class SystemActionTest {
 
     protected JsonValue configuration = null;
@@ -52,10 +51,7 @@ public class SystemActionTest {
     @Test
     public void testGetName() throws Exception {
         for (JsonValue systemActions : configuration.get("systemActions").expect(List.class)) {
-            if ("ConnectorScript#5".equals(new SystemAction(systemActions).getName())) {
-                return;
-            }
+            assertThat("ConnectorScript#5").equals(new SystemAction(systemActions).getName());
         }
-        Assert.fail();
     }
 }

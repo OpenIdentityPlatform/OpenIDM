@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -35,8 +35,8 @@ import org.identityconnectors.framework.api.ConnectorInfo;
  */
 public interface ConnectorFacadeCallback {
 
-    public void addingConnectorInfo(ConnectorInfo connectorInfo,
+    void addingConnectorInfo(ConnectorInfo connectorInfo,
             ConnectorFacadeFactory facadeFactory);
 
-    public void removedConnectorInfo(ConnectorInfo connectorInfo);
+    void removedConnectorInfo(ConnectorInfo connectorInfo);
 }

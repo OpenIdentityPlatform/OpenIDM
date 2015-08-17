@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,16 +31,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.util.FileUtil;
 import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
 
-/**
- * A NAME does ...
- *
- */
+
 public class SystemAction {
 
     public static final String SCRIPT_EXECUTE_MODE = "scriptExecuteMode";
