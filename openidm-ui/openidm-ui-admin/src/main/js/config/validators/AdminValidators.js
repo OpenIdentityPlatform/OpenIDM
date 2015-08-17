@@ -17,8 +17,9 @@
 /*global define */
 
 define("config/validators/AdminValidators", [
-    "jquery"
-], function ($) {
+    "jquery",
+    "underscore"
+], function ($, _) {
     var obj = {
         "changed": {
             "name": "Changed field",
@@ -114,7 +115,8 @@ define("config/validators/AdminValidators", [
 
                 callback();
             }
-        }, "spaceCheck": {
+        },
+        "spaceCheck": {
             "name": "Whitespace validator",
             "dependencies": [
             ],
@@ -130,6 +132,21 @@ define("config/validators/AdminValidators", [
                 }
 
                 callback();
+            }
+        },
+        "unique": {
+            "name": "Unique value",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                var v = input.val().toUpperCase().trim(),
+                    usedNames = JSON.parse($(input).attr("data-unique-list").toUpperCase());
+
+                if (v.length > 0 && !_.contains(usedNames, v)) {
+                    callback();
+                } else {
+                    callback([$.t("common.form.validation.unique")]);
+                }
             }
         }
     };

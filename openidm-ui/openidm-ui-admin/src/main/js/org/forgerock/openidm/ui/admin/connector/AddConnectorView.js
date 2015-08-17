@@ -56,8 +56,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
         template: "templates/admin/connector/AddConnectorTemplate.html",
         events: {
             "change #connectorType" : "loadConnectorTemplate",
-            "onValidate": "onValidate",
-            "click #connectorForm fieldset legend" : "sectionHideShow"
+            "onValidate": "onValidate"
         },
         data: {
 
