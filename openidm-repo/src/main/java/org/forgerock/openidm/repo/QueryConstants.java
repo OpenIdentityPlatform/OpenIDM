@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,7 +23,7 @@
  */
 package org.forgerock.openidm.repo;
 
-import org.forgerock.json.resource.servlet.HttpUtils;
+import org.forgerock.json.resource.http.HttpUtils;
 
 /**
  * Map key constants for Repository Queries
