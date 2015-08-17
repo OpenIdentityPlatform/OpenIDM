@@ -46,7 +46,9 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.http.HttpContext;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.ResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,15 +184,6 @@ public class AuditFilter implements Filter {
             return;
         }
 
-        ResourceException resourceException = null;
-        try {
-            promise.getOrThrow();
-        } catch (ResourceException e) {
-            resourceException = e;
-        } catch (InterruptedException e) {
-            LOGGER.error("Failed to log audit access entry", e);
-        }
-
         final long elapsedTime = System.currentTimeMillis() - state.actionTime;
 
         final AccessAuditEventBuilder accessAuditEventBuilder = new AccessAuditEventBuilder();
@@ -204,14 +197,23 @@ public class AuditFilter implements Filter {
                 .authenticationFromSecurityContext(context)
                 .eventName("access");
 
-        if (resourceException != null) {
-            accessAuditEventBuilder.responseWithMessage(
-                    "FAILURE - " + String.valueOf(resourceException.getCode()),
-                    elapsedTime,
-                    resourceException.getReason());
-        } else {
-            accessAuditEventBuilder.response("SUCCESS", elapsedTime);
-        }
+        promise.thenOnResultOrException(
+                new ResultHandler<Response>() {
+                    @Override
+                    public void handleResult(Response result) {
+                        accessAuditEventBuilder.response("SUCCESS", elapsedTime);
+                    }
+                },
+                new ExceptionHandler<ResourceException>() {
+                    @Override
+                    public void handleException(ResourceException resourceException) {
+                        accessAuditEventBuilder.responseWithMessage(
+                                "FAILURE - " + String.valueOf(resourceException.getCode()),
+                                elapsedTime,
+                                resourceException.getReason());
+                    }
+                });
+
         try {
             //log the log entry
             final CreateRequest createRequest =
