@@ -727,12 +727,12 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-csv</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <version>2.5.3</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-json-org</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <version>2.5.3</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.json</groupId>
@@ -743,7 +743,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-afterburner</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <version>2.5.3</version>
             </dependency>
 
             <!-- Pax Web Dependencies -->
