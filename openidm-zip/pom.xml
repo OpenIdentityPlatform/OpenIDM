@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -386,11 +386,12 @@
             </exclusions>
         </dependency>
         <!-- Commons logging used by http client -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
+        <!--TODO-crest3  is jcl-over-slf4j needed?-->
+        <!--<dependency>-->
+        <!--<groupId>org.slf4j</groupId>-->
+        <!--<artifactId>jcl-over-slf4j</artifactId>-->
+        <!--<version>${slf4j.version}</version>-->
+        <!--</dependency>-->
 
         <!-- ForgeRock commons -->
         <dependency>
@@ -591,6 +592,7 @@
             <version>0.9.9</version>
         </dependency>
         <dependency>
+            <!--TODO-crest3 codehaus is dead? Where is this used?-->
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>stax2-api</artifactId>
             <version>3.1.4</version>
@@ -598,12 +600,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
-            <version>${fasterxml.jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-jaxb-annotations</artifactId>
-            <version>${fasterxml.jackson.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -659,14 +659,6 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                </executions>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
                     <execution>
                         <id>zip-workflow-files</id>
                         <phase>prepare-package</phase>
@@ -820,11 +812,12 @@
                 </openidm.options>
             </properties>
             <dependencies>
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                    <version>${slf4j.version}</version>
-                </dependency>
+                <!--TODO-crest3 is this still needed?  Other build profiles don't-->
+                <!--<dependency>-->
+                <!--<groupId>org.slf4j</groupId>-->
+                <!--<artifactId>slf4j-jdk14</artifactId>-->
+                <!--<version>${slf4j.version}</version>-->
+                <!--</dependency>-->
             </dependencies>
         </profile>
         <profile>
