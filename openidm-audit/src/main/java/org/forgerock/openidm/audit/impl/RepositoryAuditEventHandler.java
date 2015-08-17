@@ -18,16 +18,17 @@ package org.forgerock.openidm.audit.impl;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Audit event handler for Repository.  This is a decorator to the RouterAuditEventHandler where the resourcePath is
@@ -76,45 +77,43 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
      * {@inheritDoc}
      */
     @Override
-    public void actionCollection(ServerContext serverContext, ActionRequest actionRequest,
-            ResultHandler<JsonValue> resultHandler) {
-        routerAuditEventHandler.actionCollection(serverContext, actionRequest, resultHandler);
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
+        return routerAuditEventHandler.actionCollection(context, actionRequest);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(ServerContext serverContext, String resourceId, ActionRequest actionRequest,
-            ResultHandler<JsonValue> resultHandler) {
-        routerAuditEventHandler.actionInstance(serverContext, resourceId, actionRequest, resultHandler);
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
+            ActionRequest actionRequest) {
+        return routerAuditEventHandler.actionInstance(context, resourceId, actionRequest);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void createInstance(ServerContext serverContext, CreateRequest createRequest,
-            ResultHandler<Resource> resultHandler) {
-        routerAuditEventHandler.createInstance(serverContext, createRequest, resultHandler);
+    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest createRequest) {
+        return routerAuditEventHandler.createInstance(context, createRequest);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void queryCollection(ServerContext serverContext, QueryRequest queryRequest,
-            QueryResultHandler queryResultHandler) {
-        routerAuditEventHandler.queryCollection(serverContext, queryRequest, queryResultHandler);
+    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest queryRequest,
+            QueryResourceHandler queryResourceHandler) {
+        return routerAuditEventHandler.queryCollection(context, queryRequest, queryResourceHandler);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(ServerContext serverContext, String resourceId, ReadRequest readRequest,
-            ResultHandler<Resource> resultHandler) {
-        routerAuditEventHandler.readInstance(serverContext, resourceId, readRequest, resultHandler);
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
+            ReadRequest readRequest) {
+        return routerAuditEventHandler.readInstance(context, resourceId, readRequest);
     }
 
     /**

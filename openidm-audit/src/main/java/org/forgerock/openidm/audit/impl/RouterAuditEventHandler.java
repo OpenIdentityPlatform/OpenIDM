@@ -23,23 +23,28 @@
  */
 package org.forgerock.openidm.audit.impl;
 
+import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
+import static org.forgerock.json.resource.Requests.copyOfReadRequest;
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.ResourcePath;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +56,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
     private static final Logger logger = LoggerFactory.getLogger(RouterAuditEventHandler.class);
 
     /** router target resource path */
-    private ResourceName resourcePath;
+    private ResourcePath resourcePath;
 
     /** the DependencyProvider to provide access to the ConnectionFactory */
     private DependencyProvider dependencyProvider;
@@ -61,7 +66,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
      */
     @Override
     public void configure(RouterAuditEventHandlerConfiguration config) throws ResourceException {
-        resourcePath = ResourceName.valueOf(config.getResourcePath());
+        resourcePath = ResourcePath.valueOf(config.getResourcePath());
         logger.info("Audit logging to: {}", resourcePath.toString());
     }
 
@@ -88,36 +93,33 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
      * {@inheritDoc}
      */
     @Override
-    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
+        return newExceptionPromise(ResourceUtil.notSupported(actionRequest));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
+            ActionRequest actionRequest) {
+        return newExceptionPromise(ResourceUtil.notSupported(actionRequest));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
         try {
-            final ConnectionFactory connectionFactory = getConnectionFactory();
-            handler.handleResult(
-                    connectionFactory.getConnection().create(
-                            new AuditContext(context),
-                            Requests.newCreateRequest(
-                                    resourcePath.child(request.getResourceName()),
-                                    request.getNewResourceId(),
-                                    request.getContent())));
-        } catch (ResourceException e) {
-            handler.handleError(e);
+
+            return newResultPromise(getConnectionFactory().getConnection().create(new AuditContext(context),
+                    newCreateRequest(
+                            resourcePath.child(request.getResourcePath()),
+                            request.getNewResourceId(),
+                            request.getContent())));
         } catch (Exception e) {
-            handler.handleError(ResourceUtil.adapt(e));
+            return newExceptionPromise(ResourceUtil.adapt(e));
         }
     }
 
@@ -125,32 +127,24 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
      * {@inheritDoc}
      */
     @Override
-    public void queryCollection(ServerContext context, QueryRequest request, final QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request,
+            final QueryResourceHandler queryResourceHandler) {
         try {
             final ConnectionFactory connectionFactory = getConnectionFactory();
-            final QueryRequest newRequest = Requests.copyOfQueryRequest(request);
-            newRequest.setResourceName(resourcePath.child(request.getResourceName()));
-            connectionFactory.getConnection().query(new AuditContext(context), newRequest,
-                    new QueryResultHandler() {
-                        @Override
-                        public void handleError(ResourceException error) {
-                            handler.handleError(error);
-                        }
+            final QueryRequest newRequest = copyOfQueryRequest(request);
+            newRequest.setResourcePath(resourcePath.child(request.getResourcePath()));
 
-                        @Override
-                        public boolean handleResource(Resource resource) {
-                            return handler.handleResource(resource);
-                        }
+            return newResultPromise(
+                    connectionFactory.getConnection().query(new AuditContext(context), newRequest,
+                            new QueryResourceHandler() {
+                                @Override
+                                public boolean handleResource(ResourceResponse resourceResponse) {
+                                    return queryResourceHandler.handleResource(resourceResponse);
+                                }
+                            }));
 
-                        @Override
-                        public void handleResult(QueryResult result) {
-                            handler.handleResult(result);
-                        }
-                    });
-        } catch (ResourceException e) {
-            handler.handleError(e);
         } catch (Exception e) {
-            handler.handleError(ResourceUtil.adapt(e));
+            return newExceptionPromise(ResourceUtil.adapt(e));
         }
     }
 
@@ -158,16 +152,14 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
+            ReadRequest request) {
         try {
-            final ConnectionFactory connectionFactory = getConnectionFactory();
-            final ReadRequest newRequest = Requests.copyOfReadRequest(request);
-            newRequest.setResourceName(resourcePath.child(request.getResourceName()).child(resourceId));
-            handler.handleResult(connectionFactory.getConnection().read(new AuditContext(context), newRequest));
-        } catch (ResourceException e) {
-            handler.handleError(e);
+            final ReadRequest newRequest = copyOfReadRequest(request);
+            newRequest.setResourcePath(resourcePath.child(request.getResourcePath()).child(resourceId));
+            return newResultPromise(getConnectionFactory().getConnection().read(new AuditContext(context), newRequest));
         } catch (Exception e) {
-            handler.handleError(ResourceUtil.adapt(e));
+            return newExceptionPromise(ResourceUtil.adapt(e));
         }
     }
 

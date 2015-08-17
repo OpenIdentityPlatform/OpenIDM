@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -35,6 +35,11 @@
     <description>This bundle ...</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-router</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-common</artifactId>
@@ -89,6 +94,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -103,6 +113,8 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+
+
     </dependencies>
     <build>
         <plugins>

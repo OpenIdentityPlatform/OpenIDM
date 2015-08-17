@@ -11,32 +11,25 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionProvider;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PersistenceConfig;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.sync.TriggerContext;
-import org.forgerock.script.engine.ScriptEngineFactory;
-import org.forgerock.script.javascript.RhinoScriptEngineFactory;
-import org.forgerock.script.registry.ScriptRegistryImpl;
-import org.forgerock.script.source.DirectoryContainer;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import javax.script.ScriptException;
 import java.net.URL;
@@ -47,20 +40,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.InternalContext;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.openidm.sync.TriggerContext;
+import org.forgerock.script.engine.ScriptEngineFactory;
+import org.forgerock.script.javascript.RhinoScriptEngineFactory;
+import org.forgerock.script.registry.ScriptRegistryImpl;
+import org.forgerock.script.source.DirectoryContainer;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Test the audit log filter builder
@@ -74,8 +67,6 @@ public class AuditLogFilterBuilderTest {
         Map<String, Object> configuration = new HashMap<String, Object>(1);
         configuration.put(RhinoScriptEngineFactory.LANGUAGE_NAME, new HashMap<String, Object>(1));
 
-        final Router router = new Router();
-
         scriptRegistry =
                 new ScriptRegistryImpl(configuration, ServiceLoader.load(ScriptEngineFactory.class), null, null);
 
@@ -83,23 +74,6 @@ public class AuditLogFilterBuilderTest {
         Assert.assertNotNull(container);
         scriptRegistry.addSourceUnit(new DirectoryContainer("container", container));
 
-        scriptRegistry.setPersistenceConfig(PersistenceConfig.builder().connectionProvider(
-                new ConnectionProvider() {
-                    @Override
-                    public Connection getConnection(String connectionId) throws ResourceException {
-                        if ("DEFAULT".equalsIgnoreCase(connectionId)) {
-                            return Resources.newInternalConnection(router);
-                        } else {
-                            throw new InternalServerErrorException("Connection not found with id: "
-                                    + connectionId);
-                        }
-                    }
-
-                    @Override
-                    public String getConnectionId(Connection connection) throws ResourceException {
-                        return "DEFAULT";
-                    }
-                }).build());
     }
 
     private AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
@@ -164,7 +138,7 @@ public class AuditLogFilterBuilderTest {
                 ));
 
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
 
         // When
         CreateRequest create = Requests.newCreateRequest("activity", null,
@@ -231,7 +205,7 @@ public class AuditLogFilterBuilderTest {
                 ));
 
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
 
         // When
         // When
@@ -298,7 +272,7 @@ public class AuditLogFilterBuilderTest {
                         ))
                 ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
 
         // When
         CreateRequest link = Requests.newCreateRequest("recon", null, json(object(field("action", "link"))));
@@ -336,7 +310,7 @@ public class AuditLogFilterBuilderTest {
                         ))
                 ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
 
         // When
         CreateRequest link = Requests.newCreateRequest("recon", null, json(object(field("action", "link"))));
@@ -381,8 +355,8 @@ public class AuditLogFilterBuilderTest {
                         ))
                 ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
-        ServerContext noTrigger = mock(ServerContext.class);
-        ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
+        Context noTrigger = mock(Context.class);
+        Context hasTrigger = new Context(new TriggerContext(noTrigger, "sometrigger"));
 
         // When
         // When
@@ -456,8 +430,8 @@ public class AuditLogFilterBuilderTest {
                         ))
                 ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
-        ServerContext noTrigger = mock(ServerContext.class);
-        ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
+        Context noTrigger = mock(Context.class);
+        Context hasTrigger = new InternalContext(new TriggerContext(noTrigger, "sometrigger"));
 
         // When
         // When
@@ -546,7 +520,7 @@ public class AuditLogFilterBuilderTest {
                         })
                 .build(config);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
 
         // When
         // When
@@ -618,7 +592,7 @@ public class AuditLogFilterBuilderTest {
         ));
 
         AuditLogFilter filter = getFieldValueFilterBuilder().build(config);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
 
         // When
         CreateRequest start = Requests.newCreateRequest("recon", null, json(object(field("entryType", "start"))));
@@ -653,7 +627,7 @@ public class AuditLogFilterBuilderTest {
         ));
 
         AuditLogFilter filter = getFieldValueFilterBuilder().build(config);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
 
         // When
         CreateRequest start = Requests.newCreateRequest("recon", null, json(object(field("entryType", "start"))));
@@ -670,7 +644,7 @@ public class AuditLogFilterBuilderTest {
     /** an always-true filter */
     private static AuditLogFilter TRUE = new AuditLogFilter() {
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             return true;
         }
     };
@@ -678,7 +652,7 @@ public class AuditLogFilterBuilderTest {
     /** an always-false filter */
     public static AuditLogFilter FALSE = new AuditLogFilter() {
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             return false;
         }
     };
@@ -707,7 +681,7 @@ public class AuditLogFilterBuilderTest {
 
     @Test(dataProvider = "compositeData")
     public void testCompositeIdentity(AuditLogFilter[] filters, boolean orFilterResult, boolean andFilterResult) {
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         CreateRequest request = mock(CreateRequest.class);
 
         assertThat(newOrCompositeFilter(Arrays.asList(filters)).isFiltered(context, request)).isEqualTo(orFilterResult);

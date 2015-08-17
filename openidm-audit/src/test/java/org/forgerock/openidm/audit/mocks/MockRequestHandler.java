@@ -17,28 +17,33 @@
 package org.forgerock.openidm.audit.mocks;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Mocks a RequestHandler that can be used in the Rep, Router, and CSV Audit Loggers
@@ -53,94 +58,95 @@ public class MockRequestHandler implements RequestHandler {
     /**
      * Stores the resources to be returned by the handlers. The test method should set the expected Resource to return.
      */
-    private final List<Resource> resources = new ArrayList<>();
+    private final List<ResourceResponse> resources = new ArrayList<>();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         requests.add(request);
-        handler.handleResult(json(object()));
+        return newResultPromise(newActionResponse(json(object())));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         requests.add(request);
-        handler.handleResult(new Resource(request.getNewResourceId(), "1", request.getContent()));
+        return newResultPromise(newResourceResponse(request.getNewResourceId(), "1", request.getContent()));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         requests.add(request);
-        handler.handleResult(new Resource("", "", json(object())));
+        return newResultPromise(newResourceResponse("", "", json(object())));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         requests.add(request);
-        handler.handleResult(new Resource("", "", json(object())));
+        return newResultPromise(newResourceResponse("", "", json(object())));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
+            QueryResourceHandler handler) {
         requests.add(request);
         assertThat(resources.size()).isNotEqualTo(0);
-        for (final Resource resource : resources) {
+        for (final ResourceResponse resource : resources) {
             handler.handleResource(resource);
         }
-        handler.handleResult(new QueryResult());
+        return newResultPromise(newQueryResponse());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         requests.add(request);
         assertThat(resources.size()).isNotEqualTo(0);
-        Resource returnResource = null;
+        ResourceResponse returnResource = null;
         String requestID = getRequestID(request);
-        for (Resource resource : resources) {
+        for (ResourceResponse resource : resources) {
             if (resource.getId().equals(requestID)) {
                 returnResource = resource;
                 break;
             }
         }
         assertThat(returnResource).isNotNull();
-        handler.handleResult(returnResource);
+        return newResultPromise(returnResource);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         requests.add(request);
-        handler.handleResult(new Resource("", "", json(object())));
+        return newResultPromise(newResourceResponse("", "", json(object())));
     }
 
-    public void addResource(final Resource resource) {
+    public void addResource(final ResourceResponse resource) {
         this.resources.add(resource);
     }
 
-    public void setResources(final List<Resource> resources) {
+    public void setResources(final List<ResourceResponse> resources) {
         this.resources.addAll(resources);
     }
 
-    public final List<Resource> getResources() {
+    public final List<ResourceResponse> getResources() {
         return resources;
     }
 
@@ -149,7 +155,7 @@ public class MockRequestHandler implements RequestHandler {
     }
 
     private String getRequestID(final Request request) {
-        final JsonPointer jsonPointer = new JsonPointer(request.getResourceName());
+        final JsonPointer jsonPointer = new JsonPointer(request.getResourcePath());
         return jsonPointer.leaf();
     }
 }

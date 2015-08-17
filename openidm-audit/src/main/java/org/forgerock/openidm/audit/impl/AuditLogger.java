@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,13 +25,13 @@ package org.forgerock.openidm.audit.impl;
 
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 
 /**
  * OpenIDM audit logger
@@ -72,12 +72,12 @@ public interface AuditLogger {
      * the object, and the {@code _rev} property to object version if optimistic concurrency
      * is supported.
      *
-     * @param context the {@link ServerContext} for the request
+     * @param context the {@link Context} for the request
      * @param type the requested type of audit object to create.
      * @param object the contents of the object to create in the object set.
      * @throws ForbiddenException if access to the object or object set is forbidden.
      */
-    void create(ServerContext context, String type, Map<String, Object> object) throws ResourceException;
+    void create(Context context, String type, Map<String, Object> object) throws ResourceException;
 
     /**
      * Reads an object from the object set.
@@ -87,14 +87,14 @@ public interface AuditLogger {
      * {@code _rev} will be set in the returned object. If optimistic concurrency is not
      * supported, then {@code _rev} must be {@code null} or absent.
      *
-     * @param context the {@link ServerContext} for the request
+     * @param context the {@link Context} for the request
      * @param type the type of audit log entry to read
      * @param localId the id of the object to log
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
      * @return the requested object.
      */
-    Map<String, Object> read(ServerContext context, String type, String localId) throws ResourceException;
+    Map<String, Object> read(Context context, String type, String localId) throws ResourceException;
 
     /**
      * Performs a query on the specified object and returns the associated result. The
@@ -104,15 +104,15 @@ public interface AuditLogger {
      * The query result is a JSON object structure composed of basic Java types; its overall
      * structure is defined by the implementation.
      *
-     * @param context the {@link ServerContext} for the request
+     * @param context the {@link Context} for the request
      * @param request the {@link QueryRequest} object.
-     * @param handler the {@link QueryResultHandler} object.
+     * @param handler the {@link QueryResourceHandler} object.
      * @param type the type of audit log entries to query
      * @param formatted whether to format the results.
      * @return the query result object.
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object or the specified query is forbidden.
      */
-    void query(ServerContext context, QueryRequest request, QueryResultHandler handler, String type, boolean formatted) throws ResourceException;
+    void query(Context context, QueryRequest request, QueryResourceHandler handler, String type, boolean formatted) throws ResourceException;
 
 }

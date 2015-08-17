@@ -18,14 +18,14 @@ package org.forgerock.openidm.audit.util;
 
 import static org.mockito.Mockito.mock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.audit.AuditException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ResultHandler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.audit.AuditException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.promise.ResultHandler;
 
 public class AuditTestUtils {
 
