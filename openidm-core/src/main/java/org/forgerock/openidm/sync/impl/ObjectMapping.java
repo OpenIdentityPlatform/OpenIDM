@@ -1041,10 +1041,30 @@ class ObjectMapping {
             reconContext.setStage(ReconStage.COMPLETED_SUCCESS);
             logReconEndSuccess(reconContext, context);
         } catch (InterruptedException ex) {
-            reconContext.checkCanceled();
-            throw new SynchronizationException("Interrupted execution of reconciliation", ex);
+            SynchronizationException syncException;
+            if (reconContext.isCanceled()) {
+                reconContext.setStage(ReconStage.COMPLETED_CANCELED);
+                syncException = new SynchronizationException("Reconciliation canceled: " + reconContext.getReconId());
+            }
+            else {
+                reconContext.setStage(ReconStage.COMPLETED_FAILED);
+                syncException = new SynchronizationException("Interrupted execution of reconciliation", ex);
+            }
+            doResults(reconContext);
+            throw syncException;
+        } catch (SynchronizationException e) {
+            // Make sure that the error did not occur within doResults or last logging for completed success case
+            reconContext.setStage(ReconStage.COMPLETED_FAILED);
+            if ( reconContext.getStage() != ReconStage.ACTIVE_PROCESSING_RESULTS
+                    && reconContext.getStage() != ReconStage.COMPLETED_SUCCESS ) {
+                doResults(reconContext);
+            }
+            reconContext.getStatistics().reconEnd();
+            logReconEndFailure(reconContext, context);
+            throw new SynchronizationException("Synchronization failed", e);
         } catch (Exception e) {
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
+            doResults(reconContext);
             reconContext.getStatistics().reconEnd();
             logReconEndFailure(reconContext, context);
             throw new SynchronizationException("Synchronization failed", e);
@@ -1862,7 +1882,7 @@ class ObjectMapping {
         protected void postAction(boolean sourceAction) throws SynchronizationException {
             if (null != activePolicy) {
                 activePolicy.evaluatePostAction(
-                                sourceObjectAccessor, targetObjectAccessor, action, sourceAction, getLinkQualifier());
+                                sourceObjectAccessor, targetObjectAccessor, action, sourceAction, getLinkQualifier(), reconId);
             }
         }
 
