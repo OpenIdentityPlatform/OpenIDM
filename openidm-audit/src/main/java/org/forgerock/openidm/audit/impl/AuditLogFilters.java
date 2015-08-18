@@ -58,7 +58,7 @@ public class AuditLogFilters {
      */
     public static AuditLogFilter NEVER = new AuditLogFilter() {
         @Override
-        public boolean isFiltered(ServerContext context, CreateRequest request) {
+        public boolean isFiltered(Context context, CreateRequest request) {
             return false;
         }
     };
