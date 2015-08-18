@@ -54,8 +54,8 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
         events: {
             "click .connector-delete": "deleteConnections",
             "click .toggle-view-btn": "toggleButtonChange",
-            "input .filter-input" : "filterConnectors",
-            "propertychange .filter-input" : "filterConnectors"
+            "keyup .filter-input" : "filterConnectors",
+            "paste .filter-input" : "filterConnectors"
         },
         model: {
 
