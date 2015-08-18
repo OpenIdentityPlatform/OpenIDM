@@ -1,34 +1,25 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
-import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,22 +30,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.Context;
+import javax.script.ScriptException;
+
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
@@ -530,25 +521,15 @@ class ObjectMapping {
         try {
             Map<String, Object> result = new HashMap<String, Object>(1);
             final Collection<Object> list = new ArrayList<Object>();
-            result.put(QueryResult.FIELD_RESULT, list);
+            result.put(QueryResponse.FIELD_RESULT, list);
 
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(targetObjectSet, queryParameters);
-            service.getConnectionFactory().getConnection().query(service.getServerContext(), request,
-                    new QueryResultHandler() {
+            service.getConnectionFactory().getConnection().query(service.getContext(), request,
+                    new QueryResourceHandler() {
                         @Override
-                        public void handleError(ResourceException error) {
-                            // ignore
-                        }
-
-                        @Override
-                        public boolean handleResource(Resource resource) {
+                        public boolean handleResource(ResourceResponse resource) {
                             list.add(resource.getContent().asMap());
                             return true;
-                        }
-
-                        @Override
-                        public void handleResult(QueryResult result) {
-                            //ignore
                         }
                     });
             return result;
@@ -571,7 +552,7 @@ class ObjectMapping {
         try {
             CreateRequest createRequest =
                     Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
-            Resource resource =  service.getConnectionFactory().getConnection().create(context, createRequest);
+            ResourceResponse resource =  service.getConnectionFactory().getConnection().create(context, createRequest);
             targetObject = new LazyObjectAccessor(service, targetObjectSet, resource.getId(), resource.getContent());
             measure.setResult(target);
         } catch (JsonValueException jve) {
@@ -630,7 +611,7 @@ class ObjectMapping {
             try {
                 DeleteRequest ur = Requests.newDeleteRequest(targetObjectSet, target.get("_id").required().asString());
                 ur.setRevision(target.get("_rev").asString());
-                LOGGER.trace("Delete target object {}", ur.getResourceName());
+                LOGGER.trace("Delete target object {}", ur.getResourcePath());
                 service.getConnectionFactory().getConnection().delete(context, ur);
             } catch (JsonValueException jve) {
                 throw new SynchronizationException(jve);
@@ -724,7 +705,7 @@ class ObjectMapping {
             if (value == null || value.getObject() == null) {
                 // notification without the actual value
                 value = LazyObjectAccessor.rawReadObject(
-                        service.getServerContext(), service.getConnectionFactory(), resourceContainer, resourceId);
+                        service.getContext(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
             return doSourceSync(context, resourceId, value); // synchronous for now
         }
@@ -746,7 +727,7 @@ class ObjectMapping {
         if (isSourceObject(resourceContainer, resourceId)) {
         	if (newValue == null || newValue.getObject() == null) { // notification without the actual value
                 newValue = LazyObjectAccessor.rawReadObject(
-                        service.getServerContext(), service.getConnectionFactory(), resourceContainer, resourceId);
+                        service.getContext(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
 
             if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
@@ -804,7 +785,7 @@ class ObjectMapping {
     public void performAction(JsonValue params) throws SynchronizationException {
         // If reconId is set this action is part of a reconciliation run
         String reconId = params.get("reconId").asString();
-        ServerContext context = ObjectSetContext.get();
+        Context context = ObjectSetContext.get();
         if (reconId != null) {
             context = new TriggerContext(context, "recon");
             ObjectSetContext.push(context);
@@ -942,7 +923,7 @@ class ObjectMapping {
         String reconId = reconContext.getReconId();
         EventEntry measureIdQueries = Publisher.start(EVENT_RECON_ID_QUERIES, reconId, null);
         reconContext.setStage(ReconStage.ACTIVE_QUERY_ENTRIES);
-        ServerContext context = ObjectSetContext.get();
+        Context context = ObjectSetContext.get();
         try {
             context = new TriggerContext(context, "recon");
             ObjectSetContext.push(context);
@@ -1009,8 +990,7 @@ class ObjectMapping {
                     sourceIter = sourceQueryResult.getIterator();
                 }
                 // Perform source recon phase on current set of source ids
-                ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context, allLinks,
-                        remainingTargetIds, sourceRecon);
+                ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context, allLinks, remainingTargetIds, sourceRecon);
                 sourcePhase.setFeedSize(feedSize);
                 sourcePhase.execute();
                 queryNextPage = true;
@@ -1264,13 +1244,12 @@ class ObjectMapping {
         String id;
         JsonValue objectEntry;
         ReconciliationContext reconContext;
-        ServerContext parentContext;
+        Context parentContext;
         Map<String, Map<String, Link>> allLinks;
         Collection<String> remainingIds;
         Recon reconById;
 
-        public ReconTask(ResultEntry resultEntry, ReconciliationContext reconContext,
-                ServerContext parentContext,
+        public ReconTask(ResultEntry resultEntry, ReconciliationContext reconContext, Context parentContext,
                 Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds, Recon reconById) {
             this.id = resultEntry.getId();
             // This value is null if it wasn't pre-queried
@@ -1286,7 +1265,7 @@ class ObjectMapping {
 
         public Void call() throws SynchronizationException {
             //TODO I miss the Request Context
-            ObjectSetContext.push(new ServerContext(parentContext));
+            ObjectSetContext.push(parentContext);
             try {
                 reconById.recon(id, objectEntry, reconContext, parentContext, allLinks, remainingIds);
             } finally {
@@ -1300,13 +1279,12 @@ class ObjectMapping {
      * Reconcile the source/target phase, multi threaded or single threaded.
      */
     class ReconPhase extends ReconFeeder {
-        ServerContext parentContext;
+        Context parentContext;
         Map<String, Map<String, Link>> allLinks;
         Collection<String> remainingIds;
         Recon reconById;
 
-        public ReconPhase(Iterator<ResultEntry> resultIter, ReconciliationContext reconContext,
-                ServerContext parentContext,
+        public ReconPhase(Iterator<ResultEntry> resultIter, ReconciliationContext reconContext, Context parentContext,
                 Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds, Recon reconById) {
             super(resultIter, reconContext);
             this.parentContext = parentContext;
@@ -1350,7 +1328,7 @@ class ObjectMapping {
      * @param context
      * @throws SynchronizationException
      */
-    private void logReconStart(ReconciliationContext reconContext, ServerContext context)
+    private void logReconStart(ReconciliationContext reconContext, Context context)
             throws SynchronizationException {
         ReconAuditEventLogger reconStartEntry = new ReconAuditEventLogger(null, name, context);
         reconStartEntry.setEntryType(ReconAuditEventLogger.RECON_LOG_ENTRY_TYPE_RECON_START);
@@ -1369,7 +1347,7 @@ class ObjectMapping {
      * @param context
      * @throws SynchronizationException
      */
-    private void logReconEndSuccess(ReconciliationContext reconContext, ServerContext context)
+    private void logReconEndSuccess(ReconciliationContext reconContext, Context context)
             throws SynchronizationException {
         logReconEnd(reconContext, context, Status.SUCCESS, "Reconciliation completed.");
     }
@@ -1381,7 +1359,7 @@ class ObjectMapping {
      * @param context
      * @throws SynchronizationException
      */
-    private void logReconEndFailure(ReconciliationContext reconContext, ServerContext context)
+    private void logReconEndFailure(ReconciliationContext reconContext, Context context)
             throws SynchronizationException {
         logReconEnd(reconContext, context, Status.FAILURE, "Reconciliation failed.");
     }
@@ -2519,7 +2497,7 @@ class ObjectMapping {
                 case correlationQuery:
                     // Execute the correlationQuery and return the results
                     return json(queryTargetObjectSet(execScript(type.toString(), correlationQueries.get(linkQualifier), scope).asMap()))
-                            .get(QueryResult.FIELD_RESULT).required();
+                            .get(QueryResponse.FIELD_RESULT).required();
                 case correlationScript:
                     // Execute the correlationScript and return the results corresponding to the given linkQualifier
                     return execScript(type.toString(), correlationScript, scope);

@@ -1,49 +1,41 @@
-/**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2014-2015 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*
-*/
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions copyright 2014-2015 ForgeRock AS.
+ */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_ID;
+import static org.forgerock.openidm.util.RequestUtil.hasQueryExpression;
+import static org.forgerock.openidm.util.RequestUtil.hasQueryFilter;
+import static org.forgerock.openidm.util.RequestUtil.hasQueryId;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
-import static org.forgerock.openidm.util.RequestUtil.hasQueryExpression;
-import static org.forgerock.openidm.util.RequestUtil.hasQueryFilter;
-import static org.forgerock.openidm.util.RequestUtil.hasQueryId;
 
 /**
  * A base class for reconciliation type handling
@@ -170,7 +162,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
 
         // If config doesn't explicitly specify the query, default to query all ids
         if (!specifiesQuery(queryCfg)) {
-            queryCfg.put(PARAM_QUERY_ID, ServerConstants.QUERY_ALL_IDS);
+            queryCfg.put(FIELD_QUERY_ID, ServerConstants.QUERY_ALL_IDS);
             logger.debug("Default {} query to {}", queryConfigPropertyName, ServerConstants.QUERY_ALL_IDS);
         }
         logger.debug("Effective query for {}: {}", queryConfigPropertyName, queryCfg);
@@ -220,49 +212,43 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             final Collection<String> collectionToPopulate, final boolean caseSensitive, final QuerySide querySide,
             int pageSize, String pagingCookie) throws SynchronizationException {
         final Collection<String> ids = collectionToPopulate;
+<<<<<<< e11905d40de186b06fa0e6d50f1f8e267863b7ec
         final JsonValue objList = new JsonValue(new LinkedList());
+=======
+        final JsonValue objList = new JsonValue(new ArrayList<Object>());
+>>>>>>> [OPENIDM-3753] Initial migration to CREST3.
         final ReconQueryResult reconQueryResult = new ReconQueryResult();
         try {
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(objectSet, query.asMap());
             request.setPageSize(pageSize);
             request.setPagedResultsCookie(pagingCookie);
-            reconContext.getService().getConnectionFactory().getConnection().query(
-                    reconContext.getService().getRouter(), request,
-                    new QueryResultHandler() {
-                        private boolean fullEntriesDetected = false;
-                
-                        @Override
-                        public void handleError(ResourceException error) {
-                            // ignore
-                        }
+            QueryResponse queryResponse = reconContext.getService().getConnectionFactory().getConnection().query(
+            		reconContext.getService().getContext(), request,
+            		new QueryResourceHandler() {
+            			private boolean fullEntriesDetected = false;
 
-                        @Override
-                        public boolean handleResource(Resource resource) {
-                            if (resource.getId() == null) {
-                                // do not add null values to collection
-                                logger.warn("Resource {0} id is null!", resource);
-                            }
-                            else {
-                                if (fullEntriesDetected == false && hasFullEntry(resource.getContent(), querySide)) {
-                                    fullEntriesDetected = true;
-                                    logger.debug("Detected full entries in query");
-                                }
-                                if (fullEntriesDetected) {
-                                    objList.add(resource.getContent());
-                                }
-                                ids.add(
-                                    caseSensitive
-                                    ? resource.getId()
-                                    : reconContext.getObjectMapping().getLinkType().normalizeId(resource.getId()));
-                            }
-                            return true;
-                        }
-
-                        @Override
-                        public void handleResult(QueryResult result) {
-                            reconQueryResult.setPagingCookie(result.getPagedResultsCookie());
-                        }
-                    });
+            			@Override
+            			public boolean handleResource(ResourceResponse resource) {
+            				if (resource.getId() == null) {
+            					// do not add null values to collection
+            					logger.warn("Resource {0} id is null!", resource);
+            				}
+            				else {
+            					if (fullEntriesDetected == false && hasFullEntry(resource.getContent(), querySide)) {
+            						fullEntriesDetected = true;
+            						logger.debug("Detected full entries in query");
+            					}
+            					if (fullEntriesDetected) {
+            						objList.add(resource.getContent());
+            					}
+            					ids.add(caseSensitive
+            							? resource.getId()
+            						    : reconContext.getObjectMapping().getLinkType().normalizeId(resource.getId()));
+            				}
+            				return true;
+            			}
+            		});
+            reconQueryResult.setPagingCookie(queryResponse.getPagedResultsCookie());
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
         } catch (ResourceException ose) {

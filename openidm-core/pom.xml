@@ -55,20 +55,22 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-util</artifactId>
-            <version>${commons.forgerock-util.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-common</artifactId>
         </dependency>
         <dependency>
-            <!-- required to check isPublicContext ) -->
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource-servlet</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
             <artifactId>forgerock-guava-collect</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-http-core</artifactId>
         </dependency>
 
 <!--        <dependency>

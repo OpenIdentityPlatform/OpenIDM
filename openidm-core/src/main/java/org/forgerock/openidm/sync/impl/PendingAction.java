@@ -9,20 +9,18 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.sync.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.sync.PendingActionContext;
 import org.forgerock.openidm.sync.ReconAction;
 import org.slf4j.Logger;
@@ -52,7 +50,7 @@ class PendingAction {
      * @param targetObject the full target object
      * @throws SynchronizationException if the action failed
      */
-    public static void handlePendingActions(ServerContext context, ReconAction action, ArrayList<ObjectMapping> mappings,
+    public static void handlePendingActions(Context context, ReconAction action, ArrayList<ObjectMapping> mappings,
             String resourceContainer, String resourceId, JsonValue targetObject) throws SynchronizationException {
         // Detect if there is a pending action matching the supplied action
         PendingActionContext pendingActionContext = null;
@@ -99,7 +97,7 @@ class PendingAction {
      * @param situation the original situation
      * @return the created PendingActionContext
      */
-    public static ServerContext createPendingActionContext(Context context, ReconAction action, String mappingName,
+    public static Context createPendingActionContext(Context context, ReconAction action, String mappingName,
             JsonValue sourceObject, String reconId, Situation situation) {
         // Create the pending action data map
         Map<String, Object> pendingActionMap = new HashMap<String, Object>();
