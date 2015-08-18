@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 
 /**
  * Factory class for creating PropertyRoleCalculator instances.
@@ -65,7 +65,8 @@ class RoleCalculatorFactory {
             }
 
             @Override
-            public void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource) {
+            public void calculateRoles(String principal, SecurityContextMapper securityContextMapper,
+                    ResourceResponse resource) {
                 // set roles
                 for (RoleCalculator calculator : calculators) {
                     calculator.calculateRoles(principal, securityContextMapper, resource);

@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 
 import java.util.List;
 
@@ -35,7 +35,8 @@ class DefaultRoleCalculator implements RoleCalculator {
      * {@inheritDoc}
      */
     @Override
-    public void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource) {
+    public void calculateRoles(String principal, SecurityContextMapper securityContextMapper,
+            ResourceResponse resource) {
         if (defaultRoles != null) {
             securityContextMapper.setRoles(defaultRoles);
         }

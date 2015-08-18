@@ -17,7 +17,7 @@
 package org.forgerock.openidm.jaspi.auth;
 
 import org.forgerock.guava.common.base.Function;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.util.promise.NeverThrowsException;

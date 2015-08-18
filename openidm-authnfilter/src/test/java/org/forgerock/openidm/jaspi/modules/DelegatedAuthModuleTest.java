@@ -16,9 +16,9 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.jaspi.runtime.AuditTrail;
+import org.forgerock.caf.authentication.framework.AuditTrail;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.Authenticator.AuthenticatorResult;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
@@ -55,7 +55,7 @@ public class DelegatedAuthModuleTest {
     public void setUp() throws ResourceException {
         authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
         RouteService router = mock(RouteService.class);
-        when(router.createServerContext()).thenReturn(mock(ServerContext.class));
+        when(router.createServerContext()).thenReturn(mock(Context.class));
         when(authnFilterHelper.getRouter()).thenReturn(router);
 
         authenticator = mock(Authenticator.class);
@@ -176,7 +176,7 @@ public class DelegatedAuthModuleTest {
 
         given(authResult.isAuthenticated()).willReturn(true);
         given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
-                Matchers.<ServerContext>anyObject())).willReturn(authResult);
+                Matchers.<Context>anyObject())).willReturn(authResult);
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -207,7 +207,7 @@ public class DelegatedAuthModuleTest {
 
         given(authResult.isAuthenticated()).willReturn(false);
         given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
-                Matchers.<ServerContext>anyObject())).willReturn(authResult);
+                Matchers.<Context>anyObject())).willReturn(authResult);
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);

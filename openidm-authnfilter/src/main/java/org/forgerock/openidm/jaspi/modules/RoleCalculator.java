@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 
 /**
  * Provides automatic role calculation based from the authentication configuration to provide support for common
@@ -33,5 +33,6 @@ interface RoleCalculator {
      * @param securityContextMapper The message info instance.
      * @param resource the retrieved resource for the principal.
      */
-    void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource);
+    void calculateRoles(String principal, SecurityContextMapper securityContextMapper,
+            ResourceResponse resource);
 }

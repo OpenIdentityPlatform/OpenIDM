@@ -17,22 +17,23 @@
 package org.forgerock.openidm.jaspi.config;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.array;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.openidm.router.RouteService;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
@@ -51,11 +52,11 @@ public class JaspiAuditApiTest {
         final JaspiAuditApi jaspiAuditApi = new JaspiAuditApi(osgiAuthnFilterHelper);
 
         when(osgiAuthnFilterHelper.getRouter()).thenReturn(routeService);
-        when(routeService.createServerContext()).thenReturn(new ServerContext(new RootContext()));
+        when(routeService.createServerContext()).thenReturn(new RootContext());
         when(osgiAuthnFilterHelper.getConnectionFactory()).thenReturn(connectionFactory);
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), createRequestArgumentCaptor.capture()))
-                .thenReturn(new Resource("id", "rev", null));
+                .thenReturn(newResourceResponse("id", "rev", null));
 
         final JsonValue jsonValue = JsonValue.json(object(
                 field(AuthenticationAuditEventBuilder.PRINCIPAL, array("principal1", "principal2")),

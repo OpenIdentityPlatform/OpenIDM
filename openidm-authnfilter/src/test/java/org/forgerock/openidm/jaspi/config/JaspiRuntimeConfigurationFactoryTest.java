@@ -11,27 +11,25 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.config;
 
+import org.forgerock.auth.common.AuditLogger;
+import org.forgerock.auth.common.AuditLoggingConfigurator;
 import org.forgerock.auth.common.AuditRecord;
 import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.JaspiAuditLogger;
-import org.forgerock.jaspi.logging.JaspiLoggingConfigurator;
-import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.security.auth.message.MessageInfo;
-
 import static org.testng.Assert.*;
+import static org.forgerock.openidm.jaspi.auth.AuthenticationService.*;
 
 public class JaspiRuntimeConfigurationFactoryTest {
 
@@ -69,7 +67,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         //Given
         JsonValue moduleConfiguration = JsonValue.json(
             JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object())
+                JsonValue.field(SERVER_AUTH_CONTEXT_KEY, JsonValue.object())
             )
         );
 
@@ -86,11 +84,11 @@ public class JaspiRuntimeConfigurationFactoryTest {
         //Given
         JsonValue moduleConfiguration = JsonValue.json(
             JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
-                    JsonValue.field(ModuleConfigurationFactory.SESSION_MODULE_KEY, JsonValue.object(
+                JsonValue.field(SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
+                    JsonValue.field(SESSION_MODULE_KEY, JsonValue.object(
                             JsonValue.field("enabled", false)
                     )),
-                    JsonValue.field(ModuleConfigurationFactory.AUTH_MODULES_KEY, JsonValue.array())
+                    JsonValue.field(AUTH_MODULES_KEY, JsonValue.array())
                 ))
             )
         );
@@ -100,8 +98,8 @@ public class JaspiRuntimeConfigurationFactoryTest {
 
         //Then
         assertFalse(configurationFactory.getConfiguration()
-                .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
-                .isDefined(ModuleConfigurationFactory.SESSION_MODULE_KEY));
+                .get(SERVER_AUTH_CONTEXT_KEY)
+                .isDefined(SESSION_MODULE_KEY));
     }
 
     @Test
@@ -110,12 +108,12 @@ public class JaspiRuntimeConfigurationFactoryTest {
         //Given
         JsonValue moduleConfiguration = JsonValue.json(
                 JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
-                    JsonValue.field(ModuleConfigurationFactory.SESSION_MODULE_KEY, JsonValue.object(
+                JsonValue.field(SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
+                    JsonValue.field(SESSION_MODULE_KEY, JsonValue.object(
                         JsonValue.field("enabled", true),
-                        JsonValue.field(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY, "AUTH_MODULE_CLASS_NAME")
+                        JsonValue.field(AUTH_MODULE_CLASS_NAME_KEY, "AUTH_MODULE_CLASS_NAME")
                     )),
-                    JsonValue.field(ModuleConfigurationFactory.AUTH_MODULES_KEY, JsonValue.array())
+                    JsonValue.field(AUTH_MODULES_KEY, JsonValue.array())
                 ))
             )
         );
@@ -125,11 +123,11 @@ public class JaspiRuntimeConfigurationFactoryTest {
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
-                .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
-                .get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
-        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
+                .get(SERVER_AUTH_CONTEXT_KEY)
+                .get(SESSION_MODULE_KEY);
+        assertEquals(sessionModuleConfig.get(AUTH_MODULE_CLASS_NAME_KEY).asString(),
                 IDMJaspiModuleWrapper.class.getName());
-        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+        assertEquals(sessionModuleConfig.get(AUTH_MODULE_PROPERTIES_KEY)
                 .get("authModuleClassName").asString(), "AUTH_MODULE_CLASS_NAME");
         assertFalse(sessionModuleConfig.isDefined("enabled"));
     }
@@ -140,11 +138,11 @@ public class JaspiRuntimeConfigurationFactoryTest {
         //Given
         JsonValue moduleConfiguration = JsonValue.json(
             JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
-                    JsonValue.field(ModuleConfigurationFactory.SESSION_MODULE_KEY, JsonValue.object(
-                        JsonValue.field(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY, "AUTH_MODULE_CLASS_NAME")
+                JsonValue.field(SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
+                    JsonValue.field(SESSION_MODULE_KEY, JsonValue.object(
+                        JsonValue.field(AUTH_MODULE_CLASS_NAME_KEY, "AUTH_MODULE_CLASS_NAME")
                     )),
-                    JsonValue.field(ModuleConfigurationFactory.AUTH_MODULES_KEY, JsonValue.array())
+                    JsonValue.field(AUTH_MODULES_KEY, JsonValue.array())
                 ))
             )
         );
@@ -154,11 +152,11 @@ public class JaspiRuntimeConfigurationFactoryTest {
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
-                .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
-                .get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
-        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
+                .get(SERVER_AUTH_CONTEXT_KEY)
+                .get(SESSION_MODULE_KEY);
+        assertEquals(sessionModuleConfig.get(AUTH_MODULE_CLASS_NAME_KEY).asString(),
                 IDMJaspiModuleWrapper.class.getName());
-        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+        assertEquals(sessionModuleConfig.get(AUTH_MODULE_PROPERTIES_KEY)
                 .get("authModuleClassName").asString(), "AUTH_MODULE_CLASS_NAME");
     }
 
@@ -168,11 +166,11 @@ public class JaspiRuntimeConfigurationFactoryTest {
         //Given
         JsonValue moduleConfiguration = JsonValue.json(
             JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
-                    JsonValue.field(ModuleConfigurationFactory.SESSION_MODULE_KEY, JsonValue.object(
+                JsonValue.field(SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
+                    JsonValue.field(SESSION_MODULE_KEY, JsonValue.object(
                         JsonValue.field("name", IDMAuthModule.IWA.toString())
                     )),
-                    JsonValue.field(ModuleConfigurationFactory.AUTH_MODULES_KEY, JsonValue.array())
+                    JsonValue.field(AUTH_MODULES_KEY, JsonValue.array())
                 ))
             )
         );
@@ -182,11 +180,11 @@ public class JaspiRuntimeConfigurationFactoryTest {
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
-                .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
-                .get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
-        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
+                .get(SERVER_AUTH_CONTEXT_KEY)
+                .get(SESSION_MODULE_KEY);
+        assertEquals(sessionModuleConfig.get(AUTH_MODULE_CLASS_NAME_KEY).asString(),
                 IDMJaspiModuleWrapper.class.getName());
-        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+        assertEquals(sessionModuleConfig.get(AUTH_MODULE_PROPERTIES_KEY)
                 .get("authModuleClassName").asString(), IDMAuthModule.IWA.getAuthModuleClass().getName());
     }
 
@@ -196,8 +194,8 @@ public class JaspiRuntimeConfigurationFactoryTest {
         //Given
         JsonValue moduleConfiguration = JsonValue.json(
             JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
-                    JsonValue.field(ModuleConfigurationFactory.AUTH_MODULES_KEY, JsonValue.array(
+                JsonValue.field(SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
+                    JsonValue.field(AUTH_MODULES_KEY, JsonValue.array(
                         JsonValue.object(
                             JsonValue.field("name", IDMAuthModule.JWT_SESSION.toString())
                         ),
@@ -215,26 +213,13 @@ public class JaspiRuntimeConfigurationFactoryTest {
 
         //Then
         JsonValue authModuleConfig = configurationFactory.getConfiguration()
-                .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
-                .get(ModuleConfigurationFactory.AUTH_MODULES_KEY);
+                .get(SERVER_AUTH_CONTEXT_KEY)
+                .get(AUTH_MODULES_KEY);
         assertEquals(authModuleConfig.size(), 1);
-        assertEquals(authModuleConfig.get(0).get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
+        assertEquals(authModuleConfig.get(0).get(AUTH_MODULE_CLASS_NAME_KEY).asString(),
                 IDMJaspiModuleWrapper.class.getName());
-        assertEquals(authModuleConfig.get(0).get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+        assertEquals(authModuleConfig.get(0).get(AUTH_MODULE_PROPERTIES_KEY)
                 .get("authModuleClassName").asString(), IDMAuthModule.JWT_SESSION.getAuthModuleClass().getName());
-    }
-
-    @Test
-    public void shouldGetModuleConfigurationFactory() {
-
-        //Given
-
-        //When
-        ModuleConfigurationFactory moduleConfigurationFactory =
-                JaspiRuntimeConfigurationFactory.getModuleConfigurationFactory();
-
-        //Then
-        assertEquals(moduleConfigurationFactory, configurationFactory);
     }
 
     @Test
@@ -243,7 +228,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         //Given
 
         //When
-        JaspiLoggingConfigurator loggingConfigurator = JaspiRuntimeConfigurationFactory.getLoggingConfigurator();
+        AuditLoggingConfigurator loggingConfigurator = JaspiRuntimeConfigurationFactory.getLoggingConfigurator();
 
         //Then
         assertEquals(loggingConfigurator, configurationFactory);
@@ -261,10 +246,11 @@ public class JaspiRuntimeConfigurationFactoryTest {
         assertTrue(JaspiDebugLogger.class.isAssignableFrom(debugLogger.getClass()));
     }
 
-    public static final class TestJaspiAuditLogger implements JaspiAuditLogger {
+    public static final class TestJaspiAuditLogger implements AuditLogger {
 
         @Override
-        public void audit(AuditRecord<MessageInfo> messageInfoAuditRecord) {
+        public void audit(AuditRecord auditRecord) {
+
         }
     }
 }

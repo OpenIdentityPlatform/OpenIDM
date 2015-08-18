@@ -18,20 +18,21 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.util.Function;
 
+import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +51,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.json.resource.Resource.FIELD_CONTENT;
-import static org.forgerock.json.resource.Resource.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.Resource.FIELD_CONTENT_REVISION;
+import static org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.openidm.jaspi.modules.MappingRoleCalculator.GroupComparison;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
 
@@ -102,7 +104,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
     private ServerAuthModule authModule;
     private String logClientIPHeader = null;
     private String queryOnResource;
-    private Function<QueryRequest, Resource, ResourceException> queryExecutor;
+    private Function<QueryRequest, ResourceResponse, ResourceException> queryExecutor;
     private UserDetailQueryBuilder queryBuilder;
     private RoleCalculator roleCalculator;
 
@@ -198,13 +200,13 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
         // a function to perform the user detail query on the router
         queryExecutor =
-                new Function<QueryRequest, Resource, ResourceException>() {
+                new Function<QueryRequest, ResourceResponse, ResourceException>() {
                     @Override
-                    public Resource apply(QueryRequest request) throws ResourceException {
+                    public ResourceResponse apply(QueryRequest request) throws ResourceException {
                         if (request == null) {
                             return null;
                         }
-                        final List<Resource> resources = new ArrayList<Resource>();
+                        final List<ResourceResponse> resources = new ArrayList<>();
                         authnFilterHelper.getConnectionFactory().getConnection().query(
                                 authnFilterHelper.getRouter().createServerContext(), request, resources);
 
@@ -235,14 +237,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      *
      * @param scriptConfig The script config.
      * @return The ScriptEntry.
-     * @throws JaspiAuthException If there is a problem retrieving the ScriptEntry.
+     * @throws AuthenticationException If there is a problem retrieving the ScriptEntry.
      */
-    ScriptEntry getAugmentScript(JsonValue scriptConfig) throws JaspiAuthException {
+    ScriptEntry getAugmentScript(JsonValue scriptConfig) throws AuthenticationException {
         try {
             return authnFilterHelper.getScriptRegistry().takeScript(scriptConfig);
         } catch (ScriptException e) {
             logger.error("{} when attempting to register script {}", e.toString(), scriptConfig, e);
-            throw new JaspiAuthException(e.toString(), e);
+            throw new AuthenticationException(e.toString(), e);
         }
     }
 
@@ -283,13 +285,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         if (principalName == null) {
             // As per Jaspi spec, the module developer MUST ensure that the client
             // subject's principal is set when the module returns SUCCESS.
-            throw new JaspiAuthException("Underlying Server Auth Module has not set the client subject's principal!");
+            throw new AuthenticationException(
+                    "Underlying Server Auth Module has not set the client subject's principal!");
         }
 
         // user is authenticated; populate security context
 
         try {
-            final Resource resource = getAuthenticatedResource(principalName, messageInfo);
+            final ResourceResponse resource = getAuthenticatedResource(principalName, messageInfo);
 
             final SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo)
                     .setAuthenticationId(principalName);
@@ -326,7 +329,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                 logger.debug("Failed role calculation for {} on {}.", principalName, queryOnResource, e);
             }
             if (e.isServerError()) { // HTTP server-side error; AuthException sadly does not accept cause
-                throw new JaspiAuthException("Failed pass-through authentication of " + principalName + " on "
+                throw new AuthenticationException("Failed pass-through authentication of " + principalName + " on "
                         + queryOnResource + ":" + e.getMessage(), e);
             }
             // role calculation failed
@@ -336,12 +339,13 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         return authStatus;
     }
 
-    private Resource getAuthenticatedResource(String principalName, MessageInfo messageInfo) throws ResourceException {
+    private ResourceResponse getAuthenticatedResource(String principalName, MessageInfo messageInfo)
+            throws ResourceException {
         // see if the resource was stored in the MessageInfo by the Authenticator
         if (messageInfo.getMap().containsKey(AUTHENTICATED_RESOURCE)) {
             JsonValue resourceDetail = new JsonValue(messageInfo.getMap().get(AUTHENTICATED_RESOURCE));
             if (resourceDetail.isMap()) {
-                return new Resource(resourceDetail.get(FIELD_CONTENT_ID).asString(),
+                return Responses.newResourceResponse(resourceDetail.get(FIELD_CONTENT_ID).asString(),
                         resourceDetail.get(FIELD_CONTENT_REVISION).asString(),
                         resourceDetail.get(FIELD_CONTENT));
             }
@@ -366,7 +370,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
     }
 
     private Map<String, Object> getContextMap(MessageInfo messageInfo) {
-        return (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
+        return (Map<String, Object>) messageInfo.getMap().get(ATTRIBUTE_AUTHORIZATION_CONTEXT);
     }
 
     /**
@@ -418,20 +422,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
          *
          * @param authModuleClassName The ServerAuthModule class name.
          * @return The ServerAuthModule instance.
-         * @throws JaspiAuthException If there is any problem creating the ServerAuthModule instance.
+         * @throws AuthenticationException If there is any problem creating the ServerAuthModule instance.
          */
-        ServerAuthModule construct(String authModuleClassName) throws JaspiAuthException {
+        ServerAuthModule construct(String authModuleClassName) throws AuthenticationException {
              try {
                  return Class.forName(authModuleClassName).asSubclass(ServerAuthModule.class).newInstance();
-             } catch (ClassNotFoundException e) {
+             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                  logger.error("Failed to construct Auth Module instance", e);
-                 throw new JaspiAuthException("Failed to construct Auth Module instance", e);
-             } catch (InstantiationException e) {
-                 logger.error("Failed to construct Auth Module instance", e);
-                 throw new JaspiAuthException("Failed to construct Auth Module instance", e);
-             } catch (IllegalAccessException e) {
-                 logger.error("Failed to construct Auth Module instance", e);
-                 throw new JaspiAuthException("Failed to construct Auth Module instance", e);
+                 throw new AuthenticationException("Failed to construct Auth Module instance", e);
              }
         }
     }
@@ -482,7 +480,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                 request.setAdditionalParameter(authenticationId, principal);
             } else {
                 // otherwise, use a query filter mapping the authenticationId property to the principal
-                request.setQueryFilter(QueryFilter.equalTo(authenticationId, principal));
+                request.setQueryFilter(QueryFilter.equalTo(new JsonPointer(authenticationId), principal));
             }
             return request;
         }

@@ -21,9 +21,9 @@ import org.eclipse.jetty.util.security.Password;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.util.Reject;
 import org.slf4j.Logger;
@@ -83,12 +83,12 @@ public class ResourceQueryAuthenticator implements Authenticator {
      * @param context the ServerContext to use
      * @return True if authentication is successful, otherwise false.
      */
-    public AuthenticatorResult authenticate(String username, String password, ServerContext context) throws ResourceException {
+    public AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException {
 
         Reject.ifNull(username, "Provided username was null");
         Reject.ifNull(context, "Router context was null");
 
-        final Resource resource = getResource(username, context);
+        final ResourceResponse resource = getResource(username, context);
         final UserInfo userInfo = getRepoUserInfo(username, resource);
 
         if (userInfo == null) {
@@ -103,12 +103,12 @@ public class ResourceQueryAuthenticator implements Authenticator {
         }
     }
 
-    private Resource getResource(String username, ServerContext context) throws ResourceException {
+    private ResourceResponse getResource(String username, Context context) throws ResourceException {
         QueryRequest request = Requests.newQueryRequest(queryOnResource)
                 .setQueryId(queryId)
                 .setAdditionalParameter(authenticationIdProperty, username);
 
-        final Set<Resource> result = new HashSet<Resource>();
+        final Set<ResourceResponse> result = new HashSet<>();
         connectionFactory.getConnection().query(context, request, result);
 
         if (result.size() == 0) {
@@ -118,7 +118,7 @@ public class ResourceQueryAuthenticator implements Authenticator {
 
         if (result.size() > 1) {
             logger.debug("Query to match user credentials found more than one matching user for {}", username);
-            for (Resource entry : result) {
+            for (ResourceResponse entry : result) {
                 logger.debug("Ambiguous matching username for {} found id: {}", username, entry.getId());
             }
             throw ResourceException.getException(401, "Access denied, user detail retrieved was ambiguous.");
@@ -127,7 +127,7 @@ public class ResourceQueryAuthenticator implements Authenticator {
         return result.iterator().next(); // the retrieved resource
     }
 
-    private UserInfo getRepoUserInfo(String username, Resource resource) throws ResourceException {
+    private UserInfo getRepoUserInfo(String username, ResourceResponse resource) throws ResourceException {
         if (username == null || resource == null) {
             return null;
         }

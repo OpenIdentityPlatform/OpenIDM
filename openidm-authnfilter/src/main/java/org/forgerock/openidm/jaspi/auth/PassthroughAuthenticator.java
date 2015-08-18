@@ -16,12 +16,12 @@
 
 package org.forgerock.openidm.jaspi.auth;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 
 /**
  * Contains logic to perform authentication by passing the request through to be authenticated against a OpenICF
@@ -54,15 +54,15 @@ public class PassthroughAuthenticator implements Authenticator {
      * @return <code>true</code> if authentication is successful.
      * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */
-    public AuthenticatorResult authenticate(String username, String password, ServerContext context) throws ResourceException {
+    public AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException {
 
-        final JsonValue result = connectionFactory.getConnection().action(context,
+        final ActionResponse result = connectionFactory.getConnection().action(context,
                 Requests.newActionRequest(passThroughAuth, "authenticate")
                         .setAdditionalParameter("username", username)
                         .setAdditionalParameter("password", password));
 
         // pass-through authentication is successful if _id exists in result; no resource is provided
-        return result.isDefined(Resource.FIELD_CONTENT_ID)
+        return result.getJsonContent().isDefined(ResourceResponse.FIELD_CONTENT_ID)
                 ? AuthenticatorResult.SUCCESS
                 : AuthenticatorResult.FAILED;
 
