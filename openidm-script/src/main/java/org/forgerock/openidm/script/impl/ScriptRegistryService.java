@@ -620,7 +620,6 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     } else {
                         throw new ServiceUnavailableException();
                     }
-                    break;
                 case eval:
                     if (scriptEntry.isActive()) {
                         Script script = scriptEntry.getScript(context);
@@ -629,7 +628,6 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     } else {
                         throw new ServiceUnavailableException();
                     }
-                    break;
                 default:
                     throw new BadRequestException("Unrecognized action ID " + request.getAction());
             }
