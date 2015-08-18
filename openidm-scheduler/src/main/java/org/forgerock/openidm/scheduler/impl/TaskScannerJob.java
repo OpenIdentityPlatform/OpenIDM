@@ -1,26 +1,19 @@
-/**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*/
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions copyright 2012-2015 ForgeRock AS.
+ */
+
 package org.forgerock.openidm.scheduler.impl;
 
 import java.util.ArrayList;
@@ -34,18 +27,17 @@ import java.util.concurrent.Executors;
 
 import javax.script.ScriptException;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.util.ConfigMacroUtil;
@@ -91,7 +83,7 @@ public class TaskScannerJob {
             }
         } else {
             // Launch a new thread for the whole taskscan process
-            final ServerContext context = taskScannerContext.getContext();
+            taskScannerContext.getContext();
             Runnable command = new Runnable() {
                 @Override
                 public void run() {
@@ -260,21 +252,11 @@ public class TaskScannerJob {
         final JsonValue queryResults = new JsonValue(new ArrayList<Map<String, Object>>());;
 
         QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(resourceID, params.asMap());
-        connectionFactory.getConnection().query(taskScannerContext.getContext(), request, new QueryResultHandler() {
+        connectionFactory.getConnection().query(taskScannerContext.getContext(), request, new QueryResourceHandler() {
             @Override
-            public void handleError(ResourceException error) {
-                // Ignore
-            }
-
-            @Override
-            public boolean handleResource(Resource resource) {
+            public boolean handleResource(ResourceResponse resource) {
                 queryResults.add(resource.getContent().getObject());
                 return true;
-            }
-
-            @Override
-            public void handleResult(QueryResult result) {
-                // Ignore
             }
         });
         return queryResults;
@@ -426,7 +408,7 @@ public class TaskScannerJob {
 
         if (script != null) {
             String resourceID = taskScannerContext.getObjectID();
-            ServerContext context = taskScannerContext.getContext();
+            Context context = taskScannerContext.getContext();
 
             try {
                 Script scope = script.getScript(context);

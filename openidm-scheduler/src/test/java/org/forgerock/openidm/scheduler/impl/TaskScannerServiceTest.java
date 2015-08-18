@@ -11,26 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.scheduler.impl;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ServerContext;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
@@ -42,7 +40,7 @@ public class TaskScannerServiceTest {
         final TaskScannerService taskScannerService = new TaskScannerService();
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         final Connection connection = mock(Connection.class);
-        final ServerContext serverContext = mock(ServerContext.class);
+        final Context serverContext = mock(Context.class);
         final AuditEvent auditEvent = mock(AuditEvent.class);
         final ArgumentCaptor<CreateRequest> argumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
@@ -50,7 +48,7 @@ public class TaskScannerServiceTest {
 
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), argumentCaptor.capture()))
-                .thenReturn(new Resource("id", "rev", null));
+                .thenReturn(newResourceResponse("id", "rev", null));
         when(auditEvent.getValue()).thenReturn(json(object()));
 
         //when
@@ -59,6 +57,6 @@ public class TaskScannerServiceTest {
         //then
         verify(connection).create(any(Context.class), any(CreateRequest.class));
         assertThat(argumentCaptor.getValue().getContent()).isEqualTo(auditEvent.getValue());
-        assertThat(argumentCaptor.getValue().getResourceName()).isEqualTo("audit/access");
+        assertThat(argumentCaptor.getValue().getResourcePath()).isEqualTo("audit/access");
     }
 }

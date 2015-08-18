@@ -1,40 +1,33 @@
-/**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*/
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions copyright 2012-2015 ForgeRock AS.
+ */
+
 package org.forgerock.openidm.scheduler.impl;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ServerContext;
+import javax.script.ScriptException;
+
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.script.ScriptEntry;
 import org.joda.time.Days;
 import org.joda.time.ReadablePeriod;
-
-import javax.script.ScriptException;
 
 /**
  * Represents the information for a recurring {@link org.forgerock.openidm.scheduler.impl.TaskScannerJob}.
@@ -54,7 +47,7 @@ public class TaskScannerContext {
     private String invokerName;
     private String scriptName;
     private JsonValue params;
-    private ServerContext context;
+    private Context context;
     private boolean canceled = false;
     private TaskScannerStatistic statistics;
     private TaskScannerState state;
@@ -63,7 +56,7 @@ public class TaskScannerContext {
     public TaskScannerContext(String invokerName,
                               String scriptName,
                               JsonValue params,
-                              ServerContext context,
+                              Context context,
                               ScriptEntry scriptEntry)
             throws ScriptException {
         this.invokerName = invokerName;
@@ -130,7 +123,7 @@ public class TaskScannerContext {
         statistics.setNumberOfTasksToProcess(number);
     }
 
-    public ServerContext getContext() {
+    public Context getContext() {
         return this.context;
     }
 

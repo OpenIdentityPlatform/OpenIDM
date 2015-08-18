@@ -9,11 +9,10 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.scheduler;
 
 import static org.mockito.Mockito.mock;
@@ -25,7 +24,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.osgi.framework.BundleContext;
@@ -44,7 +43,7 @@ public class SchedulerServiceTest {
     public void beforeMethod() {
     }
 
-    ComponentContext getMockedContext(Map enhancedConfig, SchedulerService sched) {
+    ComponentContext getMockedContext(Map enhancedConfig, SchedulerService service) {
 
         ComponentContext mockedContext = mock(ComponentContext.class);
         BundleContext mockedBundleContext = mock(BundleContext.class);
@@ -53,7 +52,7 @@ public class SchedulerServiceTest {
 
         EnhancedConfig mockedEnhancedConfig = mock(EnhancedConfig.class);
         when(mockedEnhancedConfig.getConfiguration(mockedContext)).thenReturn(enhancedConfig);
-        sched.bindEnhancedConfig(mockedEnhancedConfig);
+        service.bindEnhancedConfig(mockedEnhancedConfig);
 
         when(mockedContext.getProperties()).thenReturn(compContextProperties);
         when(mockedContext.getBundleContext()).thenReturn(mockedBundleContext);
