@@ -229,8 +229,11 @@
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.1</joda-time.version>
-<!--TODO-crest3 shouldn't this be able to come from the BOM?-->
+
+        <!--TODO-crest3 Keep these in sync with the BOM-->
+        <!--TODO-crest3 these should be able to come from the BOM?-->
         <jackson.version>2.5.3</jackson.version>
+        <slf4j.version>1.7.12</slf4j.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
