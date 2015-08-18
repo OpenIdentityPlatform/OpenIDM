@@ -65,33 +65,33 @@ public class StringSQLQueryFilterVisitorTest {
                 // @formatter:off
                 { alwaysTrue(), "1 = 1" },
                 { alwaysFalse(), "1 <> 1" },
-                { equalTo("/name", "alice"), "name = 'alice'"},
-                { equalTo("/age", 1234L), "age = 1234" },
-                { equalTo("/balance", 3.14159), "balance = 3.14159" },
-                { equalTo("/isAdmin", false), "isAdmin = false" },
-                { lessThan("/age", 1234L), "age < 1234" },
-                { lessThanOrEqualTo("/age", 1234L), "age <= 1234" },
-                { greaterThan("/age", 1234L), "age > 1234" },
-                { greaterThanOrEqualTo("/age", 1234L), "age >= 1234" },
-                { contains("/name", "al"), "name LIKE '%al%'" },
-                { startsWith("/name", "al"), "name LIKE 'al%'" },
-                { present("/name"), "name IS NOT NULL" },
+                { equalTo(ptr("/name"), "alice"), "name = 'alice'"},
+                { equalTo(ptr("/age"), 1234L), "age = 1234" },
+                { equalTo(ptr("/balance"), 3.14159), "balance = 3.14159" },
+                { equalTo(ptr("/isAdmin"), false), "isAdmin = false" },
+                { lessThan(ptr("/age"), 1234L), "age < 1234" },
+                { lessThanOrEqualTo(ptr("/age"), 1234L), "age <= 1234" },
+                { greaterThan(ptr("/age"), 1234L), "age > 1234" },
+                { greaterThanOrEqualTo(ptr("/age"), 1234L), "age >= 1234" },
+                { contains(ptr("/name"), "al"), "name LIKE '%al%'" },
+                { startsWith(ptr("/name"), "al"), "name LIKE 'al%'" },
+                { present(ptr("/name")), "name IS NOT NULL" },
                 { or(), "1 <> 1" }, // zero operand or is always false
                 { and(), "1 = 1" }, // zero operand and is always true
-                { or(equalTo("/age", 1234L)), "age = 1234" }, // single operand or is no-op
-                { and(equalTo("/age", 1234L)), "age = 1234" }, // single operand and is no-op
-                { or(lessThan("/age", 18L), greaterThan("/age", 30L)), "(age < 18 OR age > 30)" },
-                { and(lessThan("/age", 18L), greaterThan("/age", 30L)), "(age < 18 AND age > 30)" },
-                { or(equalTo("/role", "a"), equalTo("/role", "b"), equalTo("/role", "c")),
+                { or(equalTo(ptr("/age"), 1234L)), "age = 1234" }, // single operand or is no-op
+                { and(equalTo(ptr("/age"), 1234L)), "age = 1234" }, // single operand and is no-op
+                { or(lessThan(ptr("/age"), 18L), greaterThan(ptr("/age"), 30L)), "(age < 18 OR age > 30)" },
+                { and(lessThan(ptr("/age"), 18L), greaterThan(ptr("/age"), 30L)), "(age < 18 AND age > 30)" },
+                { or(equalTo(ptr("/role"), "a"), equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c")),
                         "(role = 'a' OR role = 'b' OR role = 'c')" },
-                { and(equalTo("/role", "a"), equalTo("/role", "b"), equalTo("/role", "c")),
+                { and(equalTo(ptr("/role"), "a"), equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c")),
                         "(role = 'a' AND role = 'b' AND role = 'c')" },
-                { or(equalTo("/role", "a"), and(equalTo("/role", "b"), equalTo("/role", "c"))),
+                { or(equalTo(ptr("/role"), "a"), and(equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c"))),
                         "(role = 'a' OR (role = 'b' AND role = 'c'))" },
-                { and(equalTo("/role", "a"), or(equalTo("/role", "b"), equalTo("/role", "c"))),
+                { and(equalTo(ptr("/role"), "a"), or(equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c"))),
                         "(role = 'a' AND (role = 'b' OR role = 'c'))" },
-                { not(equalTo("/age", 1234L)), "NOT age = 1234" },
-                { not(not(equalTo("/age", 1234L))), "NOT NOT age = 1234" },
+                { not(equalTo(ptr("/age"), 1234L)), "NOT age = 1234" },
+                { not(not(equalTo(ptr("/age"), 1234L))), "NOT NOT age = 1234" },
                 // @formatter:on
         };
     }
@@ -101,5 +101,7 @@ public class StringSQLQueryFilterVisitorTest {
         assertThat(filter.accept(visitor, null).toSQL()).isEqualTo(whereClause);
     }
 
-
+    private static JsonPointer ptr(String jsonPointer){
+        return new JsonPointer(jsonPointer);
+    }
 }
