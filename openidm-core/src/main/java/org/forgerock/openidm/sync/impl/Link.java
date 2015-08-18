@@ -9,14 +9,14 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
-
-// TODO: Extend from something like FieldMap to handle the Java ↔ JSON translations.
-
 package org.forgerock.openidm.sync.impl;
+
+import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_FILTER;
+
 
 // Java Standard Edition
 import java.util.ArrayList;
@@ -28,27 +28,26 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 // SLF4J
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.util.RequestUtil;
+import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
+// TODO: Extend from something like FieldMap to handle the Java ↔ JSON translations.
 
 // SLF4J
 // JSON Fluent library
@@ -138,7 +137,7 @@ class Link {
      * @throws SynchronizationException if getting and initializing the link details fail
      */
     private void getLink(JsonValue query) throws SynchronizationException {
-        JsonValue results = linkQuery(mapping.getService().getServerContext(), mapping.getService().getConnectionFactory(), query);
+        JsonValue results = linkQuery(mapping.getService().getContext(), mapping.getService().getConnectionFactory(), query);
         if (results.size() == 1) {
             fromJsonValue(results.get(0));
         } else if (results.size() > 1) { // shouldn't happen if index is unique
@@ -155,31 +154,19 @@ class Link {
      * @return The query results
      * @throws SynchronizationException if getting and initializing the link details fail
      */
-    private static JsonValue linkQuery(ServerContext router, ConnectionFactory connectionFactory, JsonValue query)
+    private static JsonValue linkQuery(Context router, ConnectionFactory connectionFactory, JsonValue query)
             throws SynchronizationException {
         JsonValue results = null;
         try {
             final Collection<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(linkId(null), query.asMap());
-            connectionFactory.getConnection().query(router, request, new QueryResultHandler() {
+            connectionFactory.getConnection().query(router, request, new QueryResourceHandler() {
                 @Override
-                public void handleError(ResourceException error) {
-                    // ignore
-                }
-
-                @Override
-                public boolean handleResource(Resource resource) {
+                public boolean handleResource(ResourceResponse resource) {
                     result.add(resource.getContent().asMap());
                     return true;
                 }
-
-                @Override
-                public void handleResult(QueryResult result) {
-                    // ignore
-                }
             });
-
             results = new JsonValue(result).required().expect(List.class);
         } catch (JsonValueException jve) {
             throw new SynchronizationException("Malformed link query response", jve);
@@ -272,7 +259,7 @@ class Link {
         clear();
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(PARAM_QUERY_FILTER,
+            query.put(FIELD_QUERY_FILTER,
                     QueryFilter.and(Arrays.asList(
                             QueryFilter.equalTo("/linkType", mapping.getLinkType().getName()),
                             QueryFilter.equalTo("/linkQualifier", linkQualifier),
@@ -310,7 +297,7 @@ class Link {
         clear();
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(PARAM_QUERY_FILTER,
+            query.put(FIELD_QUERY_FILTER,
                     QueryFilter.and(Arrays.asList(
                             QueryFilter.equalTo("/linkType", mapping.getLinkType().getName()),
                             QueryFilter.equalTo("/linkQualifier", linkQualifier),
@@ -334,12 +321,12 @@ class Link {
         Map<String, Link> sourceIdToLink = new ConcurrentHashMap<String, Link>();
         if (mapping != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(PARAM_QUERY_FILTER,
+            query.put(FIELD_QUERY_FILTER,
                     QueryFilter.and(Arrays.asList(
                             QueryFilter.equalTo("/linkType", mapping.getLinkType().getName()),
                             QueryFilter.equalTo("/linkQualifier", linkQualifier)))
                             .toString());
-            JsonValue queryResults = linkQuery(mapping.getService().getServerContext(), mapping.getService().getConnectionFactory(), query);
+            JsonValue queryResults = linkQuery(mapping.getService().getContext(), mapping.getService().getConnectionFactory(), query);
             for (JsonValue entry : queryResults) {
                 Link link = new Link(mapping);
                 link.fromJsonValue(entry);
@@ -374,7 +361,8 @@ class Link {
         JsonValue jv = toJsonValue();
         try {
             CreateRequest r = Requests.newCreateRequest(linkId(null), _id, jv);
-            Resource resource = mapping.getService().getConnectionFactory().getConnection().create(mapping.getService().getServerContext(), r);
+            ResourceResponse resource = 
+            		mapping.getService().getConnectionFactory().getConnection().create(mapping.getService().getContext(), r);
             this._id = resource.getId();
             this._rev = resource.getRevision();
             this.initialized = true;
@@ -394,7 +382,7 @@ class Link {
             try {
                 DeleteRequest r = Requests.newDeleteRequest(linkId(_id));
                 r.setRevision(_rev);
-                mapping.getService().getConnectionFactory().getConnection().delete(mapping.getService().getServerContext(),r);
+                mapping.getService().getConnectionFactory().getConnection().delete(mapping.getService().getContext(),r);
             } catch (ResourceException ose) {
                 LOGGER.warn("Failed to delete link", ose);
                 throw new SynchronizationException(ose);
@@ -416,7 +404,7 @@ class Link {
         try {
             UpdateRequest r = Requests.newUpdateRequest(linkId(_id), jv);
             r.setRevision(_rev);
-            Resource resource = mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getServerContext(),r);
+            ResourceResponse resource = mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getContext(),r);
             _rev =  resource.getRevision();
         } catch (ResourceException ose) {
             LOGGER.warn("Failed to update link", ose);

@@ -1,24 +1,24 @@
 /*
- *  The contents of this file are subject to the terms of the Common Development and
- *  Distribution License (the License). You may not use this file except in compliance with the
- *  License.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- *  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- *  specific language governing permission and limitations under the License.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- *  When distributing Covered Software, include this CDDL Header Notice in each file and include
- *  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- *  Header, with the fields enclosed by brackets [] replaced by your own identifying
- *  information: "Portions copyright [year] [name of copyright owner]".
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- *  Copyright 2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,16 +27,15 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.sync.ReconAction;
 import org.mockito.ArgumentCaptor;
@@ -47,13 +46,13 @@ public class AbstractSyncAuditEventLoggerTest {
 
     public static final String AUTHENTICATION_ID = "principal";
     public static final String TEST_MAPPING = "testMapping";
-    private ServerContext context;
+    private Context context;
     private ObjectMapping.SourceSyncOperation syncOperation;
 
     @BeforeClass
     public void setup() throws Exception {
         SecurityContext securityContext = new SecurityContext(new RootContext("test_id"), AUTHENTICATION_ID, null);
-        context = new ServerContext(securityContext);
+        context = securityContext;
 
         syncOperation = mock(ObjectMapping.SourceSyncOperation.class);
         syncOperation.action = ReconAction.CREATE;
@@ -117,7 +116,7 @@ public class AbstractSyncAuditEventLoggerTest {
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         Connection connection = mock(Connection.class);
         when(connectionFactory.getConnection()).thenReturn(connection);
-        when(connection.create(any(Context.class), any(CreateRequest.class))).thenReturn(new Resource("bl", "1", null));
+        when(connection.create(any(Context.class), any(CreateRequest.class))).thenReturn(newResourceResponse("bl", "1", null));
 
         ArgumentCaptor<CreateRequest> createRequestArgumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 

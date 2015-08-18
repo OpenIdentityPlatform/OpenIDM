@@ -1,36 +1,29 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
 import javax.script.ScriptException;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.openidm.sync.impl.Scripts.Script;
+import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.query.QueryFilterVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +69,7 @@ class Condition {
     /**
      * The query filter if configured
      */
-    private QueryFilter queryFilter;
+    private QueryFilter<JsonPointer> queryFilter;
     
     /**
      * The condition script if configured
@@ -92,7 +85,7 @@ class Condition {
         if (config.isNull()) {
             init(Type.TRUE, null, null);
         } else if (config.isString()) {
-            init(Type.QUERY_FILTER, QueryFilter.valueOf(config.asString()), null);
+            init(Type.QUERY_FILTER, QueryFilters.parse(config.asString()), null);
         } else {
             init(Type.SCRIPTED, null, Scripts.newInstance(config));
         }
@@ -105,7 +98,7 @@ class Condition {
      * @param queryFilter the query filter.
      * @param script the condition script.
      */
-    private void init(Type type, QueryFilter queryFilter, Script script) {
+    private void init(Type type, QueryFilter<JsonPointer> queryFilter, Script script) {
         this.type = type;
         this.queryFilter = queryFilter;
         this.script = script;
@@ -150,15 +143,15 @@ class Condition {
 
     /**
      * This is a relatively generic implementation for testing JsonValue objects though it
-     * only returns Boolean for the test result.  This may be extractable to a more common
+     * only returns Boolean for the test result.  This may be extracted to a more common
      * location for broader use.
      */
-    private static final QueryFilterVisitor<Boolean, JsonValue> JSONVALUE_FILTER_VISITOR =
-            new QueryFilterVisitor<Boolean, JsonValue>() {
+    private static final QueryFilterVisitor<Boolean, JsonValue, JsonPointer> JSONVALUE_FILTER_VISITOR =
+            new QueryFilterVisitor<Boolean, JsonValue, JsonPointer>() {
 
                 @Override
-                public Boolean visitAndFilter(final JsonValue p, final List<QueryFilter> subFilters) {
-                    for (final QueryFilter subFilter : subFilters) {
+                public Boolean visitAndFilter(final JsonValue p, final List<QueryFilter<JsonPointer>> subFilters) {
+                    for (final QueryFilter<JsonPointer> subFilter : subFilters) {
                         if (!subFilter.accept(this, p)) {
                             return Boolean.FALSE;
                         }
@@ -256,13 +249,13 @@ class Condition {
                 }
 
                 @Override
-                public Boolean visitNotFilter(final JsonValue p, final QueryFilter subFilter) {
+                public Boolean visitNotFilter(final JsonValue p, final QueryFilter<JsonPointer> subFilter) {
                     return !subFilter.accept(this, p);
                 }
 
                 @Override
-                public Boolean visitOrFilter(final JsonValue p, final List<QueryFilter> subFilters) {
-                    for (final QueryFilter subFilter : subFilters) {
+                public Boolean visitOrFilter(final JsonValue p, final List<QueryFilter<JsonPointer>> subFilters) {
+                    for (final QueryFilter<JsonPointer> subFilter : subFilters) {
                         if (subFilter.accept(this, p)) {
                             return Boolean.TRUE;
                         }

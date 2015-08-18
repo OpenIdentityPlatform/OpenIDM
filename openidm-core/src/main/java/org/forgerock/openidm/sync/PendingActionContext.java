@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2014-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.sync;
 
@@ -27,18 +19,15 @@ import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.PersistenceConfig;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.AbstractContext;
 
 
 /**
  * A ServerContext that stores a pending action information during a sync operation.
  *
  */
-public class PendingActionContext extends ServerContext {
+public class PendingActionContext extends AbstractContext {
 
     public static final String CONTEXT_NAME = "pendingAction";
 
@@ -53,7 +42,7 @@ public class PendingActionContext extends ServerContext {
      * @param pendingActionMap a Map containing the pending action data
      */
     public PendingActionContext(final Context parent, Map<String, Object> pendingActionData, String action) {
-        super(checkNotNull(parent, "Cannot instantiate PendingActionContext with null parent Context"));
+        super(checkNotNull(parent, "Cannot instantiate PendingActionContext with null parent Context"), CONTEXT_NAME);
         data.put(ATTR_ACTION, action);
         data.put(ATTR_ACTION_DATA, pendingActionData);
         data.put(ATTR_PENDING, true);
@@ -70,19 +59,10 @@ public class PendingActionContext extends ServerContext {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    public PendingActionContext(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super(savedContext, config);
-    }
-
-    /**
-     * Get this Context's name.
-     *
-     * @return this object's name
-     */
-    public String getContextName() {
-        return CONTEXT_NAME;
-    }
+//    public PendingActionContext(final JsonValue savedContext, final PersistenceConfig config)
+//            throws ResourceException {
+//        super(savedContext, config);
+//    }
     
     /**
      * Returns true if the pending link is still pending, false otherwise.

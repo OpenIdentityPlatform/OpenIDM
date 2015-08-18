@@ -1,44 +1,49 @@
 /*
- * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock Inc. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions copyright [year] [name of copyright owner]"
+ * Portions copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.*;
-import org.forgerock.script.ScriptRegistry;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.script.ScriptRegistry;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class LinkTest {
 
@@ -105,9 +110,9 @@ public class LinkTest {
         when(linkTypeMock.getName()).thenReturn("linkType");
         when(linkTypeMock.useReverse()).thenReturn(true);
 
-        when(objectMapping.getService().getServerContext()).thenReturn(new ServerContext(new RootContext()));
-        when(connectionMock.create(any(ServerContext.class), any(CreateRequest.class)))
-                .thenReturn(new Resource("testId", "testRevision", new JsonValue("testObject")));
+        when(objectMapping.getService().getContext()).thenReturn(new RootContext());
+        when(connectionMock.create(any(Context.class), any(CreateRequest.class)))
+                .thenReturn(newResourceResponse("testId", "testRevision", new JsonValue("testObject")));
 
         link.create();
 
@@ -138,9 +143,9 @@ public class LinkTest {
         when(linkTypeMock.getName()).thenReturn("linkType");
         when(linkTypeMock.useReverse()).thenReturn(true);
 
-        when(objectMapping.getService().getServerContext()).thenReturn(new ServerContext(new RootContext()));
-        doReturn(new Resource("testId", "testRevision", new JsonValue("testObject")))
-                .when(connectionMock).update(any(ServerContext.class), any(UpdateRequest.class));
+        when(objectMapping.getService().getContext()).thenReturn(new RootContext());
+        doReturn(newResourceResponse("testId", "testRevision", new JsonValue("testObject")))
+                .when(connectionMock).update(any(Context.class), any(UpdateRequest.class));
         link._id = "testId";
         link.update();
 
@@ -166,9 +171,9 @@ public class LinkTest {
         link.setLinkQualifier("default");
         link._id = UUID.randomUUID().toString();
 
-        when(objectMapping.getService().getServerContext()).thenReturn(new ServerContext(new RootContext()));
-        doReturn(new Resource("testId", "testRevision", new JsonValue("testObject")))
-                .when(connectionMock).delete(any(ServerContext.class), any(DeleteRequest.class));
+        when(objectMapping.getService().getContext()).thenReturn(new RootContext());
+        doReturn(newResourceResponse("testId", "testRevision", new JsonValue("testObject")))
+                .when(connectionMock).delete(any(Context.class), any(DeleteRequest.class));
         link.delete();
 
         // make sure that _id has been set to null

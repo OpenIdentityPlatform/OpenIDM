@@ -1,42 +1,32 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.sync.impl;
 
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +87,7 @@ public class LazyObjectAccessor {
         if (!loaded) {
             try {
                 // If not found, the object will be null
-                object = rawReadObject(service.getServerContext(), service.getConnectionFactory(), componentContext, localId);
+                object = rawReadObject(service.getContext(), service.getConnectionFactory(), componentContext, localId);
             } catch (SynchronizationException ex) {
                 throw ex; // being explicit that this would not be considered loaded
             }
@@ -142,7 +132,7 @@ public class LazyObjectAccessor {
      * @throws SynchronizationException if retrieving the object failed
      * @return the object value if found, null if not found
      */
-    public static JsonValue rawReadObject(ServerContext router, ConnectionFactory connectionFactory, String resourceContainer, String resourceId) throws SynchronizationException {
+    public static JsonValue rawReadObject(Context router, ConnectionFactory connectionFactory, String resourceContainer, String resourceId) throws SynchronizationException {
         if (resourceId == null) {
             throw new NullPointerException("Identifier passed to readObject is null");
         }

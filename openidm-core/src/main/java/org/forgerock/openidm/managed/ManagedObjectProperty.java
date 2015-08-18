@@ -1,40 +1,31 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.managed;
 
 import javax.script.ScriptException;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -167,7 +158,7 @@ class ManagedObjectProperty {
      * @throws InternalServerErrorException
      *             if script execution fails.
      */
-    private void execScript(ServerContext context, String type, ScriptEntry script,
+    private void execScript(Context context, String type, ScriptEntry script,
             JsonValue managedObject) throws InternalServerErrorException {
         try {
             if (script != null) {
@@ -204,7 +195,7 @@ class ManagedObjectProperty {
      * @throws InternalServerErrorException
      *             if any other exception occurs during execution.
      */
-    void onValidate(ServerContext context, JsonValue value) throws ForbiddenException,
+    void onValidate(Context context, JsonValue value) throws ForbiddenException,
             InternalServerErrorException {
         if (onValidate != null) {
             Script scope = onValidate.getScript(context);
@@ -231,7 +222,7 @@ class ManagedObjectProperty {
      * @throws InternalServerErrorException
      *             if an exception occurs processing the property.
      */
-    void onRetrieve(ServerContext context, JsonValue value) throws InternalServerErrorException {
+    void onRetrieve(Context context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onRetrieve", onRetrieve, value);
     }
 
@@ -245,12 +236,12 @@ class ManagedObjectProperty {
      * @throws InternalServerErrorException
      *             if an exception occurs processing the property.
      */
-    void onStore(ServerContext context, JsonValue value) throws InternalServerErrorException {
+    void onStore(Context context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onStore", onStore, value);
 
         setEncryptor();
         if (encryptor != null && value.isDefined(name)) {
-            if (!cryptoService.isEncrypted(value)) {
+/*            if (!cryptoService.isEncrypted(value)) {
                 try {
                     value.put(name,
                             new JsonCrypto(encryptor.getType(), encryptor.encrypt(value.get(name))).toJsonValue());
@@ -264,7 +255,7 @@ class ManagedObjectProperty {
                     throw new InternalServerErrorException(msg, je);
                 }
             }
-        }
+ */       }
     }
 
     /**
