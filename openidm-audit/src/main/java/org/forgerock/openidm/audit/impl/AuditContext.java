@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014-2015 ForgeRock AS. All rights reserved.
+ * Copyright 2014-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,13 +25,25 @@ package org.forgerock.openidm.audit.impl;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.AbstractContext;
+import org.forgerock.json.JsonValue;
 
 /**
- * A ServerContext used when auditing over the router.
+ * A Context used when auditing over the router.
  */
 class AuditContext extends AbstractContext {
     public AuditContext(Context parent) {
         super(parent, "AuditContext");
     }
 
+    public AuditContext(Context parent, String name) {
+        super(parent, name);
+    }
+
+    public AuditContext(String id, String name, Context parent) {
+        super(id, name, parent);
+    }
+
+    public AuditContext(JsonValue savedContext, ClassLoader classLoader) {
+        super(savedContext, classLoader);
+    }
 }

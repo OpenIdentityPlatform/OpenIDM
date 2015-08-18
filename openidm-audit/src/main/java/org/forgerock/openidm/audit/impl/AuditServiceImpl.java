@@ -26,6 +26,7 @@ package org.forgerock.openidm.audit.impl;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.cast;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
@@ -377,7 +378,7 @@ public class AuditServiceImpl implements AuditService {
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         if (request.getResourcePath() == null) {
             //TODO IGNORE FAILURE PER AUDIT LOGGER?
-            return newExceptionPromise(ResourceException.cast(new BadRequestException(
+            return newExceptionPromise(cast(new BadRequestException(
                     "Audit service called without specifying which audit log in the identifier")));
         }
 
@@ -385,7 +386,7 @@ public class AuditServiceImpl implements AuditService {
             formatException(request.getContent());
         } catch (Exception e) {
             LOGGER.error("Failed to format audit entry exception", e);
-            return newExceptionPromise(ResourceException.cast(
+            return newExceptionPromise(cast(
                     new InternalServerErrorException("Failed to format audit entry exception", e)));
         }
 
