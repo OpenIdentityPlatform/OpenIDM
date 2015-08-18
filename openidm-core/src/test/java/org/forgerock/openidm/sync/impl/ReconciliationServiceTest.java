@@ -22,11 +22,9 @@ import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 
 import org.assertj.core.data.MapEntry;
 import org.forgerock.http.Context;
@@ -39,8 +37,10 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.mockito.ArgumentCaptor;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.Test;
@@ -55,7 +55,6 @@ public class ReconciliationServiceTest {
 
         final ReadRequest readRequest = Requests.newReadRequest(new ResourcePath("resource"));
         final Connection connection = mock(Connection.class);
-        final ArgumentCaptor<QueryRequest> queryRequestArgumentCaptor = ArgumentCaptor.forClass(QueryRequest.class);
         final Context context = mock(Context.class);
 
         final ResourceResponse expectedResource = newResourceResponse("id", "rev",
@@ -72,12 +71,10 @@ public class ReconciliationServiceTest {
 	        	}
 	        });
 
-        //when
-        ResourceResponse readResponse = reconciliationService.handleRead(context, readRequest).get();
+        Promise<ResourceResponse, ResourceException> readPromise = reconciliationService.handleRead(context, readRequest);
+        AssertJPromiseAssert.assertThat(readPromise).succeeded();
 
-        //then
-        verify(connection).query(any(Context.class), queryRequestArgumentCaptor.capture(), any(Collection.class));
-
+        ResourceResponse readResponse = readPromise.get();
         assertThat(readResponse.getId()).isEqualTo(readRequest.getResourcePathObject().leaf());
         assertThat(readResponse.getRevision()).isNull();
         assertThat(readResponse.getContent().asMap()).containsExactly(MapEntry.entry("key", "value"));
@@ -92,25 +89,15 @@ public class ReconciliationServiceTest {
 
         final ReadRequest readRequest = Requests.newReadRequest(new ResourcePath("resource"));
         final Connection connection = mock(Connection.class);
-        final ArgumentCaptor<QueryRequest> queryRequestArgumentCaptor = ArgumentCaptor.forClass(QueryRequest.class);
         final Context context = mock(Context.class);
 
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.query(any(Context.class), any(QueryRequest.class), any(Collection.class)))
                 .thenReturn(newQueryResponse());
 
-        //when
-        Throwable expectedException = null;
-        try {
-			reconciliationService.handleRead(context, readRequest).get();
-		} catch (ExecutionException e) {
-			expectedException = e.getCause();
-		}
-
-        //then
-        verify(connection).query(any(Context.class), queryRequestArgumentCaptor.capture(), any(Collection.class));
-
-        assertThat(expectedException).isInstanceOf(NotFoundException.class);
+        AssertJPromiseAssert.assertThat(reconciliationService.handleRead(context, readRequest))
+        		.failedWithException()
+        		.isInstanceOf(NotFoundException.class);
 
     }
 

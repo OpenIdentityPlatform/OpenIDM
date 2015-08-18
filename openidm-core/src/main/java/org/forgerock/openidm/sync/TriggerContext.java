@@ -19,6 +19,8 @@ import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.AbstractContext;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 
 
 /**
@@ -50,14 +52,14 @@ public class TriggerContext extends AbstractContext {
      *            The JSON representation from which this context's attributes
      *            should be parsed.
      * @param config
-     *            The persistence configuration.
+     *            The ClassLoader.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-//    public TriggerContext(final JsonValue savedContext, final PersistenceConfig config)
-//            throws ResourceException {
-//        super(savedContext, config);
-//    }
+    public TriggerContext(final JsonValue savedContext, final ClassLoader classLoader)
+            throws ResourceException {
+        super(savedContext, classLoader);
+    }
 
     /**
      * Retrieves the trigger source.

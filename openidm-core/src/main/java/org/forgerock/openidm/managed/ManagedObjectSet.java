@@ -542,11 +542,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             // Execute the postCreate script if configured
             execScript(context, ScriptHook.postCreate, createResponse.getContent(),
-                    prepareScriptBindings(context, request, resourceId, new JsonValue(null), 
+                    prepareScriptBindings(context, request, resourceId, new JsonValue(null),
                     		createResponse.getContent()));
 
             // Sync any targets after managed object is created
-            performSyncAction(context, request, createResponse.getId(), 
+            performSyncAction(context, request, createResponse.getId(),
             		SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), createResponse.getContent());
 
@@ -862,9 +862,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId).toString());
                     logger.debug("Attempt sync of {}", readRequest.getResourcePath());
                     ResourceResponse currentResource = connectionFactory.getConnection().read(context, readRequest);
-                    UpdateRequest updateRequest = Requests.newUpdateRequest(readRequest.getResourcePath(), 
+                    UpdateRequest updateRequest = Requests.newUpdateRequest(readRequest.getResourcePath(),
                     		currentResource.getContent());
                     ResourceResponse updateResponse = updateInstance(context, resourceId, updateRequest).get();
+                    logger.debug("Sync of {} complete", readRequest.getResourcePath());
                     return newResultPromise(Responses.newActionResponse(updateResponse.getContent()));
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
@@ -983,7 +984,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             JsonValue details;
             boolean success = false;
             try {
-				ActionResponse actionResponse = connectionFactory.getConnection().actionAsync(context, syncRequest).get();
+				ActionResponse actionResponse = connectionFactory.getConnection().action(context, syncRequest);
 				success = true;
 				details = actionResponse.getJsonContent();
 			} catch (ResourceException e) {
@@ -995,7 +996,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 			}
             
             try {
-            	// Excectute the sync script
+            	// Execute the sync script
                 JsonValue scriptBindings = prepareScriptBindings(context, request, resourceId, oldValue, newValue);
                 Map<String,Object> syncResults = new HashMap<String,Object>();
                 syncResults.put("success", success);

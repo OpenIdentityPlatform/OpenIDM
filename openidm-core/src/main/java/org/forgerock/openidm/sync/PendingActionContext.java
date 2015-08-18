@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.AbstractContext;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 
 
 /**
@@ -54,15 +56,15 @@ public class PendingActionContext extends AbstractContext {
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
-     * @param config
-     *            The persistence configuration.
+     * @param classLoader
+     *            The ClassLoader.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-//    public PendingActionContext(final JsonValue savedContext, final PersistenceConfig config)
-//            throws ResourceException {
-//        super(savedContext, config);
-//    }
+    public PendingActionContext(final JsonValue savedContext, final ClassLoader classLoader)
+            throws ResourceException {
+        super(savedContext, classLoader);
+    }
     
     /**
      * Returns true if the pending link is still pending, false otherwise.

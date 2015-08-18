@@ -64,7 +64,7 @@ public class ReconTypeById extends ReconTypeBase {
         }
 
         // TODO: allow multiple ids
-        sourceIds = new ArrayList<String>();
+        sourceIds = new ArrayList<>();
         String rawIds = idsValue.asString();
         sourceIds.add(rawIds);
     }
