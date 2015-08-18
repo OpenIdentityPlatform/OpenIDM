@@ -114,7 +114,7 @@ public class ServletConnectionFactoryTest {
     @Test
     public void testActivate() throws Exception {
         JsonValue content = new JsonValue(new HashMap<String, Object>());
-        testable.create(createContext("admin"), Requests.newCreateRequest("/managed/user", content))
+        testable.create(createContext("admin"), Requests.newCreateRequest("/managed/user", content));
     }
 
     private Context createContext(String id) {
