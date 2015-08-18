@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,6 +23,14 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
+import static org.forgerock.json.resource.ResourceException.newBadRequestException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,12 +49,15 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -56,15 +67,13 @@ import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
@@ -75,6 +84,7 @@ import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.orientdb.impl.query.Commands;
 import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
 import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
+import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,57 +168,43 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     EmbeddedOServerService embeddedServer;
     
     @Override
-    public void handleRead(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
         try {
-            handleRead2(context, request, handler);
-        } catch (Exception ex) {  
-            handler.handleError(adapt(ex));
+            return newResultPromise(read(request));
+        } catch (Exception ex) {
+            return newExceptionPromise(adapt(ex));
         }
     }
 
     @Override
-    public void handleCreate(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
-
+    public Promise<ResourceResponse, ResourceException> handleCreate(final Context context, final CreateRequest request) {
         try {
-            handleCreate2(context, request, handler);
-        } catch (Exception ex) {  
-            handler.handleError(adapt(ex));
+            return newResultPromise(create(request));
+        } catch (Exception ex) {
+            return newExceptionPromise(adapt(ex));
         }
     }
 
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, UpdateRequest request) {
         try {
-            handleUpdate2(context, request, handler);
-        } catch (Exception ex) {  
-            handler.handleError(adapt(ex));
+            return newResultPromise(update(request));
+        } catch (Exception ex) {
+            return newExceptionPromise(adapt(ex));
         }
     }
 
 
     @Override
-    public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(final Context context, final DeleteRequest request) {
         try {
-            handleDelete2(context, request, handler);
-        } catch (Exception ex) {  
-            handler.handleError(adapt(ex));
+            return newResultPromise(delete(request));
+        } catch (Exception ex) {
+            return newExceptionPromise(adapt(ex));
         }
     }
-    
-    @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
-         try {
-            handleQuery2(context, request, handler);
-        } catch (Exception ex) {  
-            handler.handleError(adapt(ex));
-        }
-    }
-    
+
+
     /**
      * <p>
      * The object will contain metadata properties, including object identifier
@@ -225,21 +221,15 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      *             if the passed identifier is invalid
      * @return the requested object.
      */
-    //@Override
-    public void handleRead2(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) throws ResourceException {
-        Resource result = read(request);
-        handler.handleResult(result);
-    }
-
-    public Resource read(ReadRequest request) throws ResourceException {
-        if (request.getResourceNameObject().size() < 2) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to read: " + request.getResourceName());
+    @Override
+    public ResourceResponse read(ReadRequest request) throws ResourceException {
+        if (request.getResourcePathObject().size() < 2) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to read: " + request.getResourcePath());
         }
 
-        final String type = request.getResourceNameObject().parent().toString();
-        final String localId = request.getResourceNameObject().leaf();
-        Resource result = null;
+        final String type = request.getResourcePathObject().parent().toString();
+        final String localId = request.getResourcePathObject().leaf();
+        ResourceResponse result = null;
         ODatabaseDocumentTx db = getConnection();
         try {
             ODocument doc = predefinedQueries.getByID(localId, type, db);
@@ -247,7 +237,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 throw new NotFoundException("Object " + localId + " not found in " + type);
             }
             result = DocumentUtil.toResource(doc);
-            logger.trace("Completed get for id: {} result: {}", request.getResourceName(), result);
+            logger.trace("Completed get for id: {} result: {}", request.getResourcePath(), result);
             return result;
         } finally {
             if (db != null) {
@@ -262,9 +252,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param context
-     *            the client-generated identifier to use, or {@code null} if
-     *            server-generated identifier is requested.
      * @param request
      *            the contents of the object to create in the object set.
      * @throws NotFoundException
@@ -274,26 +261,20 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @throws ConflictException
      *             if an object with the same ID already exists.
      */
-    //@Override
-    public void handleCreate2(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) throws ResourceException {
-        Resource result = create(request);
-        handler.handleResult(result);
-    }
-    
-    public Resource create(CreateRequest request) throws ResourceException {
-        if (request.getResourceNameObject().isEmpty()) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + request.getResourceName());
+    @Override
+    public ResourceResponse create(CreateRequest request) throws ResourceException {
+        if (request.getResourcePathObject().isEmpty()) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + request.getResourcePath());
         }
 
-        final String type = request.getResourceName();
+        final String type = request.getResourcePath();
         // TODO: should CREST support server side generation of ID itself?
         final String localId = (request.getNewResourceId() == null || "".equals(request.getNewResourceId()))
                 ? UUID.randomUUID().toString() // Generate ID server side.
                 : request.getNewResourceId();
 
         // Used currently for logging
-        String fullId = request.getResourceName() + "/" + localId;
+        String fullId = request.getResourcePathObject().child(localId).toString();
 
         String orientClassName = typeToOrientClassName(type);
         JsonValue obj = request.getContent();
@@ -310,7 +291,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
             logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
-            return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), obj.get(DocumentUtil.TAG_REV).asString(),  obj);
+            return newResourceResponse(obj.get(DocumentUtil.TAG_ID).asString(), obj.get(DocumentUtil.TAG_REV).asString(), obj);
         } catch (ORecordDuplicatedException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
@@ -334,9 +315,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             }
         }
     }
-    
+
     /**
-     * Updates the specified object in the object set. 
+     * Updates the specified object in the object set.
      * <p>
      * This implementation does not require MVCC and uses the current revision if no revision
      * is specified in the request.
@@ -344,28 +325,21 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param context the request server context
      * @param request the contents of the object to update
      * @throws ConflictException if version is required but is {@code null}.
      * @throws ForbiddenException if access to the object is forbidden.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @throws NotFoundException if the specified object could not be found.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      * @throws BadRequestException if the passed identifier is invalid
      */
-    //@Override
-    public void handleUpdate2(ServerContext context, UpdateRequest request,
-            ResultHandler<Resource> handler) throws ResourceException {
-        Resource result = update(request);
-        handler.handleResult(result);
-    }
-    
-    public Resource update(UpdateRequest request) throws ResourceException {
-        if (request.getResourceNameObject().size() < 2) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to update: " + request.getResourceName());
+    @Override
+    public ResourceResponse update(UpdateRequest request) throws ResourceException {
+        if (request.getResourcePathObject().size() < 2) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to update: " + request.getResourcePath());
         }
 
-        final String type = request.getResourceNameObject().parent().toString();
-        final String localId = request.getResourceNameObject().leaf();
+        final String type = request.getResourcePathObject().parent().toString();
+        final String localId = request.getResourcePathObject().leaf();
 
         String orientClassName = typeToOrientClassName(type);
         JsonValue obj = request.getContent();
@@ -378,19 +352,19 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try{
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
-                throw new NotFoundException("Update on object " + request.getResourceName() + " could not find existing object.");
+                throw new NotFoundException("Update on object " + request.getResourcePath() + " could not find existing object.");
             }
             ODocument updatedDoc = DocumentUtil.toDocument(obj, existingDoc, db, orientClassName);
-            logger.trace("Updated doc for id {} to save {}", request.getResourceName(), updatedDoc);
+            logger.trace("Updated doc for id {} to save {}", request.getResourcePath(), updatedDoc);
             
             updatedDoc.save();
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
             // Set ID to return to caller
             obj.put(DocumentUtil.TAG_ID, updatedDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY));
-            logger.debug("Committed update for id: {} revision: {}", request.getResourceName(), updatedDoc.getVersion());
-            logger.trace("Update payload for id: {} doc: {}", request.getResourceName(), updatedDoc);
-            return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
+            logger.debug("Committed update for id: {} revision: {}", request.getResourcePath(), updatedDoc.getVersion());
+            logger.trace("Update payload for id: {} doc: {}", request.getResourcePath(), updatedDoc);
+            return newResourceResponse(obj.get(DocumentUtil.TAG_ID).asString(),
                     obj.get(DocumentUtil.TAG_REV).asString(), obj);
         } catch (ODatabaseException ex) {
             // Without transaction the concurrent modification exception gets nested instead
@@ -426,24 +400,18 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @throws PreconditionFailedException
      *             if version did not match the existing object in the set.
      */
-    //@Override
-    public void handleDelete2(final ServerContext context, final DeleteRequest request,
-            final ResultHandler<Resource> handler) throws ResourceException {
-        Resource result = delete(request);
-        handler.handleResult(result);
-    }
-    
-    public Resource delete(DeleteRequest request) throws ResourceException {
-        if (request.getResourceNameObject().size() < 2) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to update: " + request.getResourceName());
+    @Override
+    public ResourceResponse delete(DeleteRequest request) throws ResourceException {
+        if (request.getResourcePathObject().size() < 2) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to update: " + request.getResourcePath());
         }
 
         if (request.getRevision() == null || "".equals(request.getRevision())) {
             throw new ConflictException("Object passed into delete does not have revision it expects set.");
         }
 
-        final String type = request.getResourceNameObject().parent().toString();
-        final String localId = request.getResourceNameObject().leaf();
+        final String type = request.getResourcePathObject().parent().toString();
+        final String localId = request.getResourcePathObject().leaf();
 
         int ver = DocumentUtil.parseVersion(request.getRevision()); // This throws ConflictException if parse fails
         
@@ -451,7 +419,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try {
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
-                throw new NotFoundException("Object does not exist for delete on: " + request.getResourceName());
+                throw new NotFoundException("Object does not exist for delete on: " + request.getResourcePath());
             }
             
             db.delete(existingDoc.getIdentity(), new OSimpleVersion(ver)); 
@@ -481,15 +449,13 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     @Override
-    public void handlePatch(final ServerContext context, final PatchRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
         // TODO: impl
-        handler.handleError(new NotSupportedException("Patch not supported yet"));
+        return newExceptionPromise(adapt(new NotSupportedException("Patch not supported yet")));
     }
     
     @Override
-    public void handleAction(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         try {
             Map<String, String> params = request.getAdditionalParameters();
             switch (request.getActionAsEnum(Action.class)) {
@@ -497,7 +463,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                     String newUser = params.get("user");
                     String newPassword = params.get("password");
                     if (newUser == null || newPassword == null) {
-                        throw new BadRequestException("Expecting 'user' and 'password' parameters");
+                        return newExceptionPromise(adapt(new BadRequestException("Expecting 'user' and 'password' parameters")));
                     }
                     synchronized (dbLock) {
                         DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
@@ -506,19 +472,17 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                         config.put("password", newPassword);
                         UpdateRequest updateRequest = Requests.newUpdateRequest("config/" + PID, config);
                         connectionFactory.getConnection().update(context, updateRequest);
-                        handler.handleResult(new JsonValue(params));
+                        return newResultPromise(newActionResponse(new JsonValue(params)));
                     }
-                    break;
                 case command:
-                    handler.handleResult(new JsonValue(command(request)));
-                    break;
+                    return newResultPromise(newActionResponse(new JsonValue(command(request))));
                 default:
-                    handler.handleError(new BadRequestException("Unknown action: " + request.getAction()));
+                    return newExceptionPromise(adapt(new BadRequestException("Unknown action: " + request.getAction())));
             }
         } catch (IllegalArgumentException e) {
-            handler.handleError(new BadRequestException("Unknown action: " + request.getAction()));
+            return newExceptionPromise(adapt(new BadRequestException("Unknown action: " + request.getAction())));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         }
     }
 
@@ -533,7 +497,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
 
         ODatabaseDocumentTx db = getConnection();
         try {
-            return commands.query(request.getResourceName(), request, db);
+            return commands.query(request.getResourcePath(), request, db);
         } finally {
             if (db != null) {
                 db.close();
@@ -566,9 +530,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @throws ForbiddenException
      *             if access to the object or specified query is forbidden.
      */
-    //@Override
-    public void handleQuery2(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) throws ResourceException {
+    @Override
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
+            final QueryResourceHandler handler) {
 
         // If paged results are requested then decode the cookie in order to determine
         // the index of the first result to be returned.
@@ -587,7 +551,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 try {
                     firstResultIndex = Integer.parseInt(pagedResultsCookie);
                 } catch (final NumberFormatException e) {
-                    throw new BadRequestException("Invalid paged results cookie");
+                    return newExceptionPromise(newBadRequestException("Invalid paged results cookie"));
                 }
             } else {
                 firstResultIndex = Math.max(0, request.getPagedResultsOffset());
@@ -599,66 +563,76 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         // Once cookie is processed Queries.query() can rely on the offset.
         request.setPagedResultsOffset(firstResultIndex);
 
-        List<Resource> results = query(request);
-        for (Resource result : results) {
-            handler.handleResource(result);
-        }
+        try {
+            List<ResourceResponse> results = query(request);
+            for (ResourceResponse result : results) {
+                handler.handleResource(result);
+            }
 
-        /*
-         * Execute additional -count query if we are paging
-         */
-        final String nextCookie;
-        final int remainingResults;
-
-        if (pagedResultsRequested) {
-
+            /*
+             * Execute additional -count query if we are paging
+             */
+            final String nextCookie;
             // The number of results (if known)
-            Integer resultCount = null;
+            final int resultCount;
 
-            // Get total if -count query is available
-            final String countQueryId = request.getQueryId() + "-count";
-            if (queries.queryIdExists(countQueryId)) {
-                QueryRequest countRequest = Requests.copyOfQueryRequest(request);
-                countRequest.setQueryId(countQueryId);
+            // FIXME-crest3 add support for NONE CountPolicy
+            if (pagedResultsRequested) {
+                // Get total if -count query is available
+                final String countQueryId = request.getQueryId() + "-count";
+                if (queries.queryIdExists(countQueryId)) {
+                    QueryRequest countRequest = Requests.copyOfQueryRequest(request);
+                    countRequest.setQueryId(countQueryId);
 
-                // Strip pagination parameters
-                countRequest.setPageSize(0);
-                countRequest.setPagedResultsOffset(0);
-                countRequest.setPagedResultsCookie(null);
+                    // Strip pagination parameters
+                    countRequest.setPageSize(0);
+                    countRequest.setPagedResultsOffset(0);
+                    countRequest.setPagedResultsCookie(null);
 
-                List<Resource> countResult = query(countRequest);
+                    List<ResourceResponse> countResult = query(countRequest);
 
-                if (countResult != null && !countResult.isEmpty()) {
-                    resultCount = countResult.get(0).getContent().get("total").asInteger();
+                    if (countResult != null && !countResult.isEmpty()) {
+                        resultCount = countResult.get(0).getContent().get("total").asInteger();
+                    } else {
+                        logger.warn("Count query {} failed.", countQueryId);
+                        resultCount = NO_COUNT;
+                    }
+                } else {
+                    logger.warn("No count query found with id {}", countQueryId);
+                    resultCount = NO_COUNT;
                 }
-            }   
 
-            boolean unknownCount = resultCount == null;
-
-            if (results.size() < requestPageSize) {
-                remainingResults = 0;
-                nextCookie = null;
-            } else {
-                remainingResults = unknownCount ? -1 : resultCount - (firstResultIndex + results.size());
-                if (remainingResults == 0) {
+                if (results.size() < requestPageSize) {
                     nextCookie = null;
                 } else {
-                    nextCookie = String.valueOf(firstResultIndex + requestPageSize);
+                    final int remainingResults = resultCount - (firstResultIndex + results.size());
+                    if (remainingResults == 0) {
+                        nextCookie = null;
+                    } else {
+                        nextCookie = String.valueOf(firstResultIndex + requestPageSize);
+                    }
                 }
+            } else {
+                resultCount = NO_COUNT;
+                nextCookie = null;
             }
-        } else {
-            nextCookie = null;
-            remainingResults = -1;
+
+            if (resultCount == NO_COUNT) {
+                return newResultPromise(newQueryResponse(nextCookie));
+            } else {
+                return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
+            }
+        } catch (ResourceException e) {
+            return newExceptionPromise(e);
         }
 
-        handler.handleResult(new QueryResult(nextCookie, remainingResults));
     }
 
-    public List<Resource> query(QueryRequest request) throws ResourceException {
-        List<Resource> results = new ArrayList<Resource>();
+    @Override
+    public List<ResourceResponse> query(final QueryRequest request) throws ResourceException {
+        List<ResourceResponse> results = new ArrayList<ResourceResponse>();
 
-        logger.trace("Full id: {} Extracted type: {}", request.getResourceName(), request.getResourceName());
-        
+        logger.trace("Full id: {} Extracted type: {}", request.getResourcePath(), request.getResourcePath());
         // TODO: Statistics is not returned in result anymore
         // TODO: result is not needed in map form anymore
         Map<String, Object> result = new HashMap<String, Object>();
@@ -667,16 +641,16 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             //List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
             //result.put(QueryConstants.QUERY_RESULT, docs);
             long start = System.currentTimeMillis();
-            List<ODocument> queryResult = queries.query(request.getResourceName(), request, db);
+            List<ODocument> queryResult = queries.query(request.getResourcePath(), request, db);
             long end = System.currentTimeMillis();
             if (queryResult != null) {
                 long convStart = System.currentTimeMillis();
                 for (ODocument entry : queryResult) {
                     Map<String, Object> convertedEntry = DocumentUtil.toMap(entry);
                     //docs.add(convertedEntry);
-                    results.add(new Resource(
-                            (String) convertedEntry.get(DocumentUtil.TAG_ID), 
-                            (String) convertedEntry.get(DocumentUtil.TAG_REV), 
+                    results.add(newResourceResponse(
+                            (String) convertedEntry.get(DocumentUtil.TAG_ID),
+                            (String) convertedEntry.get(DocumentUtil.TAG_REV),
                             new JsonValue(convertedEntry)));
                 }
                 long convEnd = System.currentTimeMillis();
