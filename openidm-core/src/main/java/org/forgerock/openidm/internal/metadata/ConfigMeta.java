@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * A NAME does ...
  *
  */
-public class ConfigMeta /*implements MetaDataProvider*/ {
+public class ConfigMeta implements MetaDataProvider {
 
     /**
      * Setup logging for the {@link ConfigMeta}.
