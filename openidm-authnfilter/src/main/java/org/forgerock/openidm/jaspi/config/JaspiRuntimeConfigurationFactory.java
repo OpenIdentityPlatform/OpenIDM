@@ -11,18 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.config;
 
+import org.forgerock.auth.common.AuditLogger;
+import org.forgerock.auth.common.AuditLoggingConfigurator;
 import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.jaspi.logging.JaspiAuditLogger;
-import org.forgerock.jaspi.logging.JaspiLoggingConfigurator;
-import org.forgerock.jaspi.runtime.AuditApi;
-import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.caf.authentication.framework.AuditApi;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
+import org.forgerock.openidm.jaspi.auth.AuthenticationService;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 
@@ -34,7 +34,7 @@ import java.util.List;
  * A singleton instance that implements both the Jaspi ModuleConfigurationFactory and JaspiLoggingConfigurator
  * interfaces, that provides all of the configuration information for the Jaspi Runtime to be configured correctly.
  */
-public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFactory, JaspiLoggingConfigurator {
+public enum JaspiRuntimeConfigurationFactory implements AuditLoggingConfigurator {
 
     /**
      * The Singleton instance of the JaspiRuntimeConfigurationFactory.
@@ -55,22 +55,12 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
     }
 
     /**
-     * Gets the ModuleConfigurationFactory that the Jaspi Runtime will use to configure its authentication
-     * modules.
-     *
-     * @return An instance of a ModuleConfigurationFactory.
-     */
-    public static ModuleConfigurationFactory getModuleConfigurationFactory() {
-        return INSTANCE;
-    }
-
-    /**
      * Gets the Logging Configurator that the Jaspi Runtime will use to configure its debug and audit logger
      * instances.
      *
      * @return An instance of a JaspiLoggingConfigurator.
      */
-    public static JaspiLoggingConfigurator getLoggingConfigurator() {
+    public static AuditLoggingConfigurator getLoggingConfigurator() {
         return INSTANCE;
     }
 
@@ -96,17 +86,17 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
 
         final JsonValue moduleConfig = new JsonValue(moduleConfiguration);
 
-        JsonValue serverAuthContext = moduleConfig.get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
+        JsonValue serverAuthContext = moduleConfig.get(AuthenticationService.SERVER_AUTH_CONTEXT_KEY)
                 .required();
 
-        if (serverAuthContext.isDefined(ModuleConfigurationFactory.SESSION_MODULE_KEY)) {
-            JsonValue sessionModuleConfig = serverAuthContext.get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
+        if (serverAuthContext.isDefined(AuthenticationService.SESSION_MODULE_KEY)) {
+            JsonValue sessionModuleConfig = serverAuthContext.get(AuthenticationService.SESSION_MODULE_KEY);
             if (!processModuleConfiguration(sessionModuleConfig)) {
-                serverAuthContext.remove(ModuleConfigurationFactory.SESSION_MODULE_KEY);
+                serverAuthContext.remove(AuthenticationService.SESSION_MODULE_KEY);
             }
         }
 
-        JsonValue authModulesConfig = serverAuthContext.get(ModuleConfigurationFactory.AUTH_MODULES_KEY).required();
+        JsonValue authModulesConfig = serverAuthContext.get(AuthenticationService.AUTH_MODULES_KEY).required();
 
         List<Integer> toRemove = new ArrayList<Integer>();
         for (int i = 0; i < authModulesConfig.size(); i++) {
@@ -197,7 +187,6 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
     /**
      * {@inheritDoc}
      */
-    @Override
     public JsonValue getConfiguration() {
         return moduleConfiguration;
     }
@@ -205,7 +194,6 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
     /**
      * {@inheritDoc}
      */
-    @Override
     public DebugLogger getDebugLogger() {
         return debugLogger;
     }
@@ -214,7 +202,7 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
      * {@inheritDoc}
      */
     @Override
-    public JaspiAuditLogger getAuditLogger() {
+    public AuditLogger getAuditLogger() {
         return null;
     }
 }

@@ -16,15 +16,16 @@
 
 package org.forgerock.openidm.jaspi.auth;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.json.resource.Resource.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.Resource.FIELD_CONTENT_REVISION;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.Reject;
 
 
@@ -41,10 +42,10 @@ public class StaticAuthenticator implements Authenticator {
     private static final String RESOURCE_FIELD_PASSWORD = "password";
 
     /** The static "resource" */
-    private final Resource resource;
+    private final ResourceResponse resource;
 
     /**
-     * Constructs an instance of the AnonymousAuthenticator.
+     * Constructs an instance of the StaticAuthenticator.
      *
      * @param username The static username.
      * @param password The static password.
@@ -54,12 +55,12 @@ public class StaticAuthenticator implements Authenticator {
         Reject.ifNull(username, "username was not specified");
         Reject.ifNull(password, "password was not specified");
 
-        resource = new Resource(username, RESOURCE_REV,
+        resource = newResourceResponse(username, RESOURCE_REV,
                 json(object(
-                    field(FIELD_CONTENT_ID, username),
-                    field(FIELD_CONTENT_REVISION, RESOURCE_REV),
-                    field(RESOURCE_FIELD_USERNAME, username),
-                    field(RESOURCE_FIELD_PASSWORD, password))));
+                        field(FIELD_CONTENT_ID, username),
+                        field(FIELD_CONTENT_REVISION, RESOURCE_REV),
+                        field(RESOURCE_FIELD_USERNAME, username),
+                        field(RESOURCE_FIELD_PASSWORD, password))));
     }
 
     /**
@@ -70,7 +71,7 @@ public class StaticAuthenticator implements Authenticator {
      * @param context the ServerContext to use
      * @return True if authentication is successful, otherwise false.
      */
-    public AuthenticatorResult authenticate(String username, String password, ServerContext context) throws ResourceException {
+    public AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException {
 
         Reject.ifNull(username, "Provided username was null");
         Reject.ifNull(context, "Router context was null");

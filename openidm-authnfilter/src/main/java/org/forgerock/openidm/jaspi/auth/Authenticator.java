@@ -15,9 +15,9 @@
  */
 package org.forgerock.openidm.jaspi.auth;
 
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 
 /**
  * Authenticates a user given a username and password combination.
@@ -29,9 +29,9 @@ public interface Authenticator {
      */
     class AuthenticatorResult {
         private final boolean authenticated;
-        private final Resource resource;
+        private final ResourceResponse resource;
 
-        private AuthenticatorResult(boolean authenticated, Resource resource) {
+        private AuthenticatorResult(boolean authenticated, ResourceResponse resource) {
             this.authenticated = authenticated;
             this.resource = resource;
         }
@@ -48,7 +48,7 @@ public interface Authenticator {
          * Return the resource for the authenticated user.
          * @return the resource for the authenticated user.
          */
-        public Resource getResource() {
+        public ResourceResponse getResource() {
             return resource;
         }
 
@@ -59,7 +59,7 @@ public interface Authenticator {
         public static final AuthenticatorResult SUCCESS = new AuthenticatorResult(true, null);
 
         /** create a successful authentication with a resource */
-        public static AuthenticatorResult authenticationSuccess(Resource resource) {
+        public static AuthenticatorResult authenticationSuccess(ResourceResponse resource) {
             return new AuthenticatorResult(true, resource);
         }
     }
@@ -73,5 +73,5 @@ public interface Authenticator {
      * @return the result of the authentication (success/failure and, optionally, the associated resource)
      * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */
-    AuthenticatorResult authenticate(String username, String password, ServerContext context) throws ResourceException;
+    AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException;
 }

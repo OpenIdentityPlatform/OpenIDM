@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.config;
@@ -25,16 +25,17 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.forgerock.jaspi.JaspiRuntimeFilter;
-import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY;
+import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
-import static org.forgerock.openidm.servletregistration.RegisteredFilter.FILTER_ORDER;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
+
+import static org.forgerock.openidm.jaspi.auth.AuthenticationService.SERVER_AUTH_CONTEXT_KEY;
+import static org.forgerock.openidm.servletregistration.RegisteredFilter.FILTER_ORDER;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS_PATH_URLS;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES;
@@ -221,22 +222,22 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
     private void registerAuthnFilter(JsonValue scriptExtensions, List<String> additionalUrlPatterns)
             throws Exception {
 
-        Map<String, String> initParams = new HashMap<String, String>();
+        Map<String, String> initParams = new HashMap<>();
         initParams.put("module-configuration-factory-class", JaspiRuntimeConfigurationFactory.class.getName());
         initParams.put("logging-configurator-class", JaspiRuntimeConfigurationFactory.class.getName());
         initParams.put("audit-api-class", JaspiRuntimeConfigurationFactory.class.getName());
 
-        List<String> urlPatterns = new ArrayList<String>();
+        List<String> urlPatterns = new ArrayList<>();
         urlPatterns.add("/openidm/*");
         urlPatterns.addAll(additionalUrlPatterns);
 
-        Map<String, Object> filterConfig = new HashMap<String, Object>();
+        Map<String, Object> filterConfig = new HashMap<>();
         filterConfig.put(SERVLET_FILTER_CLASS_PATH_URLS, new ArrayList<String>());
         filterConfig.put(SERVLET_FILTER_SYSTEM_PROPERTIES, new HashMap<String, Object>());
         filterConfig.put(SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES, new HashMap<String, Object>());
         filterConfig.put(SERVLET_FILTER_INIT_PARAMETERS, initParams);
         filterConfig.put(SERVLET_FILTER_URL_PATTERNS, urlPatterns);
-        filterConfig.put(SERVLET_FILTER_CLASS, JaspiRuntimeFilter.class.getCanonicalName());
+        filterConfig.put(SERVLET_FILTER_CLASS, AuthenticationFilter.class.getCanonicalName());
         filterConfig.put(FILTER_ORDER, DEFAULT_FILTER_ORDER);
         if (!scriptExtensions.isNull() && scriptExtensions.isMap()) {
             filterConfig.put(SERVLET_FILTER_SCRIPT_EXTENSIONS, scriptExtensions.asMap());

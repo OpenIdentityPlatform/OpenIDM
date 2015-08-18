@@ -35,35 +35,37 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.servlet.HttpContext;
+import org.forgerock.json.resource.http.HttpContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY;
-import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.AUTH_MODULES_KEY;
-import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.json.resource.ResourceException.newBadRequestException;
+import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.jaspi.config.JaspiRuntimeConfigurationFactory.MODULE_CONFIG_ENABLED;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.PROPERTY_MAPPING;
@@ -91,12 +93,18 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
     /** Re-authentication password header. */
     private static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
 
+    // note: 'static final' required to avoid error with use in static context below
+    public static final String SERVER_AUTH_CONTEXT_KEY = "serverAuthContext";
+    public static final String SESSION_MODULE_KEY = "sessionModule";
+    public static final String AUTH_MODULES_KEY = "authModules";
+    public static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
+    public static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
 
     private JsonValue config;
 
 
     /** The authenticators to delegate to.*/
-    private List<Authenticator> authenticators = new ArrayList<Authenticator>();
+    private List<Authenticator> authenticators = new ArrayList<>();
 
     // ----- Declarative Service Implementation
 
@@ -210,7 +218,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
      * Action support, including reauthenticate action {@inheritDoc}
      */
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {
             if (Action.reauthenticate.equals(request.getActionAsEnum(Action.class))) {
                 if (context.containsContext(HttpContext.class)
@@ -228,8 +236,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
                             if (authenticator.authenticate(authcid, password, context).isAuthenticated()) {
                                 JsonValue result = new JsonValue(new HashMap<String, Object>());
                                 result.put("reauthenticated", true);
-                                handler.handleResult(result);
-                                return;
+                                return newResultPromise(newActionResponse(result));
                             }
                         } catch (ResourceException e) {
                             // log error and try next authentication mechanism
@@ -245,13 +252,13 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
                 throw new IllegalArgumentException();
             }
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         } catch (IllegalArgumentException e) { // from getActionAsEnum
-            handler.handleError(
-                    new BadRequestException(
+            return newExceptionPromise(
+                    newBadRequestException(
                             "Action " + request.getAction() + " on authentication service not supported"));
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+            return newExceptionPromise(newInternalServerErrorException("Error processing action", e));
         }
     }
 
@@ -259,27 +266,23 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
      * {@inheritDoc}
      */
     @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Patch operations are not supported");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
+        return newExceptionPromise(newNotSupportedException("Patch operation not supported"));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Read operations are not supported");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
+        return newExceptionPromise(newNotSupportedException("Read operation not supported"));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Update operations are not supported");
-        handler.handleError(e);
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
+        return newExceptionPromise(newNotSupportedException("Update operation not supported"));
     }
 }

@@ -11,15 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.script.Script;
@@ -69,7 +69,7 @@ class AugmentationScriptExecutor {
             }
 
             // Create internal ServerContext chain for script-call
-            ServerContext context = authnFilterHelper.getRouter().createServerContext();
+            Context context = authnFilterHelper.getRouter().createServerContext();
             final Script script = augmentScript.getScript(context);
             // Pass auth module properties and SecurityContextWrapper details to augmentation script
             script.put("properties", properties);
@@ -94,13 +94,13 @@ class AugmentationScriptExecutor {
         } catch (ScriptThrownException e) {
             final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
             logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);
-            throw new JaspiAuthException(re.getMessage(), re);
+            throw new AuthenticationException(re.getMessage(), re);
         } catch (ScriptException e) {
             logger.error("{} when attempting to execute script {}", e.toString(), augmentScript.getName(), e);
-            throw new JaspiAuthException(e.getMessage(), e);
+            throw new AuthenticationException(e.getMessage(), e);
         } catch (ResourceException e) {
             logger.error("{} when attempting to create server context", e.toString(), e);
-            throw new JaspiAuthException(e.getMessage(), e);
+            throw new AuthenticationException(e.getMessage(), e);
         }
     }
 }

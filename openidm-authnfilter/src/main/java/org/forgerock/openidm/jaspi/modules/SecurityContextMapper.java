@@ -11,14 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_COMPONENT;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_ID;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_ROLES;
@@ -31,9 +31,10 @@ import java.util.Map;
 
 import javax.security.auth.message.MessageInfo;
 
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.servlet.SecurityContextFactory;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.http.SecurityContextFactory;
+
+import static org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
 
 /**
  * A JsonValue-wrapper to contain the security context information before the SecurityContext proper is built.
@@ -55,10 +56,10 @@ class SecurityContextMapper {
 
     private SecurityContextMapper(MessageInfo messageInfo) {
         messageInfoMap = messageInfo.getMap();
-        Map<String, Object> contextMap = (Map<String, Object>) messageInfoMap.get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
+        Map<String, Object> contextMap = (Map<String, Object>) messageInfoMap.get(ATTRIBUTE_AUTHORIZATION_CONTEXT);
         if (contextMap == null) {
             contextMap = new HashMap<String, Object>();
-            messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+            messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
         }
         // create the JsonValue auth-data wrapper around the AUTHCID value
         authData = json(object(field(AUTHENTICATION_ID, messageInfoMap.get(SecurityContextFactory.ATTRIBUTE_AUTHCID))));
@@ -98,7 +99,7 @@ class SecurityContextMapper {
      */
     SecurityContextMapper setAuthorizationId(Map<String, Object> authorizationId) {
         authData.put(AUTHORIZATION_ID, authorizationId);
-        messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, authorizationId);
+        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, authorizationId);
         return this;
     }
 

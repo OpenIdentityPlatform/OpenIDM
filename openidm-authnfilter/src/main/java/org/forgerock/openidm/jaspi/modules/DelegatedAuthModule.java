@@ -28,23 +28,23 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Map;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.AuditTrail;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.framework.AuditTrail;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.Credential;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.BASIC_AUTH_CRED_HELPER;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_AUTH_CRED_HELPER;
@@ -167,14 +167,14 @@ public class DelegatedAuthModule implements ServerAuthModule {
         try {
             Authenticator.AuthenticatorResult result = authenticator.authenticate(
                     credential.username, credential.password, authnFilterHelper.getRouter().createServerContext());
-            final Resource resource = result.getResource();
+            final ResourceResponse resource = result.getResource();
             if (resource != null) {
                 final JsonValue messageMap = new JsonValue(messageInfo.getMap());
                 messageMap.put(IDMJaspiModuleWrapper.AUTHENTICATED_RESOURCE,
                         json(object(
-                                field(Resource.FIELD_CONTENT_ID, resource.getId()),
-                                field(Resource.FIELD_CONTENT_REVISION, resource.getRevision()),
-                                field(Resource.FIELD_CONTENT, resource.getContent().asMap())))
+                                field(ResourceResponse.FIELD_CONTENT_ID, resource.getId()),
+                                field(ResourceResponse.FIELD_CONTENT_REVISION, resource.getRevision()),
+                                field(ResourceResponse.FIELD_CONTENT, resource.getContent().asMap())))
                         .asMap());
             }
             return result.isAuthenticated();
@@ -182,7 +182,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
             logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
             messageInfo.getMap().put(AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());
             if (e.isServerError()) { // HTTP server-side error
-                throw new JaspiAuthException(
+                throw new AuthenticationException(
                         "Failed delegated authentication of " + credential.username + " on " + queryOnResource, e);
             }
             // authentication failed

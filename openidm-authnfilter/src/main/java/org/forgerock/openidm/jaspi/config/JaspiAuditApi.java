@@ -18,12 +18,13 @@ package org.forgerock.openidm.jaspi.config;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
-import org.forgerock.jaspi.runtime.AuditApi;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.caf.authentication.framework.AuditApi;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
+import org.forgerock.openidm.router.RouteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class JaspiAuditApi implements AuditApi {
             if (authnFilterHelper.getRouter() != null) {
                 // TODO We need Context!!!
                 CreateRequest createRequest = Requests.newCreateRequest("audit/authentication", auditEvent.getValue());
-                ServerContext ctx = authnFilterHelper.getRouter().createServerContext();
+                Context ctx = authnFilterHelper.getRouter().createServerContext();
                 authnFilterHelper.getConnectionFactory().getConnection().create(ctx, createRequest);
             } else {
                 // Filter should have rejected request if router is not available

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -30,7 +30,6 @@ import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
 import org.mockito.Matchers;
@@ -40,8 +39,9 @@ import org.testng.annotations.Test;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
+import static org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
 
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 
 /**
@@ -50,7 +50,7 @@ import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
  */
 public class IDMJaspiModuleWrapperTest {
 
-    private ServerContext context;
+    private Context context;
     private OSGiAuthnFilterHelper authnFilterHelper;
     private IDMJaspiModuleWrapper.AuthModuleConstructor authModuleConstructor;
     private RoleCalculatorFactory roleCalculatorFactory;
@@ -61,7 +61,7 @@ public class IDMJaspiModuleWrapperTest {
     @BeforeMethod
     public void setUp() {
         try {
-            context = mock(ServerContext.class);
+            context = mock(Context.class);
             RouteService routeService = mock(RouteService.class);
             when(routeService.createServerContext()).thenReturn(context);
             authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
@@ -90,8 +90,8 @@ public class IDMJaspiModuleWrapperTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
-        Map<String, Object> contextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<>();
+        Map<String, Object> contextMap = new HashMap<>();
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -100,7 +100,7 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_CONTINUE);
@@ -134,7 +134,7 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_SUCCESS);
@@ -168,7 +168,7 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
@@ -192,8 +192,8 @@ public class IDMJaspiModuleWrapperTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
-        Map<String, Object> contextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<>();
+        Map<String, Object> contextMap = new HashMap<>();
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -209,7 +209,7 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
         clientSubject.getPrincipals().add(principalOne);
         clientSubject.getPrincipals().add(principalTwo);
         clientSubject.getPrincipals().add(principalThree);
@@ -236,8 +236,8 @@ public class IDMJaspiModuleWrapperTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
-        Map<String, Object> contextMap = new HashMap<String, Object>();
+        Map<String, Object> messageInfoMap = new HashMap<>();
+        Map<String, Object> contextMap = new HashMap<>();
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -250,7 +250,7 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
         given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
         clientSubject.getPrincipals().add(principalOne);
         clientSubject.getPrincipals().add(principalTwo);
 
