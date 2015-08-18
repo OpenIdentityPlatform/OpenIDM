@@ -146,26 +146,12 @@
   margin-left:5px;
 }
 
-.btn-group-dark {
-  .btn-default {
-    color: #333;
-    border-color: #ccc;
-    background-color:transparent;
+/*
+  Button group
+*/
 
-    .fa {
-      width:14px;
-    }
-  }
-
-  .btn-default:hover,
-  .btn-default:focus,
-  .btn-default.focus,
-  .btn-default:active,
-  .btn-default.active {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #adadad;
-  }
+.btn-group .toggle-view-btn .fa {
+  width:14px;
 }
 
 /*
@@ -182,6 +168,13 @@
 
 .btn-default {
   color:@base-theme-color;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color:#3f7269;
+    border-color:#519387;
+  }
 }
 
 /*
