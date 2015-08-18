@@ -379,6 +379,7 @@ with two objectives:
 * Determine whether the user has an `Agent` or `Insured` role.
 * Ensures that OpenIDM looks through the source *only* for the specified role.
 
+++++
 <programlisting language="javascript"><![CDATA["validSource" : {
         "type" : "text/javascript",
         "globals" : { },
@@ -393,7 +394,7 @@ with two objectives:
                   &&(linkQualifier ==='insured')));\n
                 }\n
               i++;\n}\n\nres"
-        }]]</programlisting>
+        }]]></programlisting>
 ++++
 
 You can see how correlation queries are configured in the `sync.json` file.
@@ -488,18 +489,10 @@ accounts based on link qualifiers and roles:
 }]]></programlisting>
 ++++
 
-The `validSource` script uses the effectiveRoles property to determine whether a has the `Agent` or
-the `Insured` role, based on that user's effective roles.
-            **
-The validSource script looks through the effective roles of a user and figures
-out if the user has the `Agent` or the `Insured` role, while at the same time
-making sure that the source is considered **only** for the matching category.
+The `validSource` script uses the effectiveRoles property to determine whether
+a user has the `Agent` or the `Insured` role, based on that user's effective
+roles.
 
-At this point we have all we need to create our users in MU and see the impact
-in the ldap directory server. Just run the commands, in the previous chapter,
-which created the 2 roles (1.a.), the 2 users (1.b.) and the associated
-grants (1.c.).
-            **
 OpenIDM needs to associate the assignments to the mapping. So the sample
 version of `sync.json` includes the following element as part of the
 `managedUser_systemLdapAccounts` mapping :
@@ -634,8 +627,8 @@ same result in the Admin UI:
 . Click Manage > Role.
 . You should see both `Agent` and `Customer` in the Role List window that
 appears.
-. Click Agent > Users. You should see that only user `jdoe` is included
+. Click Agent > Users. You should see that user `jdoe` is included
 as an Agent.
-. Click Back to Roles > Customer > Users. You should see that both users,
+. Click Back to Roles > Customer > Users. You should see that users
 `bjensen` and `jdoe` are included as Customers.
 
