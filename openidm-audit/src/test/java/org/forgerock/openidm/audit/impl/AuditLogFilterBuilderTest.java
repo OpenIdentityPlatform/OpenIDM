@@ -356,7 +356,7 @@ public class AuditLogFilterBuilderTest {
                 ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         Context noTrigger = mock(Context.class);
-        Context hasTrigger = new Context(new TriggerContext(noTrigger, "sometrigger"));
+        Context hasTrigger = new TriggerContext(noTrigger, "sometrigger");
 
         // When
         // When
