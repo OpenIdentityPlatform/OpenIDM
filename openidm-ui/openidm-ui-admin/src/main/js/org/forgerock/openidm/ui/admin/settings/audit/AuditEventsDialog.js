@@ -24,7 +24,7 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/admin/settings/AuditEventsDialog", [
+define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractView",
