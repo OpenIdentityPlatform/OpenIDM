@@ -515,7 +515,7 @@ $ ./startup.sh -p samples/sample2</screen>
     <xref linkend="external-ldap-config-2" />. The LDAP user must have write
     access to create users from OpenIDM on the LDAP server. When you configure
     the LDAP server, import the appropriate LDIF file
-    (<filename>openidm/sampes/sample2b/data/Example.ldif).</filename>
+    (<filename>openidm/samples/sample2b/data/Example.ldif).</filename>
    </para>
   </section>
 
