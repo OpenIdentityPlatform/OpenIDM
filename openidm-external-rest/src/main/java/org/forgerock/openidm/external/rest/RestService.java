@@ -316,7 +316,7 @@ public class RestService implements SingletonResourceProvider {
                 }
             }
         } catch (Exception e) {
-            return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(e));
+            return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(e.getMessage(), e));
         }
     }
 
