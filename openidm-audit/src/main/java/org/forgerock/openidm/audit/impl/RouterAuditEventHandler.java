@@ -26,6 +26,8 @@ package org.forgerock.openidm.audit.impl;
 import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
 import static org.forgerock.json.resource.Requests.copyOfReadRequest;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.openidm.util.ResourceUtil.adapt;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -43,7 +45,6 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +95,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
      */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
-        return newExceptionPromise(ResourceUtil.notSupported(actionRequest));
+        return newExceptionPromise(notSupported(actionRequest));
     }
 
     /**
@@ -103,7 +104,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
             ActionRequest actionRequest) {
-        return newExceptionPromise(ResourceUtil.notSupported(actionRequest));
+        return newExceptionPromise(notSupported(actionRequest));
     }
 
     /**
@@ -119,7 +120,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
                             request.getNewResourceId(),
                             request.getContent())));
         } catch (Exception e) {
-            return newExceptionPromise(ResourceUtil.adapt(e));
+            return newExceptionPromise(adapt(e));
         }
     }
 
@@ -144,7 +145,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
                             }));
 
         } catch (Exception e) {
-            return newExceptionPromise(ResourceUtil.adapt(e));
+            return newExceptionPromise(adapt(e));
         }
     }
 
@@ -159,7 +160,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
             newRequest.setResourcePath(resourcePath.child(request.getResourcePath()).child(resourceId));
             return newResultPromise(getConnectionFactory().getConnection().read(new AuditContext(context), newRequest));
         } catch (Exception e) {
-            return newExceptionPromise(ResourceUtil.adapt(e));
+            return newExceptionPromise(adapt(e));
         }
     }
 

@@ -184,7 +184,6 @@ public class AuditFilter implements Filter {
             return;
         }
 
-        final long elapsedTime = System.currentTimeMillis() - state.actionTime;
 
         final AccessAuditEventBuilder accessAuditEventBuilder = new AccessAuditEventBuilder();
         accessAuditEventBuilder.forHttpCrestRequest(context, state.request)
@@ -193,7 +192,6 @@ public class AuditFilter implements Filter {
                 .resourceOperationFromRequest(state.request)
                 .clientFromHttpContext(context)
                 .transactionIdFromRootContext(context)
-                .timestamp(System.currentTimeMillis())
                 .authenticationFromSecurityContext(context)
                 .eventName("access");
 
@@ -201,29 +199,38 @@ public class AuditFilter implements Filter {
                 new ResultHandler<Response>() {
                     @Override
                     public void handleResult(Response result) {
-                        accessAuditEventBuilder.response("SUCCESS", elapsedTime);
+                        long now = System.currentTimeMillis();
+                        final long elapsedTime = now - state.actionTime;
+                        accessAuditEventBuilder.response("SUCCESS", elapsedTime)
+                                .timestamp(now);
                     }
                 },
                 new ExceptionHandler<ResourceException>() {
                     @Override
                     public void handleException(ResourceException resourceException) {
+                        long now = System.currentTimeMillis();
+                        final long elapsedTime = now - state.actionTime;
                         accessAuditEventBuilder.responseWithMessage(
-                                "FAILURE - " + String.valueOf(resourceException.getCode()),
-                                elapsedTime,
-                                resourceException.getReason());
+                                "FAILURE - " + resourceException.getCode(), elapsedTime, resourceException.getReason())
+                                .timestamp(now);
+                    }
+                })
+                .thenAlways(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            //log the log entry
+                            final CreateRequest createRequest = Requests.newCreateRequest("audit/access",
+                                    accessAuditEventBuilder.toEvent().getValue());
+
+                            //wrap the context in a new internal context since we are using the external connection
+                            // factory
+                            connectionFactory.getConnection().create(new InternalContext(context), createRequest);
+                        } catch (ResourceException e) {
+                            LOGGER.error("Failed to log audit access entry", e);
+                        }
                     }
                 });
-
-        try {
-            //log the log entry
-            final CreateRequest createRequest =
-                    Requests.newCreateRequest("audit/access", accessAuditEventBuilder.toEvent().getValue());
-
-            //wrap the context in a new internal context since we are using the external connection factory
-            connectionFactory.getConnection().create(new InternalContext(context), createRequest);
-        } catch (ResourceException e) {
-            LOGGER.error("Failed to log audit access entry", e);
-        }
     }
 
     public void setConnectionFactory(ConnectionFactory connectionFactory) {

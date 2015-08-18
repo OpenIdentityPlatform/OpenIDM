@@ -17,7 +17,6 @@
 package org.forgerock.openidm.audit.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -43,6 +42,7 @@ import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -54,6 +54,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
+import org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.script.Script;
@@ -111,7 +112,9 @@ public class AuditServiceImplTest {
                 new RootContext(), createRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).isNotNull().succeeded();
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .succeeded();
         ResourceResponse resourceResponse = promise.getOrThrow();
         AssertJJsonValueAssert.assertThat(resourceResponse.getContent()).isEqualTo(createRequest.getContent());
     }
@@ -127,7 +130,10 @@ public class AuditServiceImplTest {
         Promise<ResourceResponse, ResourceException> promise = auditService.handleRead(new RootContext(), readRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .failedWithException()
+                .hasCauseInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -143,7 +149,10 @@ public class AuditServiceImplTest {
                 new RootContext(), updateRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .failedWithException()
+                .hasCauseInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -158,7 +167,10 @@ public class AuditServiceImplTest {
                 new RootContext(), deleteRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .failedWithException()
+                .hasCauseInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -174,7 +186,10 @@ public class AuditServiceImplTest {
                 new RootContext(), patchRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .failedWithException()
+                .hasCauseInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -189,15 +204,9 @@ public class AuditServiceImplTest {
                 actionRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException();
-        try {
-            promise.getOrThrow();
-            fail("expected to get BadRequestException");
-        } catch (BadRequestException e) {
-            // we're all good, this is what we expected.
-        } catch (InterruptedException | ResourceException e) {
-            fail("expected to get BadRequestException");
-        }
+        AssertJPromiseAssert.assertThat(promise)
+                .failedWithException()
+                .hasCauseInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -225,6 +234,7 @@ public class AuditServiceImplTest {
                 changedFieldsRequest);
 
         // then
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         ActionResponse actionResponse = promise.getOrThrow();
         List<String> changedFields = actionResponse.getJsonContent().asList(String.class);
         assertThat(changedFields.size()).isEqualTo(1);
@@ -254,9 +264,9 @@ public class AuditServiceImplTest {
                 changedPasswordRequest);
 
         //then
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         ActionResponse response = promise.getOrThrow();
         List<String> changedPasswords = response.getJsonContent().asList(String.class);
-
         assertThat(changedPasswords.size()).isEqualTo(1);
         assertThat(changedPasswords.get(0)).isEqualTo("/password");
     }
@@ -275,11 +285,14 @@ public class AuditServiceImplTest {
                 queryResultHandler);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).isNotNull().failedWithException();
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .failedWithException()
+                .hasCauseInstanceOf(NotSupportedException.class);
     }
 
     @Test
-    public void testExceptionFormmatter() throws Exception {
+    public void testExceptionFormatter() throws Exception {
         //given
         AuditServiceImpl auditService = createAuditService("/audit.json");
 
@@ -298,8 +311,8 @@ public class AuditServiceImplTest {
                 new RootContext(), createRequest);
 
         //then
-        ResourceResponse response = promise.getOrThrow();
-        JsonValue content = response.getContent();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
+        JsonValue content = promise.get().getContent();
 
         final JsonValue expectedResource = createRequest.getContent();
         expectedResource.put("exception", "Exception Formatted");
@@ -317,12 +330,12 @@ public class AuditServiceImplTest {
                 new RootContext(), Requests.newActionRequest("", availableHandlers.name()));
 
         //then
-        ActionResponse actionResponse = promise.getOrThrow();
-
+        AssertJPromiseAssert.assertThat(promise).succeeded();
+        ActionResponse actionResponse = promise.get();
         final JsonValue result = actionResponse.getJsonContent();
         assertThat(result.keys().size()).isEqualTo(1);
         assertThat(result.get(0).get("class").asString())
-                .isEqualTo("org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler");
+                .isEqualTo(PassThroughAuditEventHandler.class.getName());
 
         // { "type": "object", "properties": { "message": { "type": "string" } } }
         final JsonValue expectedConfig = json(object(
