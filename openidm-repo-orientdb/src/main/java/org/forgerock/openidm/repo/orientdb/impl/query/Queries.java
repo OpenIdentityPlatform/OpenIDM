@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,9 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -43,6 +42,7 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
         }
 
         @Override
-        public StringSQLRenderer visitNotFilter(Map<String, String> objects, QueryFilter subFilter) {
+        public StringSQLRenderer visitNotFilter(Map<String, String> objects, QueryFilter<JsonPointer> subFilter) {
             return new StringSQLRenderer("(NOT " + subFilter.accept(this, objects) + ")");
         }
 
@@ -134,7 +134,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
     }
 
     private QueryInfo<OSQLSynchQuery<ODocument>> findQueryInfo(String type, Map<String, String> params,
-            String queryId, String queryExpression, QueryFilter filter) {
+            String queryId, String queryExpression, QueryFilter<JsonPointer> filter) {
         String queryString = queryExpression == null ? null : queryExpression + params.get("pageClause");
         if (filter != null) {
             // If there is a filter, use it's query string

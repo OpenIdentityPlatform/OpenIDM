@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,14 +34,15 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ConflictException;
 
+import org.forgerock.json.resource.Responses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.JsonValue.json;
 
 /**
  * A utility class for handling and converting OrientDB ODocuments
@@ -70,13 +71,13 @@ public class DocumentUtil  {
      * @return the Resource with the id, rev, and the doc converted into maps, lists, 
      *         java types; or null if the doc was null
      */
-    public static Resource toResource(ODocument doc) {
-        Resource result = null;
+    public static ResourceResponse toResource(ODocument doc) {
+        ResourceResponse result = null;
         Map<String, Object> map = toMap(doc);
         if (map != null) {
-            String id = (String) map.get(Resource.FIELD_CONTENT_ID);
-            String rev = (String) map.get(Resource.FIELD_CONTENT_REVISION);
-            result = new Resource(id, rev, new JsonValue(map));
+            String id = (String) map.get(ResourceResponse.FIELD_CONTENT_ID);
+            String rev = (String) map.get(ResourceResponse.FIELD_CONTENT_REVISION);
+            result = Responses.newResourceResponse(id, rev, new JsonValue(map));
         }
         return result;
     }
