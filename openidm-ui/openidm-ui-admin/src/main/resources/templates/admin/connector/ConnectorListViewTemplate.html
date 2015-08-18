@@ -8,9 +8,22 @@
             </h1>
         </div>
         <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
-            <div class="btn-group" role="group" aria-label="...">
+            <div class="btn-group pull-left" role="group" aria-label="...">
                 <a href="#connectors/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
             </div>
+            <div class="pull-right">
+                <div class="btn-group btn-icon" data-toggle="btns">
+                    <a class="btn toggle-view-btn fr-btn-secondary active" href="#connectorCardContainer" data-toggle="tab"><i class="fa fa-th"></i></a>
+                    <a class="btn toggle-view-btn fr-btn-secondary" href="#connectorGridContainer" data-toggle="tab"><i class="fa fa-list"></i></a>
+                </div>
+                <div class="toolbar-search">
+                    <div class="form-group has-feedback has-feedback-left">
+                        <input type="text" class="form-control filter-input" aria-label="Connector Filter" placeholder="Filter...">
+                        <div class="form-control-feedback "><i class="fa fa-search"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
         </div>
     </div>
 </section>
@@ -23,70 +36,76 @@
             </div>
         </div>
 
-        <div id="resourceConnectorContainer" class="list-grid">
-            <div class="row">
-                {{#each currentConnectors}}
-                <div class="col-sm-6 col-md-3 ">
-                    <div class="card-container" style="z-index: 5;">
-                        <div  data-resource-type="connector" data-connector-title="{{cleanUrlName}}"  class="card">
-                            <div class="card-heading">
-                                <!-- Single button -->
-                                <div class="btn-group">
-                                    <button type="button" id="{{name}}ConnectorToggle" class="btn btn-link fa-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                        <i class="fa fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu pull-right" role="menu">
-                                        {{#each objectTypes}}
-                                        <li><a href="#resource/system/{{../name}}/{{this}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{this}})</a></li>
-                                        {{/each}}
-                                        <li><a href="#connectors/edit/{{cleanUrlName}}/"><i class="fa fa-pencil"></i>{{t "common.form.edit"}}</a></li>
-                                        <li class="connector-delete"><span><i class="fa fa-times"></i>{{t "common.form.delete"}}</span></li>
-                                        <li class="divider"></li>
-                                        <li><a href="#mapping/add/connector/{{name}}"><i class="fa fa-plus"></i>{{t "templates.connector.addMapping"}}</a></li>
-                                    </ul>
+        <div class="tab-content tab-content-transparent">
+            <div id="connectorCardContainer" class="tab-pane active">
+                <div class="row">
+                    {{#each currentConnectors}}
+                    <div class="col-sm-6 col-md-3 card-spacer" data-name="{{name}}" data-type="{{displayName}}" data-connector-title="{{cleanUrlName}}" >
+                        <div class="card-container" style="z-index: 5;">
+                            <div class="card">
+                                <div class="card-heading">
+                                    <div class="btn-group">
+                                        <button type="button" id="{{name}}ConnectorToggle" class="btn btn-link fa-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-right" role="menu">
+                                            {{#each objectTypes}}
+                                            <li><a href="#resource/system/{{../name}}/{{this}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{this}})</a></li>
+                                            {{/each}}
+                                            <li><a href="#connectors/edit/{{cleanUrlName}}/"><i class="fa fa-pencil"></i>{{t "common.form.edit"}}</a></li>
+                                            <li class="connector-delete"><span><i class="fa fa-times"></i>{{t "common.form.delete"}}</span></li>
+                                            <li class="divider"></li>
+                                            <li><a href="#mapping/add/connector/{{name}}"><i class="fa fa-plus"></i>{{t "templates.connector.addMapping"}}</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <a href="#connectors/edit/{{cleanUrlName}}/">
+                                        <div class="image circle">
+                                            <i class="{{iconClass}}"></i>
+                                        </div>
+                                        <div class="content">
+                                            <div class="main">
+                                                <h3 class="name">{{name}}</h3>
+                                                <p class="cardtype">{{displayName}}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="card-footer">
+                                    {{#if ok}}
+                                    <span class="text-success"><i class="fa fa-check"></i> {{t "templates.connector.activeState"}}</span>
+                                    {{else}}
+                                    {{#if enabled}}
+                                    <span title="{{error}}" class="text-danger"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
+                                    {{else}}
+                                    <span title="{{error}}" class="text-warning"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
+                                    {{/if}}
+                                    {{/if}}
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <a href="#connectors/edit/{{cleanUrlName}}/">
+                        </div>
+                    </div>
+                    {{/each}}
+                    <div class="col-sm-6 col-md-3 ">
+                        <div class="add-card" style="z-index: 3;">
+                            <div class="">
+                                <a href="#connectors/add/">
                                     <div class="image circle">
-                                        <i class="{{iconClass}}"></i>
+                                        <i class="fa fa-plus"></i>
                                     </div>
                                     <div class="content">
-                                        <div class="main">
-                                            <h3 class="name">{{name}}</h3>
-                                            <p class="cardtype">{{displayName}}</p>
-                                        </div>
+                                        {{t "templates.connector.addConnector"}}
                                     </div>
                                 </a>
-                            </div>
-                            <div class="card-footer">
-                                {{#if ok}}
-                                <span class="text-success"><i class="fa fa-check"></i> {{t "templates.connector.activeState"}}</span>
-                                {{else}}
-                                {{#if enabled}}
-                                <span title="{{error}}" class="text-danger"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
-                                {{else}}
-                                <span title="{{error}}" class="text-warning"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
-                                {{/if}}
-                                {{/if}}
                             </div>
                         </div>
                     </div>
                 </div>
-                {{/each}}
-                <div class="col-sm-6 col-md-3 ">
-                    <div class="add-card" style="z-index: 3;">
-                        <div class="">
-                            <a href="#connectors/add/">
-                                <div class="image circle">
-                                    <i class="fa fa-plus"></i>
-                                </div>
-                                <div class="content">
-                                    {{t "templates.connector.addConnector"}}
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+            </div>
+            <div id="connectorGridContainer" class="tab-pane">
+                <div class="panel panel-default">
+                    <div class="panel-body" id="connectorGrid"></div>
                 </div>
             </div>
         </div>

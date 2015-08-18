@@ -45,8 +45,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
     "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
-    "org/forgerock/commons/ui/common/main/AbstractModel",
-    "org/forgerock/commons/ui/common/main/AbstractCollection",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils"
 ], function($, _, Handlebars, Backbone,
@@ -66,8 +64,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             QueryFilterEditor,
             AddPropertyMappingDialog,
             EditPropertyMappingDialog,
-            AbstractModel,
-            AbstractCollection,
             Backgrid,
             BackgridUtils) {
 

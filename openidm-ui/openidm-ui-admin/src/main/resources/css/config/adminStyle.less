@@ -26,6 +26,10 @@
   Base Page Styles
 */
 
+.backgrid-table thead {
+  border-bottom: 2px solid #ddd;
+}
+
 .add-item-inline {
   .form-group {
     float: left;
@@ -120,20 +124,42 @@
   color: @failure-color;
 }
 
+.tab-content.tab-content-transparent {
+  background-color:transparent;
+}
+
+.has-feedback-left .form-control-feedback {
+  left:0px;
+}
+
+.has-feedback-left .form-control {
+  padding-right:12px;
+  padding-left:34px;
+}
+
+/*
+  Toolbar
+*/
+
+.toolbar .toolbar-search {
+  display:inline-block;
+  margin-left:5px;
+}
+
+/*
+  Button group
+*/
+
+.btn-group .toggle-view-btn .fa {
+  width:14px;
+}
+
 /*
   Dropdown fix
 */
 
 .dropdown-menu .fa {
   margin-right:10px;
-}
-
-/*
-  Temporary styles due to conflicts in COMMONS
-*/
-
-.btn-default {
-  color:@base-theme-color;
 }
 
 /*
