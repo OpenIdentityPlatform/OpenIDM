@@ -241,7 +241,7 @@ class ManagedObjectProperty {
 
         setEncryptor();
         if (encryptor != null && value.isDefined(name)) {
-/*            if (!cryptoService.isEncrypted(value)) {
+            if (!cryptoService.isEncrypted(value)) {
                 try {
                     value.put(name,
                             new JsonCrypto(encryptor.getType(), encryptor.encrypt(value.get(name))).toJsonValue());
@@ -255,7 +255,7 @@ class ManagedObjectProperty {
                     throw new InternalServerErrorException(msg, je);
                 }
             }
- */       }
+        }
     }
 
     /**
