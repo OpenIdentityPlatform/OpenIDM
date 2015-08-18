@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,6 +27,7 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
 import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
@@ -545,13 +546,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
              * Execute additional -count query if we are paging
              */
             final String nextCookie;
-            final int remainingResults;
+
+            // The number of results (if known)
+            final int resultCount;
 
             if (pagedResultsRequested) {
-
-                // The number of results (if known)
-                Integer resultCount = null;
-
                 TableHandler tableHandler = getTableHandler(trimStartingSlash(request.getResourcePath()));
 
                 // Get total if -count query is available
@@ -569,16 +568,19 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
                     if (countResult != null && !countResult.isEmpty()) {
                         resultCount = countResult.get(0).getContent().get("total").asInteger();
+                    } else {
+                        logger.warn("Count query {} failed", countQueryId);
+                        resultCount = NO_COUNT;
                     }
+                } else {
+                    logger.warn("Count query with id {} not found", countQueryId);
+                    resultCount = NO_COUNT;
                 }
 
-                boolean unknownCount = resultCount == null;
-
                 if (results.size() < requestPageSize) {
-                    remainingResults = 0;
                     nextCookie = null;
                 } else {
-                    remainingResults = unknownCount ? -1 : resultCount - (firstResultIndex + results.size());
+                    final int remainingResults = resultCount - (firstResultIndex + results.size());
                     if (remainingResults == 0) {
                         nextCookie = null;
                     } else {
@@ -587,11 +589,15 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 }
             } else {
                 nextCookie = null;
-                remainingResults = -1;
+                resultCount = NO_COUNT;
             }
 
-            // TODO-crest3 Check for count policy properly
-            return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, remainingResults));
+            // TODO-crest3 Check for count policy in the request
+            if (resultCount == NO_COUNT) {
+                return newResultPromise(newQueryResponse(nextCookie));
+            } else {
+                return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
+            }
         } catch (final ResourceException e) {
             return newExceptionPromise(e);
         } catch (Exception e) {
