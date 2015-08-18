@@ -102,6 +102,7 @@
  <xinclude:include href='chap-sample.xml' />
  <xinclude:include href='chap-samples.xml' />
  <xinclude:include href='chap-samples-roles.xml' />
+ <xinclude:include href='chap-multiaccount.xml' />
  <xinclude:include href='chap-repository.xml' />
  <xinclude:include href='chap-uninstall.xml' />
  <xinclude:include href='chap-upgrade.xml' />
