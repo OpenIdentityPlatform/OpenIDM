@@ -22,11 +22,12 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define Backbone*/
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
     "jquery",
     "underscore",
+    "backbone",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -37,7 +38,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils"
-], function($, _,
+], function($, _, Backbone,
             AdminAbstractView,
             eventManager,
             constants,
