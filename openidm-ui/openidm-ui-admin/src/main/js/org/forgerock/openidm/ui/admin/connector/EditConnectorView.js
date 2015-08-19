@@ -66,7 +66,6 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
         events: {
             "change #connectorType" : "loadConnectorTemplate",
             "onValidate": "onValidate",
-            "click #connectorForm fieldset legend" : "sectionHideShow",
             "click #updateObjectTypes" : "objectTypeFormSubmit",
             "click #updateSync" : "syncFormSubmit",
             "click .addLiveSync" : "addLiveSync",

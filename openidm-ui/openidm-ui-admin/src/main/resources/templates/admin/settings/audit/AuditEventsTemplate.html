@@ -1,0 +1,41 @@
+<table class="group-field-block table">
+    <thead>
+    <tr>
+        <th class="col-sm-4">{{t "templates.audit.events.eventDef"}}</th>
+        <th class="col-sm-6">{{t "templates.audit.events.type"}}</th>
+        <th class="col-sm-2"></th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {{#each events}}
+    <tr>
+        <td>{{name}}</td>
+        <td>
+            {{#if defaultEvents}}
+            {{t "templates.audit.events.default"}}
+            {{else}}
+            {{t "templates.audit.events.custom"}}
+            {{/if}}
+        </td>
+        <td>
+            <div class="btn-group pull-right">
+                <button class="btn btn-link editEvent" data-name="{{name}}"><i class="fa fa-pencil"></i></button>
+                {{#unless defaultEvents}}
+                <button class="btn btn-link deleteEvent" data-name="{{name}}"><i class="fa fa-times"></i></button>
+                {{/unless}}
+            </div>
+        </td>
+    </tr>
+    {{/each}}
+    </tbody>
+</table>
+
+<button class="btn btn-default addEvent"><i class="fa fa-plus"></i> {{t "templates.audit.events.addCustom"}}</button>
+
+<div role="alert" class="alert alert-warning col-md-12" style="display: none">
+    <i class="fa fa-exclamation-circle"></i><strong> {{t "templates.audit.changesPending"}}</strong>
+    <span class="message">
+        <a href="#" class="undo undo-events">{{t "templates.audit.undo"}}</a>
+    </span>
+</div>

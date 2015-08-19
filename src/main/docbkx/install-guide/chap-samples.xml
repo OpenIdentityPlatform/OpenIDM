@@ -515,7 +515,7 @@ $ ./startup.sh -p samples/sample2</screen>
     <xref linkend="external-ldap-config-2" />. The LDAP user must have write
     access to create users from OpenIDM on the LDAP server. When you configure
     the LDAP server, import the appropriate LDIF file
-    (<filename>openidm/sampes/sample2b/data/Example.ldif).</filename>
+    (<filename>openidm/samples/sample2b/data/Example.ldif).</filename>
    </para>
   </section>
 
@@ -3704,9 +3704,9 @@ $ ./startup.sh -p samples/scriptedazure/</userinput></screen>
    connectors that can provision any Microsoft system.
   </para>
   <para>
-   The PowerShell Connector Toolkit is available, with a subscription, from
+   The PowerShell Connector Toolkit is available, with a subscription, from the
    <link xlink:show="new" xlink:href="https://backstage.forgerock.com/">ForgeRock
-   Backstage</link>.
+   Backstage</link> site.
   </para>
   <para>
    This sample provides a number of PowerShell scripts that enable you to
@@ -3762,9 +3762,9 @@ $ <userinput>cp samples/provisioners/provisioner.openicf.connectorinfoprovider.j
     <step>
      <para>
       Download the PowerShell Connector Toolkit archive
-      (<filename>mspowershell-connector-1.4.1.0.zip</filename>) from <link
+      (<filename>mspowershell-connector-1.4.1.0.zip</filename>) from the <link
       xlink:show="new" xlink:href="https://backstage.forgerock.com/">ForgeRock
-      Backstage</link>.
+      Backstage</link> site.
      </para>
      <para>
       Extract the archive and move the <filename>MsPowerShell.Connector.dll</filename>
@@ -7134,9 +7134,8 @@ $ ./startup.sh -p samples/audit-sample</screen>
   <note>
    <para>
     The Google Apps Connector, and this corresponding sample, are provided only
-    with the <link xlink:show="new"
-    xlink:href="https://backstage.forgerock.com">OpenIDM
-    Enterprise build</link>.
+    with the OpenIDM Enterprise build, available on the <link xlink:show="new"
+    xlink:href="https://backstage.forgerock.com">ForgeRock Backstage</link> site.
    </para>
   </note>
   <para>
@@ -7580,8 +7579,8 @@ OpenIDM version "3.1.0" (revision: 0) null null
   <note>
    <para>
     The Salesforce Connector, and this corresponding sample, are provided only
-    with the <link xlink:show="new"
-    xlink:href="https://backstage.forgerock.com">OpenIDM Enterprise build</link>.
+    with the OpenIDM Enterprise build, available on the <link xlink:show="new"
+    xlink:href="https://backstage.forgerock.com">ForgeRock Backstage</link> site.
    </para>
   </note>
   <para>

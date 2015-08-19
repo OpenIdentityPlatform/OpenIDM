@@ -102,6 +102,9 @@ class ObjectMapping {
     public static final Name EVENT_RECON_TARGET = Name.get(
             "openidm/internal/discovery-engine/reconciliation/target-phase");
 
+    /** Default number of executor threads to process ReconTasks */
+    private static final int DEFAULT_TASK_THREADS = 10;
+
     /** Logger */
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
 
@@ -222,7 +225,10 @@ class ObjectMapping {
     private final Boolean linkingEnabled;
 
     /** The number of processing threads to use in reconciliation */
-    int taskThreads = 10; // TODO: make configurable
+    private int taskThreads;
+
+    /** The number of initial tasks the ReconFeeder should submit to executors */
+    private int feedSize;
 
     /** a reference to the {@link SynchronizationService} */
     private final SynchronizationService service;
@@ -285,10 +291,8 @@ class ObjectMapping {
         onUnlinkScript = Scripts.newInstance(config.get("onUnlink"));
         resultScript = Scripts.newInstance(config.get("result"));
         prefetchLinks = config.get("prefetchLinks").defaultTo(Boolean.TRUE).asBoolean();
-        Integer confTaskThreads = config.get("taskThreads").asInteger();
-        if (confTaskThreads != null) {
-            taskThreads = confTaskThreads.intValue();
-        }
+        taskThreads = config.get("taskThreads").defaultTo(DEFAULT_TASK_THREADS).asInteger();
+        feedSize = config.get("feedSize").defaultTo(ReconFeeder.DEFAULT_FEED_SIZE).asInteger();
         correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
         syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
         linkingEnabled = config.get("enableLinking").defaultTo(Boolean.TRUE).asBoolean();
@@ -1008,6 +1012,7 @@ class ObjectMapping {
                 // Perform source recon phase on current set of source ids
                 ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context, allLinks,
                         remainingTargetIds, sourceRecon);
+                sourcePhase.setFeedSize(feedSize);
                 sourcePhase.execute();
                 queryNextPage = true;
             } while (reconSourceQueryPaging && sourceQueryResult.getPagingCookie() != null); // If paging, loop through next pages
@@ -1024,6 +1029,7 @@ class ObjectMapping {
                 reconContext.getStatistics().targetPhaseStart();
                 ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context,
                         allLinks, null, targetRecon);
+                targetPhase.setFeedSize(feedSize);
                 targetPhase.execute();
                 reconContext.getStatistics().targetPhaseEnd();
                 measureTarget.end();
@@ -1035,10 +1041,30 @@ class ObjectMapping {
             reconContext.setStage(ReconStage.COMPLETED_SUCCESS);
             logReconEndSuccess(reconContext, context);
         } catch (InterruptedException ex) {
-            reconContext.checkCanceled();
-            throw new SynchronizationException("Interrupted execution of reconciliation", ex);
+            SynchronizationException syncException;
+            if (reconContext.isCanceled()) {
+                reconContext.setStage(ReconStage.COMPLETED_CANCELED);
+                syncException = new SynchronizationException("Reconciliation canceled: " + reconContext.getReconId());
+            }
+            else {
+                reconContext.setStage(ReconStage.COMPLETED_FAILED);
+                syncException = new SynchronizationException("Interrupted execution of reconciliation", ex);
+            }
+            doResults(reconContext);
+            throw syncException;
+        } catch (SynchronizationException e) {
+            // Make sure that the error did not occur within doResults or last logging for completed success case
+            reconContext.setStage(ReconStage.COMPLETED_FAILED);
+            if ( reconContext.getStage() != ReconStage.ACTIVE_PROCESSING_RESULTS
+                    && reconContext.getStage() != ReconStage.COMPLETED_SUCCESS ) {
+                doResults(reconContext);
+            }
+            reconContext.getStatistics().reconEnd();
+            logReconEndFailure(reconContext, context);
+            throw new SynchronizationException("Synchronization failed", e);
         } catch (Exception e) {
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
+            doResults(reconContext);
             reconContext.getStatistics().reconEnd();
             logReconEndFailure(reconContext, context);
             throw new SynchronizationException("Synchronization failed", e);
@@ -1856,7 +1882,7 @@ class ObjectMapping {
         protected void postAction(boolean sourceAction) throws SynchronizationException {
             if (null != activePolicy) {
                 activePolicy.evaluatePostAction(
-                                sourceObjectAccessor, targetObjectAccessor, action, sourceAction, getLinkQualifier());
+                                sourceObjectAccessor, targetObjectAccessor, action, sourceAction, getLinkQualifier(), reconId);
             }
         }
 

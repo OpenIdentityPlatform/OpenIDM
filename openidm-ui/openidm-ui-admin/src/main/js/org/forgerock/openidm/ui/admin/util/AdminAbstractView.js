@@ -26,21 +26,29 @@
 
 define("org/forgerock/openidm/ui/admin/util/AdminAbstractView", [
     "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView"
-], function($, AbstractView) {
+], function($, _, AbstractView) {
     var AdminAbstractView = AbstractView.extend({
 
-        sectionHideShow: function(event) {
-            var clickedEle = event.target;
+        compareObjects: function(property, obj1, obj2) {
+            function compare(val1, val2) {
+                _.each(val1, function(property, key) {
+                    if (_.isEmpty(property) && !_.isNumber(property) && !_.isBoolean(property)) {
+                        delete val1[key];
+                    }
+                });
 
-            if($(clickedEle).not("legend")){
-                clickedEle = $(clickedEle).closest("legend");
+                _.each(val2, function(property, key) {
+                    if (_.isEmpty(property) && !_.isNumber(property) && !_.isBoolean(property)) {
+                        delete val2[key];
+                    }
+                });
+
+                return _.isEqual(val1, val2);
             }
 
-            $(clickedEle).find("i").toggleClass("fa-plus-square-o");
-            $(clickedEle).find("i").toggleClass("fa-minus-square-o");
-
-            $(clickedEle).parent().find(".group-body").slideToggle("slow");
+            return compare(obj1[property], obj2[property]);
         }
     });
 

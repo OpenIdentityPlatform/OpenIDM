@@ -2144,7 +2144,7 @@ $ <userinput>cat samples/workflow/data/xmlConnectorData.xml </userinput>
     <listitem>
      <para>
       Download and install OpenDJ, as described in <link xlink:show="new"
-      xlink:href="https://backstage.forgerock.com/#!/docs/opendj/2.6.0/install-guide#chap-install-gui">Installing
+      xlink:href="https://backstage.forgerock.com/#!/docs/opendj/2.6.0/install-guide/chap-install-gui">Installing
       OpenDJ With the QuickSetup Wizard</link>.
      </para>
      <para>

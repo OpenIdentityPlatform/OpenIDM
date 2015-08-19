@@ -26,6 +26,18 @@
   Base Page Styles
 */
 
+.backgrid-table thead {
+  border-bottom: 2px solid #ddd;
+}
+
+.add-item-inline {
+  .form-group {
+    float: left;
+    padding-right: 5px;
+    width: auto;
+  }
+}
+
 .ui-jqgrid {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
@@ -88,6 +100,10 @@
   padding: 30px;
 }
 
+.collapse > .panel-body {
+  padding: 0 30px 30px;
+}
+
 .panel-collapse-group .panel {
   margin-bottom:0px;
 }
@@ -108,20 +124,42 @@
   color: @failure-color;
 }
 
+.tab-content.tab-content-transparent {
+  background-color:transparent;
+}
+
+.has-feedback-left .form-control-feedback {
+  left:0px;
+}
+
+.has-feedback-left .form-control {
+  padding-right:12px;
+  padding-left:34px;
+}
+
+/*
+  Toolbar
+*/
+
+.toolbar .toolbar-search {
+  display:inline-block;
+  margin-left:5px;
+}
+
+/*
+  Button group
+*/
+
+.btn-group .toggle-view-btn .fa {
+  width:14px;
+}
+
 /*
   Dropdown fix
 */
 
 .dropdown-menu .fa {
   margin-right:10px;
-}
-
-/*
-  Temporary styles due to conflicts in COMMONS
-*/
-
-.btn-default {
-  color:@base-theme-color;
 }
 
 /*
@@ -285,6 +323,11 @@
   }
 }
 
+.tab-content {
+  background-color: #fff;
+  margin-bottom: 50px;
+}
+
 .editResourceViewContainer {
   .resource-avatar {
     display: table;
@@ -329,11 +372,6 @@
     font-weight: 400;
     display: inline-block;
     margin-bottom: 0;
-  }
-
-  .tab-content {
-    background-color: #fff;
-    margin-bottom: 50px;
   }
 
   .fa-search {

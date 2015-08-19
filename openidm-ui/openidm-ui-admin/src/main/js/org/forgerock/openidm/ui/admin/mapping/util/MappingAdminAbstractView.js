@@ -106,15 +106,12 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView", [
             },
 
             AbstractMappingSave: function(mapping, callback) {
-                _.each(syncConfig.mappings, function(map, key) {
-                    syncConfig.mappings[key] = _.omit(mapping, "recon");
+                var i = _.findIndex(syncConfig.mappings, {name: mapping.name});
 
-                    if (map.name === this.getMappingName()) {
-                        currentMapping = syncConfig.mappings[key];
-                    }
-                }, this);
-
-                ConfigDelegate.updateEntity("sync", {"mappings" : syncConfig.mappings}).then(_.bind(callback, this));
+                if (i >= 0) {
+                    currentMapping = syncConfig.mappings[i] = mapping;
+                    ConfigDelegate.updateEntity("sync", {"mappings": syncConfig.mappings}).then(_.bind(callback, this));
+                }
             }
         });
 

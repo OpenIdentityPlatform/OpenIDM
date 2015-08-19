@@ -1,0 +1,42 @@
+<form id="auditEventHandlersForm" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.name"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control"
+                   value="{{eventHandler.name}}"
+                   data-unique-list="{{stringify usedEventHandlerNames}}"
+                   id="eventHandlerName"
+                   {{#if newEventHandler}}
+                   data-validator="unique"
+                   data-validator-event="keyup blur"
+                   {{else}}
+                   disabled
+                   {{/if}}/>
+            <div class="validation-message"></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.auditEvents"}}</label>
+        <div class="col-sm-6">
+            {{#each events}}
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" class="auditEventsCheckBox" {{#if this}}checked {{/if}}value="{{@key}}"> {{@key}}
+                </label>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.useForQueries"}}</label>
+        <div class="col-sm-6">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" class="useForQueries" {{#if useForQueries}}checked {{/if}}/>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div id="auditEventHandlerConfig" class="jsonEditorContainer panel-body"></div>
+</form>
