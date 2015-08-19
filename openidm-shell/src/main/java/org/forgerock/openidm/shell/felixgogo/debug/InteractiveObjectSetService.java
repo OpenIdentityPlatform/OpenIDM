@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +24,9 @@
 
 package org.forgerock.openidm.shell.felixgogo.debug;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -33,8 +36,8 @@ import java.util.Scanner;
 
 import org.apache.felix.service.command.CommandSession;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ConnectionProvider;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -43,9 +46,6 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * A ServiceListener.
@@ -56,7 +56,7 @@ class InteractiveObjectSetService implements /* RequestHandler, */ServiceListene
 
     public static final String ROUTER_SERVICE_FILTER = "(service.pid=org.forgerock.openidm.router)";
 
-    private ConnectionProvider router = null;
+    private ConnectionFactory router = null;
 
     private CommandSession session;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -71,9 +71,9 @@ class InteractiveObjectSetService implements /* RequestHandler, */ServiceListene
         this.session = session;
         try {
             ServiceReference<?>[] ref =
-                    context.getServiceReferences(ConnectionProvider.class.getName(), ROUTER_SERVICE_FILTER);
+                    context.getServiceReferences(ConnectionFactory.class.getName(), ROUTER_SERVICE_FILTER);
             if (null != ref && ref.length > 0) {
-                router = (ConnectionProvider) context.getService(ref[0]);
+                router = (ConnectionFactory) context.getService(ref[0]);
             }
         } catch (InvalidSyntaxException e) {
             // couldn't attach router
@@ -131,7 +131,7 @@ class InteractiveObjectSetService implements /* RequestHandler, */ServiceListene
         }
     }
 
-    private ConnectionProvider getRouter() {
+    private ConnectionFactory getRouter() {
         return router;
     }
 
@@ -203,11 +203,11 @@ class InteractiveObjectSetService implements /* RequestHandler, */ServiceListene
         ServiceReference<?> sr = event.getServiceReference();
         switch (event.getType()) {
         case ServiceEvent.REGISTERED: {
-            router = (ConnectionProvider) context.getService(sr);
+            router = (ConnectionFactory) context.getService(sr);
             break;
         }
         case ServiceEvent.MODIFIED: {
-            router = (ConnectionProvider) context.getService(sr);
+            router = (ConnectionFactory) context.getService(sr);
             break;
         }
         case ServiceEvent.UNREGISTERING: {
