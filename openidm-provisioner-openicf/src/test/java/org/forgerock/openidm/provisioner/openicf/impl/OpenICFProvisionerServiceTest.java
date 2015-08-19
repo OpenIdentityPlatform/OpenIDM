@@ -249,16 +249,6 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         };
     }
 
-    @Override
-    public Connection getConnection(String connectionId) throws ResourceException {
-        return Resources.newInternalConnection(router);
-    }
-
-    @Override
-    public String getConnectionId(Connection connection) throws ResourceException {
-        return "DEFAULT";
-    }
-
     // ----- Implementation of ConnectorInfoManager interface
 
     @Override
