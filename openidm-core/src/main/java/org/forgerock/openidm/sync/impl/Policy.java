@@ -173,13 +173,15 @@ class Policy {
                                    LazyObjectAccessor target, 
                                    ReconAction action, 
                                    boolean sourceAction, 
-                                   String linkQualifier) throws SynchronizationException {
+                                   String linkQualifier,
+                                   String reconId) throws SynchronizationException {
         if (postAction != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("linkQualifier", linkQualifier);
             scope.put("sourceAction", sourceAction);
             scope.put("action", action.name());
             scope.put("situation", situation.name());
+            scope.put("reconId", reconId);
             if (source != null) {
                 scope.put("source", source.asMap());
             }

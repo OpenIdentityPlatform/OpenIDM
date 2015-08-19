@@ -21,26 +21,12 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
-#settings .tab-pane {
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+#AuditEventsDialog .jsonEditorContainer > div > h3,
+#AuditEventHandlersDialog .jsonEditorContainer > div > h3 {
+  display: none;
 }
 
 #AuditEventsDialog {
-  .watchedField, .passwordField, .newFilterValue {
-    border: 1px solid #519387;
-  }
-
-  .deleteWatchedField.btn, .deletePasswordField.btn , .deleteFilterFieldValue.btn{
-    padding-top: 0;
-  }
-
-  input[type="checkbox"] {
-    margin: 4px 10px 0 0;
-  }
-
   #filterFieldsPane {
     .well {
       margin-bottom: 20px;
@@ -50,57 +36,26 @@
         margin: 0;
         padding: 0 0 10px;
         background: none;
-
-        .filterFieldsCollapse {
-          padding-left: 0px;
-          padding-right: 0px;
-        }
-      }
-
-      .list-group {
-        margin-bottom: 0px;
-        .filterField {
-          border-top-right-radius: 4px;
-          border-top-left-radius: 4px;
-        }
-
       }
     }
   }
 }
 
 #settings {
-  #logTo {
+  .tab-pane {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+  }
+
+  #AuditEventsView {
     .alert-warning {
       margin-top: 15px;
-    }
-
-    .list-table .list-group .list-group-item {
-      .form-control {
-        display: inline;
-        width: auto;
-        margin: 0 5px 10px 0;
-      }
-      label.form-control {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-        white-space: nowrap;
-        margin-right: 10px;
-      }
-
-      .small {
-        width: 70px;
-      }
     }
   }
 
   .panel-collapse {
     margin-bottom: 0;
-  }
-
-  #auditForm {
-
   }
 
   #authenticationForm {

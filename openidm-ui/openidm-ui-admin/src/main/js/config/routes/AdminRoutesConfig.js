@@ -38,14 +38,12 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             defaults : ["", ""],
             url: /^connectors\/edit\/(.+?)\/(.*)$/,
-            pattern: "connectors/edit/?/?",
-            forceUpdate: true
+            pattern: "connectors/edit/?/?"
         },
         "addConnectorView" : {
             view: "org/forgerock/openidm/ui/admin/connector/AddConnectorView",
             role: "ui-admin",
-            url: "connectors/add/",
-            forceUpdate: true
+            url: "connectors/add/"
         },
         "managedListView" : {
             view: "org/forgerock/openidm/ui/admin/managed/ManagedListView",
@@ -56,45 +54,38 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
             role: "ui-admin",
             url: /^managed\/edit\/(.+)\/$/,
-            pattern: "managed/edit/?/",
-            forceUpdate: true
+            pattern: "managed/edit/?/"
         },
         "addManagedView" : {
             view: "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
             role: "ui-admin",
-            url: "managed/add/",
-            forceUpdate: true
+            url: "managed/add/"
         },
         "authenticationView" : {
             view: "org/forgerock/openidm/ui/admin/authentication/AuthenticationView",
             role: "ui-admin",
-            url: "authentication/",
-            forceUpdate: true
+            url: "authentication/"
         },
         "settingsView" : {
             view: "org/forgerock/openidm/ui/admin/settings/SettingsView",
             role: "ui-admin",
-            url: "settings/",
-            forceUpdate: true
+            url: "settings/"
         },
         "addMappingView" : {
             view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
             role: "ui-admin",
-            url: "mapping/add/",
-            forceUpdate: true
+            url: "mapping/add/"
         },
         "autoAddMappingView" : {
             view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
             role: "ui-admin",
             url: /mapping\/add\/(.+?)\/(.+?)$/,
-            pattern: "mapping/add/?/?",
-            forceUpdate: true
+            pattern: "mapping/add/?/?"
         },
         "mappingListView" : {
             view: "org/forgerock/openidm/ui/admin/mapping/MappingListView",
             role: "ui-admin",
-            url: "mapping/",
-            forceUpdate: true
+            url: "mapping/"
         },
         "propertiesView" : {
             childView: "org/forgerock/openidm/ui/admin/mapping/PropertiesView",
@@ -153,8 +144,7 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
             role: "ui-admin",
             url: /^resource\/(managed)\/(.+)\/edit\/(.+)$/,
-            pattern: "resource/?/?/edit/?",
-            forceUpdate: true
+            pattern: "resource/?/?/edit/?"
         },
         "adminNewManagedObjectView" : {
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",

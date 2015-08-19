@@ -1709,8 +1709,11 @@ Content-Length: 89
   <title>Accessing Log Entries Over REST</title>
 
    <para>
-    You can interact with the audit and activity logs over REST, as
-    shown in the following table.</para>
+    You can interact with the audit logs over REST, as shown in the following
+    table. Queries on the audit endpoint must use <literal>queryFilter</literal>
+    syntax. Predefined queries (invoked with the <literal>_queryId</literal>
+    parameter) are not supported.
+   </para>
 
      <informaltable pgwide="1">
       <tgroup cols="3">
@@ -1726,7 +1729,7 @@ Content-Length: 89
       </thead>
       <tbody>
        <row>
-        <entry>/openidm/audit/recon</entry>
+        <entry>/openidm/audit/recon?_queryFilter=true</entry>
         <entry>GET</entry>
         <entry>Displays the reconciliation audit log</entry>
        </row>
@@ -1736,18 +1739,17 @@ Content-Length: 89
         <entry>Reads a specific reconciliation audit log entry</entry>
        </row>
        <row>
-        <entry>/openidm/audit/recon?_queryId=audit-by-recon-id&amp;reconId=<replaceable>id</replaceable></entry>
+        <entry>/openidm/audit/recon?_queryFilter=/reconId+eq+"<replaceable>reconId</replaceable>"</entry>
         <entry>GET</entry>
         <entry>Queries the audit log for a particular reconciliation operation</entry>
        </row>
        <row>
-        <entry>/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=
-        <replaceable>situation</replaceable>&amp;reconId=<replaceable>id</replaceable></entry>
+        <entry>/openidm/audit/recon?_queryFilter=/reconId+eq+"<replaceable>reconId</replaceable>"+and+situation+eq+"<replaceable>situation</replaceable>"</entry>
         <entry>GET</entry>
         <entry>Queries the reconciliation audit log for a specific reconciliation situation</entry>
        </row>
        <row>
-        <entry>/openidm/audit/sync</entry>
+        <entry>/openidm/audit/sync?_queryFilter=true</entry>
         <entry>GET</entry>
         <entry>Displays the synchronization audit log</entry>
        </row>
@@ -1757,7 +1759,7 @@ Content-Length: 89
         <entry>Reads a specific synchronization audit log entry</entry>
        </row>
        <row>
-        <entry>/openidm/audit/activity</entry>
+        <entry>/openidm/audit/activity?_queryFilter=true</entry>
         <entry>GET</entry>
         <entry>Displays the activity log</entry>
        </row>
@@ -1767,12 +1769,13 @@ Content-Length: 89
         <entry>Returns activity information for a specific action</entry>
        </row>
        <row>
-        <entry>/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=<replaceable>id</replaceable></entry>
+        <entry>/openidm/audit/activity?_queryFilter=transactionId=<replaceable>id</replaceable></entry>
         <entry>GET</entry>
-        <entry>Queries the activity log for the details of an action</entry>
+        <entry>Queries the activity log for all actions resulting from a
+         specific transaction</entry>
        </row>
        <row>
-        <entry>/openidm/audit/access</entry>
+        <entry>/openidm/audit/access?_queryFilter=true</entry>
         <entry>GET</entry>
         <entry>Displays the full list of auditable actions.</entry>
        </row>
@@ -1780,6 +1783,17 @@ Content-Length: 89
         <entry>/openidm/audit/access/<replaceable>id</replaceable></entry>
         <entry>GET</entry>
         <entry>Displays information on the specific audit item.</entry>
+       </row>
+       <row>
+        <entry>/openidm/audit/authentication?_queryFilter=true</entry>
+        <entry>GET</entry>
+        <entry>Displays a complete list of authentication attempts, successful
+         and unsuccessful.</entry>
+       </row>
+       <row>
+        <entry>/openidm/audit/authentication?_queryFilter=/principal+eq+"<replaceable>principal</replaceable>"</entry>
+        <entry>GET</entry>
+        <entry>Displays the authentication attempts by a specified user.</entry>
        </row>
       </tbody>
       </tgroup>

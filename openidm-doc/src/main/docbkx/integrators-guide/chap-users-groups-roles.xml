@@ -1602,14 +1602,6 @@ if (object.org === 'example') {
       }
    ]
 } </programlisting>
-  <para>
-   Do not use the default symmetric key, <literal>openidm-sym-default</literal>,
-   in production. See the chapter on
-   <link xlink:href="integrators-guide#chap-security"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
-   and Hardening OpenIDM</citetitle></link> for instructions on adding your
-   own symmetric key.
-  </para>
  </section>
 
  <section xml:id="restricting-http-access">

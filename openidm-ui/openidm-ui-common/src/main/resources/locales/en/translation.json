@@ -609,51 +609,59 @@
             "actionAlert": "You must provide a value for the action."
         },
         "audit": {
-            "audit": "Audit",
-            "events": "Events",
-            "eventTypes": "Event Types",
-            "addEvent": "Add Event",
-            "changesPending": "Changes Pending!",
-            "undo": "Undo Changes",
-            "warning": "Warning",
-            "notice": "Notice",
-            "eventTypesDesc": "The eventTypes configuration specifies what events OpenIDM writes to audit logs. OpenIDM supports the following event types: access, activity, synchronization, and reconciliation. The filter for actions under activity logging shows the actions on managed or system objects for which OpenIDM writes to the activity log.",
-            "noMoreEvents": "There are no more events to add.",
-            "dialog": {
-                "filterActions": "Filter Actions",
-                "filterActionsDesc": "The filter actions list enables you to configure the conditions that result in actions being written to the activity log.",
-                "noActions": "There are no actions for this type of event.",
-                "filterFields": "Filter Fields",
-                "filterFieldAdd": "Add",
-                "filterFieldAddField": "Add Field",
-                "filterFieldDelete": "Delete Field",
-                "filterFieldsDesc": "Filter Fields Desc",
-                "filterScript": "Filter Script",
-                "filterScriptDesc": "You can create a script for filtering. As it does for other scripts, OpenIDM makes the create request and the context objects available to the script. ",
-                "declarative": "Declarative",
-                "script": "Script",
-                "watchedFields": "Watched Fields",
-                "watchedFieldsDesc": "The Watched Fields parameter enables you to specify a list of fields that should be monitored for changes.",
-                "passwordFields": "Password Fields",
-                "passwordFieldsDesc": "The passwordFields parameter enables you to specify a list of fields that are considered passwords.",
-                "readMore": "Read More"
+            "eventHandlers": {
+                "title": "Audit Event Handlers",
+                "desc": "Configure existing events, or add a custom event",
+                "name": "Name",
+                "type": "Type",
+                "auditEvents": "Audit Events",
+                "useForQueries": "Manage queries with",
+                "addOption": "Add an event handler...",
+                "addButton": "Add Event Handler",
+                "dialog": {
+                    "add": "Add Audit Event Handler",
+                    "edit": "Edit Audit Event Handler"
+                }
             },
-            "logTo": "Log To",
-            "logToDesc": "The logTo parameter enables you to specify the format, location of where the file will be written, and various properties for each log type specified.",
-            "logType": "Log Type",
-            "logDetails": "Details",
-            "logDelimiter": "Delimiter",
-            "logLocation": "Location",
-            "logBuffer": "Buffer Size",
-            "logMaxFlushDelay": "Max Flush Delay",
-            "logUsedForQueries": "Used for Queries",
-            "logIgnoreLoggingFailures": "Ignore Logging Failures",
-            "router": "Router",
-            "csv": "CSV",
-            "repository": "Repository",
-            "addLog": "Add Log",
-            "exceptionFormatter": "Exception Formatter",
-            "exceptionFormatterDesc": "Specify how exceptions are to be formatted and display by the audit logger."
+            "events": {
+                "title": "Audit Events",
+                "desc": "Configure available events to log, or add a custom event definition.",
+                "addCustom": "Add a Custom Event",
+                "default": "Default",
+                "custom": "Custom",
+                "eventDef": "Event",
+                "type": "Type",
+                "dialog": {
+                    "addEvent": "Add Event",
+                    "editEvent": "Edit Event",
+                    "name": "Name your event",
+                    "exampleName": "e.g. Example event name",
+                    "schema": "Schema",
+                    "filterActions": "Filter Actions",
+                    "filterFields": "Filter Fields",
+                    "filterScript": "Filter Script",
+                    "filterTriggers": "Filter Triggers",
+                    "watchedFields": "Watched Fields",
+                    "passwordFields": "Password Fields",
+                    "filterActionsDesc": "Configure actions to be audited",
+                    "noActions": "There are no actions for this type of event.",
+                    "filterFieldsDesc": "Limit audit logs by entry type and value",
+                    "filterFieldDelete": "Delete Field",
+                    "filterFieldAddField": "Add Field",
+                    "filterScriptDesc": "Create a script to filter audit log data.",
+                    "triggerDesc": "Actions to be logged for",
+                    "watchedFieldsDesc": "Defines properties to monitor (e.g. email, address)",
+                    "passwordFieldsDesc": "Identify attributes to treat as password fields."
+                }
+            },
+            "exceptionFormatter": {
+              "title": "Exception Formatter",
+              "desc": "Specify script to handle display of exceptions to audit logger."
+            },
+            "audit": "Audit",
+            "notice": "Notice",
+            "changesPending": "Changes Pending",
+            "undo": "Undo Changes"
         },
         "auth": {
             "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
@@ -1281,7 +1289,8 @@
                 "emailExists" : "Email address already exists.",
                 "shouldBeLong" : "Should be long value",
                 "wrongDateFormat" : "Wrong format",
-                "spaceNotAllowed" : "Cannot contain a space"
+                "spaceNotAllowed" : "Cannot contain a space",
+                "unique" : "Unique value required"
             }
         },
         "user" : {
