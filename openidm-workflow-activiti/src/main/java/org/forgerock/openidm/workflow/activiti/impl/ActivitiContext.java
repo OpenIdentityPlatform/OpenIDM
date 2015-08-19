@@ -11,29 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.openidm.workflow.activiti.impl.mixin;
+package org.forgerock.openidm.workflow.activiti.impl;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.form.AbstractFormType;
-import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.AbstractContext;
+import org.forgerock.json.JsonValue;
 
 /**
- *
+ * Concrete context used for serialization/deserialization of Activiti workflows.
  */
-public class FormPropertyHandlerMixIn {
-    
-  @JsonProperty(ActivitiConstants.ID)
-  protected String id;
-  protected String name;
-  protected AbstractFormType type;
-  protected boolean isReadable;
-  protected boolean isWritable;
-  protected boolean isRequired;
-  protected String variableName;
-  protected Expression variableExpression;
-  protected Expression defaultExpression;
-  
+public class ActivitiContext extends AbstractContext {
+
+    public ActivitiContext(Context parent) {
+        super(parent, "activiti");
+    }
+
+    public ActivitiContext(JsonValue savedContext, ClassLoader classLoader) {
+        super(savedContext, classLoader);
+    }
 }

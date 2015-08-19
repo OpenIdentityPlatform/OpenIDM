@@ -1,57 +1,58 @@
 /*
- * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions copyright [year] [name of copyright owner]"
+ * Copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+
+import static org.forgerock.json.resource.ResourceException.newBadRequestException;
+import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.HistoricTaskInstanceEntity;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricTaskInstanceEntityMixIn;
+import org.forgerock.util.promise.Promise;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -66,10 +67,10 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
 
     static {
         MAPPER = new ObjectMapper();
-        MAPPER.getSerializationConfig().addMixInAnnotations(HistoricTaskInstanceEntity.class,
+        MAPPER.addMixIn(HistoricTaskInstanceEntity.class,
                 HistoricTaskInstanceEntityMixIn.class);
-        MAPPER.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-        MAPPER.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
     /**
@@ -85,52 +86,47 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void actionCollection(ServerContext context, ActionRequest request,
-                                 ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(ServerContext context, String resourceId, ActionRequest request,
-                               ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void createInstance(ServerContext context, CreateRequest request,
-                               ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request,
-                               ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId, DeleteRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
-                              ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request, QueryResourceHandler handler) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             HistoricTaskInstanceQuery query = processEngine.getHistoryService().createHistoricTaskInstanceQuery();
@@ -144,14 +140,14 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
                 }
                 for (HistoricTaskInstance i : query.list()) {
                     Map<String, Object> value = MAPPER.convertValue(i, Map.class);
-                    handler.handleResource(new Resource(i.getId(), null, new JsonValue(value)));
+                    handler.handleResource(newResourceResponse(i.getId(), null, new JsonValue(value)));
                 }
-                handler.handleResult(new QueryResult());
+                return newResultPromise(newQueryResponse());
             } else {
-                handler.handleError(new BadRequestException("Unknown query-id"));
+                return newExceptionPromise(newBadRequestException("Unknown query-id"));
             }
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 
@@ -159,18 +155,16 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(ServerContext context, String resourceId, ReadRequest request,
-                             ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
-                               ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**

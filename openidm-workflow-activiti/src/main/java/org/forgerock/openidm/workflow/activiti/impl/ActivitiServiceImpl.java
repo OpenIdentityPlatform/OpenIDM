@@ -1,27 +1,21 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2012-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
+
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,9 +42,23 @@ import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
 import org.activiti.osgi.OsgiScriptingEngines;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.apache.felix.scr.annotations.*;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.*;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.core.IdentityServer;
@@ -60,6 +68,7 @@ import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
+import org.forgerock.util.promise.Promise;
 import org.h2.jdbcx.JdbcDataSource;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
@@ -138,11 +147,6 @@ public class ActivitiServiceImpl implements RequestHandler {
     target = "(osgi.jndi.service.name=jdbc/openidm)")
     private DataSource dataSource;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
-            bind = "bindPersistenceConfig", unbind = "unbindPersistenceConfig"
-    )
-    private PersistenceConfig persistenceConfig;
-
     @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)",
             bind = "bindRouteService", unbind = "unbindRouteService"
     )
@@ -183,38 +187,39 @@ public class ActivitiServiceImpl implements RequestHandler {
     private String workflowDir;
     
     @Override
-    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        activitiResource.handleAction(context, request, handler);
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
+        return activitiResource.handleAction(context, request);
     }
 
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        activitiResource.handleCreate(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
+        return activitiResource.handleCreate(context, request);
     }
 
     @Override
-    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
-        activitiResource.handleDelete(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
+        return activitiResource.handleDelete(context, request);
     }
 
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupported(request));
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupported(request));
     }
 
     @Override
-    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
-        activitiResource.handleQuery(context, request, handler);
+    public Promise<QueryResponse, ResourceException> handleQuery(
+            Context context, QueryRequest request, QueryResourceHandler handler) {
+        return activitiResource.handleQuery(context, request, handler);
     }
 
     @Override
-    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-        activitiResource.handleRead(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
+        return activitiResource.handleRead(context, request);
     }
 
     @Override
-    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        activitiResource.handleUpdate(context, request, handler);
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
+        return activitiResource.handleUpdate(context, request);
     }
 
     public enum EngineLocation {
@@ -468,16 +473,6 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     protected void unbindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(null);
-    }
-
-    protected void bindPersistenceConfig(PersistenceConfig config) {
-        this.persistenceConfig = config;
-        this.idmSessionFactory.setPersistenceConfig(config);
-    }
-
-    protected void unbindPersistenceConfig(PersistenceConfig config) {
-        this.persistenceConfig = null;
-        this.idmSessionFactory.setPersistenceConfig(null);
     }
 
     public void bindService(JavaDelegate delegate, Map props) {

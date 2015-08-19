@@ -1,30 +1,51 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
- * 
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
- * 
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- * 
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2012-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.*;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.task.IdentityLink;
+import org.forgerock.http.Context;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.resource.SortKey;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.Map;
 import java.util.HashMap;
@@ -42,15 +63,11 @@ import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.*;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskEntityMixIn;
+import org.forgerock.util.promise.Promise;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * Resource implementation of TaskInstance related Activiti operations
@@ -62,9 +79,9 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     static {
         mapper = new ObjectMapper();
-        mapper.getSerializationConfig().addMixInAnnotations(TaskEntity.class, TaskEntityMixIn.class);
-        mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        mapper.addMixIn(TaskEntity.class, TaskEntityMixIn.class);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
     public TaskInstanceResource(ProcessEngine processEngine) {
@@ -76,69 +93,68 @@ public class TaskInstanceResource implements CollectionResourceProvider {
     }
 
     @Override
-    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnCollection(request));
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnCollection(request));
     }
 
     @Override
-    public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             TaskService taskService = processEngine.getTaskService();
             Task task = processEngine.getTaskService().createTaskQuery().taskId(resourceId).singleResult();
             if (task == null) {
-                handler.handleError(new NotFoundException());
+                return newExceptionPromise(newNotFoundException());
             } else {
                 if ("claim".equals(request.getAction())) {
                     taskService.claim(resourceId, request.getContent().expect(Map.class).asMap().get("userId").toString());
                 } else if ("complete".equals(request.getAction())) {
                     taskService.complete(resourceId, request.getContent().expect(Map.class).asMap());
                 } else {
-                    handler.handleError(new BadRequestException("Unknown action"));
+                    return newExceptionPromise(newBadRequestException("Unknown action"));
                 }
                 Map<String, String> result = new HashMap<String, String>(1);
                 result.put("Task action performed", request.getAction());
-                handler.handleResult(new JsonValue(result));
+                return newResultPromise(newActionResponse(new JsonValue(result)));
             }
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 
     @Override
-    public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
-    public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId, DeleteRequest request) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
 
             Task task = processEngine.getTaskService().createTaskQuery().taskId(resourceId).singleResult();
             if (task == null) {
-                handler.handleError(new NotFoundException("Task " + resourceId + " not found."));
-                return;
+                return newExceptionPromise(newNotFoundException("Task " + resourceId + " not found."));
             }
 
             Map<String, Object> deletedTask = mapper.convertValue(task, Map.class);
             processEngine.getTaskService()
                     .deleteTask(resourceId, request.getAdditionalParameter(ActivitiConstants.ACTIVITI_DELETEREASON));
-            handler.handleResult(new Resource(task.getId(), null, new JsonValue(deletedTask)));
+            return newResultPromise(newResourceResponse(task.getId(), null, new JsonValue(deletedTask)));
         } catch (ActivitiObjectNotFoundException ex) {
-            handler.handleError(new NotFoundException(ex.getMessage()));
+            return newExceptionPromise(newNotFoundException(ex.getMessage()));
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 
     @Override
-    public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
-    public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request, QueryResourceHandler handler) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             TaskQuery query = processEngine.getTaskService().createTaskQuery();
@@ -151,7 +167,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 List<Task> list = query.list();
                 for (Task taskInstance : list) {
                     Map value = mapper.convertValue(taskInstance, HashMap.class);
-                    Resource r = new Resource(taskInstance.getId(), null, new JsonValue(value));
+                    ResourceResponse r = newResourceResponse(taskInstance.getId(), null, new JsonValue(value));
                     if (taskInstance.getDelegationState() == DelegationState.PENDING) {
                         r.getContent().add(ActivitiConstants.ACTIVITI_DELEGATE, taskInstance.getAssignee());
                     } else {
@@ -159,26 +175,26 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                     }
                     handler.handleResource(r);
                 }
-                handler.handleResult(new QueryResult());
+                return newResultPromise(newQueryResponse());
             } else {
-                handler.handleError(new BadRequestException("Unknown query-id"));
+                return newExceptionPromise(newBadRequestException("Unknown query-id"));
             }
         } catch (NotSupportedException e) {
-            handler.handleError(e);
+            return newExceptionPromise(cast(e));
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 
     @Override
-    public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             TaskQuery query = processEngine.getTaskService().createTaskQuery();
             query.taskId(resourceId);
             Task task = query.singleResult();
             if (task == null) {
-                handler.handleError(new NotFoundException());
+                return newExceptionPromise(newNotFoundException());
             } else {
                 Map value = mapper.convertValue(task, HashMap.class);
                 TaskFormData data = processEngine.getFormService().getTaskFormData(task.getId());
@@ -203,10 +219,10 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 value.put(ActivitiConstants.ACTIVITI_VARIABLES, variables);
                 value.put("candidates", getCandidateIdentities(task).getObject());
 
-                handler.handleResult(new Resource(task.getId(), null, new JsonValue(value)));
+                return newResultPromise(newResourceResponse(task.getId(), null, new JsonValue(value)));
             }
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 
@@ -233,12 +249,12 @@ public class TaskInstanceResource implements CollectionResourceProvider {
     }
 
     @Override
-    public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             Task task = processEngine.getTaskService().createTaskQuery().taskId(resourceId).singleResult();
             if (task == null) {
-                handler.handleError(new NotFoundException());
+                return newExceptionPromise(newNotFoundException());
             } else {
                 Map value = request.getContent().expect(Map.class).asMap();
                 if (value.containsKey(ActivitiConstants.ACTIVITI_ASSIGNEE)) {
@@ -257,10 +273,10 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 processEngine.getTaskService().saveTask(task);
                 Map<String, String> result = new HashMap<String, String>(1);
                 result.put("Task updated", resourceId);
-                handler.handleResult(new Resource(resourceId, null, new JsonValue(result)));
+                return newResultPromise(newResourceResponse(resourceId, null, new JsonValue(result)));
             }
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 

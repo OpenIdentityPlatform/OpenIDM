@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -27,7 +19,6 @@ import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.javax.el.ELContext;
 import org.activiti.engine.impl.javax.el.ELResolver;
-import org.forgerock.json.resource.ServerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +29,7 @@ import java.util.Map;
 import javax.script.Bindings;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.impl.context.Context;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.JsonValue;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSession;
 import org.forgerock.script.ScriptEntry;
@@ -56,7 +46,6 @@ public class OpenIDMELResolver extends ELResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenIDMELResolver.class);
     private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
-    private PersistenceConfig persistenceConfig;
     private ScriptRegistry scriptRegistry;
 
     public OpenIDMELResolver(Map<String, JavaDelegate> delegateMap) {
@@ -66,14 +55,13 @@ public class OpenIDMELResolver extends ELResolver {
     @Override
     public Object getValue(ELContext context, Object base, Object property) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
-        persistenceConfig = session.getOpenIDMPersistenceConfig();
         scriptRegistry = session.getOpenIDMScriptRegistry();
         Map<String, String> scriptJson = new HashMap<String, String>(3);
         Bindings bindings = null;
         String key = (String) property;
         try {
             JsonValue openidmContext = (JsonValue) context.getELResolver().getValue(context, null, ActivitiConstants.OPENIDM_CONTEXT);
-            ServerContext serverContext = new ServerContext(openidmContext, persistenceConfig);
+            org.forgerock.http.Context serverContext = new ActivitiContext(openidmContext, this.getClass().getClassLoader());
             ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", "groovy"));
             if (script == null) {
                 scriptJson.put("source", "");

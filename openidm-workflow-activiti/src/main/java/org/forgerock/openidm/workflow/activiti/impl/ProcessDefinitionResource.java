@@ -1,33 +1,51 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
- * 
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
- * 
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- * 
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2012-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
+
+import static org.forgerock.json.resource.ResourceException.*;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.forgerock.http.Context;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
+import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,16 +66,14 @@ import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.apache.ibatis.exceptions.PersistenceException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.*;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.ProcessDefinitionMixIn;
 import org.forgerock.util.encode.Base64;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Resource implementation of ProcessDefinition related Activiti operations
@@ -70,11 +86,11 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
 
     static {
         mapper = new ObjectMapper();
-        mapper.getSerializationConfig().addMixInAnnotations(ProcessDefinitionEntity.class, ProcessDefinitionMixIn.class);
-        mapper.getSerializationConfig().addMixInAnnotations(EnumFormType.class, EnumFormTypeMixIn.class);
-        mapper.getSerializationConfig().addMixInAnnotations(DateFormType.class, DateFormTypeMixIn.class);
-        mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        mapper.addMixIn(ProcessDefinitionEntity.class, ProcessDefinitionMixIn.class);
+        mapper.addMixIn(EnumFormType.class, EnumFormTypeMixIn.class);
+        mapper.addMixIn(DateFormType.class, DateFormTypeMixIn.class);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
     public ProcessDefinitionResource(ProcessEngine processEngine) {
@@ -82,96 +98,105 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     }
 
     @Override
-    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnCollection(request));
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnCollection(request));
     }
 
     @Override
-    public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ActionResponse, ResourceException> actionInstance(
+            Context context, String resourceId, ActionRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
-    public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
-    public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> deleteInstance(
+            Context context, String resourceId, DeleteRequest request) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-            ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) processEngine.getRepositoryService().getProcessDefinition(resourceId);
+            ProcessDefinitionEntity processDefinition =
+                    (ProcessDefinitionEntity) processEngine.getRepositoryService().getProcessDefinition(resourceId);
             if (processDefinition != null) {
-                Resource r = convertInstance(processDefinition, request.getFields());
+                ResourceResponse r = convertInstance(processDefinition, request.getFields());
                 processEngine.getRepositoryService().deleteDeployment(processDefinition.getDeploymentId(), false);
-                handler.handleResult(r);
+                return newResultPromise(r);
             } else {
-                handler.handleError(new NotFoundException());
+                return newExceptionPromise(newNotFoundException());
             }
         } catch (ActivitiObjectNotFoundException ex) {
-            handler.handleError(new NotFoundException(ex.getMessage()));
+            return newExceptionPromise(newNotFoundException(ex.getMessage()));
         } catch (PersistenceException ex) {
-            handler.handleError(new ConflictException("The process definition has running instances, can not be deleted"));
+            return newExceptionPromise(
+                    cast(new ConflictException("The process definition has running instances, can not be deleted")));
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage()));
         }
     }
 
     @Override
-    public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> patchInstance(
+            Context context, String resourceId, PatchRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
-    public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection
+            (Context context, QueryRequest request, QueryResourceHandler handler) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             if (ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
-                List<ProcessDefinition> definitionList = processEngine.getRepositoryService().createProcessDefinitionQuery().list();
+                List<ProcessDefinition> definitionList =
+                        processEngine.getRepositoryService().createProcessDefinitionQuery().list();
                 if (definitionList != null && definitionList.size() > 0) {
                     for (ProcessDefinition processDefinition : definitionList) {
                         Map value = mapper.convertValue(processDefinition, HashMap.class);
-                        Resource r = new Resource(processDefinition.getId(), null, new JsonValue(value));
+                        ResourceResponse r = newResourceResponse(processDefinition.getId(), null, new JsonValue(value));
                         handler.handleResource(r);
                     }
                 }
-                handler.handleResult(new QueryResult());
+                return newResultPromise(newQueryResponse());
             } else if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
                 ProcessDefinitionQuery query = processEngine.getRepositoryService().createProcessDefinitionQuery();
                 setProcessDefinitionParams(query, request);
                 List<ProcessDefinition> list = query.list();
                 for (ProcessDefinition processDefinition : list) {
                     Map value = mapper.convertValue(processDefinition, HashMap.class);
-                    Resource r = new Resource(processDefinition.getId(), null, new JsonValue(value));
+                    ResourceResponse r = newResourceResponse(processDefinition.getId(), null, new JsonValue(value));
                     handler.handleResource(r);
                 }
-                handler.handleResult(new QueryResult());
+                return newResultPromise(newQueryResponse());
             } else {
-                handler.handleError(new BadRequestException("Unknown query-id"));
+                return newExceptionPromise(newBadRequestException("Unknown query-id"));
             }
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 
     @Override
-    public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(
+            Context context, String resourceId, ReadRequest request) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             ProcessDefinitionEntity def =
                     (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService())
                             .getDeployedProcessDefinition(resourceId);
-            handler.handleResult(convertInstance(def, request.getFields()));
+            return newResultPromise(convertInstance(def, request.getFields()));
         } catch (ActivitiObjectNotFoundException ex) {
-            handler.handleError(new NotFoundException(ex.getMessage()));
+            return newExceptionPromise(newNotFoundException(ex.getMessage()));
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
         }
     }
 
     @Override
-    public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> updateInstance(
+            Context context, String resourceId, UpdateRequest request) {
+        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
@@ -244,7 +269,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
      * @return converted process definition
      * @throws IOException 
      */
-    private Resource convertInstance(ProcessDefinitionEntity processDefinition, List<JsonPointer> fields)
+    private ResourceResponse convertInstance(ProcessDefinitionEntity processDefinition, List<JsonPointer> fields)
             throws IOException {
         final String deploymentId = processDefinition.getDeploymentId();
         final JsonValue content = new JsonValue(mapper.convertValue(processDefinition, Map.class));
@@ -276,6 +301,6 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
         }
         DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) processDefinition.getStartFormHandler();
         content.put(ActivitiConstants.FORMPROPERTIES, getFormHandlerData(startFormHandler.getFormPropertyHandlers()));
-        return new Resource(processDefinition.getId(), null, content);
+        return newResourceResponse(processDefinition.getId(), null, content);
     }
 }
