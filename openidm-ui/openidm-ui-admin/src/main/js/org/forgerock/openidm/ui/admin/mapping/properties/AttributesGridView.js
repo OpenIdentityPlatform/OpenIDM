@@ -213,7 +213,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                             EditPropertyMappingDialog.render({
                                 id: this.model.attributes.id,
                                 mappingProperties: _this.model.mappingProperties,
-                                availProperties: _this.model.availableObjects.target.properties,
+                                availProperties: _this.model.availableObjects.source.properties,
                                 saveCallback: function(props) {
                                     _this.setMappingProperties(props);
                                 }
