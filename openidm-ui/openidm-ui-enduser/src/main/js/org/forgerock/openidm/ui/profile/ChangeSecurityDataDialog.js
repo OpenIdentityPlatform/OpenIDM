@@ -115,13 +115,13 @@ define("org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog", [
 
             $("#dialogs").hide();
             this.show(_.bind(function() {
+                this.$el.find("input[type=submit]").prop('disabled', true);
+
                 validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
                     $("#dialogs").show();
                     if (!this.reauth_required) {
                         this.reloadData();
                     }
-
-                    this.$el.find("input[type=submit]").prop('disabled', true);
                 }, this));
             }, this));
         },
