@@ -1711,7 +1711,8 @@ Content-Length: 89
    <para>
     You can interact with the audit logs over REST, as shown in the following
     table. Queries on the audit endpoint must use <literal>queryFilter</literal>
-    syntax. Predefined queries are not supported.
+    syntax. Predefined queries (invoked with the <literal>_queryId</literal>
+    parameter) are not supported.
    </para>
 
      <informaltable pgwide="1">
