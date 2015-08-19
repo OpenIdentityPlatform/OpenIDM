@@ -167,7 +167,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             } else if (this.currentDialog.find("#Condition_Script input[name=conditionalUpdate]:checked").val() === "conditionalFilter") {
                 propertyObj.condition = {};
                 propertyObj.condition = this.conditionFilterEditor.getFilterString();
-
+                // applies when the filter option selected is "No Filter"
+                if (propertyObj.condition.length === 0) {
+                    delete propertyObj.condition;
+                }
             } else {
                 delete propertyObj.condition;
             }
