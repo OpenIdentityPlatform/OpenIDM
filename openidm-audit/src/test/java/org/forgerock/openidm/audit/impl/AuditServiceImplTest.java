@@ -53,7 +53,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -116,7 +115,7 @@ public class AuditServiceImplTest {
                 .isNotNull()
                 .succeeded();
         ResourceResponse resourceResponse = promise.getOrThrow();
-        AssertJJsonValueAssert.assertThat(resourceResponse.getContent()).isEqualTo(createRequest.getContent());
+        assertThat(resourceResponse.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
 
     @Test
@@ -133,7 +132,7 @@ public class AuditServiceImplTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .failedWithException()
-                .hasCauseInstanceOf(NotSupportedException.class);
+                .isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -152,7 +151,7 @@ public class AuditServiceImplTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .failedWithException()
-                .hasCauseInstanceOf(NotSupportedException.class);
+                .isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -170,7 +169,7 @@ public class AuditServiceImplTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .failedWithException()
-                .hasCauseInstanceOf(NotSupportedException.class);
+                .isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -189,7 +188,7 @@ public class AuditServiceImplTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .failedWithException()
-                .hasCauseInstanceOf(NotSupportedException.class);
+                .isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -206,7 +205,7 @@ public class AuditServiceImplTest {
         //then
         AssertJPromiseAssert.assertThat(promise)
                 .failedWithException()
-                .hasCauseInstanceOf(BadRequestException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -288,7 +287,7 @@ public class AuditServiceImplTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .failedWithException()
-                .hasCauseInstanceOf(NotSupportedException.class);
+                .isInstanceOf(NotSupportedException.class);
     }
 
     @Test
