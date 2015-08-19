@@ -1,6 +1,6 @@
 {
     "auditServiceConfig" : {
-        "handlerForQueries" : "csv",
+        "handlerForQueries" : "repo",
         "availableAuditEventHandlers" : [
             "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
