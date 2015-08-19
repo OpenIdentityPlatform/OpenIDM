@@ -13,7 +13,7 @@
                 <include>org.forgerock.openidm:openidm-util</include>
                 <include>org.forgerock.openidm:openidm-workflow-activiti</include>
                 <include>org.forgerock.commons:json-fluent</include>
-                <include>org.codehaus.jackson:*</include>
+                <include>com.fasterxml.jackson:*</include>
                 <include>org.slf4j:*</include>
                 <include>org.apache.*:*</include>
                 <include>org.restlet.osgi:org.restlet.ext.httpclient</include>

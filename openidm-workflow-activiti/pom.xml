@@ -71,6 +71,10 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-groovy</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-util</artifactId>
+        </dependency>
 
 
         <dependency>
@@ -181,6 +185,18 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.enterprise</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
         <!-- Provided Dependencies -->
         <dependency>
@@ -235,21 +251,9 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>org.codehaus.jackson</groupId>
-                    <artifactId>jackson-core-asl</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.codehaus.jackson</groupId>
-                    <artifactId>jackson-mapper-asl</artifactId>
-                </dependency>
-                <dependency>
                     <groupId>org.restlet.osgi</groupId>
                     <artifactId>org.restlet.ext.servlet</artifactId>
                     <version>2.1.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.forgerock.commons</groupId>
-                    <artifactId>json-fluent</artifactId>
                 </dependency>
                 <dependency>
                     <groupId>org.restlet.osgi</groupId>

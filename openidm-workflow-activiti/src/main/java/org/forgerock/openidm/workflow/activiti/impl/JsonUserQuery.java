@@ -1,34 +1,25 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2012-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.Page;
@@ -58,7 +49,7 @@ public class JsonUserQuery extends UserQueryImpl {
             QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
             request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
             List<User> userList = new ArrayList<User>();
-            QueryResultHandler handler = new QueryResultHandlerImpl(userList);
+            QueryResourceHandler handler = new QueryResultHandlerImpl(userList);
             identityService.query(request, handler);
             return userList;
         } catch (ResourceException e) {
@@ -76,7 +67,7 @@ public class JsonUserQuery extends UserQueryImpl {
                 request.setQueryId("for-userName");
                 request.setAdditionalParameter("uid", getId());
             }
-            Collection<Resource> result = new ArrayList<Resource>();
+            Collection<ResourceResponse> result = new ArrayList<>();
             identityService.query(request, result);
             return result.size();
         } catch (ResourceException e) {
@@ -94,7 +85,7 @@ public class JsonUserQuery extends UserQueryImpl {
             QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
             request.setQueryId("for-userName");
             request.setAdditionalParameter("uid", id);
-            List<Resource> result = new ArrayList<Resource>();
+            List<ResourceResponse> result = new ArrayList<>();
             identityService.query(request, result);
             if (result.size() > 0) {
                 JsonUser user = new JsonUser(result.get(0).getContent());
@@ -107,7 +98,7 @@ public class JsonUserQuery extends UserQueryImpl {
 
     }
 
-    private class QueryResultHandlerImpl implements QueryResultHandler {
+    private class QueryResultHandlerImpl implements QueryResourceHandler {
 
         private final List<User> userList;
 
@@ -116,17 +107,8 @@ public class JsonUserQuery extends UserQueryImpl {
         }
 
         @Override
-        public void handleError(ResourceException error) {
-            throw new RuntimeException(error);
-        }
-
-        @Override
-        public boolean handleResource(Resource resource) {
+        public boolean handleResource(ResourceResponse resource) {
             return userList.add(readUser(resource.getContent().get(ActivitiConstants.ID).asString()));
-        }
-
-        @Override
-        public void handleResult(QueryResult result) {
         }
     }
 

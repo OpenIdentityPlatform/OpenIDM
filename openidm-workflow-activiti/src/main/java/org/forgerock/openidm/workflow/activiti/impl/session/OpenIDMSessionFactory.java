@@ -1,31 +1,22 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright © 2012 ForgeRock Inc. All rights reserved.
- * 
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
- * 
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- * 
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2012-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl.session;
 
 import org.activiti.engine.impl.interceptor.Session;
 import org.activiti.engine.impl.interceptor.SessionFactory;
-import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.script.ScriptRegistry;
 
 /**
@@ -35,7 +26,6 @@ import org.forgerock.script.ScriptRegistry;
  */
 public class OpenIDMSessionFactory implements SessionFactory {
 
-    private PersistenceConfig persistenceConfig;
     private ScriptRegistry scriptRegistry;
 //    private String url;
 //    private String user;
@@ -76,13 +66,8 @@ public class OpenIDMSessionFactory implements SessionFactory {
      * Creates new OpenIDMSessionFactory
      * @param router Router newBuilder of the OpenIDM
      */
-    public OpenIDMSessionFactory(PersistenceConfig persistenceConfig, ScriptRegistry scriptRegistry) {
-        this.persistenceConfig = persistenceConfig;
+    public OpenIDMSessionFactory(ScriptRegistry scriptRegistry) {
         this.scriptRegistry = scriptRegistry;
-    }
-
-    public void setPersistenceConfig(PersistenceConfig persistenceConfig) {
-        this.persistenceConfig = persistenceConfig;
     }
 
     public void setScriptRegistry(ScriptRegistry scriptRegistry) {
@@ -96,6 +81,6 @@ public class OpenIDMSessionFactory implements SessionFactory {
 
     @Override
     public Session openSession() {
-        return new OpenIDMSessionImpl(persistenceConfig, scriptRegistry);
+        return new OpenIDMSessionImpl(scriptRegistry);
     }
 }
