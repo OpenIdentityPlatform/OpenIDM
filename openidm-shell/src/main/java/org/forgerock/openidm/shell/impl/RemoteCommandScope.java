@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -41,13 +41,13 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
@@ -233,7 +233,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             Map<String, JsonValue> remoteConfigSet = new HashMap<String, JsonValue>();
             try {
-                Resource responseValue = resource.read(null, Requests.newReadRequest("config"));
+                ResourceResponse responseValue = resource.read(null, Requests.newReadRequest("config"));
                 Iterator<JsonValue> iterator = responseValue.getContent().get("configurations").iterator();
                 while (iterator.hasNext()) {
                     JsonValue configValue = iterator.next();
@@ -252,7 +252,7 @@ public class RemoteCommandScope extends CustomCommandScope {
                 return;
             }
 
-            final ResourceName configResource = ResourceName.valueOf("config");
+            final ResourcePath configResource = ResourcePath.valueOf("config");
             for (Map.Entry<String, File> entry : localConfigSet.entrySet()) {
                 try {
                     if (remoteConfigSet.containsKey(entry.getKey())) {
@@ -377,7 +377,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         session.getConsole().append("[ConfigExport] \t").println(targetDir.getAbsolutePath());
 
         try {
-            Resource responseValue = resource.read(null, Requests.newReadRequest("config"));
+            ResourceResponse responseValue = resource.read(null, Requests.newReadRequest("config"));
             Iterator<JsonValue> iterator = responseValue.getContent().get("configurations").iterator();
             String bkpPostfix = "." + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date()) + ".bkp";
             while (iterator.hasNext()) {
@@ -470,7 +470,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             // Phase#1 - Get available connectors
             if (!finalConfig.exists()) {
-                responseValue = resource.action(null, request);
+                responseValue = resource.action(null, request).getJsonContent();
 
                 JsonValue connectorRef = responseValue.get("connectorRef");
                 if (!connectorRef.isNull() && connectorRef.isList()) {
@@ -524,7 +524,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             // Repeatable phase #2 and #3
             request.setContent(new JsonValue(configuration));
-            responseValue = resource.action(null, request);
+            responseValue = resource.action(null, request).getJsonContent();
 
             configuration = responseValue.asMap();
             configuration.put("name", name);
