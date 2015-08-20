@@ -117,7 +117,7 @@ public final class RouteBuilder {
         if ((null == collection) && (null == singleton) && (null == handler)) {
             throw new NullPointerException("Failed because the service is not set");
         }
-        if (uriTemplate != null && uriTemplate.toString().length() > 0) {
+        if (uriTemplate == null || uriTemplate.toString().length() == 0) {
             throw new NullPointerException("Failed because the uriTemplate is not set");
         }
         return this;
