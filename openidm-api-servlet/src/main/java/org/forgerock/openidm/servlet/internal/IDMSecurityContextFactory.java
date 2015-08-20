@@ -24,6 +24,11 @@
 
 package org.forgerock.openidm.servlet.internal;
 
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
@@ -71,7 +76,17 @@ public class IDMSecurityContextFactory implements HttpContextFactory {
     public Context createContext(Context parent, org.forgerock.http.protocol.Request request) throws ResourceException {
 
         final SecurityContextFactory securityContextFactory = SecurityContextFactory.getHttpServletContextFactory();
-        final SecurityContext securityContext = securityContextFactory.createContext(parent);
+        // TODO-crest3 Temporary security context hack while fixing auth - do not merge this evil!! (brmiller)
+        final SecurityContext badSecurityContext = securityContextFactory.createContext(parent);
+        final SecurityContext securityContext = new SecurityContext(badSecurityContext.getParent(),
+                "openidm-admin",
+                json(
+                    object(
+                            field("id", "openidm-admin"),
+                            field("component", "repo/internal/user"),
+                            field("ipAddress", "0:0:0:0:0:0:0:1"),
+                            field("roles", array("openidm-admin", "openidm-authorized"))
+                            )).asMap());
 
         // execute global security context augmentation scripts
         for (ScriptEntry augmentScript : augmentationScripts) {
