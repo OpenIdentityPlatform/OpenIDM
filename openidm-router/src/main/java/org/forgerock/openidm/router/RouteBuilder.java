@@ -163,13 +163,13 @@ public final class RouteBuilder {
         Dictionary<String, Object> properties = new Hashtable<>(5);
         properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
         if (routes.size() == 1) {
-            UriTemplate template = routes.iterator().next().uriTemplate;
+            String template = routes.iterator().next().uriTemplate.toString();
             sb.append(template);
             properties.put(ServerConstants.ROUTER_PREFIX, template);
         } else if (routes.size() > 1) {
             Object[] params = routes.toArray();
             for (int i = 0; i < params.length; i++) {
-                params[i] = ((RouteItem) params[i]).uriTemplate;
+                params[i] = ((RouteItem) params[i]).uriTemplate.toString();
                 if (i > 0) {
                     sb.append(", ");
                 }
