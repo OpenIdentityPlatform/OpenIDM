@@ -412,6 +412,36 @@
             <artifactId>forgerock-audit-handler-csv</artifactId>
         </dependency>
 
+        <!-- TODO-crest3 these are unresolved dependencies from forgerock-chf-?
+             that do not get brought in unless we explicitly name them
+        -->
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-guice-core</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>3.0</version>
+            <classifier>no_aop</classifier>
+            <exclusions>
+                <exclusion>
+                    <artifactId>aopalliance</artifactId>
+                    <groupId>aopalliance</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>javax.inject</artifactId>
+                    <groupId>javax.inject</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+            <version>1_2</version>
+        </dependency>
+
         <!-- OpenICF -->
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
