@@ -33,6 +33,79 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
 ], function ($, _, Backgrid, DateUtil) {
     var obj = {};
 
+    /**
+     * Makes the provided table sortable, expects a jquery object and a data array corresponding to the reordered table rows.
+     *
+     * @param data
+     * @param callback
+     */
+    obj.sortable = function(data, callback) {
+        if (data.grid && data.rows.length > 0) {
+
+            var offset = 0,
+                bottomBounds = 0,
+                topBounds = 0,
+                startIndex = -1,
+                table;
+
+            data.grid.nestingSortable({
+                containerSelector: 'table',
+                itemPath: '> tbody',
+                itemSelector: 'tr',
+                placeholder: '<tr class="placeholder"/>',
+                onMousedown: function ($item, _super, event) {
+                    table = $item.closest(this.containerSelector);
+                    topBounds = table.offset().top;
+                    bottomBounds = topBounds + table.height();
+
+                    offset = event.offsetY;
+
+                    startIndex = table.find("tbody tr").index($item);
+
+                    // set a fixed width of all cells so that when dragging, our cells width doesn't collapse
+                    $('td, th', 'table').each(function () {
+                        var cell = $(this);
+                        cell.width(cell.width());
+                    });
+
+                    if (!event.target.nodeName.match(/^(input|select)$/i)) {
+                        event.preventDefault();
+                        return true;
+                    }
+                },
+
+                onDrag: function ($item, position, _super, event) {
+                    if (position.top - offset >= topBounds && position.top - offset <= bottomBounds) {
+                        $item.css("top", position.top - offset);
+                    }
+                },
+
+                onDrop: function ($item, container, _super, event) {
+                    var endIndex = table.find("tbody tr").index($item),
+                        tempCopy;
+
+                    if (startIndex >= 0 && endIndex >= 0) {
+                        tempCopy = data.rows[startIndex];
+                        data.rows.splice(startIndex, 1);
+                        data.rows.splice(endIndex, 0, tempCopy);
+                    }
+
+                    // remove fixed width so that if content/table is resized then
+                    $('td, th', 'table').each(function () {
+                        var cell = $(this);
+                        cell.css('width', '');
+                    });
+
+                    _super($item, container, _super, event);
+
+                    if (callback) {
+                        callback(data.rows);
+                    }
+                }
+            });
+        }
+    };
+
     obj.formatDate = function(date) {
         var returnDate = "";
         if(date) {

@@ -1,45 +1,43 @@
-<div class="panel-body">
-    <p class="panel-description">{{t "templates.correlation.dataAssociationManagmentInfo"}}</p>
+<p class="panel-description">{{t "templates.correlation.dataAssociationManagmentInfo"}}</p>
 
-    <div id="reconContainer">
+<div id="reconContainer">
 
-        {{#if reconAvailable}}
-        <div id="newLinksWarning" class="changesPending alert-box warning-message" style="display:none;">
-            <div class="alert-message">
-                <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
-                    <span class="message">
-                        <span id="newLinksWarningText"></span>
-                        <button id="doSyncButton" class="btn btn-primary" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
-                            <span class="fa fa-clock-o"></span>
-                            {{t "templates.mapping.syncNow"}}
-                        </button> {{t "templates.mapping.analysis.forResultsToTakeEffect"}}
-                    </span>
-            </div>
+    {{#if reconAvailable}}
+    <div id="newLinksWarning" class="changesPending alert-box warning-message" style="display:none;">
+        <div class="alert-message">
+            <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
+                <span class="message">
+                    <span id="newLinksWarningText"></span>
+                    <button id="doSyncButton" class="btn btn-primary" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
+                        <span class="fa fa-clock-o"></span>
+                        {{t "templates.mapping.syncNow"}}
+                    </button> {{t "templates.mapping.analysis.forResultsToTakeEffect"}}
+                </span>
         </div>
-
-        <form class="form-inline">
-            <div class="form-group">
-                {{t "templates.mapping.analysis.view"}}:
-                <select class="form-control" id="situationSelection">
-                    <option value="{{allSituations}}">{{t "templates.mapping.analysis.allSituations"}}</option>
-                    {{#each situationList}}
-                    <option value="{{key}}">{{key}} ({{value}})</option>
-                    {{/each}}
-                </select>
-            </div>
-            <button id="changeAssociation" class="btn btn-primary actionButton" disabled>{{t "templates.mapping.analysis.changeAssociation"}}</button>
-            {{#unless hideSingleRecordReconButton}}<button id="singleRecordSync" class="btn btn-primary actionButton" disabled>{{t "templates.mapping.analysis.reconcileSelectedRecord"}}</button>{{/unless}}
-        </form>
-
-        <div id="analysisGridContainer">
-            <table class="recon-grid" id="analysisGrid"></table>
-            <div class="recon-pager" id="analysisGridGridPager"></div>
-        </div>
-        {{else}}
-        <button id="doSyncButton" class="btn btn-primary" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
-        <span class="fa fa-clock-o"></span>
-        {{t "templates.mapping.syncNow"}}
-        </button> {{t "templates.mapping.analysis.clickToAnalyze"}}
-        {{/if}}
     </div>
+
+    <form class="form-inline">
+        <div class="form-group">
+            {{t "templates.mapping.analysis.view"}}:
+            <select class="form-control" id="situationSelection">
+                <option value="{{allSituations}}">{{t "templates.mapping.analysis.allSituations"}}</option>
+                {{#each situationList}}
+                <option value="{{key}}">{{key}} ({{value}})</option>
+                {{/each}}
+            </select>
+        </div>
+        <button id="changeAssociation" class="btn btn-primary actionButton" disabled>{{t "templates.mapping.analysis.changeAssociation"}}</button>
+        {{#unless hideSingleRecordReconButton}}<button id="singleRecordSync" class="btn btn-primary actionButton" disabled>{{t "templates.mapping.analysis.reconcileSelectedRecord"}}</button>{{/unless}}
+    </form>
+
+    <div id="analysisGridContainer">
+        <table class="recon-grid" id="analysisGrid"></table>
+        <div class="recon-pager" id="analysisGridGridPager"></div>
+    </div>
+    {{else}}
+    <button id="doSyncButton" class="btn btn-primary" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
+    <span class="fa fa-clock-o"></span>
+    {{t "templates.mapping.syncNow"}}
+    </button> {{t "templates.mapping.analysis.clickToAnalyze"}}
+    {{/if}}
 </div>
