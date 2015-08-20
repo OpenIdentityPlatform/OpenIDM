@@ -54,7 +54,7 @@ exports.fetch = function (resourceName) {
 
     var _ = require('lib/lodash'),
         getException = function (e) {
-            if (_.has(e, "javaException") && _.has(e.javaException, "cause")) {
+            if (_.has(e, "javaException") && _.has(e.javaException, "cause") && e.javaException.cause !== null) {
                 return e.javaException.cause.localizedMessage || e.javaException.cause.message;
             } else if (_.has(e, "messageDetail") && _.has(e.messageDetail, "message")) {
                 return e.messageDetail.message;
