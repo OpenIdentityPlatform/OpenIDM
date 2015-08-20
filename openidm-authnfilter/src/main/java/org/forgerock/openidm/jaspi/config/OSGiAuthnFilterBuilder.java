@@ -26,34 +26,32 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 
-import org.forgerock.jaspi.JaspiRuntimeFilter;
+import org.forgerock.caf.authentication.framework.AuthenticationFilter;
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.base.Predicate;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
+import org.forgerock.openidm.jaspi.auth.AuthenticationService;
+import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
+import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.*;
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
+import static org.forgerock.openidm.jaspi.auth.AuthenticationService.MODULE_CONFIG_ENABLED;
 import static org.forgerock.openidm.jaspi.auth.AuthenticationService.SERVER_AUTH_CONTEXT_KEY;
-import static org.forgerock.openidm.servletregistration.RegisteredFilter.FILTER_ORDER;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS_PATH_URLS;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_URL_PATTERNS;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_INIT_PARAMETERS;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SYSTEM_PROPERTIES;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
+
+import javax.security.auth.message.module.ServerAuthModule;
 
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Configures the authentication chains based on configuration obtained through OSGi.
@@ -94,15 +92,6 @@ import java.util.Map;
  * }
  *     </code>
  * </pre>
- *
- * Also,
- * <pre>
- *     <code>
- *         OSGiAuthnFilterBuilder.getInstance()
- *     </code>
- * </pre>
- * may be used to inject the OSGi dependencies into other modules as an OSGiAuthnFilterHelper.
- *
  */
 @Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
 @Properties({
@@ -120,8 +109,6 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
     private static final int DEFAULT_FILTER_ORDER = 100;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    private static OSGiAuthnFilterBuilder instance;
 
     // ----- Declarative Service Implementation
 
@@ -159,7 +146,10 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
     )
     ServletRegistration servletFilterRegistration;
 
-    private RegisteredFilter filter;
+//    private RegisteredFilter filter;
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.jaspi.config)")
+    private AuthFilterWrapper authFilterWrapper;
 
     /**
      * Configures the commons Authentication Filter with the configuration in the authentication.json file.
@@ -168,12 +158,14 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
      */
     @Activate
     protected void activate(ComponentContext context) throws Exception {
-        instance = this;
-        JsonValue scriptExtensions = config.get(SERVLET_FILTER_SCRIPT_EXTENSIONS);
-        List<String> additionalUrlPatterns = getAdditionalUrlPatterns(config);
-        configureAuthenticationFilter(config);
+        // TODO-crest3/caf2 is there a CHF Filter analogue to script extensions, url patterns
+        // JsonValue scriptExtensions = config.get(SERVLET_FILTER_SCRIPT_EXTENSIONS);
+        // List<String> additionalUrlPatterns = getAdditionalUrlPatterns(config);
 
-        registerAuthnFilter(scriptExtensions, additionalUrlPatterns);
+        authFilterWrapper.setFilter(configureAuthenticationFilter(config));
+
+        // TODO-crest3/caf2 no longer registering servlet filter!
+        // registerAuthnFilter(scriptExtensions, additionalUrlPatterns);
     }
 
     /**
@@ -182,6 +174,7 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
      * @param config The authentication json configuration.
      * @return The additional url parameters, if any.
      */
+    /* TODO-crest3/caf2 chopping block
     private List<String> getAdditionalUrlPatterns(final JsonValue config) {
         List<String> additionalUrlPatterns = config
                 .get(SERVER_AUTH_CONTEXT_KEY)
@@ -191,20 +184,90 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
         config.get(SERVER_AUTH_CONTEXT_KEY).remove(CONFIG_ADDITIONAL_URL_PATTERNS);
         return additionalUrlPatterns;
     }
+    */
 
     /**
      * Configures the commons Authentication Filter with the given configuration.
      *
      * @param jsonConfig The authentication configuration.
      */
-    private void configureAuthenticationFilter(JsonValue jsonConfig) throws Exception {
+    private AuthenticationFilter configureAuthenticationFilter(JsonValue jsonConfig) throws Exception {
 
         if (jsonConfig == null) {
             // No configurations found
             logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
-            return;
+            return null;
         }
-        JaspiRuntimeConfigurationFactory.INSTANCE.setModuleConfiguration(jsonConfig);
+
+        // make copy of config
+        final JsonValue moduleConfig = new JsonValue(jsonConfig);
+        final JsonValue serverAuthContext = moduleConfig.get(SERVER_AUTH_CONTEXT_KEY).required();
+        final JsonValue sessionConfig = serverAuthContext.get(AuthenticationService.SESSION_MODULE_KEY);
+        final JsonValue authModulesConfig = serverAuthContext.get(AuthenticationService.AUTH_MODULES_KEY);
+
+        return AuthenticationFilter.builder()
+                .logger(logger)
+                .auditApi(new JaspiAuditApi(this))
+                .sessionModule(processModuleConfiguration(sessionConfig))
+                        .authModules(
+                                FluentIterable.from(authModulesConfig)
+                                        // transform each module config to a builder
+                                        .transform(new Function<JsonValue, AuthenticationModuleBuilder>() {
+                                            @Override
+                                            public AuthenticationModuleBuilder apply(JsonValue authModuleConfig) {
+                                                return processModuleConfiguration(authModuleConfig);
+                                            }
+                                        })
+                                        // weed out nulls
+                                        .filter(new Predicate<AuthenticationModuleBuilder>() {
+                                                    @Override
+                                                    public boolean apply(AuthenticationModuleBuilder builder) {
+                                                        return builder != null;
+                                                    }
+                                                }
+                                        )
+                                        .toList())
+                        .build();
+    }
+
+    /**
+     * Process the module configuration for a specific module, checking to see if the module is enabled and
+     * resolving the module class name if an alias is used.
+     *
+     * @param moduleConfig The specific module configuration json.
+     * @return Whether the module is enabled or not.
+     */
+    private AuthenticationModuleBuilder processModuleConfiguration(JsonValue moduleConfig) {
+
+        if (moduleConfig.isDefined(MODULE_CONFIG_ENABLED) && !moduleConfig.get(MODULE_CONFIG_ENABLED).asBoolean()) {
+            return null;
+        }
+        moduleConfig.remove(MODULE_CONFIG_ENABLED);
+
+        ServerAuthModule module;
+        if (moduleConfig.isDefined("name")) {
+            module = moduleConfig.get("name").asEnum(IDMAuthModule.class).newInstance(this);
+        } else {
+            logger.warn("Unable to create auth module from config " + moduleConfig.toString());
+            return null;
+        }
+
+        JsonValue moduleProperties = moduleConfig.get("properties");
+        if (moduleProperties.isDefined("privateKeyPassword")) {
+            // decrypt/de-obfuscate privateKey password
+            moduleProperties.put("privateKeyPassword",
+                    JettyPropertyUtil.decryptOrDeobfuscate(moduleProperties.get("privateKeyPassword").asString()));
+        }
+
+        if (moduleProperties.isDefined("keystorePassword")) {
+            // decrypt/de-obfuscate keystore password
+            moduleProperties.put("keystorePassword",
+                    JettyPropertyUtil.decryptOrDeobfuscate(moduleProperties.get("keystorePassword").asString()));
+        }
+
+        // wrap all auth modules in an IDMJaspiModuleWrapper to apply the IDM business logic
+        return configureModule(new IDMJaspiModuleWrapper(this, module))
+                .withSettings(moduleProperties.asMap());
     }
 
     /**
@@ -215,6 +278,7 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
      * @param additionalUrlPatterns additional url patterns to which to apply the filter
      * @throws Exception If a problem occurs whilst registering the filter.
      */
+/*
     private void registerAuthnFilter(JsonValue scriptExtensions, List<String> additionalUrlPatterns)
             throws Exception {
 
@@ -243,6 +307,7 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
 
         filter = servletFilterRegistration.registerFilter(filterConfigJson);
     }
+*/
 
     /**
      * Unregisters the authentication filter.
@@ -251,25 +316,16 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
      */
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        if (filter != null) {
+        if (authFilterWrapper != null) {
             try {
-                servletFilterRegistration.unregisterFilter(filter);
-                JaspiRuntimeConfigurationFactory.INSTANCE.clear();
-                logger.info("Unregistered authentication filter.");
+// TODO-crest3/caf2 no longer registering as servlet filter!
+//                servletFilterRegistration.unregisterFilter(filter);
+//                logger.info("Unregistered authentication filter.");
+                authFilterWrapper.setFilter(AuthFilterWrapper.PASSTHROUGH_FILTER);
             } catch (Exception ex) {
                 logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
             }
         }
-        instance = null;
-    }
-
-    /**
-     * Get this instance of the OSGiAuthnFilterHelper.
-     *
-     * @return the instance of the OSGiAuthnFilterHelper.
-     */
-    public static OSGiAuthnFilterHelper getInstance() {
-        return instance;
     }
 
     // ----- OSGiAuthnFilterHelper Implementation

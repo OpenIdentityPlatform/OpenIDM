@@ -18,7 +18,7 @@ package org.forgerock.openidm.jaspi.config;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
-import org.forgerock.jaspi.runtime.AuditApi;
+import org.forgerock.caf.authentication.framework.AuditApi;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
@@ -39,10 +39,6 @@ public class JaspiAuditApi implements AuditApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(JaspiAuditApi.class);
 
     private final OSGiAuthnFilterHelper authnFilterHelper;
-
-    public JaspiAuditApi() {
-        this(OSGiAuthnFilterBuilder.getInstance());
-    }
 
     JaspiAuditApi(OSGiAuthnFilterHelper authnFilterHelper) {
         this.authnFilterHelper = authnFilterHelper;

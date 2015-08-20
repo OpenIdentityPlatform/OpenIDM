@@ -51,6 +51,14 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>*</Import-Package>
+                        <Export-Package>
+                            org.forgerock.openidm.jaspi.config;version=${project.version}
+                        </Export-Package>
+                    </instructions>
+                </configuration>
                 <!--<configuration>-->
                     <!--<instructions>-->
                         <!--<Export-Package>-->
@@ -67,6 +75,11 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet-registrator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-api-servlet</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -132,6 +145,11 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-audit-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>forgerock-guava-collect</artifactId>
         </dependency>
 
         <!-- OSGI Dependencies -->
