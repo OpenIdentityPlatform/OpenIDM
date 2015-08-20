@@ -34,7 +34,7 @@ import org.forgerock.json.resource.UpdateRequest
 if (request instanceof CreateRequest) {
     return [
             method: "create",
-            resourceName: request.resourceName,
+            resourceName: request.resourcePath,
             newResourceId: request.newResourceId,
             parameters: request.additionalParameters,
             content: request.content.getObject(),
@@ -43,14 +43,14 @@ if (request instanceof CreateRequest) {
 } else if (request instanceof ReadRequest) {
     return [
             method: "read",
-            resourceName: request.resourceName,
+            resourceName: request.resourcePath,
             parameters: request.additionalParameters,
             context: context
     ]
 } else if (request instanceof UpdateRequest) {
     return [
             method: "update",
-            resourceName: request.resourceName,
+            resourceName: request.resourcePath,
             revision: request.revision,
             parameters: request.additionalParameters,
             content: request.content.getObject(),
@@ -59,7 +59,7 @@ if (request instanceof CreateRequest) {
 } else if (request instanceof PatchRequest) {
     return [
             method: "patch",
-            resourceName: request.resourceName,
+            resourceName: request.resourcePath,
             revision: request.revision,
             patch: request.patchOperations,
             parameters: request.additionalParameters,
@@ -70,7 +70,7 @@ if (request instanceof CreateRequest) {
     return [
             [
                     method: "query",
-                    resourceName: request.resourceName,
+                    resourceName: request.resourcePath,
                     pagedResultsCookie: request.pagedResultsCookie,
                     pagedResultsOffset: request.pagedResultsOffset,
                     pageSize: request.pageSize,
@@ -84,7 +84,7 @@ if (request instanceof CreateRequest) {
 } else if (request instanceof DeleteRequest) {
     return [
             method: "delete",
-            resourceName: request.resourceName,
+            resourceName: request.resourcePath,
             revision: request.revision,
             parameters: request.additionalParameters,
             context: context

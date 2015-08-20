@@ -386,8 +386,8 @@ policyImpl = (function (){
         
         // since this function runs on both the client and the server, we need to 
         // check for the presence of our server-side functions before using them.
-        if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.resourceName && !request.resourceName.match('/*$')) {
-            fullObject_server = openidm.read(request.resourceName);
+        if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.resourcePath && !request.resourcePath.match('/*$')) {
+            fullObject_server = openidm.read(request.resourcePath);
             if (fullObject_server === null) {
                 fullObject_server = {};
             }
@@ -456,8 +456,8 @@ policyImpl = (function (){
                 || (request.additionalParameters !== null && typeof request.additionalParameters.external !== "undefined")) {
 
             // don't do a read if the resource ends with "/*", which indicates that this is a new record
-            if (typeof request.resourceName === "string" && !request.resourceName.match('/\\*$')) { 
-                currentObject = openidm.read(request.resourceName);
+            if (typeof request.resourcePath === "string" && !request.resourcePath.match('/\\*$')) { 
+                currentObject = openidm.read(request.resourcePath);
 
                 // if the given resource doesn't exist, this also indicates that 
                 // this is a new record (likely a client-assigned ID)
@@ -781,19 +781,19 @@ policyProcessor = (function (policyConfig,policyImpl){
             props,
             prop;
         
-        if (request.resourceName !== null && request.resourceName !== undefined) {
+        if (request.resourcePath !== null && request.resourcePath !== undefined) {
             // Get the policy configuration for the specified resource
-            resource = getResource(resources, request.resourceName);
+            resource = getResource(resources, request.resourcePath);
             if (resource === null ) {
                 resource = {};
-                resource.resource = request.resourceName;
+                resource.resource = request.resourcePath;
                 resource.properties = [];
             }
             // Update the policy configuration with any resource specific
-            updateResourceConfig(resource, request.resourceName);
+            updateResourceConfig(resource, request.resourcePath);
         }
         if (method === "read") {
-            if (request.resourceName === null || request.resourceName === "") {
+            if (request.resourcePath === null || request.resourcePath === "") {
                 compArray = [];
                 for (i = 0; i < resources.length; i++) {
                     rsrc = resources[i];
@@ -808,7 +808,7 @@ policyProcessor = (function (policyConfig,policyImpl){
             action = request.action;
             failedPolicyRequirements = [];
             returnObject = {};
-            if (request.resourceName === null) {
+            if (request.resourcePath === null) {
                 throw "No resource specified";
             }
             if (resource === null) {
