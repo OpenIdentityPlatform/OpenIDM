@@ -46,7 +46,7 @@
         return res;
 
     } else if (request.method === "delete") {
-        notification = openidm.read("repo/ui/notification/"+request.resourceName);
+        notification = openidm.read("repo/ui/notification/"+request.resourcePath);
 
         if(notification !== null) {
             if (notification.receiverId === userId) {

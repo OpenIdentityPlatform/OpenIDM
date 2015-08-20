@@ -99,7 +99,7 @@ switch (operation) {
                         }
                     }
 
-                    UpdateRequest updateRequest = Requests.newUpdateRequest(request.resourceName, resource.content)
+                    UpdateRequest updateRequest = Requests.newUpdateRequest(request.resourcePath, resource.content)
                     updateRequest.setRevision(resource.revision)
                     updateRequest.addField("_id", "_rev")
                     def r = connection.update(new RootContext(), updateRequest)

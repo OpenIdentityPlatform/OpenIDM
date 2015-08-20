@@ -28,15 +28,15 @@ var fullResourcePath,
 
 enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
 
-if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
+if (request.resourcePath.indexOf("policy/") !== 0 && enforce !== "false") {
     if (request.method === "create") {
-        if (request.resourceName === "") {
+        if (request.resourcePath === "") {
             fullResourcePath = request.newResourceId !== null ? request.newResourceId : "*";
         } else {
-            fullResourcePath = request.resourceName + "/" + (request.newResourceId !== null ? request.newResourceId : "*");
+            fullResourcePath = request.resourcePath + "/" + (request.newResourceId !== null ? request.newResourceId : "*");
         }
     } else {
-        fullResourcePath = request.resourceName;
+        fullResourcePath = request.resourcePath;
     }
 
     result = openidm.action("policy/" + fullResourcePath, "validateObject", request.content, { "external" : "true" });

@@ -25,7 +25,7 @@
     if (request.method === "create") {
         return {
                 method: "create",
-                resourceName: request.resourceName,
+                resourceName: request.resourcePath,
                 newResourceId: request.newResourceId,
                 parameters: request.additionalParameters,
                 content: request.content,
@@ -34,14 +34,14 @@
     } else if (request.method === "read") {
         return {
                 method: "read",
-                resourceName: request.resourceName,
+                resourceName: request.resourcePath,
                 parameters: request.additionalParameters,
                 context: context.current
                 };
     } else if (request.method === "update") {
         return {
                 method: "update",
-                resourceName: request.resourceName,
+                resourceName: request.resourcePath,
                 revision: request.revision,
                 parameters: request.additionalParameters,
                 content: request.content,
@@ -50,7 +50,7 @@
     } else if (request.method === "patch") {
         return {
                 method: "patch",
-                resourceName: request.resourceName,
+                resourceName: request.resourcePath,
                 revision: request.revision,
                 parameters: request.additionalParameters,
                 patch: request.patchOperations,
@@ -60,7 +60,7 @@
         // query results must be returned as a list of maps
         return [ {
                 method: "query",
-                resourceName: request.resourceName,
+                resourceName: request.resourcePath,
                 pagedResultsCookie: request.pagedResultsCookie,
                 pagedResultsOffset: request.pagedResultsOffset,
                 pageSize: request.pageSize,
@@ -74,7 +74,7 @@
     } else if (request.method === "delete") {
         return {
                 method: "delete",
-                resourceName: request.resourceName,
+                resourceName: request.resourcePath,
                 revision: request.revision,
                 parameters: request.additionalParameters,
                 context: context.current

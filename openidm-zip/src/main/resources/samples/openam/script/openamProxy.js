@@ -65,7 +65,7 @@
         };
     }
 
-    proxyRequest.url = authModule.properties.openamDeploymentUrl + "/" + request.resourceName;
+    proxyRequest.url = authModule.properties.openamDeploymentUrl + "/" + request.resourcePath;
 
     if (request.action === "logout") {
         proxyRequest.url += "?_action=logout";
