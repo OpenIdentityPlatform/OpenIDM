@@ -63,7 +63,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.openidm.jaspi.config.JaspiRuntimeConfigurationFactory.MODULE_CONFIG_ENABLED;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.PROPERTY_MAPPING;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ID;
@@ -96,6 +95,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
     public static final String AUTH_MODULES_KEY = "authModules";
     public static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
     public static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
+    public static final String MODULE_CONFIG_ENABLED = "enabled";
 
     private JsonValue config;
 

@@ -20,6 +20,8 @@ import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.jaspi.modules.session.openam.OpenAMSessionModule;
 import org.forgerock.jaspi.modules.iwa.IWAModule;
 import org.forgerock.jaspi.modules.openid.OpenIdConnectModule;
+import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 
 import javax.security.auth.message.module.ServerAuthModule;
 
@@ -29,25 +31,78 @@ import javax.security.auth.message.module.ServerAuthModule;
 public enum IDMAuthModule {
 
     /** JWT Session Auth Module. */
-    JWT_SESSION(JwtSessionModule.class),
+    JWT_SESSION(JwtSessionModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return new JwtSessionModule();
+        }
+    },
     /** OpenAM Session Auth Module. */
-    OPENAM_SESSION(OpenAMSessionModule.class),
+    OPENAM_SESSION(OpenAMSessionModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return new OpenAMSessionModule();
+        }
+    },
     /** Client-cert Auth Module. */
-    CLIENT_CERT(ClientCertAuthModule.class),
+    CLIENT_CERT(ClientCertAuthModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return new ClientCertAuthModule();
+        }
+    },
     /** Delegated auth module using an {@link org.forgerock.openidm.jaspi.auth.Authenticator} */
-    DELEGATED(DelegatedAuthModule.class),
+    DELEGATED(DelegatedAuthModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return new DelegatedAuthModule(authnFilterHelper,
+                    new AuthenticatorFactory(
+                            authnFilterHelper.getConnectionFactory(),
+                            authnFilterHelper.getCryptoService()));
+        }
+    },
     /** Managed User Auth Module. */
-    MANAGED_USER(DelegatedAuthModule.class),
+    MANAGED_USER(DelegatedAuthModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return DELEGATED.newInstance(authnFilterHelper);
+        }
+    },
     /** Internal User Auth Module. */
-    INTERNAL_USER(DelegatedAuthModule.class),
+    INTERNAL_USER(DelegatedAuthModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return DELEGATED.newInstance(authnFilterHelper);
+        }
+    },
     /** Static User Auth Module. */
-    STATIC_USER(DelegatedAuthModule.class),
+    STATIC_USER(DelegatedAuthModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return DELEGATED.newInstance(authnFilterHelper);
+        }
+    },
     /** Passthrough to OpenICF connector Auth Module. */
-    PASSTHROUGH(DelegatedAuthModule.class),
+    PASSTHROUGH(DelegatedAuthModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return DELEGATED.newInstance(authnFilterHelper);
+        }
+    },
     /** IWA Auth Module. */
-    IWA(IWAModule.class),
+    IWA(IWAModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return new IWAModule();
+        }
+    },
     /** OpenID Connect Auth Module. */
-    OPENID_CONNECT(OpenIdConnectModule.class);
+    OPENID_CONNECT(OpenIdConnectModule.class) {
+        @Override
+        public ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+            return new OpenIdConnectModule();
+        }
+    };
 
     private Class<? extends ServerAuthModule> clazz;
 
@@ -68,4 +123,6 @@ public enum IDMAuthModule {
     public Class<? extends ServerAuthModule> getAuthModuleClass() {
         return clazz;
     }
+
+    public abstract ServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper);
 }

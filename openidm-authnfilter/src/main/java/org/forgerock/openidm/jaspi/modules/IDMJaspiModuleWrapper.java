@@ -18,7 +18,7 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -27,7 +27,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Responses;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.ScriptEntry;
@@ -52,7 +51,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
+import static org.forgerock.authz.filter.http.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT;
@@ -93,7 +92,6 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
     public static final String AUTHENTICATED_RESOURCE = "org.forgerock.openidm.authentication.resource";
 
     private final OSGiAuthnFilterHelper authnFilterHelper;
-    private final AuthModuleConstructor authModuleConstructor;
     private final AugmentationScriptExecutor augmentationScriptExecutor;
 
     /** an security context augmentation script, if configured */
@@ -101,8 +99,9 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
     private final RoleCalculatorFactory roleCalculatorFactory;
 
+    private final ServerAuthModule authModule;
+
     private JsonValue properties = json(object());
-    private ServerAuthModule authModule;
     private String logClientIPHeader = null;
     private String queryOnResource;
     private Function<QueryRequest, ResourceResponse, ResourceException> queryExecutor;
@@ -111,13 +110,13 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
     /**
      * Constructs a new instance of the IDMJaspiModuleWrapper.
+     *
+     * @param authnFilterHelper An instance of the OSGiAuthnFilterHelper.
+     * @param authModule The auth module wrapped by this module.
      */
-    public IDMJaspiModuleWrapper() throws AuthException {
-        this.authnFilterHelper = OSGiAuthnFilterBuilder.getInstance();
-        if (authnFilterHelper == null) {
-            throw new AuthException("OSGiAuthnFilterHelper is not ready.");
-        }
-        this.authModuleConstructor = new AuthModuleConstructor();
+    public IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper, ServerAuthModule authModule) {
+        this.authnFilterHelper = authnFilterHelper;
+        this.authModule = authModule;
         this.roleCalculatorFactory = new RoleCalculatorFactory();
         this.augmentationScriptExecutor = new AugmentationScriptExecutor(authnFilterHelper);
     }
@@ -126,16 +125,16 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * Constructs a new instance of the IDMJaspiModuleWrapper with the provided parameters, for test use.
      *
      * @param authnFilterHelper An instance of the OSGiAuthnFilterHelper.
-     * @param authModuleConstructor An instance of the AuthModuleConstructor.
+     * @param authModule The auth module wrapped by this module.
      * @param roleCalculatorFactory An instance of the RoleCalculatorFactory.
      * @param augmentationScriptExecutor An instance of the AugmentationScriptExecutor.
      */
     IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper,
-            AuthModuleConstructor authModuleConstructor,
+            ServerAuthModule authModule,
             RoleCalculatorFactory roleCalculatorFactory,
             AugmentationScriptExecutor augmentationScriptExecutor) {
         this.authnFilterHelper = authnFilterHelper;
-        this.authModuleConstructor = authModuleConstructor;
+        this.authModule = authModule;
         this.roleCalculatorFactory = roleCalculatorFactory;
         this.augmentationScriptExecutor = augmentationScriptExecutor;
     }
@@ -177,7 +176,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
             CallbackHandler handler, Map options) throws AuthException {
 
         properties = new JsonValue(options);
-        authModule = authModuleConstructor.construct(properties.get("authModuleClassName").asString());
+//        authModule = authModuleConstructor.construct(properties.get("authModuleClassName").asString());
         authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options);
 
         logClientIPHeader = properties.get("clientIPHeader").asString();
@@ -238,14 +237,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      *
      * @param scriptConfig The script config.
      * @return The ScriptEntry.
-     * @throws JaspiAuthException If there is a problem retrieving the ScriptEntry.
+     * @throws AuthenticationException If there is a problem retrieving the ScriptEntry.
      */
-    ScriptEntry getAugmentScript(JsonValue scriptConfig) throws JaspiAuthException {
+    ScriptEntry getAugmentScript(JsonValue scriptConfig) throws AuthenticationException {
         try {
             return authnFilterHelper.getScriptRegistry().takeScript(scriptConfig);
         } catch (ScriptException e) {
             logger.error("{} when attempting to register script {}", e.toString(), scriptConfig, e);
-            throw new JaspiAuthException(e.toString(), e);
+            throw new AuthenticationException(e.toString(), e);
         }
     }
 
@@ -286,7 +285,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         if (principalName == null) {
             // As per Jaspi spec, the module developer MUST ensure that the client
             // subject's principal is set when the module returns SUCCESS.
-            throw new JaspiAuthException(
+            throw new AuthenticationException(
                     "Underlying Server Auth Module has not set the client subject's principal!");
         }
 
@@ -330,7 +329,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                 logger.debug("Failed role calculation for {} on {}.", principalName, queryOnResource, e);
             }
             if (e.isServerError()) { // HTTP server-side error; AuthException sadly does not accept cause
-                throw new JaspiAuthException("Failed pass-through authentication of " + principalName + " on "
+                throw new AuthenticationException("Failed pass-through authentication of " + principalName + " on "
                         + queryOnResource + ":" + e.getMessage(), e);
             }
             // role calculation failed
@@ -423,14 +422,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
          *
          * @param authModuleClassName The ServerAuthModule class name.
          * @return The ServerAuthModule instance.
-         * @throws JaspiAuthException If there is any problem creating the ServerAuthModule instance.
+         * @throws AuthenticationException If there is any problem creating the ServerAuthModule instance.
          */
-        ServerAuthModule construct(String authModuleClassName) throws JaspiAuthException {
+        ServerAuthModule construct(String authModuleClassName) throws AuthenticationException {
              try {
                  return Class.forName(authModuleClassName).asSubclass(ServerAuthModule.class).newInstance();
              } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                  logger.error("Failed to construct Auth Module instance", e);
-                 throw new JaspiAuthException("Failed to construct Auth Module instance", e);
+                 throw new AuthenticationException("Failed to construct Auth Module instance", e);
              }
         }
     }

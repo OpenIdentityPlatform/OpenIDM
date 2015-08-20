@@ -28,15 +28,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.framework.AuditTrail;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.AuditTrail;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
+import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +61,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
     private final static Logger logger = LoggerFactory.getLogger(DelegatedAuthModule.class);
 
     private final OSGiAuthnFilterHelper authnFilterHelper;
+    private final AuthenticatorFactory authenticatorFactory;
 
     private String queryOnResource;
     private Authenticator authenticator;
@@ -68,23 +69,15 @@ public class DelegatedAuthModule implements ServerAuthModule {
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
-     */
-    public DelegatedAuthModule() throws AuthException {
-        authnFilterHelper = OSGiAuthnFilterBuilder.getInstance();
-        if (authnFilterHelper == null) {
-            throw new AuthException("OSGiAuthnFilterHelper is not ready.");
-        }
-    }
-
-    /**
-     * Constructor used by tests to inject dependencies.
      *
-     * @param authnFilterHelper A mock of an OSGiAuthnFilterHelper
-     * @param authenticator A mock of an PassthroughAuthenticator instance.
+     * @param authnFilterHelper
+     * @param authenticatorFactory
      */
-    DelegatedAuthModule(OSGiAuthnFilterHelper authnFilterHelper, Authenticator authenticator) {
+    public DelegatedAuthModule(OSGiAuthnFilterHelper authnFilterHelper, AuthenticatorFactory authenticatorFactory) {
+        Reject.ifNull(authnFilterHelper, "AuthnFilterHelper cannot be null");
+        Reject.ifNull(authenticatorFactory, "AuthenticationFactory cannot be null");
         this.authnFilterHelper = authnFilterHelper;
-        this.authenticator = authenticator;
+        this.authenticatorFactory = authenticatorFactory;
     }
 
     /**
@@ -107,9 +100,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
             Map options) throws AuthException {
 
         queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
-        authenticator = new AuthenticatorFactory(
-                authnFilterHelper.getConnectionFactory(), authnFilterHelper.getCryptoService())
-            .apply(new JsonValue(options));
+        authenticator = authenticatorFactory.apply(new JsonValue(options));
     }
 
     /**
@@ -190,7 +181,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
             logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
             messageInfo.getMap().put(AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());
             if (e.isServerError()) { // HTTP server-side error
-                throw new JaspiAuthException(
+                throw new AuthenticationException(
                         "Failed delegated authentication of " + credential.username + " on " + queryOnResource, e);
             }
             // authentication failed
