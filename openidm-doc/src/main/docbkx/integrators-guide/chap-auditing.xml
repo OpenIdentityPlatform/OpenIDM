@@ -341,7 +341,8 @@
   <para>
    Only one audit event handler can be configured to manage queries on the
    audit logs. The audit query handler can be any one of the event handlers
-   described in the previous section.
+   described in the previous section. The default audit query handler is the
+   OpenIDM repository.
   </para>
   <para>
    To specify which audit event handler should be used for queries, set the
@@ -350,7 +351,7 @@
   </para>
   <programlisting language="javascript">{
     "auditServiceConfig" : {
-        "handlerForQueries" : "csv"
+        "handlerForQueries" : "repo"
     },
 ...</programlisting>
  </section>
