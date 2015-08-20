@@ -1,64 +1,64 @@
-<div class="panel-body">
-    <div class="row">
-        <div class="col-md-6">
-            <select class="correlationQueryType form-control">
-                <option value="none">{{t "templates.correlation.noQuery"}}</option>
-                <option value="queries">{{t "templates.correlation.queries"}}</option>
-                <option value="script">{{t "templates.correlation.correlationScript"}}</option>
-            </select>
-        </div>
-        <div class="group-body correlationQueries col-md-12">
-            <p class="help-paragraph">
-                {{t "templates.correlation.correlationQueryHelp"}}
-            </p>
-            <table class="table">
-                <tbody>
-                <tr>
-                    <th>
-                        {{t "templates.correlation.type"}}
-                    </th>
-                    <th>
-                        {{t "templates.correlation.status"}}
-                    </th>
-                    <th></th>
-                </tr>
-                {{#each correlationQueries}}
-                <tr data-script-type="validTarget" class="group row-{{linkQualifier}}{{#if deleted}} disabled{{/if}}">
-                    <td>
-                            <span class="linkQualifierContainer">{{t "templates.correlation.linkQualifier"}}:
-                                <span class="linkQualifierLabel{{#if error}} linkQualifierError{{/if}}">{{linkQualifier}}</span>
-                            </span>
-                    </td>
-                    <td class="status-column">
-                            <span class="status{{#if deleted}} deleted{{/if}}">
-                                {{#if deleted}} ({{t "templates.correlation.deleted"}} <span class="undo">{{t "templates.correlation.undo"}}</span>){{/if}}
-                                {{#if edited}} ({{t "templates.correlation.edited"}} <span class="undo">{{t "templates.correlation.undo"}}</span>){{/if}}
-                                {{#if added}} ({{t "templates.correlation.added"}}){{/if}}
-                            </span>
-                    </td>
-                    <td class="text-right event-hook-body">
-                        <span class="icon-button edit"><i class="fa fa-pencil"></i></span>
-                        <span class="icon-button trash"><i class="fa fa-times-circle"></i></span>
-                    </td>
-
-                </tr>
-                {{/each}}
-                </tbody>
-            </table>
-            <button id="addNewCorrelationQuery" class="btn btn-primary" {{#if noLinkQualifiers}} disabled="true" {{/if}}><i class="fa fa-plus"></i> {{t "templates.correlation.addQuery"}}</button>
-        </div>
-        <div id="correlationScriptBody" class="group-body col-md-12">
-            <p class="help-paragraph">
-                {{t "templates.correlation.correlationScriptHelp"}}
-            </p>
-            <div id="correlationScriptContent"></div>
-        </div>
+<div class="row">
+    <div class="col-md-6">
+        <select class="correlationQueryType form-control">
+            <option value="none">{{t "templates.correlation.noQuery"}}</option>
+            <option value="queries">{{t "templates.correlation.queries"}}</option>
+            <option value="script">{{t "templates.correlation.correlationScript"}}</option>
+        </select>
     </div>
-    <div role="alert" class="changesPending alert alert-warning correlationQueryChangesMsg">
-        <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.correlation.warning"}}!</strong>
-        <span class="message">{{t "templates.correlation.changesPending"}}</span>
+    <div class="group-body correlationQueries col-md-12">
+        <p class="help-paragraph">
+            {{t "templates.correlation.correlationQueryHelp"}}
+        </p>
+        <table class="table">
+            <tbody>
+            <tr>
+                <th>
+                    {{t "templates.correlation.type"}}
+                </th>
+                <th>
+                    {{t "templates.correlation.status"}}
+                </th>
+                <th></th>
+            </tr>
+            {{#each correlationQueries}}
+            <tr data-script-type="validTarget" class="group row-{{linkQualifier}}{{#if deleted}} disabled{{/if}}">
+                <td>
+                        <span class="linkQualifierContainer">{{t "templates.correlation.linkQualifier"}}:
+                            <span class="linkQualifierLabel{{#if error}} linkQualifierError{{/if}}">{{linkQualifier}}</span>
+                        </span>
+                </td>
+                <td class="status-column">
+                        <span class="status{{#if deleted}} deleted{{/if}}">
+                            {{#if deleted}} ({{t "templates.correlation.deleted"}} <span class="undo">{{t "templates.correlation.undo"}}</span>){{/if}}
+                            {{#if edited}} ({{t "templates.correlation.edited"}} <span class="undo">{{t "templates.correlation.undo"}}</span>){{/if}}
+                            {{#if added}} ({{t "templates.correlation.added"}}){{/if}}
+                        </span>
+                </td>
+                <td class="text-right event-hook-body">
+                    <span class="icon-button edit"><i class="fa fa-pencil"></i></span>
+                    <span class="icon-button trash"><i class="fa fa-times-circle"></i></span>
+                </td>
+
+            </tr>
+            {{/each}}
+            </tbody>
+        </table>
+        <button id="addNewCorrelationQuery" class="btn btn-primary" {{#if noLinkQualifiers}} disabled="true" {{/if}}><i class="fa fa-plus"></i> {{t "templates.correlation.addQuery"}}</button>
+    </div>
+    <div id="correlationScriptBody" class="group-body col-md-12">
+        <p class="help-paragraph">
+            {{t "templates.correlation.correlationScriptHelp"}}
+        </p>
+        <div id="correlationScriptContent"></div>
     </div>
 </div>
+
+<div role="alert" class="changesPending alert alert-warning correlationQueryChangesMsg">
+    <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.correlation.warning"}}!</strong>
+    <span class="message">{{t "templates.correlation.changesPending"}}</span>
+</div>
+
 <div class="panel-footer clearfix">
     <input type="button" disabled class="saveCorrelationQuery btn btn-primary pull-right" value="{{t "common.form.save"}}"/>
     <input type="button" disabled class="resetCorrelationQuery btn btn-default pull-right" value="{{t "common.form.reset"}}"/>

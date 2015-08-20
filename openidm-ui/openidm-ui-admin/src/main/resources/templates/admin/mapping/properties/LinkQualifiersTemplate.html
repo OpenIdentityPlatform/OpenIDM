@@ -1,53 +1,51 @@
-<div class="panel-body">
-    <form class="">
-        <div role="tabpanel" class="tab-pane">
-            <p>{{t "templates.correlation.linkQualifierInfo"}}</p>
+<form class="">
+    <div role="tabpanel" class="tab-pane">
+        <p>{{t "templates.correlation.linkQualifierInfo"}}</p>
 
-            <div class="btn-group btn-group-tabs" data-toggle="btns" id="linkQualifierTabs">
-                <a role="presentation" id="staticQualifierTab" class="btn btn-default active" href="#staticLinkQualifier" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.correlation.static"}}</a>
-                <a role="presentation" id="scriptQualifierTab" class="btn btn-default" href="#scriptLinkQualifier" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.correlation.dynamic"}}</a>
-            </div>
+        <div class="btn-group btn-group-tabs" data-toggle="btns" id="linkQualifierTabs">
+            <a role="presentation" id="staticQualifierTab" class="btn btn-default active" href="#staticLinkQualifier" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.correlation.static"}}</a>
+            <a role="presentation" id="scriptQualifierTab" class="btn btn-default" href="#scriptLinkQualifier" aria-controls="home" role="tab" data-toggle="tab">{{t "templates.correlation.dynamic"}}</a>
+        </div>
 
-            <div id="linkQualifierTabBodies" class="tab-content">
-                <div class="tab-pane active" id="staticLinkQualifier">
-                    <p>{{t "templates.correlation.linkQualifierStaticInfo"}}</p>
-                    <div class="form-group addLinkQualifierContainer">
-                        <div class="input-group">
-                            <input class="form-control newLinkQualifier" autocomplete="off" type="text" placeholder="{{t "templates.correlation.linkQualifier"}}" />
-                            <div class="input-group-addon">
-                                <button type="button" class="addLinkQualifier clean-btn">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </div>
+        <div id="linkQualifierTabBodies" class="tab-content">
+            <div class="tab-pane active" id="staticLinkQualifier">
+                <p>{{t "templates.correlation.linkQualifierStaticInfo"}}</p>
+                <div class="form-group addLinkQualifierContainer">
+                    <div class="input-group">
+                        <input class="form-control newLinkQualifier" autocomplete="off" type="text" placeholder="{{t "templates.correlation.linkQualifier"}}" />
+                        <div class="input-group-addon">
+                            <button type="button" class="addLinkQualifier clean-btn">
+                                <i class="fa fa-plus"></i>
+                            </button>
                         </div>
                     </div>
-                    <div id="staticLinkQualifierList">
-                        {{#each linkQualifiers}}
-                        <button type="button" class="removeLinkQualifier btn btn-primary" {{#if ../doNotDelete}} disabled=true {{/if}}>
-                        <span class="linkQualifier">{{this}}</span>
-                        <i class="fa fa-times fa-lg"></i>
-                        </button>
-                        {{/each}}
-                    </div>
-                    <div role="alert" class="notValid alert alert-warning" style="display:none;">
-                        <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.correlation.warning"}}!</strong>
-                        <span class="message">{{t "templates.mapping.uniqueLinkQualifiers"}}</span>
-                    </div>
                 </div>
-                <div class="tab-pane" id="scriptLinkQualifier">
-                    <p>{{t "templates.correlation.linkQualifierScriptInfo"}}</p>
-                    <div id="scriptLinkQualifierBody"></div>
-                    <div id="scriptLinkQualifierList"></div>
+                <div id="staticLinkQualifierList">
+                    {{#each linkQualifiers}}
+                    <button type="button" class="removeLinkQualifier btn btn-primary" {{#if ../doNotDelete}} disabled=true {{/if}}>
+                    <span class="linkQualifier">{{this}}</span>
+                    <i class="fa fa-times fa-lg"></i>
+                    </button>
+                    {{/each}}
+                </div>
+                <div role="alert" class="notValid alert alert-warning" style="display:none;">
+                    <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.correlation.warning"}}!</strong>
+                    <span class="message">{{t "templates.mapping.uniqueLinkQualifiers"}}</span>
+                </div>
+            </div>
+            <div class="tab-pane" id="scriptLinkQualifier">
+                <p>{{t "templates.correlation.linkQualifierScriptInfo"}}</p>
+                <div id="scriptLinkQualifierBody"></div>
+                <div id="scriptLinkQualifierList"></div>
 
-                    <div role="alert" id="badLinkQualifierScript" class="alert alert-danger" style="display:none;">
-                        <i class="fa fa-exclamation-circle"></i><strong>{{t "common.form.error"}}!</strong>
-                        <span class="message"></span>
-                    </div>
+                <div role="alert" id="badLinkQualifierScript" class="alert alert-danger" style="display:none;">
+                    <i class="fa fa-exclamation-circle"></i><strong>{{t "common.form.error"}}!</strong>
+                    <span class="message"></span>
                 </div>
             </div>
         </div>
-    </form>
-</div>
+    </div>
+</form>
 <div class="panel-footer clearfix">
     <input type="button" class="btn linkQualifierSave btn-primary pull-right" value="{{t "common.form.save"}}"/>
 </div>

@@ -49,6 +49,7 @@ require.config({
         spin: "libs/spin-2.0.1-min",
         jquery: "libs/jquery-2.1.1-min",
         jqueryui: "libs/jquery-ui-1.11.1-min",
+        jquerySortable: "libs/jquery-nestingSortable-0.9.12",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         gentleSelect: "libs/jquery-gentleSelect-0.1.3.1-min",
         cron: "libs/jquery-cron-r2427",
@@ -112,6 +113,9 @@ require.config({
             deps: ["jquery"]
         },
         jqueryui: {
+            deps: ["jquery"]
+        },
+        jquerySortable: {
             deps: ["jquery"]
         },
         i18nGrid: {

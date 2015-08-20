@@ -7,7 +7,11 @@
             </h4>
         </div>
         <div id="linkQualifierBody" class="collapse {{#if hasLinkQualifiers}} in {{/if}}" role="tabpanel" aria-labelledby="linkQualifierHeading">
-            <div id="mappingLinkQualifiers"></div>
+            <div class="panel-body">
+                <div class="group-body">
+                    <div id="mappingLinkQualifiers"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -18,7 +22,11 @@
             </h4>
         </div>
         <div id="attributesBody" class="collapse in" role="tabpanel" aria-labelledby="attributesHeading" aria-expanded="true" style="">
-            <div id="attributesGrid"></div>
+            <div class="panel-body">
+                <div class="group-body">
+                    <div id="attributesGrid"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -26,12 +34,15 @@
         <div class="panel-heading" role="tab" id="roleEntitlementsHeading">
             <h4 class="panel-title">
                 <a data-toggle="collapse" href="#roleEntitlementsBody" aria-expanded="false" aria-controls="roleEntitlementsHeading">{{t "templates.mapping.roleEntitlements"}}</a>
-                <span class="help-text">{{t "templates.mapping.roleEntitlementsDescription"}}</span></a>
+                <!--<span class="help-text">{{t "templates.mapping.roleEntitlementsDescription"}}</span></a>-->
             </h4>
         </div>
         <div id="roleEntitlementsBody" class="collapse" role="tabpanel" aria-labelledby="roleEntitlementsHeading">
-            <div id="mappingRoleEntitlements"></div>
+            <div class="panel-body">
+                <div class="group-body">
+                    <div id="mappingRoleEntitlements"></div>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
