@@ -94,7 +94,10 @@ exports.fetch = function (resourceName) {
         });
 
         try {
-            currentResource = openidm.read(resourceName, null, context.current);
+            // TODO-crest3: restore the below commented-out line when forgerock-script supports passing along crest3 contexts
+            // https://bugster.forgerock.org/jira/browse/OPENIDM-3857 filed to track this regression
+            //currentResource = openidm.read(resourceName, null, context.current);
+            currentResource = openidm.read(resourceName);
         } catch (e) {
             currentResource["error"] = getException(e);
         }
