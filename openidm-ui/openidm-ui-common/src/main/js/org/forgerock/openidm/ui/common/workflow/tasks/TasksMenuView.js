@@ -189,7 +189,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
                     data.tasks.push(this.prepareParamsFromTask(task));
                 }
 
-                this.$el.append(uiUtils.fillTemplateWithData("templates/workflow/tasks/ProcessUserTaskTableTemplate.html", data));
+                uiUtils.renderTemplate("templates/workflow/tasks/ProcessUserTaskTableTemplate.html", this.$el, data);
             }
 
             active = false;
