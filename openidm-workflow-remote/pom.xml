@@ -77,10 +77,6 @@
         </dependency>
         <!-- REST Dependencies-->
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource-servlet</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.httpclient</artifactId>
         </dependency>
