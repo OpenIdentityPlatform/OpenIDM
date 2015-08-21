@@ -830,7 +830,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 }
             });
         	
-        	if(ex[0] == null) {
+        	if(ex[0] != null) {
             	return newExceptionPromise(ex[0]);
         	}
         	
