@@ -53,10 +53,6 @@
             <artifactId>forgerock-audit-json</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-crypto</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${project.version}</version>
