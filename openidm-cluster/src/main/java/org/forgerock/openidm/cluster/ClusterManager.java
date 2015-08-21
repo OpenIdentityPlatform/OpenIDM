@@ -758,11 +758,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         private long checkinInterval;
         private long checkinOffset;
         private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        private ScheduledFuture handler;
+        private ScheduledFuture<?> handler;
         private boolean running = false;
 
         public ClusterManagerThread(long checkinInterval, long checkinOffset) {
             this.checkinInterval = checkinInterval;
+            this.checkinOffset = checkinOffset;
         }
 
         public void startup() {
