@@ -37,7 +37,7 @@ public class ClusterManagerTest {
     private ClusterManagementService clusterService = null;
 
     @BeforeMethod
-    public void setUp() throws ResourceException {
+    public void setUp() throws ResourceException, InterruptedException {
     	final ClusterManager clusterManager = new ClusterManager();
     	final MockRepositoryService mockRepoService = new MockRepositoryService();
     	clusterManager.repoService = mockRepoService;
@@ -47,6 +47,10 @@ public class ClusterManagerTest {
     	clusterService = clusterManager;
     	// Start the Cluster Management Service thread
     	clusterService.startClusterManagement();
+    	
+    	// Allow enough time for the cluster management thread 
+    	// to initialize the node data in the repository
+    	Thread.sleep(1000);
     }
     
     @AfterMethod
