@@ -22,7 +22,7 @@
         },
         "messages" : {
             "WorkflowMessages" : {
-                "cancelActiveProcess" : "Workflow Process cancelled."
+                "cancelActiveProcess" : "Workflow Process canceled."
             },
             "AuditMessages" : {
                 "auditSaveSuccessful": "Audit configurations have been saved."
