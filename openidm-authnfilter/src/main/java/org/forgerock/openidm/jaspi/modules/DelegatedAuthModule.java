@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Map;
 
-import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.caf.authentication.framework.AuditTrail;
+import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
@@ -182,7 +182,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
             logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
             messageInfo.getMap().put(AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());
             if (e.isServerError()) { // HTTP server-side error
-                throw new AuthenticationException(
+                throw new JaspiAuthException(
                         "Failed delegated authentication of " + credential.username + " on " + queryOnResource, e);
             }
             // authentication failed

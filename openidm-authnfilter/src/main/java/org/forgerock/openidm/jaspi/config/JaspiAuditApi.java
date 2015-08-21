@@ -18,7 +18,7 @@ package org.forgerock.openidm.jaspi.config;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
-import org.forgerock.caf.authentication.framework.AuditApi;
+import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;

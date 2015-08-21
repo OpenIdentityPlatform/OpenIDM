@@ -25,8 +25,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 
+import org.forgerock.jaspi.JaspiRuntimeFilter;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.ServerConstants;
@@ -237,7 +237,7 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
         filterConfig.put(SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES, new HashMap<String, Object>());
         filterConfig.put(SERVLET_FILTER_INIT_PARAMETERS, initParams);
         filterConfig.put(SERVLET_FILTER_URL_PATTERNS, urlPatterns);
-        filterConfig.put(SERVLET_FILTER_CLASS, AuthenticationFilter.class.getCanonicalName());
+        filterConfig.put(SERVLET_FILTER_CLASS, JaspiRuntimeFilter.class.getCanonicalName());
         filterConfig.put(FILTER_ORDER, DEFAULT_FILTER_ORDER);
         if (!scriptExtensions.isNull() && scriptExtensions.isMap()) {
             filterConfig.put(SERVLET_FILTER_SCRIPT_EXTENSIONS, scriptExtensions.asMap());
