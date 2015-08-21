@@ -50,8 +50,9 @@ public class SystemActionTest {
 
     @Test
     public void testGetName() throws Exception {
+        int i = 1;
         for (JsonValue systemActions : configuration.get("systemActions").expect(List.class)) {
-            assertThat("ConnectorScript#5").equals(new SystemAction(systemActions).getName());
+            assertThat("ConnectorScript#"+ i++).isEqualTo(new SystemAction(systemActions).getName());
         }
     }
 }

@@ -282,6 +282,10 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         service.deleteConnectorEventHandler(osgiConnectorEventHandler);
     }
 
+    public void bindConnectorFacadeFactory(ConnectorFacadeFactory connectorFacadeFactory) {
+        this.connectorFacadeFactory = connectorFacadeFactory;
+    }
+
     @Activate
     public void activate(ComponentContext context) {
         logger.trace("Activating Service with configuration {}", context.getProperties());
