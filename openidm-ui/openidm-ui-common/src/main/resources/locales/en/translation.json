@@ -22,10 +22,10 @@
         },
         "messages" : {
             "WorkflowMessages" : {
-              "cancelActiveProcess" : "Workflow Process cancelled."
+                "cancelActiveProcess" : "Workflow Process cancelled."
             },
             "AuditMessages" : {
-              "auditSaveSuccessful": "Audit configurations have been saved."
+                "auditSaveSuccessful": "Audit configurations have been saved."
             },
             "CommonMessages" : {
                 "authenticationFailed" : "Login/password combination is invalid.",
@@ -655,8 +655,8 @@
                 }
             },
             "exceptionFormatter": {
-              "title": "Exception Formatter",
-              "desc": "Specify script to handle display of exceptions to audit logger."
+                "title": "Exception Formatter",
+                "desc": "Specify script to handle display of exceptions to audit logger."
             },
             "audit": "Audit",
             "notice": "Notice",
@@ -757,7 +757,7 @@
             "username": "Username",
             "password": "Password",
             "smtp": "Use SMTP Authentication",
-            "tls": "Use TLS",
+            "tls": "Use STARTTLS",
             "from": "Sender Email Address"
         },
         "connector" : {
