@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.caf.authentication.framework.AuditTrail;
+import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.Context;
 import org.forgerock.openidm.jaspi.auth.Authenticator;

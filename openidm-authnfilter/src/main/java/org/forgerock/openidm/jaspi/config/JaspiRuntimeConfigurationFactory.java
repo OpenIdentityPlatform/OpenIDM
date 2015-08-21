@@ -19,7 +19,10 @@ package org.forgerock.openidm.jaspi.config;
 import org.forgerock.auth.common.AuditLogger;
 import org.forgerock.auth.common.AuditLoggingConfigurator;
 import org.forgerock.auth.common.DebugLogger;
-import org.forgerock.caf.authentication.framework.AuditApi;
+import org.forgerock.jaspi.logging.JaspiAuditLogger;
+import org.forgerock.jaspi.logging.JaspiLoggingConfigurator;
+import org.forgerock.jaspi.runtime.AuditApi;
+import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.jaspi.auth.AuthenticationService;
@@ -34,7 +37,7 @@ import java.util.List;
  * A singleton instance that implements both the Jaspi ModuleConfigurationFactory and JaspiLoggingConfigurator
  * interfaces, that provides all of the configuration information for the Jaspi Runtime to be configured correctly.
  */
-public enum JaspiRuntimeConfigurationFactory implements AuditLoggingConfigurator {
+public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFactory, JaspiLoggingConfigurator {
 
     /**
      * The Singleton instance of the JaspiRuntimeConfigurationFactory.
@@ -55,12 +58,22 @@ public enum JaspiRuntimeConfigurationFactory implements AuditLoggingConfigurator
     }
 
     /**
+     * Gets the ModuleConfigurationFactory that the JaspiRuntime will use to configure its authentication
+     * modules.
+     *
+     * @return An instance of a ModuleConfigurationFactory.
+     */
+    public static ModuleConfigurationFactory getModuleConfigurationFactory() {
+        return INSTANCE;
+    }
+
+    /**
      * Gets the Logging Configurator that the Jaspi Runtime will use to configure its debug and audit logger
      * instances.
      *
      * @return An instance of a JaspiLoggingConfigurator.
      */
-    public static AuditLoggingConfigurator getLoggingConfigurator() {
+    public static JaspiLoggingConfigurator getLoggingConfigurator() {
         return INSTANCE;
     }
 
@@ -202,7 +215,7 @@ public enum JaspiRuntimeConfigurationFactory implements AuditLoggingConfigurator
      * {@inheritDoc}
      */
     @Override
-    public AuditLogger getAuditLogger() {
+    public JaspiAuditLogger getAuditLogger() {
         return null;
     }
 }

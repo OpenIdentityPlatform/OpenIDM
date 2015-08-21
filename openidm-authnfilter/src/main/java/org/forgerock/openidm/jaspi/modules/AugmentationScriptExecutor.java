@@ -16,8 +16,8 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.http.Context;
+import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
@@ -94,13 +94,13 @@ class AugmentationScriptExecutor {
         } catch (ScriptThrownException e) {
             final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
             logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);
-            throw new AuthenticationException(re.getMessage(), re);
+            throw new JaspiAuthException(re.getMessage(), re);
         } catch (ScriptException e) {
             logger.error("{} when attempting to execute script {}", e.toString(), augmentScript.getName(), e);
-            throw new AuthenticationException(e.getMessage(), e);
+            throw new JaspiAuthException(e.getMessage(), e);
         } catch (ResourceException e) {
             logger.error("{} when attempting to create server context", e.toString(), e);
-            throw new AuthenticationException(e.getMessage(), e);
+            throw new JaspiAuthException(e.getMessage(), e);
         }
     }
 }

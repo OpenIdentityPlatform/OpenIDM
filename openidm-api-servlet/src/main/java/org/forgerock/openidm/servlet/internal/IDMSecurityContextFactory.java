@@ -76,17 +76,7 @@ public class IDMSecurityContextFactory implements HttpContextFactory {
     public Context createContext(Context parent, org.forgerock.http.protocol.Request request) throws ResourceException {
 
         final SecurityContextFactory securityContextFactory = SecurityContextFactory.getHttpServletContextFactory();
-        // TODO-crest3 Temporary security context hack while fixing auth - do not merge this evil!! (brmiller)
-        final SecurityContext badSecurityContext = securityContextFactory.createContext(parent);
-        final SecurityContext securityContext = new SecurityContext(badSecurityContext.getParent(),
-                "openidm-admin",
-                json(
-                    object(
-                            field("id", "openidm-admin"),
-                            field("component", "repo/internal/user"),
-                            field("ipAddress", "0:0:0:0:0:0:0:1"),
-                            field("roles", array("openidm-admin", "openidm-authorized"))
-                            )).asMap());
+        final SecurityContext securityContext = securityContextFactory.createContext(parent);
 
         // execute global security context augmentation scripts
         for (ScriptEntry augmentScript : augmentationScripts) {

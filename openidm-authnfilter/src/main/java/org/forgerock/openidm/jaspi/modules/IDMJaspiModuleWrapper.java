@@ -18,7 +18,7 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -237,14 +237,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      *
      * @param scriptConfig The script config.
      * @return The ScriptEntry.
-     * @throws AuthenticationException If there is a problem retrieving the ScriptEntry.
+     * @throws JaspiAuthException If there is a problem retrieving the ScriptEntry.
      */
-    ScriptEntry getAugmentScript(JsonValue scriptConfig) throws AuthenticationException {
+    ScriptEntry getAugmentScript(JsonValue scriptConfig) throws JaspiAuthException {
         try {
             return authnFilterHelper.getScriptRegistry().takeScript(scriptConfig);
         } catch (ScriptException e) {
             logger.error("{} when attempting to register script {}", e.toString(), scriptConfig, e);
-            throw new AuthenticationException(e.toString(), e);
+            throw new JaspiAuthException(e.toString(), e);
         }
     }
 
@@ -285,7 +285,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         if (principalName == null) {
             // As per Jaspi spec, the module developer MUST ensure that the client
             // subject's principal is set when the module returns SUCCESS.
-            throw new AuthenticationException(
+            throw new JaspiAuthException(
                     "Underlying Server Auth Module has not set the client subject's principal!");
         }
 
@@ -329,7 +329,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                 logger.debug("Failed role calculation for {} on {}.", principalName, queryOnResource, e);
             }
             if (e.isServerError()) { // HTTP server-side error; AuthException sadly does not accept cause
-                throw new AuthenticationException("Failed pass-through authentication of " + principalName + " on "
+                throw new JaspiAuthException("Failed pass-through authentication of " + principalName + " on "
                         + queryOnResource + ":" + e.getMessage(), e);
             }
             // role calculation failed
@@ -422,14 +422,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
          *
          * @param authModuleClassName The ServerAuthModule class name.
          * @return The ServerAuthModule instance.
-         * @throws AuthenticationException If there is any problem creating the ServerAuthModule instance.
+         * @throws JaspiAuthException If there is any problem creating the ServerAuthModule instance.
          */
-        ServerAuthModule construct(String authModuleClassName) throws AuthenticationException {
+        ServerAuthModule construct(String authModuleClassName) throws JaspiAuthException {
              try {
                  return Class.forName(authModuleClassName).asSubclass(ServerAuthModule.class).newInstance();
              } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                  logger.error("Failed to construct Auth Module instance", e);
-                 throw new AuthenticationException("Failed to construct Auth Module instance", e);
+                 throw new JaspiAuthException("Failed to construct Auth Module instance", e);
              }
         }
     }
