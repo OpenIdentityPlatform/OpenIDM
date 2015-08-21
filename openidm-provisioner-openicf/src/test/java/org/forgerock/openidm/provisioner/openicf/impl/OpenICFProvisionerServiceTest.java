@@ -106,6 +106,7 @@ import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerF
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.util.promise.Promise;
@@ -190,6 +191,19 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             new ArrayList<Pair<OpenICFProvisionerService, ComponentContext>>();
 
     protected final Router router = new Router();
+
+    final RouteService routeService = new RouteService() {
+
+        @Override
+        public Context createServerContext() throws ResourceException {
+            return new RootContext();
+        }
+
+        @Override
+        public Context createServerContext(Context parentContext) throws ResourceException {
+            return new RootContext();
+        }
+    };
 
     public OpenICFProvisionerServiceTest() {
         try {
@@ -406,6 +420,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             service.bindRouterRegistry(this);
             service.bindSyncFailureHandlerFactory(this);
             service.bindEnhancedConfig(new JSONEnhancedConfig());
+            service.bindRouteService(routeService);
             service.bindConnectionFactory(Resources.newInternalConnectionFactory(router));
 
             //set as NullActivityLogger to be the mock logger.
@@ -439,6 +454,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
                     for (Pair<OpenICFProvisionerService, ComponentContext> pair : systems) {
                         bindProvisionerService(pair.getLeft(),(Map) null);
                     }
+                    bindRouteService(routeService);
                 }};
 
         router.addRoute(uriTemplate("system"), systemObjectSetService);
@@ -569,7 +585,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         ActionResponse response = connection.action(new RootContext(), actionRequest);
         assertThat(ConnectorUtil.convertToSyncToken(
                 response.getJsonContent().get("connectorData")).getValue()).isEqualTo(1);
-        assertThat(sync.requests.size()).isEqualTo( 1);
+        assertThat(sync.requests.size()).isEqualTo(1);
         ActionRequest delta = sync.requests.remove(0);
         assertThat(delta.getAction()).isEqualTo("notifyCreate");
 

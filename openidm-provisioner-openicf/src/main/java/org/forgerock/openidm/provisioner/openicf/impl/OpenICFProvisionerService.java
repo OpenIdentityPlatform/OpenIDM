@@ -297,7 +297,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     RouteService routeService;
     Context routerContext = null;
 
-    private void bindRouteService(final RouteService service) throws ResourceException {
+    protected void bindRouteService(final RouteService service) throws ResourceException {
         routeService = service;
         routerContext = service.createServerContext();
     }
@@ -1506,7 +1506,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 }
                             }
                         }, operationOptionsBuilder.build());
-                if(ex[0] == null) {
+                if(ex[0] != null) {
                     return newExceptionPromise(newInternalServerErrorException(ex[0].getMessage(), ex[0]));
                 }
                 activityLogger.log(context, request,

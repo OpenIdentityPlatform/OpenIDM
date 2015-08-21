@@ -258,16 +258,16 @@ public class ConnectorUtilTest {
     @Test void testCoercedTypeCastingForByte() {
         // String -> Byte
         Byte byteValueFromString = ConnectorUtil.coercedTypeCasting("100", Byte.class);
-        assertThat(byteValueFromString.byteValue()).isEqualTo(100);
+        assertThat(byteValueFromString.byteValue()).isEqualTo(new Byte("100"));
         // Integer -> Byte
         Byte byteValueFromNumber = ConnectorUtil.coercedTypeCasting(10, Byte.class);
-        assertThat(byteValueFromNumber.byteValue()).isEqualTo(10);
+        assertThat(byteValueFromNumber.byteValue()).isEqualTo(new Byte("10"));
         // Byte -> Byte
         Byte byteValueFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("124"), Byte.class);
-        assertThat(byteValueFromBoxedByte.byteValue()).isEqualTo(124);
+        assertThat(byteValueFromBoxedByte.byteValue()).isEqualTo(new Byte("124"));
         // byte -> Byte
         Byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.class);
-        assertThat(byteValueFromPrimitiveByte.byteValue()).isEqualTo(10);
+        assertThat(byteValueFromPrimitiveByte.byteValue()).isEqualTo((byte) 10);
         // Byte -> String
         String stringFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("10"), String.class);
         assertThat(stringFromBoxedByte).isEqualTo(Base64.encode(new byte[] {new Byte("10")}));
@@ -279,16 +279,16 @@ public class ConnectorUtilTest {
     @Test void testCoercedTypeCastingForByteType() {
         // String -> byte
         byte byteValueFromString = ConnectorUtil.coercedTypeCasting("100", Byte.TYPE);
-        assertThat(byteValueFromString).isEqualTo(100);
+        assertThat(byteValueFromString).isEqualTo(Byte.parseByte("100"));
         //Integer -> byte
         byte byteValueFromNumber = ConnectorUtil.coercedTypeCasting(10, Byte.TYPE);
-        assertThat(byteValueFromNumber).isEqualTo(10);
+        assertThat(byteValueFromNumber).isEqualTo(Byte.parseByte("10"));
         // Byte -> byte
         byte byteValueFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("124"), Byte.TYPE);
-        assertThat(byteValueFromBoxedByte).isEqualTo(124);
+        assertThat(byteValueFromBoxedByte).isEqualTo(new Byte("124"));
         // byte -> byte
         byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.TYPE);
-        assertThat(byteValueFromPrimitiveByte).isEqualTo(10);
+        assertThat(byteValueFromPrimitiveByte).isEqualTo((byte) 10);
     }
 
     public APIConfiguration getRuntimeAPIConfiguration() {

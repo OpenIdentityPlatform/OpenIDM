@@ -199,13 +199,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     RouteService routeService;
     Context routerContext = null;
 
-    private void bindRouteService(final RouteService service) throws ResourceException {
+    protected void bindRouteService(final RouteService service) throws ResourceException {
         routeService = service;
         // TODO-crest3
         routerContext = service.createServerContext();
     }
 
-    private void unbindRouteService(final RouteService service) {
+    protected void unbindRouteService(final RouteService service) {
         routeService = null;
         routerContext = null;
     }
@@ -231,6 +231,10 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     protected void unbindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) {
         connectorConfigurationHelpers.remove(helper.getProvisionerType());
+    }
+
+    protected void bindConnectionFactory(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
