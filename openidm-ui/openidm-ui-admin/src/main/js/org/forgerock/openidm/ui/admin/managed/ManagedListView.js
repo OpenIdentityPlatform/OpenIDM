@@ -108,7 +108,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
             this.model.managedObjectCollection = new ManagedObjects();
 
             _.each(this.data.currentManagedObjects, function(managedObject) {
-                managedObject.type = "Managed Object";
+                managedObject.type = $.t("templates.connector.managedObjectType");
                 this.model.managedObjectCollection.add(managedObject);
             }, this);
 
