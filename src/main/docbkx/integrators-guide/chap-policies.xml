@@ -28,7 +28,8 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook
- http://docbook.org/xml/5.0/xsd/docbook.xsd'>
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Using Policies to Validate Data</title>
  <indexterm>
   <primary>Policies</primary>
@@ -60,10 +61,23 @@
      policies.</para>
    </listitem>
  </itemizedlist>
- 
-  <para>A default policy applies to all managed objects. You can configure the 
-  default policy to suit your requirements, or you can extend the policy 
-  service by supplying your own scripted policies.</para>
+
+ <para>
+  A default policy applies to all managed objects. You can configure the
+  default policy to suit your requirements, or you can extend the policy
+  service by supplying your own scripted policies.
+ </para>
+
+ <note>
+  <para>
+   The OpenIDM
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="integrators-guide#appendix-router">Router Service</link>
+   limits policies to managed, system, and internal user repository objects.
+   To apply policies to additional objects such as the audit service, you should
+   modify the <filename>conf/router.json</filename> file.
+  </para>
+ </note>
 
   <section xml:id="configuring-default-policy">
     <title>Configuring the Default Policy</title>
