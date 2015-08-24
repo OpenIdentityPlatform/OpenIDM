@@ -24,6 +24,9 @@ import org.forgerock.script.ScriptRegistry;
  */
 public interface OpenIDMSession extends Session {
 
+    ClassLoader getClassLoader();
+    void setClassLoader(ClassLoader classLoader);
+
     ScriptRegistry getOpenIDMScriptRegistry();
     void setOpenIDMScriptRegistry(ScriptRegistry scriptRegistry);
 }
