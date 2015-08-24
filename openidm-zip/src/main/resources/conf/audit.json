@@ -2,7 +2,7 @@
     "auditServiceConfig" : {
         "handlerForQueries" : "repo",
         "availableAuditEventHandlers" : [
-            "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+            "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
         ]
@@ -10,7 +10,7 @@
     "eventHandlers" : [
         {
             "name" : "csv",
-            "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+            "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
             "config" : {
                 "logDirectory" : "audit"
             },
