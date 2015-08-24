@@ -251,7 +251,7 @@ CREATE  TABLE  [openidm].[auditrecon]
   objectid NVARCHAR(38) NOT NULL ,
   entrytype NVARCHAR(7) NULL ,
   rootactionid NVARCHAR(511) NULL ,
-  reconid NVARCHAR(36) NULL ,
+  reconid NVARCHAR(56) NULL ,
   reconaction NVARCHAR(36) NULL ,
   reconciling NVARCHAR(12) NULL ,
   sourceobjectid NVARCHAR(511) NULL ,
