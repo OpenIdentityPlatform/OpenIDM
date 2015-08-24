@@ -12,6 +12,52 @@
   margin-left: 10px;
 }
 
+#mappingDialogTabs .tab-content {
+  padding: 10px;
+  border: none;
+}
+
+h4.connector-role {
+  font-weight: 400;
+  margin-top: 0;
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 5px;
+}
+
+.mapping-table .tab-header h3 {
+  margin:5px 0 0;
+}
+
+
+#roleEntitlementsPanel .panel-heading .panel-title .help-text {
+  color: #888;
+  margin-left: 10px;
+  margin-top: 1px;
+  margin-bottom: 0;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.table-user-association>thead {
+  background-color: @background-color;
+}
+
+.mappings-table {
+  .table>tbody>tr>td {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .logo {
+    width: 70px;
+  }
+}
+
+#attributesHeading {
+  padding: 15px;
+}
+
 /*
   REMOVE when switched to selectize
 */
@@ -23,8 +69,10 @@
   display:none;
 }
 
+/*
+  Add Mapping Page
+*/
 .addMapping {
-
   .page-header {
     margin-bottom: 10px;
   }
@@ -135,32 +183,40 @@
   .card-container {
     height: 280px;
   }
+
   .card {
     height: 278px;
+
+    .card-body {
+      margin: 20px 0;
+    }
+
+    .cardtype {
+      font-weight: bold;
+      margin-bottom: 0;
+    }
+
+    .objectType {
+      color: #999999;
+      text-align: center;
+    }
   }
-  .card-body {
-    margin: 20px 0;
-  }
-  .card .cardtype {
-    font-weight: bold;
-    margin-bottom: 0;
-  }
-  .card .objectType {
-    color: #999999;
-    text-align: center;
-  }
-  .section-header{
+
+  .section-header {
     border-top: 1px solid #ddd;
     padding-top: 10px;
   }
+
   .resourceConnectorHeader {
     border: none;
   }
+
   .arrow-breaker {
     border-bottom: 1px solid #ddd;
     margin-top: 50px;
 
-    .arrow-box:after, .arrow-box:before {
+    .arrow-box:after,
+    .arrow-box:before {
       bottom: 100%;
       left: 50%;
       border: solid transparent;
@@ -176,11 +232,13 @@
       border-width: 31px;
       margin-left: -31px;
     }
+
     .arrow-box:after {
       border-bottom-color: @background-color;
       border-width: 30px;
       margin-left: -30px;
     }
+
     .arrow-box {
       position: relative;
       top: 1px;
@@ -198,422 +256,372 @@
   }
 }
 
-.mapping {
-  margin-bottom: 20px;
-  position: relative;
-}
-.mappings-list .mapping {
-  margin-bottom: 40px;
-}
-.mappings-list .mapping:hover .panel,
-.mappings-list .mapping:focus .panel {
-  border-color: @base-theme-color;
-}
 #mappingConfigHolder {
   clear: both;
 }
 
-.mapping .panel {
-  overflow: auto;
-  display: table;
-  width: 100%;
-  -webkit-transition: border-color 0.3s ease-in-out;
-  -o-transition: border-color 0.3s ease-in-out;
-  -moz-transition: border-color 0.3s ease-in-out;
-  -ms-transition: border-color 0.3s ease-in-out;
-  transition: border-color 0.3s ease-in-out;
-}
-.mapping .panel-heading {
-  border-bottom: 1px solid #ddd;
-}
-.panel-heading.panel-heading-left {
-  display: table-cell;
-  vertical-align: top;
-  border-bottom: none;
-  border-right: 1px solid #ddd;
-}
-.mapping .mapping-body {
-  display: table-cell;
-  width: 100%;
-}
-h4.connector-role {
-  font-weight: 400;
-  margin-top: 0;
-  font-size: 14px;
-  color: #777;
-  margin-bottom: 5px;
-}
-.mapping .media {
-  margin-top: 10px;
+.mappings-list {
+  .mapping .back a {
+    pointer-events: all;
+    display: block;
+    width: 100%;
+    height: 164px;
+  }
+
+  .mapping {
+    margin-bottom: 40px;
+
+    &:hover .panel,
+    &:focus .panel {
+      border-color: @base-theme-color;
+    }
+  }
 }
 
-.mapping .source {
-  position: relative;
-  border-bottom: 1px solid #ddd;
-
-  text-align: center;
-}
-.mapping .source:before {
-  border: solid transparent;
-  content: "";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  border-color: transparent;
-  border-top-color: #ddd;
-  border-width: 21px;
-  border-left-width: 21px;
-  margin-top: 0;
-  margin-left: -21px;
-  bottom: -42px;
-}
-.mapping .source:after {
-  border: solid transparent;
-  content: "";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  border-color: transparent;
-  border-top-color: #fff;
-  border-width: 20px;
-  border-left-width: 20px;
-  margin-top: 0;
-  margin-left: -20px;
-  bottom: -40px;
-
-}
-
-.mapping .source .arrow {
-  position: absolute;
-  bottom: -18px;
-  z-index: 100;
-  display: table;
-  width: 100%;
-  text-align: center;
-  color: @base-theme-color;
-}
-.mapping .source .arrow .arrow-inner{
-  display: table-cell;
-  vertical-align: middle;
-  width: 100%;
-}
-.mapping .source .arrow .arrow-inner:after {
-  content: "\f063";
-  font: normal normal normal 14px/1 FontAwesome;
-}
-
-.mapping-table .tab-header h3 {
-  margin:5px 0 0;
-}
-.mapping .panel-body {
-  padding-right: 30px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-
-  text-align: left;
-}
-.mapping .image {
-  text-align: center;
-  height: 60px;
-  display: block;
-  margin: 0 auto 0;
-  display: table;
-}
-.mapping .image.circle {
-  border-radius: 50%;
-  overflow: hidden;
-  width: 60px;
-  background-color: @base-theme-color;
-  color: #fff;
-  font-size: 28px;
-}
-.mapping .image i {
-  display: table-cell;
-  vertical-align: middle;
-}
 .mapping .panel-heading,
 .mapping .panel-footer {
-  background-color: transparent;
-  overflow: auto;
-  display: table;
-  width: 100%;
-  padding: 0;
-}
-.mapping .panel-heading .media,
-.mapping .panel-footer .media {
-  margin: 0;
-}
-.mapping .panel-heading > div,
-.mapping .panel-footer > div {
-  display: table-cell;
-  vertical-align: middle;
-  float: none !important;
-}
-.mapping .panel-heading .connector-info,
-.mapping .panel-footer .connector-info {
-  padding: 10px 15px;
-}
-.mapping .panel-footer .connector-info .sync-status {
-  position: relative;
-  margin-top: 10px;
-  display: block;
-  color: @base-theme-color;
-  cursor: pointer;
-}
-.mapping .panel-footer .connector-info .sync-status:before {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  margin-left: 2px;
-  vertical-align: middle;
-  position: absolute;
-  left: 3px;
-  top: 5px;
-  border-left: 4px solid;
-  border-right: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
+  border-top: 1px solid #ddd;
+
+  .connector-actions {
+    border-top: 1px solid #ddd;
+  }
+
+  h2.connector-name {
+    font-size: 15px;
+    margin-top: 0;
+    color: #52585C;
+    font-weight: 600;
+    line-height: 22px;
+    margin-bottom: 0;
+  }
+
+  .btn-link {
+    font-size: 16px;
+    padding: 0 15px 0;
+    border-right: 1px solid #ddd;
+    height: 62px;
+    display: block;
+    float: left;
+    width: 50%;
+
+    &.delete-button {
+      border-right:0px;
+    }
+  }
+
+  .mapping-action .btn-link {
+    border-right: none;
+    width: 100%;
+  }
 }
 
-.mapping .panel-footer .connector-info .sync-status[aria-expanded="true"]:before {
-  border-top: 4px solid;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
-  top: 7px;
-  left: 0;
+/*
+  Mapping List Page
+*/
+.mapping {
+  margin-bottom: 20px;
+  position: relative;
+
+  .panel-footer .help-link {
+    padding: 18px;
+  }
+
+  .panel-heading .btn-link:hover,
+  .panel-footer .btn-link:hover,
+  .panel-heading .btn-link:focus,
+  .panel-footer .btn-link:focus {
+    background: #eee;
+    text-decoration: none;
+  }
+
+  .media {
+    margin-top: 10px;
+
+    .pull-left {
+      max-width: 90px;
+      margin-right: 20px;
+    }
+
+    h3 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 21px;
+    }
+
+    h4 {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+  }
+
+  .mapping-body {
+    display: table-cell;
+    width: 100%;
+  }
+
+  .panel {
+    overflow: auto;
+    display: table;
+    width: 100%;
+    -webkit-transition: border-color 0.3s ease-in-out;
+    -o-transition: border-color 0.3s ease-in-out;
+    -moz-transition: border-color 0.3s ease-in-out;
+    -ms-transition: border-color 0.3s ease-in-out;
+    transition: border-color 0.3s ease-in-out;
+
+    .panel-heading {
+      border-bottom: 1px solid #ddd;
+    }
+
+    &.panel-heading-left {
+      display: table-cell;
+      vertical-align: top;
+      border-bottom: none;
+      border-right: 1px solid #ddd;
+    }
+  }
+
+  .panel-body {
+    padding-right: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: left;
+  }
+
+  .image {
+    text-align: center;
+    height: 60px;
+    display: block;
+    margin: 0 auto 0;
+    display: table;
+
+    &.circle {
+      border-radius: 50%;
+      overflow: hidden;
+      width: 60px;
+      background-color: @base-theme-color;
+      color: #fff;
+      font-size: 28px;
+    }
+
+    i {
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
+
+  .panel-heading,
+  .panel-footer {
+    background-color: transparent;
+    overflow: auto;
+    display: table;
+    width: 100%;
+    padding: 0;
+
+    .connector-info {
+      padding: 10px 15px;
+    }
+
+    >div {
+      display: table-cell;
+      vertical-align: middle;
+      float: none !important;
+    }
+  }
+
+  .panel-footer .connector-info .sync-status {
+    position: relative;
+    margin-top: 10px;
+    display: block;
+    color: @base-theme-color;
+    cursor: pointer;
+
+    &:before {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      margin-left: 2px;
+      vertical-align: middle;
+      position: absolute;
+      left: 3px;
+      top: 5px;
+      border-left: 4px solid;
+      border-right: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+    }
+
+    &[aria-expanded="true"]:before {
+      border-top: 4px solid;
+      border-right: 4px solid transparent;
+      border-left: 4px solid transparent;
+      top: 7px;
+      left: 0;
+    }
+  }
+
+  .source {
+    border-bottom: 1px solid #ddd;
+
+    &:before {
+      border: solid transparent;
+      content: "";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+      border-color: transparent;
+      border-top-color: #ddd;
+      border-width: 21px;
+      border-left-width: 21px;
+      margin-top: 0;
+      left: 50%;
+      margin-left: -7px;
+      bottom: -41px;
+    }
+
+    &:after {
+      border: solid transparent;
+      content: "";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+      border-color: transparent;
+      border-top-color: #fff;
+      border-width: 20px;
+      border-left-width: 20px;
+      margin-top: 0;
+      left: 50%;
+      margin-left: -6px;
+      bottom: -39px;
+    }
+
+    .arrow {
+      position: absolute;
+      bottom: -18px;
+      z-index: 100;
+      display: table;
+      width: 100%;
+      text-align: center;
+      color: @base-theme-color;
+
+      .arrow-inner {
+        display: table-cell;
+        vertical-align: middle;
+        width: 100%;
+
+        &:after {
+          content: "\f063";
+          font: normal normal normal 14px/1 FontAwesome;
+        }
+      }
+    }
+  }
 }
+
+/*
+  Mapping base view sync details
+*/
 .sync-results {
   border-top: 1px solid #ddd;
   padding: 15px;
+
+  .success-display {
+    color: #70a796;
+  }
+
+  .failure-display {
+    color: #ca3127;
+  }
+
+  .time-display {
+    color: #88b5a7;
+  }
+
+  .warning-display {
+    color: #e6bf24;
+  }
 }
-.sync-detail-list .sync-item {
-  height: 40px;
-  width: 100%;
+
+.sync-detail-list {
+  .sync-item {
+    height: 40px;
+    width: 100%;
+
+    .fa-circle {
+      font-size: 12px;
+      padding: 15px;
+    }
+
+    .item-title {
+      display: inline-block;
+      margin-right: 50px;
+      width: 150px;
+    }
+
+    .fa-info-circle {
+      color: #a3a3a3;
+      cursor: pointer;
+      float: right;
+      font-size: 16px;
+      margin-right: 15px;
+      margin-top: 12px;
+
+      &:hover {
+        color: #5a646d;
+      }
+    }
+  }
+
+  .sync-item:nth-child(2n+1) {
+    background-color: @background-color;
+  }
 }
-.sync-detail-list .sync-item:nth-child(2n+1) {
-  background-color: @background-color;
-}
-.sync-detail-list .sync-item .fa-circle {
-  font-size: 12px;
-  padding: 15px;
-}
-.sync-detail-list .sync-item .item-title {
-  display: inline-block;
-  margin-right: 50px;
-  width: 150px;
-}
-.sync-detail-list .sync-item .fa-info-circle {
-  color: #a3a3a3;
-  cursor: pointer;
-  float: right;
-  font-size: 16px;
-  margin-right: 15px;
-  margin-top: 12px;
-}
-.sync-detail-list .sync-item .fa-info-circle:hover {
-  color: #5a646d;
-}
-.sync-results .success-display {
-  color: #70a796;
-}
-.sync-results .failure-display {
-  color: #ca3127;
-}
-.sync-results .time-display {
-  color: #88b5a7;
-}
-.sync-results .warning-display {
-  color: #e6bf24;
-}
+
 .boxed-stats {
   border: 1px solid #ddd;
   margin-bottom: 15px;
   overflow:hidden;
-}
-.boxed-stats p {
-  padding-bottom: 0;
-}
-.boxed-stats .header {
-  color: #777;
-  font-size: 12px;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
-}
-.boxed-stats .display-number {
-  font-size: 43px;
-  line-height: 1;
-  font-weight: 300;
-  margin: 0;
-}
-.boxed-stats .subtitle {
-  font-size: 10px;
-}
-.boxed-stats.end {
-  border-right: 1px solid #e3e3e3;
-}
-.boxed-stats .boxed-stat {
-  padding: 15px;
+
+  p {
+    padding-bottom: 0;
+  }
+
+  .header {
+    color: #777;
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+
+  .display-number {
+    font-size: 43px;
+    line-height: 1;
+    font-weight: 300;
+    margin: 0;
+  }
+
+  .subtitle {
+    font-size: 10px;
+  }
+
+  .boxed-stat {
+    padding: 15px;
+
+    &.end {
+      border-right: 1px solid #e3e3e3;
+    }
+  }
 }
 
-.mapping .panel-heading .connector-actions,
-.mapping .panel-footer .connector-actions {
-  border-top: 1px solid #ddd;
-}
-.mapping .panel-heading .connector-actions>div,
-.mapping .panel-footer .connector-actions>div {
-
-}
-.mapping .panel-heading h2.connector-name,
-.mapping .panel-footer h2.connector-name {
-  font-size: 15px;
-  margin-top: 0;
-  color: #52585C;
-  font-weight: 600;
-  line-height: 22px;
-  margin-bottom: 0;
-}
-.mapping .panel-heading .connector-status,
-.mapping .panel-footer .connector-status {
-
-}
-.mapping .panel-heading .connector-status i,
-.mapping .panel-footer .connector-status i {
-
-}
-.mapping .panel-heading .btn-link,
-.mapping .panel-footer .btn-link {
-  font-size: 16px;
-  padding: 0 15px 0;
-  border-right: 1px solid #ddd;
-  height: 62px;
-  display: block;
-  float: left;
-  width: 50%;
-}
-
-.mapping .panel-footer .help-link {
-  padding: 18px;
-}
-
-#roleEntitlementsPanel .panel-heading .panel-title .help-text {
-  color: #888;
-  margin-left: 10px;
-  margin-top: 1px;
-  margin-bottom: 0;
-  font-weight: 400;
-  font-size: 14px;
-}
-
-.mapping .panel-heading .mapping-action .btn-link,
-.mapping .panel-footer .mapping-action .btn-link {
-  border-right: none;
-  width: 100%;
-}
-.mapping .panel-heading .btn-link:hover,
-.mapping .panel-footer .btn-link:hover,
-.mapping .panel-heading .btn-link:focus,
-.mapping .panel-footer .btn-link:focus {
-  background: #eee;
-  text-decoration: none;
-}
-.table-user-association>thead {
-  background-color: @background-color;
-}
-.mappings-table .table>tbody>tr>td {
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-.mappings-table .logo {
-  width: 70px;
-}
-
-.mapping .media .pull-left {
-  max-width: 90px;
-  margin-right: 20px;
-}
-.mapping .media h3 {
-  margin: 0;
-  font-weight: 700;
-  font-size: 21px;
-}
-.mapping .media h4 {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 3px;
-}
-.mapping-table .column-title {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #777;
-  font-weight: 400;
-  line-height: 12px;
-}
-.mapping-table .bridge-logo {
-  max-width: 90px;
-  float: right;
-  display: none;
-}
-.mapping-table .bridge-name {
-  font-weight: 600;
-}
-.mapping-table .meta {
-  font-weight: 400;
-}
-.mapping-table ul li:first-child {
-
-}
-.mapping-table .attribute-list {
-  margin-bottom: 20px;
-}
-.mapping-table ul li .attribute-map {
-  display: block;
-  border-bottom: 1px solid #eee;
-  padding: 14px 9px;
-}
-.mapping-table ul li .attribute-map .source-value,
-.mapping-table ul li .attribute-map .target-value {
-  padding: 5px 0;
-}
-.mapping-table ul li a.attribute-map .edit-icon {
-  width: 20px;
-  display: inline-block;
-}
-
-.mapping-table ul li .attribute-edit {
-  padding: 14px;
-  border-bottom: 1px solid #eee;
-  display: none;
-  background: #f9f9f9;
-}
-.mapping .front {
-  position: relative;
-  z-index: 3;
-  pointer-events: none;
-}
-.mapping .front button,
-.mapping .front a {
-  pointer-events: all;
-}
-.mapping .back {
-  position: absolute;
-  top:0;
-  pointer-events: none;
-  width: 100%;
-  z-index: 2;
-}
-.mappings-list .mapping .back a {
-  pointer-events: all;
-  display: block;
-  width: 100%;
-  height: 164px;
-}
-
+/*
+  Policy Page
+*/
 #mappingContent {
   background-color: #fff;
   border-left: 1px solid #ddd;
@@ -635,7 +643,6 @@ h4.connector-role {
     }
 
     .form-policy-editor {
-
       padding: 10px 0;
 
       label {
@@ -658,10 +665,12 @@ h4.connector-role {
 
       .situationRow {
         margin-bottom: 15px;
+
         .form-control {
           width: 80%;
           display: inline-block;
         }
+
         min-height: 38px;
       }
     }
@@ -669,6 +678,7 @@ h4.connector-role {
 
   .mapped-entitlement {
     margin-bottom: 50px;
+
     .mapped-entitlement-heading {
       border-top: 2px solid @base-theme-color;
       padding: 0 12px;
@@ -687,51 +697,9 @@ h4.connector-role {
   }
 }
 
-#attributesHeading {
-  padding: 15px;
-}
-
-#subNavHolderClone{
-  .container{
-    padding: 0px;
-    margin: 0px;
-    width: 100%;
-  }
-}
-
-/*
-  Properties styles
-*/
-
-.popover .popover-header {
-  margin-left:15px;
-  margin-top:10px;
-  margin-bottom:0px;
-}
-
-.popover-content .code-tooltip {
-  max-height:200px;
-  white-space:pre;
-}
-
-.popover-info {
-  max-width:250px;
-  width:250px;
-}
-
-.popover-info.popover-large {
-  max-width:550px;
-  width:550px;
-}
-
-.selectize-holder .selectize-control {
-  margin-top:4px;
-}
-
 /*
   Properties Grid related styles
 */
-
 #attributesBody {
   .tool-group-right {
     clear:both;
@@ -763,13 +731,12 @@ h4.connector-role {
   }
 
   #previewHolder {
+    position:relative;
+    bottom:18px;
 
     .caret {
       color: #333333;
     }
-
-    position:relative;
-    bottom:18px;
   }
 
   #previewTitle {
@@ -827,36 +794,12 @@ h4.connector-role {
   }
 }
 
-@media (min-width: 768px) {
-  #attributesBody {
-    #previewDropdownButton {
-      width:auto;
-    }
-
-    .tool-group-right {
-      clear:none;
-    }
-
-    #numRepresentativeProps {
-      width:35px;
-      padding-right:0px;
-      display:inline-block;
-    }
-
-    #findSampleSource {
-      width:200px;
-      display:inline-block;
-    }
-  }
-}
-
+/*
+  Link qualifier
+*/
 .removeLinkQualifier {
   margin-top: 15px;
   margin-right:5px;
-}
-
-#numRepresentativeProps {
-  margin-right:10px;
 }
 
 #gbox_mappingTable {
@@ -883,122 +826,157 @@ h4.connector-role {
   margin-top:15px;
 }
 
+/*
+  Media Queries
+*/
 @media (min-width: 993px) {
-  .addMapping #resourceMappingBody .mapping-swap-holder {
-    height: 140px;
+  .addMapping #resourceMappingBody {
+    .mapping-swap-holder {
+      height: 140px;
 
-    .mapping-swap {
-      transform: rotate(0deg);
-      -webkit-transform: rotate(0deg);
-      -moz-transform: rotate(0deg);
-      -ms-transform: rotate(0deg);
-      -o-transform: rotate(0deg);
+      .mapping-swap {
+        transform: rotate(0deg);
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+      }
+      p {
+        margin-top: 10px;
+      }
     }
-    p {
-      margin-top: 10px;
+
+    .mapping-create-body {
+      button {
+        width: auto;
+      }
     }
   }
-
-  .addMapping #resourceMappingBody .mapping-create-body {
-    button {
-      width: auto;
-    }
-  }
-}
-
-#mappingDialogTabs .tab-content {
-  padding: 10px;
-  border: none;
 }
 
 @media (min-width: 768px) {
-  .mapping .target {
-    height: 100px;
-  }
-  .mapping .target .panel-body {
-    padding-left: 0;
-  }
-  .mapping .source {
-    position: relative;
-    border-right: 1px solid #ddd;
-    border-bottom: none;
-    height: 100px;
-    text-align: center;
-  }
-  .mapping .source:before {
-    left: 100%;
-    border: solid transparent;
-    content: "";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-    border-color: transparent;
-    border-left-color: #ddd;
-    border-width: 21px;
-    border-left-width: 21px;
-    top: 50%;
-    margin-left: 0;
-    margin-top: -21px;
-    bottom: auto;
-  }
-  .mapping .source:after {
-    left: 100%;
-    border: solid transparent;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-    border-color: rgba(213, 13, 186, 0);
-    border-left-color: #fff;
-    border-width: 20px;
-    border-left-width: 20px;
-    top: 50%;
-    bottom: auto;
-    margin-left: 0;
-    margin-top: -20px;
+  #attributesBody {
+    #previewDropdownButton {
+      width:auto;
+    }
 
+    .tool-group-right {
+      clear:none;
+    }
+
+    #numRepresentativeProps {
+      width:35px;
+      padding-right:0px;
+      display:inline-block;
+    }
+
+    #findSampleSource {
+      width:200px;
+      display:inline-block;
+    }
   }
-  .mapping .source .arrow {
-    position: absolute;
-    top: 0;
-    right: -11px;
-    z-index: 100;
-    height: 100px;
-    width: auto;
-    display: table;
-    color: @base-theme-color;
-  }
-  .mapping .source .arrow .arrow-inner{
-    display: table-cell;
-    vertical-align: middle;
-    width: auto;
-  }
-  .mapping .source .arrow .arrow-inner:after {
-    content: "\f061";
-  }
-  .mapping .panel-heading .connector-actions>div,
-  .mapping .panel-footer .connector-actions>div,
-  .mapping .panel-heading .mapping-action>div,
-  .mapping .panel-footer .mapping-action>div {
-    float: right;
-  }
-  .mapping .panel-heading .connector-actions,
-  .mapping .panel-footer .connector-actions {
-    text-align: right;
-    float: none !important;
-    border: none;
-    overflow: hidden;
-  }
-  .mapping .panel-heading .btn-link,
-  .mapping .panel-footer .btn-link {
-    border-left: 1px solid #ddd;
-    border-right: none;
-    width: auto;
-  }
-  .mapping .panel-heading .mapping-action .btn-link,
-  .mapping .panel-footer .mapping-action .btn-link {
-    width: auto;
+
+  .mapping {
+    .target {
+      height: 100px;
+
+      .panel-body {
+        padding-left: 0;
+      }
+    }
+
+    .source {
+      position: relative;
+      border-right: 1px solid #ddd;
+      border-bottom: none;
+      height: 100px;
+      text-align: center;
+      border-bottom: none;
+
+      .arrow {
+        position: absolute;
+        top: 0;
+        right: -11px;
+        z-index: 100;
+        height: 100px;
+        width: auto;
+        display: table;
+        color: @base-theme-color;
+
+        .arrow-inner {
+          display: table-cell;
+          vertical-align: middle;
+          width: auto;
+          border-top:none;
+
+          &:after {
+            content: "\f061";
+          }
+        }
+      }
+
+      &:before {
+        left: 100%;
+        border: solid transparent;
+        content: "";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-color: transparent;
+        border-left-color: #ddd;
+        border-width: 21px;
+        border-left-width: 21px;
+        top: 50%;
+        margin-left: 0;
+        margin-top: -21px;
+        bottom: auto;
+      }
+
+      &:after {
+        left: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-color: rgba(213, 13, 186, 0);
+        border-left-color: #fff;
+        border-width: 20px;
+        border-left-width: 20px;
+        top: 50%;
+        bottom: auto;
+        margin-left: 0;
+        margin-top: -20px;
+      }
+    }
+
+    .panel-heading .connector-actions>div,
+    .panel-footer .connector-actions>div,
+    .panel-heading .mapping-action>div,
+    .panel-footer .mapping-action>div {
+      float: right;
+    }
+
+    .panel-heading,
+    .panel-footer {
+      .connector-actions {
+        text-align: right;
+        float: none !important;
+        border: none;
+        overflow: hidden;
+      }
+
+      .btn-link {
+        border-left: 1px solid #ddd;
+        border-right: none;
+        width: auto;
+      }
+
+      .mapping-action .btn-link {
+        width: auto;
+      }
+    }
   }
 }
