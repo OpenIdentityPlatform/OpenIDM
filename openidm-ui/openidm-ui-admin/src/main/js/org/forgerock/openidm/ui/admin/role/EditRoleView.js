@@ -42,8 +42,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
 
         events: {
             "click .saveRole": "saveRole",
-            "click #deleteRole": "deleteRole",
-            "click .backToList": "backToList"
+            "click #deleteRole": "deleteRole"
         },
         render: function(args, callback) {
             var rolePromise,
@@ -110,13 +109,6 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.data.role._id, rev: this.data.role._rev}, this.data.role, formVal.role, successCallback);
             }
         },
-        backToList: function(e){
-            if(e){
-                e.preventDefault();
-            }
-
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminListManagedObjectView", args: this.data.args});
-        },
         deleteRole: function(e, callback){
             if(e) {
                 e.preventDefault();
@@ -125,7 +117,9 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }), _.bind(function(){
                 resourceDelegate.deleteResource(this.data.serviceUrl, this.data.role._id, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role.properties.name })});
-                    this.backToList();
+
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminListManagedObjectView", args: ["managed","role"]});
+
                     if(callback) {
                         callback();
                     }
