@@ -811,7 +811,6 @@ class ObjectMapping {
         }
 
         try {
-            Context rootContext = context.asContext(RootContext.class);
             ReconAction action = params.get("action").required().asEnum(ReconAction.class);
             SyncOperation op = null;
             ReconAuditEventLogger event = null;
@@ -822,7 +821,7 @@ class ObjectMapping {
                     op = sop;
                     sop.fromJsonValue(params);
 
-                    event = new ReconAuditEventLogger(sop, name, rootContext);
+                    event = new ReconAuditEventLogger(sop, name, context);
                     event.setLinkQualifier(sop.getLinkQualifier());
                     String sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sop.getSourceObjectId());
                     event.setSourceObjectId(sourceObjectId);
@@ -844,7 +843,7 @@ class ObjectMapping {
                     top.fromJsonValue(params);
                     String targetId = params.get("targetId").required().asString();
 
-                    event = new ReconAuditEventLogger(top, name, rootContext);
+                    event = new ReconAuditEventLogger(top, name, context);
                     event.setLinkQualifier(top.getLinkQualifier());
                     String targetObjectId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
                     event.setTargetObjectId(targetObjectId);
@@ -1137,7 +1136,7 @@ class ObjectMapping {
          * {@inheritDoc}
          */
         @Override
-        public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, 
+        public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context context,
                 Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds)
                 throws SynchronizationException {
             reconContext.checkCanceled();
@@ -1151,7 +1150,7 @@ class ObjectMapping {
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
 
-                ReconAuditEventLogger auditEvent = new ReconAuditEventLogger(op, name, rootContext);
+                ReconAuditEventLogger auditEvent = new ReconAuditEventLogger(op, name, context);
                 auditEvent.setLinkQualifier(op.getLinkQualifier());
                 op.sourceObjectAccessor = sourceObjectAccessor;
                 if (allLinks != null) {
@@ -1210,7 +1209,7 @@ class ObjectMapping {
          * {@inheritDoc}
          */
         @Override
-        public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, Map<String, 
+        public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context context, Map<String,
                 Map<String, Link>> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
             reconContext.checkCanceled();
             for (String linkQualifier : getAllLinkQualifiers()) {
@@ -1218,7 +1217,7 @@ class ObjectMapping {
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
 
-                ReconAuditEventLogger event = new ReconAuditEventLogger(op, name, rootContext);
+                ReconAuditEventLogger event = new ReconAuditEventLogger(op, name, context);
                 event.setLinkQualifier(op.getLinkQualifier());
                 
                 if (objectEntry == null) {
