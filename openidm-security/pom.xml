@@ -114,6 +114,12 @@
             <artifactId>forgerock-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
