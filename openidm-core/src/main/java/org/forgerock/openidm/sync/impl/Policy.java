@@ -15,10 +15,10 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-import static org.forgerock.json.resource.ActionRequest.*;
 
 // Java Standard Edition
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.impl.Scripts.Script;
 import org.slf4j.Logger;
@@ -127,7 +127,7 @@ class Policy {
             Map<String, Object> recon = new HashMap<String, Object>();
             scope.put("recon", recon);
             JsonValue actionParam = syncOperation.toJsonValue();
-            actionParam.put(FIELD_ACTION, "performAction");
+            actionParam.put(HttpUtils.PARAM_ACTION, "performAction");
             recon.put("actionParam", actionParam.getObject());
 
             scope.put("sourceAction", (syncOperation instanceof ObjectMapping.SourceSyncOperation));
