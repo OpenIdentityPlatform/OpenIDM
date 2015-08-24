@@ -26,6 +26,7 @@ import org.forgerock.script.ScriptRegistry;
  */
 public class OpenIDMSessionFactory implements SessionFactory {
 
+    private ClassLoader classLoader;
     private ScriptRegistry scriptRegistry;
 //    private String url;
 //    private String user;
@@ -66,8 +67,18 @@ public class OpenIDMSessionFactory implements SessionFactory {
      * Creates new OpenIDMSessionFactory
      * @param router Router newBuilder of the OpenIDM
      */
-    public OpenIDMSessionFactory(ScriptRegistry scriptRegistry) {
+    public OpenIDMSessionFactory(ClassLoader classLoader, ScriptRegistry scriptRegistry) {
+        this.classLoader = classLoader;
         this.scriptRegistry = scriptRegistry;
+    }
+
+    /**
+     * Sets ClassLoader for OpenIDMSession.
+     *
+     * @param classLoader org.forgerock.openidm.router ClassLoader
+     */
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
     public void setScriptRegistry(ScriptRegistry scriptRegistry) {
@@ -81,6 +92,6 @@ public class OpenIDMSessionFactory implements SessionFactory {
 
     @Override
     public Session openSession() {
-        return new OpenIDMSessionImpl(scriptRegistry);
+        return new OpenIDMSessionImpl(classLoader, scriptRegistry);
     }
 }
