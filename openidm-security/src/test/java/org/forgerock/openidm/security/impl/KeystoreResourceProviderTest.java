@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.security.impl;
 
+import static org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert.assertThat;
+
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonValue;
@@ -146,8 +148,7 @@ public class KeystoreResourceProviderTest {
         final ActionResponse result = connection.action(new RootContext(), actionRequest);
 
         //then
-        // TODO-crest3 replace with AssertJActionResponseAssert
-        assertThat(!result.getJsonContent().get("privateKey").isNull());
+        assertThat(result).withContent().hasObject("privateKey");
         checkResultForRequiredFields(result.getJsonContent());
         checkKeyStoreEntry(result.getJsonContent());
     }
@@ -165,8 +166,7 @@ public class KeystoreResourceProviderTest {
         final ActionResponse result = connection.action(new RootContext(), actionRequest);
 
         //then
-        // TODO-crest3 replace with AssertJActionResponseAssert
-        assertThat(result.getJsonContent().get("privateKey").isNull());
+        assertThat(result).withContent().hasObject("privateKey");
         checkResultForRequiredFields(result.getJsonContent());
         checkKeyStoreEntry(result.getJsonContent());
     }
