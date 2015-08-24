@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
   `entrytype` VARCHAR(7) NULL ,
   `rootactionid` VARCHAR(511) NULL ,
-  `reconid` VARCHAR(36) NULL ,
+  `reconid` VARCHAR(56) NULL ,
   `reconaction` VARCHAR(36) NULL ,
   `reconciling` VARCHAR(12) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
