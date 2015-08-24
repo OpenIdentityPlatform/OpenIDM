@@ -26,7 +26,7 @@ Sample 3 - Scripted SQL
 =======================
 
 This sample demonstrates creating a new CustomScriptedSQL connector, using the
-custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar that is included in the
+custom-scripted-connector-bundler-4.0.0-SNAPSHOT.jar that is included in the
 tools directory of the OpenIDM zip file. The sample relies on the new custom
 connector that you will create with the connector bundler. It provides an
 example configuration and a handful of Groovy scripts that are used to
@@ -95,7 +95,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
    the custom config provided in the sample3/data directory.
 
    $ cd path/to/openidm/samples/sample3/create-connector
-   $ java -jar ../../../tools/custom-scripted-connector-bundler-3.2.0-SNAPSHOT.jar -c ../data/scriptedsql.json
+   $ java -jar ../../../tools/custom-scripted-connector-bundler-4.0.0-SNAPSHOT.jar -c ../data/scriptedsql.json
 
 2. Copy the provided sample scripts into the connector src directory; these will
    become part of the custom connector.
