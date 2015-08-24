@@ -1,61 +1,8 @@
-#attributesGridHolder .table tbody tr {
-  height:65px;
-}
-
-#attributesGridHolder tr:hover {
-  background: #f3f3f3;
-  cursor: pointer;
-}
-
-#attributesGridHolder .smallScreenCell .properties-badge {
-  top: 0px;
-  margin-left: 10px;
-}
-
+/*
+  General Mapping Styles
+*/
 #mappingDialogTabs .tab-content {
   padding: 10px;
-  border: none;
-}
-
-h4.connector-role {
-  font-weight: 400;
-  margin-top: 0;
-  font-size: 14px;
-  color: #777;
-  margin-bottom: 5px;
-}
-
-.mapping-table .tab-header h3 {
-  margin:5px 0 0;
-}
-
-
-#roleEntitlementsPanel .panel-heading .panel-title .help-text {
-  color: #888;
-  margin-left: 10px;
-  margin-top: 1px;
-  margin-bottom: 0;
-  font-weight: 400;
-  font-size: 14px;
-}
-
-.table-user-association>thead {
-  background-color: @background-color;
-}
-
-.mappings-table {
-  .table>tbody>tr>td {
-    padding-top: 20px;
-    padding-bottom: 20px;
-  }
-
-  .logo {
-    width: 70px;
-  }
-}
-
-#attributesHeading {
-  padding: 15px;
 }
 
 /*
@@ -65,8 +12,27 @@ h4.connector-role {
   display:none;
 }
 
-#subNavHolder {
-  display:none;
+.table-user-association>thead {
+  background-color: @background-color;
+}
+
+/*
+  Mapping Properties Styles
+*/
+#attributesGridHolder {
+  .table tbody tr {
+    height:65px;
+
+    &:hover {
+      background: #f3f3f3;
+      cursor: pointer;
+    }
+  }
+
+  .smallScreenCell .properties-badge {
+    top: 0px;
+    margin-left: 10px;
+  }
 }
 
 /*
@@ -111,7 +77,6 @@ h4.connector-role {
         font-size: 50px;
       }
     }
-
 
     .mapping-create-body {
       margin-top: 20px;
@@ -159,6 +124,7 @@ h4.connector-role {
       background-color: #fff;
       border-radius: 4px;
       color: #444444;
+
       &:hover {
         border-color: @base-theme-color;
         -webkit-transition: border-color 0.3s ease-in-out;
@@ -177,7 +143,6 @@ h4.connector-role {
         transform: translateY(-50%);
       }
     }
-
   }
 
   .card-container {
@@ -256,10 +221,9 @@ h4.connector-role {
   }
 }
 
-#mappingConfigHolder {
-  clear: both;
-}
-
+/*
+  Mapping List Page
+*/
 .mappings-list {
   .mapping .back a {
     pointer-events: all;
@@ -275,52 +239,27 @@ h4.connector-role {
     &:focus .panel {
       border-color: @base-theme-color;
     }
-  }
-}
 
-.mapping .panel-heading,
-.mapping .panel-footer {
-  border-top: 1px solid #ddd;
-
-  .connector-actions {
-    border-top: 1px solid #ddd;
-  }
-
-  h2.connector-name {
-    font-size: 15px;
-    margin-top: 0;
-    color: #52585C;
-    font-weight: 600;
-    line-height: 22px;
-    margin-bottom: 0;
-  }
-
-  .btn-link {
-    font-size: 16px;
-    padding: 0 15px 0;
-    border-right: 1px solid #ddd;
-    height: 62px;
-    display: block;
-    float: left;
-    width: 50%;
-
-    &.delete-button {
-      border-right:0px;
+    .panel-footer .btn-link {
+      padding: 0 15px 0;
     }
-  }
-
-  .mapping-action .btn-link {
-    border-right: none;
-    width: 100%;
   }
 }
 
 /*
-  Mapping List Page
+  Mapping card styles
 */
 .mapping {
   margin-bottom: 20px;
   position: relative;
+
+  h4.connector-role {
+    font-weight: 400;
+    margin-top: 0;
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 5px;
+  }
 
   .panel-footer .help-link {
     padding: 18px;
@@ -332,6 +271,42 @@ h4.connector-role {
   .panel-footer .btn-link:focus {
     background: #eee;
     text-decoration: none;
+  }
+
+  .panel-heading,
+  .panel-footer {
+    border-top: 1px solid #ddd;
+
+    .connector-actions {
+      border-top: 1px solid #ddd;
+    }
+
+    h2.connector-name {
+      font-size: 15px;
+      margin-top: 0;
+      color: #52585C;
+      font-weight: 600;
+      line-height: 22px;
+      margin-bottom: 0;
+    }
+
+    .btn-link {
+      font-size: 16px;
+      border-right: 1px solid #ddd;
+      height: 62px;
+      display: block;
+      float: left;
+      width: 50%;
+
+      &.delete-button {
+        border-right:0px;
+      }
+    }
+
+    .mapping-action .btn-link {
+      border-right: none;
+      width: 100%;
+    }
   }
 
   .media {
@@ -665,13 +640,12 @@ h4.connector-role {
 
       .situationRow {
         margin-bottom: 15px;
+        min-height: 38px;
 
         .form-control {
           width: 80%;
           display: inline-block;
         }
-
-        min-height: 38px;
       }
     }
   }
@@ -790,7 +764,6 @@ h4.connector-role {
     .title {
       margin-bottom:5px;
     }
-
   }
 }
 

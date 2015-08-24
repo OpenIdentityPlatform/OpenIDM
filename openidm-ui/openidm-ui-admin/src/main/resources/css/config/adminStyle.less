@@ -89,6 +89,17 @@
   padding-left: 15px;
 }
 
+.ui-autocomplete {
+  li.ui-state-focus {
+    color: #fff;
+    background: @base-theme-color;
+  }
+
+  li.ui-menu-item {
+    padding:5px;
+  }
+}
+
 /*
   Popover styling
 */
@@ -281,6 +292,7 @@ table.placeholder {
   input[type=text]{
     width: 300px;
   }
+
   .managed-property {
     border: 1px solid #efefef;
     margin-top: 15px;
@@ -288,6 +300,9 @@ table.placeholder {
   }
 }
 
+/*
+  Script List Styles
+*/
 .scripts-container {
   margin-top: 15px;
 
@@ -309,22 +324,12 @@ table.placeholder {
   }
 }
 
-.ui-autocomplete {
-  li.ui-state-focus {
-    color: #fff;
-    background: @base-theme-color;
-  }
-
-  li.ui-menu-item {
-    padding:5px;
-  }
-}
-
 /*
   Graph Display
 */
 .reportsGraphBody {
   overflow:hidden;
+
   .node circle {
     fill: #fff;
     stroke: @base-theme-color;
@@ -352,7 +357,6 @@ table.placeholder {
     margin-bottom: 0px;
     margin-top: 0px;
   }
-
 
   td.noData {
     padding: 10px;
@@ -391,9 +395,11 @@ table.placeholder {
   }
 }
 
+/*
+  List table styles
+*/
 .list-table {
   .list-group {
-
     .list-group-item:last-child {
       border-bottom-right-radius: 0;
       border-bottom-left-radius: 0;
