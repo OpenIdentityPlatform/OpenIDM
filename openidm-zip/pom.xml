@@ -673,30 +673,15 @@
 
                         <configuration>
                             <tasks>
-                                <zip
-                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
-                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationRoles.bar"
-                                        includes="certificationRoles*"/>
+                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationRoles.bar" includes="certificationRoles*" />
 
-                                <zip
-                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
-                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationEntitlements.bar"
-                                        includes="certificationEntitlements*"/>
+                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationEntitlements.bar" includes="certificationEntitlements*" />
 
-                                <zip
-                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
-                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/manualMatch.bar"
-                                        includes="manualMatch*"/>
+                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/manualMatch.bar" includes="manualMatch*" />
 
-                                <zip
-                                        basedir="${basedir}/src/main/resources/samples/usecase/workflow"
-                                        destfile="${project.build.directory}/bar-files/samples/usecase/workflow/newUserCreate.bar"
-                                        includes="newUserCreate.bpmn20.xml,nUC*.xhtml"/>
+                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/newUserCreate.bar" includes="newUserCreate.bpmn20.xml,nUC*.xhtml" />
 
-                                <zip
-                                        basedir="${basedir}/src/main/resources/samples/workflow/workflow"
-                                        destfile="${project.build.directory}/bar-files/samples/workflow/workflow/chess.bar"
-                                        includes="chess*"/>
+                                <zip basedir="${basedir}/src/main/resources/samples/workflow/workflow" destfile="${project.build.directory}/bar-files/samples/workflow/workflow/chess.bar" includes="chess*" />
 
                             </tasks>
                         </configuration>
@@ -878,10 +863,10 @@
             </dependencies>
             <properties>
                 <!-- We reset these properties to include the SaaS connectors samples in the commercial build -->
-                <exclude.google.samples/>
-                <exclude.salesforce.samples/>
-                <exclude.google.provisioner/>
-                <exclude.salesforce.provisioner/>
+                <exclude.google.samples />
+                <exclude.salesforce.samples />
+                <exclude.google.provisioner />
+                <exclude.salesforce.provisioner />
                 <!-- Properties to include the SaaS connectors in the commercial build -->
                 <google.provisioner>provisioner.openicf-google.json</google.provisioner>
                 <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
