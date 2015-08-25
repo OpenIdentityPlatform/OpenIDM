@@ -62,9 +62,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/openidm/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/openidm/trunk</url>
+        <connection>scm:git:ssh://git@stash.forgerock.org:7999/openidm/openidm.git</connection>
+        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/openidm/openidm.git</developerConnection>
+        <url>https://stash.forgerock.org/projects/OPENIDM/repos/openidm/browse</url>
     </scm>
     <distributionManagement>
         <site>
