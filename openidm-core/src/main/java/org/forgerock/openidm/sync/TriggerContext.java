@@ -51,7 +51,7 @@ public class TriggerContext extends AbstractContext {
      * @param savedContext
      *            The JSON representation from which this context's attributes
      *            should be parsed.
-     * @param config
+     * @param classLoader
      *            The ClassLoader.
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
