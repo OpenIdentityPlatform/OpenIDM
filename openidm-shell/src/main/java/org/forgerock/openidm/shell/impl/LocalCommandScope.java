@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.shell.impl;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -38,15 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import javax.crypto.spec.SecretKeySpec;
-
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
