@@ -239,7 +239,10 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
 
             if(search.length > 0) {
                 _.each(this.$el.find(".card-spacer"), function(card) {
-                    if($(card).attr("data-type").indexOf(search) > -1 || $(card).attr("data-name").indexOf(search) > -1) {
+                    console.log($(card).attr("data-type"));
+                    console.log($(card).attr("data-name"));
+                    console.log(search);
+                    if($(card).attr("data-type").toLowerCase().indexOf(search) > -1 || $(card).attr("data-name").toLowerCase().indexOf(search) > -1) {
                         $(card).fadeIn();
                     } else {
                         $(card).fadeOut();
@@ -247,7 +250,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                 }, this);
 
                 _.each(this.$el.find(".backgrid-table tbody tr"), function(row) {
-                    if($(row).attr("data-type").indexOf(search) > -1 || $(row).attr("data-name").indexOf(search) > -1) {
+                    if($(row).attr("data-type").toLowerCase().indexOf(search) > -1 || $(row).attr("data-name").toLowerCase().indexOf(search) > -1) {
                         $(row).fadeIn();
                     } else {
                         $(row).fadeOut();
