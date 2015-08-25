@@ -124,12 +124,6 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-api-servlet</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -401,7 +395,7 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>launcher-zip</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
+            <version>1.1.0</version>
             <type>zip</type>
         </dependency>
         <dependency>
