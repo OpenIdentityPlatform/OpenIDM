@@ -166,7 +166,7 @@ public class AuditFilter implements Filter {
         final AccessAuditEventBuilder accessAuditEventBuilder = new AccessAuditEventBuilder();
         accessAuditEventBuilder.forHttpCrestRequest(context, state.request)
                 .authorizationIdFromSecurityContext(context)
-                .serverFromHttpContext(context)
+                // TODO CAUD-114 .serverFromHttpContext(context)
                 .resourceOperationFromRequest(state.request)
                 .clientFromHttpContext(context)
                 .transactionIdFromRootContext(context)
