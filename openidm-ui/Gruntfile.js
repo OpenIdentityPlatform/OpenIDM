@@ -24,6 +24,17 @@
 
 module.exports = function(grunt) {
 
+    /*
+        If your system has never been configured to use increased processes you will need to increase the limit on your system (for Mac not sure about
+        windows).
+
+        Type the following in terminal:
+        launchctl limit maxfiles 2048 2048 && ulimit -n 2048
+
+        You will also need to configure an environment variable
+
+        export FORGEROCK_UI_SRC=PATH TO COMMONS (Example: ~/Documents/workspace/forgerock-ui)
+    */
     grunt.initConfig({
         forgerockui: process.env.FORGEROCK_UI_SRC,
         watch: {
