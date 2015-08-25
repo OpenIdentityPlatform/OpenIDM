@@ -40,7 +40,7 @@ public class TaskScannerServiceTest {
         final TaskScannerService taskScannerService = new TaskScannerService();
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         final Connection connection = mock(Connection.class);
-        final Context serverContext = mock(Context.class);
+        final Context context = mock(Context.class);
         final AuditEvent auditEvent = mock(AuditEvent.class);
         final ArgumentCaptor<CreateRequest> argumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
@@ -52,7 +52,7 @@ public class TaskScannerServiceTest {
         when(auditEvent.getValue()).thenReturn(json(object()));
 
         //when
-        taskScannerService.auditScheduledService(serverContext, auditEvent);
+        taskScannerService.auditScheduledService(context, auditEvent);
 
         //then
         verify(connection).create(any(Context.class), any(CreateRequest.class));

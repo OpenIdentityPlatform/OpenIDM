@@ -41,7 +41,7 @@ public class SystemObjectSetServiceTest {
         final SystemObjectSetService systemObjectSetService = new SystemObjectSetService();
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         final Connection connection = mock(Connection.class);
-        final Context serverContext = mock(Context.class);
+        final Context context = mock(Context.class);
         final AuditEvent auditEvent = mock(AuditEvent.class);
         final ArgumentCaptor<CreateRequest> argumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
@@ -53,7 +53,7 @@ public class SystemObjectSetServiceTest {
                 .thenReturn(newResourceResponse("id", "rev", null));
         when(auditEvent.getValue()).thenReturn(json(object()));
 
-        systemObjectSetService.auditScheduledService(serverContext, auditEvent);
+        systemObjectSetService.auditScheduledService(context, auditEvent);
 
         // then
         verify(connection).create(any(Context.class), any(CreateRequest.class));

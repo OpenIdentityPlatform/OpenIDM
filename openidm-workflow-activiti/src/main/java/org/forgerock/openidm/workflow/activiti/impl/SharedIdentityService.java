@@ -83,7 +83,7 @@ public class SharedIdentityService implements IdentityService {
     //SCIM Group Schema
     public static final String SCIM_MEMBERS = "members";
     private RouteService repositoryRoute;
-    private Context serverContext;
+    private Context context;
     private CryptoService cryptoService;
     private ConnectionFactory connectionFactory;
     
@@ -94,7 +94,7 @@ public class SharedIdentityService implements IdentityService {
         repositoryRoute = router;
         if (router != null) {
             try {
-                this.serverContext = repositoryRoute.createServerContext();
+                this.context = repositoryRoute.createServerContext();
             } catch (ResourceException ex) {
                 Logger.getLogger(SharedIdentityService.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -114,12 +114,12 @@ public class SharedIdentityService implements IdentityService {
     }
 
     public QueryResponse query(QueryRequest request, QueryResourceHandler handler) throws ResourceException {
-        return getConnection().query(serverContext, request, handler);
+        return getConnection().query(context, request, handler);
     }
 
     public QueryResponse query(QueryRequest request, Collection<? super ResourceResponse> result)
             throws ResourceException {
-        return getConnection().query(serverContext, request, result);
+        return getConnection().query(context, request, result);
     }
 
     /**
@@ -147,10 +147,10 @@ public class SharedIdentityService implements IdentityService {
             try {
                 if (existingUser != null) {
                     UpdateRequest request = newUpdateRequest(USER_PATH, jsonUser.getId(), jsonUser);
-                    getConnection().update(serverContext, request);
+                    getConnection().update(context, request);
                 } else {
                     CreateRequest request = Requests.newCreateRequest(USER_PATH, jsonUser.getId(), jsonUser);
-                    getConnection().create(serverContext, request);
+                    getConnection().create(context, request);
                 }
             } catch (ResourceException ex) {
                 throw new RuntimeException(ex);
@@ -173,7 +173,7 @@ public class SharedIdentityService implements IdentityService {
     public void deleteUser(String userId) {
         try {
             DeleteRequest request = Requests.newDeleteRequest(USER_PATH + userId);
-            getConnection().delete(serverContext, request);
+            getConnection().delete(context, request);
         } catch (ResourceException ex) {
             throw new RuntimeException(ex);
         }
@@ -212,10 +212,10 @@ public class SharedIdentityService implements IdentityService {
             try {
                 if (existingGroup != null) {
                     UpdateRequest request = newUpdateRequest(GROUP_PATH, jsonGroup.getId(), jsonGroup);
-                    getConnection().update(serverContext, request);
+                    getConnection().update(context, request);
                 } else {
                     CreateRequest request = Requests.newCreateRequest(GROUP_PATH, jsonGroup.getId(), jsonGroup);
-                    getConnection().create(serverContext, request);
+                    getConnection().create(context, request);
                 }
             } catch (ResourceException ex) {
                 throw new RuntimeException(ex);
@@ -232,7 +232,7 @@ public class SharedIdentityService implements IdentityService {
     public void deleteGroup(String groupId) {
         try {
             DeleteRequest request = Requests.newDeleteRequest(GROUP_PATH + groupId);
-            getConnection().delete(serverContext, request);
+            getConnection().delete(context, request);
         } catch (ResourceException e) {
             throw new RuntimeException(e);
         }

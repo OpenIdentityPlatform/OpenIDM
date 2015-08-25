@@ -41,7 +41,7 @@ public class SynchronizationServiceTest {
         final SynchronizationService synchronizationService = new SynchronizationService();
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         final Connection connection = mock(Connection.class);
-        final Context serverContext = mock(Context.class);
+        final Context context = mock(Context.class);
         final AuditEvent auditEvent = mock(AuditEvent.class);
         final ArgumentCaptor<CreateRequest> argumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
 
@@ -53,7 +53,7 @@ public class SynchronizationServiceTest {
         when(auditEvent.getValue()).thenReturn(json(object()));
 
         //when
-        synchronizationService.auditScheduledService(serverContext, auditEvent);
+        synchronizationService.auditScheduledService(context, auditEvent);
 
         //then
         verify(connection).create(any(Context.class), any(CreateRequest.class));

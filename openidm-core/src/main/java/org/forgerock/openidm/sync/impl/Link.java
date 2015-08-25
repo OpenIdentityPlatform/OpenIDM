@@ -148,19 +148,19 @@ class Link {
     /**
      * Issues a query on link(s)
      *
-     * @param router the ServerContext
+     * @param context the Context chain for the request
      * @param connectionFactory the connection factory
      * @param query the query parameters
      * @return The query results
      * @throws SynchronizationException if getting and initializing the link details fail
      */
-    private static JsonValue linkQuery(Context router, ConnectionFactory connectionFactory, JsonValue query)
+    private static JsonValue linkQuery(Context context, ConnectionFactory connectionFactory, JsonValue query)
             throws SynchronizationException {
         JsonValue results = null;
         try {
             final Collection<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(linkId(null), query.asMap());
-            connectionFactory.getConnection().query(router, request, new QueryResourceHandler() {
+            connectionFactory.getConnection().query(context, request, new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
                     result.add(resource.getContent().asMap());

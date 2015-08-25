@@ -513,7 +513,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * Handle ConnectorExceptions from ConnectorFacade invocations.  Maps each ConnectorException subtype to the
      * appropriate {@link ResourceException} for passing to {@code handleError}.  Optionally logs to activity log.
      *
-     * @param context the ServerContext from the original request
+     * @param context the Context from the original request
      * @param request the original request
      * @param exception the ConnectorException that was thrown by the facade
      * @param resourceId the resourceId being operated on
@@ -683,7 +683,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * Checks the RemoteWrappedException to determine which Exception has been wrapped and returns
      * the appropriated corresponding exception.
      *
-     * @param context the ServerContext from the original request
+     * @param context the Context from the original request
      * @param request the original request
      * @param exception the ConnectorException that was thrown by the facade
      * @param resourceId the resourceId being operated on
@@ -2037,7 +2037,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * "ok": false
      * }}
      *
-     * @param context the ServerContext of the request requesting the status
+     * @param context the Context of the request requesting the status
      * @return a Map of the current status of a connector
      */
     public Map<String, Object> getStatus(Context context) {

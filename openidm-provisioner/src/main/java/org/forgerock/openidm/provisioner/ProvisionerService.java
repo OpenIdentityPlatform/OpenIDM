@@ -54,7 +54,7 @@ public interface ProvisionerService {
      * </p/>
      * TODO Provide a sample object
      *
-     * @param context the request's ServerContext in case the status report operation needs to perform a router request
+     * @param context the request's Context in case the status report operation needs to perform a router request
      * @return the provisioner's status
      */
     Map<String, Object> getStatus(Context context);

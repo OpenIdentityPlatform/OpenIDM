@@ -50,7 +50,7 @@ public class PassthroughAuthenticator implements Authenticator {
      *
      * @param username The user's username
      * @param password The user's password.
-     * @param context the ServerContext to use when making requests on the router
+     * @param context the Context to use when making requests on the router
      * @return <code>true</code> if authentication is successful.
      * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */

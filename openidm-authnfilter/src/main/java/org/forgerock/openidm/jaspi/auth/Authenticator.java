@@ -69,7 +69,7 @@ public interface Authenticator {
      *
      * @param username The user's username
      * @param password The user's password.
-     * @param context the ServerContext to use when making requests on the router
+     * @param context the Context to use when making requests on the router
      * @return the result of the authentication (success/failure and, optionally, the associated resource)
      * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */

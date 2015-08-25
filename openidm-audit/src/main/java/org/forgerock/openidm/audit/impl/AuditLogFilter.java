@@ -27,7 +27,7 @@ interface AuditLogFilter {
     /**
      * Test whether the log message described in the request should be filtered out; i.e. not logged.
      *
-     * @param context the ServerContext associated with the request
+     * @param context the Context associated with the request
      * @param request the audit log create request.  Implementations will typically
      *                examine request.getContent()
      * @return true if the log message should be dropped, false if it should be logged
