@@ -16,13 +16,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.openidm.util.FileUtil;
-import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +24,13 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.util.FileUtil;
+import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 public class ObjectClassInfoHelperFactoryTest {
 

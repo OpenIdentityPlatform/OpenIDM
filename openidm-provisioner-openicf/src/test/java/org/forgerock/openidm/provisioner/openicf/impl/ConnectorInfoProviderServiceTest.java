@@ -40,7 +40,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;

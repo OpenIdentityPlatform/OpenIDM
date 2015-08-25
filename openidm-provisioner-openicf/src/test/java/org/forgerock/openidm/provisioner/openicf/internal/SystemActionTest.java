@@ -29,9 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

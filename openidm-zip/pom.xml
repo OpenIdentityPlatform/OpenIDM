@@ -810,13 +810,10 @@
                 </openidm.options>
             </properties>
             <dependencies>
-                <!--TODO-crest3 is this still needed?  Other build profiles don't-->
-                <!--TODO-crest3 also note the issue between having jul-to-slf4j and slf4j-jdk14 in the same classpath; workflow-activiti uses jul-to-slf4j: http://www.slf4j.org/legacy.html#jul-to-slf4j-->
-                <!--<dependency>-->
-                <!--<groupId>org.slf4j</groupId>-->
-                <!--<artifactId>slf4j-jdk14</artifactId>-->
-                <!--<version>${slf4j.version}</version>-->
-                <!--</dependency>-->
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </dependency>
             </dependencies>
         </profile>
         <profile>
