@@ -212,11 +212,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             final Collection<String> collectionToPopulate, final boolean caseSensitive, final QuerySide querySide,
             int pageSize, String pagingCookie) throws SynchronizationException {
         final Collection<String> ids = collectionToPopulate;
-<<<<<<< e11905d40de186b06fa0e6d50f1f8e267863b7ec
         final JsonValue objList = new JsonValue(new LinkedList());
-=======
-        final JsonValue objList = new JsonValue(new ArrayList<Object>());
->>>>>>> [OPENIDM-3753] Initial migration to CREST3.
         final ReconQueryResult reconQueryResult = new ReconQueryResult();
         try {
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(objectSet, query.asMap());
