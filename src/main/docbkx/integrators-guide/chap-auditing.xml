@@ -149,7 +149,7 @@
      <programlisting language="javascript">"eventHandlers" : [
     {
         "name" : "csv",
-        "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+        "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
         "config" : {
             "logDirectory" : "audit"
         },
@@ -351,9 +351,18 @@
   </para>
   <programlisting language="javascript">{
     "auditServiceConfig" : {
-        "handlerForQueries" : "repo"
+        "handlerForQueries" : "repo",
+        "availableAuditEventHandlers" : [
+            "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+            "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+            "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+        ]
     },
 ...</programlisting>
+  <para>
+   The <literal>availableAuditEventHandlers</literal> property provides the
+   array of audit event handlers available to OpenIDM.
+  </para>
  </section>
 
  <section xml:id="audit-log-types">
