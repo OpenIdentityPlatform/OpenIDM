@@ -24,27 +24,14 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
-import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
-import org.forgerock.openidm.util.FileUtil;
-import org.forgerock.util.encode.Base64;
-import org.identityconnectors.common.Assertions;
-import org.identityconnectors.framework.api.APIConfiguration;
-import org.identityconnectors.framework.api.ConnectorFacade;
-import org.identityconnectors.framework.api.ConnectorFacadeFactory;
-import org.identityconnectors.framework.api.operations.*;
-import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.Schema;
-import org.identityconnectors.framework.common.serializer.SerializerUtil;
-import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
-import org.identityconnectors.test.common.TestHelpers;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.refEq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,12 +43,27 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
+import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
+import org.forgerock.openidm.util.FileUtil;
+import org.forgerock.util.encode.Base64;
+import org.identityconnectors.common.Assertions;
+import org.identityconnectors.framework.api.APIConfiguration;
+import org.identityconnectors.framework.api.ConnectorFacade;
+import org.identityconnectors.framework.api.ConnectorFacadeFactory;
+import org.identityconnectors.framework.api.operations.APIOperation;
+import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.Schema;
+import org.identityconnectors.framework.common.serializer.SerializerUtil;
+import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
+import org.identityconnectors.test.common.TestHelpers;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 /**
  * Sample Class Doc.

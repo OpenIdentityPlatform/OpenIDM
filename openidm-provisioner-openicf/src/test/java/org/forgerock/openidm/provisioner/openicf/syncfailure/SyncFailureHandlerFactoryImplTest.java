@@ -18,17 +18,16 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.JsonValue;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Config tests for SyncFailureHandlerFactoryImpl factor method.

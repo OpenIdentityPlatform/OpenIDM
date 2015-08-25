@@ -21,6 +21,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,8 +30,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import javax.script.ScriptException;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -39,7 +39,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.codehaus.jackson.JsonProcessingException;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;

@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -47,7 +48,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
@@ -452,7 +452,6 @@ public class SchedulerService implements RequestHandler {
      * Determines if a job already exists.
      *
      * @param jobName       The name of the job
-     * @param persisted     If the job is persisted or not
      * @return              True if the job exists, false otherwise
      * @throws SchedulerException
      */
