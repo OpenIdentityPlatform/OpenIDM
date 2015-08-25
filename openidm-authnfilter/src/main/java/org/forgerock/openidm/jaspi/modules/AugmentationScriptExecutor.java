@@ -68,7 +68,7 @@ class AugmentationScriptExecutor {
                         + augmentScript.getName().toString());
             }
 
-            // Create internal ServerContext chain for script-call
+            // Create internal Context chain for script-call
             Context context = authnFilterHelper.getRouter().createServerContext();
             final Script script = augmentScript.getScript(context);
             // Pass auth module properties and SecurityContextWrapper details to augmentation script
@@ -99,7 +99,7 @@ class AugmentationScriptExecutor {
             logger.error("{} when attempting to execute script {}", e.toString(), augmentScript.getName(), e);
             throw new JaspiAuthException(e.getMessage(), e);
         } catch (ResourceException e) {
-            logger.error("{} when attempting to create server context", e.toString(), e);
+            logger.error("{} when attempting to create context", e.toString(), e);
             throw new JaspiAuthException(e.getMessage(), e);
         }
     }

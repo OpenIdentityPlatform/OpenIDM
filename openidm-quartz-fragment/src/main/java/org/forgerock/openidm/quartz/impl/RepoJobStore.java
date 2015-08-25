@@ -199,7 +199,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         return context;
     }
 
-    public static void setServerContext(Context context) {
+    public static void setContext(Context context) {
         RepoJobStore.context = context;
     }
 

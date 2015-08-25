@@ -54,7 +54,7 @@ public class OpenIDMELResolver extends ELResolver {
     }
     
     @Override
-    public Object getValue(ELContext context, Object base, Object property) {
+    public Object getValue(ELContext elContext, Object base, Object property) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
         classLoader = session.getClassLoader();
         scriptRegistry = session.getOpenIDMScriptRegistry();
@@ -62,8 +62,8 @@ public class OpenIDMELResolver extends ELResolver {
         Bindings bindings = null;
         String key = (String) property;
         try {
-            JsonValue openidmContext = (JsonValue) context.getELResolver().getValue(context, null, ActivitiConstants.OPENIDM_CONTEXT);
-            org.forgerock.http.Context serverContext = new ActivitiContext(openidmContext, classLoader);
+            JsonValue openidmContext = (JsonValue) elContext.getELResolver().getValue(elContext, null, ActivitiConstants.OPENIDM_CONTEXT);
+            org.forgerock.http.Context context = new ActivitiContext(openidmContext, classLoader);
             ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", "groovy"));
             if (script == null) {
                 scriptJson.put("source", "");
@@ -71,7 +71,7 @@ public class OpenIDMELResolver extends ELResolver {
                 scriptJson.put("name", "ActivitiScript");
                 script = scriptRegistry.takeScript(new JsonValue(scriptJson));
             }
-            bindings = script.getScriptBindings(serverContext, null);
+            bindings = script.getScriptBindings(context, null);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
             throw new ActivitiException(ex.getMessage(), ex);
@@ -79,12 +79,12 @@ public class OpenIDMELResolver extends ELResolver {
         if (base == null) {
             // according to javadoc, can only be a String
             if (bindings.containsKey(key)) {
-                context.setPropertyResolved(true);
+                elContext.setPropertyResolved(true);
                 return bindings.get(key);
             } else {
                 for (String name : delegateMap.keySet()) {
                     if (name.equalsIgnoreCase(key)) {
-                        context.setPropertyResolved(true);
+                        elContext.setPropertyResolved(true);
                         return delegateMap.get(name);
                     }
                 }
@@ -92,7 +92,7 @@ public class OpenIDMELResolver extends ELResolver {
         }
         //fetching the openidmcontext sets it to true, we need to set it 
         //to false again if the property was not found
-        context.setPropertyResolved(false);
+        elContext.setPropertyResolved(false);
         return null;
     }
 

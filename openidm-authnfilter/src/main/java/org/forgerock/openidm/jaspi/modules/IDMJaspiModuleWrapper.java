@@ -156,7 +156,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * Required configuration:
      * <ul>
      *     <li>connectionFactory - the ConnectionFactory for making an authenticate request on the router</li>
-     *     <li>context - the ServerContext to use when making requests on the router</li>
+     *     <li>context - the Context to use when making requests on the router</li>
      *     <li>queryOnResource - the resource to perform the role calculation query on</li>
      *     <li>authenticationId - the object attribute that represents the authentication id</li>
      *     <li>groupMembership - the object attribute representing the group membership</li>

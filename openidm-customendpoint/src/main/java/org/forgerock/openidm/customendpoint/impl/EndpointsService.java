@@ -114,13 +114,6 @@ public class EndpointsService extends AbstractScriptedService {
         return new String[] { routerPrefix };
     }
 
-    protected JsonValue serialiseServerContext(Context context) throws ResourceException {
-        if (null != context) {
-            return context.toJsonValue();
-        }
-        return null;
-    }
-
     protected BundleContext getBundleContext() {
         return context.getBundleContext();
     }

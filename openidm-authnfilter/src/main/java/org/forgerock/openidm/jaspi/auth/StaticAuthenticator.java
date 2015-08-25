@@ -68,7 +68,7 @@ public class StaticAuthenticator implements Authenticator {
      *
      * @param username The username.
      * @param password The password.
-     * @param context the ServerContext to use
+     * @param context the Context to use
      * @return True if authentication is successful, otherwise false.
      */
     public AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException {

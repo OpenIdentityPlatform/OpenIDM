@@ -174,12 +174,12 @@ public class SchedulerService implements RequestHandler {
 
     protected void bindRepo(final RouteService service) throws ResourceException {
         logger.debug("binding RepositoryService");
-        RepoJobStore.setServerContext(service.createServerContext());
+        RepoJobStore.setContext(service.createServerContext());
     }
 
     protected void unbindRepo(final RouteService service) {
         logger.debug("unbinding RepositoryService");
-        RepoJobStore.setServerContext(null);
+        RepoJobStore.setContext(null);
     }
 
     /** Enhanced configuration service. */

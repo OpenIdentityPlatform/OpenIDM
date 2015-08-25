@@ -24,7 +24,7 @@ import org.forgerock.json.resource.ResourceException;
 
 
 /**
- * A ServerContext that stores the source of a trigger during a sync operation.
+ * A Context that stores the source of a trigger during a sync operation.
  *
  */
 public class TriggerContext extends AbstractContext {

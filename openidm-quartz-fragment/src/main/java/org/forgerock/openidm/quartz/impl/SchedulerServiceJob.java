@@ -74,7 +74,7 @@ public class SchedulerServiceJob implements Job {
      * Builds the Context
      * 
      * @param id  The authentication id
-     * @return the new ServerContext
+     * @return the SecurityContext for the scheduled job
      */
     private Context newScheduledContext(String id) {
         final Map<String, Object> authzid = new HashMap<String, Object>();

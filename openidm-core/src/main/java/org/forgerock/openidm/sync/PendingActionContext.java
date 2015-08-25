@@ -26,7 +26,7 @@ import org.forgerock.json.resource.ResourceException;
 
 
 /**
- * A ServerContext that stores a pending action information during a sync operation.
+ * A Context that stores a pending action information during a sync operation.
  *
  */
 public class PendingActionContext extends AbstractContext {
@@ -41,7 +41,8 @@ public class PendingActionContext extends AbstractContext {
      * Create a new PendingActionContext from an existing (parent) context.
      *
      * @param parent the parent server context
-     * @param pendingActionMap a Map containing the pending action data
+     * @param pendingActionData a Map containing the pending action data
+     * @param action the recon/sync action being performed
      */
     public PendingActionContext(final Context parent, Map<String, Object> pendingActionData, String action) {
         super(checkNotNull(parent, "Cannot instantiate PendingActionContext with null parent Context"), CONTEXT_NAME);
