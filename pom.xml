@@ -65,7 +65,8 @@
         <connection>scm:git:ssh://git@stash.forgerock.org:7999/openidm/openidm.git</connection>
         <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/openidm/openidm.git</developerConnection>
         <url>https://stash.forgerock.org/projects/OPENIDM/repos/openidm/browse</url>
-    </scm>
+      <tag>3.x</tag>
+  </scm>
     <distributionManagement>
         <site>
             <id>forgerock.org</id>

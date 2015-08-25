@@ -22,9 +22,7 @@
  your own identifying information:
  "Portions Copyrighted [year] [name of copyright owner]"
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.forgerock.openidm.tools</groupId>
@@ -39,7 +37,8 @@
         <connection>scm:svn:https://svn.forgerock.org/openidm/trunk/tools/custom-scripted-connector-bundler</connection>
         <developerConnection>scm:svn:https://svn.forgerock.org/openidm/trunk/tools/custom-scripted-connector-bundler</developerConnection>
         <url>http://sources.forgerock.org/browse/openidm/trunk/tools/custom-scripted-connector-bundler</url>
-    </scm>
+      <tag>3.x</tag>
+  </scm>
     <issueManagement>
         <system>jira</system>
         <url>https://bugster.forgerock.org/jira/browse/OPENIDM</url>
@@ -58,7 +57,7 @@
             groovyjar*;version="[2.2,3)",
             groovyx.net.http*;resolution:=optional,
         </openicf.osgi.import.defaults>
-        <openicf.osgi.embed/>
+        <openicf.osgi.embed />
     </properties>
     <repositories>
         <repository>
