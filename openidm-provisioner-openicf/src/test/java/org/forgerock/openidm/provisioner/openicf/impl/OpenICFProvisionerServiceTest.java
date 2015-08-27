@@ -164,14 +164,8 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
     protected final Router router = new Router();
 
     final RouteService routeService = new RouteService() {
-
         @Override
-        public Context createServerContext() throws ResourceException {
-            return new RootContext();
-        }
-
-        @Override
-        public Context createServerContext(Context parentContext) throws ResourceException {
+        public Context createServerContext() {
             return new RootContext();
         }
     };
@@ -222,14 +216,8 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
             }
 
             @Override
-            public Context createServerContext() throws ResourceException {
+            public Context createServerContext() {
                 return new RootContext();
-            }
-
-            @Override
-            public Context createServerContext(Context parentContext)
-                    throws ResourceException {
-                return parentContext;
             }
         };
     }

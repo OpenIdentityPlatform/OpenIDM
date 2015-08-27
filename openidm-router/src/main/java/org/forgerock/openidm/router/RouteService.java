@@ -35,12 +35,5 @@ public interface RouteService {
      * reason.
      */
     // TODO-crest3 : rename to createContext
-    public Context createServerContext() throws ResourceException;
-
-    /**
-     * @throws ResourceException If the connection request failed for some
-     * reason.
-     */
-    // TODO-crest3 : rename to createContext
-    public Context createServerContext(Context parentContext) throws ResourceException;
+    public Context createServerContext();
 }
