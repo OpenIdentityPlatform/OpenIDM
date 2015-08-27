@@ -9,17 +9,17 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.jetty;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.ssl.SslConnector;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,33 +30,30 @@ import org.slf4j.LoggerFactory;
  * Allows for just using SSL mutual auth on a given port.
  *
  */
-public class DisableOpenIDMAuth {
+public final class DisableOpenIDMAuth {
 
     final static Logger logger = LoggerFactory.getLogger(DisableOpenIDMAuth.class);
     
     private static Set<Integer> clientAuthOnly = new HashSet<Integer>();
-    
+
+    private DisableOpenIDMAuth() {}
+
     /**
-     * @return Requested OpenIDM configuration property
+     * Sets openidm.auth.clientauthonlyports if client auth is required.
+     *
+     * @param serverConnector A instance of the ServerConnector
      */
-    public static void add(Object connector) {
+    public static void add(ServerConnector serverConnector) {
         int port = -1;
-        if (connector instanceof SslConnector) {
-            SslConnector sslConnector = (SslConnector) connector;
-            port = sslConnector.getPort();
-            boolean needClientAuth = sslConnector.getNeedClientAuth();
+        SslConnectionFactory sslConnectionFactory = (SslConnectionFactory) serverConnector.getConnectionFactory("SSL-http/1.1");
+        port = serverConnector.getPort();
+        if (sslConnectionFactory != null) {
+            boolean needClientAuth = sslConnectionFactory.getSslContextFactory().getNeedClientAuth();
             if (needClientAuth == false) {
                 logger.warn("OpenIDM authentication disabled on port {} without the port requiring SSL mutual authentication.", port);
             } else {
                 logger.info("Port {} set up to require SSL mutual authentication only, no additional OpenIDM authentication.", port);
             }
-        } else if (connector instanceof Connector) {
-            Connector plainConnector = (Connector) connector;
-            port = plainConnector.getPort();
-            logger.warn("OpenIDM authentication disabled on port {} without SSL.", port);
-        } else {
-            logger.warn("Connector type not recognized and can not disable authentication on it. {}", connector);
-            return;
         }
         clientAuthOnly.add(Integer.valueOf(port));
         setProperty();

@@ -1,8 +1,21 @@
 <?xml version="1.0"?>
-<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//
-DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
-
-<Configure class="org.eclipse.jetty.server.Server">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+<!--
+    ~ The contents of this file are subject to the terms of the Common Development and
+    ~ Distribution License (the License). You may not use this file except in compliance with the
+    ~ License.
+    ~
+    ~ You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+    ~ specific language governing permission and limitations under the License.
+    ~
+    ~ When distributing Covered Software, include this CDDL Header Notice in each file and include
+    ~ the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+    ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
+    ~ information: "Portions copyright [year] [name of copyright owner]".
+    ~
+    ~ Copyright 2015 ForgeRock AS.
+-->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
 
     <!-- =========================================================== -->
     <!-- Set connectors                                              -->
@@ -10,98 +23,213 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
     <!-- One of each type!                                           -->
     <!-- =========================================================== -->
 
+    <!--<Arg name="threadpool">
+        <New class="org.eclipse.jetty.util.thread.QueuedThreadPool">
+            <Arg name="maxThreads">500</Arg>
+            <Arg name="minThreads">50</Arg>
+            <Arg name="idleTimeout">60000</Arg>
+            <Arg name="queue">
+                <New class="java.util.concurrent.ArrayBlockingQueue">
+                    <Arg type="int">6000</Arg>
+                </New>
+            </Arg>
+            <Set name="minThreads">50</Set>
+            <Set name="maxThreads">500</Set>
+            <Set name="detailedDump">false</Set>
+        </New>
+    </Arg>-->
+
+    <New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Set name="outputBufferSize">32768</Set>
+        <Set name="requestHeaderSize">8192</Set>
+        <Set name="responseHeaderSize">8192</Set>
+        <Call name="addCustomizer">
+            <Arg><New class="org.eclipse.jetty.server.ForwardedRequestCustomizer"/></Arg>
+        </Call>
+    </New>
+
+    <New id="tlsHttpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Arg><Ref refid="httpConfig"/></Arg>
+        <Set name="secureScheme">https</Set>
+        <Set name="securePort">
+            <Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                <Arg>openidm.port.https</Arg>
+            </Call>
+        </Set>
+        <Call name="addCustomizer">
+            <Arg><New class="org.eclipse.jetty.server.SecureRequestCustomizer"/></Arg>
+        </Call>
+    </New>
+
+    <New id="mutualAuthHttpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Arg><Ref refid="httpConfig"/></Arg>
+        <Set name="secureScheme">https</Set>
+        <Set name="securePort">
+            <Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                <Arg>openidm.port.mutualauth</Arg>
+            </Call>
+        </Set>
+        <Call name="addCustomizer">
+            <Arg><New class="org.eclipse.jetty.server.SecureRequestCustomizer"/></Arg>
+        </Call>
+    </New>
+
+    <Array id="excludedCipherSuites" type="java.lang.String">
+
+        <!-- EXP-RC4-MD5  -->
+        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+        <!-- EXP-EDH-RSA-DES-CBC-SHA or EXP-DHE-RSA-DES-CBC-SHA  -->
+        <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+
+        <!-- EXP-DES-CBC-SHA -->
+        <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
+        <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+        <Item>SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	</Item>
+        <Item>TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA</Item>
+
+        <!-- DES-CBC-SHA -->
+        <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
+        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+        <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
+        <Item>SSL_DH_anon_WITH_DES_CBC_SHA</Item>
+        <Item>TLS_KRB5_WITH_DES_CBC_SHA</Item>
+
+        <!--
+        EDH-RSA-DES-CBC-SHA or DHE-RSA-DES-CBC-SHA is excluded above
+        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+        -->
+
+        <!-- RC4-MD5 -->
+        <Item>SSL_RSA_WITH_RC4_128_MD5</Item>
+        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+        <Item>SSL_DH_anon_WITH_RC4_128_MD5</Item>
+        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+        <Item>TLS_KRB5_WITH_RC4_128_MD5</Item>
+        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+        <!-- RC4-SHA  -->
+        <Item>SSL_RSA_WITH_RC4_128_SHA</Item>
+        <Item>TLS_ECDH_ECDSA_WITH_RC4_128_SHA</Item>
+        <Item>TLS_ECDH_RSA_WITH_RC4_128_SHA</Item>
+        <Item>TLS_ECDHE_ECDSA_WITH_RC4_128_SHA</Item>
+        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+        <Item>TLS_ECDH_anon_WITH_RC4_128_SHA</Item>
+        <Item>TLS_KRB5_WITH_RC4_128_SHA</Item>
+        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_SHA</Item>
+
+        <!--
+        ECDHE-RSA-RC4-SHA is excluded above
+        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+        -->
+
+    </Array>
+
+    <New id="sslContextFactory" class="org.eclipse.jetty.util.ssl.SslContextFactory">
+        <Set name="keyStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
+        <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
+        <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
+        <Set name="trustStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
+        <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
+        <Set name="wantClientAuth">true</Set>
+        <Set name="certAlias"><Get class="org.forgerock.openidm.jetty.Param" name="certAlias"/></Set>
+        <Set name="ExcludeProtocols">
+            <Array type="java.lang.String">
+                <Item>SSLv3</Item>
+            </Array>
+        </Set>
+        <Set name="ExcludeCipherSuites">
+            <Ref refid="excludedCipherSuites"/>
+        </Set>
+    </New>
+
+    <New id="sslContextFactoryMutualAuth" class="org.eclipse.jetty.util.ssl.SslContextFactory">
+        <Set name="keyStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
+        <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
+        <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
+        <Set name="trustStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
+        <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
+        <Set name="needClientAuth">true</Set>
+        <Set name="certAlias"><Get class="org.forgerock.openidm.jetty.Param" name="certAlias"/></Set>
+        <Set name="ExcludeProtocols">
+            <Array type="java.lang.String">
+                <Item>SSLv3</Item>
+            </Array>
+        </Set>
+        <Set name="ExcludeCipherSuites">
+            <Ref refid="excludedCipherSuites"/>
+        </Set>
+    </New>
+
     <Call name="addConnector">
         <Arg>
-            <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                <Set name="host"><Property name="jetty.host" /></Set>
-                <Set name="port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.http</Arg></Call></Set>
-                <Set name="maxIdleTime">300000</Set>
-                <Set name="Acceptors">2</Set>
-                <Set name="statsOn">false</Set>
-                <Set name="confidentialPort">
+            <New class="org.eclipse.jetty.server.ServerConnector">
+                <Arg name="server"><Ref refid="Server" /></Arg>
+                <Arg name="executor"/>
+                <Arg name="scheduler"/>
+                <Arg name="bufferPool"/>
+                <Arg name="acceptors" type="int">-1</Arg>
+                <Arg name="selectors" type="int">-1</Arg>
+                <Arg name="factories">
+                    <Array type="org.eclipse.jetty.server.ConnectionFactory">
+                        <Item>
+                            <New class="org.eclipse.jetty.server.HttpConnectionFactory">
+                                <Arg name="config"><Ref refid="httpConfig" /></Arg>
+                            </New>
+                        </Item>
+                    </Array>
+                </Arg>
+                <Set name="port">
+                    <Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                        <Arg>openidm.port.http</Arg>
+                    </Call>
+                </Set>
+                <Set name="idleTimeout">300000</Set>
+                <Set name="name">
+                    <Property name="jetty.host" default="0.0.0.0" />:<Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                    <Arg>openidm.port.http</Arg>
+                </Call>
+                </Set>
+            </New>
+        </Arg>
+    </Call>
+
+    <Call id="sslConnector" name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ServerConnector">
+                <Arg name="server"><Ref refid="Server" /></Arg>
+                <Arg name="executor"/>
+                <Arg name="scheduler"/>
+                <Arg name="bufferPool"/>
+                <Arg name="acceptors" type="int">-1</Arg>
+                <Arg name="selectors" type="int">-1</Arg>
+                <Arg name="factories">
+                    <Array type="org.eclipse.jetty.server.ConnectionFactory">
+                        <Item>
+                            <New class="org.eclipse.jetty.server.SslConnectionFactory">
+                                <Arg name="next">http/1.1</Arg>
+                                <Arg name="sslContextFactory"><Ref refid="sslContextFactory"/></Arg>
+                            </New>
+                        </Item>
+                        <Item>
+                            <New class="org.eclipse.jetty.server.HttpConnectionFactory">
+                                <Arg name="config"><Ref refid="tlsHttpConfig"/></Arg>
+                            </New>
+                        </Item>
+                    </Array>
+                </Arg>
+                <Set name="port">
                     <Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
                         <Arg>openidm.port.https</Arg>
                     </Call>
                 </Set>
-            </New>
-        </Arg>
-    </Call>
-
-    <Call name="addConnector">
-        <Arg>
-            <New class="org.eclipse.jetty.server.ssl.SslSocketConnector">
-                <Arg>
-                    <New class="org.eclipse.jetty.http.ssl.SslContextFactory">
-                        <Set name="keyStore"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
-                        <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
-                        <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
-                        <Set name="trustStore"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
-                        <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
-                        <Set name="wantClientAuth">true</Set>
-                        <Set name="needClientAuth">false</Set>
-                        <Set name="certAlias"><Get class="org.forgerock.openidm.jetty.Param" name="certAlias"/></Set>
-                        <Set name="ExcludeProtocols">
-                            <Array type="java.lang.String">
-                                <Item>SSLv3</Item>
-                            </Array>
-                        </Set>
-                    </New>
-                </Arg>
-                <Set name="Port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.https</Arg></Call></Set>
-                <Set name="maxIdleTime">30000</Set>
-                <Set name="ExcludeCipherSuites">
-                    <Array type="java.lang.String">
-
-                        <!-- EXP-RC4-MD5  -->
-                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
-
-                        <!-- EXP-EDH-RSA-DES-CBC-SHA or EXP-DHE-RSA-DES-CBC-SHA  -->
-                        <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
-
-                        <!-- EXP-DES-CBC-SHA -->
-                        <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
-                        <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
-                        <Item>SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA</Item>
-
-                        <!-- DES-CBC-SHA -->
-                        <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
-                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
-                        <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
-                        <Item>SSL_DH_anon_WITH_DES_CBC_SHA</Item>
-                        <Item>TLS_KRB5_WITH_DES_CBC_SHA</Item>
-
-                        <!--
-                        EDH-RSA-DES-CBC-SHA or DHE-RSA-DES-CBC-SHA is excluded above
-                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
-                        -->
-
-                        <!-- RC4-MD5 -->
-                        <Item>SSL_RSA_WITH_RC4_128_MD5</Item>
-                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>SSL_DH_anon_WITH_RC4_128_MD5</Item>
-                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>TLS_KRB5_WITH_RC4_128_MD5</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
-
-                        <!-- RC4-SHA  -->
-                        <Item>SSL_RSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDH_ECDSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDH_RSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDHE_ECDSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDH_anon_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_KRB5_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_SHA</Item>
-
-                        <!--
-                        ECDHE-RSA-RC4-SHA is excluded above
-                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
-                        -->
-
-                    </Array>
+                <Set name="idleTimeout">30000</Set>
+                <Set name="name">
+                    <Property name="jetty.host" default="0.0.0.0" />:<Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                    <Arg>openidm.port.https</Arg>
+                </Call>
                 </Set>
             </New>
         </Arg>
@@ -109,98 +237,43 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 
     <Call name="addConnector">
         <Arg>
-            <New class="org.eclipse.jetty.server.ssl.SslSocketConnector" id="MutualAuthPort">
-                <Arg>
-                    <New class="org.eclipse.jetty.http.ssl.SslContextFactory">
-                        <Set name="keyStore"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
-                        <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
-                        <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
-                        <Set name="trustStore"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
-                        <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
-                        <Set name="wantClientAuth">true</Set>
-                        <Set name="needClientAuth">true</Set>
-                        <Set name="certAlias"><Get class="org.forgerock.openidm.jetty.Param" name="certAlias"/></Set>
-                        <Set name="ExcludeProtocols">
-                            <Array type="java.lang.String">
-                                <Item>SSLv3</Item>
-                            </Array>
-                        </Set>
-                    </New>
+            <New class="org.eclipse.jetty.server.ServerConnector" id="MutualAuthPort">
+                <Arg name="server"><Ref refid="Server" /></Arg>
+                <Arg name="factories">
+                    <Array type="org.eclipse.jetty.server.ConnectionFactory">
+                        <Item>
+                            <New class="org.eclipse.jetty.server.SslConnectionFactory">
+                                <Arg name="next">http/1.1</Arg>
+                                <Arg name="sslContextFactory">
+                                    <Ref refid="sslContextFactoryMutualAuth"/>
+                                </Arg>
+                            </New>
+                        </Item>
+                        <Item>
+                            <New class="org.eclipse.jetty.server.HttpConnectionFactory">
+                                <Arg name="config"><Ref refid="mutualAuthHttpConfig"/></Arg>
+                            </New>
+                        </Item>
+                    </Array>
                 </Arg>
-
-                <Set name="Port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.mutualauth</Arg></Call></Set>
-                <Set name="maxIdleTime">30000</Set>
+                <Set name="port">
+                    <Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                        <Arg>openidm.port.mutualauth</Arg>
+                    </Call>
+                </Set>
+                <Set name="idleTimeout">30000</Set>
+                <Set name="name">
+                    <Property name="jetty.host" default="0.0.0.0" />:<Call class="org.forgerock.openidm.jetty.Param"  name="getProperty">
+                    <Arg>openidm.port.mutualauth</Arg>
+                </Call>
+                </Set>
                 <Call class="org.forgerock.openidm.jetty.DisableOpenIDMAuth" name="add">
                     <Arg>
-                        <Ref id="MutualAuthPort"/>
+                        <Ref refid="MutualAuthPort"/>
                     </Arg>
                 </Call>
-                <Set name="ExcludeCipherSuites">
-                    <Array type="java.lang.String">
-
-                        <!-- EXP-RC4-MD5  -->
-                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
-
-                        <!-- EXP-EDH-RSA-DES-CBC-SHA or EXP-DHE-RSA-DES-CBC-SHA  -->
-                        <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
-
-                        <!-- EXP-DES-CBC-SHA -->
-                        <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
-                        <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
-                        <Item>SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA</Item>
-
-                        <!-- DES-CBC-SHA -->
-                        <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
-                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
-                        <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
-                        <Item>SSL_DH_anon_WITH_DES_CBC_SHA</Item>
-                        <Item>TLS_KRB5_WITH_DES_CBC_SHA</Item>
-
-                        <!--
-                        EDH-RSA-DES-CBC-SHA or DHE-RSA-DES-CBC-SHA is excluded above
-                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
-                        -->
-
-                        <!-- RC4-MD5 -->
-                        <Item>SSL_RSA_WITH_RC4_128_MD5</Item>
-                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>SSL_DH_anon_WITH_RC4_128_MD5</Item>
-                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
-                        <Item>TLS_KRB5_WITH_RC4_128_MD5</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
-
-                        <!-- RC4-SHA  -->
-                        <Item>SSL_RSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDH_ECDSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDH_RSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDHE_ECDSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_ECDH_anon_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_KRB5_WITH_RC4_128_SHA</Item>
-                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_SHA</Item>
-
-                        <!--
-                        ECDHE-RSA-RC4-SHA is excluded above
-                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
-                        -->
-
-                    </Array>
-                </Set>
             </New>
         </Arg>
-    </Call>
-
-    <!-- Set the pax-web osgi port values -->
-    <Call class="java.lang.System" name="setProperty">
-        <Arg>org.osgi.service.http.port</Arg>
-        <Arg><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.http</Arg></Call></Arg>
-    </Call>
-    <Call class="java.lang.System" name="setProperty">
-        <Arg>org.osgi.service.http.port.secure</Arg>
-        <Arg><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.https</Arg></Call></Arg>
     </Call>
 
 </Configure>
