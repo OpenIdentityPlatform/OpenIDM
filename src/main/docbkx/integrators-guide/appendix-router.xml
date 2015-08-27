@@ -131,6 +131,37 @@
      </listitem>
     </varlistentry>
    </variablelist>
+   <section xml:id="script-pattern-match">
+    <title>Pattern Matching in the <literal>router.json</literal> File</title>
+    <para>
+     Pattern matching can minimize overhead in the router service. For example,
+     the default <filename>router.json</filename> file includes instances
+     of the <literal>pattern</literal> filter object, which limits script
+     requests to specified methods and endpoints.
+    </para>
+    <para>
+     Based on the following code snippet, the router service would
+     trigger the <filename>policyFilter.js</filename> script for
+     <literal>CREATE</literal> and <literal>UPDATE</literal> calls to
+     managed, system, and internal repository objects.
+    </para>
+    <programlisting language="javascript">{
+  "pattern" : "^(managed|system|repo/internal)($|(/.+))",
+  "onRequest" : {
+     "type" : "text/javascript",
+     "file" : "policyFilter.js"
+  },
+  "methods" : [
+     "create",
+     "update"
+  ]
+},</programlisting>
+    <para>
+     Without the noted <literal>pattern</literal>, OpenIDM would apply the
+     policy filter to additional objects such as the audit service, which
+     may affect performance.
+    </para>
+   </section>
   </section>
 
   <section xml:id="script-sequence">
@@ -145,8 +176,10 @@ client -&gt; filter 1 onRequest -&gt; filter 2 onRequest -&gt; resource
 client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
     </screen>
     
-    <para>The following sample <filename>router.json</filename> file shows the 
-    order in which the scripts would be executed:</para>
+    <para>
+     The following sample <filename>router.json</filename> file shows the
+     order in which the scripts would be executed:
+    </para>
     
     <programlisting language="javascript">
 {
