@@ -1015,7 +1015,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * supplied {@link List} of fields indicates which fields to read and then merge with the relationship
      * object.
      *    
-     * @param context the context of the request
+     * @param context the {@link Context} of the request
      * @param value the value of the relationship object
      * @param fieldsList the list of fields to read and merge with the relationship object.
      * @throws ResourceException if an error is encountered.
