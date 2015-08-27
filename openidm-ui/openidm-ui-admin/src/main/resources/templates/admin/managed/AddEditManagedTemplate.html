@@ -6,7 +6,7 @@
 
 {{#if addState}}
     <div class="container">
-        <div class="page-header no-border">
+        <div class="page-header">
             <h1>{{addEditTitle}}
                 <div  class="pull-right help-link">
                     <a href="{{docHelpUrl}}integrators-guide/index.html#chap-users-groups-roles" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
@@ -50,7 +50,7 @@
                             <a data-toggle="collapse" href="#generalDetails" aria-expanded="true" aria-controls="ldapSelectionHeading">{{t "common.form.generalDetails"}}</a>
                         </h4>
                     </div>
-                    <div id="generalDetails" class="panel-body collapse in" role="tabpanel" aria-labelledby="generalDetails" aria-expanded="true">
+                    <div id="generalDetails" class="collapse in" role="tabpanel" aria-labelledby="generalDetails" aria-expanded="true">
                         <div class="panel-body">
                             <div class="form-group has-feedback">
                                 <label for="managedObjectName" class="col-sm-3 control-label">{{t "templates.managed.managedObjectName"}}</label>
