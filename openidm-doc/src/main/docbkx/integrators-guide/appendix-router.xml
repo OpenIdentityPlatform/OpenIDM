@@ -140,13 +140,13 @@
      requests to specified methods and endpoints.
     </para>
     <para>
-     For example, based on the following code snippet, the router service would
+     Based on the following code snippet, the router service would
      trigger the <filename>policyFilter.js</filename> script for
      <literal>CREATE</literal> and <literal>UPDATE</literal> calls to
-     managed and system objects.
+     managed, system, and internal repository objects.
     </para>
     <programlisting language="javascript">{
-  "pattern" : "^(managed|system)($|(/.+))",
+  "pattern" : "^(managed|system|repo/internal)($|(/.+))",
   "onRequest" : {
      "type" : "text/javascript",
      "file" : "policyFilter.js"
@@ -156,6 +156,11 @@
      "update"
   ]
 },</programlisting>
+    <para>
+     Without the noted <literal>pattern</literal>, OpenIDM would apply the
+     policy filter to additional objects such as the audit service, which
+     may affect performance.
+    </para>
    </section>
   </section>
 
