@@ -598,7 +598,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                         resultCount = NO_COUNT;
                     }
                 } else {
-                    logger.warn("No count query found with id {}", countQueryId);
+                    // TODO - log this when we implement CountPolicy handling
+                    //logger.warn("No count query found with id {}", countQueryId);
                     resultCount = NO_COUNT;
                 }
 
