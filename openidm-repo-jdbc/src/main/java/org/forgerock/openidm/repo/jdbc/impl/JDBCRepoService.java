@@ -573,7 +573,8 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                         resultCount = NO_COUNT;
                     }
                 } else {
-                    logger.warn("Count query with id {} not found", countQueryId);
+                    // TODO - log this when we implement CountPolicy handling
+                    //logger.warn("Count query with id {} not found", countQueryId);
                     resultCount = NO_COUNT;
                 }
 
