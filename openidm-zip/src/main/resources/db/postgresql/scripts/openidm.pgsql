@@ -158,18 +158,51 @@ CREATE TABLE openidm.securitykeys (
 );
 
 -- -----------------------------------------------------
+-- Table openidm.auditauthentication
+-- -----------------------------------------------------
+CREATE TABLE openidm.auditauthentication (
+  objectid VARCHAR(38) NOT NULL,
+  transactionid VARCHAR(56) DEFAULT NULL,
+  activitydate VARCHAR(29) DEFAULT NULL,
+  userid VARCHAR(255) DEFAULT NULL,
+  eventname VARCHAR(50) DEFAULT NULL,
+  result VARCHAR(255) DEFAULT NULL,
+  principals TEXT,
+  context TEXT,
+  sessionid VARCHAR(255),
+  entries TEXT,
+  PRIMARY KEY (objectid)
+);
+
+-- -----------------------------------------------------
 -- Table openidm.auditaccess
 -- -----------------------------------------------------
 
 CREATE TABLE openidm.auditaccess (
   objectid VARCHAR(38) NOT NULL,
-  activitydate VARCHAR(29) DEFAULT NULL,
   activity VARCHAR(24) DEFAULT NULL,
-  ip VARCHAR(40) DEFAULT NULL,
-  principal TEXT,
+  activitydate VARCHAR(29) DEFAULT NULL,
+  transactionid VARCHAR(56) DEFAULT NULL,
+  eventname VARCHAR(255),
+  server_ip VARCHAR(40),
+  server_port VARCHAR(5),
+  client_host VARCHAR(255),
+  client_ip VARCHAR(40),
+  client_port VARCHAR(5),
+  userid VARCHAR(255) DEFAULT NULL,
+  principal TEXT NULL,
   roles VARCHAR(1024) DEFAULT NULL,
-  status VARCHAR(7) DEFAULT NULL,
-  userid VARCHAR(24) DEFAULT NULL ,
+  auth_component VARCHAR(255) DEFAULT NULL,
+  resource_uri VARCHAR(255) DEFAULT NULL,
+  resource_protocol VARCHAR(10) DEFAULT NULL,
+  resource_method VARCHAR(10) DEFAULT NULL,
+  resource_detail VARCHAR(255) DEFAULT NULL,
+  http_method VARCHAR(10) DEFAULT NULL,
+  http_path VARCHAR(255) DEFAULT NULL,
+  http_querystring VARCHAR(255) DEFAULT NULL,
+  http_headers TEXT,
+  status VARCHAR(20) DEFAULT NULL,
+  elapsedtime VARCHAR(13) DEFAULT NULL,
   PRIMARY KEY (objectid)
 );
 
@@ -180,25 +213,28 @@ CREATE TABLE openidm.auditaccess (
 
 CREATE TABLE openidm.auditactivity (
   objectid VARCHAR(38) NOT NULL,
-  rootactionid VARCHAR(511) DEFAULT NULL,
-  parentactionid VARCHAR(511) DEFAULT NULL,
-  activityid VARCHAR(511) DEFAULT NULL,
-  activitydate VARCHAR(29) DEFAULT NULL,
   activity VARCHAR(24) DEFAULT NULL,
-  message TEXT,
-  subjectid VARCHAR(511) DEFAULT NULL,
-  subjectrev VARCHAR(255) DEFAULT NULL,
-  requester TEXT,
-  approver TEXT,
+  activitydate VARCHAR(29) DEFAULT NULL,
+  transactionid VARCHAR(56) DEFAULT NULL,
+  eventname VARCHAR(255) DEFAULT NULL,
+  userid VARCHAR(255) DEFAULT NULL,
+  runas VARCHAR(255) DEFAULT NULL,
+  resource_uri VARCHAR(255) DEFAULT NULL,
+  resource_protocol VARCHAR(10) DEFAULT NULL,
+  resource_method VARCHAR(10) DEFAULT NULL,
+  resource_detail VARCHAR(255) DEFAULT NULL,
   subjectbefore TEXT,
   subjectafter TEXT,
-  status VARCHAR(7) DEFAULT NULL,
   changedfields VARCHAR(255) DEFAULT NULL,
   passwordchanged VARCHAR(5) DEFAULT NULL,
-  PRIMARY KEY (objectid)
+  subjectrev VARCHAR(255) DEFAULT NULL,
+  message TEXT,
+  activityobjectid VARCHAR(255),
+  status VARCHAR(20),
+  PRIMARY KEY (objectid),
 );
 
-CREATE INDEX idx_auditactivity_rootactionid ON openidm.auditactivity (rootactionid);
+CREATE INDEX idx_auditactivity_transactionid ON openidm.auditactivity (transactionid);
 
 
 -- -----------------------------------------------------
@@ -207,24 +243,25 @@ CREATE INDEX idx_auditactivity_rootactionid ON openidm.auditactivity (rootaction
 
 CREATE TABLE openidm.auditrecon (
   objectid VARCHAR(38) NOT NULL,
-  entrytype VARCHAR(7) DEFAULT NULL,
-  rootactionid VARCHAR(511) DEFAULT NULL,
-  reconid VARCHAR(56) DEFAULT NULL,
-  reconaction VARCHAR(36) DEFAULT NULL,
-  reconciling VARCHAR(12) DEFAULT NULL,
-  sourceobjectid VARCHAR(511) DEFAULT NULL,
-  targetobjectid VARCHAR(511) DEFAULT NULL,
-  ambiguoustargetobjectids TEXT,
+  transactionid VARCHAR(56) NOT NULL,
   activitydate VARCHAR(29) DEFAULT NULL,
-  situation VARCHAR(24) DEFAULT NULL,
+  eventname VARCHAR(50) DEFAULT NULL,
+  userid VARCHAR(255) DEFAULT NULL,
   activity VARCHAR(24) DEFAULT NULL,
-  status VARCHAR(7) DEFAULT NULL,
-  message TEXT,
-  actionid VARCHAR(255) DEFAULT NULL,
   exceptiondetail TEXT,
-  mapping VARCHAR(511) DEFAULT NULL,
   linkqualifier VARCHAR(255) DEFAULT NULL,
+  mapping VARCHAR(511) DEFAULT NULL,
+  message TEXT,
   messagedetail TEXT,
+  situation VARCHAR(24) DEFAULT NULL,
+  sourceobjectid VARCHAR(511) DEFAULT NULL,
+  status VARCHAR(20) DEFAULT NULL,
+  targetobjectid VARCHAR(511) DEFAULT NULL,
+  reconciling VARCHAR(12) DEFAULT NULL,
+  ambiguoustargetobjectids TEXT,
+  reconaction VARCHAR(36) DEFAULT NULL,
+  entrytype VARCHAR(7) DEFAULT NULL,
+  reconid VARCHAR(56) DEFAULT NULL,
   PRIMARY KEY (objectid)
 );
 
@@ -235,19 +272,20 @@ CREATE TABLE openidm.auditrecon (
 
 CREATE TABLE openidm.auditsync (
   objectid VARCHAR(38) NOT NULL,
-  rootactionid VARCHAR(511) DEFAULT NULL,
-  sourceobjectid VARCHAR(511) DEFAULT NULL,
-  targetobjectid VARCHAR(511) DEFAULT NULL,
+  transactionid VARCHAR(56) NOT NULL,
   activitydate VARCHAR(29) DEFAULT NULL,
-  situation VARCHAR(24) DEFAULT NULL,
+  eventname VARCHAR(50) DEFAULT NULL,
+  userid VARCHAR(255) DEFAULT NULL,
   activity VARCHAR(24) DEFAULT NULL,
-  status VARCHAR(7) DEFAULT NULL,
-  message TEXT,
-  actionid VARCHAR(255) DEFAULT NULL,
   exceptiondetail TEXT,
-  mapping VARCHAR(511) DEFAULT NULL,
   linkqualifier VARCHAR(255) DEFAULT NULL,
+  mapping VARCHAR(511) DEFAULT NULL,
+  message TEXT,
   messagedetail TEXT,
+  situation VARCHAR(24) DEFAULT NULL,
+  sourceobjectid VARCHAR(511) DEFAULT NULL,
+  status VARCHAR(20) DEFAULT NULL,
+  targetobjectid VARCHAR(511) DEFAULT NULL,
   PRIMARY KEY (objectid)
 );
 
