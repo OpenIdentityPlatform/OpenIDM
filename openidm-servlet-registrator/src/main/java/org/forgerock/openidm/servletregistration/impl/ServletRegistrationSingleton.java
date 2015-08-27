@@ -290,8 +290,12 @@ public class ServletRegistrationSingleton implements ServletRegistration {
                         }
                     }
                 }
-                Object val = m.invoke(filter, args);
-                return val;
+                // need to compare proxy objects equality to the first argument,
+                // otherwise it would compare the filter to the first argument
+                if (m.getName().equals("equals") && args != null && args.length == 1) {
+                    return proxy == args[0];
+                }
+                return m.invoke(filter, args);
             } catch (InvocationTargetException e) {
                 logger.debug("Filter invocation InvocationTargetException", e.getTargetException());
                 throw e.getTargetException();
