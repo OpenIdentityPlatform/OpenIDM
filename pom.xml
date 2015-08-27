@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+  ~ Copyright 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -229,6 +229,7 @@
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.1</joda-time.version>
+        <paxweb.version>4.1.1</paxweb.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
@@ -763,17 +764,17 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-api</artifactId>
-                <version>3.0.0</version>
+                <version>${paxweb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>3.0.0</version>
+                <version>${paxweb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty-bundle</artifactId>
-                <version>3.0.0</version>
+                <version>${paxweb.version}</version>
             </dependency>
         
             <!-- H2 Database -->
