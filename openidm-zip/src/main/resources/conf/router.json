@@ -7,7 +7,7 @@
             }
         },
         {
-            "pattern" : "^(managed|system)($|(/.+))",
+            "pattern" : "^(managed|system|repo/internal)($|(/.+))",
             "onRequest" : {
                 "type" : "text/javascript",
                 "file" : "policyFilter.js"
