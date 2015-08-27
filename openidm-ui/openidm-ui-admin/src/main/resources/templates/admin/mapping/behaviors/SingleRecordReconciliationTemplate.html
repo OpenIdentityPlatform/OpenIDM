@@ -1,8 +1,10 @@
-<form action="" class="form center no-margin" style="white-space: nowrap;" method="post" onsubmit="return false" id="syncForm">
-    <div  class="float-left offset15">
-        <label for="findSampleSource" class="inline">{{t "templates.sync.testSync.findSourceRecord"}}:</label> <input type="text" id="findSampleSource" value="{{sampleSource_txt}}" placeholder="{{t 'templates.mapping.analysis.enterSearchTerms'}}">
-        <span class="fa fa-times sampleSourceAction" id="removeSourceRecord" title="{{t 'templates.sync.testSync.removeSourceRecord'}}" style="display:none;"></span>
-        <span class="fa fa-refresh sampleSourceAction" id="refreshSourceRecord" title="{{t 'templates.sync.testSync.refreshSourceRecord'}}" style="display:none;"></span>
-    </div>
-     <div id="testSyncGrid"></div>
-</form>
+<div class="panel-body">
+    <form action="" class="form center no-margin" style="white-space: nowrap;" method="post" onsubmit="return false" id="syncForm">
+        <div  class="float-left offset15">
+            <label for="findSampleSource" class="inline">{{t "templates.sync.testSync.findSourceRecord"}}:</label> <input type="text" id="findSampleSource" value="{{sampleSource_txt}}" placeholder="{{t 'templates.mapping.analysis.enterSearchTerms'}}">
+            <span class="fa fa-times sampleSourceAction" id="removeSourceRecord" title="{{t 'templates.sync.testSync.removeSourceRecord'}}" style="display:none;"></span>
+            <span class="fa fa-refresh sampleSourceAction" id="refreshSourceRecord" title="{{t 'templates.sync.testSync.refreshSourceRecord'}}" style="display:none;"></span>
+        </div>
+         <div id="testSyncGrid"></div>
+    </form>
+</div>

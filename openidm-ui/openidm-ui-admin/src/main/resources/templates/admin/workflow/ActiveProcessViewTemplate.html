@@ -1,22 +1,20 @@
-<div class="tab-pane-body">
-    <div class="toolbar page-toolbar no-top-border clearfix" role="toolbar" aria-label="toolbar">
-        <form class="form-inline">
-            <div class="form-group">
-                <label for="processAssignedTo">{{t "templates.workflows.processes.startedByFilter"}}</label>
-                <select id="processAssignedTo" class="form-control"></select>
-            </div>
-            <div class="form-group">
-                <label for="processFilterType">{{t "templates.workflows.processes.filterByType"}}</label>
-                <select id="processFilterType" class="form-control">
-                    <option value="all">All</option>
-                    {{#each processDefinitions}}
-                    <option value="{{key}}">{{name}}</option>
-                    {{/each}}
-                </select>
-            </div>
-        </form>
-    </div>
-    <div id="processGridHolder" class="panel-body table-responsive">
+<div class="toolbar page-toolbar no-top-border clearfix" role="toolbar" aria-label="toolbar">
+    <form class="form-inline">
+        <div class="form-group">
+            <label for="processAssignedTo">{{t "templates.workflows.processes.startedByFilter"}}</label>
+            <select id="processAssignedTo" class="form-control"></select>
+        </div>
+        <div class="form-group">
+            <label for="processFilterType">{{t "templates.workflows.processes.filterByType"}}</label>
+            <select id="processFilterType" class="form-control">
+                <option value="all">All</option>
+                {{#each processDefinitions}}
+                <option value="{{key}}">{{name}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </form>
+</div>
+<div id="processGridHolder" class="panel-body table-responsive">
 
-    </div>
 </div>
