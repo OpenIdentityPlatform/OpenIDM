@@ -32,7 +32,6 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.http.Context;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.openidm.router.RouteService;
 import org.mockito.ArgumentCaptor;

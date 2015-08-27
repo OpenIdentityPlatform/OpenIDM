@@ -29,7 +29,6 @@ import org.forgerock.http.context.RootContext;
 import org.forgerock.http.routing.RouteMatcher;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
@@ -84,8 +83,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         this(context, null);
     }
 
-    protected RouterRegistryImpl(BundleContext context,
-            ServiceTracker<Router, Router> routerTracker) {
+    protected RouterRegistryImpl(BundleContext context, ServiceTracker<Router, Router> routerTracker) {
         if (null == context) {
             throw new NullPointerException("Failure the BundleContext value is null.");
         }
@@ -157,16 +155,14 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
     @Override
     public RouterRegistry getService(Bundle bundle,
             ServiceRegistration<RouterRegistry> registration) {
-// TODO: reduce logging level
-        logger.info("getService RouterRegistryService {}", bundle);
+        logger.debug("getService RouterRegistryService {}", bundle);
         return new RouterRegistryServiceImpl(bundle, this);
     }
 
     @Override
     public void ungetService(Bundle bundle,
             ServiceRegistration<RouterRegistry> registration, RouterRegistry service) {
-// TODO: reduce logging level
-        logger.info("ungetService RouterRegistryService {}", bundle);
+        logger.debug("ungetService RouterRegistryService {}", bundle);
         ((RouterRegistryServiceImpl) service).dispose();
     }
 
@@ -280,16 +276,6 @@ class RouteServiceImpl implements RouteService {
         bundle = null;
     }
 
-    // TODO-crest3 : remove this method
-    public Context createServerContext() throws ResourceException {
-        return createServerContext(createInternalSecurityContext());
-    }
-
-    // TODO-crest3 : remove this method
-    public Context createServerContext(Context parentContext) throws ResourceException {
-        return parentContext;
-    }
-
     /**
      * Create a default internal {@link org.forgerock.json.resource.SecurityContext} used for
      * internal trusted calls.
@@ -301,7 +287,7 @@ class RouteServiceImpl implements RouteService {
      *
      * @return a new {@code SecurityContext}
      */
-    private SecurityContext createInternalSecurityContext() {
+    public Context createServerContext() {
         // TODO Finalise the default system context
         // Ideally, we would have an internal system user that we could point to;
         // point to it now and build it later
@@ -320,8 +306,7 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
     protected RouteMatcher[] registeredRoutes;
     protected ServiceRegistration factoryServiceRegistration;
 
-    RouteEntryImpl(BundleContext parent, Bundle bundle, final AtomicReference<Router> router,
-            RouteBuilder builder) {
+    RouteEntryImpl(BundleContext parent, Bundle bundle, final AtomicReference<Router> router, RouteBuilder builder) {
         super(bundle, router);
 
         final Router r = router.get();
@@ -334,8 +319,7 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
             Dictionary<String, Object> props = builder.buildServiceProperties();
             props.put(Constants.SERVICE_PID, RouteService.class.getName());
             factoryServiceRegistration =
-                    parent.registerService(RouteService.class.getName(), new RouteServiceFactory(
-                            router), props);
+                    parent.registerService(RouteService.class.getName(), new RouteServiceFactory(router), props);
         }
     }
 
@@ -378,15 +362,12 @@ class RouteServiceFactory implements ServiceFactory<RouteService> {
     }
 
     public RouteService getService(Bundle bundle, ServiceRegistration<RouteService> registration) {
-// TODO: reduce logging level
-        logger.info("getService RouteService {}", bundle);
+        logger.debug("getService RouteService {}", bundle);
         return new RouteServiceImpl(bundle, internalRouter);
     }
 
-    public void ungetService(Bundle bundle, ServiceRegistration<RouteService> registration,
-            RouteService service) {
-// TODO: reduce logging level
-        logger.info("ungetService RouteService {}", bundle);
+    public void ungetService(Bundle bundle, ServiceRegistration<RouteService> registration, RouteService service) {
+        logger.debug("ungetService RouteService {}", bundle);
         ((RouteServiceImpl) service).dispose();
     }
 }

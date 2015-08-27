@@ -28,8 +28,7 @@ import org.activiti.engine.impl.identity.Authentication;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.activiti.engine.identity.NativeGroupQuery;
 import org.activiti.engine.identity.NativeUserQuery;
 import org.forgerock.http.Context;
@@ -93,11 +92,7 @@ public class SharedIdentityService implements IdentityService {
     public void setRouter(RouteService router) {
         repositoryRoute = router;
         if (router != null) {
-            try {
-                this.context = repositoryRoute.createServerContext();
-            } catch (ResourceException ex) {
-                Logger.getLogger(SharedIdentityService.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            this.context = repositoryRoute.createServerContext();
         }
     }
     

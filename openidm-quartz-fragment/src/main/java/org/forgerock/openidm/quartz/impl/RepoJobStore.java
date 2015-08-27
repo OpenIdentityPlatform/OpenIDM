@@ -38,7 +38,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -46,7 +45,6 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
@@ -186,11 +184,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             }
             RouteService repoService = RouteService.class.cast(ctx.getService(serviceReference));
             if (repoService != null) {
-                try {
-                	context = repoService.createServerContext();
-                } catch (ResourceException e) {
-                    /* ignore */
-                }
+                context = repoService.createServerContext();
             }
             if (context == null) {
                 throw new JobPersistenceException("Repo router is null");
