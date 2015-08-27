@@ -1,11 +1,10 @@
-<section>
-    <div class="back-bar">
-        <div class="container">
-            <a href="#managed/">{{t "templates.managed.backToManaged"}}</a>
-        </div>
+<div class="back-bar">
+    <div class="container">
+        <a href="#managed/">{{t "templates.managed.backToManaged"}}</a>
     </div>
+</div>
 
-    {{#if addState}}
+{{#if addState}}
     <div class="container">
         <div class="page-header no-border">
             <h1>{{addEditTitle}}
@@ -15,7 +14,7 @@
             </h1>
         </div>
     </div>
-    {{else}}
+{{else}}
     <div class="container">
         <div class="page-header clearfix">
             <span class="header-icon pull-left"><i class="fa {{#if currentManagedObject.schema.icon}}{{currentManagedObject.schema.icon}}{{else}}fa-database{{/if}}"></i></span>
@@ -40,8 +39,7 @@
             <h1>{{currentManagedObject.name}}</h1>
         </div>
     </div>
-    {{/if}}
-</section>
+{{/if}}
 <div class="container">
     <div class="panel panel-default panel-content panel-collapse-group has-border">
         <form id="managedObjectForm" class="form-horizontal" role="form" autocomplete="off">
@@ -157,7 +155,7 @@
                 </div>
             </div>
         </form>
-        <div class="panel panel-connector panel-default panel-collapse">
+        <div class="panel panel-connector panel-collapse">
             <div class="schema-panel">
                 <div class="panel-heading" role="tab" id="managedSchemaHeading">
                     <h4 class="panel-title">
@@ -176,12 +174,11 @@
                     <span class="message"></span>
                 </p>
             </div>
-            <div class="panel-footer clearfix">
-                <div class="pull-right">
-                    <a href="#managed/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
-                    <input type="submit" id="addEditManaged" name="addEditButton" value="{{addEditSubmitTitle}}" class="btn btn-primary" disabled="true">
-                    <div style="clear:both;"></div>
-                </div>
+        </div>
+        <div class="panel-footer clearfix">
+            <div class="pull-right">
+                <a href="#managed/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                <input type="submit" id="addEditManaged" name="addEditButton" value="{{addEditSubmitTitle}}" class="btn btn-primary" disabled="true">
             </div>
         </div>
     </div>

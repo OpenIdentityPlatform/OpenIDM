@@ -1,31 +1,33 @@
 {{#if showSampleSource}}
-<div class="clearfix">
-    <div class="pull-right">
-        <input type="button" id="syncUser" class="btn btn-primary" value="{{t "templates.sync.testSync.reconcileSelectedRecord"}}"/>
-    </div>
-    <div>
-        {{#if showChangedPropertyMessage}}<div id="changedPropertyMessage" class="float-left"><span class="fa fa-info-circle"></span> {{ t "templates.sync.testSync.changedPropertyMessage"}}</div>{{/if}}
-        <table class="table">
-            <thead>
-            <tr>
-                <th colspan="2"><h3>{{t "templates.sync.testSync.sourceProperties"}}</h3></th>
-                <th class="leftBorder" colspan="2"><h3>{{t "templates.sync.testSync.targetProperties"}}</h3></th>
-            </tr>
-            </thead>
-            <tbody>
-            {{#each propMap}}
-            <tr>
-                <td><label for="test_source_{{source}}">{{source}}</label></td>
-                <td><input autocomplete="off" type="text" id="test_source_{{source}}" readonly name="{{source}}" value="{{sourceValue}}"></td>
-                <td class="leftBorder"><label class="light" for="test_target_{{target}}">{{target}}</label></td>
-                <td class="{{#if changed}}changed{{/if}}" {{#if changed}}title="Previous Value: {{targetBefore}}"{{/if}}>
-                <input autocomplete="off" type="text" id="test_target_{{target}}" readonly name="{{target}}" value="{{targetValue}}">
-                {{#if changed}}<span class="fa fa-info-circle"></span>{{/if}}
-                </td>
-            </tr>
-            {{/each}}
-            </tbody>
-        </table>
+<div class="panel-body">
+    <div class="clearfix">
+        <div class="pull-right">
+            <input type="button" id="syncUser" class="btn btn-primary" value="{{t "templates.sync.testSync.reconcileSelectedRecord"}}"/>
+        </div>
+        <div>
+            {{#if showChangedPropertyMessage}}<div id="changedPropertyMessage" class="float-left"><span class="fa fa-info-circle"></span> {{ t "templates.sync.testSync.changedPropertyMessage"}}</div>{{/if}}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th colspan="2"><h3>{{t "templates.sync.testSync.sourceProperties"}}</h3></th>
+                    <th class="leftBorder" colspan="2"><h3>{{t "templates.sync.testSync.targetProperties"}}</h3></th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each propMap}}
+                <tr>
+                    <td><label for="test_source_{{source}}">{{source}}</label></td>
+                    <td><input autocomplete="off" type="text" id="test_source_{{source}}" readonly name="{{source}}" value="{{sourceValue}}"></td>
+                    <td class="leftBorder"><label class="light" for="test_target_{{target}}">{{target}}</label></td>
+                    <td class="{{#if changed}}changed{{/if}}" {{#if changed}}title="Previous Value: {{targetBefore}}"{{/if}}>
+                    <input autocomplete="off" type="text" id="test_target_{{target}}" readonly name="{{target}}" value="{{targetValue}}">
+                    {{#if changed}}<span class="fa fa-info-circle"></span>{{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {{/if}}
