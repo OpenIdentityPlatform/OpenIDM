@@ -71,7 +71,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.quartz.impl.RepoJobStore;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
