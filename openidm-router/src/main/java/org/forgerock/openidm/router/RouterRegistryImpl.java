@@ -24,13 +24,10 @@
 
 package org.forgerock.openidm.router;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.RootContext;
 import org.forgerock.http.routing.RouteMatcher;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.Bundle;
@@ -46,11 +43,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -274,30 +267,6 @@ class RouteServiceImpl implements RouteService {
 
     void dispose() {
         bundle = null;
-    }
-
-    /**
-     * Create a default internal {@link org.forgerock.json.resource.SecurityContext} used for
-     * internal trusted calls.
-     * <p>
-     * If the request is initiated in a non-authenticated location (
-     * {@code BundleActivator}, {@code Scheduler}, {@code ConfigurationAdmin})
-     * this context should be used. The AUTHORIZATION module grants full access
-     * to this context.
-     *
-     * @return a new {@code SecurityContext}
-     */
-    public Context createServerContext() {
-        // TODO Finalise the default system context
-        // Ideally, we would have an internal system user that we could point to;
-        // point to it now and build it later
-        final Map<String, Object> authzid = new HashMap<String, Object>();
-        authzid.put(SecurityContext.AUTHZID_ID, "system");
-        List<String> roles = new ArrayList<String>();
-        roles.add("system");
-        authzid.put(SecurityContext.AUTHZID_ROLES, roles);
-        authzid.put(SecurityContext.AUTHZID_COMPONENT, "internal/user");
-        return new SecurityContext(new RootContext(), "system", authzid);
     }
 }
 

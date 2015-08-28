@@ -54,12 +54,7 @@ public class DelegatedAuthModuleTest {
     @BeforeMethod
     public void setUp() throws ResourceException {
         authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
-        RouteService router = mock(RouteService.class);
-        when(router.createServerContext()).thenReturn(mock(Context.class));
-        when(authnFilterHelper.getRouter()).thenReturn(router);
-
         authenticator = mock(Authenticator.class);
-
         module = new DelegatedAuthModule(authnFilterHelper, authenticator);
     }
 

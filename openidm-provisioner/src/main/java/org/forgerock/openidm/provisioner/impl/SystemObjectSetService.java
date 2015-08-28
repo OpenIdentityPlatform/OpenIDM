@@ -70,7 +70,7 @@ import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
@@ -195,28 +195,9 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         }
     }
 
-    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
-    RouteService routeService;
-    Context routerContext = null;
-
-    protected void bindRouteService(final RouteService service) throws ResourceException {
-        routeService = service;
-        // TODO-crest3
-        routerContext = service.createServerContext();
-    }
-
-    protected void unbindRouteService(final RouteService service) {
-        routeService = null;
-        routerContext = null;
-    }
-
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
-
-    public ConnectionFactory getConnectionFactory() {
-        return connectionFactory;
-    }
 
     @Reference(referenceInterface = ConnectorConfigurationHelper.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
@@ -474,13 +455,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         ResourceResponse previousStage = null;
         try {
             ReadRequest readRequest = Requests.newReadRequest(previousStageResourceContainer, previousStageId);
-            previousStage = connectionFactory.getConnection().read(routerContext, readRequest);
+            previousStage = connectionFactory.getConnection().read(ContextUtil.createServerContext(), readRequest);
 
             response = locateService(id).liveSynchronize(id.getObjectType(),
                     previousStage != null && previousStage.getContent() != null ? previousStage.getContent() : null);
             UpdateRequest updateRequest = Requests.newUpdateRequest(previousStageResourceContainer, previousStageId, response);
             updateRequest.setRevision(previousStage.getRevision());
-            connectionFactory.getConnection().update(routerContext, updateRequest);
+            connectionFactory.getConnection().update(ContextUtil.createServerContext(), updateRequest);
         } catch (ResourceException e) { // NotFoundException?
             if (previousStage != null) {
                 throw e;
@@ -488,7 +469,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             response = locateService(id).liveSynchronize(id.getObjectType(), null);
             if (response != null) {
                 CreateRequest createRequest = Requests.newCreateRequest(previousStageResourceContainer, previousStageId, response);
-                connectionFactory.getConnection().create(routerContext, createRequest);
+                connectionFactory.getConnection().create(ContextUtil.createServerContext(), createRequest);
             }
         }
         if (response != null && !detailedFailure) {

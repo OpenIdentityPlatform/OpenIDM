@@ -167,21 +167,6 @@ public class SchedulerService implements RequestHandler {
             target = "(" + ServerConstants.ROUTER_PREFIX + "=/policy*)")
     protected RouteService policy;
 
-    /** Internal object set router service. */
-    @Reference(name = "ref_SchedulerService_RepositoryService", bind = "bindRepo",
-            unbind = "unbindRepo", target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo*)")
-    protected RouteService repo;
-
-    protected void bindRepo(final RouteService service) throws ResourceException {
-        logger.debug("binding RepositoryService");
-        RepoJobStore.setContext(service.createServerContext());
-    }
-
-    protected void unbindRepo(final RouteService service) {
-        logger.debug("unbinding RepositoryService");
-        RepoJobStore.setContext(null);
-    }
-
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;

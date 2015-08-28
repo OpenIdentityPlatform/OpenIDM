@@ -29,6 +29,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.util.Function;
 
@@ -208,7 +209,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                         }
                         final List<ResourceResponse> resources = new ArrayList<>();
                         authnFilterHelper.getConnectionFactory().getConnection().query(
-                                authnFilterHelper.getRouter().createServerContext(), request, resources);
+                                ContextUtil.createServerContext(), request, resources);
 
                         if (resources.isEmpty()) {
                             throw ResourceException.getException(401, "Access denied, no user detail could be retrieved.");

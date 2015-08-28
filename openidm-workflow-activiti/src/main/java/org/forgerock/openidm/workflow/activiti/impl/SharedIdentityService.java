@@ -34,7 +34,7 @@ import org.activiti.engine.identity.NativeUserQuery;
 import org.forgerock.http.Context;
 import org.forgerock.json.resource.*;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.ContextUtil;
 
 /**
  * @version $Revision$ $Date$
@@ -81,21 +81,13 @@ public class SharedIdentityService implements IdentityService {
     public static final String SCIM_X509CERTIFICATES = "x509Certificates";
     //SCIM Group Schema
     public static final String SCIM_MEMBERS = "members";
-    private RouteService repositoryRoute;
-    private Context context;
+    private Context context = ContextUtil.createServerContext();
     private CryptoService cryptoService;
     private ConnectionFactory connectionFactory;
     
     public static final String USER_PATH = "managed/user/";
     public static final String GROUP_PATH = "managed/group/";
 
-    public void setRouter(RouteService router) {
-        repositoryRoute = router;
-        if (router != null) {
-            this.context = repositoryRoute.createServerContext();
-        }
-    }
-    
     public void setCryptoService(CryptoService service) {
         this.cryptoService = service;
     }

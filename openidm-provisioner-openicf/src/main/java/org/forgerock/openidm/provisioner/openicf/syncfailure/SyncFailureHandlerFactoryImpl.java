@@ -66,21 +66,6 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
-    /** the router */
-    @Reference(target = "("+ ServerConstants.ROUTER_PREFIX + "=/*)")
-    RouteService routeService;
-    Context routerContext = null;
-
-    private void bindRouteService(final RouteService service) throws ResourceException {
-        routeService = service;
-        routerContext = service.createServerContext();
-    }
-
-    private void unbindRouteService(final RouteService service) {
-        routeService = null;
-        routerContext = null;
-    }
-
     /**
      * Create a <em>SyncFailureHandler</em> from the config.  The config should optionally
      * describe
@@ -131,12 +116,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     private SyncFailureHandler getPostRetryHandler(JsonValue config) throws Exception {
         if (config.isString()) {
             if (CONFIG_DEAD_LETTER.equals(config.asString())) {
-                return new DeadLetterQueueHandler(
-                        connectionFactory, new Accessor<Context>() {
-                            public Context access() {
-                                return routerContext;
-                            }
-                        });
+                return new DeadLetterQueueHandler(connectionFactory);
             } else if (CONFIG_LOGGED_IGNORE.equals(config.asString())) {
                 return new LoggedIgnoreHandler();
             }
@@ -148,12 +128,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
                         config.get(CONFIG_SCRIPT),
                         // pass internal handlers so a script can call them if desired
                         new LoggedIgnoreHandler(),
-                        new DeadLetterQueueHandler(
-                                connectionFactory, new Accessor<Context>() {
-                                    public Context access() {
-                                        return routerContext;
-                                    }
-                                }));
+                        new DeadLetterQueueHandler(connectionFactory));
             }
         }
 

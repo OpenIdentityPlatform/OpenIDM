@@ -147,10 +147,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     target = "(osgi.jndi.service.name=jdbc/openidm)")
     private DataSource dataSource;
 
-    @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)",
-            bind = "bindRouteService", unbind = "unbindRouteService"
-    )
-    RouteService repositoryRoute;
+    @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)")
+    private RouteService routeService;
 
     @Reference(policy = ReferencePolicy.DYNAMIC,
             bind = "bindCryptoService", unbind = "unbindCryptoService"
@@ -463,16 +461,6 @@ public class ActivitiServiceImpl implements RequestHandler {
         logger.info("ProcessEngine stopped.");
     }
  
-    protected void bindRouteService(RouteService route) {
-        repositoryRoute = route;
-        this.identityService.setRouter(route);
-    }
-
-    protected void unbindRouteService(RouteService route) {
-        repositoryRoute = null;
-        this.identityService.setRouter(null);
-    }
-
     protected void bindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(scriptRegistry);
     }
