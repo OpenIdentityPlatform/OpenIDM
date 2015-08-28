@@ -164,10 +164,6 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
     protected final Router router = new Router();
 
     final RouteService routeService = new RouteService() {
-        @Override
-        public Context createServerContext() {
-            return new RootContext();
-        }
     };
 
     public OpenICFProvisionerServiceTest() {
@@ -208,16 +204,10 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
     public RouteEntry addRoute(RouteBuilder routeBuilder) {
 
         final RouteMatcher[] routes = routeBuilder.register(router);
-        // TODO-crest3
         return new RouteEntry() {
             @Override
             public boolean removeRoute() {
                 return router.removeRoute(routes);
-            }
-
-            @Override
-            public Context createServerContext() {
-                return new RootContext();
             }
         };
     }
@@ -315,7 +305,6 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
             service.bindRouterRegistry(this);
             service.bindSyncFailureHandlerFactory(this);
             service.bindEnhancedConfig(new JSONEnhancedConfig());
-            service.bindRouteService(routeService);
             service.bindConnectionFactory(Resources.newInternalConnectionFactory(router));
 
             //set as NullActivityLogger to be the mock logger.
@@ -349,7 +338,6 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
                     for (Pair<OpenICFProvisionerService, ComponentContext> pair : systems) {
                         bindProvisionerService(pair.getLeft(),(Map) null);
                     }
-                    bindRouteService(routeService);
                 }};
 
         router.addRoute(uriTemplate("system"), systemObjectSetService);

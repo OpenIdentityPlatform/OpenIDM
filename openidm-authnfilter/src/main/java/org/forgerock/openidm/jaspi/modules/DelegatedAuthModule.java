@@ -34,6 +34,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
+import org.forgerock.openidm.util.ContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,7 +167,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
 
         try {
             Authenticator.AuthenticatorResult result = authenticator.authenticate(
-                    credential.username, credential.password, authnFilterHelper.getRouter().createServerContext());
+                    credential.username, credential.password, ContextUtil.createServerContext());
             final ResourceResponse resource = result.getResource();
             if (resource != null) {
                 final JsonValue messageMap = new JsonValue(messageInfo.getMap());

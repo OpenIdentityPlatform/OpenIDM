@@ -52,7 +52,7 @@ import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.ContextUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -175,20 +175,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     public Context getContext() throws JobPersistenceException {
         if (context == null) {
-            BundleContext ctx = FrameworkUtil.getBundle(RouteService.class).getBundleContext();
-            ServiceReference serviceReference = null;
-            try {
-                serviceReference = ctx.getServiceReferences(RouteService.class, "(openidm.router.prefix=/repo*)").iterator().next();
-            } catch (InvalidSyntaxException e) {
-                /* ignore the filter is correct */
-            }
-            RouteService repoService = RouteService.class.cast(ctx.getService(serviceReference));
-            if (repoService != null) {
-                context = repoService.createServerContext();
-            }
-            if (context == null) {
-                throw new JobPersistenceException("Repo router is null");
-            }
+            context = ContextUtil.createServerContext();
         }
         return context;
     }

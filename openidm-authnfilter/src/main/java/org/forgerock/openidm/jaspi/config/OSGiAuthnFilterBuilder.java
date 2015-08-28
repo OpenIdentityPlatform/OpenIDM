@@ -44,7 +44,6 @@ import static org.forgerock.openidm.servletregistration.ServletRegistration.SERV
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SYSTEM_PROPERTIES;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
 
-import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -141,9 +140,6 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
     private void unBindAuthenticationConfig(AuthenticationConfig authenticationConfig) {
         config = null;
     }
-
-    @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")
-    RouteService repositoryRoute;
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     CryptoService cryptoService;
@@ -277,15 +273,6 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
     }
 
     // ----- OSGiAuthnFilterHelper Implementation
-
-    /**
-     * Returns the Router instance.
-     *
-     * @return The Router instance.
-     */
-    public RouteService getRouter() {
-        return repositoryRoute;
-    }
 
     /**
      * Returns the Crypto Service instance.

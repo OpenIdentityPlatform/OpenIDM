@@ -16,6 +16,11 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
+import static org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
+
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,18 +36,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
-
-import org.forgerock.http.Context;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 
 /**
  * Tests IDMUserAuthModule using "internal/user" resource/query
@@ -50,7 +49,6 @@ import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
  */
 public class IDMJaspiModuleWrapperTest {
 
-    private Context context;
     private OSGiAuthnFilterHelper authnFilterHelper;
     private IDMJaspiModuleWrapper.AuthModuleConstructor authModuleConstructor;
     private RoleCalculatorFactory roleCalculatorFactory;
@@ -61,11 +59,7 @@ public class IDMJaspiModuleWrapperTest {
     @BeforeMethod
     public void setUp() {
         try {
-            context = mock(Context.class);
-            RouteService routeService = mock(RouteService.class);
-            when(routeService.createServerContext()).thenReturn(context);
             authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
-            when(authnFilterHelper.getRouter()).thenReturn(routeService);
             when(authnFilterHelper.getConnectionFactory()).thenReturn(mock(ConnectionFactory.class));
 
             authModule = mock(ServerAuthModule.class);

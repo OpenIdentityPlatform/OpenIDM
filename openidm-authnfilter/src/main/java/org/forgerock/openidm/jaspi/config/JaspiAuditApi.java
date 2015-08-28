@@ -24,6 +24,7 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.Context;
+import org.forgerock.openidm.util.ContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,15 +73,9 @@ public class JaspiAuditApi implements AuditApi {
                 .toEvent();
 
         try {
-            if (authnFilterHelper.getRouter() != null) {
-                // TODO We need Context!!!
-                CreateRequest createRequest = Requests.newCreateRequest("audit/authentication", auditEvent.getValue());
-                Context ctx = authnFilterHelper.getRouter().createServerContext();
-                authnFilterHelper.getConnectionFactory().getConnection().create(ctx, createRequest);
-            } else {
-                // Filter should have rejected request if router is not available
-                LOGGER.warn("Failed to log entry for {} as router is null.", username);
-            }
+            final CreateRequest createRequest = Requests.newCreateRequest("audit/authentication", auditEvent.getValue());
+            final Context context = ContextUtil.createServerContext();
+            authnFilterHelper.getConnectionFactory().getConnection().create(context, createRequest);
         } catch (ResourceException e) {
             LOGGER.warn("Failed to log entry for {}", username, e);
         }

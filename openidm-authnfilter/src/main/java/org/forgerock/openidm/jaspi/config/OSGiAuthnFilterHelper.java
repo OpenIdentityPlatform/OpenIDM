@@ -18,21 +18,12 @@ package org.forgerock.openidm.jaspi.config;
 
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
 
 /**
  * An interface to help provide the auth module dependencies from OSGi.
- *
  */
 public interface OSGiAuthnFilterHelper {
-
-    /**
-     * Returns the Router instance.
-     *
-     * @return The Router instance.
-     */
-    RouteService getRouter();
 
     /**
      * Returns the Crypto Service instance.

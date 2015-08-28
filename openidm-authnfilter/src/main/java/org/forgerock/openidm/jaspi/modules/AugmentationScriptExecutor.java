@@ -22,6 +22,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.exception.ScriptThrownException;
@@ -69,7 +70,7 @@ class AugmentationScriptExecutor {
             }
 
             // Create internal Context chain for script-call
-            Context context = authnFilterHelper.getRouter().createServerContext();
+            Context context = ContextUtil.createServerContext();
             final Script script = augmentScript.getScript(context);
             // Pass auth module properties and SecurityContextWrapper details to augmentation script
             script.put("properties", properties);

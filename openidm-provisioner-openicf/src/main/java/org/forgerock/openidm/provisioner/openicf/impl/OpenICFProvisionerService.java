@@ -283,21 +283,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         this.activityLogger = NullActivityLogger.INSTANCE;
     }
 
-    // TODO-crest3 routerContext is a bad name
-    @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/*)")
-    RouteService routeService;
-    Context routerContext = null;
-
-    protected void bindRouteService(final RouteService service) throws ResourceException {
-        routeService = service;
-        routerContext = service.createServerContext();
-    }
-
-    private void unbindRouteService(final RouteService service) {
-        routeService = null;
-        routerContext = null;
-    }
-
     /**
      * ConnectorInfoProvider service.
      */
@@ -2231,9 +2216,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    connectionFactory.getConnection().action(routerContext, onCreateRequest);
+                                                    final Context context = ContextUtil.createServerContext();
+                                                    connectionFactory.getConnection().action(context, onCreateRequest);
 
-                                                    activityLogger.log(routerContext, onCreateRequest,
+                                                    activityLogger.log(context, onCreateRequest,
                                                                     "sync-create", onCreateRequest.getResourcePath(),
                                                                     deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
@@ -2251,9 +2237,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    connectionFactory.getConnection().action(routerContext, onUpdateRequest);
+                                                    final Context context = ContextUtil.createServerContext();
+                                                    connectionFactory.getConnection().action(context, onUpdateRequest);
 
-                                                    activityLogger.log(routerContext, onUpdateRequest,
+                                                    activityLogger.log(context, onUpdateRequest,
                                                             "sync-update", onUpdateRequest.getResourcePath(),
                                                             deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
@@ -2266,9 +2253,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    connectionFactory.getConnection().action(routerContext, onDeleteRequest);
+                                                    final Context context = ContextUtil.createServerContext();
+                                                    connectionFactory.getConnection().action(context, onDeleteRequest);
 
-                                                    activityLogger.log(routerContext, onDeleteRequest,
+                                                    activityLogger.log(context, onDeleteRequest,
                                                             "sync-delete", onDeleteRequest.getResourcePath(),
                                                             null, null, Status.SUCCESS);
                                                     break;
