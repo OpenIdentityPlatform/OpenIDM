@@ -14,35 +14,40 @@ package org.forgerock.openidm.managed;/*
  * Copyright 2015 ForgeRock AS.
  */
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
+import org.forgerock.http.Context;
+import org.forgerock.http.ResourcePath;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * Set of relationships for a given managed resource's property
@@ -52,10 +57,10 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     private ConnectionFactory connectionFactory;
 
     /** Path to this resource in the repo */
-    private static final ResourceName REPO_RESOURCE_CONTAINER = new ResourceName("repo", "relationships");
+    private static final ResourcePath REPO_RESOURCE_CONTAINER = new ResourcePath("repo", "relationships");
 
     /** Name of the source resource these relationships are "edges" of */
-    private final ResourceName resourceName;
+    private final ResourcePath resourceName;
 
     /** The property representing this relationship */
     private final JsonPointer propertyName;
@@ -66,7 +71,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
      * @param resourceName Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName Name of property on first object represents the relationship
      */
-    public ManagedObjectRelationshipSet(final ConnectionFactory connectionFactory, final ResourceName resourceName, final JsonPointer propertyName) {
+    public ManagedObjectRelationshipSet(final ConnectionFactory connectionFactory, final ResourcePath resourceName, final JsonPointer propertyName) {
         this.connectionFactory = connectionFactory;
         this.resourceName = resourceName;
         this.propertyName = propertyName;
@@ -86,13 +91,13 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 //    }
 
     @Override
-    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ACTION not supported on relationship collections"));
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
+        return newExceptionPromise(newNotSupportedException("ACTION not supported on relationship collections"));
     }
 
     @Override
-    public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ACTION not supported on relationship instance"));
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
+        return newExceptionPromise(newNotSupportedException("ACTION not supported on relationship instance"));
     }
 
     /**
@@ -119,7 +124,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
      *
      * @return
      */
-    private Resource formatResponse(final Resource fromRepo) {
+    private ResourceResponse formatResponse(final ResourceResponse fromRepo) {
         final JsonValue converted = json(object());
         final Map<String, Object> properties = new LinkedHashMap<>();
         final Map<String, Object> repoProperties = fromRepo.getContent().get("_properties").asMap();
@@ -134,117 +139,128 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         converted.put(SchemaField.FIELD_REFERENCE, fromRepo.getContent().get("secondId").asString());
         converted.put(SchemaField.FIELD_PROPERTIES, properties);
 
-        return new Resource(fromRepo.getId(), fromRepo.getRevision(), converted);
+        return newResourceResponse(fromRepo.getId(), fromRepo.getRevision(), converted);
     }
 
     @Override
-    public void createInstance(final ServerContext context, final CreateRequest request, final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
         final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
-        createRequest.setResourceName(REPO_RESOURCE_CONTAINER);
+        createRequest.setResourcePath(REPO_RESOURCE_CONTAINER);
         createRequest.setContent(convertToRepoObject(request.getContent()));
 
         try {
-            final Resource resource = connectionFactory.getConnection().create(context, createRequest);
-            handler.handleResult(formatResponse(resource));
+            return connectionFactory.getConnection().createAsync(context, createRequest).then(
+                    new Function<ResourceResponse, ResourceResponse, ResourceException>() {
+                        @Override
+                        public ResourceResponse apply(ResourceResponse resourceResponse) throws ResourceException {
+                            return formatResponse(resourceResponse);
+                        }
+                    }
+            );
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         }
 
     }
 
     @Override
-    public void deleteInstance(ServerContext context, String resourceId, final DeleteRequest _request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, String resourceId, final DeleteRequest _request) {
         final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(_request);
-        deleteRequest.setResourceName(REPO_RESOURCE_CONTAINER.child(_request.getResourceName()));
+        deleteRequest.setResourcePath(REPO_RESOURCE_CONTAINER.child(_request.getResourcePath()));
 
         try {
             if (deleteRequest.getRevision() == null) {
+                /*
+                 * If no revision was supplied we must perform a read to get the latest revision
+                 */
+
                 final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(resourceId));
-                final Resource resource = connectionFactory.getConnection().read(context, readRequest);
-                deleteRequest.setRevision(resource.getRevision());
+                final Promise<ResourceResponse, ResourceException> readResult = connectionFactory.getConnection().readAsync(context, readRequest);
+
+                return readResult.thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                    @Override
+                    public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse) throws ResourceException {
+                        deleteRequest.setRevision(resourceResponse.getRevision());
+                        return connectionFactory.getConnection().deleteAsync(context, deleteRequest);
+                    }
+                });
+            } else {
+                return connectionFactory.getConnection().deleteAsync(context, deleteRequest);
             }
-
-            final Resource deletedResource = connectionFactory.getConnection().delete(context, deleteRequest);
-
-            handler.handleResult(formatResponse(deletedResource));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("PATCH currently not supported on relationships"));
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+        return newExceptionPromise(newNotSupportedException("PATCH currently not supported on relationships"));
     }
 
     /** {@inheritDoc} */
     // GET /managed/user/{firstId}/{firstKey}
     @Override
-    public void queryCollection(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
         final String firstId = request.getAdditionalParameter("firstId");
 
         final QueryRequest _request = Requests.newQueryRequest(REPO_RESOURCE_CONTAINER);
 
         _request.setQueryFilter(QueryFilter.and(
-                QueryFilter.equalTo("firstId", resourceName.child(firstId)),
-                QueryFilter.equalTo("firstKey", propertyName.toString())
+                QueryFilter.equalTo(new JsonPointer("firstId"), resourceName.child(firstId)),
+                QueryFilter.equalTo(new JsonPointer("firstKey"), propertyName)
         ));
 
         try {
-            connectionFactory.getConnection().query(context, _request, new QueryResultHandler() {
+            return connectionFactory.getConnection().queryAsync(context, _request, new QueryResourceHandler() {
                 @Override
-                public void handleError(ResourceException e) {
-                    handler.handleError(e);
-                }
-
-                @Override
-                public boolean handleResource(Resource resource) {
+                public boolean handleResource(ResourceResponse resource) {
                     return handler.handleResource(formatResponse(resource));
-                }
-
-                @Override
-                public void handleResult(QueryResult queryResult) {
-                    handler.handleResult(queryResult);
                 }
             });
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(resourceId));
-            Resource resource = connectionFactory.getConnection().read(context, readRequest);
-            handler.handleResult(formatResponse(resource));
+            return connectionFactory.getConnection().readAsync(context, readRequest).then(
+                    new Function<ResourceResponse, ResourceResponse, ResourceException>() {
+                        @Override
+                        public ResourceResponse apply(ResourceResponse resourceResponse) throws ResourceException {
+                            return formatResponse(resourceResponse);
+                        }
+                    }
+            );
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         }
     }
 
     @Override
-    public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(resourceId));
             final JsonValue newValue = request.getContent();
 
             // current resource in the db
-            final Resource oldResource = connectionFactory.getConnection().read(context, readRequest);
+            final ResourceResponse oldResource = connectionFactory.getConnection().read(context, readRequest);
             final String rev = request.getRevision();
 
             if (newValue.asMap().equals(oldResource.getContent().asMap())) { // resource has not changed
-                handler.handleResult(new Resource(resourceId, rev, null));
+                return newResultPromise(newResourceResponse(resourceId, rev, null));
             } else {
                 final UpdateRequest updateRequest = Requests.newUpdateRequest(REPO_RESOURCE_CONTAINER.child(resourceId), newValue);
                 updateRequest.setRevision(rev);
 
-                final Resource response = connectionFactory.getConnection().update(context, updateRequest);
+                final ResourceResponse response = connectionFactory.getConnection().update(context, updateRequest);
 
-                handler.handleResult(formatResponse(response));
+                return newResultPromise(formatResponse(response));
             }
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return newExceptionPromise(e);
         }
     }
 }

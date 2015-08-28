@@ -15,30 +15,15 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.resource.Responses.*;
-import static org.forgerock.json.resource.ResourceResponse.*;
-import static org.forgerock.util.promise.Promises.*;
-import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onCreate;
-import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onDelete;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.script.ScriptException;
-import javax.xml.validation.Schema;
-
-import org.forgerock.json.JsonValue;
-import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -60,9 +45,9 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
-import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
@@ -80,10 +65,22 @@ import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.exception.ScriptThrownException;
-import org.forgerock.util.promise.Promise;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.Function;
 import org.forgerock.util.Pair;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.script.ScriptException;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Provides access to a set of managed objects of a given type: managed/[type]/{id}.
@@ -505,7 +502,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         final List<ResourceResponse> resources = new ArrayList<ResourceResponse>();
 
         connectionFactory.getConnection().query(context, queryRequest,
-        		new QueryResourceHandler() {
+                new QueryResourceHandler() {
                     @Override
                     public boolean handleResource(ResourceResponse resource) {
                         logger.debug("Patch by query found resource " + resource.getId());
@@ -586,93 +583,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         }
     }
 
-    /*
-     * The following classes are required to get a blocking get() implementation using
-     * ResultHandlers until we have a proper Promise<V, E> implementation from CREST3
-     */
-
-    protected final class BlockingResultHandler<T> implements ResultHandler<T> {
-        private T result = null;
-        private ResourceException exception = null;
-
-        @Override
-        public synchronized void handleError(ResourceException error) {
-            this.exception = error;
-            notify();
-        }
-
-        @Override
-        public synchronized void handleResult(T result) {
-            this.result = result;
-            notify();
-        }
-
-        public synchronized T get() throws ResourceException {
-            try {
-                // Wait if we don't have a result yet
-                if (exception == null && result == null) {
-                    wait();
-                }
-            } catch (InterruptedException e) {
-                throw new InternalServerErrorException(e.getMessage(), e);
-            }
-
-            if (exception != null) {
-                throw exception;
-            } else {
-                return result;
-            }
-        }
-    }
-
-    protected final class BlockingQueryResultHandler implements QueryResultHandler {
-        private List<Resource> results = new ArrayList<>();
-        private ResourceException exception = null;
-        private boolean done = false;
-
-        @Override
-        public synchronized void handleError(ResourceException error) {
-            this.exception = error;
-            done = true;
-            notify();
-        }
-
-        @Override
-        public synchronized boolean handleResource(Resource resource) {
-            results.add(resource);
-
-            /*
-             * TODO - this will go on forever so long as there are more results.
-             *        we may wish to constrain this by returning false eventually.
-             */
-
-            return true;
-        }
-
-        @Override
-        public synchronized void handleResult(QueryResult result) {
-            done = true;
-            notify();
-        }
-
-        public synchronized List<Resource> get() throws ResourceException {
-            try {
-                // Wait if we're not done
-                if (!done) {
-                    wait();
-                }
-            } catch (InterruptedException e) {
-                throw new InternalServerErrorException(e.getMessage(), e);
-            }
-
-            if (exception != null) {
-                throw exception;
-            } else {
-                return results;
-            }
-        }
-    }
-
     /**
      * Returns a deep copy of the supplied {@link JsonValue}.
      * Used to remove special relation fields before persisting the
@@ -706,28 +616,30 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *
      * @throws ResourceException
      */
-    private JsonValue fetchRelationship(final ServerContext context, final String resourceId, final JsonPointer relationshipField) throws ResourceException {
+    private JsonValue fetchRelationship(final Context context, final String resourceId, final JsonPointer relationshipField) throws ResourceException {
         final QueryRequest queryRequest = Requests.newQueryRequest("");
         queryRequest.setAdditionalParameter("firstId", resourceId);
+        final List<ResourceResponse> relations = new ArrayList<>();
 
-        final BlockingQueryResultHandler handler = new BlockingQueryResultHandler();
-
-        relationshipSets.get(relationshipField).queryCollection(context, queryRequest, handler);
+        relationshipSets.get(relationshipField).queryCollection(context, queryRequest, new QueryResourceHandler() {
+            @Override
+            public boolean handleResource(ResourceResponse resourceResponse) {
+                relations.add(resourceResponse);
+                return true;
+            }
+        });
 
         if (schema.getField(relationshipField).isArray()) {
             final JsonValue buf = new JsonValue(new ArrayList<>());
 
-            // FIXME - blocking for each relation sucks. CREST3 promises will solve this.
-            for (Resource resource : handler.get()) {
+            for (ResourceResponse resource : relations) {
                 buf.add(resource.getContent().asMap());
             }
 
             return buf;
         } else {
-            final List<Resource> results = handler.get();
-
-            if (results != null && !results.isEmpty()) {
-                return results.get(0).getContent();
+            if (!relations.isEmpty()) {
+                return relations.get(0).getContent();
             } else {
                 return new JsonValue(null);
             }
@@ -743,7 +655,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *
      * @throws ResourceException If an error occured querying the relationships
      */
-    private JsonValue fetchRelationships(final ServerContext context, final String resourceId) throws ResourceException {
+    private JsonValue fetchRelationships(final Context context, final String resourceId) throws ResourceException {
         final JsonValue relationships = new JsonValue(new HashMap<String, Object>());
 
         for (JsonPointer relationshipField : schema.getRelationshipFields()) {
@@ -761,7 +673,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param resourceId Id of resource to delete relations of
      * @throws ResourceException
      */
-    private void deleteRelationships(final ServerContext context, final String resourceId) throws ResourceException {
+    private void deleteRelationships(final Context context, final String resourceId) throws ResourceException {
         for (JsonPointer relationField : schema.getRelationshipFields()) {
             deleteRelationships(context, resourceId, relationField);
         }
@@ -776,30 +688,34 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *
      * @throws ResourceException
      */
-    private void deleteRelationships(final ServerContext context, final String resourceId, final JsonPointer relationField) throws ResourceException {
+    private void deleteRelationships(final Context context, final String resourceId, final JsonPointer relationField) throws ResourceException {
         final boolean isArray = schema.getFields().get(relationField).isArray();
         final JsonValue existingRelations = fetchRelationship(context, resourceId, relationField);
 
+        final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
+
         if (isArray) {
             for (JsonValue relation : existingRelations) {
-                final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
                 final String id = relation.get(SchemaField.FIELD_PROPERTIES).get("_id").asString();
                 final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
-                relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest, handler);
+                final Promise<ResourceResponse, ResourceException> response = relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest);
 
-                // FIXME - this is blocking. need crest3 promises.
-                handler.get();
+                promises.add(response);
             }
         } else {
             if (!existingRelations.isNull()) {
-                final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
                 final String id = existingRelations.get(SchemaField.FIELD_PROPERTIES).get("_id").asString();
                 final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
-                relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest, handler);
+                final Promise response = relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest);
 
-                // FIXME - this is blocking. need crest3 promises.
-                handler.get();
+                promises.add(response);
             }
+        }
+
+        try {
+            Promises.when(promises).getOrThrow();
+        } catch (InterruptedException e) {
+            throw ResourceException.adapt(e);
         }
     }
 
@@ -810,7 +726,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param resourceId Id of the resource that needs relationships
      * @param value Value containing resource fields to persist
      */
-    private JsonValue persistRelationships(final ServerContext context, final String resourceId, final JsonValue value) throws ResourceException {
+    private JsonValue persistRelationships(final Context context, final String resourceId, final JsonValue value) throws ResourceException {
         // create/update relationship references. Update if we have UUIDs
         // delete all relationships not in this array
 
@@ -819,6 +735,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         // List of Ids we have created/updated that should not be purged afterwards
         final List<String> idsToKeep = new ArrayList<>();
+
+        // List of promises for each relation
+        final List<Promise> promises = new ArrayList<>();
 
         for (Map.Entry<JsonPointer, ManagedObjectRelationshipSet> entry : relationshipSets.entrySet()) {
             JsonPointer relationField = entry.getKey();
@@ -847,16 +766,21 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     for (JsonValue relationobject : fieldValue) {
                         relationobject.put("firstId", resourceId);
 
-                        final BlockingResultHandler<Resource> handler = new BlockingResultHandler<>();
                         final CreateRequest createRequest = Requests.newCreateRequest("", relationobject);
-                        relations.createInstance(context, createRequest, handler);
+                        final Promise<ResourceResponse, ResourceException> promise = relations.createInstance(context, createRequest);
 
-                        // FIXME - we should not be blocking on every create need to join() after all
-                        // need to call get() here in case we have an exception
-                        final Resource result = handler.get();
-                        idsToKeep.add(result.getId());
+                        promise.then(new Function<ResourceResponse, Void, ResourceException>() {
+                            @Override
+                            public Void apply(ResourceResponse resourceResponse) throws ResourceException {
+                                // FIXME - these probably need locks now
+                                idsToKeep.add(resourceResponse.getId());
+                                buf.add(resourceResponse.getContent().asMap());
+                                return null;
+                            }
+                        });
 
-                        buf.add(result.getContent().asMap());
+                        promises.add(promise);
+
                     }
 
                     persisted.put(relationField, buf);
@@ -878,6 +802,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 persisted.put(relationField, null);
             }
 
+        }
+
+        // Wait for all promises to complete
+        try {
+            Promises.when(promises).getOrThrow();
+        } catch (Exception e) {
+            throw ResourceException.adapt(e);
         }
 
         return persisted;
