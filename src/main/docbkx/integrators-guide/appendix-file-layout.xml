@@ -401,7 +401,7 @@
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term><filename>openidm/conf/ui.context-enduser.json</filename></term>
+   <term><filename>openidm/conf/ui.context-selfservice.json</filename></term>
    <listitem>
     <para>Configuration file that specifies the context root of the UI,
     <literal>/</literal> by default</para>
