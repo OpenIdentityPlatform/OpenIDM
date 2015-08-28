@@ -96,7 +96,12 @@ public class ManagedObjectService implements RequestHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected ScriptRegistry scriptRegistry;
 
-    /** Route service. */
+    /**
+     * Route service on "sync" endpoint.  An aspect of CRUDPAQ on managed objects is to synchronize their
+     * attributes with remote system if configured.  As this message is sent over the router, we need to
+     * know if the SynchronizationService is available.  This optional reference is used to indicate that
+     * availability.
+     */
     @Reference(referenceInterface = RouteService.class,
             policy = ReferencePolicy.DYNAMIC,
             bind = "bindSyncRoute",
