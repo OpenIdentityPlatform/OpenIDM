@@ -404,5 +404,20 @@
       },
    "operationOptions" :
       {
-      }
+      },
+   "systemActions" :
+      [
+         {
+            "scriptId" : "ConnectorScript#1",
+            "actions" :
+            [
+               {
+                  "systemType" : ".*TestConnector",
+                  "actionType" : "Groovy",
+                  "actionSource" : "return \"Arthur Dent\""
+
+               }
+            ]
+         }
+      ]
 }
