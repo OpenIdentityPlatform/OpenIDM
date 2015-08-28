@@ -22,7 +22,6 @@ import org.forgerock.http.Context;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.Authenticator.AuthenticatorResult;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
-import org.forgerock.openidm.router.RouteService;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

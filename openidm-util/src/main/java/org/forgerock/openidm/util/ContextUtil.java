@@ -61,8 +61,7 @@ public class ContextUtil {
      *
      * @return a new {@code SecurityContext}
      */
-    public static Context createServerContext() {
-        // TODO Finalise the default system context
+    public static Context createContext() {
         // Ideally, we would have an internal system user that we could point to;
         // point to it now and build it later
         final Map<String, Object> authzid = new HashMap<String, Object>();

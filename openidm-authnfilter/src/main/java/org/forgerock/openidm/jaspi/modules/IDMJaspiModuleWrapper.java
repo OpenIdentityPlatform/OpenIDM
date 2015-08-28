@@ -209,7 +209,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                         }
                         final List<ResourceResponse> resources = new ArrayList<>();
                         authnFilterHelper.getConnectionFactory().getConnection().query(
-                                ContextUtil.createServerContext(), request, resources);
+                                ContextUtil.createContext(), request, resources);
 
                         if (resources.isEmpty()) {
                             throw ResourceException.getException(401, "Access denied, no user detail could be retrieved.");
