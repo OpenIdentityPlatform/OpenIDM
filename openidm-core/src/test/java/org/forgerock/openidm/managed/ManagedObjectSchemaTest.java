@@ -23,17 +23,17 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
 
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.JsonPointer;
 import org.testng.annotations.Test;
 
 /**
