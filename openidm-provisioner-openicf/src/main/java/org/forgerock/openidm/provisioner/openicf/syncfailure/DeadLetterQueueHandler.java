@@ -68,7 +68,7 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
             Map<String,Object> syncDetail = new HashMap<String, Object>(syncFailure);
             syncDetail.put("failureCause", failureCause.toString());
             CreateRequest request = Requests.newCreateRequest(resourceContainer, resourceId, new JsonValue(syncDetail));
-            connectionFactory.getConnection().create(ContextUtil.createServerContext(), request);
+            connectionFactory.getConnection().create(ContextUtil.createContext(), request);
             logger.info("{} saved to dead letter queue", syncFailure.get("uid"));
         } catch (ResourceException e) {
             throw new SyncHandlerException("Failed reading/writing " + resourceContainer + "/" + resourceId, e);

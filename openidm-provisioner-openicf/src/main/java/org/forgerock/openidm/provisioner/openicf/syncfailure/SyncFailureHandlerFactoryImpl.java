@@ -25,8 +25,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.router.RouteService;
-import org.forgerock.openidm.util.Accessor;
 import org.forgerock.script.ScriptRegistry;
 
 /**

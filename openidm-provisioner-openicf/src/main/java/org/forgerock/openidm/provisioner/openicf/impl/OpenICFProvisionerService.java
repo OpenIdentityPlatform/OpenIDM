@@ -127,7 +127,6 @@ import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerF
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncHandlerException;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
-import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -2216,7 +2215,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createServerContext();
+                                                    final Context context = ContextUtil.createContext();
                                                     connectionFactory.getConnection().action(context, onCreateRequest);
 
                                                     activityLogger.log(context, onCreateRequest,
@@ -2237,7 +2236,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createServerContext();
+                                                    final Context context = ContextUtil.createContext();
                                                     connectionFactory.getConnection().action(context, onUpdateRequest);
 
                                                     activityLogger.log(context, onUpdateRequest,
@@ -2253,7 +2252,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createServerContext();
+                                                    final Context context = ContextUtil.createContext();
                                                     connectionFactory.getConnection().action(context, onDeleteRequest);
 
                                                     activityLogger.log(context, onDeleteRequest,

@@ -70,7 +70,7 @@ class AugmentationScriptExecutor {
             }
 
             // Create internal Context chain for script-call
-            Context context = ContextUtil.createServerContext();
+            Context context = ContextUtil.createContext();
             final Script script = augmentScript.getScript(context);
             // Pass auth module properties and SecurityContextWrapper details to augmentation script
             script.put("properties", properties);

@@ -33,7 +33,6 @@ import java.util.concurrent.Callable;
 import javax.script.ScriptException;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.CreateRequest;

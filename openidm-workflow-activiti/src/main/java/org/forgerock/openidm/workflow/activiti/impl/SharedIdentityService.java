@@ -81,7 +81,7 @@ public class SharedIdentityService implements IdentityService {
     public static final String SCIM_X509CERTIFICATES = "x509Certificates";
     //SCIM Group Schema
     public static final String SCIM_MEMBERS = "members";
-    private Context context = ContextUtil.createServerContext();
+    private Context context = ContextUtil.createContext();
     private CryptoService cryptoService;
     private ConnectionFactory connectionFactory;
     

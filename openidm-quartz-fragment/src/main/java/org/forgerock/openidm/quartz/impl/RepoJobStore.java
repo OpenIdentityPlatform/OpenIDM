@@ -175,7 +175,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     public Context getContext() throws JobPersistenceException {
         if (context == null) {
-            context = ContextUtil.createServerContext();
+            context = ContextUtil.createContext();
         }
         return context;
     }
