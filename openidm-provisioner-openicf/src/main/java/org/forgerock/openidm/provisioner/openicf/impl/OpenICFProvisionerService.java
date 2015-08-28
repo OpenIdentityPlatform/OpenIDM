@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2015 ForgeRock AS.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -129,7 +121,6 @@ import org.forgerock.openidm.provisioner.openicf.commons.AttributeMissingExcepti
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
-import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
 import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandler;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory;
@@ -238,7 +229,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
-    private ConnectorFacadeCallback connectorFacadeCallback = null;
+    private Promise<ConnectorInfo, RuntimeException> connectorFacadeCallback = null;
     private boolean serviceAvailable = false;
     private JsonValue jsonConfiguration = null;
     private ConnectorReference connectorReference = null;
@@ -361,104 +352,75 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
 
             syncFailureHandler = syncFailureHandlerFactory.create(jsonConfiguration.get("syncFailureHandler"));
+            
+            connectorInfoProvider.findConnectorInfoAsync(connectorReference).thenOnResult(
+                    new org.forgerock.util.promise.ResultHandler<ConnectorInfo>() {
+                        public void handleResult(ConnectorInfo connectorInfo) {
+                            try {
+                                APIConfiguration config = connectorInfo.createDefaultAPIConfiguration();
+                                operationHelperBuilder =
+                                        new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration,
+                                                config, cryptoService);
+                                try {
+                                    Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
+                                            ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
 
-            if (connectorInfoProvider.findConnectorInfo(connectorReference) == null) {
-                if (connectorReference.getConnectorLocation().isLocal()) {
-                    // Not possible to satisfy the connector reference, bail out
-                    throw new InvalidException("Connector not found: " + connectorReference.getConnectorKey());
-                } else {
-                    // Connector may become available later
-                    logger.warn("Remote OpenICF Connector {} could not be located, may not yet be connected to " +
-                            "the remote connector server.", connectorReference);
-                }
-            }
+                                    objectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
 
-            connectorFacadeCallback = new ConnectorFacadeCallback() {
-                @Override
-                public void addingConnectorInfo(ConnectorInfo connectorInfo,
-                                                ConnectorFacadeFactory facadeFactory) {
-                    try {
-                        APIConfiguration config = connectorInfo.createDefaultAPIConfiguration();
-                        operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration,
-                                config, cryptoService);
-                        try {
-                            // TODO Iterate over the supported type and register
-                            boolean allowModification = !jsonConfiguration.get("readOnly").defaultTo(false).asBoolean();
-                            if (!allowModification) {
-                                logger.debug("OpenICF Provisioner Service {} is running in read-only mode", systemIdentifier.getName());
-                            }
+                                    for (Map.Entry<String, ObjectClassInfoHelper> entry :
+                                            objectTypes.entrySet()) {
 
-                            Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
-                                    ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
-
-                            objectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
-
-                            for (Map.Entry<String, ObjectClassInfoHelper> entry :
-                                    objectTypes.entrySet()) {
-
-                                objectClassHandlers.put(entry.getKey(),
-                                        Resources.newCollection(
-                                                new ObjectClassResourceProvider(
-                                                        entry.getKey(),
-                                                        entry.getValue(),
-                                                        objectOperations.get(entry.getKey()),
-                                                        allowModification)));
-                            }
-
-                            // TODO Fix this Map
-                            // ValidateApiOp
-                            // TestApiOp
-                            // ScriptOnConnectorApiOp
-                            // ScriptOnResourceApiOp
-                            // SchemaApiOp
-                            systemOperations = Collections.emptyMap();
-                        } catch (Exception e) {
-                            logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier.getName(), e);
-                            throw new ComponentException(
-                                    "OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
-                        }
-
-                        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, config, cryptoService);
-
-                        final ConnectorFacade facade = facadeFactory.newInstance(config);
-
-                        if (null == facade) {
-                            logger.warn("OpenICF ConnectorFacade of {} is not available", connectorReference);
-                        } else {
-                            facade.validate();
-                            if (connectorFacade.compareAndSet(null, facade)) {
-                                if (facade.getSupportedOperations().contains(TestApiOp.class)) {
-                                    try {
-                                        facade.test();
-                                        logger.debug("OpenICF connector test of {} succeeded!", systemIdentifier);
-                                        serviceAvailable = true;
-                                    } catch (Exception e) {
-                                        logger.error("OpenICF connector test of {} failed!", systemIdentifier, e);
+                                        objectClassHandlers.put(entry.getKey(),
+                                                Resources.newCollection(
+                                                        new ObjectClassResourceProvider(
+                                                                entry.getKey(),
+                                                                entry.getValue(),
+                                                                objectOperations.get(entry.getKey()))));
                                     }
-                                } else {
-                                    logger.debug("OpenICF connector of {} does not support test.", connectorReference);
-                                    serviceAvailable = true;
+
+                                    // TODO Fix this Map
+                                    // ValidateApiOp
+                                    // TestApiOp
+                                    // ScriptOnConnectorApiOp
+                                    // ScriptOnResourceApiOp
+                                    // SchemaApiOp
+                                    systemOperations = Collections.emptyMap();
+                                } catch (Exception e) {
+                                    logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier.getName(), e);
+                                    throw new ComponentException(
+                                            "OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
                                 }
+
+                                ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, config, cryptoService);
+
+                                final ConnectorFacade facade = connectorInfoProvider.createConnectorFacade(config);
+
+                                if (null == facade) {
+                                    logger.warn("OpenICF ConnectorFacade of {} is not available", connectorReference);
+                                } else {
+                                    facade.validate();
+                                    if (connectorFacade.compareAndSet(null, facade)) {
+                                        if (facade.getSupportedOperations().contains(TestApiOp.class)) {
+                                            try {
+                                                facade.test();
+                                                logger.debug("OpenICF connector test of {} succeeded!", systemIdentifier);
+                                                serviceAvailable = true;
+                                            } catch (Exception e) {
+                                                logger.error("OpenICF connector test of {} failed!", systemIdentifier, e);
+                                            }
+                                        } else {
+                                            logger.debug("OpenICF connector of {} does not support test.", connectorReference);
+                                            serviceAvailable = true;
+                                        }
+                                    }
+                                }
+                                logger.info("OpenICF Provisioner Service component {} is activated.",
+                                        systemIdentifier.getName());
+                            } catch (Throwable t) {
+                                logger.warn(t.getMessage());
                             }
                         }
-                    } catch (Throwable t) {
-                        logger.warn(t.getMessage());
-                    } finally {
-                        logger.info("OpenICF Provisioner Service component {} is activated{}",
-                                systemIdentifier.getName(),
-                                (null != connectorFacade.get()
-                                        ? "."
-                                        : " although the service is not available yet."));
-                    }
-                }
-
-                @Override
-                public void removedConnectorInfo(ConnectorInfo connectorInfo) {
-                    connectorFacade.set(null);
-                }
-            };
-
-            connectorInfoProvider.addConnectorFacadeCallback(connectorReference, connectorFacadeCallback);
+                    });
 
             routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
                     .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName())
@@ -469,7 +431,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     .withRequestHandler(new ObjectClassRequestHandler())
                     .seal());
 
-            logger.info("OpenICF Provisioner Service component {} is activated{}", systemIdentifier.getName(),
+            logger.info("OpenICF Provisioner Service component {} route enabled{}", systemIdentifier.getName(),
                     (null != connectorFacade.get()
                             ? "."
                             : " although the service is not available yet."));
@@ -482,7 +444,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     @Deactivate
     protected void deactivate(ComponentContext context) {
         if (null != connectorFacadeCallback) {
-            connectorInfoProvider.deleteConnectorFacadeCallback(connectorFacadeCallback);
+            connectorFacadeCallback.cancel(false);
             connectorFacadeCallback = null;
         }
         if (null != routeEntry) {
@@ -1159,15 +1121,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
         private final ObjectClassInfoHelper objectClassInfoHelper;
         private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
-        private final boolean allowModification;
         private final String objectClass;
 
         private ObjectClassResourceProvider(String objectClass, ObjectClassInfoHelper objectClassInfoHelper,
-                Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations,
-                boolean allowModification) {
+                Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations) {
             this.objectClassInfoHelper = objectClassInfoHelper;
             this.operations = operations;
-            this.allowModification = allowModification;
             this.objectClass = objectClass;
         }
 

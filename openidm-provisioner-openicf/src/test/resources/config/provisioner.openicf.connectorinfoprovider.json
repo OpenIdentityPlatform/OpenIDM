@@ -7,7 +7,8 @@
             "port"          : 8759,
             "useSSL"        : false,
             "timeout"       : 0,
-            "key"           : "Passw0rd"
+            "key"           : "Passw0rd",
+            "protocol"      : "websocket"
         }
     ]
 }
