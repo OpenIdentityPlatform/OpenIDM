@@ -1355,7 +1355,7 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
    By default, the self service UI is registered at the root context and is
    accessible at the URL <literal>https://localhost:8443</literal>. To specify
    a different URL, edit the
-   <filename><replaceable>project-dir</replaceable>/conf/ui.context-enduser.json</filename>
+   <filename><replaceable>project-dir</replaceable>/conf/ui.context-selfservice.json</filename>
    file, setting the <literal>urlContextRoot</literal> property to the new URL.
   </para>
   <para>
@@ -1393,7 +1393,7 @@ $ <userinput>vi AdminUserRegistrationTemplate.html</userinput></screen>
   <para>
    The UI is packaged as a separate bundle that can be disabled in the
    configuration before server startup. To disable the registration of the UI
-   servlet, edit the <filename>openidm/conf/ui.context-enduser.json</filename>
+   servlet, edit the <filename>openidm/conf/ui.context-selfservice.json</filename>
    file, setting the <literal>enabled</literal> property to false:
   </para>
   <screen>"enabled" : false,</screen>
