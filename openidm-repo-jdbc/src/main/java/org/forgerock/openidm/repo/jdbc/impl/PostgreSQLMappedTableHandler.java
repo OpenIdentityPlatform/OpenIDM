@@ -14,7 +14,7 @@ package org.forgerock.openidm.repo.jdbc.impl;/*
  * Copyright 2015 ForgeRock AS.
  */
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
