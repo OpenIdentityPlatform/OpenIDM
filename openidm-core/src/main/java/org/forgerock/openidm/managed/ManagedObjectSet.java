@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.managed;
 
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
@@ -632,10 +633,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         });
 
         if (schema.getField(relationshipField).isArray()) {
-            final JsonValue buf = new JsonValue(new ArrayList<>());
+            final JsonValue buf = json(array());
 
             for (ResourceResponse resource : relations) {
-                buf.add(resource.getContent().asMap());
+                buf.add(resource.getContent().getObject());
             }
 
             return buf;
@@ -661,8 +662,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         final JsonValue relationships = new JsonValue(new HashMap<String, Object>());
 
         for (JsonPointer relationshipField : schema.getRelationshipFields()) {
-            relationships.put(relationshipField, fetchRelationship(context, resourceId, relationshipField));
-
+            relationships.put(relationshipField, fetchRelationship(context, resourceId, relationshipField).getObject());
         }
 
         return relationships;
@@ -733,7 +733,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         // delete all relationships not in this array
 
         // Map of responses for each field
-        final Map<JsonPointer, Promise<List<ResourceResponse>, ResourceException>> responses = new HashMap<>();
+        final Map<JsonPointer, Promise<JsonValue, ResourceException>> persistedRelations = new HashMap<>();
 
         for (Map.Entry<JsonPointer, ManagedObjectRelationshipSet> entry : relationshipSets.entrySet()) {
             JsonPointer relationField = entry.getKey();
@@ -767,33 +767,41 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                         promises.add(relations.createInstance(context, createRequest));
                     }
 
-                    responses.put(relationField, Promises.when(promises));
+                    final Promise<JsonValue, ResourceException> valuePromise = Promises.when(promises).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
+                        @Override
+                        public JsonValue apply(List<ResourceResponse> responses) throws ResourceException {
+                            final JsonValue value = json(array());
+                            for (final ResourceResponse response : responses) {
+                                value.add(response.getContent().getObject());
+                            }
+                            return value;
+                        }
+                    });
+
+                    persistedRelations.put(relationField, valuePromise);
                 } else { // only a single relationship
                     fieldValue.put("firstId", resourceId);
 
                     final CreateRequest createRequest = Requests.newCreateRequest("", fieldValue);
-                    responses.put(relationField, Promises.when(relations.createInstance(context, createRequest)));
+                    final Promise<JsonValue, ResourceException> jsonPromise = relations.createInstance(context, createRequest).then(new Function<ResourceResponse, JsonValue, ResourceException>() {
+                        @Override
+                        public JsonValue apply(ResourceResponse value) throws ResourceException {
+                            return value.getContent();
+                        }
+                    });
+
+                    persistedRelations.put(relationField, jsonPromise);
                 }
             } else {
-                responses.put(relationField, null);
+//                responses.put(relationField, null);
             }
 
         }
 
         final JsonValue result = json(object());
 
-        for (JsonPointer field : responses.keySet()) {
-            final List<ResourceResponse> results = responses.get(field).getOrThrowUninterruptibly();
-
-            if (schema.getField(field).isArray()) {
-                final List<Map<String, Object>> relationships = new ArrayList<>();
-                for (ResourceResponse item : results) {
-                    relationships.add(item.getContent().asMap());
-                }
-                result.put(field, relationships);
-            } else {
-                result.put(field, results.get(0).getContent().asMap());
-            }
+        for (JsonPointer field : persistedRelations.keySet()) {
+            result.put(field, persistedRelations.get(field).getOrThrowUninterruptibly().getObject());
         }
 
         return result;
@@ -1163,10 +1171,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @throws ResourceException 
      */
     private ResourceResponse prepareResponse(Context context, ResourceResponse resource, List<JsonPointer> fields) {
-        Map<JsonPointer, SchemaField> fieldsToRemove = new HashMap<JsonPointer, SchemaField>(schema.getHiddenByDefaultFields());
-        Map<JsonPointer, List<JsonPointer>> resourceExpansionMap = new HashMap<JsonPointer, List<JsonPointer>>();
+        Map<JsonPointer, SchemaField> fieldsToRemove = new HashMap<>(schema.getHiddenByDefaultFields());
+        Map<JsonPointer, List<JsonPointer>> resourceExpansionMap = new HashMap<>();
         if (fields != null && fields.size() > 0) {
-            for (JsonPointer field : new ArrayList<JsonPointer>(fields)) {
+            for (JsonPointer field : new ArrayList<>(fields)) {
                 if (field.equals(SchemaField.FIELD_ALL_RELATIONSHIPS)) {
                     // Return all relationship fields, so remove them from fieldsToRemove map
                     for (JsonPointer key : schema.getRelationshipFields()) {
