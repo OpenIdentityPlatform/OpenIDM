@@ -1,4 +1,4 @@
-package org.forgerock.openidm.repo.jdbc.impl;/*
+/*
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -13,6 +13,7 @@ package org.forgerock.openidm.repo.jdbc.impl;/*
  *
  * Copyright 2015 ForgeRock AS.
  */
+package org.forgerock.openidm.repo.jdbc.impl;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
