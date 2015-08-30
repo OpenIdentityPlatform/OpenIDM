@@ -120,14 +120,12 @@
                             "type" : "relationship",
                             "returnByDefault" : true,
                             "properties" : {
-                                "_ref" : {
-                                    "type" : "string"
-                        	    },
-                                "_id": {
-                                    "type": "string"
-                                },
+                                "_ref" : { "type" : "string" },
                                 "_refProperties": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
                                 }
                             },
                             "resourceCollection" : {
