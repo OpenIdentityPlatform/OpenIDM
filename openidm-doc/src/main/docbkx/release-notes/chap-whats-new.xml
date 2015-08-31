@@ -39,20 +39,24 @@
 
   <variablelist>
    <varlistentry>
-    <term>Administration User Interface</term>
+    <term>Integration of a Common Audit Facility</term>
     <listitem>
      <para>
-      The new web-based Admin UI enables you to configure connectors, customize
-      managed objects, set up attribute mappings between resources, configure
-      reconciliation and synchronization rules, and more. For more information,
-      see <link xlink:show="new" xlink:href="integrators-guide#ui-admin"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
-      OpenIDM from the Admin UI</citetitle></link> in the <emphasis>Integrator's
-      Guide</emphasis>.
+      OpenIDM ${docTargetVersion} replaces the existing audit facility with a
+      new facility that is common across ForgeRock's Identity Platform. The
+      audit facility now logs authentication events by default, and supports the
+      addition of custom audit event handlers.
+     </para>
+     <para>
+      For information about the common audit facility, see <olink
+      targetdoc="integrators-guide" targetptr="chap-auditing"/>.
+     </para>
+     <para>
+      For details about changes required for existing OpenIDM deployments, see
+      <xref linkend="major-changes" />.
      </para>
     </listitem>
    </varlistentry>
-   
    <varlistentry>
     <term>Bootstrap and Font Awesome</term>
     <listitem>
@@ -78,22 +82,6 @@
      </para>
     </listitem>
    </varlistentry>
-
-   <varlistentry>
-    <term>Addition of an <emphasis>aggregated view</emphasis> to the Data
-     Management UI</term>
-    <listitem>
-     <para>
-      The Data Management UI now includes a read-only view of the user account in
-      each of the external resources to which it is linked. For more information,
-      see <link xlink:show="new" xlink:href="integrators-guide#user-linked-view"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To View a
-      User's Account in External Resources</citetitle></link> in the
-      <emphasis>Integrator's Guide</emphasis>.
-     </para>
-    </listitem>
-   </varlistentry>
-
    <varlistentry>
     <term>Full Stack Sample</term>
     <listitem>
@@ -106,114 +94,6 @@
      </para>
     </listitem>
    </varlistentry>
-
-   <varlistentry>
-    <term>Reconciliation Performance Improvements</term>
-    <listitem>
-     <para>
-      To improve reconciliation query performance on slower systems, you can now
-      preload the entire result set into memory on the source or target system,
-      or on both systems. For more information, see <link xlink:show="new"
-      xlink:href="integrators-guide#recon-query-optimization"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Improving
-      Reconciliation Query Performance</citetitle></link> in the
-      <emphasis>Integrator's Guide</emphasis>.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>Updated Connectors, New Connectors and Samples</term>
-    <listitem>
-     <para>
-      Several of the connectors bundled with OpenIDM have been updated. For
-      details of the latest versions, see <link xlink:show="new"
-      xlink:href="integrators-guide#connectors-with-openidm"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connectors
-      Supported With OpenIDM ${docTargetVersion}</citetitle></link> in the
-      <emphasis>Integrator's Guide</emphasis>.
-     </para>
-     <para>
-      The <link xlink:show="new"
-      xlink:href="https://forgerock.org/downloads/">Enterprise build</link> of
-      OpenIDM bundles two new connectors, and corresponding sample
-      configurations - a Google Apps Connector and a Salesforce connector. For
-      more information, see <link xlink:show="new"
-      xlink:href="install-guide#sample-salesforce-connector"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
-      Salesforce With the Salesforce Connector</citetitle></link> and
-      <link xlink:show="new"  xlink:href="install-guide#sample-google-connector"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
-      Google With the Google Apps Connector</citetitle></link> in the
-      <emphasis>Installation Guide</emphasis>.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>Support for PostgreSQL</term>
-    <listitem>
-     <para>
-      OpenIDM ${docTargetVersion} supports PostgreSQL, 9.3 or higher, as an
-      internal repository. For information on configuring OpenIDM with a
-      PostgreSQL repository, see <link
-      xlink:href="install-guide#repository-postgresql"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
-      OpenIDM With PostgreSQL</citetitle></link> in the <emphasis>Installation
-      Guide</emphasis>.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>Improvements to the Audit Facility</term>
-    <listitem>
-     <itemizedlist>
-      <listitem>
-       <para>
-        Audit logs for synchronization operations
-       </para>
-       <para>
-        The reconciliation audit facility has been extended to LiveSync and
-        implicit sync operations. For more information, see <link xlink:show="new"
-        xlink:href="integrators-guide#querying-sync-logs"
-        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Querying the
-        Synchronization Audit Log</citetitle></link> in the <emphasis>Integrator's
-        Guide</emphasis>.
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        Ability to purge audit logs
-       </para>
-       <para>
-        OpenIDM ${docTargetVersion} provides the ability to purge audit logs at
-        a scheduled interval, or when the logs reach a certain size. For more
-        information, see <link xlink:show="new"
-        xlink:href="integrators-guide#audit-purging"
-        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Purging
-        Obsolete Audit Information</citetitle></link> in the
-        <emphasis>Integrator's Guide</emphasis>.
-       </para>
-      </listitem>
-      <listitem>
-       <para>
-        Ability to filter audit logs
-       </para>
-       <para>
-        The audit facility provides a new mechanism that enables you to filter
-        audit data, thereby reducing the volume of data that is logged. For more
-        information, see <link xlink:show="new"
-        xlink:href="integrators-guide#audit-filtering"
-        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Filtering
-        Data for Audits</citetitle></link> in the <emphasis>Integrator's
-        Guide</emphasis>.
-       </para>
-      </listitem>
-     </itemizedlist>
-    </listitem>
-   </varlistentry>
-
   </variablelist>
 
  <para>
