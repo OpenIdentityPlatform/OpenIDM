@@ -47,13 +47,6 @@ public class SyncFailureHandlerFactoryImplTest {
             bind.setAccessible(true);
             bind.set(factory, mock(ScriptRegistry.class));
         }
-        /*
-        bind = SyncFailureHandlerFactoryImpl.class.getDeclaredField("routeService");
-        if (null != bind) {
-            bind.setAccessible(true);
-            bind.set(factory, mock(RouteService.class));
-        }
-        */
     }
 
     private SyncFailureHandlerFactory createInitialFactory() {
