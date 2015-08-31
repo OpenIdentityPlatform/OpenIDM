@@ -70,7 +70,6 @@ import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
@@ -305,7 +304,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                     logger.debug("liveSync called with explicit source parameter {}", source);
                 }
                 return newResultPromise(newActionResponse(
-                        liveSync(source, Boolean.valueOf(params.get("detailedFailure").asString()))));
+                        liveSync(context, source, Boolean.valueOf(params.get("detailedFailure").asString()))));
             case availableConnectors:
                 // stage 1 - direct action to get available connectors
                 return newResultPromise(newActionResponse(getAvailableConnectors()));
@@ -416,7 +415,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
             if (params.get("action").asEnum(SystemAction.class).isLiveSync()) {
                 String source = params.get("source").required().asString();
-                liveSync(source, true);
+                liveSync(context, source, true);
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
@@ -442,12 +441,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     }
 
     /**
-     * Live sync the specified provisioner resource
+     * Live sync the specified provisioner resource.
+     *
+     * @param context the request context associated with the invocation
      * @param source the URI of the provisioner instance to live sync
      * @param detailedFailure whether in the case of failures additional details such as the
-     * record content of where it failed should be included in the response
      */
-    private JsonValue liveSync(String source, boolean detailedFailure) throws ResourceException {
+    private JsonValue liveSync(Context context, String source, boolean detailedFailure) throws ResourceException {
         JsonValue response;
         Id id = new Id(source);
         String previousStageResourceContainer = "repo/synchronisation/pooledSyncStage";
@@ -455,13 +455,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         ResourceResponse previousStage = null;
         try {
             ReadRequest readRequest = Requests.newReadRequest(previousStageResourceContainer, previousStageId);
-            previousStage = connectionFactory.getConnection().read(ContextUtil.createInternalContext(), readRequest);
+            previousStage = connectionFactory.getConnection().read(context, readRequest);
 
             response = locateService(id).liveSynchronize(id.getObjectType(),
                     previousStage != null && previousStage.getContent() != null ? previousStage.getContent() : null);
             UpdateRequest updateRequest = Requests.newUpdateRequest(previousStageResourceContainer, previousStageId, response);
             updateRequest.setRevision(previousStage.getRevision());
-            connectionFactory.getConnection().update(ContextUtil.createInternalContext(), updateRequest);
+            connectionFactory.getConnection().update(context, updateRequest);
         } catch (ResourceException e) { // NotFoundException?
             if (previousStage != null) {
                 throw e;
@@ -469,7 +469,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             response = locateService(id).liveSynchronize(id.getObjectType(), null);
             if (response != null) {
                 CreateRequest createRequest = Requests.newCreateRequest(previousStageResourceContainer, previousStageId, response);
-                connectionFactory.getConnection().create(ContextUtil.createInternalContext(), createRequest);
+                connectionFactory.getConnection().create(context, createRequest);
             }
         }
         if (response != null && !detailedFailure) {
