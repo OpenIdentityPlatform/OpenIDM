@@ -167,7 +167,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
 
         try {
             Authenticator.AuthenticatorResult result = authenticator.authenticate(
-                    credential.username, credential.password, ContextUtil.createContext());
+                    credential.username, credential.password, ContextUtil.createInternalContext());
             final ResourceResponse resource = result.getResource();
             if (resource != null) {
                 final JsonValue messageMap = new JsonValue(messageInfo.getMap());

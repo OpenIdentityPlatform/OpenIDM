@@ -74,7 +74,7 @@ public class JaspiAuditApi implements AuditApi {
 
         try {
             final CreateRequest createRequest = Requests.newCreateRequest("audit/authentication", auditEvent.getValue());
-            final Context context = ContextUtil.createContext();
+            final Context context = ContextUtil.createInternalContext();
             authnFilterHelper.getConnectionFactory().getConnection().create(context, createRequest);
         } catch (ResourceException e) {
             LOGGER.warn("Failed to log entry for {}", username, e);
