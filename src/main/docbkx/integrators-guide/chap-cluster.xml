@@ -43,19 +43,19 @@
 
  <para>
   To ensure availability of the identity management service, you can deploy
-  OpenIDM on multiple systems, in a cluster. In a clustered environment, you
-  would configure each of these systems to point to the same external database.
+  OpenIDM on multiple instances, in a cluster. In a clustered environment, you
+  would configure each of these instances to point to the same external database.
   The database does not have to be clustered.
  </para>
  <para>
-  In a clustered environment, if one OpenIDM system in a cluster shuts down
+  In a clustered environment, if one OpenIDM instance in a cluster shuts down
   or fails to check in with the cluster management service, a second OpenIDM
-  system will detect the failure. If the unavailable system did not
-  complete one or more tasks, one of the available systems attempts to recover
+  instance will detect the failure. If the unavailable instance did not
+  complete one or more tasks, one of the available instances attempts to recover
   and rerun those tasks.
  </para>
  <para>
-  For example, if an OpenIDM system named <literal>instance1</literal> loses
+  For example, if an OpenIDM instance named <literal>instance1</literal> loses
   connectivity while executing a scheduled task, the cluster manager notifies
   the scheduler service that <literal>instance1</literal> is not available.
   The scheduler service then attempts to clean up any jobs that
@@ -84,14 +84,14 @@
   <filename>cluster.json</filename>, <filename>boot/boot.properties</filename>,
   and <filename>scheduler.json</filename>; you can find each of these files in
   the <filename>openidm/conf</filename> subdirectory. When you configure a
-  cluster, you may modify these files in every OpenIDM system in your cluster.
+  cluster, you may modify these files in every OpenIDM instance in your cluster.
  </para>
 
  <section xml:id="cluster-config">
   <title>Configuring an OpenIDM Instance as Part of a Cluster</title>
 
   <para>
-   Each OpenIDM system in a cluster must be configured to use the same
+   Each OpenIDM instance in a cluster must be configured to use the same
    repository. As OrientDB is not supported in production environments, you
    should configure a supported repository, as described in the following
    chapter of the <citetitle>Installation Guide</citetitle>:
@@ -129,7 +129,7 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
     </para>
     <para>In that chapter, you should see a reference to a data definition
      language script file. You need to import that file into just one OpenIDM
-     system in your cluster.
+     instance in your cluster.
     </para>
    </listitem>
    <listitem>
@@ -161,7 +161,7 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    <title>Edit the Boot Configuration File</title>
 
    <para>
-    In each OpenIDM system in your cluster, open the following file:
+    In each OpenIDM instance in your cluster, open the following file:
     <filename>conf/boot/boot.properties</filename>.
    </para>
 
@@ -169,19 +169,19 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
     <listitem>
      <para>
       Find the <literal>openidm.node.id</literal> property. Specify a unique
-      identifier for each OpenIDM system. For the first system, you
+      identifier for each OpenIDM instance. For the first instance, you
       might specify the following:
      </para>
-     <programlisting language="javascript">openidm.node.id=instance1</programlisting>
+     <screen>openidm.node.id=instance1</screen>
      <para>
-      For the second OpenIDM system, you might specify the following (and so
+      For the second OpenIDM instance, you might specify the following (and so
       on):
      </para>
-     <programlisting language="javascript">openidm.node.id=instance2</programlisting>
+     <screen>I'veopenidm.node.id=instance2</screen>
      <para>
       You can set any value for <literal>openidm.node.id</literal>, as long as
       the value is unique within the cluster. Then the cluster manager can
-      detect unavailable OpenIDM systems (by node ID).
+      detect unavailable OpenIDM instances (by node ID).
      </para>
     </listitem>
     <listitem>
@@ -191,7 +191,7 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
      <itemizedlist>
       <listitem>
        <para>
-        On one OpenIDM system, set <literal>openidm.instance.type</literal>
+        On one OpenIDM instance, set <literal>openidm.instance.type</literal>
         as follows:
        </para>
        <programlisting>openidm.instance.type=clustered-first</programlisting>
@@ -206,12 +206,12 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
       </listitem>
       <listitem>
        <para>
-        On all other OpenIDM systems in the cluster, set
+        On all other OpenIDM instances in the cluster, set
         <literal>openidm.instance.type</literal> as follows:
        </para>
        <programlisting>openidm.instance.type=clustered-additional</programlisting>
        <para>
-        For each OpenIDM system set to <literal>clustered-additional</literal>,
+        For each OpenIDM instance set to <literal>clustered-additional</literal>,
         the Crypto Service activates, but does not generate, a new secret key.
         You will need to create a new secret key for each keystore, manually,
         as noted in <xref linkend="cluster-new-key" />. The Crypto Service
@@ -262,10 +262,10 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    </itemizedlist>
    <para>
     The value of <literal>openidm.instance.type</literal> is used during the
-    setup process. When the primary OpenIDM system has been configured,
+    setup process. When the primary OpenIDM instance has been configured,
     additional nodes are bootstrapped with the security settings
     (keystore and truststore) of the primary node. Once the process is complete,
-    all OpenIDM systems in the cluster are considered equal. In other words,
+    all OpenIDM instances in the cluster are considered equal. In other words,
     OpenIDM clusters do not have a "master" node.
    </para>
 
@@ -302,7 +302,7 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
      Whether you do so with a <command>keytool</command> command or with a REST
      call, you should now have an <emphasis>alias</emphasis> for your new key.
      Be sure to include the alias at least in the aforementioned
-     <literal>clustered-additional</literal> systems. You will need to
+     <literal>clustered-additional</literal> instances. You will need to
      include the new alias <literal>new-sym-key</literal> in both the
      <filename>conf/boot/boot.properties</filename>:
     </para>
@@ -363,44 +363,44 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
      <para>
       The <literal>instanceTimeout</literal> specifies the length of time (in
       milliseconds) that a member of the cluster can be "down" before the
-      cluster service considers that system to be in recovery mode.
+      cluster service considers that instance to be in recovery mode.
      </para>
      <para>
       <emphasis>Recovery mode</emphasis> suggests that the
-      <literal>instanceTimeout</literal> of an OpenIDM system has expired,
-      and that another OpenIDM system in the cluster has detected that event.
+      <literal>instanceTimeout</literal> of an OpenIDM instance has expired,
+      and that another OpenIDM instance in the cluster has detected that event.
      </para>
      <para>
-      The scheduler component of the second OpenIDM system should now be
+      The scheduler component of the second OpenIDM instance should now be
       moving any incomplete jobs into the queue for the cluster.
      </para>
     </listitem>
     <listitem>
      <para>
       The <literal>instanceRecoveryTimeout</literal> specifies the time
-      (in milliseconds) that an OpenIDM system can be in recovery mode before
+      (in milliseconds) that an OpenIDM instance can be in recovery mode before
       it is considered to be offline.
      </para>
      <para>
       This property sets a limit; after this recovery timeout, other members of
-      the cluster stops trying access an unavailable OpenIDM system.
+      the cluster stops trying access an unavailable OpenIDM instance.
      </para>
     </listitem>
     <listitem>
      <para>
       The <literal>instanceCheckInInterval</literal> specifies the frequency
-      (in milliseconds) that this OpenIDM system checks in with the cluster
+      (in milliseconds) that this OpenIDM instance checks in with the cluster
       manager to indicate that it is still online.
      </para>
     </listitem>
     <listitem>
      <para>
       The <literal>instanceCheckInOffset</literal> specifies an offset (in
-      milliseconds) for the checkin timing, when multiple OpenIDM systems
+      milliseconds) for the checkin timing, when multiple OpenIDM instances
       in a cluster are started simultaneously.
      </para>
      <para>
-      The checkin offset prevents multiple OpenIDM systems from checking in
+      The checkin offset prevents multiple OpenIDM instances from checking in
       simultaneously, which would strain the cluster manager resource.
      </para>
     </listitem>
@@ -441,8 +441,8 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    <listitem>
     <para>
      Jobs that are configured as persistent but <emphasis>not concurrent</emphasis>
-     fire only on one system in the cluster. That job will not fire again at the
-     scheduled time, on any system in the cluster, until the current job is
+     fire only on one instance in the cluster. That job will not fire again at the
+     scheduled time, on any instance in the cluster, until the current job is
      complete.
     </para>
     <para>
@@ -453,30 +453,30 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    </listitem>
   </itemizedlist>
   <para>
-   OpenIDM systems in a cluster claim jobs in a random order. If one system goes
+   OpenIDM instances in a cluster claim jobs in a random order. If one instance goes
    down, the cluster manager automatically fails over unstarted jobs that have
-   been claimed by that system.
+   been claimed by that instance.
   </para>
   <para>
-   For example, if OpenIDM system A claims a job but does not start it, and
-   then loses connectivity, OpenIDM system B can claim that job.
+   For example, if OpenIDM instance A claims a job but does not start it, and
+   then loses connectivity, OpenIDM instance B can claim that job.
   </para>
   <para>
-   In contrast, if OpenIDM system A claims a job, starts it, and then loses
-   connectivity, other OpenIDM systems in the cluster cannot claim that job.
-   That specific job is never completed. Instead, a second OpenIDM system
+   In contrast, if OpenIDM instance A claims a job, starts it, and then loses
+   connectivity, other OpenIDM instances in the cluster cannot claim that job.
+   That specific job is never completed. Instead, a second OpenIDM instance
    claims the next scheduled occurrence of that job.
   </para>
 
   <note>
    <para>
     This behavior varies from OpenIDM 2.1.0, in which an unavailable OpenIDM
-    system would have to reconnect to the cluster to free a job
+    instance would have to reconnect to the cluster to free a job
     that it had already claimed.
    </para>
   </note>
   <para>
-   If a LiveSync operation leads to multiple changes, a single OpenIDM system
+   If a LiveSync operation leads to multiple changes, a single OpenIDM instance
    process all changes related to that operation.
   </para>
 
@@ -492,9 +492,9 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    </para>
 
    <para>
-    You can prevent a specific OpenIDM system from claiming pending jobs, or
+    You can prevent a specific OpenIDM instance from claiming pending jobs, or
     participating in processing clustered schedules. To do so, go to the
-    specific OpenIDM system, open its <filename>boot.properties</filename> file
+    specific OpenIDM instance, open its <filename>boot.properties</filename> file
     and add the following line:
    </para>
    <programlisting>
@@ -502,11 +502,11 @@ execute.clustered.schedules=false
    </programlisting>
 
    <para>
-    As every OpenIDM system in a cluster reads their configuration from a
+    As every OpenIDM instance in a cluster reads its configuration from a
     single repository, token substitution then defines a specific scheduler
-    configuration for each system. It does so by setting
+    configuration for each instance. It does so by setting
     <literal>"executePersistentSchedules"</literal> to <literal>false</literal>
-    in the scheduler configuration for each system.
+    in the scheduler configuration for each instance.
    </para>
 
    <para>
