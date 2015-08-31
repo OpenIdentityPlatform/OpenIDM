@@ -61,9 +61,9 @@ CREATE TABLE IF NOT EXISTS `openidm`.`relationships` (
   `objectid` VARCHAR(255) NOT NULL,
   `rev` VARCHAR(30) NOT NULL,
   `firstid` VARCHAR(255) NOT NULL,
-  `firstkey` VARCHAR(32) NOT NULL,
+  `firstpropname` VARCHAR(32) NOT NULL,
   `secondid` VARCHAR(255) NOT NULL,
-  `fullobject` MEDIUMTEXT NULL,
+  `properties` MEDIUMTEXT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `idx_relationships_object` (`objectid` ASC)
 ) ENGINE = InnoDB;

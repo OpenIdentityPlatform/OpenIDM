@@ -621,7 +621,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      */
     private JsonValue fetchRelationship(final Context context, final String resourceId, final JsonPointer relationshipField) throws ResourceException {
         final QueryRequest queryRequest = Requests.newQueryRequest("");
-        queryRequest.setAdditionalParameter("firstId", resourceId);
+        queryRequest.setAdditionalParameter(ManagedObjectRelationshipSet.PARAM_FIRST_ID, resourceId);
         final List<ResourceResponse> relations = new ArrayList<>();
 
         relationshipSets.get(relationshipField).queryCollection(context, queryRequest, new QueryResourceHandler() {
@@ -630,7 +630,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 relations.add(resourceResponse);
                 return true;
             }
-        });
+        }).getOrThrowUninterruptibly(); // call get() so we block until we have all items
 
         if (schema.getField(relationshipField).isArray()) {
             final JsonValue buf = json(array());
@@ -761,9 +761,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>(fieldValue.size());
 
                     for (JsonValue relationobject : fieldValue) {
-                        relationobject.put("firstId", resourceId);
-
                         final CreateRequest createRequest = Requests.newCreateRequest("", relationobject);
+                        createRequest.setAdditionalParameter(ManagedObjectRelationshipSet.PARAM_FIRST_ID, resourceId);
                         promises.add(relations.createInstance(context, createRequest));
                     }
 
@@ -780,9 +779,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
                     persistedRelations.put(relationField, valuePromise);
                 } else { // only a single relationship
-                    fieldValue.put("firstId", resourceId);
-
                     final CreateRequest createRequest = Requests.newCreateRequest("", fieldValue);
+                    createRequest.setAdditionalParameter(ManagedObjectRelationshipSet.PARAM_FIRST_ID, resourceId);
                     final Promise<JsonValue, ResourceException> jsonPromise = relations.createInstance(context, createRequest).then(new Function<ResourceResponse, JsonValue, ResourceException>() {
                         @Override
                         public JsonValue apply(ResourceResponse value) throws ResourceException {

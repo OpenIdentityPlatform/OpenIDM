@@ -137,12 +137,12 @@
                 "objectToColumn" : {
                     "_id": "objectid",
                     "_rev": "rev",
-                    "_properties": {
-                        "column": "fullobject",
+                    "properties": {
+                        "column": "properties",
                         "type": "JSON_MAP"
                     },
                     "firstId": "firstid",
-                    "firstKey": "firstkey",
+                    "firstPropertyName": "firstpropname",
                     "secondId": "secondid"
                 }
             },

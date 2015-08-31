@@ -440,9 +440,9 @@ CREATE TABLE relationships (
   objectid VARCHAR2(255 CHAR) NOT NULL,
   rev VARCHAR2(38 CHAR) NOT NULL,
   firstid VARCHAR2(255 CHAR) NOT NULL,
-  firstkey VARCHAR2(32 CHAR) NOT NULL,
+  firstpropname VARCHAR2(32 CHAR) NOT NULL,
   secondid VARCHAR2(255 CHAR) NOT NULL,
-  fullobject CLOB
+  properties CLOB
 );
 
 
@@ -458,7 +458,7 @@ PROMPT Creating Unique Index idx_relationships_first on relationships...
 CREATE UNIQUE INDEX idx_relationships_first ON relationships
 (
   firstid,
-  firstkey
+  firstpropname
 )
 ;
 PROMPT Creating Unique Index idx_relationships_objectid on relationships ...
