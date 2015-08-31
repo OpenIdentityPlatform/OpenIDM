@@ -17,6 +17,8 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
 import java.util.Map;
 
+import org.forgerock.http.Context;
+
 /**
  * A Null-object SyncFailureHandler that implements the equivalent of an "ignore"
  * operation.
@@ -34,11 +36,12 @@ public class NullSyncFailureHandler implements SyncFailureHandler {
     /**
      * Handle sync failure.
      *
+     * @param context the request context associated with the invocation
      * @param syncFailure contains the sync failure data
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
+    public void invoke(Context context, Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
         // Null object pattern - does nothing - everything is "OK"
     }

@@ -17,6 +17,8 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
 import java.util.Map;
 
+import org.forgerock.http.Context;
+
 /**
  * A retry failure handler which retries infinitely.
  *
@@ -33,11 +35,12 @@ public class InfiniteRetrySyncFailureHandler implements SyncFailureHandler {
      * Handle sync failure by counting retries on this sync token, passing to
      * (optional) post-retry handler when retries are exceeded.
      *
+     * @param context the request context associated with the invocation
      * @param syncFailure contains sync failure data
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(Map<String, Object> syncFailure, Exception failureCause) 
+    public void invoke(Context context, Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         throw new SyncHandlerException("Failed to synchronize " + syncFailure.get("uid") + " object on "

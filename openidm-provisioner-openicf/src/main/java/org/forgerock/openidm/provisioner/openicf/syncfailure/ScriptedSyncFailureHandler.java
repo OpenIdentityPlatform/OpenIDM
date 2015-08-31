@@ -18,6 +18,7 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.script.Script;
@@ -52,7 +53,7 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
         throws ScriptException {
 
         this.scriptEntry = scriptRegistry.takeScript(config);
-        this.builtInHandlers = new HashMap<String,SyncFailureHandler>();
+        this.builtInHandlers = new HashMap<>();
         for (SyncFailureHandler handler : builtInHandlers) {
             if (handler instanceof LoggedIgnoreHandler) {
                 this.builtInHandlers.put("loggedIgnore", handler);
@@ -66,10 +67,11 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
      * Handle sync failure by counting retries on this sync token, passing to
      * (optional) post-retry handler when retries are exceeded.
      *
+     * @param context the request context associated with the invocation
      * @param syncFailure @throws SyncHandlerException when retries are not exceeded
      * @param failureCause the cause of the sync failure
      */
-    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
+    public void invoke(Context context, Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         if (null == scriptEntry) {
@@ -77,6 +79,7 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
         }
 
         Script script = scriptEntry.getScript(new RootContext());
+        script.put("context", syncFailure);
         script.put("syncFailure", syncFailure);
         script.put("failureCause", failureCause);
         script.put("failureHandlers", builtInHandlers);

@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
+import org.forgerock.http.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +32,12 @@ public class LoggedIgnoreHandler implements SyncFailureHandler {
     /**
      * Handle sync failure.
      *
+     * @param context the request context associated with the invocation
      * @param syncFailure JsonValue that contains the sync failure data
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
+    public void invoke(Context context, Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
         logger.warn("{} liveSync failure on sync-token {} for {}, {} - {}",
                 syncFailure.get("systemIdentifier"),
