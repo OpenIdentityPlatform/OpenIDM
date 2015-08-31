@@ -174,8 +174,8 @@
 
   <para>
    With this document, we want to make it as easy as possible to test OpenIDM.
-   To that end, we assume that with this guide you may be running OpenIDM on
-   an operating system and repository that are not supported in production.
+   To that end, we assume that you may be running OpenIDM on an operating
+   system and repository that are not supported in production.
   </para>
 
   <para>
