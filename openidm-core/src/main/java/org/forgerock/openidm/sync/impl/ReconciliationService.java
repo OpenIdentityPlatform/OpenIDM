@@ -15,10 +15,8 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-import static org.forgerock.json.resource.ResourceException.newNotFoundException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.query.QueryFilter.and;
 import static org.forgerock.util.query.QueryFilter.equalTo;
@@ -190,7 +188,7 @@ public class ReconciliationService
                     ResourceResponse response = null;
                     
                     if (queryResult.isEmpty()) {
-                    	return newExceptionPromise(newNotFoundException("Reconciliation with id " + localId + " not found." ));
+                    	return new NotFoundException("Reconciliation with id " + localId + " not found." ).asPromise();
                     } else {
                         for (ResourceResponse resource : queryResult) {
                         	response = newResourceResponse(localId, null, resource.getContent().get("messageDetail").expect(Map.class));
@@ -203,9 +201,9 @@ public class ReconciliationService
                 }
             }
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
@@ -214,7 +212,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException>  handleCreate(Context context, CreateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     /**
@@ -222,7 +220,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     /**
@@ -230,7 +228,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     /**
@@ -239,7 +237,7 @@ public class ReconciliationService
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request, 
     		final QueryResourceHandler handler) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     /**
@@ -247,7 +245,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
@@ -303,7 +301,7 @@ public class ReconciliationService
             }
             return newResultPromise(newActionResponse(new JsonValue(result)));
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
         finally {
             ObjectSetContext.pop();

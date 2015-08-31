@@ -16,7 +16,6 @@
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import static org.forgerock.json.resource.Router.uriTemplate;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
@@ -74,7 +73,7 @@ public class ActivitiResource implements RequestHandler {
         try {
             return resources.handleAction(context, request);
         } catch (Exception ex) {
-            return newExceptionPromise(ResourceUtil.adapt(ex));
+            return ResourceUtil.adapt(ex).asPromise();
         }
     }
 
@@ -83,7 +82,7 @@ public class ActivitiResource implements RequestHandler {
         try {
             return resources.handleCreate(context, request);
         } catch (Exception ex) {
-            return newExceptionPromise(ResourceUtil.adapt(ex));
+            return ResourceUtil.adapt(ex).asPromise();
         }
     }
 
@@ -92,13 +91,13 @@ public class ActivitiResource implements RequestHandler {
         try {
             return resources.handleDelete(context, request);
         } catch (Exception ex) {
-            return newExceptionPromise(ResourceUtil.adapt(ex));
+            return ResourceUtil.adapt(ex).asPromise();
         }
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
@@ -107,7 +106,7 @@ public class ActivitiResource implements RequestHandler {
         try {
             return resources.handleQuery(context, request, handler);
         } catch (Exception ex) {
-            return newExceptionPromise(ResourceUtil.adapt(ex));
+            return ResourceUtil.adapt(ex).asPromise();
         }
     }
 
@@ -116,7 +115,7 @@ public class ActivitiResource implements RequestHandler {
         try {
             return resources.handleRead(context, request);
         } catch (Exception ex) {
-            return newExceptionPromise(ResourceUtil.adapt(ex));
+            return ResourceUtil.adapt(ex).asPromise();
         }
     }
 
@@ -125,7 +124,7 @@ public class ActivitiResource implements RequestHandler {
         try {
             return resources.handleUpdate(context, request);
         } catch (Exception ex) {
-            return newExceptionPromise(ResourceUtil.adapt(ex));
+            return ResourceUtil.adapt(ex).asPromise();
         }
     }
 }

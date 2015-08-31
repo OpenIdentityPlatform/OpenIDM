@@ -44,7 +44,9 @@ import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
@@ -138,20 +140,17 @@ public class RestService implements SingletonResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return Promises.newExceptionPromise(
-                ResourceException.newNotSupportedException("Patch operations are not supported"));
+        return new NotSupportedException("Patch operations are not supported").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return Promises.newExceptionPromise(
-                ResourceException.newNotSupportedException("Read operations are not supported"));
+        return new NotSupportedException("Read operations are not supported").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return Promises.newExceptionPromise(
-                ResourceException.newNotSupportedException("Update operations are not supported"));
+        return new NotSupportedException("Update operations are not supported").asPromise();
     }
 
     @Override
@@ -164,10 +163,9 @@ public class RestService implements SingletonResourceProvider {
             if (content == null
                     || !content.isMap()
                     || content.asMap().isEmpty()) {
-                return Promises.newExceptionPromise(
-                        ResourceException.newBadRequestException("Invalid action call on "
+                throw new BadRequestException("Invalid action call on "
                         + request.getResourcePath() + "/" + request.getAction()
-                        + " : missing post body to define what to invoke."));
+                        + " : missing post body to define what to invoke.");
             }
 
             String url = content.get(ARG_URL).required().asString();
@@ -207,7 +205,7 @@ public class RestService implements SingletonResourceProvider {
                         cr.setChallengeResponse(challengeResponse);
                     } else if ("bearer".equalsIgnoreCase(type)) {
                         String token = auth.get("token").required().asString();
-                        
+
                         logger.debug("Using bearer authentication");
                         Series<Header> extraHeaders = (Series<Header>) attrs.get("org.restlet.http.headers");
                         if (extraHeaders == null) {
@@ -216,9 +214,8 @@ public class RestService implements SingletonResourceProvider {
                         extraHeaders.set("Authorization", "Bearer " + token);
                         attrs.put("org.restlet.http.headers", extraHeaders);
                     } else {
-                        return Promises.newExceptionPromise(ResourceException.newBadRequestException(
-                                "Invalid auth type \"" + type + "\" on "
-                                + request.getResourcePath() + "/" + request.getAction()));
+                        throw new BadRequestException("Invalid auth type \"" + type + "\" on "
+                                + request.getResourcePath() + "/" + request.getAction());
                     }
                 }
 
@@ -241,9 +238,10 @@ public class RestService implements SingletonResourceProvider {
                         // TODO: media type arg?
                         representation = cr.options();
                     } else {
-                        return Promises.newExceptionPromise(ResourceException.newBadRequestException(
-                                "Unknown method " + method));
+                        throw new BadRequestException("Unknown method " + method);
                     }
+                } catch (ResourceException e) {
+                    throw e;
                 } catch (org.restlet.resource.ResourceException e) {
                     int code = e.getStatus().getCode();
                     String text = null;
@@ -262,7 +260,7 @@ public class RestService implements SingletonResourceProvider {
                         detail.put("content", text);
                         exception.setDetail(detail);
                     }
-                    return Promises.newExceptionPromise(exception);
+                    throw exception;
                 }
 
                 String text = representation.getText();
@@ -274,13 +272,13 @@ public class RestService implements SingletonResourceProvider {
                             return Promises.newResultPromise(
                                     Responses.newActionResponse(JsonUtil.parseStringified(text)));
                         } else {
-                            return Promises.newExceptionPromise(ResourceException.newBadRequestException(
-                                    "Unable to parse url argument " + url));
+                            throw new BadRequestException("Unable to parse url argument " + url);
                         }
+                    } catch (ResourceException e) {
+                        throw e;
                     } catch (Exception ex) {
-                        return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(
-                                "Failure in parsing the response as JSON: " + text
-                                        + " Reported failure: " + ex.getMessage(), ex));
+                        throw new InternalServerErrorException("Failure in parsing the response as JSON: " + text
+                                + " Reported failure: " + ex.getMessage(), ex);
                     }
                 } else {
                     try {
@@ -302,21 +300,23 @@ public class RestService implements SingletonResourceProvider {
                         return Promises.newResultPromise(
                                 Responses.newActionResponse(result));
                     } catch (Exception ex) {
-                        return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(
-                                "Failure in parsing the response: " + text
-                                        + " Reported failure: " + ex.getMessage(), ex));
+                        throw new InternalServerErrorException("Failure in parsing the response: " + text
+                                + " Reported failure: " + ex.getMessage(), ex);
                     }
                 }
+            } catch (ResourceException e) {
+                return e.asPromise();
             } catch (java.io.IOException ex) {
-                return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(
-                        "Failed to invoke " + content, ex));
+                return new InternalServerErrorException("Failed to invoke " + content, ex).asPromise();
             } finally {
                 if (null != cr) {
                     cr.release();
                 }
             }
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
-            return Promises.newExceptionPromise(ResourceException.newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 

@@ -19,7 +19,6 @@ package org.forgerock.openidm.info.health;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.http.Context;
@@ -52,6 +51,6 @@ public class OsInfoResourceProvider extends AbstractInfoResourceProvider {
                 field("operatingSystemVersion", operatingSystemMXBean.getVersion())
         ));
 
-        return newResultPromise(newResourceResponse("", "", result));
+        return newResourceResponse("", "", result).asPromise();
     }
 }

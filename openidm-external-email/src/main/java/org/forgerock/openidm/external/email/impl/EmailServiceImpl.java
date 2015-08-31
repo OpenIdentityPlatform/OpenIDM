@@ -85,7 +85,7 @@ public class EmailServiceImpl implements SingletonResourceProvider {
         try {
             emailClient.send(request.getContent());
         } catch (ResourceException e) {
-            return Promises.newExceptionPromise(e);
+            return e.asPromise();
         }
         result.put("status", "OK");
         return Promises.newResultPromise(Responses.newActionResponse(new JsonValue(result)));
@@ -93,17 +93,17 @@ public class EmailServiceImpl implements SingletonResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return Promises.newExceptionPromise((ResourceException)new ForbiddenException("Operation is not implemented"));
+        return new ForbiddenException("Operation is not implemented").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return Promises.newExceptionPromise((ResourceException)new ForbiddenException("Operation is not implemented"));
+        return new ForbiddenException("Operation is not implemented").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return Promises.newExceptionPromise((ResourceException) new ForbiddenException("Operation is not implemented"));
+        return new ForbiddenException("Operation is not implemented").asPromise();
     }
 
     @Activate

@@ -19,12 +19,9 @@ package org.forgerock.openidm.scheduler;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.QueryResponse.FIELD_RESULT;
-import static org.forgerock.json.resource.ResourceException.newBadRequestException;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -57,6 +54,7 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -472,15 +470,15 @@ public class SchedulerService implements RequestHandler {
             
             return newResultPromise(newResourceResponse(id, null, getSchedule(id)));
         } catch (ParseException e) {
-        	return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+        	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (ObjectAlreadyExistsException e) {
-        	return newExceptionPromise(ResourceUtil.adapt(new ConflictException(e.getMessage(), e)));
+        	return ResourceUtil.adapt(new ConflictException(e.getMessage(), e)).asPromise();
         } catch (SchedulerException e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (JsonException e) {
-        	return newExceptionPromise(newBadRequestException("Error creating schedule", e));
+        	return new BadRequestException("Error creating schedule", e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
@@ -495,9 +493,9 @@ public class SchedulerService implements RequestHandler {
             // Return the result
             return newResultPromise(newResourceResponse(request.getResourcePath(), null, schedule));
         } catch (SchedulerException e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
@@ -527,15 +525,15 @@ public class SchedulerService implements RequestHandler {
                 		getSchedule(request.getResourcePath())));
             }
         } catch (ParseException e) {
-        	return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+        	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (ObjectAlreadyExistsException e) {
-        	return newExceptionPromise(ResourceUtil.adapt(new ConflictException(e.getMessage(), e)));
+        	return ResourceUtil.adapt(new ConflictException(e.getMessage(), e)).asPromise();
         } catch (SchedulerException e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (JsonException e) {
-        	return newExceptionPromise(newBadRequestException("Error updating schedule", e));
+        	return new BadRequestException("Error updating schedule", e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
@@ -555,17 +553,17 @@ public class SchedulerService implements RequestHandler {
             // Return the deleted resource
             return newResultPromise(newResourceResponse(request.getResourcePath(), null, schedule));
         } catch (JsonException e) {
-        	return newExceptionPromise(newBadRequestException("Error deleting schedule", e));
+        	return new BadRequestException("Error deleting schedule", e).asPromise();
         } catch (SchedulerException e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException>  handlePatch(Context context, PatchRequest request) {
-    	return newExceptionPromise(ResourceUtil.notSupported(request));
+    	return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
@@ -608,11 +606,11 @@ public class SchedulerService implements RequestHandler {
             }
             return newResultPromise(newQueryResponse());
         } catch (JsonException e) {
-        	return newExceptionPromise(newBadRequestException("Error performing query", e));
+        	return new BadRequestException("Error performing query", e).asPromise();
         } catch (SchedulerException e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
@@ -639,12 +637,12 @@ public class SchedulerService implements RequestHandler {
                 throw new BadRequestException("Unknown action: " + action);
             }
         } catch (JsonException e) {
-        	return newExceptionPromise(newBadRequestException("Error performing action " 
-        			+ request.getAction() + " on schedule", e));
+        	return new BadRequestException("Error performing action " + request.getAction() + " on schedule", e)
+                    .asPromise();
         } catch (SchedulerException e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 

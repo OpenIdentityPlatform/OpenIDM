@@ -18,7 +18,6 @@ package org.forgerock.openidm.scheduler.impl;
 
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import javax.script.ScriptException;
@@ -156,7 +155,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
             }
             return newResultPromise(newResourceResponse(id, null, new JsonValue(result)));
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
@@ -217,7 +216,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
 
             return newResultPromise(newActionResponse(new JsonValue(result)));
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         }
     }
 
@@ -294,26 +293,26 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request, QueryResourceHandler handler) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 }

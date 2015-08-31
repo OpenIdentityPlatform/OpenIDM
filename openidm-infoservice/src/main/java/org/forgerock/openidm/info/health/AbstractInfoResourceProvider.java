@@ -16,18 +16,8 @@
 
 package org.forgerock.openidm.info.health;
 
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
-
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.*;
 import org.forgerock.http.Context;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.SingletonResourceProvider;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -37,21 +27,21 @@ public abstract class AbstractInfoResourceProvider implements SingletonResourceP
 
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
-        return newExceptionPromise(newNotSupportedException("Action is not supported"));
+        return new NotSupportedException("Action is not supported").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return newExceptionPromise(newNotSupportedException("Patch is not supported"));
+        return new NotSupportedException("Patch is not supported").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return newExceptionPromise(newNotSupportedException("Read is not supported"));
+        return new NotSupportedException("Read is not supported").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return newExceptionPromise(newNotSupportedException("Update is not supported"));
+        return new NotSupportedException("Update is not supported").asPromise();
     }
 }

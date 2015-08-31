@@ -40,7 +40,6 @@ import org.testng.annotations.Test;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
 import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.IDM_SUFFIX;
 
 /**

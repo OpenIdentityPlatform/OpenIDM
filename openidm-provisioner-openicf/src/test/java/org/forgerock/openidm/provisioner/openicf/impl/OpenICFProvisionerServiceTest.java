@@ -20,10 +20,8 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Router.uriTemplate;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,6 +61,7 @@ import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PermanentException;
@@ -436,15 +435,15 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         }
 
         public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-            return newExceptionPromise(newNotSupportedException());
+            return new NotSupportedException().asPromise();
         }
 
         public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-            return newExceptionPromise(newNotSupportedException());
+            return new NotSupportedException().asPromise();
         }
 
         public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-            return newExceptionPromise(newNotSupportedException());
+            return new NotSupportedException().asPromise();
         }
     }
 

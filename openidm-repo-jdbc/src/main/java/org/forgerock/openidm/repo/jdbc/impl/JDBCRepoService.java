@@ -28,8 +28,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Responses.newActionResponse;
@@ -41,7 +39,6 @@ import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -178,9 +175,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         try {
             return newResultPromise(read(request));
         } catch (final ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException("Read failed", e));
+            return new InternalServerErrorException("Read failed", e).asPromise();
         }
     }
 
@@ -229,9 +226,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         try {
             return newResultPromise(create(request));
         } catch (final ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException("Failed to create resource", e));
+            return new InternalServerErrorException("Failed to create resource", e).asPromise();
         }
     }
 
@@ -321,9 +318,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         try {
             return newResultPromise(update(request));
         } catch (final ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException("Update failed", e));
+            return new InternalServerErrorException("Update failed", e).asPromise();
         }
     }
 
@@ -416,9 +413,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         try {
             return newResultPromise(delete(request));
         } catch (final ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException("Failed to delete", e));
+            return new InternalServerErrorException("Failed to delete", e).asPromise();
         }
     }
 
@@ -501,7 +498,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return newExceptionPromise(newNotSupportedException("Patch operations are not supported"));
+        return new NotSupportedException("Patch operations are not supported").asPromise();
     }
 
     @Override
@@ -600,9 +597,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
             }
         } catch (final ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException("Query failed", e));
+            return new InternalServerErrorException("Query failed", e).asPromise();
         }
     }
 
@@ -664,9 +661,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 throw new NotSupportedException("Action operations are not supported");
             }
         } catch (final ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException("Action failed", e));
+            return new InternalServerErrorException("Action failed", e).asPromise();
         }
     }
 

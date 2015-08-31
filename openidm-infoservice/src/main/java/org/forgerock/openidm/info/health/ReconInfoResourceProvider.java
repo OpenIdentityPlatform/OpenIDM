@@ -20,16 +20,14 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.http.Context;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +59,7 @@ public class ReconInfoResourceProvider extends AbstractInfoResourceProvider {
             return newResultPromise(newResourceResponse("", "", result));
         } catch (Exception e) {
             logger.error("Unable to get reconciliation mbean");
-            return newExceptionPromise(newInternalServerErrorException("Unable to get reconciliation mbean", e));
+            return new InternalServerErrorException("Unable to get reconciliation mbean", e).asPromise();
         }
     }
 }

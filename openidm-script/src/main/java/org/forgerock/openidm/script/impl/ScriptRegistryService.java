@@ -24,10 +24,7 @@
 
 package org.forgerock.openidm.script.impl;
 
-import static org.forgerock.json.resource.ResourceException.newBadRequestException;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.File;
@@ -632,45 +629,45 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     throw new BadRequestException("Unrecognized action ID " + request.getAction());
             }
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (ScriptCompilationException e) {
-            return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+            return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (IllegalArgumentException e) { // from getActionAsEnum
-            return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+            return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) {
         final ResourceException e = new NotSupportedException("Query operations are not supported");
-        return newExceptionPromise(e);
+        return e.asPromise();
     }
 
     public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
         final ResourceException e = new NotSupportedException("Read operations are not supported");
-        return newExceptionPromise(e);
+        return e.asPromise();
     }
 
     public Promise<ResourceResponse, ResourceException> handleCreate(final Context context, final CreateRequest request) {
         final ResourceException e = new NotSupportedException("Create operations are not supported");
-        return newExceptionPromise(e);
+        return e.asPromise();
     }
 
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context, final DeleteRequest request) {
         final ResourceException e = new NotSupportedException("Delete operations are not supported");
-        return newExceptionPromise(e);
+        return e.asPromise();
     }
 
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
         final ResourceException e = new NotSupportedException("Patch operations are not supported");
-        return newExceptionPromise(e);
+        return e.asPromise();
     }
 
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, final UpdateRequest request) {
         final ResourceException e = new NotSupportedException("Update operations are not supported");
-        return newExceptionPromise(e);
+        return e.asPromise();
     }
     
     @Override
