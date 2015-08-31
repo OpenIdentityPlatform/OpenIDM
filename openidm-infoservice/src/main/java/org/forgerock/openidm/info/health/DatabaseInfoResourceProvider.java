@@ -19,13 +19,11 @@ package org.forgerock.openidm.info.health;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -56,7 +54,7 @@ public class DatabaseInfoResourceProvider extends AbstractInfoResourceProvider {
         Boolean enabled = Boolean.parseBoolean(
                 IdentityServer.getInstance().getProperty("openidm.bonecp.statistics.enabled", "false"));
         if (!enabled) {
-            return newExceptionPromise(newInternalServerErrorException("BoneCP statistics mbean not enabled"));
+            return new InternalServerErrorException("BoneCP statistics mbean not enabled").asPromise();
         }
         try {
             final ObjectName objectName = new ObjectName("com.jolbox.bonecp:type=BoneCP-*");
@@ -89,10 +87,10 @@ public class DatabaseInfoResourceProvider extends AbstractInfoResourceProvider {
                 ));
                 results.put(name.getCanonicalName(), singleResult.getObject());
             }
-            return newResultPromise(newResourceResponse("", "", results));
+            return newResourceResponse("", "", results).asPromise();
         } catch (Exception e) {
             logger.error("Unable to get BoneCP statistics mbean");
-            return newExceptionPromise(newInternalServerErrorException("Unable to get BoneCP statistics mbean", e));
+            return new InternalServerErrorException("Unable to get BoneCP statistics mbean", e).asPromise();
         }
     }
 }

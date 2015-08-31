@@ -24,10 +24,8 @@
 
 package org.forgerock.openidm.shell.impl;
 
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,6 +47,7 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -134,7 +133,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public Promise<ActionResponse, ResourceException> actionAsync(Context context, ActionRequest request) {
-        return newExceptionPromise(newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     /**
@@ -158,7 +157,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> createAsync(Context context, CreateRequest request) {
-        return newExceptionPromise(newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     /**
@@ -175,7 +174,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> deleteAsync(Context context, DeleteRequest request) {
-        return newExceptionPromise(newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     /**
@@ -199,7 +198,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public ResourceResponse patch(Context context, PatchRequest request) throws ResourceException {
-        throw newNotSupportedException();
+        throw new NotSupportedException();
     }
 
     /**
@@ -207,7 +206,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> patchAsync(Context context, PatchRequest request) {
-        return newExceptionPromise(newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     /**
@@ -215,7 +214,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public QueryResponse query(Context context, QueryRequest request, QueryResourceHandler handler) throws ResourceException {
-        throw newNotSupportedException();
+        throw new NotSupportedException();
     }
 
     /**
@@ -223,7 +222,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public QueryResponse query(Context context, QueryRequest request, Collection<? super ResourceResponse> results) throws ResourceException {
-        throw newNotSupportedException();
+        throw new NotSupportedException();
     }
 
     /**
@@ -231,7 +230,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public Promise<QueryResponse, ResourceException> queryAsync(Context context, QueryRequest request, QueryResourceHandler handler) {
-        return newExceptionPromise(newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     /**
@@ -248,7 +247,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readAsync(Context context, ReadRequest request) {
-        return newExceptionPromise(newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     /**
@@ -265,7 +264,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> updateAsync(Context context, UpdateRequest request) {
-        return newExceptionPromise(newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     private ClientResource getClientResource(Reference ref) {

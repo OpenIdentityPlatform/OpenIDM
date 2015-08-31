@@ -15,8 +15,6 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -207,7 +205,7 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override

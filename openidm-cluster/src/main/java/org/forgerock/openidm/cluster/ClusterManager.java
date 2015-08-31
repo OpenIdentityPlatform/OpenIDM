@@ -296,10 +296,10 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 }
                 return newResultPromise(newResourceResponse(request.getResourcePath(), null, result));
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             }
         } catch (Throwable t) {
-        	return newExceptionPromise(ResourceUtil.adapt(t));
+        	return ResourceUtil.adapt(t).asPromise();
         }
     }
 
@@ -839,31 +839,31 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     @Override
     public Promise<ActionResponse, ResourceException>  handleAction(Context context, ActionRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request, QueryResourceHandler handler) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 }

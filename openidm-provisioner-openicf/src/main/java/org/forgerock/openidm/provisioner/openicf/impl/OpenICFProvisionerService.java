@@ -18,11 +18,9 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.ResourceException.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
@@ -108,7 +106,6 @@ import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
@@ -726,7 +723,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return newExceptionPromise(newNotSupportedException("Read operations are not supported"));
+        return new NotSupportedException("Read operations are not supported").asPromise();
     }
 
     @Override
@@ -741,31 +738,32 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 case livesync:
                     return handleLiveSyncAction(context, request);
                 default:
-                    return newExceptionPromise(newBadRequestException("Unsupported action: " + request.getAction()));
+                    throw new BadRequestException("Unsupported action: " + request.getAction());
             }
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (ConnectorException e) {
-             return newExceptionPromise(adaptConnectorException(context, request, e, null,
-                     request.getResourcePath(), null, null, activityLogger));
+             return adaptConnectorException(context, request, e, null, request.getResourcePath(), null, null,
+                     activityLogger)
+                     .asPromise();
         } catch (JsonValueException e) {
-            return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+            return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (IllegalArgumentException e) {
             // from request.getActionAsEnum
-            return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+            return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return newExceptionPromise(newNotSupportedException("Patch operations are not supported"));
+        return new NotSupportedException("Patch operations are not supported").asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return newExceptionPromise(newNotSupportedException("Update operations are not supported"));
+        return new NotSupportedException("Update operations are not supported").asPromise();
     }
 
     private Promise<ActionResponse, ResourceException> handleScriptAction(final ActionRequest request)
@@ -773,12 +771,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         try {
             final String scriptId = request.getAdditionalParameter(SystemAction.SCRIPT_ID);
             if (StringUtils.isBlank(scriptId)) {
-                return newExceptionPromise(newBadRequestException("Missing required parameter: "
-                        + SystemAction.SCRIPT_ID));
+                throw new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID);
             }
 
             if (!localSystemActionCache.containsKey(scriptId)) {
-                return newExceptionPromise(newBadRequestException("Script ID: " + scriptId + " is not defined."));
+                throw new BadRequestException("Script ID: " + scriptId + " is not defined.");
             }
 
             SystemAction action = localSystemActionCache.get(scriptId);
@@ -787,8 +784,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             final List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
 
             if (scriptContextBuilderList.isEmpty()) {
-                return newExceptionPromise(newBadRequestException("Script ID: " + scriptId +
-                        " for systemType " + systemType + " is not defined."));
+                throw new BadRequestException("Script ID: " + scriptId + " for systemType " + systemType
+                        + " is not defined.");
             }
 
             JsonValue result = new JsonValue(new HashMap<String, Object>());
@@ -820,22 +817,22 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             if (value instanceof String) {
                                 newValue = new GuardedString(((String) value).toCharArray());
                             } else {
-                                return newExceptionPromise(newBadRequestException("Invalid type for password."));
+                                throw new BadRequestException("Invalid type for password.");
                             }
                         }
                         if ("username".equalsIgnoreCase(key)) {
                             if (value instanceof String == false) {
-                                return newExceptionPromise(newBadRequestException("Invalid type for username."));
+                                throw new BadRequestException("Invalid type for username.");
                             }
                         }
                         if ("workingdir".equalsIgnoreCase(key)) {
                             if (value instanceof String == false) {
-                                return newExceptionPromise(newBadRequestException("Invalid type for workingdir."));
+                                throw new BadRequestException("Invalid type for workingdir.");
                             }
                         }
                         if ("timeout".equalsIgnoreCase(key)) {
                             if (!(value instanceof String) && !(value instanceof Number)) {
-                                return newExceptionPromise(newBadRequestException("Invalid type for timeout."));
+                                throw new BadRequestException("Invalid type for timeout.");
                             }
                         }
                         contextBuilder.addScriptArgument(key, newValue);
@@ -876,7 +873,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         contextBuilder.addScriptArgument(entry.getKey(), entry.getValue());
                     }
                 } else if (!content.isNull()) {
-                    return newExceptionPromise(newBadRequestException("Content is not of type Map"));
+                    throw new BadRequestException("Content is not of type Map");
                 }
 
                 // ScriptContext scriptContext = script.getScriptContextBuilder().build();
@@ -906,9 +903,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             }
             return newResultPromise(newActionResponse(result));
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -982,12 +979,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != delegate) {
                     return delegate.handleAction(context, request);
                 } else {
-                    return newExceptionPromise(newNotFoundException("Not found: " + objectClass));
+                    throw new NotFoundException("Not found: " + objectClass);
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -998,12 +995,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != delegate) {
                     return delegate.handleCreate(context, request);
                 } else {
-                    return newExceptionPromise(newNotFoundException("Not found: " + objectClass));
+                    throw new NotFoundException("Not found: " + objectClass);
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1014,12 +1011,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != delegate) {
                     return delegate.handleDelete(context, request);
                 } else {
-                    return newExceptionPromise(newNotFoundException("Not found: " + objectClass));
+                    throw new NotFoundException("Not found: " + objectClass);
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1030,12 +1027,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != delegate) {
                     return delegate.handlePatch(context, request);
                 } else {
-                    return newExceptionPromise(newNotFoundException("Not found: " + objectClass));
+                    throw new NotFoundException("Not found: " + objectClass);
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1047,12 +1044,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != delegate) {
                     return delegate.handleQuery(context, request, handler);
                 } else {
-                    return newExceptionPromise(newNotFoundException("Not found: " + objectClass));
+                    throw new NotFoundException("Not found: " + objectClass);
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1063,12 +1060,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != delegate) {
                     return delegate.handleRead(context, request);
                 } else {
-                    return newExceptionPromise(newNotFoundException("Not found: " + objectClass));
+                    throw new NotFoundException("Not found: " + objectClass);
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1079,12 +1076,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != delegate) {
                     return delegate.handleUpdate(context, request);
                 } else {
-                    return newExceptionPromise(newNotFoundException("Not found: " + objectClass));
+                    throw new NotFoundException("Not found: " + objectClass);
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
     }
@@ -1159,17 +1156,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     case liveSync:
                         return handleLiveSync(context, request);
                     default:
-                        return newExceptionPromise(
-                                newBadRequestException("Unsupported action: " + request.getAction()));
+                        throw new BadRequestException("Unsupported action: " + request.getAction());
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (JsonValueException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (IllegalArgumentException e) { // from request.getActionAsEnum
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1199,8 +1195,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 // handle ConnectorException from facade.authenticate:
                 // log to activity log only if this is an external request
                 // (let internal requests do their own logging upon the handleError...)
-                return newExceptionPromise(adaptConnectorException(context, request, e, null, null, null, null,
-                        ContextUtil.isExternal(context) ? activityLogger : NullActivityLogger.INSTANCE));
+                throw adaptConnectorException(context, request, e, null, null, null, null,
+                        ContextUtil.isExternal(context) ? activityLogger : NullActivityLogger.INSTANCE);
             }
         }
 
@@ -1218,7 +1214,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         @Override
         public Promise<ActionResponse, ResourceException> actionInstance(
                 Context context, String resourceId, ActionRequest request) {
-            return newExceptionPromise(newNotSupportedException("Actions are not supported for resource instances"));
+            return new NotSupportedException("Actions are not supported for resource instances").asPromise();
         }
 
         @Override
@@ -1240,15 +1236,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         null, resource.getContent(), Status.SUCCESS);
                 return newResultPromise(resource);
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (ConnectorException e) {
-                return newExceptionPromise(adaptConnectorException(context, request, e, getSource(objectClass),
-                        objectClassInfoHelper
-                                .getCreateResourceId(request), request.getContent(), null, activityLogger));
+                return adaptConnectorException(context, request, e, getSource(objectClass),
+                        objectClassInfoHelper.getCreateResourceId(request), request.getContent(), null, activityLogger)
+                        .asPromise();
             } catch (JsonValueException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1279,14 +1275,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         uid.getUidValue()), before.getContent(), null, Status.SUCCESS);
                 return newResultPromise(newResourceResponse(uid.getUidValue(), uid.getRevision(), result));
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (ConnectorException e) {
-                return newExceptionPromise(adaptConnectorException(context, request, e,
-                        getSource(objectClass), resourceId, null, null, activityLogger));
+                return adaptConnectorException(context, request, e,
+                        getSource(objectClass), resourceId, null, null, activityLogger)
+                        .asPromise();
             } catch (JsonValueException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1367,14 +1364,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         beforeValue, resource.getContent(), Status.SUCCESS);
                 return newResultPromise(resource);
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (ConnectorException e) {
-                return newExceptionPromise(adaptConnectorException(context, request, e, getSource(objectClass),
-                        resourceId, beforeValue, null, activityLogger));
+                return adaptConnectorException(context, request, e, getSource(objectClass),
+                        resourceId, beforeValue, null, activityLogger)
+                        .asPromise();
             } catch (JsonValueException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1433,7 +1431,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 }
 
                 final JsonValue logValue = json(array());
-                final Exception[] ex = new Exception[]{null};
+                final Exception[] ex = new Exception[] { null };
                 SearchResult searchResult = facade.search(objectClassInfoHelper.getObjectClass(), filter,
                         new ResultsHandler() {
                             @Override
@@ -1444,13 +1442,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                     return handler.handleResource(resource);
                                 } catch (Exception e) {
                                     ex[0] = e;
-                                    // TODO-crest3 handle error
+                                    // TODO ICF needs a way to handle exceptions through the facade
                                     return false;
                                 }
                             }
                         }, operationOptionsBuilder.build());
-                if(ex[0] != null) {
-                    return newExceptionPromise(newInternalServerErrorException(ex[0].getMessage(), ex[0]));
+                if (ex[0] != null) {
+                    throw new InternalServerErrorException(ex[0].getMessage(), ex[0]);
                 }
                 activityLogger.log(context, request,
                         "query: " + request.getQueryId()
@@ -1463,18 +1461,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 return newResultPromise(
                         newQueryResponse(searchResult != null ? searchResult.getPagedResultsCookie() : null));
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (ConnectorException e) {
-                return newExceptionPromise(
-                        adaptConnectorException(context, request, e, null, null, null, null, activityLogger));
+                return adaptConnectorException(context, request, e, null, null, null, null, activityLogger).asPromise();
             } catch (JsonValueException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (AttributeMissingException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (IllegalArgumentException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             } finally {
                 measure.end();
             }
@@ -1497,19 +1494,19 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     final String matchedUri = context.containsContext(UriRouterContext.class)
                             ? context.asContext(UriRouterContext.class).getMatchedUri()
                             : "unknown path";
-                    return newExceptionPromise(
-                            newNotFoundException("Object " + resourceId + " not found on " + matchedUri));
+                    throw new NotFoundException("Object " + resourceId + " not found on " + matchedUri);
 
                 }
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (ConnectorException e) {
-                return newExceptionPromise(adaptConnectorException(context, request, e,
-                        getSource(objectClass), resourceId, null, null, activityLogger));
+                return adaptConnectorException(context, request, e,
+                        getSource(objectClass), resourceId, null, null, activityLogger)
+                        .asPromise();
             } catch (JsonValueException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1529,8 +1526,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 // TODO Fix for http://bugster.forgerock.org/jira/browse/CREST-29
                 final Name newName = null;
                 final Set<Attribute> replaceAttributes =
-                        objectClassInfoHelper.getUpdateAttributes(request, newName,
-                                cryptoService);
+                        objectClassInfoHelper.getUpdateAttributes(request, newName, cryptoService);
 
                 OperationOptions operationOptions;
                 OperationOptionsBuilder operationOptionsBuilder = operations.get(UpdateApiOp.class)
@@ -1563,14 +1559,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         before.getContent(), resource.getContent(), Status.SUCCESS);
                 return newResultPromise(resource);
             } catch (ResourceException e) {
-                return newExceptionPromise(e);
+                return e.asPromise();
             } catch (ConnectorException e) {
-                return newExceptionPromise(adaptConnectorException(context, request, e, getSource(objectClass),
-                        resourceId, content, null, activityLogger));
+                return adaptConnectorException(context, request, e, getSource(objectClass),
+                        resourceId, content, null, activityLogger)
+                        .asPromise();
             } catch (JsonValueException e) {
-                return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+                return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
-                return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
             }
         }
 
@@ -1578,7 +1575,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         private String getReauthPassword(Context context) {
             try {
                 // get reauth password
-                return  context.asContext(HttpContext.class).getHeaderAsString(REAUTH_HEADER);
+                return context.asContext(HttpContext.class).getHeaderAsString(REAUTH_HEADER);
             } catch (Exception e) {
                 // there will not always be a HttpContext and this is acceptable so catch exception to
                 // prevent the exception from  stopping the remaining update
@@ -1692,17 +1689,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
         @Override
         public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
-            return newExceptionPromise(newNotSupportedException("Actions are not supported for resource instances"));
+            return new NotSupportedException("Actions are not supported for resource instances").asPromise();
         }
 
         @Override
         public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-            return newExceptionPromise(newNotSupportedException("Patch operations are not supported"));
+            return new NotSupportedException("Patch operations are not supported").asPromise();
         }
 
         @Override
         public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-            return newExceptionPromise(newNotSupportedException("Update operations are not supported"));
+            return new NotSupportedException("Update operations are not supported").asPromise();
         }
     }
     

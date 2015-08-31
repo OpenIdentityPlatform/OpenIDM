@@ -16,8 +16,6 @@
 
 package org.forgerock.openidm.servlet.internal;
 
-import static org.forgerock.json.resource.ResourceException.cast;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -193,8 +191,9 @@ public class ScriptedFilter implements Filter {
         if (onRequest != null) {
             ScriptEntry scriptEntry = onRequest.getRight();
             if (!scriptEntry.isActive()) {
-                return newExceptionPromise(cast(new ServiceUnavailableException(
-                        "Failed to execute inactive script: " + onRequest.getRight().getName())));
+                return new ServiceUnavailableException(
+                        "Failed to execute inactive script: " + onRequest.getRight().getName())
+                    .asPromise();
             }
             Script script = populateScript(scriptEntry, context, request);
             try {
@@ -204,7 +203,7 @@ public class ScriptedFilter implements Filter {
                         onRequest.getRight().getName(), onRequest.getLeft(), e);
                 ResourceException re = Utils.adapt(e);
                 logger.debug("ResourceException detail: " + re.getDetail());
-                return newExceptionPromise(re);
+                return re.asPromise();
             }
         }
         return newResultPromise(request);
@@ -216,8 +215,9 @@ public class ScriptedFilter implements Filter {
             logger.info("Filter response: {}.", context.getId());
             ScriptEntry scriptEntry = onResponse.getRight();
             if (!scriptEntry.isActive()) {
-                return newExceptionPromise(cast(new ServiceUnavailableException(
-                        "Failed to execute inactive script: " + onResponse.getRight().getName())));
+                return new ServiceUnavailableException(
+                        "Failed to execute inactive script: " + onResponse.getRight().getName())
+                    .asPromise();
             }
             Script script = populateScript(scriptEntry, context, request);
             script.put("response", response);
@@ -228,7 +228,7 @@ public class ScriptedFilter implements Filter {
                         onResponse.getRight().getName(), onResponse.getLeft(), e);
                 ResourceException re = Utils.adapt(e);
                 logger.debug("ResourceException detail: " + re.getDetail());
-                return newExceptionPromise(re);
+                return re.asPromise();
             }
         }
         return newResultPromise(response);
@@ -239,8 +239,9 @@ public class ScriptedFilter implements Filter {
         if (onFailure != null) {
             ScriptEntry scriptEntry = onFailure.getRight();
             if (!scriptEntry.isActive()) {
-                return newExceptionPromise(cast(new ServiceUnavailableException(
-                        "Failed to execute inactive script: " + onFailure.getRight().getName())));
+                return new ServiceUnavailableException(
+                        "Failed to execute inactive script: " + onFailure.getRight().getName())
+                    .asPromise();
             }
             Script script = populateScript(scriptEntry, context, request);
             script.put("exception", error.includeCauseInJsonValue().toJsonValue().asMap());
@@ -251,10 +252,10 @@ public class ScriptedFilter implements Filter {
                         onFailure.getRight().getName(), onFailure.getLeft(), e);
                 ResourceException re = Utils.adapt(e);
                 logger.debug("ResourceException detail: " + re.getDetail());
-                return newExceptionPromise(re);
+                return re.asPromise();
             }
         }
-        return newExceptionPromise(error);
+        return error.asPromise();
     }
 
     private Script populateScript(final ScriptEntry scriptEntry, final Context context, final Request request) {

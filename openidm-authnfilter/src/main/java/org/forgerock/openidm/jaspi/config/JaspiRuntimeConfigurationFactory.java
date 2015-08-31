@@ -16,8 +16,6 @@
 
 package org.forgerock.openidm.jaspi.config;
 
-import org.forgerock.auth.common.AuditLogger;
-import org.forgerock.auth.common.AuditLoggingConfigurator;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.logging.JaspiAuditLogger;
 import org.forgerock.jaspi.logging.JaspiLoggingConfigurator;

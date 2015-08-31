@@ -18,9 +18,7 @@ package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.resource.ResourceException.newBadRequestException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
@@ -428,12 +426,12 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     throw new BadRequestException("Action" + request.getAction() + " is not supported.");
             }
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (IllegalArgumentException e) { 
         	// from getActionAsEnum
-        	return newExceptionPromise(newBadRequestException(e.getMessage(), e));
+        	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceUtil.adapt(e));
+        	return ResourceUtil.adapt(e).asPromise();
         } finally {
             ObjectSetContext.pop();
         }
@@ -441,16 +439,16 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 }

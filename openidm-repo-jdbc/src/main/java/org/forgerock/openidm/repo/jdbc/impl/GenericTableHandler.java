@@ -55,7 +55,6 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;

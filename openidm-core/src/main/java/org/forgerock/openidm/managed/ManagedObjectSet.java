@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.script.ScriptException;
@@ -77,8 +76,6 @@ import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
-import org.forgerock.util.promise.ResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -556,9 +553,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             return newResultPromise(createResponse);
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceException.newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -582,9 +579,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             
             return newResultPromise(readResponse);
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceException.newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -617,9 +614,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             return newResultPromise(updatedResponse);
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceException.newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -659,9 +656,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             return newResultPromise(deletedResource);
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceException.newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -672,7 +669,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         	return newResultPromise(patchResourceById(context, request, resourceId, request.getRevision(), 
             		request.getPatchOperations()));
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         }
     }
 
@@ -831,7 +828,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             });
         	
         	if(ex[0] != null) {
-            	return newExceptionPromise(ex[0]);
+            	return ex[0].asPromise();
         	}
         	
             activityLogger.log(context, request, 
@@ -841,7 +838,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         	return newResultPromise(queryResponse);
 
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         }
     }
 
@@ -871,12 +868,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (IllegalArgumentException e) { 
         	// from getActionAsEnum
-        	return newExceptionPromise(ResourceException.newBadRequestException(e.getMessage(), e));
+        	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(ResourceException.newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -902,10 +899,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (IllegalArgumentException e) { 
         	// from getActionAsEnum
-        	return newExceptionPromise(ResourceException.newBadRequestException(e.getMessage(), e));
+        	return new BadRequestException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -992,7 +989,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 				details = e.getDetail();
 			} catch (Exception e) {
 				success = false;
-				details = ResourceException.newInternalServerErrorException(e.getMessage(), e).getDetail();
+				details = new InternalServerErrorException(e.getMessage(), e).getDetail();
 			}
             
             try {

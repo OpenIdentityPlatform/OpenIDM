@@ -20,7 +20,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
@@ -56,6 +55,6 @@ public class MemoryInfoResourceProvider extends AbstractInfoResourceProvider {
                 ))
         ));
 
-        return newResultPromise(newResourceResponse("", "", result));
+        return newResourceResponse("", "", result).asPromise();
     }
 }

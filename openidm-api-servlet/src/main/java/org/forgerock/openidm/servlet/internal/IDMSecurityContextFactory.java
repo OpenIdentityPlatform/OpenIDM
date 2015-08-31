@@ -24,11 +24,6 @@
 
 package org.forgerock.openidm.servlet.internal;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;

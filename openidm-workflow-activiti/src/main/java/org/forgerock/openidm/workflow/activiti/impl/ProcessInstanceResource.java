@@ -15,12 +15,8 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
-import static org.forgerock.json.resource.ResourceException.newBadRequestException;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
-import static org.forgerock.json.resource.ResourceException.newNotFoundException;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.InputStream;
@@ -45,9 +41,12 @@ import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -111,12 +110,12 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupportedOnCollection(request));
+        return ResourceUtil.notSupportedOnCollection(request).asPromise();
     }
 
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
+        return ResourceUtil.notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -143,15 +142,15 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 resultMap.put(ActivitiConstants.ID, instance.getId());
                 JsonValue content = new JsonValue(resultMap);
                 return newResultPromise(newResourceResponse(instance.getId(), null, content));
-
             } else {
-                return newExceptionPromise(
-                        newInternalServerErrorException("The process instance could not be created"));
+                throw new InternalServerErrorException("The process instance could not be created");
             }
         } catch (ActivitiObjectNotFoundException ex) {
-            return newExceptionPromise(newNotFoundException(ex.getMessage(), ex));
+            return new NotFoundException(ex.getMessage(), ex).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception ex) {
-            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
+            return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
     }
 
@@ -166,18 +165,20 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 processEngine.getRuntimeService().deleteProcessInstance(resourceId, "Deleted by Openidm");
                 return newResultPromise(r);
             } else {
-                return newExceptionPromise(newNotFoundException());
+                throw new NotFoundException();
             }
         } catch (ActivitiObjectNotFoundException ex) {
-            return newExceptionPromise(newNotFoundException(ex.getMessage(), ex));
+            return new NotFoundException(ex.getMessage(), ex).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception ex) {
-            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
+            return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
+        return ResourceUtil.notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -206,10 +207,12 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 }
                 return newResultPromise(newQueryResponse());
             } else {
-                return newExceptionPromise(newBadRequestException("Unknown query-id"));
+                throw new BadRequestException("Unknown query-id");
             }
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception ex) {
-            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
+            return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
     }
 
@@ -221,7 +224,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                     processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult();
 
             if (instance == null) {
-                return newExceptionPromise(newNotFoundException());
+                throw new NotFoundException();
             } else {
                 JsonValue content = new JsonValue(MAPPER.convertValue(instance, Map.class));
                 // TODO OPENIDM-3603 add relationship support
@@ -257,8 +260,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 }
                 return newResultPromise(newResourceResponse(instance.getId(), null, content));
             }
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception ex) {
-            return newExceptionPromise(newInternalServerErrorException(ex.getMessage(), ex));
+            return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
     }
 
@@ -280,7 +285,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(
             Context context, String resourceId, UpdateRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupportedOnInstance(request));
+        return ResourceUtil.notSupportedOnInstance(request).asPromise();
     }
 
     /**

@@ -38,9 +38,11 @@ import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
@@ -60,11 +62,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-import static org.forgerock.json.resource.ResourceException.newBadRequestException;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.jaspi.config.JaspiRuntimeConfigurationFactory.MODULE_CONFIG_ENABLED;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
@@ -252,13 +250,12 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
                 throw new IllegalArgumentException();
             }
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (IllegalArgumentException e) { // from getActionAsEnum
-            return newExceptionPromise(
-                    newBadRequestException(
-                            "Action " + request.getAction() + " on authentication service not supported"));
+            return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
+                    .asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException("Error processing action", e));
+            return new InternalServerErrorException("Error processing action", e).asPromise();
         }
     }
 
@@ -267,7 +264,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
      */
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return newExceptionPromise(newNotSupportedException("Patch operation not supported"));
+        return new NotSupportedException("Patch operation not supported").asPromise();
     }
 
     /**
@@ -275,7 +272,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return newExceptionPromise(newNotSupportedException("Read operation not supported"));
+        return new NotSupportedException("Read operation not supported").asPromise();
     }
 
     /**
@@ -283,6 +280,6 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
      */
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return newExceptionPromise(newNotSupportedException("Update operation not supported"));
+        return new NotSupportedException("Update operation not supported").asPromise();
     }
 }

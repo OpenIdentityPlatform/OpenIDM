@@ -17,7 +17,6 @@
 package org.forgerock.openidm.audit.events.handlers.impl;
 
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
@@ -65,7 +64,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(actionRequest));
+        return ResourceExceptionsUtil.notSupported(actionRequest).asPromise();
     }
 
     /**
@@ -75,7 +74,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
             ActionRequest actionRequest) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(actionRequest));
+        return ResourceExceptionsUtil.notSupported(actionRequest).asPromise();
     }
 
     /**
@@ -99,7 +98,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     @Override
     public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest queryRequest,
             QueryResourceHandler queryResourceHandler) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(queryRequest));
+        return ResourceExceptionsUtil.notSupported(queryRequest).asPromise();
     }
 
     /**
@@ -109,7 +108,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
             ReadRequest readRequest) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(readRequest));
+        return ResourceExceptionsUtil.notSupported(readRequest).asPromise();
     }
 
     /**

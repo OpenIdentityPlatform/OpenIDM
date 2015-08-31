@@ -25,9 +25,7 @@
 package org.forgerock.openidm.config.manage;
 
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.json.resource.ResourceException.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -62,7 +60,6 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -171,9 +168,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         try {
         	return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(read(request.getResourcePathObject()))));
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
     
@@ -253,9 +250,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             sendClusterEvent(ConfigAction.CREATE, request.getResourcePathObject(), request.getNewResourceId(), content.asMap());
             return newResultPromise(newResourceResponse(request.getNewResourceId(), null, content));
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -333,9 +330,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             sendClusterEvent(ConfigAction.UPDATE, request.getResourcePathObject(), null, content.asMap());
             return newResultPromise(newResourceResponse(request.getResourcePath(), null, content));
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -403,9 +400,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             sendClusterEvent(ConfigAction.DELETE, request.getResourcePathObject(), null, null);
             return newResultPromise(newResourceResponse(request.getResourcePath(), null, result));
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         } catch (Exception e) {
-        	return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+        	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -453,7 +450,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     @Override
@@ -482,13 +479,13 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                 
             }));
         } catch (ResourceException e) {
-        	return newExceptionPromise(e);
+        	return e.asPromise();
         }
     }
 
     @Override
     public Promise<ActionResponse, ResourceException>  handleAction(Context context, ActionRequest request) {
-        return newExceptionPromise(ResourceUtil.notSupported(request));
+        return ResourceUtil.notSupported(request).asPromise();
     }
 
     /**

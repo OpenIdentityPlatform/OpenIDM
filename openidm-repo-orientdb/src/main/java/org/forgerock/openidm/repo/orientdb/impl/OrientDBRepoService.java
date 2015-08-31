@@ -24,11 +24,9 @@
 package org.forgerock.openidm.repo.orientdb.impl;
 
 import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
-import static org.forgerock.json.resource.ResourceException.newBadRequestException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.File;
@@ -172,7 +170,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try {
             return newResultPromise(read(request));
         } catch (Exception ex) {
-            return newExceptionPromise(adapt(ex));
+            return adapt(ex).asPromise();
         }
     }
 
@@ -181,7 +179,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try {
             return newResultPromise(create(request));
         } catch (Exception ex) {
-            return newExceptionPromise(adapt(ex));
+            return adapt(ex).asPromise();
         }
     }
 
@@ -190,7 +188,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try {
             return newResultPromise(update(request));
         } catch (Exception ex) {
-            return newExceptionPromise(adapt(ex));
+            return adapt(ex).asPromise();
         }
     }
 
@@ -200,7 +198,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try {
             return newResultPromise(delete(request));
         } catch (Exception ex) {
-            return newExceptionPromise(adapt(ex));
+            return adapt(ex).asPromise();
         }
     }
 
@@ -451,7 +449,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
         // TODO: impl
-        return newExceptionPromise(adapt(new NotSupportedException("Patch not supported yet")));
+        return adapt(new NotSupportedException("Patch not supported yet")).asPromise();
     }
     
     @Override
@@ -463,7 +461,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                     String newUser = params.get("user");
                     String newPassword = params.get("password");
                     if (newUser == null || newPassword == null) {
-                        return newExceptionPromise(adapt(new BadRequestException("Expecting 'user' and 'password' parameters")));
+                        return adapt(new BadRequestException("Expecting 'user' and 'password' parameters")).asPromise();
                     }
                     synchronized (dbLock) {
                         DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
@@ -477,12 +475,12 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 case command:
                     return newResultPromise(newActionResponse(new JsonValue(command(request))));
                 default:
-                    return newExceptionPromise(adapt(new BadRequestException("Unknown action: " + request.getAction())));
+                    return adapt(new BadRequestException("Unknown action: " + request.getAction())).asPromise();
             }
         } catch (IllegalArgumentException e) {
-            return newExceptionPromise(adapt(new BadRequestException("Unknown action: " + request.getAction())));
+            return adapt(new BadRequestException("Unknown action: " + request.getAction())).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
     }
 
@@ -551,7 +549,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 try {
                     firstResultIndex = Integer.parseInt(pagedResultsCookie);
                 } catch (final NumberFormatException e) {
-                    return newExceptionPromise(newBadRequestException("Invalid paged results cookie"));
+                    return new BadRequestException("Invalid paged results cookie").asPromise();
                 }
             } else {
                 firstResultIndex = Math.max(0, request.getPagedResultsOffset());
@@ -624,7 +622,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
             }
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
 
     }

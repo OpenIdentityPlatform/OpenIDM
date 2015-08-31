@@ -24,7 +24,6 @@
 
 package org.forgerock.openidm.servlet.internal;
 
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.apache.commons.lang3.StringUtils;
@@ -323,7 +322,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
                 try {
                     return newResultPromise(getConnection());
                 } catch (ResourceException e) {
-                    return newExceptionPromise(e);
+                    return e.asPromise();
                 }
             }
            

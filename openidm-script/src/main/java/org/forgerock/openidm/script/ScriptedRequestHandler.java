@@ -24,11 +24,9 @@
 
 package org.forgerock.openidm.script;
 
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.HashMap;
@@ -168,11 +166,11 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 return newResultPromise(newActionResponse(new JsonValue(result)));
             }
         } catch (ScriptException e) {
-            return newExceptionPromise(convertScriptException(e));
+            return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -187,11 +185,11 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handleCreate(context, request, script.getBindings());
             return evaluate(request, script);
         } catch (ScriptException e) {
-            return newExceptionPromise(convertScriptException(e));
+            return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -206,11 +204,11 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handleDelete(context, request, script.getBindings());
             return evaluate(request, script);
         } catch (ScriptException e) {
-            return newExceptionPromise(convertScriptException(e));
+            return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -225,11 +223,11 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handlePatch(context, request, script.getBindings());
             return evaluate(request, script);
         } catch (ScriptException e) {
-            return newExceptionPromise(convertScriptException(e));
+            return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -323,20 +321,20 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                     } else {
                         logger.debug("Script returned unexpected query result structure: ",
                                  result.getObject());
-                        return newExceptionPromise(
-                                newInternalServerErrorException(
-                                        "Script returned unexpected query result structure of type "
-                                                + result.getObject().getClass()));
+                        return new InternalServerErrorException(
+                                "Script returned unexpected query result structure of type "
+                                + result.getObject().getClass())
+                            .asPromise();
                     }
                 }
             }
             return newResultPromise(queryResponse);
         } catch (ScriptException e) {
-            return newExceptionPromise(convertScriptException(e));
+            return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
     
@@ -371,11 +369,11 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handleRead(context, request, script.getBindings());
             return evaluate(request, script);
         } catch (ScriptException e) {
-            return newExceptionPromise(convertScriptException(e));
+            return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
@@ -390,11 +388,11 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handleUpdate(context, request, script.getBindings());
             return evaluate(request, script);
         } catch (ScriptException e) {
-            return newExceptionPromise(convertScriptException(e));
+            return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(newInternalServerErrorException(e.getMessage(), e));
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 

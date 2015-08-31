@@ -131,7 +131,7 @@ public class JsonResourceRouterService implements ConnectionFactory {
                 try {
                     return Promises.newResultPromise(getConnection());
                 } catch (ResourceException e) {
-                    return Promises.newExceptionPromise(e);
+                    return e.asPromise();
                 }
             }
         };
