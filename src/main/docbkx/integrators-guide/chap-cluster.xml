@@ -213,10 +213,11 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
        <para>
         For each OpenIDM instance set to <literal>clustered-additional</literal>,
         the Crypto Service activates, but does not generate, a new secret key.
-        You will need to create a new secret key for each keystore, manually,
-        as noted in <xref linkend="cluster-new-key" />. The Crypto Service
-        does not add any <literal>decryptionTransformers</literal>. The
-        Security Manager performs the following tasks:
+        You will need to create a new secret key which will be added to each
+        keystore. For instructions, see <xref linkend="cluster-new-key" />.
+        The Crypto Service does not add any
+        <literal>decryptionTransformers</literal>. The Security Manager
+        performs the following tasks:
        </para>
        <itemizedlist>
         <listitem>
