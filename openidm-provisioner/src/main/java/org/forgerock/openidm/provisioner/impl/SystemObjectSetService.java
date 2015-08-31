@@ -455,13 +455,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         ResourceResponse previousStage = null;
         try {
             ReadRequest readRequest = Requests.newReadRequest(previousStageResourceContainer, previousStageId);
-            previousStage = connectionFactory.getConnection().read(ContextUtil.createContext(), readRequest);
+            previousStage = connectionFactory.getConnection().read(ContextUtil.createInternalContext(), readRequest);
 
             response = locateService(id).liveSynchronize(id.getObjectType(),
                     previousStage != null && previousStage.getContent() != null ? previousStage.getContent() : null);
             UpdateRequest updateRequest = Requests.newUpdateRequest(previousStageResourceContainer, previousStageId, response);
             updateRequest.setRevision(previousStage.getRevision());
-            connectionFactory.getConnection().update(ContextUtil.createContext(), updateRequest);
+            connectionFactory.getConnection().update(ContextUtil.createInternalContext(), updateRequest);
         } catch (ResourceException e) { // NotFoundException?
             if (previousStage != null) {
                 throw e;
@@ -469,7 +469,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             response = locateService(id).liveSynchronize(id.getObjectType(), null);
             if (response != null) {
                 CreateRequest createRequest = Requests.newCreateRequest(previousStageResourceContainer, previousStageId, response);
-                connectionFactory.getConnection().create(ContextUtil.createContext(), createRequest);
+                connectionFactory.getConnection().create(ContextUtil.createInternalContext(), createRequest);
             }
         }
         if (response != null && !detailedFailure) {

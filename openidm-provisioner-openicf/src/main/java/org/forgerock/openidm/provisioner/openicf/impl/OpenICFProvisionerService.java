@@ -2215,7 +2215,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createContext();
+                                                    final Context context = ContextUtil.createInternalContext();
                                                     connectionFactory.getConnection().action(context, onCreateRequest);
 
                                                     activityLogger.log(context, onCreateRequest,
@@ -2236,7 +2236,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createContext();
+                                                    final Context context = ContextUtil.createInternalContext();
                                                     connectionFactory.getConnection().action(context, onUpdateRequest);
 
                                                     activityLogger.log(context, onUpdateRequest,
@@ -2252,7 +2252,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createContext();
+                                                    final Context context = ContextUtil.createInternalContext();
                                                     connectionFactory.getConnection().action(context, onDeleteRequest);
 
                                                     activityLogger.log(context, onDeleteRequest,
