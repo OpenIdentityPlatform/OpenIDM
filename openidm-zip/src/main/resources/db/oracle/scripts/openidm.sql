@@ -48,8 +48,8 @@ PROMPT Creating Table auditaccess ...
 CREATE TABLE auditaccess (
   objectid VARCHAR2(38 CHAR) NOT NULL,
   activity VARCHAR2(24 CHAR),
-  activitydate VARCHAR2(29 CHAR),
-  transactionid VARCHAR2(56 CHAR),
+  activitydate VARCHAR2(29 CHAR) NOT NULL,
+  transactionid VARCHAR2(56 CHAR) NOT NULL,
   eventname VARCHAR2(255 CHAR),
   server_ip VARCHAR2(40 CHAR),
   server_port VARCHAR2(5 CHAR),
@@ -117,8 +117,8 @@ ENABLE
 PROMPT Creating TABLE auditauthentication ...
 CREATE TABLE auditauthentication (
   objectid VARCHAR2(38 CHAR) NOT NULL,
-  transactionid VARCHAR2(56 CHAR),
-  activitydate VARCHAR2(29 CHAR),
+  transactionid VARCHAR2(56 CHAR) NOT NULL,
+  activitydate VARCHAR2(29 CHAR) NOT NULL,
   userid VARCHAR2(255 CHAR),
   eventname VARCHAR2(50 CHAR),
   RESULT VARCHAR2(255 CHAR),
@@ -148,8 +148,8 @@ PROMPT Creating Table auditactivity ...
 CREATE TABLE auditactivity (
   objectid VARCHAR2(38 CHAR) NOT NULL, 
   activity VARCHAR2(24 CHAR),  
-  activitydate VARCHAR2(29 CHAR), 
-  transactionid VARCHAR2(56 CHAR),  
+  activitydate VARCHAR2(29 CHAR) NOT NULL,
+  transactionid VARCHAR2(56 CHAR) NOT NULL,
   eventname VARCHAR2(255 CHAR),  
   userid VARCHAR2(255 CHAR),  
   runas VARCHAR2(255 CHAR),  
@@ -193,7 +193,7 @@ PROMPT Creating Table auditrecon ...
 CREATE TABLE auditrecon (
   objectid VARCHAR2(38) NOT NULL,
   transactionid VARCHAR2(56) NOT NULL,
-  activitydate VARCHAR2(29 CHAR),
+  activitydate VARCHAR2(29 CHAR) NOT NULL,
   eventname VARCHAR2(50 CHAR),
   userid VARCHAR2(255 CHAR),
   activity VARCHAR2(24 CHAR),
@@ -233,7 +233,7 @@ PROMPT Creating Table auditsync ...
 CREATE TABLE auditsync (
   objectid VARCHAR2(38) NOT NULL,
   transactionid VARCHAR2(56) NOT NULL,
-  activitydate VARCHAR2(29 CHAR),
+  activitydate VARCHAR2(29 CHAR) NOT NULL,
   eventname VARCHAR2(50 CHAR),
   userid VARCHAR2(255 CHAR),
   activity VARCHAR2(24 CHAR),
