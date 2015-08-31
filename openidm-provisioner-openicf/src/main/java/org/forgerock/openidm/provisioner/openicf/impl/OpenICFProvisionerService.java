@@ -2270,7 +2270,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             syncFailureMap.put("uid", syncDelta.getUid().getUidValue());
                                             syncFailureMap.put("failedRecord", failedRecord[0]);
                                             try {
-                                                syncFailureHandler.invoke(syncFailureMap, e);
+                                                syncFailureHandler.invoke(context, syncFailureMap, e);
                                             } catch (SyncHandlerException syncHandlerException) {
                                                 // Current contract of the failure handler is that throwing this exception indicates 
                                                 // that it should retry for this entry

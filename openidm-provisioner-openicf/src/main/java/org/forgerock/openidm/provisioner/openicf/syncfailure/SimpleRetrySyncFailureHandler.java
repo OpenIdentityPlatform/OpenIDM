@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
+import org.forgerock.http.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,11 +57,12 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
      * Handle sync failure by counting retries on this sync token, passing to
      * (optional) post-retry handler when retries are exceeded.
      *
+     * @param context the request context associated with the invocation
      * @param syncFailure contains sync failure data
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
+    public void invoke(Context context, Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         final Object token = syncFailure.get("token");
@@ -77,7 +79,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
             logger.info("{}:{} sync retries = {}/{}, retries exhausted", 
                     syncFailure.get("systemIdentifier"), syncFailure.get("uid"),
                     currentRetries, syncFailureRetries);
-            postRetryHandler.invoke(syncFailure, failureCause);
+            postRetryHandler.invoke(context, syncFailure, failureCause);
         } else {
             logger.info("{}:{} sync retries = {}/{}, retrying", 
                     syncFailure.get("systemIdentifier"), syncFailure.get("uid"),
