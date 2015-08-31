@@ -173,11 +173,11 @@
   </para>
 
   <para>
-   One of our objectives with this document is to make it as easy as possible
-   to test OpenIDM. To that end, this document assumes that you are running
-   either Windows 7 or CentOS 6.x, along with the stock installation of OpenIDM.
-   In production, we do not support installations of OpenIDM on Windows 7, and
-   we require replacing the default internal repository, OrientDB.
+   With this document, we want to make it as easy as possible to test OpenIDM.
+   To that end, we assume that you are running either Windows 7 or CentOS 6.x,
+   along with the specified installation of OpenIDM. In production, we do not
+   support installations of OpenIDM on Windows 7, and we require replacing the
+   default internal repository, OrientDB.
   </para>
 
   <para>
