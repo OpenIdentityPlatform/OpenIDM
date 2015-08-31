@@ -1848,16 +1848,6 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
    REST interface, as outlined in the following examples.
   </para>
   <para>
-   All <literal>audit/recon</literal> query responses are formatted based on the
-   <literal>entryType</literal> of the entry. Fields that are not required for
-   the specific entry type are stripped away from the response. For example, a
-   <literal>summary</literal> entry would not need to include a null
-   <literal>targetObjectId</literal> field, as this would not add information to
-   a summary. You can specify that this auto-formatting be disabled and return
-   the full entry for all entry types. To disable entry formatting, include
-   <literal>formatted=false</literal> as a query parameter in the request.
-  </para>
-  <para>
    To return all reconciliation operations logged in the audit log, query the
    <literal>audit/recon</literal> endpoint, as follows:
   </para>
