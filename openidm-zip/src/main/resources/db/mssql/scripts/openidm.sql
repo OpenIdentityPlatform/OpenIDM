@@ -87,13 +87,13 @@ CREATE  TABLE [openidm].[relationsips]
   id NUMERIC(19,0) NOT NULL IDENTITY ,
   objectid NVARCHAR(255) NOT NULL ,
   firstid NVARCHAR(255) NOT NULL ,
-  firstkey NVARCHAR(32) NOT NULL ,
+  firstpropname NVARCHAR(32) NOT NULL ,
   secondid NVARCHAR(255) NOT NULL ,
   rev NVARCHAR(38) NOT NULL ,
-  fullobject NTEXT NULL ,
+  properties NTEXT NULL ,
   PRIMARY KEY CLUSTERED (id),
 );
-CREATE INDEX idx_relationships_first ON [openidm].[relationships] (firstid ASC, firstkey ASC);
+CREATE INDEX idx_relationships_first ON [openidm].[relationships] (firstid ASC, firstpropname ASC);
 CREATE UNIQUE INDEX idx_relationships_objectid ON [openidm].[relationships] (objectid ASC);
 END
 

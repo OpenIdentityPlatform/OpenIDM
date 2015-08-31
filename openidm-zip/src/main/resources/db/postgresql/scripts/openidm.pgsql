@@ -55,15 +55,15 @@ CREATE TABLE openidm.relationships (
   objectid VARCHAR(255) NOT NULL,
   rev VARCHAR(30) NOT NULL,
   firstid VARCHAR(255) NOT NULL,
-  firstkey VARCHAR(32) NOT NULL,
+  firstpropname VARCHAR(32) NOT NULL,
   secondid VARCHAR(255) NOT NULL,
-  fullobject JSON,
+  properties JSON,
   PRIMARY KEY (id)
 );
 
-CREATE UNIQUE INDEX idx_relationships_uniq ON openidm.relationships (firstid, firstkey, secondid);
+CREATE UNIQUE INDEX idx_relationships_uniq ON openidm.relationships (firstid, firstpropname, secondid);
 CREATE UNIQUE INDEX idx_relationships_objectid ON openidm.relationships (objectid);
-CREATE INDEX idx_relationships_first ON openidm.relationships (firstId,firstKey);
+CREATE INDEX idx_relationships_first ON openidm.relationships (firstId,firstpropname);
 
 -- -----------------------------------------------------
 -- Table openidm.managedobjects

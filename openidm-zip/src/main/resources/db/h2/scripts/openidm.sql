@@ -46,13 +46,13 @@ CREATE TABLE IF NOT EXISTS `openidm`.`relationships` (
   `objectid` VARCHAR(255) NOT NULL,
   `rev` VARCHAR(30) NOT NULL,
   `firstid` VARCHAR(255) NOT NULL,
-  `firstkey` VARCHAR(32) NOT NULL,
+  `firstpropname` VARCHAR(32) NOT NULL,
   `secondid` VARCHAR(255) NOT NULL,
-  `fullobject` MEDIUMTEXT NULL,
+  `properties` MEDIUMTEXT NULL,
   PRIMARY KEY (`id`)
 );
 
-CREATE INDEX IF NOT EXISTS `openidm`.`fk_relationships_first` ON `openidm.relationships` (`firstid` ASC, `firstkey` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`fk_relationships_first` ON `openidm.relationships` (`firstid` ASC, `firstpropname` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
