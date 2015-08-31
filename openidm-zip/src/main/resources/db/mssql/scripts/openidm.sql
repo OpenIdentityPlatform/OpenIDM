@@ -249,25 +249,26 @@ BEGIN
 CREATE  TABLE  [openidm].[auditrecon] 
 (
   objectid NVARCHAR(38) NOT NULL ,
-  entrytype NVARCHAR(7) NULL ,
-  rootactionid NVARCHAR(511) NULL ,
-  reconid NVARCHAR(56) NULL ,
-  reconaction NVARCHAR(36) NULL ,
-  reconciling NVARCHAR(12) NULL ,
-  sourceobjectid NVARCHAR(511) NULL ,
-  targetobjectid NVARCHAR(511) NULL ,
-  ambiguoustargetobjectids NTEXT NULL ,
-  activitydate NVARCHAR(29) NULL,
-  situation NVARCHAR(24) NULL ,
+  transactionid NVARCHAR(56) NOT NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
+  eventname NVARCHAR(50) NULL ,
+  userid NVARCHAR(255) NULL ,
   activity NVARCHAR(24) NULL ,
-  status NVARCHAR(7) NULL ,
-  message NTEXT NULL ,
-  actionid NVARCHAR(511) NULL ,
   exceptiondetail NTEXT NULL ,
-  mapping NVARCHAR(511) NULL ,
   linkqualifier NVARCHAR(255) NULL ,
+  mapping NVARCHAR(511) NULL ,
+  message NTEXT NULL ,
   messagedetail NTEXT NULL ,
-  PRIMARY KEY CLUSTERED (objectid),
+  situation NVARCHAR(24) NULL ,
+  sourceobjectid NVARCHAR(511) NULL ,
+  status NVARCHAR(20) NULL ,
+  targetobjectid NVARCHAR(511) NULL ,
+  reconciling NVARCHAR(12) NULL ,
+  ambiguoustargetobjectids NTEXT NULL ,
+  reconaction NVARCHAR(36) NULL ,
+  entrytype NVARCHAR(7) NULL ,
+  reconid NVARCHAR(56) NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
 );
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditrecon, 'COLUMN', activitydate;
 END
@@ -281,20 +282,21 @@ BEGIN
 CREATE  TABLE  [openidm].[auditsync] 
 (
   objectid NVARCHAR(38) NOT NULL ,
-  rootactionid NVARCHAR(511) NULL ,
-  sourceobjectid NVARCHAR(511) NULL ,
-  targetobjectid NVARCHAR(511) NULL ,
-  activitydate NVARCHAR(29) NULL ,
-  situation NVARCHAR(24) NULL ,
+  transactionid NVARCHAR(56) NOT NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
+  eventname NVARCHAR(50) NULL ,
+  userid NVARCHAR(255) NULL ,
   activity NVARCHAR(24) NULL ,
-  status NVARCHAR(7) NULL ,
-  message NTEXT NULL ,
-  actionid NVARCHAR(511) NULL ,
   exceptiondetail NTEXT NULL ,
-  mapping NVARCHAR(511) NULL ,
   linkqualifier NVARCHAR(255) NULL ,
+  mapping NVARCHAR(511) NULL ,
+  message NTEXT NULL ,
   messagedetail NTEXT NULL ,
-  PRIMARY KEY CLUSTERED (objectid),
+  situation NVARCHAR(24) NULL ,
+  sourceobjectid NVARCHAR(511) NULL ,
+  status NVARCHAR(20) NULL ,
+  targetobjectid NVARCHAR(511) NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
 );
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditsync, 'COLUMN', activitydate;
 END
@@ -307,25 +309,28 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditactivity' and xtype=
 BEGIN
 CREATE  TABLE [openidm].[auditactivity] 
 (
-  objectid NVARCHAR(38) NOT NULL ,
-  rootactionid NVARCHAR(450) NULL ,
-  parentactionid NVARCHAR(511) NULL ,
-  activityid NVARCHAR(511) NULL ,
-  activitydate NVARCHAR(29) NULL,
-  activity NVARCHAR(24) NULL ,
-  message NTEXT NULL ,
-  subjectid NVARCHAR(511) NULL ,
-  subjectrev NVARCHAR(255) NULL ,
-  requester NTEXT NULL ,
-  approver NTEXT NULL ,
-  subjectbefore NTEXT NULL ,
-  subjectafter NTEXT NULL ,
-  status NVARCHAR(7) NULL ,
-  changedfields NVARCHAR(255) NULL ,
-  passwordchanged NVARCHAR(5) NULL ,
-  PRIMARY KEY CLUSTERED (objectid) ,
+  objectid NVARCHAR(38) NOT NULL,
+  activity NVARCHAR(24) NULL,
+  activitydate NVARCHAR(29) NOT NULL,
+  transactionid NVARCHAR(56) NOT NULL,
+  eventname NVARCHAR(255) NULL,
+  userid NVARCHAR(255) NULL,
+  runas NVARCHAR(255) NULL,
+  resource_uri NVARCHAR(255) NULL,
+  resource_protocol NVARCHAR(10) NULL,
+  resource_method NVARCHAR(10) NULL,
+  resource_detail NVARCHAR(255) NULL,
+  subjectbefore NTEXT,
+  subjectafter NTEXT,
+  changedfields NVARCHAR(255) NULL,
+  passwordchanged NVARCHAR(5) NULL,
+  subjectrev NVARCHAR(255) NULL,
+  message NTEXT,
+  activityobjectid NVARCHAR(255),
+  status NVARCHAR(20),
+  PRIMARY KEY CLUSTERED (objectid),
 );
-CREATE INDEX idx_auditactivity_rootactionid ON [openidm].[auditactivity] (rootactionid ASC);
+CREATE INDEX idx_auditactivity_transactionid ON [openidm].[auditactivity] (transactionid ASC);
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditactivity, 'COLUMN', activitydate;
 END
 
@@ -353,18 +358,54 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditaccess' and xtype='U
 BEGIN
 CREATE  TABLE [openidm].[auditaccess] (
   objectid NVARCHAR(38) NOT NULL ,
-  activitydate NVARCHAR(29) NULL,
   activity NVARCHAR(24) NULL ,
-  ip NVARCHAR(40) NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
+  transactionid NVARCHAR(56) NOT NULL ,
+  eventname NVARCHAR(255) NULL ,
+  server_ip NVARCHAR(40) ,
+  server_port NVARCHAR(5) ,
+  client_host NVARCHAR(255) ,
+  client_ip NVARCHAR(40) ,
+  client_port NVARCHAR(5) ,
+  userid NVARCHAR(255) NULL ,
   principal NTEXT NULL ,
   roles NVARCHAR(1024) NULL ,
-  status NVARCHAR(7) NULL ,
-  userid NVARCHAR(24) NULL ,
-  PRIMARY KEY CLUSTERED (objectid),
+  auth_component NVARCHAR(255) NULL ,
+  resource_uri NVARCHAR(255) NULL ,
+  resource_protocol NVARCHAR(10) NULL ,
+  resource_method NVARCHAR(10) NULL ,
+  resource_detail NVARCHAR(255) NULL ,
+  http_method NVARCHAR(10) NULL ,
+  http_path NVARCHAR(255) NULL ,
+  http_querystring NVARCHAR(255) NULL ,
+  http_headers NTEXT ,
+  status NVARCHAR(20) NULL ,
+  elapsedtime NVARCHAR(13) NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
 );
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditaccess, 'COLUMN', activitydate;
 END
 
+-- -----------------------------------------------------
+-- Table openidm.auditauthentication
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='auditauthentication' and xtype='U')
+BEGIN
+CREATE TABLE [openidm].[auditauthentication] (
+  objectid NVARCHAR(38) NOT NULL ,
+  transactionid NVARCHAR(56) NOT NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
+  userid NVARCHAR(255) NULL ,
+  eventname NVARCHAR(50) NULL ,
+  result NVARCHAR(255) NULL ,
+  principals NTEXT NULL ,
+  context NTEXT NULL ,
+  sessionid NVARCHAR(255) NULL ,
+  entries NTEXT NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
+);
+EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditauthentication, 'COLUMN', activitydate;
+END
 
 -- -----------------------------------------------------
 -- Table `openidm`.`schedulerobjects`
