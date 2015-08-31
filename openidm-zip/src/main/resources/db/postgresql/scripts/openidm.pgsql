@@ -162,8 +162,8 @@ CREATE TABLE openidm.securitykeys (
 -- -----------------------------------------------------
 CREATE TABLE openidm.auditauthentication (
   objectid VARCHAR(38) NOT NULL,
-  transactionid VARCHAR(56) DEFAULT NULL,
-  activitydate VARCHAR(29) DEFAULT NULL,
+  transactionid VARCHAR(56) NOT NULL,
+  activitydate VARCHAR(29) NOT NULL,
   userid VARCHAR(255) DEFAULT NULL,
   eventname VARCHAR(50) DEFAULT NULL,
   result VARCHAR(255) DEFAULT NULL,
@@ -181,8 +181,8 @@ CREATE TABLE openidm.auditauthentication (
 CREATE TABLE openidm.auditaccess (
   objectid VARCHAR(38) NOT NULL,
   activity VARCHAR(24) DEFAULT NULL,
-  activitydate VARCHAR(29) DEFAULT NULL,
-  transactionid VARCHAR(56) DEFAULT NULL,
+  activitydate VARCHAR(29) NOT NULL,
+  transactionid VARCHAR(56) NOT NULL,
   eventname VARCHAR(255),
   server_ip VARCHAR(40),
   server_port VARCHAR(5),
@@ -214,8 +214,8 @@ CREATE TABLE openidm.auditaccess (
 CREATE TABLE openidm.auditactivity (
   objectid VARCHAR(38) NOT NULL,
   activity VARCHAR(24) DEFAULT NULL,
-  activitydate VARCHAR(29) DEFAULT NULL,
-  transactionid VARCHAR(56) DEFAULT NULL,
+  activitydate VARCHAR(29) NOT NULL,
+  transactionid VARCHAR(56) NOT NULL,
   eventname VARCHAR(255) DEFAULT NULL,
   userid VARCHAR(255) DEFAULT NULL,
   runas VARCHAR(255) DEFAULT NULL,
@@ -244,7 +244,7 @@ CREATE INDEX idx_auditactivity_transactionid ON openidm.auditactivity (transacti
 CREATE TABLE openidm.auditrecon (
   objectid VARCHAR(38) NOT NULL,
   transactionid VARCHAR(56) NOT NULL,
-  activitydate VARCHAR(29) DEFAULT NULL,
+  activitydate VARCHAR(29) NOT NULL,
   eventname VARCHAR(50) DEFAULT NULL,
   userid VARCHAR(255) DEFAULT NULL,
   activity VARCHAR(24) DEFAULT NULL,
@@ -273,7 +273,7 @@ CREATE TABLE openidm.auditrecon (
 CREATE TABLE openidm.auditsync (
   objectid VARCHAR(38) NOT NULL,
   transactionid VARCHAR(56) NOT NULL,
-  activitydate VARCHAR(29) DEFAULT NULL,
+  activitydate VARCHAR(29) NOT NULL,
   eventname VARCHAR(50) DEFAULT NULL,
   userid VARCHAR(255) DEFAULT NULL,
   activity VARCHAR(24) DEFAULT NULL,
