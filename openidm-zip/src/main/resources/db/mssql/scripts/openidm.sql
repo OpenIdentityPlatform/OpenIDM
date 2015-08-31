@@ -250,7 +250,7 @@ CREATE  TABLE  [openidm].[auditrecon]
 (
   objectid NVARCHAR(38) NOT NULL ,
   transactionid NVARCHAR(56) NOT NULL ,
-  activitydate NVARCHAR(29) NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
   eventname NVARCHAR(50) NULL ,
   userid NVARCHAR(255) NULL ,
   activity NVARCHAR(24) NULL ,
@@ -283,7 +283,7 @@ CREATE  TABLE  [openidm].[auditsync]
 (
   objectid NVARCHAR(38) NOT NULL ,
   transactionid NVARCHAR(56) NOT NULL ,
-  activitydate NVARCHAR(29) NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
   eventname NVARCHAR(50) NULL ,
   userid NVARCHAR(255) NULL ,
   activity NVARCHAR(24) NULL ,
@@ -311,8 +311,8 @@ CREATE  TABLE [openidm].[auditactivity]
 (
   objectid NVARCHAR(38) NOT NULL,
   activity NVARCHAR(24) NULL,
-  activitydate NVARCHAR(29) NULL,
-  transactionid NVARCHAR(56) NULL,
+  activitydate NVARCHAR(29) NOT NULL,
+  transactionid NVARCHAR(56) NOT NULL,
   eventname NVARCHAR(255) NULL,
   userid NVARCHAR(255) NULL,
   runas NVARCHAR(255) NULL,
@@ -359,8 +359,8 @@ BEGIN
 CREATE  TABLE [openidm].[auditaccess] (
   objectid NVARCHAR(38) NOT NULL ,
   activity NVARCHAR(24) NULL ,
-  activitydate NVARCHAR(29) NULL ,
-  transactionid NVARCHAR(56) NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
+  transactionid NVARCHAR(56) NOT NULL ,
   eventname NVARCHAR(255) NULL ,
   server_ip NVARCHAR(40) ,
   server_port NVARCHAR(5) ,
@@ -393,8 +393,8 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditauthentication' and 
 BEGIN
 CREATE TABLE [openidm].[auditauthentication] (
   objectid NVARCHAR(38) NOT NULL ,
-  transactionid NVARCHAR(56) NULL ,
-  activitydate NVARCHAR(29) NULL ,
+  transactionid NVARCHAR(56) NOT NULL ,
+  activitydate NVARCHAR(29) NOT NULL ,
   userid NVARCHAR(255) NULL ,
   eventname NVARCHAR(50) NULL ,
   result NVARCHAR(255) NULL ,
