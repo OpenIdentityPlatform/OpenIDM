@@ -1,4 +1,4 @@
-<div class="tab-pane-body sync-input-body">
+<div class="sync-input-body">
     <div  id="syncForm" class="form clearfix panel-collapse-group">
 
         <!--Policies-->
@@ -13,12 +13,8 @@
             </div>
 
             <div id="policyPatternBody" class="collapse in" role="tabpanel" aria-labelledby="policyPatternHeading" aria-expanded="true">
-                <div class="panel-body">
-                    <div class="group-body">
-                        <p class="panel-description">{{t "templates.sync.policiesDesc"}}</p>
-                        <div id="policyPattern"></div>
-                    </div>
-                </div>
+                <p class="panel-description inline-description">{{t "templates.sync.policiesDesc"}}</p>
+                <div id="policyPattern"></div>
             </div>
         </div>
 
@@ -33,12 +29,8 @@
                 </h4>
             </div>
             <div id="situationalQueriesBody" class="collapse {{#unless hideSituational}} in{{/unless}}" role="tabpanel" aria-labelledby="situationalQueriesHeading" aria-expanded="{{#unless hideSituational}} in{{/unless}}">
-                <div class="panel-body">
-                    <div class="group-body">
-                        <p class="panel-description">{{t "templates.sync.situationalEventScriptsDesc"}}</p>
-                        <div id="situationalQueries"></div>
-                    </div>
-                </div>
+                <p class="panel-description inline-description">{{t "templates.sync.situationalEventScriptsDesc"}}</p>
+                <div id="situationalQueries"></div>
             </div>
         </div>
 
@@ -53,12 +45,8 @@
                 </h4>
             </div>
             <div id="reconQueryViewBody" class="collapse {{#unless hideRecon}} in{{/unless}}" role="tabpanel" aria-labelledby="reconQueryViewHeading" aria-expanded="{{#unless hideRecon}} in{{/unless}}">
-                <div class="panel-body">
-                    <div class="group-body">
-                        <p class="panel-description">{{t "templates.sync.reconScriptDesc"}}</p>
-                        <div id="reconQueryView"></div>
-                    </div>
-                </div>
+                <p class="panel-description inline-description">{{t "templates.sync.reconScriptDesc"}}</p>
+                <div id="reconQueryView"></div>
             </div>
         </div>
 
@@ -74,12 +62,8 @@
                 </h4>
             </div>
             <div id="singleRecordReconBody" class="collapse" role="tabpanel" aria-labelledby="singleRecordReconHeading">
-                <div class="panel-body">
-                    <div class="group-body">
-                        <p class="panel-description">{{t "templates.sync.singleRecordReconDesc"}}</p>
-                        <div id="testSyncView"></div>
-                    </div>
-                </div>
+                <p class="panel-description inline-description">{{t "templates.sync.singleRecordReconDesc"}}</p>
+                <div id="testSyncView"></div>
             </div>
         </div>
 
