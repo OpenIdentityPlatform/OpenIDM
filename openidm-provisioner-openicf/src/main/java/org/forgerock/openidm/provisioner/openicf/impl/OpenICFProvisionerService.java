@@ -2116,6 +2116,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * The {@code previousStage} object is the previously returned value of this
      * method.
      *
+     * @param context the request context associated with the invocation
      * @param previousStage
      *            The previously returned object. If null then it's the first
      *            execution.
@@ -2132,7 +2133,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.JsonValue)}
      *      or any exception happed inside the connector.
      */
-    public JsonValue liveSynchronize(final String objectType, final JsonValue previousStage) throws ResourceException {
+    public JsonValue liveSynchronize(final Context context, final String objectType, final JsonValue previousStage)
+            throws ResourceException {
 
         if (!serviceAvailable) {
             return previousStage;
@@ -2215,7 +2217,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createInternalContext();
                                                     connectionFactory.getConnection().action(context, onCreateRequest);
 
                                                     activityLogger.log(context, onCreateRequest,
@@ -2236,7 +2237,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createInternalContext();
                                                     connectionFactory.getConnection().action(context, onUpdateRequest);
 
                                                     activityLogger.log(context, onUpdateRequest,
@@ -2252,7 +2252,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
-                                                    final Context context = ContextUtil.createInternalContext();
                                                     connectionFactory.getConnection().action(context, onDeleteRequest);
 
                                                     activityLogger.log(context, onDeleteRequest,

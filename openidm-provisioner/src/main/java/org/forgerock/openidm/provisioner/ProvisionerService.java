@@ -79,10 +79,11 @@ public interface ProvisionerService {
      * <p/>
      * All exceptions must be handled to save the the new stage object.
      *
+     * @param context the request context associated with the invocation
      * @param objectType
      * @param previousStage           The previously returned object. If null then it's the first execution.
      * @return The new updated stage object. This will be the {@code previousStage} at next call.
      * @throws ResourceException if a failure occurred during live sync
      */
-    JsonValue liveSynchronize(String objectType, JsonValue previousStage) throws ResourceException;
+    JsonValue liveSynchronize(Context context, String objectType, JsonValue previousStage) throws ResourceException;
 }
