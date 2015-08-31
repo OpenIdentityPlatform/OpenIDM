@@ -131,32 +131,45 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`securitykeys` (
   `rev` VARCHAR(38) NOT NULL ,
   `keypair` TEXT NULL ,
   PRIMARY KEY (`objectid`) );
-  
-   
+
+CREATE TABLE IF NOT EXISTS `openidm`.`auditauthentication` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `activitydate` VARCHAR(29) NOT NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `userid` VARCHAR(255) NULL ,
+  `eventname` VARCHAR(50) NULL ,
+  `result` VARCHAR(255) NULL ,
+  `principals` TEXT ,
+  `context` TEXT ,
+  `sessionid` VARCHAR(255) ,
+  `entries` TEXT ,
+  PRIMARY KEY (`objectid`) );
+
 CREATE TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `entrytype` VARCHAR(7) NULL ,
-  `rootactionid` VARCHAR(511) NULL ,
-  `reconid` VARCHAR(56) NULL ,
-  `reconaction` VARCHAR(36) NULL ,
-  `reconciling` VARCHAR(12) NULL ,
-  `sourceobjectid` VARCHAR(511) NULL ,
-  `targetobjectid` VARCHAR(511) NULL ,
-  `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `situation` VARCHAR(24) NULL ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `activitydate` VARCHAR(29) NOT NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `eventname` VARCHAR(50) NULL ,
+  `userid` VARCHAR(255) NULL ,
   `activity` VARCHAR(24) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `message` TEXT NULL ,
-  `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
-  `mapping` VARCHAR(511) NULL ,
   `linkqualifier` VARCHAR(255) NULL ,
-  `messagedetail` MEDIUMTEXT NULL,
+  `mapping` VARCHAR(511) NULL ,
+  `message` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL ,
+  `situation` VARCHAR(24) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `status` VARCHAR(20) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
+  `reconciling` VARCHAR(12) NULL ,
+  `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
+  `reconaction` VARCHAR(36) NULL ,
+  `entrytype` VARCHAR(7) NULL ,
+  `reconid` VARCHAR(56) NULL ,
   PRIMARY KEY (`objectid`) );
 
 
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_reconid` ON `openidm`.`auditrecon`(`reconid` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_transactionid` ON `openidm`.`auditrecon` (`transactionid` ASC);
 CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_targetobjectid` ON `openidm`.`auditrecon`(`targetobjectid` ASC);
 CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_sourceobjectid` ON `openidm`.`auditrecon`(`sourceobjectid` ASC);
 CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_activitydate` ON `openidm`.`auditrecon`(`activitydate` ASC);
@@ -167,42 +180,46 @@ CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_status` ON `openidm`.`audit
    
 CREATE TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(511) NULL ,
-  `sourceobjectid` VARCHAR(511) NULL ,
-  `targetobjectid` VARCHAR(511) NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `situation` VARCHAR(24) NULL ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `activitydate` VARCHAR(29) NOT NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `eventname` VARCHAR(50) NULL ,
+  `userid` VARCHAR(255) NULL ,
   `activity` VARCHAR(24) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `message` TEXT NULL ,
-  `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
-  `mapping` VARCHAR(511) NULL ,
   `linkqualifier` VARCHAR(255) NULL ,
-  `messagedetail` MEDIUMTEXT NULL,
+  `mapping` VARCHAR(511) NULL ,
+  `message` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL ,
+  `situation` VARCHAR(24) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `status` VARCHAR(20) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
   PRIMARY KEY (`objectid`) );
   
   
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(511) NULL ,
-  `parentactionid` VARCHAR(511) NULL ,
-  `activityid` VARCHAR(511) NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `activity` VARCHAR(24) NULL ,
-  `message` TEXT NULL ,
-  `subjectid` VARCHAR(511) NULL ,
-  `subjectrev` VARCHAR(255) NULL ,
-  `requester` TEXT NULL ,
-  `approver` TEXT NULL ,
+  `activitydate` VARCHAR(29) NOT NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `eventname` VARCHAR(255) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `runas` VARCHAR(255) NULL ,
+  `resource_uri` VARCHAR(255) NULL ,
+  `resource_protocol` VARCHAR(10) NULL ,
+  `resource_method` VARCHAR(10) NULL ,
+  `resource_detail` VARCHAR(255) NULL ,
   `subjectbefore` MEDIUMTEXT NULL ,
   `subjectafter` MEDIUMTEXT NULL ,
-  `status` VARCHAR(7) NULL ,
   `changedfields` VARCHAR(255) NULL ,
-  `passwordchanged` VARCHAR(5) NULL,
+  `passwordchanged` VARCHAR(5) NULL ,
+  `subjectrev` VARCHAR(255) NULL ,
+  `message` TEXT NULL,
+  `activityobjectid` VARCHAR(255) ,
+  `status` VARCHAR(20) ,
   PRIMARY KEY (`objectid`));
   
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditactivity_rootactionid` ON  `openidm`.`auditactivity`(`rootactionid` ASC);    
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditactivity_transactionid` ON  `openidm`.`auditactivity`(`transactionid` ASC);
   
 CREATE  TABLE IF NOT EXISTS `openidm`.`internaluser` (
   `objectid` VARCHAR(254) NOT NULL ,
@@ -214,13 +231,29 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`internaluser` (
   
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `activity` VARCHAR(24) NULL ,
-  `ip` VARCHAR(40) NULL ,
+  `activitydate` VARCHAR(29) NOT NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `eventname` VARCHAR(255) ,
+  `server_ip` VARCHAR(40) ,
+  `server_port` VARCHAR(5) ,
+  `client_host` VARCHAR(255) ,
+  `client_ip` VARCHAR(40) ,
+  `client_port` VARCHAR(5) ,
+  `userid` VARCHAR(255) NULL ,
   `principal` TEXT NULL ,
   `roles` VARCHAR(1024) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `userid` VARCHAR(24) NULL ,
+  `auth_component` VARCHAR(255) NULL ,
+  `resource_uri` VARCHAR(255) NULL ,
+  `resource_protocol` VARCHAR(10) NULL ,
+  `resource_method` VARCHAR(10) NULL ,
+  `resource_detail` VARCHAR(255) NULL ,
+  `http_method` VARCHAR(10) NULL ,
+  `http_path` VARCHAR(255) NULL ,
+  `http_querystring` VARCHAR(255) NULL ,
+  `http_headers` TEXT ,
+  `status` VARCHAR(20) NULL ,
+  `elapsedtime` VARCHAR(13) NULL ,
   PRIMARY KEY (`objectid`) );
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjects` (
