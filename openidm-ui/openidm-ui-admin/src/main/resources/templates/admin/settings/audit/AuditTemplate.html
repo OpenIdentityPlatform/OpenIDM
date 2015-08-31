@@ -1,69 +1,65 @@
-<div class="tab-pane-body">
-    <div class="form clearfix panel-collapse-group">
+<div class="form clearfix panel-collapse-group">
+    <!--AuditEventHandlersView-->
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading" role="tab" id="AuditEventHandlersHeader">
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#configuring-event-handlers" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#AuditEventHandlersBody" aria-expanded="true" aria-controls="AuditEventHandlersHeader">
+                    {{t "templates.audit.eventHandlers.title"}}
+                </a>
+            </h4>
+        </div>
 
-        <!--AuditEventHandlersView-->
-        <div class="panel panel-default panel-collapse">
-            <div class="panel-heading" role="tab" id="AuditEventHandlersHeader">
-                <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#configuring-event-handlers" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#AuditEventHandlersBody" aria-expanded="true" aria-controls="AuditEventHandlersHeader">
-                        {{t "templates.audit.eventHandlers.title"}}
-                    </a>
-                </h4>
-            </div>
-
-            <div id="AuditEventHandlersBody" class="collapse in" role="tabpanel" aria-labelledby="AuditEventHandlersHeader" aria-expanded="true">
-                <div class="panel-body">
-                    <div class="group-body">
-                        <p class="panel-description">{{t "templates.audit.eventHandlers.desc"}}</p>
-                        <div id="AuditEventHandlersView"></div>
-                    </div>
+        <div id="AuditEventHandlersBody" class="collapse in" role="tabpanel" aria-labelledby="AuditEventHandlersHeader" aria-expanded="true">
+            <div class="panel-body">
+                <div class="group-body">
+                    <p class="panel-description">{{t "templates.audit.eventHandlers.desc"}}</p>
+                    <div id="AuditEventHandlersView"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!--AuditEventsView-->
-        <div class="panel panel-default panel-collapse">
-            <div class="panel-heading" role="tab" id="AuditEventsHeader">
-                <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#audit-log-types" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#AuditEventsBody" aria-expanded="true" aria-controls="AuditEventsHeader">
-                        {{t "templates.audit.events.title"}}
-                    </a>
-                </h4>
-            </div>
+    <!--AuditEventsView-->
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading" role="tab" id="AuditEventsHeader">
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#audit-log-types" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#AuditEventsBody" aria-expanded="true" aria-controls="AuditEventsHeader">
+                    {{t "templates.audit.events.title"}}
+                </a>
+            </h4>
+        </div>
 
-            <div id="AuditEventsBody" class="collapse in" role="tabpanel" aria-labelledby="AuditEventsHeader" aria-expanded="true">
-                <div class="panel-body">
-                    <div class="group-body">
-                        <p class="panel-description">{{t "templates.audit.events.desc"}}</p>
-                        <div id="AuditEventsView"></div>
-                    </div>
+        <div id="AuditEventsBody" class="collapse in" role="tabpanel" aria-labelledby="AuditEventsHeader" aria-expanded="true">
+            <div class="panel-body">
+                <div class="group-body">
+                    <p class="panel-description">{{t "templates.audit.events.desc"}}</p>
+                    <div id="AuditEventsView"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!--ExceptionFormatterView-->
-        <div class="panel panel-default panel-collapse">
-            <div class="panel-heading" role="tab" id="ExceptionFormatterHeader">
-                <!--<a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>-->
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#ExceptionFormatterBody" aria-expanded="true" aria-controls="ExceptionFormatterHeader">
-                        {{t "templates.audit.exceptionFormatter.title"}}
-                    </a>
-                </h4>
-            </div>
+    <!--ExceptionFormatterView-->
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading" role="tab" id="ExceptionFormatterHeader">
+            <!--<a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>-->
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#ExceptionFormatterBody" aria-expanded="true" aria-controls="ExceptionFormatterHeader">
+                    {{t "templates.audit.exceptionFormatter.title"}}
+                </a>
+            </h4>
+        </div>
 
-            <div id="ExceptionFormatterBody" class="collapse in" role="tabpanel" aria-labelledby="ExceptionFormatterHeader" aria-expanded="true">
-                <div class="panel-body">
-                    <div class="group-body">
-                        <p class="panel-description">{{t "templates.audit.exceptionFormatter.desc"}}</p>
-                        <div id="ExceptionFormatterView"></div>
-                    </div>
+        <div id="ExceptionFormatterBody" class="collapse in" role="tabpanel" aria-labelledby="ExceptionFormatterHeader" aria-expanded="true">
+            <div class="panel-body">
+                <div class="group-body">
+                    <p class="panel-description">{{t "templates.audit.exceptionFormatter.desc"}}</p>
+                    <div id="ExceptionFormatterView"></div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 

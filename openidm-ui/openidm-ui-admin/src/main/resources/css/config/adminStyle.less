@@ -42,9 +42,14 @@
   border-bottom: 1px solid #eee;
 }
 
-.no-border{
+.no-border {
   border: none;
 }
+
+.no-margin-bottom {
+  margin-bottom:0px;
+}
+
 
 .alert-warning .fa,
 .alert-danger .fa {
@@ -134,21 +139,17 @@
 /*
   Panel Styles
 */
+.panel-description.inline-description {
+  margin-bottom:0px;
+  margin-left:33px;
+  margin-top:10px;
+}
+
 .panel-collapse h4.panel-title {
   font-size: 18px;
   text-transform: none;
   letter-spacing: 0;
   font-weight: 600;
-}
-.panel-heading {
-  padding: 30px 30px 30px 15px !important;
-}
-.panel-body {
-  padding: 30px;
-}
-
-.collapse > .panel-body {
-  padding: 0 30px 30px;
 }
 
 .panel-collapse-group .panel {
@@ -217,7 +218,7 @@ table.placeholder {
   }
 
   .form-group {
-    margin-right:20px;
+    margin-right:15px;
   }
 
   .toolbar-search {
@@ -268,6 +269,10 @@ table.placeholder {
   border-bottom: 1px solid #ddd;
   border-top: 1px solid #ddd;
 
+  .btn-group.left-group {
+    margin-left:15px;
+  }
+
   &.no-top-border {
     border-top:0px;
   }
@@ -304,11 +309,7 @@ table.placeholder {
   Script List Styles
 */
 .scripts-container {
-  margin-top: 15px;
-
   .table {
-    margin-top: 15px;
-
     td,th {
       border-top: none;
       border-bottom: 1px solid #eee;
@@ -640,21 +641,6 @@ Dialog Catch
 .panel-collapse-group {
   border:none;
 }
-
-.tab-content {
-  background-color: #fff;
-}
-
-.tab-pane-button-footer {
-  height:35px;
-}
-
-.tab-pane-button-footer .tab-button-bar {
-  margin-right:10px;
-  position:relative;
-  bottom:10px;
-}
-
 
 .tab-content {
   background-color: #fff;

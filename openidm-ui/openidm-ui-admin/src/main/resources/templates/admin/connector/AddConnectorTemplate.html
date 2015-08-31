@@ -1,90 +1,85 @@
-<section>
-    <div class="back-bar">
-        <div class="container">
-            <a href="#connectors/">{{t "templates.connector.backToConnectorList"}}</a>
-        </div>
-    </div>
+<div class="back-bar">
     <div class="container">
-        <div class="page-header no-border">
-            <h1>{{t "templates.connector.addConnectorTitle"}}</h1>
-        </div>
+        <a href="#connectors/">{{t "templates.connector.backToConnectorList"}}</a>
     </div>
-</section>
-<section>
-    <div class="container">
-        <form class="form-horizontal" role="form" id="connectorForm">
-            <div class="panel panel-connector panel-default panel-content panel-collapse-group has-border">
-                <div>
-                    <div class="panel panel-default panel-collapse">
-                        <div class="panel-heading" role="tab" id="connectorGeneralHeading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" href="#connectorGeneralDetails" aria-expanded="true" aria-controls="connectorGeneralDetails" class="">{{t "common.form.generalDetails"}}</a>
-                            </h4>
-                        </div>
-                        <div id="connectorGeneralDetails" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorGeneralDetails" aria-expanded="true">
-                            <div class="panel-body">
-                                <div class="form-group has-feedback">
-                                    <label class="col-sm-3 control-label" for="connectorName">{{t "templates.connector.connectorName"}}</label>
-                                    <div class="col-sm-8">
-                                        <input class="form-control" type="text" id="connectorName" name="name" value="{{connectorName}}" {{#if editState}} disabled="true" {{else}}data-validator="required spaceCheck" data-validator-event="keyup blur" required autofocus {{/if}} autofocus />
-                                        <div class="validation-message"></div>
+</div>
+<div class="container">
+    <div class="page-header">
+        <h1>{{t "templates.connector.addConnectorTitle"}}</h1>
+    </div>
+</div>
+<div class="container">
+    <form class="form-horizontal" role="form" id="connectorForm">
+        <div class="panel panel-collapse-group has-border">
+            <div>
+                <div class="panel panel-default panel-collapse">
+                    <div class="panel-heading" role="tab" id="connectorGeneralHeading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#connectorGeneralDetails" aria-expanded="true" aria-controls="connectorGeneralDetails" class="">{{t "common.form.generalDetails"}}</a>
+                        </h4>
+                    </div>
+                    <div id="connectorGeneralDetails" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorGeneralDetails" aria-expanded="true">
+                        <div class="panel-body">
+                            <div class="form-group has-feedback">
+                                <label class="col-sm-3 control-label" for="connectorName">{{t "templates.connector.connectorName"}}</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" type="text" id="connectorName" name="name" value="{{connectorName}}" {{#if editState}} disabled="true" {{else}}data-validator="required spaceCheck" data-validator-event="keyup blur" required autofocus {{/if}} autofocus />
+                                    <div class="validation-message"></div>
 
-                                        {{#unless editState}}
-                                        <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
-                                        {{/unless}}
-                                    </div>
+                                    {{#unless editState}}
+                                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                                    {{/unless}}
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorEnabled"}}</label>
-                                    <div class="col-sm-8">
-                                        <select class="form-control" data-validator="required" data-validator-event="changed" id="connectorEnabled" name="enabled">
-                                            {{#staticSelect enabled}}
-                                            <option value="true">{{t "common.form.true"}}</option>
-                                            <option value="false">{{t "common.form.false"}}</option>
-                                            {{/staticSelect}}
-                                        </select>
-                                    </div>
+                            <div class="form-group">
+                                <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorEnabled"}}</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control" data-validator="required" data-validator-event="changed" id="connectorEnabled" name="enabled">
+                                        {{#staticSelect enabled}}
+                                        <option value="true">{{t "common.form.true"}}</option>
+                                        <option value="false">{{t "common.form.false"}}</option>
+                                        {{/staticSelect}}
+                                    </select>
                                 </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorType"}}</label>
-                                    <div class="col-sm-8">
-                                        <select name="connectorType" class="form-control" id="connectorType">
-                                            {{#each versionDisplay}}
-                                            <optgroup label="{{groupName}}">
-                                                {{#each versions}}
-                                                <option value="{{connectorName}}_{{bundleVersion}}" connectorTypeName="{{connectorName}}" bundleVersion="{{bundleVersion}}" systemType="{{systemType}}" {{#if selected}} selected{{/if}}>{{displayName}} - {{bundleVersion}}</option>
-                                                {{/each}}
-                                            </optgroup>
+                            <div class="form-group">
+                                <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorType"}}</label>
+                                <div class="col-sm-8">
+                                    <select name="connectorType" class="form-control" id="connectorType">
+                                        {{#each versionDisplay}}
+                                        <optgroup label="{{groupName}}">
+                                            {{#each versions}}
+                                            <option value="{{connectorName}}_{{bundleVersion}}" connectorTypeName="{{connectorName}}" bundleVersion="{{bundleVersion}}" systemType="{{systemType}}" {{#if selected}} selected{{/if}}>{{displayName}} - {{bundleVersion}}</option>
                                             {{/each}}
-                                        </select>
-                                    </div>
+                                        </optgroup>
+                                        {{/each}}
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div id="connectorDetails"></div>
                 </div>
-                <div class="panel-footer clearfix">
-                    <div class="pull-right">
-                        <a href="#connectors/"><button class="btn btn-default" type="button">{{t 'common.form.cancel'}}</button></a>
-                        <input  id="submitConnector" name="submitConnector" disabled="true" class="btn btn-primary" type="submit" value="{{t "templates.connector.addConnectorTitle"}}" />
-                        <div style="clear:both;"></div>
-                    </div>
+
+                <div id="connectorDetails"></div>
+            </div>
+            <div class="panel-footer clearfix">
+                <div class="pull-right">
+                    <a href="#connectors/"><button class="btn btn-default" type="button">{{t 'common.form.cancel'}}</button></a>
+                    <input  id="submitConnector" name="submitConnector" disabled="true" class="btn btn-primary" type="submit" value="{{t "templates.connector.addConnectorTitle"}}" />
                 </div>
             </div>
+        </div>
 
-            <div role="alert" id="connectorErrorMessage" class="alert alert-danger" style="display:none;">
-                <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.error" }}</strong>
-                <span class='message'></span>
-            </div>
+        <div role="alert" id="connectorErrorMessage" class="alert alert-danger" style="display:none;">
+            <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.error" }}</strong>
+            <span class='message'></span>
+        </div>
 
-            <div role="alert" id="connectorWarningMessage" class="alert alert-warning" style="display:none;">
-                <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.warning" }}</strong>
-                <span class='message'></span>
-            </div>
-        </form>
-    </div>
-</section>
+        <div role="alert" id="connectorWarningMessage" class="alert alert-warning" style="display:none;">
+            <i class='fa fa-exclamation-circle'></i><strong>{{t "common.form.warning" }}</strong>
+            <span class='message'></span>
+        </div>
+    </form>
+</div>

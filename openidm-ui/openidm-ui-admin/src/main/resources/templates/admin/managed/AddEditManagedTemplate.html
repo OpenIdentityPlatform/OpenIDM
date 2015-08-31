@@ -1,13 +1,12 @@
-<section>
-    <div class="back-bar">
-        <div class="container">
-            <a href="#managed/">{{t "templates.managed.backToManaged"}}</a>
-        </div>
-    </div>
-
-    {{#if addState}}
+<div class="back-bar">
     <div class="container">
-        <div class="page-header no-border">
+        <a href="#managed/">{{t "templates.managed.backToManaged"}}</a>
+    </div>
+</div>
+
+{{#if addState}}
+    <div class="container">
+        <div class="page-header">
             <h1>{{addEditTitle}}
                 <div  class="pull-right help-link">
                     <a href="{{docHelpUrl}}integrators-guide/index.html#chap-users-groups-roles" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
@@ -15,7 +14,7 @@
             </h1>
         </div>
     </div>
-    {{else}}
+{{else}}
     <div class="container">
         <div class="page-header clearfix">
             <span class="header-icon pull-left"><i class="fa {{#if currentManagedObject.schema.icon}}{{currentManagedObject.schema.icon}}{{else}}fa-database{{/if}}"></i></span>
@@ -40,8 +39,7 @@
             <h1>{{currentManagedObject.name}}</h1>
         </div>
     </div>
-    {{/if}}
-</section>
+{{/if}}
 <div class="container">
     <div class="panel panel-default panel-content panel-collapse-group has-border">
         <form id="managedObjectForm" class="form-horizontal" role="form" autocomplete="off">
@@ -52,7 +50,7 @@
                             <a data-toggle="collapse" href="#generalDetails" aria-expanded="true" aria-controls="ldapSelectionHeading">{{t "common.form.generalDetails"}}</a>
                         </h4>
                     </div>
-                    <div id="generalDetails" class="panel-body collapse in" role="tabpanel" aria-labelledby="generalDetails" aria-expanded="true">
+                    <div id="generalDetails" class="collapse in" role="tabpanel" aria-labelledby="generalDetails" aria-expanded="true">
                         <div class="panel-body">
                             <div class="form-group has-feedback">
                                 <label for="managedObjectName" class="col-sm-3 control-label">{{t "templates.managed.managedObjectName"}}</label>
@@ -157,7 +155,7 @@
                 </div>
             </div>
         </form>
-        <div class="panel panel-connector panel-default panel-collapse">
+        <div class="panel panel-connector panel-collapse">
             <div class="schema-panel">
                 <div class="panel-heading" role="tab" id="managedSchemaHeading">
                     <h4 class="panel-title">
@@ -176,12 +174,11 @@
                     <span class="message"></span>
                 </p>
             </div>
-            <div class="panel-footer clearfix">
-                <div class="pull-right">
-                    <a href="#managed/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
-                    <input type="submit" id="addEditManaged" name="addEditButton" value="{{addEditSubmitTitle}}" class="btn btn-primary" disabled="true">
-                    <div style="clear:both;"></div>
-                </div>
+        </div>
+        <div class="panel-footer clearfix">
+            <div class="pull-right">
+                <a href="#managed/"><input type="button" id="addEditCancel" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                <input type="submit" id="addEditManaged" name="addEditButton" value="{{addEditSubmitTitle}}" class="btn btn-primary" disabled="true">
             </div>
         </div>
     </div>
