@@ -47,13 +47,29 @@ CREATE SEQUENCE  objecttypes_id_SEQ
 PROMPT Creating Table auditaccess ...
 CREATE TABLE auditaccess (
   objectid VARCHAR2(38 CHAR) NOT NULL,
-  activitydate VARCHAR2(29 CHAR),
   activity VARCHAR2(24 CHAR),
-  ip VARCHAR2(40 CHAR),
+  activitydate VARCHAR2(29 CHAR),
+  transactionid VARCHAR2(56 CHAR),
+  eventname VARCHAR2(255 CHAR),
+  server_ip VARCHAR2(40 CHAR),
+  server_port VARCHAR2(5 CHAR),
+  client_host VARCHAR2(255 CHAR),
+  client_ip VARCHAR2(40 CHAR),
+  client_port VARCHAR2(5 CHAR),
+  userid VARCHAR2(255 CHAR),
   principal CLOB,
   roles VARCHAR2(1024 CHAR),
-  status VARCHAR2(7 CHAR),
-  userid VARCHAR2(24 CHAR)
+  auth_component VARCHAR2(255 CHAR),
+  resource_uri VARCHAR2(255 CHAR),
+  resource_protocol VARCHAR2(10 CHAR),
+  resource_method VARCHAR2(10 CHAR),
+  resource_detail VARCHAR2(255 CHAR),
+  http_method VARCHAR2(10 CHAR),
+  http_path VARCHAR2(255 CHAR),
+  http_querystring VARCHAR2(255 CHAR),
+  http_headers CLOB,
+  status VARCHAR2(20 CHAR),
+  elapsedtime VARCHAR2(13 CHAR),
 );
 
 
@@ -62,7 +78,7 @@ COMMENT ON COLUMN auditaccess.activitydate IS 'Date format: 2011-09-09T14:58:17.
 
 PROMPT Creating Primary Key Constraint PRIMARY on table auditaccess ... 
 ALTER TABLE auditaccess
-ADD CONSTRAINT PRIMARY PRIMARY KEY
+ADD CONSTRAINT PRIMARY_OBJECTID PRIMARY KEY
 (
   objectid
 )
@@ -94,27 +110,61 @@ ADD CONSTRAINT PRIMARY_0 PRIMARY KEY
 ENABLE
 ;
 
+
+-- -----------------------------------------------------
+-- Table openidm.auditauthentication
+-- -----------------------------------------------------
+PROMPT Creating TABLE auditauthentication ...
+CREATE TABLE auditauthentication (
+  objectid VARCHAR2(38 CHAR) NOT NULL,
+  transactionid VARCHAR2(56 CHAR),
+  activitydate VARCHAR2(29 CHAR),
+  userid VARCHAR2(255 CHAR),
+  eventname VARCHAR2(50 CHAR),
+  RESULT VARCHAR2(255 CHAR),
+  principals CLOB,
+  CONTEXT CLOB,
+  sessionid VARCHAR2(255 CHAR),
+  entries CLOB
+);
+
+COMMENT ON COLUMN auditauthentication.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
+;
+
+PROMPT Creating PRIMARY KEY CONSTRAINT PRIMARY ON TABLE auditauthentication ...
+ALTER TABLE auditauthentication
+ADD CONSTRAINT PRIMARY PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
+
+
 -- DROP TABLE auditactivity CASCADE CONSTRAINTS;
 
 
 PROMPT Creating Table auditactivity ...
 CREATE TABLE auditactivity (
-  objectid VARCHAR2(38 CHAR) NOT NULL,
-  rootactionid VARCHAR2(511 CHAR),
-  parentactionid VARCHAR2(511 CHAR),
-  activityid VARCHAR2(511 CHAR),
-  activitydate VARCHAR2(29 CHAR),
-  activity VARCHAR2(24 CHAR),
+  objectid VARCHAR2(38 CHAR) NOT NULL, 
+  activity VARCHAR2(24 CHAR),  
+  activitydate VARCHAR2(29 CHAR), 
+  transactionid VARCHAR2(56 CHAR),  
+  eventname VARCHAR2(255 CHAR),  
+  userid VARCHAR2(255 CHAR),  
+  runas VARCHAR2(255 CHAR),  
+  resource_uri VARCHAR2(255 CHAR),  
+  resource_protocol VARCHAR2(10 CHAR),  
+  resource_method VARCHAR2(10 CHAR),  
+  resource_detail VARCHAR2(255 CHAR),  
+  subjectbefore CLOB, 
+  subjectafter CLOB, 
+  changedfields VARCHAR2(255 CHAR),  
+  passwordchanged VARCHAR2(5 CHAR),  
+  subjectrev VARCHAR2(255 CHAR),  
   message CLOB,
-  subjectid VARCHAR2(511 CHAR),
-  subjectrev VARCHAR2(255 CHAR),
-  requester CLOB,
-  approver CLOB,
-  subjectbefore CLOB,
-  subjectafter CLOB,
-  changedfields VARCHAR2(255 CHAR),
-  passwordchanged VARCHAR2(5 CHAR),
-  status VARCHAR2(7 CHAR)
+  activityobjectid VARCHAR2(255 CHAR), 
+  status VARCHAR2(20 CHAR), 
 );
 
 
@@ -129,10 +179,10 @@ ADD CONSTRAINT PRIMARY_8 PRIMARY KEY
 )
 ENABLE
 ;
-PROMPT Creating Index idx_auditactivity_rootactionid on auditactivity ...
-CREATE INDEX idx_auditactivity_rootactionid ON auditactivity
+PROMPT Creating Index idx_auditactivity_transactionid on auditactivity ...
+CREATE INDEX idx_auditactivity_transactionid ON auditactivity
 (
-  rootactionid
+  transactionid
 ) 
 ;
 
@@ -141,25 +191,26 @@ CREATE INDEX idx_auditactivity_rootactionid ON auditactivity
 
 PROMPT Creating Table auditrecon ...
 CREATE TABLE auditrecon (
-  objectid VARCHAR2(38 CHAR) NOT NULL,
-  entrytype VARCHAR2(7 CHAR),
-  rootactionid VARCHAR2(511 CHAR),
-  reconid VARCHAR2(56 CHAR),
-  reconaction VARCHAR2(36 CHAR),
-  reconciling VARCHAR2(12 CHAR),
-  sourceobjectid VARCHAR2(511 CHAR),
-  targetobjectid VARCHAR2(511 CHAR),
-  ambiguoustargetobjectids CLOB,
+  objectid VARCHAR2(38) NOT NULL,
+  transactionid VARCHAR2(56) NOT NULL,
   activitydate VARCHAR2(29 CHAR),
-  situation VARCHAR2(24 CHAR),
+  eventname VARCHAR2(50 CHAR),
+  userid VARCHAR2(255 CHAR),
   activity VARCHAR2(24 CHAR),
-  status VARCHAR2(7 CHAR),
-  message CLOB,
-  actionid VARCHAR2(511 CHAR),
   exceptiondetail CLOB,
-  mapping VARCHAR2(511 CHAR),
   linkqualifier VARCHAR2(255 CHAR),
-  messagedetail CLOB
+  mapping VARCHAR2(511 CHAR),
+  message CLOB,
+  messagedetail CLOB,
+  situation VARCHAR2(24 CHAR),
+  sourceobjectid VARCHAR2(511 CHAR),
+  status VARCHAR2(20 CHAR),
+  targetobjectid VARCHAR2(511 CHAR),
+  reconciling VARCHAR2(12 CHAR),
+  ambiguoustargetobjectids CLOB,
+  reconaction VARCHAR2(36 CHAR),
+  entrytype VARCHAR2(7 CHAR),
+  reconid VARCHAR2(56 CHAR),
 );
 
 
@@ -180,20 +231,21 @@ ENABLE
 
 PROMPT Creating Table auditsync ...
 CREATE TABLE auditsync (
-  objectid VARCHAR2(38 CHAR) NOT NULL,
-  rootactionid VARCHAR2(511 CHAR),
-  sourceobjectid VARCHAR2(511 CHAR),
-  targetobjectid VARCHAR2(511 CHAR),
+  objectid VARCHAR2(38) NOT NULL,
+  transactionid VARCHAR2(56) NOT NULL,
   activitydate VARCHAR2(29 CHAR),
-  situation VARCHAR2(24 CHAR),
+  eventname VARCHAR2(50 CHAR),
+  userid VARCHAR2(255 CHAR),
   activity VARCHAR2(24 CHAR),
-  status VARCHAR2(7 CHAR),
-  message CLOB,
-  actionid VARCHAR2(511 CHAR),
   exceptiondetail CLOB,
-  mapping VARCHAR2(511 CHAR),
   linkqualifier VARCHAR2(255 CHAR),
-  messagedetail CLOB
+  mapping VARCHAR2(511 CHAR),
+  message CLOB,
+  messagedetail CLOB,
+  situation VARCHAR2(24 CHAR),
+  sourceobjectid VARCHAR2(511 CHAR),
+  status VARCHAR2(20 CHAR),
+  targetobjectid VARCHAR2(511 CHAR),
 );
 
 
