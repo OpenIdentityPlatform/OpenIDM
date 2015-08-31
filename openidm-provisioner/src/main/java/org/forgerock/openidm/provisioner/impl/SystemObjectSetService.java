@@ -457,7 +457,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             ReadRequest readRequest = Requests.newReadRequest(previousStageResourceContainer, previousStageId);
             previousStage = connectionFactory.getConnection().read(context, readRequest);
 
-            response = locateService(id).liveSynchronize(id.getObjectType(),
+            response = locateService(id).liveSynchronize(context, id.getObjectType(),
                     previousStage != null && previousStage.getContent() != null ? previousStage.getContent() : null);
             UpdateRequest updateRequest = Requests.newUpdateRequest(previousStageResourceContainer, previousStageId, response);
             updateRequest.setRevision(previousStage.getRevision());
@@ -466,7 +466,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             if (previousStage != null) {
                 throw e;
             }
-            response = locateService(id).liveSynchronize(id.getObjectType(), null);
+            response = locateService(id).liveSynchronize(context, id.getObjectType(), null);
             if (response != null) {
                 CreateRequest createRequest = Requests.newCreateRequest(previousStageResourceContainer, previousStageId, response);
                 connectionFactory.getConnection().create(context, createRequest);
