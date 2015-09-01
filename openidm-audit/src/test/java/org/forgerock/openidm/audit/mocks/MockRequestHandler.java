@@ -22,7 +22,6 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +65,7 @@ public class MockRequestHandler implements RequestHandler {
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         requests.add(request);
-        return newResultPromise(newActionResponse(json(object())));
+        return newActionResponse(json(object())).asPromise();
     }
 
     /**
@@ -75,7 +74,7 @@ public class MockRequestHandler implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         requests.add(request);
-        return newResultPromise(newResourceResponse(request.getNewResourceId(), "1", request.getContent()));
+        return newResourceResponse(request.getNewResourceId(), "1", request.getContent()).asPromise();
     }
 
     /**
@@ -84,7 +83,7 @@ public class MockRequestHandler implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         requests.add(request);
-        return newResultPromise(newResourceResponse("", "", json(object())));
+        return newResourceResponse("", "", json(object())).asPromise();
     }
 
     /**
@@ -93,7 +92,7 @@ public class MockRequestHandler implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         requests.add(request);
-        return newResultPromise(newResourceResponse("", "", json(object())));
+        return newResourceResponse("", "", json(object())).asPromise();
     }
 
     /**
@@ -107,7 +106,7 @@ public class MockRequestHandler implements RequestHandler {
         for (final ResourceResponse resource : resources) {
             handler.handleResource(resource);
         }
-        return newResultPromise(newQueryResponse());
+        return newQueryResponse().asPromise();
     }
 
     /**
@@ -126,7 +125,7 @@ public class MockRequestHandler implements RequestHandler {
             }
         }
         assertThat(returnResource).isNotNull();
-        return newResultPromise(returnResource);
+        return returnResource.asPromise();
     }
 
     /**
@@ -135,7 +134,7 @@ public class MockRequestHandler implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         requests.add(request);
-        return newResultPromise(newResourceResponse("", "", json(object())));
+        return newResourceResponse("", "", json(object())).asPromise();
     }
 
     public void addResource(final ResourceResponse resource) {

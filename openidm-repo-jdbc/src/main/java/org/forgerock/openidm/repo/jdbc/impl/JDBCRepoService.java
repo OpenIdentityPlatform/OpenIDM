@@ -39,7 +39,6 @@ import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -173,7 +172,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
-            return newResultPromise(read(request));
+            return read(request).asPromise();
         } catch (final ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -224,7 +223,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         try {
-            return newResultPromise(create(request));
+            return create(request).asPromise();
         } catch (final ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -316,7 +315,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         try {
-            return newResultPromise(update(request));
+            return update(request).asPromise();
         } catch (final ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -411,7 +410,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         try {
-            return newResultPromise(delete(request));
+            return delete(request).asPromise();
         } catch (final ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -592,9 +591,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
             // TODO-crest3 Check for count policy in the request
             if (resultCount == NO_COUNT) {
-                return newResultPromise(newQueryResponse(nextCookie));
+                return newQueryResponse(nextCookie).asPromise();
             } else {
-                return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
+                return newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount).asPromise();
             }
         } catch (final ResourceException e) {
             return e.asPromise();
@@ -656,7 +655,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         try {
             if (ACTION_COMMAND.equalsIgnoreCase(request.getAction())) {
-                return newResultPromise(command(request));
+                return command(request).asPromise();
             } else {
                 throw new NotSupportedException("Action operations are not supported");
             }

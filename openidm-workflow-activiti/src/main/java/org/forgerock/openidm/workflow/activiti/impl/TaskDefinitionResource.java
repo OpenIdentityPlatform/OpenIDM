@@ -17,7 +17,6 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -135,7 +134,7 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
                     r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormHandler.getFormKey());
                     handler.handleResource(r);
                 }
-                return newResultPromise(newQueryResponse());
+                return newQueryResponse().asPromise();
             } else {
                 return new BadRequestException("Unknown query-id").asPromise();
             }
@@ -168,7 +167,7 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
                         reader.close();
                     }
                 }
-                return newResultPromise(r);
+                return r.asPromise();
             } else {
                 throw new NotFoundException("Task definition for " + resourceId + " was not found");
             }

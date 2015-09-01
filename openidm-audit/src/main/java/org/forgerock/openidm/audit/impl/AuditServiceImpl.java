@@ -35,7 +35,6 @@ import static org.forgerock.openidm.audit.impl.AuditLogFilters.newEventTypeFilte
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -390,7 +389,7 @@ public class AuditServiceImpl implements AuditService {
 
         // Don't audit the audit log
         if (context.containsContext(AuditContext.class)) {
-            return newResultPromise(newResourceResponse(null, null, request.getContent()));
+            return newResourceResponse(null, null, request.getContent()).asPromise();
         }
 
         LOGGER.debug("Audit create called for {} with {}", request.getResourcePath(), request.getContent().asMap());
@@ -400,7 +399,7 @@ public class AuditServiceImpl implements AuditService {
                     request.getResourcePath(),
                     request.getNewResourceId(),
                     request.getContent().get(new JsonPointer("resourceOperation/operation/method")));
-            return newResultPromise(newResourceResponse(null, null, request.getContent()));
+            return newResourceResponse(null, null, request.getContent()).asPromise();
         }
 
         return auditService.handleCreate(context, request);
@@ -487,17 +486,17 @@ public class AuditServiceImpl implements AuditService {
                     List<String> changedFields =
                             checkForFields(watchFieldFilters, content.get("before"), content.get("after"));
 
-                    return newResultPromise(newActionResponse(new JsonValue(changedFields)));
+                    return newActionResponse(new JsonValue(changedFields)).asPromise();
 
                 case getChangedPasswordFields:
                     List<String> changedPasswordFields =
                             checkForFields(passwordFieldFilters, content.get("before"), content.get("after"));
 
-                    return newResultPromise(newActionResponse(new JsonValue(changedPasswordFields)));
+                    return newActionResponse(new JsonValue(changedPasswordFields)).asPromise();
 
                 case availableHandlers:
                     try {
-                        return newResultPromise(newActionResponse(getAvailableAuditEventHandlersWithConfigSchema()));
+                        return newActionResponse(getAvailableAuditEventHandlersWithConfigSchema()).asPromise();
                     } catch (ResourceException e) {
                         return e.asPromise();
                     }

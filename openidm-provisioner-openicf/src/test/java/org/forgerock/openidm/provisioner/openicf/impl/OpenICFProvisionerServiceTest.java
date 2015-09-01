@@ -431,7 +431,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
 
         public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
             requests.add(request);
-            return newResultPromise(newActionResponse(new JsonValue(true)));
+            return newActionResponse(new JsonValue(true)).asPromise();
         }
 
         public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {

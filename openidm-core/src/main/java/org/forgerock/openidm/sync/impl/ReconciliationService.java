@@ -17,7 +17,6 @@ package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.query.QueryFilter.and;
 import static org.forgerock.util.query.QueryFilter.equalTo;
 
@@ -166,12 +165,12 @@ public class ReconciliationService
                 }
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("reconciliations", runList);
-                return newResultPromise(newResourceResponse("", null, new JsonValue(result)));
+                return newResourceResponse("", null, new JsonValue(result)).asPromise();
             } else {
                 final String localId = request.getResourcePathObject().leaf();
                 // First try and get it from in memory
                 if (reconRuns.containsKey(localId)) {
-                	return newResultPromise(newResourceResponse(localId, null, new JsonValue(reconRuns.get(localId).getSummary())));
+                	return newResourceResponse(localId, null, new JsonValue(reconRuns.get(localId).getSummary())).asPromise();
                 } else {
                     // Next, if not in memory, try and get it from audit log
                     final Collection<ResourceResponse> queryResult = new ArrayList<>();
@@ -196,7 +195,7 @@ public class ReconciliationService
                         }
                     }
 
-                    return newResultPromise(response);
+                    return response.asPromise();
 
                 }
             }
@@ -299,7 +298,7 @@ public class ReconciliationService
                     throw new BadRequestException("Action " + request.getAction() + " on recon run " + id + " not supported " + request.getAdditionalParameters());
                 }
             }
-            return newResultPromise(newActionResponse(new JsonValue(result)));
+            return newActionResponse(new JsonValue(result)).asPromise();
         } catch (Exception e) {
         	return ResourceUtil.adapt(e).asPromise();
         }

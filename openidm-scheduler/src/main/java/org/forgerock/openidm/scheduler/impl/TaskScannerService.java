@@ -18,7 +18,6 @@ package org.forgerock.openidm.scheduler.impl;
 
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -153,7 +152,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 }
                 result = buildTaskData(foundRun);
             }
-            return newResultPromise(newResourceResponse(id, null, new JsonValue(result)));
+            return newResourceResponse(id, null, new JsonValue(result)).asPromise();
         } catch (Exception e) {
         	return ResourceUtil.adapt(e).asPromise();
         }
@@ -214,7 +213,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 }
             }
 
-            return newResultPromise(newActionResponse(new JsonValue(result)));
+            return newActionResponse(new JsonValue(result)).asPromise();
         } catch (Exception e) {
         	return ResourceUtil.adapt(e).asPromise();
         }

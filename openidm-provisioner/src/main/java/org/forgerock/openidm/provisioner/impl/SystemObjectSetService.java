@@ -245,16 +245,16 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 //  Multi phase configuration event calls this to generate the response for the next phase.
                 if (content.size() == 0) {
                     // Stage 1 : list available connectors
-                    return newResultPromise(newActionResponse(getAvailableConnectors()));
+                    return newActionResponse(getAvailableConnectors()).asPromise();
                 } else if (isGenerateConnectorCoreConfig(content)) {
                     // Stage 2: generate basic configuration
-                    return newResultPromise(newActionResponse(helper.generateConnectorCoreConfig(content)));
+                    return newActionResponse(helper.generateConnectorCoreConfig(content)).asPromise();
                 } else if (isGenerateFullConfig(content)) {
                     // Stage 3: generate/validate full configuration
-                    return newResultPromise(newActionResponse(helper.generateConnectorFullConfig(content)));
+                    return newActionResponse(helper.generateConnectorFullConfig(content)).asPromise();
                 } else {
                     // illegal request ??
-                    return newResultPromise(newActionResponse(json(object())));
+                    return newActionResponse(json(object())).asPromise();
                 }
             case testConfig:
                 JsonValue config = content;
@@ -266,10 +266,10 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 }
                 ps = locateServiceForTest(name);
                 if (ps != null) {
-                    return newResultPromise(newActionResponse(new JsonValue(ps.testConfig(config))));
+                    return newActionResponse(new JsonValue(ps.testConfig(config))).asPromise();
                 } else {
                     // service for config-name doesn't exist; test it using the ConnectorConfigurationHelper
-                    return newResultPromise(newActionResponse(new JsonValue(helper.test(config))));
+                    return newActionResponse(new JsonValue(helper.test(config))).asPromise();
                 }
             case test:
                 if (id.isNull()) {
@@ -277,13 +277,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                     for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
                         list.add(entry.getValue().getStatus(context));
                     }
-                    return newResultPromise(newActionResponse(new JsonValue(list)));
+                    return newActionResponse(new JsonValue(list)).asPromise();
                 } else {
                     ps = locateServiceForTest(id);
                     if (ps == null) {
                         throw new NotFoundException("System: " + id.asString() + " is not available.");
                     } else {
-                        return newResultPromise(newActionResponse(new JsonValue(ps.getStatus(context))));
+                        return newActionResponse(new JsonValue(ps.getStatus(context))).asPromise();
                     }
                 }
             case activeSync:
@@ -301,13 +301,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                         liveSync(context, source, Boolean.valueOf(params.get("detailedFailure").asString()))));
             case availableConnectors:
                 // stage 1 - direct action to get available connectors
-                return newResultPromise(newActionResponse(getAvailableConnectors()));
+                return newActionResponse(getAvailableConnectors()).asPromise();
             case createCoreConfig:
                 // stage 2 - direct action to create core configuration
-                return newResultPromise(newActionResponse(helper.generateConnectorCoreConfig(content)));
+                return newActionResponse(helper.generateConnectorCoreConfig(content)).asPromise();
             case createFullConfig:
                 // stage 3 - direct action to create full configuration
-                return newResultPromise(newActionResponse(helper.generateConnectorFullConfig(content)));
+                return newActionResponse(helper.generateConnectorFullConfig(content)).asPromise();
             default:
                 return new BadRequestException("Unsupported actionId: " + request.getAction()).asPromise();
             }

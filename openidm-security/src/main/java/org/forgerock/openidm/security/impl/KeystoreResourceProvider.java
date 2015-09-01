@@ -25,7 +25,6 @@
 package org.forgerock.openidm.security.impl;
 
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -130,7 +129,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                         result.put("privateKey", getKeyMap(csr.getRight()));
                     }
                 }
-                return newResultPromise(Responses.newActionResponse(result));
+                return Responses.newActionResponse(result).asPromise();
             } else {
                 return new BadRequestException("Unsupported action " + request.getAction()).asPromise();
             }
@@ -158,7 +157,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                 aliasList.add(aliases.nextElement());
             }
             content.put("aliases", aliasList);
-            return newResultPromise(newResourceResponse(resourceName, null, content));
+            return newResourceResponse(resourceName, null, content).asPromise();
         } catch (KeyStoreException e) {
             return ResourceUtil.adapt(e).asPromise();
         }

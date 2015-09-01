@@ -19,7 +19,6 @@ package org.forgerock.openidm.sync.impl;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -395,17 +394,17 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
                     resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
                     logger.debug("Synchronization action=notifyCreate, resourceContainer={}, resourceId={} ", resourceContainer, resourceId);
-                    return newResultPromise(newActionResponse(notifyCreate(context, resourceContainer, resourceId, request.getContent().get("newValue"))));
+                    return newActionResponse(notifyCreate(context, resourceContainer, resourceId, request.getContent().get("newValue"))).asPromise();
                 case notifyUpdate:
                     resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
                     resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
                     logger.debug("Synchronization action=notifyUpdate, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
-                    return newResultPromise(newActionResponse(notifyUpdate(context, resourceContainer, resourceId, request.getContent().get("oldValue"), request.getContent().get("newValue"))));
+                    return newActionResponse(notifyUpdate(context, resourceContainer, resourceId, request.getContent().get("oldValue"), request.getContent().get("newValue"))).asPromise();
                 case notifyDelete:
                     resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
                     resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
                     logger.debug("Synchronization action=notifyDelete, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
-                    return newResultPromise(newActionResponse(notifyDelete(context, resourceContainer, resourceId, request.getContent().get("oldValue"))));
+                    return newActionResponse(notifyDelete(context, resourceContainer, resourceId, request.getContent().get("oldValue"))).asPromise();
                 case recon:
                     JsonValue result = new JsonValue(new HashMap<String, Object>());
                     JsonValue mapping = _params.get("mapping").required();
@@ -415,13 +414,13 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     result.put("_id", reconId);
                     result.put("comment1", "Deprecated API on sync service. Call recon action on recon service instead.");
                     result.put("comment2", "Deprecated return property reconId, use _id instead.");
-                    return newResultPromise(newActionResponse(result));
+                    return newActionResponse(result).asPromise();
                 case performAction:
                     logger.debug("Synchronization action=performAction, params={}", _params);
                     ObjectMapping objectMapping = getMapping(_params.get("mapping").required().asString());
                     objectMapping.performAction(_params);
                     //result.put("status", performAction(_params));
-                    return newResultPromise(newActionResponse(new JsonValue(new HashMap<String, Object>())));
+                    return newActionResponse(new JsonValue(new HashMap<String, Object>())).asPromise();
                 default:
                     throw new BadRequestException("Action" + request.getAction() + " is not supported.");
             }

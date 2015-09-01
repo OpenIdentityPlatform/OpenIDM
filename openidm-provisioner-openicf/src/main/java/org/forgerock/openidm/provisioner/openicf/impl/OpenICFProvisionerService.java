@@ -901,7 +901,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 }
                 resultList.add(actionResult);
             }
-            return newResultPromise(newActionResponse(result));
+            return newActionResponse(result).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -910,7 +910,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     private Promise<ActionResponse, ResourceException> handleTestAction(Context context, ActionRequest request) {
-        return newResultPromise(newActionResponse(new JsonValue(getStatus(context))));
+        return newActionResponse(new JsonValue(getStatus(context))).asPromise();
     }
 
     private Promise<ActionResponse, ResourceException> handleLiveSyncAction(
@@ -925,7 +925,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         final ActionRequest forwardRequest = Requests.newActionRequest(getSource(objectTypeName), request.getAction());
 
         // forward request to be handled in ObjectClassResourceProvider#actionCollection
-        return newResultPromise(connectionFactory.getConnection().action(context, forwardRequest));
+        return connectionFactory.getConnection().action(context, forwardRequest).asPromise();
     }
 
     /**
@@ -1190,7 +1190,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != uid.getRevision()) {
                     result.put(ResourceResponse.FIELD_CONTENT_REVISION, uid.getRevision());
                 }
-                return newResultPromise(newActionResponse(result));
+                return newActionResponse(result).asPromise();
             } catch (ConnectorException e) {
                 // handle ConnectorException from facade.authenticate:
                 // log to activity log only if this is an external request
@@ -1207,7 +1207,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             .setAdditionalParameter("source", getSource(objectClass));
 
             // forward request to be handled in SystemObjectSetService#actionInstance
-            return newResultPromise(connectionFactory.getConnection().action(context, forwardRequest));
+            return connectionFactory.getConnection().action(context, forwardRequest).asPromise();
 
         }
 
@@ -1234,7 +1234,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResourceResponse resource = getCurrentResource(facade, uid, null);
                 activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
                         null, resource.getContent(), Status.SUCCESS);
-                return newResultPromise(resource);
+                return resource.asPromise();
             } catch (ResourceException e) {
                 return e.asPromise();
             } catch (ConnectorException e) {
@@ -1273,7 +1273,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 }
                 activityLogger.log(context, request, "message", getSource(objectClass,
                         uid.getUidValue()), before.getContent(), null, Status.SUCCESS);
-                return newResultPromise(newResourceResponse(uid.getUidValue(), uid.getRevision(), result));
+                return newResourceResponse(uid.getUidValue(), uid.getRevision(), result).asPromise();
             } catch (ResourceException e) {
                 return e.asPromise();
             } catch (ConnectorException e) {
@@ -1362,7 +1362,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResourceResponse resource = getCurrentResource(facade, uid, null);
                 activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
                         beforeValue, resource.getContent(), Status.SUCCESS);
-                return newResultPromise(resource);
+                return resource.asPromise();
             } catch (ResourceException e) {
                 return e.asPromise();
             } catch (ConnectorException e) {
@@ -1489,7 +1489,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     ResourceResponse resource = objectClassInfoHelper.build(connectorObject, cryptoService);
                     activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
                             resource.getContent(), resource.getContent(), Status.SUCCESS);
-                    return newResultPromise(resource);
+                    return resource.asPromise();
                 } else {
                     final String matchedUri = context.containsContext(UriRouterContext.class)
                             ? context.asContext(UriRouterContext.class).getMatchedUri()
@@ -1557,7 +1557,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResourceResponse resource = getCurrentResource(facade, uid, null);
                 activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
                         before.getContent(), resource.getContent(), Status.SUCCESS);
-                return newResultPromise(resource);
+                return resource.asPromise();
             } catch (ResourceException e) {
                 return e.asPromise();
             } catch (ConnectorException e) {
@@ -1684,7 +1684,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
         @Override
         public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-            return newResultPromise(schema);
+            return schema.asPromise();
         }
 
         @Override

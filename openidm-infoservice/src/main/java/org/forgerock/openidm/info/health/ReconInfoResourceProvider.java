@@ -20,7 +20,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
@@ -56,7 +55,7 @@ public class ReconInfoResourceProvider extends AbstractInfoResourceProvider {
                     field("maximumPoolSize", mBeanServer.getAttribute(objectName, "MaximumPoolSize")),
                     field("currentPoolSize", mBeanServer.getAttribute(objectName, "PoolSize"))
             ));
-            return newResultPromise(newResourceResponse("", "", result));
+            return newResourceResponse("", "", result).asPromise();
         } catch (Exception e) {
             logger.error("Unable to get reconciliation mbean");
             return new InternalServerErrorException("Unable to get reconciliation mbean", e).asPromise();

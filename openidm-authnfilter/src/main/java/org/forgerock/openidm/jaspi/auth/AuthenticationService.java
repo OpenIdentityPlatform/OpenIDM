@@ -62,7 +62,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.jaspi.config.JaspiRuntimeConfigurationFactory.MODULE_CONFIG_ENABLED;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
@@ -234,7 +233,7 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
                             if (authenticator.authenticate(authcid, password, context).isAuthenticated()) {
                                 JsonValue result = new JsonValue(new HashMap<String, Object>());
                                 result.put("reauthenticated", true);
-                                return newResultPromise(newActionResponse(result));
+                                return newActionResponse(result).asPromise();
                             }
                         } catch (ResourceException e) {
                             // log error and try next authentication mechanism

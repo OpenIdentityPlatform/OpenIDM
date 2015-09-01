@@ -468,7 +468,7 @@ public class SchedulerService implements RequestHandler {
 
             addSchedule(scheduleConfig, id, false);
             
-            return newResultPromise(newResourceResponse(id, null, getSchedule(id)));
+            return newResourceResponse(id, null, getSchedule(id)).asPromise();
         } catch (ParseException e) {
         	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (ObjectAlreadyExistsException e) {
@@ -491,7 +491,7 @@ public class SchedulerService implements RequestHandler {
             // Get the schedule
             JsonValue schedule = getSchedule(request.getResourcePath());
             // Return the result
-            return newResultPromise(newResourceResponse(request.getResourcePath(), null, schedule));
+            return newResourceResponse(request.getResourcePath(), null, schedule).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
@@ -551,7 +551,7 @@ public class SchedulerService implements RequestHandler {
             // Delete the schedule
             deleteSchedule(request.getResourcePath());
             // Return the deleted resource
-            return newResultPromise(newResourceResponse(request.getResourcePath(), null, schedule));
+            return newResourceResponse(request.getResourcePath(), null, schedule).asPromise();
         } catch (JsonException e) {
         	return new BadRequestException("Error deleting schedule", e).asPromise();
         } catch (SchedulerException e) {
@@ -604,7 +604,7 @@ public class SchedulerService implements RequestHandler {
             for (JsonValue r: result.get(FIELD_RESULT)){
                 handler.handleResource(newResourceResponse(r.get("_id").asString(), null, new JsonValue(r)));
             }
-            return newResultPromise(newQueryResponse());
+            return newQueryResponse().asPromise();
         } catch (JsonException e) {
         	return new BadRequestException("Error performing query", e).asPromise();
         } catch (SchedulerException e) {
@@ -632,7 +632,7 @@ public class SchedulerService implements RequestHandler {
                 }
                 CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(params));
                 ResourceResponse response = handleCreate(context, createRequest).getOrThrow();
-                return newResultPromise(newActionResponse(response.getContent()));
+                return newActionResponse(response.getContent()).asPromise();
             } else {
                 throw new BadRequestException("Unknown action: " + action);
             }

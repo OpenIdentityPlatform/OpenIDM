@@ -613,7 +613,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     if (scriptEntry.isActive()) {
                         // just get the script - compilation technically happened above in takeScript
                         scriptEntry.getScript(context);
-                        return newResultPromise(newActionResponse(new JsonValue(true)));
+                        return newActionResponse(new JsonValue(true)).asPromise();
                     } else {
                         throw new ServiceUnavailableException();
                     }
