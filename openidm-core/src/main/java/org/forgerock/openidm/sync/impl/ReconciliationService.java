@@ -17,6 +17,7 @@ package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 import static org.forgerock.util.query.QueryFilter.and;
 import static org.forgerock.util.query.QueryFilter.equalTo;
 
@@ -69,7 +70,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -211,7 +211,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException>  handleCreate(Context context, CreateRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -219,7 +219,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -227,7 +227,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -236,7 +236,7 @@ public class ReconciliationService
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request, 
     		final QueryResourceHandler handler) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -244,7 +244,7 @@ public class ReconciliationService
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override

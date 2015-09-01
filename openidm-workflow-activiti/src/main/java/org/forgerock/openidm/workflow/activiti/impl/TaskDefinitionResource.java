@@ -17,6 +17,8 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -60,7 +62,6 @@ import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.task.TaskDefinition;
 import org.forgerock.json.JsonValue;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.FormPropertyHandlerMixIn;
@@ -96,27 +97,27 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return ResourceUtil.notSupportedOnCollection(request).asPromise();
+        return notSupportedOnCollection(request).asPromise();
     }
 
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId, DeleteRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -184,6 +185,6 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 }

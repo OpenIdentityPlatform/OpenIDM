@@ -20,7 +20,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.openidm.util.ResourceUtil.*;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +65,6 @@ import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.forgerock.json.JsonValue;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskEntityMixIn;
 import org.forgerock.util.promise.Promise;
 
@@ -95,7 +94,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return ResourceUtil.notSupportedOnCollection(request).asPromise();
+        return notSupportedOnCollection(request).asPromise();
     }
 
     @Override
@@ -125,7 +124,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -151,7 +150,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override

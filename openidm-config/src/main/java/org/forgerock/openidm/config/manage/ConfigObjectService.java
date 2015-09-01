@@ -26,6 +26,7 @@ package org.forgerock.openidm.config.manage;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -84,7 +85,6 @@ import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -450,7 +450,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
@@ -485,7 +485,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ActionResponse, ResourceException>  handleAction(Context context, ActionRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     /**

@@ -17,7 +17,8 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +69,6 @@ import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.ProcessDefinitionMixIn;
@@ -99,18 +99,18 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return ResourceUtil.notSupportedOnCollection(request).asPromise();
+        return notSupportedOnCollection(request).asPromise();
     }
 
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(
             Context context, String resourceId, ActionRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -142,7 +142,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(
             Context context, String resourceId, PatchRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -200,7 +200,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(
             Context context, String resourceId, UpdateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**

@@ -4,6 +4,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterManager;
 import org.forgerock.openidm.cluster.InstanceState;
 import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -147,30 +147,30 @@ public class MockRepositoryService implements RepositoryService, RequestHandler 
 	@Override
 	public Promise<ActionResponse, ResourceException> handleAction(
 			Context context, ActionRequest request) {
-		return ResourceUtil.notSupported(request).asPromise();
+		return notSupported(request).asPromise();
 	}
 
 	@Override
 	public Promise<ResourceResponse, ResourceException> handleCreate(
 			Context context, CreateRequest request) {
-		return ResourceUtil.notSupported(request).asPromise();
+		return notSupported(request).asPromise();
 	}
 
 	@Override
 	public Promise<ResourceResponse, ResourceException> handleDelete(
 			Context context, DeleteRequest request) {
-		return ResourceUtil.notSupported(request).asPromise();
+		return notSupported(request).asPromise();
 	}
 
 	@Override
 	public Promise<ResourceResponse, ResourceException> handlePatch(
 			Context context, PatchRequest request) {
-		return ResourceUtil.notSupported(request).asPromise();
+		return notSupported(request).asPromise();
 	}
 
 	@Override
 	public Promise<ResourceResponse, ResourceException> handleUpdate(
 			Context context, UpdateRequest request) {
-		return ResourceUtil.notSupported(request).asPromise();
+		return notSupported(request).asPromise();
 	}
 }

@@ -17,6 +17,8 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -67,7 +69,6 @@ import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.HistoricProcessInstanceEntity;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.forgerock.json.JsonValue;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricProcessInstanceMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricTaskInstanceEntityMixIn;
 import org.forgerock.util.Function;
@@ -109,12 +110,12 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return ResourceUtil.notSupportedOnCollection(request).asPromise();
+        return notSupportedOnCollection(request).asPromise();
     }
 
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -177,7 +178,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     @Override
@@ -284,7 +285,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(
             Context context, String resourceId, UpdateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**

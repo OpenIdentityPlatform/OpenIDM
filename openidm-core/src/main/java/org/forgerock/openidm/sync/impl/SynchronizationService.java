@@ -19,6 +19,7 @@ package org.forgerock.openidm.sync.impl;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +58,6 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.sync.ReconAction;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
@@ -436,16 +436,16 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 }
