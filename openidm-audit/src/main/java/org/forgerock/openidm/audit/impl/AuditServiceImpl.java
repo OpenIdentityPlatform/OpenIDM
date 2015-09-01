@@ -495,11 +495,7 @@ public class AuditServiceImpl implements AuditService {
                     return newActionResponse(new JsonValue(changedPasswordFields)).asPromise();
 
                 case availableHandlers:
-                    try {
-                        return newActionResponse(getAvailableAuditEventHandlersWithConfigSchema()).asPromise();
-                    } catch (ResourceException e) {
-                        return e.asPromise();
-                    }
+                    return getAvailableAuditEventHandlersWithConfigSchema();
 
                 default:
                     //allow to fall to caud
@@ -622,7 +618,7 @@ public class AuditServiceImpl implements AuditService {
      * @return A json object containing the available audit event handlers and their config schema.
      * @throws AuditException If an error occurs instantiating one of the audit event handlers
      */
-    private JsonValue getAvailableAuditEventHandlersWithConfigSchema() throws ResourceException {
+    private Promise<ActionResponse, ResourceException> getAvailableAuditEventHandlersWithConfigSchema() {
         try {
             final List<String> availableAuditEventHandlers = auditService.getConfig().getAvailableAuditEventHandlers();
             final JsonValue result = new JsonValue(new LinkedList<>());
@@ -637,14 +633,16 @@ public class AuditServiceImpl implements AuditService {
                     ));
                     result.add(entry.getObject());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                    throw new InternalServerErrorException(String.format("An error occurred while trying to instantiate class "
-                            + "for the handler '%s' or its configuration", auditEventHandler), e);
+                    return new InternalServerErrorException(String.format("An error occurred while trying to instantiate class "
+                            + "for the handler '%s' or its configuration", auditEventHandler), e)
+                            .asPromise();
                 }
             }
-            return result;
+            return newActionResponse(result).asPromise();
         } catch (AuditException e) {
-            throw new InternalServerErrorException(
-                    "Unable to get available audit event handlers and their config schema", e);
+            return new InternalServerErrorException(
+                    "Unable to get available audit event handlers and their config schema", e)
+                    .asPromise();
         }
     }
 }

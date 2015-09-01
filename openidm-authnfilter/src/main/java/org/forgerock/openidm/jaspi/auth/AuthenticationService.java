@@ -225,7 +225,8 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
                     String password = httpContext.getHeaderAsString(HEADER_REAUTH_PASSWORD);
                     if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {
                         logger.debug("Reauthentication failed, missing or empty headers");
-                        throw new ForbiddenException("Reauthentication failed, missing or empty headers");
+                        return new ForbiddenException("Reauthentication failed, missing or empty headers")
+                                .asPromise();
                     }
 
                     for (Authenticator authenticator : authenticators) {
@@ -241,15 +242,14 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
                         }
                     }
 
-                    throw new ForbiddenException("Reauthentication failed for " + authcid);
+                    return new ForbiddenException("Reauthentication failed for " + authcid).asPromise();
                 } else {
-                    throw new InternalServerErrorException("Failure to reauthenticate - missing context");
+                    return new InternalServerErrorException("Failure to reauthenticate - missing context").asPromise();
                 }
             } else {
-                throw new IllegalArgumentException();
+                return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
+                        .asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (IllegalArgumentException e) { // from getActionAsEnum
             return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
                     .asPromise();

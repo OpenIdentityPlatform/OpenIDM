@@ -143,12 +143,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 JsonValue content = new JsonValue(resultMap);
                 return newResourceResponse(instance.getId(), null, content).asPromise();
             } else {
-                throw new InternalServerErrorException("The process instance could not be created");
+                return new InternalServerErrorException("The process instance could not be created").asPromise();
             }
         } catch (ActivitiObjectNotFoundException ex) {
             return new NotFoundException(ex.getMessage(), ex).asPromise();
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception ex) {
             return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
@@ -165,12 +163,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 processEngine.getRuntimeService().deleteProcessInstance(resourceId, "Deleted by Openidm");
                 return r.asPromise();
             } else {
-                throw new NotFoundException();
+                return new NotFoundException().asPromise();
             }
         } catch (ActivitiObjectNotFoundException ex) {
             return new NotFoundException(ex.getMessage(), ex).asPromise();
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception ex) {
             return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
@@ -207,10 +203,8 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 }
                 return newQueryResponse().asPromise();
             } else {
-                throw new BadRequestException("Unknown query-id");
+                return new BadRequestException("Unknown query-id").asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception ex) {
             return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
@@ -224,7 +218,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                     processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult();
 
             if (instance == null) {
-                throw new NotFoundException();
+                return new NotFoundException().asPromise();
             } else {
                 JsonValue content = new JsonValue(MAPPER.convertValue(instance, Map.class));
                 // TODO OPENIDM-3603 add relationship support
@@ -241,7 +235,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                             .processInstanceId(resourceId)
                             .singleResult();
                     if (executionEntity == null) {
-                        throw new ActivitiObjectNotFoundException(
+                         new ActivitiObjectNotFoundException(
                                 "Process instance with id" + resourceId + " could not be found", ProcessInstance.class);
                     }
 
@@ -260,8 +254,6 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 }
                 return newResourceResponse(instance.getId(), null, content).asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception ex) {
             return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
