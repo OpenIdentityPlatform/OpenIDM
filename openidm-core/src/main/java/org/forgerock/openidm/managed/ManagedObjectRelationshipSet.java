@@ -152,11 +152,13 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 //
 //    }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
         return newExceptionPromise(newNotSupportedException("ACTION not supported on relationship collections"));
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
         return newExceptionPromise(newNotSupportedException("ACTION not supported on relationship instance"));
@@ -183,6 +185,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         ));
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
         final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
@@ -197,6 +200,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, String resourceId, final DeleteRequest _request) {
         final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(_request);
@@ -226,6 +230,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
         return newExceptionPromise(newNotSupportedException("PATCH currently not supported on relationships"));
@@ -271,6 +276,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
         try {
@@ -281,6 +287,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String resourceId, final UpdateRequest request) {
         try {
