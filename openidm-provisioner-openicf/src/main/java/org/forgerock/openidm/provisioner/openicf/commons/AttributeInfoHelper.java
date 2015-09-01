@@ -154,6 +154,8 @@ public class AttributeInfoHelper {
                             builder.setReadable(false);
                         } else if (AttributeFlag.NOT_RETURNED_BY_DEFAULT.equals(flag)) {
                             builder.setReturnedByDefault(false);
+                        } else if (AttributeFlag.MULTIVALUED.equals(flag)) {
+                            builder.setMultiValued(true);
                         } else {
                             flags0.add(flag);
                         }
