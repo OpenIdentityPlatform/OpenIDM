@@ -15,10 +15,9 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
-
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +47,6 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricTaskInstanceEntityMixIn;
 import org.forgerock.util.promise.Promise;
@@ -86,7 +84,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**
@@ -94,7 +92,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      */
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**
@@ -102,7 +100,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**
@@ -110,7 +108,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId, DeleteRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**
@@ -118,7 +116,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**
@@ -155,7 +153,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**
@@ -163,7 +161,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
-        return ResourceUtil.notSupportedOnInstance(request).asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /**

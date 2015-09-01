@@ -18,6 +18,7 @@ package org.forgerock.openidm.scheduler.impl;
 
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -62,7 +63,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.promise.Promise;
@@ -288,26 +288,26 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request, QueryResourceHandler handler) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 }

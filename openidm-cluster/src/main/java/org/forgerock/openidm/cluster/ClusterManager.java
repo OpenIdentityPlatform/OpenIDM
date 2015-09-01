@@ -26,6 +26,7 @@ package org.forgerock.openidm.cluster;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -70,7 +71,6 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.DateUtil;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -834,31 +834,31 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     @Override
     public Promise<ActionResponse, ResourceException>  handleAction(Context context, ActionRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request, QueryResourceHandler handler) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 }

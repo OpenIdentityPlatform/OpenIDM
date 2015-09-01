@@ -16,6 +16,7 @@
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
@@ -24,7 +25,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -35,7 +35,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -86,7 +85,7 @@ public class ActivitiResource implements RequestHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override

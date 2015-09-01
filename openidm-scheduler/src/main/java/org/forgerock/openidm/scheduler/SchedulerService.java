@@ -22,6 +22,7 @@ import static org.forgerock.json.resource.QueryResponse.FIELD_RESULT;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -73,7 +74,6 @@ import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
 import org.forgerock.openidm.router.RouteService;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -563,7 +563,7 @@ public class SchedulerService implements RequestHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException>  handlePatch(Context context, PatchRequest request) {
-    	return ResourceUtil.notSupported(request).asPromise();
+    	return notSupported(request).asPromise();
     }
 
     @Override

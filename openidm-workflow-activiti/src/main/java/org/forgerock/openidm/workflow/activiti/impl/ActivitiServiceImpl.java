@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -63,7 +65,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.router.RouteService;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.forgerock.util.promise.Promise;
@@ -205,7 +206,7 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return ResourceUtil.notSupported(request).asPromise();
+        return notSupported(request).asPromise();
     }
 
     @Override
