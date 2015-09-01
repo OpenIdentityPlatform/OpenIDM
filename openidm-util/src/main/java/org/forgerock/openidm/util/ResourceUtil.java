@@ -169,30 +169,6 @@ public class ResourceUtil {
         }
     }
 
-    /**
-     * Adapts a {@code Throwable} to a {@code ResourceException}. If the
-     * {@code Throwable} is an JSON {@code JsonValueException} then an
-     * appropriate {@code ResourceException} is returned, otherwise an
-     * {@code InternalServerErrorException} is returned.
-     *
-     * @param t
-     *            The {@code Throwable} to be converted.
-     * @return The equivalent resource exception.
-     */
-    public static ResourceException adapt(final Throwable t) {
-        int resourceResultCode;
-        try {
-            throw t;
-        } catch (final ResourceException e) {
-            return e;
-        } catch (final JsonValueException e) {
-            resourceResultCode = ResourceException.BAD_REQUEST;
-        } catch (final Throwable tmp) {
-            resourceResultCode = ResourceException.INTERNAL_ERROR;
-        }
-        return ResourceException.getException(resourceResultCode, t.getMessage(), t);
-    }
-
     public static ResourceException notSupported(final Request request) {
         return new NotSupportedException(ResourceMessages.ERR_OPERATION_NOT_SUPPORTED_EXPECTATION
                 .get(request.getRequestType().name()).toString());

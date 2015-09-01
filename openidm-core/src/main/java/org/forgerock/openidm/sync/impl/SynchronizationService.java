@@ -429,8 +429,6 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         } catch (IllegalArgumentException e) { 
         	// from getActionAsEnum
         	return new BadRequestException(e.getMessage(), e).asPromise();
-        } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
         } finally {
             ObjectSetContext.pop();
         }

@@ -24,6 +24,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -70,29 +71,17 @@ public class ActivitiResource implements RequestHandler {
 
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
-        try {
-            return resources.handleAction(context, request);
-        } catch (Exception ex) {
-            return ResourceUtil.adapt(ex).asPromise();
-        }
+        return resources.handleAction(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        try {
-            return resources.handleCreate(context, request);
-        } catch (Exception ex) {
-            return ResourceUtil.adapt(ex).asPromise();
-        }
+        return resources.handleCreate(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        try {
-            return resources.handleDelete(context, request);
-        } catch (Exception ex) {
-            return ResourceUtil.adapt(ex).asPromise();
-        }
+        return resources.handleDelete(context, request);
     }
 
     @Override
@@ -103,28 +92,16 @@ public class ActivitiResource implements RequestHandler {
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(
             Context context, QueryRequest request, QueryResourceHandler handler) {
-        try {
-            return resources.handleQuery(context, request, handler);
-        } catch (Exception ex) {
-            return ResourceUtil.adapt(ex).asPromise();
-        }
+        return resources.handleQuery(context, request, handler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
-        try {
-            return resources.handleRead(context, request);
-        } catch (Exception ex) {
-            return ResourceUtil.adapt(ex).asPromise();
-        }
+        return resources.handleRead(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        try {
-            return resources.handleUpdate(context, request);
-        } catch (Exception ex) {
-            return ResourceUtil.adapt(ex).asPromise();
-        }
+        return resources.handleUpdate(context, request);
     }
 }

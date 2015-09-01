@@ -264,41 +264,37 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
-            try {
-                Map<String, Object> resultMap = new HashMap<String, Object>();
-                String resourcePath = request.getResourcePath();
-                logger.debug("Resource Name: " + request.getResourcePath()); 
-                JsonValue result = null; 
-                if (resourcePath.isEmpty()) {
-                    // Return a list of all nodes in the cluster
-                    QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_CONTAINER.toString());
-                    queryRequest.setQueryId(QUERY_INSTANCES);
-                    queryRequest.setAdditionalParameter("fields", "*");
-                    logger.debug("Attempt query {}", QUERY_INSTANCES);
-                    final List<Object> list = new ArrayList<Object>();
-                    connectionFactory.getConnection().query(context, queryRequest, new QueryResourceHandler() {
-                    	
-						@Override
-						public boolean handleResource(ResourceResponse resource) {
-                            list.add(getInstanceMap(resource.getContent()));
-                            return true;
-						}
-						
-                    });
-                    resultMap.put("results", list);
-                    result = new JsonValue(resultMap);
-                } else {
-                    logger.debug("Attempting to read instance {} from the database", resourcePath);
-                    ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(resourcePath).toString());
-                    ResourceResponse instanceValue = connectionFactory.getConnection().read(context, readRequest);
-                    result = new JsonValue(getInstanceMap(instanceValue.getContent()));
-                }
-                return newResourceResponse(request.getResourcePath(), null, result).asPromise();
-            } catch (ResourceException e) {
-                return e.asPromise();
+            Map<String, Object> resultMap = new HashMap<String, Object>();
+            String resourcePath = request.getResourcePath();
+            logger.debug("Resource Name: " + request.getResourcePath());
+            JsonValue result = null;
+            if (resourcePath.isEmpty()) {
+                // Return a list of all nodes in the cluster
+                QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_CONTAINER.toString());
+                queryRequest.setQueryId(QUERY_INSTANCES);
+                queryRequest.setAdditionalParameter("fields", "*");
+                logger.debug("Attempt query {}", QUERY_INSTANCES);
+                final List<Object> list = new ArrayList<Object>();
+                connectionFactory.getConnection().query(context, queryRequest, new QueryResourceHandler() {
+
+                    @Override
+                    public boolean handleResource(ResourceResponse resource) {
+                        list.add(getInstanceMap(resource.getContent()));
+                        return true;
+                    }
+
+                });
+                resultMap.put("results", list);
+                result = new JsonValue(resultMap);
+            } else {
+                logger.debug("Attempting to read instance {} from the database", resourcePath);
+                ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(resourcePath).toString());
+                ResourceResponse instanceValue = connectionFactory.getConnection().read(context, readRequest);
+                result = new JsonValue(getInstanceMap(instanceValue.getContent()));
             }
-        } catch (Throwable t) {
-        	return ResourceUtil.adapt(t).asPromise();
+            return newResourceResponse(request.getResourcePath(), null, result).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         }
     }
 
