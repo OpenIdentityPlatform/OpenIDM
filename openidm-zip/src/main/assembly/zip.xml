@@ -955,7 +955,7 @@
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
                 <exclude>org.apache.felix:*gogo*</exclude>
-                <exclude>org.springframework*:*</exclude> <!--exclude optional Activiti dependecy-->
+                <exclude>org.springframework*:*</exclude> <!--exclude optional Activiti dependency-->
                 <exclude>stax:*</exclude>
                 <exclude>snappy:*</exclude>
                 <exclude>colt:*</exclude>
@@ -965,6 +965,7 @@
                 <exclude>org.javassist:*</exclude>
                 <exclude>*:*:js</exclude>
                 <exclude>*:*:css</exclude>
+                <exclude>*:*:less</exclude>
                 <exclude>*:*:zip</exclude>
                 <exclude>*:*:pom</exclude>
                 <exclude>com.google.oauth-client:google-oauth-client</exclude>
