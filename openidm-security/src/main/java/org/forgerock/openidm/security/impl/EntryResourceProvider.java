@@ -49,12 +49,10 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
 
 /**
  * A generic collection resource provider servicing requests on entries in a keystore
- * 
  */
 public abstract class EntryResourceProvider extends SecurityResourceProvider implements CollectionResourceProvider {
 
@@ -69,8 +67,9 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         try {
             if (null != request.getNewResourceId()) {
                 if (store.getStore().containsAlias(request.getNewResourceId())) {
-                    throw new ConflictException("The resource with ID '" + request.getNewResourceId()
-                            + "' could not be created because there is already another resource with the same ID");
+                    return new ConflictException("The resource with ID '" + request.getNewResourceId()
+                            + "' could not be created because there is already another resource with the same ID")
+                            .asPromise();
                 } else {
                     String resourceId = request.getNewResourceId();
                     storeEntry(request.getContent(), resourceId);
@@ -80,10 +79,8 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                     return newResourceResponse(resourceId, null, request.getContent()).asPromise();
                 }
             } else {
-                throw new BadRequestException("A valid resource ID must be specified in the request");
+                return new BadRequestException("A valid resource ID must be specified in the request").asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -94,13 +91,11 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
             final ReadRequest request) {
         try {
             if (!store.getStore().containsAlias(resourceId)) {
-                throw new NotFoundException();
+                return new NotFoundException().asPromise();
             } else {
                 JsonValue result = readEntry(resourceId);
                 return newResourceResponse(resourceId, null, result).asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -125,7 +120,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
             final DeleteRequest request) {
         try {
             if (!store.getStore().containsAlias(resourceId)) {
-                throw new NotFoundException();
+                return new NotFoundException().asPromise();
             } else {
                 store.getStore().deleteEntry(resourceId);
                 store.store();
@@ -134,8 +129,6 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                 saveStore();
                 return newResourceResponse(resourceId, null, new JsonValue(null)).asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }

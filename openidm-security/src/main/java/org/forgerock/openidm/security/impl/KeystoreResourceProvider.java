@@ -83,7 +83,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
             if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction()) ||
                     ACTION_GENERATE_CSR.equalsIgnoreCase(request.getAction())) {
                 if (alias == null) {
-                    throw new BadRequestException("A valid resource ID must be specified in the request");
+                    return new BadRequestException("A valid resource ID must be specified in the request").asPromise();
                 }
                 String algorithm = request.getContent().get("algorithm").defaultTo(DEFAULT_ALGORITHM).asString();
                 String signatureAlgorithm = request.getContent().get("signatureAlgorithm")
@@ -93,8 +93,9 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                 if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction())) {
                     // Generate self-signed certificate
                     if (store.getStore().containsAlias(alias)) {
-                        throw new ConflictException("The resource with ID '" + alias
-                                + "' could not be created because there is already another resource with the same ID");
+                        return new ConflictException("The resource with ID '" + alias
+                                + "' could not be created because there is already another resource with the same ID")
+                                .asPromise();
                     } else {
                         logger.info("Generating a new self-signed certificate with the alias {}", alias);
                         String domainName = request.getContent().get("domainName").required().asString();
@@ -134,8 +135,6 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
             } else {
                 return new BadRequestException("Unsupported action " + request.getAction()).asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }

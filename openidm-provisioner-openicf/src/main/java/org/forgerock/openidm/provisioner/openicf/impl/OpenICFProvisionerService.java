@@ -738,10 +738,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 case livesync:
                     return handleLiveSyncAction(context, request);
                 default:
-                    throw new BadRequestException("Unsupported action: " + request.getAction());
+                    return new BadRequestException("Unsupported action: " + request.getAction()).asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (ConnectorException e) {
              return adaptConnectorException(context, request, e, null, request.getResourcePath(), null, null,
                      activityLogger)
@@ -766,16 +764,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return new NotSupportedException("Update operations are not supported").asPromise();
     }
 
-    private Promise<ActionResponse, ResourceException> handleScriptAction(final ActionRequest request)
-            throws ResourceException {
+    private Promise<ActionResponse, ResourceException> handleScriptAction(final ActionRequest request) {
         try {
             final String scriptId = request.getAdditionalParameter(SystemAction.SCRIPT_ID);
             if (StringUtils.isBlank(scriptId)) {
-                throw new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID);
+                return new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID).asPromise();
             }
 
             if (!localSystemActionCache.containsKey(scriptId)) {
-                throw new BadRequestException("Script ID: " + scriptId + " is not defined.");
+                return new BadRequestException("Script ID: " + scriptId + " is not defined.").asPromise();
             }
 
             SystemAction action = localSystemActionCache.get(scriptId);
@@ -784,8 +781,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             final List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
 
             if (scriptContextBuilderList.isEmpty()) {
-                throw new BadRequestException("Script ID: " + scriptId + " for systemType " + systemType
-                        + " is not defined.");
+                return new BadRequestException("Script ID: " + scriptId + " for systemType " + systemType
+                        + " is not defined.")
+                        .asPromise();
             }
 
             JsonValue result = new JsonValue(new HashMap<String, Object>());
@@ -817,22 +815,22 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             if (value instanceof String) {
                                 newValue = new GuardedString(((String) value).toCharArray());
                             } else {
-                                throw new BadRequestException("Invalid type for password.");
+                                return new BadRequestException("Invalid type for password.").asPromise();
                             }
                         }
                         if ("username".equalsIgnoreCase(key)) {
                             if (value instanceof String == false) {
-                                throw new BadRequestException("Invalid type for username.");
+                                return new BadRequestException("Invalid type for username.").asPromise();
                             }
                         }
                         if ("workingdir".equalsIgnoreCase(key)) {
                             if (value instanceof String == false) {
-                                throw new BadRequestException("Invalid type for workingdir.");
+                                return new BadRequestException("Invalid type for workingdir.").asPromise();
                             }
                         }
                         if ("timeout".equalsIgnoreCase(key)) {
                             if (!(value instanceof String) && !(value instanceof Number)) {
-                                throw new BadRequestException("Invalid type for timeout.");
+                                return new BadRequestException("Invalid type for timeout.").asPromise();
                             }
                         }
                         contextBuilder.addScriptArgument(key, newValue);
@@ -873,7 +871,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         contextBuilder.addScriptArgument(entry.getKey(), entry.getValue());
                     }
                 } else if (!content.isNull()) {
-                    throw new BadRequestException("Content is not of type Map");
+                    return new BadRequestException("Content is not of type Map").asPromise();
                 }
 
                 // ScriptContext scriptContext = script.getScriptContextBuilder().build();
@@ -914,18 +912,22 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     private Promise<ActionResponse, ResourceException> handleLiveSyncAction(
-            final Context context, final ActionRequest request) throws ResourceException {
+            final Context context, final ActionRequest request) {
 
         final String objectTypeName = getObjectTypeName(ObjectClass.ALL);
 
         if (objectTypeName == null) {
-            throw new BadRequestException("__ALL__ object class is not configured");
+            return new BadRequestException("__ALL__ object class is not configured").asPromise();
         }
 
         final ActionRequest forwardRequest = Requests.newActionRequest(getSource(objectTypeName), request.getAction());
 
         // forward request to be handled in ObjectClassResourceProvider#actionCollection
-        return connectionFactory.getConnection().action(context, forwardRequest).asPromise();
+        try {
+            return connectionFactory.getConnection().action(context, forwardRequest).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 
     /**

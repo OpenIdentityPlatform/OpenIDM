@@ -229,12 +229,11 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             if (action.requiresConnectorConfigurationHelper(content)) {
                 final String connectorName = content.get(CONNECTOR_REF).get(CONNECTOR_NAME).asString();
                 if (connectorName == null) {
-                    throw new NotFoundException("No connector name provided");
+                    return new NotFoundException("No connector name provided").asPromise();
                 }
                 provisionerType = getProvisionerType(connectorName);
                 if (provisionerType == null || !connectorConfigurationHelpers.containsKey(provisionerType)) {
-                    // TODO-crest3
-                    throw new ServiceUnavailableException("The required service is not available");
+                    return new ServiceUnavailableException("The required service is not available").asPromise();
                 }
             }
 
@@ -259,10 +258,10 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             case testConfig:
                 JsonValue config = content;
                 if (!id.isNull()) {
-                    throw new BadRequestException("A system ID must not be specified in the request");
+                    return new BadRequestException("A system ID must not be specified in the request").asPromise();
                 }
                 if (name.isNull()) {
-                    throw new BadRequestException("Invalid configuration to test: no 'name' specified");
+                    return new BadRequestException("Invalid configuration to test: no 'name' specified").asPromise();
                 }
                 ps = locateServiceForTest(name);
                 if (ps != null) {
@@ -281,7 +280,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 } else {
                     ps = locateServiceForTest(id);
                     if (ps == null) {
-                        throw new NotFoundException("System: " + id.asString() + " is not available.");
+                        return new NotFoundException("System: " + id.asString() + " is not available.").asPromise();
                     } else {
                         return newActionResponse(new JsonValue(ps.getStatus(context))).asPromise();
                     }
@@ -292,8 +291,9 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 String source = params.get("source").asString();
                 if (source == null) {
                     logger.debug("liveSync requires an explicit source parameter, source is : {}", source);
-                    throw new BadRequestException("liveSync action requires either an explicit source parameter, "
-                            + "or needs to be called on a specific provisioner URI");
+                    return new BadRequestException("liveSync action requires either an explicit source parameter, "
+                            + "or needs to be called on a specific provisioner URI")
+                            .asPromise();
                 } else {
                     logger.debug("liveSync called with explicit source parameter {}", source);
                 }
@@ -311,8 +311,6 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             default:
                 return new BadRequestException("Unsupported actionId: " + request.getAction()).asPromise();
             }
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (IllegalArgumentException e) {
             // from getActionAsEnum
             return new BadRequestException(e.getMessage(), e).asPromise();
