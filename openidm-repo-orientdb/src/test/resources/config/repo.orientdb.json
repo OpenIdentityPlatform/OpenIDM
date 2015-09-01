@@ -153,6 +153,20 @@
                     }
                 ]
             },
+            "relationships": {
+                "index": [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyNames" : [ "firstId", "firstPropertyName", "secondId"],
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "config" : {
                 "index" : [
                     {
