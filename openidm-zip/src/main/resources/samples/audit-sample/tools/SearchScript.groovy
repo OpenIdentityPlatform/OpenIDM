@@ -21,133 +21,223 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
+import static org.forgerock.json.JsonValue.*;
+
 import groovy.sql.Sql
-import org.identityconnectors.framework.common.objects.SearchResult;
 
 import java.sql.Connection;
 
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.common.objects.SearchResult;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 
 def sql = new Sql(connection as Connection);
-def result = [];
 def where = "";
 def filter = filter as Filter;
 
+def auditauthentication = new ObjectClass("auditauthentication");
 def auditrecon = new ObjectClass("auditrecon");
 def auditactivity = new ObjectClass("auditactivity");
 def auditaccess = new ObjectClass("auditaccess");
 def auditsync = new ObjectClass("auditsync");
 
 if (filter instanceof EqualsFilter && ((EqualsFilter) filter).getAttribute().is(Uid.NAME)) {
-    //This is a Read
-
     def id = AttributeUtil.getStringValue(((EqualsFilter) filter).getAttribute());
     where = " WHERE objectid = '${id}'";
 }
 
+log.info("Search: ObjectClass {0}, where {1}", objectClass, where);
+
 switch ( objectClass ) {
-    case auditrecon:
-        sql.eachRow("SELECT * FROM auditrecon" + where,
-            { row ->
-                handler {
-                    uid row.objectid
-                    id row.objectid // Name is required by OpenICF connector
-                    attribute 'entrytype', row.entrytype
-                    attribute 'rootactionid', row.rootactionid
-                    attribute 'activity', row.activity
-                    attribute 'message', row.message
-                    attribute 'reconciling', row.reconciling
-                    attribute 'reconid', row.reconid
-                    attribute 'situation', row.situation
-                    attribute 'sourceobjectid', row.sourceobjectid
-                    attribute 'status:', row.status
-                    attribute 'targetobjectid', row.targetobjectid
-                    attribute 'ambiguoustargetobjectids', row.ambiguoustargetobjectids
-                    attribute 'activitydate', row.activitydate
-                    attribute 'actionid', row.actionid
-                    attribute 'exceptiondetail', row.exceptiondetail
-                    attribute 'linkqualifier', row.linkqualifier
-                    attribute 'mapping', row.mapping
-                    attribute 'messagedetail', row.messagedetail
+    case auditaccess:
+        sql.eachRow("SELECT * FROM auditaccess" + where,
+                { row ->
+                    handler {
+                        uid row.objectid
+                        id row.objectid // Name is required by OpenICF connector
+                        attribute 'activity', row.activity
+                        attribute 'activitydate', row.activitydate
+                        attribute 'transactionid', row.transactionid
+                        attribute 'eventname', row.eventname
+                        attribute 'server',
+                                JsonValueUtil.fromEntries(
+                                    field("ip", row.server_ip),
+                                    field("port", row.server_port)
+                                ).getObject()
+                        attribute 'client',
+                                JsonValueUtil.fromEntries(
+                                    field("host", row.client_host),
+                                    field("ip", row.client_ip),
+                                    field("port", row.client_port)
+                                ).getObject()
+                        attribute 'authentication',
+                                JsonValueUtil.fromEntries(
+                                    field("id", row.userid)
+                                ).getObject()
+                        attribute 'authorizationId',
+                                JsonValueUtil.fromEntries(
+                                    field("id", row.principal),
+                                    field("roles",
+                                            JsonValueUtil.fromJsonString(row.roles)?.getObject()),
+                                    field("component", row.auth_component)
+                                ).getObject()
+                        attribute 'resource',
+                                JsonValueUtil.fromEntries(
+                                    field("uri", row.resource_uri),
+                                    field("protocol", row.resource_protocol),
+                                    field("method", row.resource_method),
+                                    field("detail", row.resource_detail)
+                                ).getObject()
+                        attribute 'http',
+                                JsonValueUtil.fromEntries(
+                                    field("method", row.http_method),
+                                    field("path", row.http_path),
+                                    field("querystring", row.http_querystring),
+                                    field("headers",
+                                            JsonValueUtil.fromJsonString(row.http_headers)?.getObject())
+                                ).getObject()
+                        attribute 'response',
+                                JsonValueUtil.fromEntries(
+                                    field("status", row.status),
+                                    field("elapsedTime", row.elapsedtime)
+                                ).getObject()
+                    }
                 }
-            }
         );
-    break
+        break
+
+    case auditauthentication:
+        sql.eachRow("SELECT * FROM auditauthentication" + where,
+                { row ->
+                    handler {
+                        uid row.objectid
+                        id row.objectid
+                        attribute 'transactionid', row.transactionid
+                        attribute 'activitydate', row.activitydate
+                        attribute 'authentication',
+                                JsonValueUtil.fromEntries(
+                                    field("id", row.userid)
+                                ).getObject()
+                        attribute 'eventname', row.eventname
+                        attribute 'result', row.result
+                        attribute 'principal', row.principals
+                        attribute 'context',
+                                JsonValueUtil.fromJsonString(row.context)?.getObject()
+                        attribute 'sessionid', row.sessionid
+                        attribute 'entries',
+                                JsonValueUtil.fromJsonString(row.entries)?.getObject()
+                    }
+                }
+        );
+        break;
 
     case auditactivity:
         sql.eachRow("SELECT * FROM auditactivity" + where,
-            { row ->
-                handler {
-                    uid row.objectid
-                    id row.objectid // Name is required by OpenICF connector
-                    attribute 'activityid', row.activityid
-                    attribute 'activitydate', row.activitydate
-                    attribute 'activity', row.activity
-                    attribute 'message', row.message
-                    attribute 'subjectid', row.subjectid
-                    attribute 'subjectrev', row.subjectrev
-                    attribute 'rootactionid', row.rootactionid
-                    attribute 'parentactionid', row.parentactionid
-                    attribute 'requester', row.requester
-                    attribute 'subjectbefore', row.subjectbefore
-                    attribute 'subjectafter', row.subjectafter
-                    attribute 'status', row.status
-                    attribute 'changedfields', row.changedfields
-                    attribute 'passwordchanged', row.passwordchanged
+                { row ->
+                    handler {
+                        uid row.objectid
+                        id row.objectid // Name is required by OpenICF connector
+                        attribute 'activitydate', row.activitydate
+                        attribute 'activity', row.activity
+                        attribute 'transactionid', row.transactionid
+                        attribute 'eventname', row.eventname
+                        attribute 'authentication',
+                                JsonValueUtil.fromEntries(
+                                    field("id", row.userid)
+                                ).getObject()
+                        attribute 'runas', row.runas
+                        attribute 'resourceOperation',
+                                JsonValueUtil.fromEntries(
+                                    field("uri", row.resource_uri),
+                                    field("protocol", row.resource_protocol),
+                                    field("operation", JsonValueUtil.fromEntries(
+                                        field("method", row.resource_method),
+                                        field("detail", row.resource_detail)
+                                    ).getObject())
+                                ).getObject()
+                        attribute 'subjectbefore', row.subjectbefore
+                        attribute 'subjectafter', row.subjectafter
+                        attribute 'changedfields',
+                                JsonValueUtil.fromJsonString(row.changedfields)?.getObject()
+                        attribute 'passwordchanged', JsonValueUtil.booleanFromString(row.passwordchanged)
+                        attribute 'subjectrev', row.subjectrev
+                        attribute 'message', row.message
+                        attribute 'activityobjectid', row.activityobjectid
+                        attribute 'status', row.status
+                    }
                 }
-            }
         );
-    break
+        break
 
-    case auditaccess:
-        sql.eachRow("SELECT * FROM auditaccess" + where,
-            { row ->
-                handler {
-                    uid row.objectid
-                    id row.objectid // Name is required by OpenICF connector
-                    attribute 'activity', row.activity
-                    attribute 'ip', row.ip
-                    attribute 'principal', row.principal
-                    attribute 'roles', row.roles?.tokenize(',')
-                    attribute 'status', row.status
-                    attribute 'activitydate', row.activitydate
-                    attribute 'userid', row.userid
+    case auditrecon:
+        sql.eachRow("SELECT * FROM auditrecon" + where,
+                { row ->
+                    handler {
+                        uid row.objectid
+                        id row.objectid // Name is required by OpenICF connector
+                        attribute 'transactionid', row.transactionid
+                        attribute 'activitydate', row.activitydate
+                        attribute 'eventname', row.eventname
+                        attribute 'authentication',
+                                JsonValueUtil.fromEntries(
+                                    field("id", row.userid)
+                                ).getObject()
+                        attribute 'activity', row.activity
+                        attribute 'exceptiondetail', row.exceptiondetail
+                        attribute 'linkqualifier', row.linkqualifier
+                        attribute 'mapping', row.mapping
+                        attribute 'message', row.message
+                        attribute 'messagedetail',
+                                JsonValueUtil.fromJsonString(row.messagedetail)?.getObject()
+                        attribute 'situation', row.situation
+                        attribute 'sourceobjectid', row.sourceobjectid
+                        attribute 'status', row.status
+                        attribute 'targetobjectid', row.targetobjectid
+                        attribute 'reconciling', row.reconciling
+                        attribute 'ambiguoustargetobjectids', row.ambiguoustargetobjectids
+                        attribute 'reconaction', row.reconaction
+                        attribute 'entrytype', row.entrytype
+                        attribute 'reconid', row.reconid
+                    }
                 }
-            }
         );
-    break
+        break
 
     case auditsync:
         sql.eachRow("SELECT * FROM auditsync" + where,
-            { row ->
-                handler {
-                    uid row.objectid
-                    id row.objectid
-                    attribute 'objectid', row.objectid
-                    attribute 'rootactionid', row.rootactionid
-                    attribute 'sourceobjectid', row.sourceobjectid
-                    attribute 'targetobjectid:', row.targetobjectid
-                    attribute 'activitydate', row.activitydate
-                    attribute 'activity', row.activity
-                    attribute 'situation', row.situation
-                    attribute 'status', row.status
-                    attribute 'message', row.message
-                    attribute 'actionid', row.actionid
-                    attribute 'exceptiondetail', row.exceptiondetail
-                    attribute 'linkqualifier', row.linkqualifier
-                    attribute 'mapping', row.mapping
-                    attribute 'messagedetail', row.messagedetail
+                { row ->
+                    handler {
+                        uid row.objectid
+                        id row.objectid
+                        attribute 'transactionid', row.transactionid
+                        attribute 'activitydate', row.activitydate
+                        attribute 'eventname', row.eventname
+                        attribute 'authentication',
+                                JsonValueUtil.fromEntries(
+                                    field("id", row.userid)
+                                ).getObject()
+                        attribute 'activity', row.activity
+                        attribute 'exceptiondetail', row.exceptiondetail
+                        attribute 'linkqualifier', row.linkqualifier
+                        attribute 'mapping', row.mapping
+                        attribute 'message', row.message
+                        attribute 'messagedetail',
+                                JsonValueUtil.fromJsonString(row.messagedetail)?.getObject()
+                        attribute 'situation', row.situation
+                        attribute 'sourceobjectid', row.sourceobjectid
+                        attribute 'status', row.status
+                        attribute 'targetobjectid', row.targetobjectid
+                    }
                 }
-            }
         );
         break;
 
     default:
-    log.warn("Didn't match objectClass " + objectClass);
+        log.warn("Didn't match objectClass " + objectClass);
 }
 
 return new SearchResult();

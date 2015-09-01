@@ -46,318 +46,6 @@
         "postRetryAction" : "logged-ignore"
     },
     "objectTypes" : {
-        "recon" : {
-            "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
-            "type" : "object",
-            "nativeType" : "auditrecon",
-            "properties" : {
-                "_id" : {
-                    "type" : "string",
-                    "required" : true,
-                    "nativeName" : "__NAME__",
-                    "nativeType" : "string"
-                },
-                "entryType" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "entrytype",
-                    "nativeType" : "string"
-                },
-                "rootActionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "rootactionid",
-                    "nativeType" : "string"
-                },
-                "action" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activity",
-                    "nativeType" : "string"
-                },
-                "message" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "message",
-                    "nativeType" : "string"
-                },
-                "reconciling" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "reconciling",
-                    "nativeType" : "string"
-                },
-                "reconId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "reconid",
-                    "nativeType" : "string"
-                },
-                "situation" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "situation",
-                    "nativeType" : "string"
-                },
-                "sourceObjectId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "sourceobjectid",
-                    "nativeType" : "string"
-                },
-                "status" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "status",
-                    "nativeType" : "string"
-                },
-                "targetObjectId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "targetobjectid",
-                    "nativeType" : "string"
-                },
-                "ambiguousTargetObjectIds" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "ambiguoustargetobjectids",
-                    "nativeType" : "string"
-                },
-                "timestamp" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activitydate",
-                    "nativeType" : "string"
-                },
-                "actionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "actionid",
-                    "nativeType" : "string"
-                },
-                "exception" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "exceptiondetail",
-                    "nativeType" : "string"
-                },
-                "linkQualifier" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName": "linkqualifier",
-                    "nativeType" : "string"
-                },
-                "mapping" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "mapping",
-                    "nativeType" : "string"
-                },
-                "messageDetail" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "messagedetail",
-                    "nativeType" : "string"
-                },
-                "reconAction" : {
-                    "type": "string",
-                    "required": false,
-                    "nativeName": "reconaction",
-                    "nativeType" : "string"
-                }
-            }
-        },
-        "sync" : {
-            "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
-            "type" : "object",
-            "nativeType" : "auditsync",
-            "properties" : {
-                "_id" : {
-                    "type" : "string",
-                    "required" : true,
-                    "nativeName" : "__NAME__",
-                    "nativeType" : "string"
-                },
-                "rootActionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "rootactionid",
-                    "nativeType" : "string"
-                },
-                "action" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activity",
-                    "nativeType" : "string"
-                },
-                "message" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "message",
-                    "nativeType" : "string"
-                },
-                "situation" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "situation",
-                    "nativeType" : "string"
-                },
-                "sourceObjectId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "sourceobjectid",
-                    "nativeType" : "string"
-                },
-                "status" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "status",
-                    "nativeType" : "string"
-                },
-                "targetObjectId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "targetobjectid",
-                    "nativeType" : "string"
-                },
-                "timestamp" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activitydate",
-                    "nativeType" : "string"
-                },
-                "actionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "actionid",
-                    "nativeType" : "string"
-                },
-                "exception" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "exceptiondetail",
-                    "nativeType" : "string"
-                },
-                "linkQualifier" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName": "linkqualifier",
-                    "nativeType" : "string"
-                },
-                "mapping" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "mapping",
-                    "nativeType" : "string"
-                },
-                "messageDetail" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "messagedetail",
-                    "nativeType" : "string"
-                }
-            }
-        },
-        "activity" : {
-            "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
-            "type" : "object",
-            "nativeType" : "auditactivity",
-            "properties" : {
-                "_id" : {
-                    "type" : "string",
-                    "required" : true,
-                    "nativeName" : "__NAME__",
-                    "nativeType" : "string"
-                },
-                "activityId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activityid",
-                    "nativeType" : "string"
-                },
-                "timestamp" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activitydate",
-                    "nativeType" : "string"
-                },
-                "action" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activity",
-                    "nativeType" : "string"
-                },
-                "message" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "message",
-                    "nativeType" : "string"
-                },
-                "objectId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "subjectid",
-                    "nativeType" : "string"
-                },
-                "rev" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "subjectrev",
-                    "nativeType" : "string"
-                },
-                "rootActionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "rootactionid",
-                    "nativeType" : "string"
-                },
-                "parentActionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "parentactionid",
-                    "nativeType" : "string"
-                },
-                "requester" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "requester",
-                    "nativeType" : "string"
-                },
-                "before" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "subjectbefore",
-                    "nativeType" : "string"
-                },
-                "after" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "subjectafter",
-                    "nativeType" : "string"
-                },
-                "status" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "status",
-                    "nativeType" : "string"
-                },
-                "changedFields" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "changedfields",
-                    "nativeType" : "string"
-                },
-                "passwordChanged" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "passwordchanged",
-                    "nativeType" : "string"
-                }
-            }
-        },
         "access" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "objectid",
@@ -376,31 +64,85 @@
                     "nativeName" : "activity",
                     "nativeType" : "string"
                 },
-                "ip" : {
+                "timestamp" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "ip",
+                    "nativeName" : "activitydate",
                     "nativeType" : "string"
                 },
-                "principal" : {
+                "transactionId" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "principal",
+                    "nativeName" : "transactionid",
                     "nativeType" : "string"
                 },
-                "roles" : {
-                    "type" : "array",
-                    "required" : false,
-                    "nativeName" : "roles",
-                    "nativeType" : "string",
-                    "flags" : [
-                        "multivalued"
-                    ]
-                },
-                "status" : {
+                "eventName" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "status",
+                    "nativeName" : "eventname",
+                    "nativeType" : "string"
+                },
+                "authentication" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "authentication",
+                    "nativeType" : "object"
+                },
+                "server" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "server",
+                    "nativeType" : "object"
+                },
+                "client" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "client",
+                    "nativeType" : "object"
+                },
+                "authorizationId" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "authorizationId",
+                    "nativeType" : "object"
+                },
+                "resourceOperation" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "resourceOperation",
+                    "nativeType" : "object"
+                },
+                "http" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "http",
+                    "nativeType" : "object"
+                },
+                "response" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "response",
+                    "nativeType" : "object"
+                }
+            }
+        },
+
+        "activity" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "objectid",
+            "type" : "object",
+            "nativeType" : "auditactivity",
+            "properties" : {
+                "_id" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "action" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activity",
                     "nativeType" : "string"
                 },
                 "timestamp" : {
@@ -409,10 +151,393 @@
                     "nativeName" : "activitydate",
                     "nativeType" : "string"
                 },
-                "userid" : {
+                "transactionId" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "userid",
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
+                "eventName" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "eventname",
+                    "nativeType" : "string"
+                },
+                "authentication" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "authentication",
+                    "nativeType" : "object"
+                },
+                "runAs" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "runas",
+                    "nativeType" : "string"
+                },
+                "resourceOperation" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "resourceOperation",
+                    "nativeType" : "object"
+                },
+                "before" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "subjectbefore",
+                    "nativeType" : "string"
+                },
+                "after" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "subjectafter",
+                    "nativeType" : "string"
+                },
+                "changedFields" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "changedfields",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
+                },
+                "revision" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "revision",
+                    "nativeType" : "string"
+                },
+                "objectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "objectid",
+                    "nativeType" : "string"
+                },
+                "status" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "status",
+                    "nativeType" : "string"
+                },
+                "message" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "message",
+                    "nativeType" : "string"
+                },
+                "passwordChanged" : {
+                    "type" : "boolean",
+                    "required" : false,
+                    "nativeName" : "passwordchanged",
+                    "nativeType" : "boolean"
+                }
+            }
+        },
+
+        "authentication" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "objectid",
+            "type" : "object",
+            "nativeType" : "auditauthentication",
+            "properties" : {
+                "_id" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "timestamp" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activitydate",
+                    "nativeType" : "string"
+                },
+                "transactionId" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
+                "eventName" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "eventname",
+                    "nativeType" : "string"
+                },
+                "authentication" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "authentication",
+                    "nativeType" : "object"
+                },
+                "result" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "result",
+                    "nativeType" : "string"
+                },
+                "principal" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "principal",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
+                },
+                "context" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "context",
+                    "nativeType" : "object"
+                },
+                "sessionId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "sessionid",
+                    "nativeType" : "string"
+                },
+                "entries" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "entries",
+                    "nativeType" : "object",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
+                }
+            }
+        },
+
+        "recon" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "objectid",
+            "type" : "object",
+            "nativeType" : "auditrecon",
+            "properties" : {
+                "_id" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "transactionId" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
+                "timestamp" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activitydate",
+                    "nativeType" : "string"
+                },
+                "eventName" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "eventname",
+                    "nativeType" : "string"
+                },
+                "authentication" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "authentication",
+                    "nativeType" : "object"
+                },
+                "action" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "action",
+                    "nativeType" : "string"
+                },
+                "exception" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "exception",
+                    "nativeType" : "string"
+                },
+                "linkQualifier" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "linkqualifier",
+                    "nativeType" : "string"
+                },
+                "mapping" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "mapping",
+                    "nativeType" : "string"
+                },
+                "message" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "message",
+                    "nativeType" : "string"
+                },
+                "messageDetail" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "messagedetail",
+                    "nativeType" : "object",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
+                },
+                "situation" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "situation",
+                    "nativeType" : "string"
+                },
+                "sourceObjectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "sourceobjectid",
+                    "nativeType" : "string"
+                },
+                "status" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "status",
+                    "nativeType" : "string"
+                },
+                "targetObjectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "targetobjectid",
+                    "nativeType" : "string"
+                },
+                "reconciling" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "reconciling",
+                    "nativeType" : "string"
+                },
+                "ambiguousTargetObjectIds" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "ambiguoustargetobjectids",
+                    "nativeType" : "string"
+                },
+                "reconAction" : {
+                    "type": "string",
+                    "required": false,
+                    "nativeName": "reconaction",
+                    "nativeType" : "string"
+                },
+                "entryType" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "entrytype",
+                    "nativeType" : "string"
+                },
+                "reconId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "reconid",
+                    "nativeType" : "string"
+                }
+            }
+        },
+        "sync" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "objectid",
+            "type" : "object",
+            "nativeType" : "auditsync",
+            "properties" : {
+                "_id" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "transactionId" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
+                "timestamp" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activitydate",
+                    "nativeType" : "string"
+                },
+                "eventName" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "eventName",
+                    "nativeType" : "string"
+                },
+                "authentication" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "authentication",
+                    "nativeType" : "object"
+                },
+                "action" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activity",
+                    "nativeType" : "string"
+                },
+                "exception" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "exception",
+                    "nativeType" : "string"
+                },
+                "linkQualifier" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName": "linkqualifier",
+                    "nativeType" : "string"
+                },
+                "mapping" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "mapping",
+                    "nativeType" : "string"
+                },
+                "message" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "message",
+                    "nativeType" : "string"
+                },
+                "messageDetail" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "messagedetail",
+                    "nativeType" : "object",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
+                },
+                "situation" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "situation",
+                    "nativeType" : "string"
+                },
+                "sourceObjectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "sourceobjectid",
+                    "nativeType" : "string"
+                },
+                "status" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "status",
+                    "nativeType" : "string"
+                },
+                "targetObjectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "targetobjectid",
                     "nativeType" : "string"
                 }
             }

@@ -100,39 +100,36 @@ You will see the sync logs consistent with the curl commands executed.
 ### Use OpenIDM's REST API
 Inspect audit access logs.
 
-    $ curl -k \
+    $ curl -k -u "openidm-admin:openidm-admin" \
     --header "Content-Type: application/json" \
-    --header "X-OpenIDM-Username: openidm-admin" \
-    --header "X-OpenIDM-Password: openidm-admin" \
-    --request GET \
-    "https://localhost:8443/openidm/audit/access"
+    "https://localhost:8443/openidm/audit/access?_queryId=query-all-ids"
  
 Inspect audit activity logs.
 
-    $ curl -k \
+    $ curl -k -u "openidm-admin:openidm-admin" \
     --header "Content-Type: application/json" \
-    --header "X-OpenIDM-Username: openidm-admin" \
-    --header "X-OpenIDM-Password: openidm-admin" \
-    --request GET \
-    "https://localhost:8443/openidm/audit/activity"
+    "https://localhost:8443/openidm/audit/activity?_queryId=query-all-ids"
  
 Inspect audit recon logs.
 
-    $ curl -k \
+    $ curl -k -u "openidm-admin:openidm-admin" \
     --header "Content-Type: application/json" \
-    --header "X-OpenIDM-Username: openidm-admin" \
-    --header "X-OpenIDM-Password: openidm-admin" \
-    --request GET \
-    "https://localhost:8443/openidm/audit/recon"
+    "https://localhost:8443/openidm/audit/recon?_queryId=query-all-ids"
  
 Inspect audit sync logs.
 
-    $ curl -k \
+    $ curl -k -u "openidm-admin:openidm-admin" \
     --header "Content-Type: application/json" \
-    --header "X-OpenIDM-Username: openidm-admin" \
-    --header "X-OpenIDM-Password: openidm-admin" \
-    --request GET \
-    "https://localhost:8443/openidm/audit/sync"
+    "https://localhost:8443/openidm/audit/sync?_queryId=query-all-ids"
+ 
+ Inspect an audit sync log entry:
+ 
+    $ curl -k -u "openidm-admin:openidm-admin" \
+    --header "Content-Type: application/json" \
+    "https://localhost:8443/openidm/audit/sync?_queryFilter=_id%20eq%20%225bb8f936-4bf9-42f2-a04d-a9242a936489%22"
+    
+    Substitute the object id above ("225bb8f936-4bf9-42f2-a04d-a9242a936489") with the object id you wish to see.
+ 
  
 For a more complete list of commands that can be run on the audit logs please see the
 [OpenIDM Integrators Guide](http://openidm.forgerock.org/doc/integrators-guide/index.html#accessing-log-REST)

@@ -36,7 +36,8 @@ def log = log as Log;
 
 log.info("Entering Test Script");
 
-// a relatively-cheap query to run on start up to ensure database connectivity
+// a relatively-cheap query to run on start up to ensure database connectivity and table existence
+sql.eachRow("select * from auditauthentication limit 1", { } );
 sql.eachRow("select * from auditrecon limit 1", { } );
 sql.eachRow("select * from auditactivity limit 1", { } );
 sql.eachRow("select * from auditaccess limit 1", { } );
