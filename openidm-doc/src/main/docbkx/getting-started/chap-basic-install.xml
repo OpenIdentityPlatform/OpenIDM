@@ -34,10 +34,6 @@
 
  <title>Getting Started With OpenIDM</title>
 
- <!-- The suggestion was "Understanding OpenIDM", but that misses the point
- of the chapter. I could split this chapter into two, but this chapter
- is already pretty short to begin with. -->
-
  <para>
   Whenever you need access to important information, administrators need to
   know who you are. They need to know your identity, which may be distributed
@@ -170,6 +166,25 @@
     </para>
    </listitem>
   </itemizedlist>
+
+  <para>
+   We provide this document, <citetitle>Getting Started with OpenIDM</citetitle>,
+   for demonstration purposes only.
+  </para>
+
+  <para>
+   With this document, we want to make it as easy as possible to test OpenIDM.
+   To that end, we assume that you may be running OpenIDM on an operating
+   system and repository that are not supported in production.
+  </para>
+
+  <para>
+   For a list of software that we support in production, see the following
+   section of the <citetitle>OpenIDM Release Notes</citetitle>:
+   <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+         xlink:href="release-notes#chap-before-you-install"><citetitle>Before
+   You Install OpenIDM</citetitle></link>.
+  </para>
 
   <section xml:id="java-prerequisites">
    <title>Java Environment</title>
