@@ -17,7 +17,6 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -141,7 +140,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 resultMap.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID, instance.getProcessDefinitionId());
                 resultMap.put(ActivitiConstants.ID, instance.getId());
                 JsonValue content = new JsonValue(resultMap);
-                return newResultPromise(newResourceResponse(instance.getId(), null, content));
+                return newResourceResponse(instance.getId(), null, content).asPromise();
             } else {
                 throw new InternalServerErrorException("The process instance could not be created");
             }
@@ -163,7 +162,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 Map value = MAPPER.convertValue(process, HashMap.class);
                 ResourceResponse r = newResourceResponse(process.getId(), null, new JsonValue(value));
                 processEngine.getRuntimeService().deleteProcessInstance(resourceId, "Deleted by Openidm");
-                return newResultPromise(r);
+                return r.asPromise();
             } else {
                 throw new NotFoundException();
             }
@@ -195,7 +194,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                     ResourceResponse r = newResourceResponse(i.getId(), null, new JsonValue(value));
                     handler.handleResource(r);
                 }
-                return newResultPromise(newQueryResponse());
+                return newQueryResponse().asPromise();
             } else if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
                 setProcessInstanceParams(query, request);
                 setSortKeys(query, request);
@@ -205,7 +204,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                     value.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(processinstance));
                     handler.handleResource(newResourceResponse(processinstance.getId(), null, new JsonValue(value)));
                 }
-                return newResultPromise(newQueryResponse());
+                return newQueryResponse().asPromise();
             } else {
                 throw new BadRequestException("Unknown query-id");
             }
@@ -258,7 +257,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                         }
                     }
                 }
-                return newResultPromise(newResourceResponse(instance.getId(), null, content));
+                return newResourceResponse(instance.getId(), null, content).asPromise();
             }
         } catch (ResourceException e) {
             return e.asPromise();

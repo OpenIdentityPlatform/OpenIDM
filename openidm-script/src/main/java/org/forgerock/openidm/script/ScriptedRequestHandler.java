@@ -27,7 +27,6 @@ package org.forgerock.openidm.script;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -155,15 +154,15 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handleAction(context, request, script.getBindings());
             Object result = script.eval();
             if (null == result) {
-                return newResultPromise(newActionResponse(new JsonValue(null)));
+                return newActionResponse(new JsonValue(null)).asPromise();
             } else if (result instanceof JsonValue) {
-                return newResultPromise(newActionResponse((JsonValue) result));
+                return newActionResponse((JsonValue) result).asPromise();
             } else if (result instanceof Map) {
-                return newResultPromise(newActionResponse(new JsonValue(result)));
+                return newActionResponse(new JsonValue(result)).asPromise();
             } else {
                 JsonValue resource = new JsonValue(new HashMap<String, Object>(1));
                 resource.put("result", result);
-                return newResultPromise(newActionResponse(new JsonValue(result)));
+                return newActionResponse(new JsonValue(result)).asPromise();
             }
         } catch (ScriptException e) {
             return convertScriptException(e).asPromise();
@@ -328,7 +327,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                     }
                 }
             }
-            return newResultPromise(queryResponse);
+            return queryResponse.asPromise();
         } catch (ScriptException e) {
             return convertScriptException(e).asPromise();
         } catch (ResourceException e) {
@@ -425,13 +424,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             throws ScriptException {
         Object result = script.eval();
         if (null == result) {
-            return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(null)));
+            return newResourceResponse(request.getResourcePath(), null, new JsonValue(null)).asPromise();
         } else if (result instanceof JsonValue) {
-            return newResultPromise(newResourceResponse(request.getResourcePath(), null, (JsonValue) result));
+            return newResourceResponse(request.getResourcePath(), null, (JsonValue) result).asPromise();
         } else if (result instanceof Map) {
-            return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(result)));
+            return newResourceResponse(request.getResourcePath(), null, new JsonValue(result)).asPromise();
         } else {
-            return newResultPromise(newResourceResponse(request.getResourcePath(), null, new JsonValue(result)));
+            return newResourceResponse(request.getResourcePath(), null, new JsonValue(result)).asPromise();
         }
     }
 }

@@ -27,7 +27,6 @@ import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -168,7 +167,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
         try {
-            return newResultPromise(read(request));
+            return read(request).asPromise();
         } catch (Exception ex) {
             return adapt(ex).asPromise();
         }
@@ -177,7 +176,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(final Context context, final CreateRequest request) {
         try {
-            return newResultPromise(create(request));
+            return create(request).asPromise();
         } catch (Exception ex) {
             return adapt(ex).asPromise();
         }
@@ -186,7 +185,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, UpdateRequest request) {
         try {
-            return newResultPromise(update(request));
+            return update(request).asPromise();
         } catch (Exception ex) {
             return adapt(ex).asPromise();
         }
@@ -196,7 +195,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context, final DeleteRequest request) {
         try {
-            return newResultPromise(delete(request));
+            return delete(request).asPromise();
         } catch (Exception ex) {
             return adapt(ex).asPromise();
         }
@@ -470,10 +469,10 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                         config.put("password", newPassword);
                         UpdateRequest updateRequest = Requests.newUpdateRequest("config/" + PID, config);
                         connectionFactory.getConnection().update(context, updateRequest);
-                        return newResultPromise(newActionResponse(new JsonValue(params)));
+                        return newActionResponse(new JsonValue(params)).asPromise();
                     }
                 case command:
-                    return newResultPromise(newActionResponse(new JsonValue(command(request))));
+                    return newActionResponse(new JsonValue(command(request))).asPromise();
                 default:
                     return adapt(new BadRequestException("Unknown action: " + request.getAction())).asPromise();
             }
@@ -617,9 +616,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             }
 
             if (resultCount == NO_COUNT) {
-                return newResultPromise(newQueryResponse(nextCookie));
+                return newQueryResponse(nextCookie).asPromise();
             } else {
-                return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
+                return newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount).asPromise();
             }
         } catch (ResourceException e) {
             return e.asPromise();

@@ -141,7 +141,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
                     Map<String, Object> value = MAPPER.convertValue(i, Map.class);
                     handler.handleResource(newResourceResponse(i.getId(), null, new JsonValue(value)));
                 }
-                return newResultPromise(newQueryResponse());
+                return newQueryResponse().asPromise();
             } else {
                 return new BadRequestException("Unknown query-id").asPromise();
             }

@@ -27,7 +27,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.Arrays;
 import java.util.List;
@@ -267,7 +266,7 @@ public class MaintenanceService implements RequestHandler {
     }
 
     private Promise<ActionResponse, ResourceException> handleMaintenanceStatus() {
-        return newResultPromise(newActionResponse(json(object(field("maintenanceEnabled", maintenanceEnabled)))));
+        return newActionResponse(json(object(field("maintenanceEnabled", maintenanceEnabled)))).asPromise();
     }
 
     /**

@@ -551,7 +551,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 createResponse = cullPrivateProperties(createResponse);
             }
 
-            return newResultPromise(createResponse);
+            return createResponse.asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -577,7 +577,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             	readResponse = cullPrivateProperties(readResponse);
             }
             
-            return newResultPromise(readResponse);
+            return readResponse.asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -612,7 +612,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 updatedResponse = cullPrivateProperties(updatedResponse);
             }
 
-            return newResultPromise(updatedResponse);
+            return updatedResponse.asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -654,7 +654,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 deletedResource = cullPrivateProperties(deletedResource);
             }
 
-            return newResultPromise(deletedResource);
+            return deletedResource.asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -835,7 +835,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             		"query: " + request.getQueryId() + ", parameters: " + request.getAdditionalParameters(), 
             		request.getQueryId(), null, new JsonValue(results), Status.SUCCESS);
             
-        	return newResultPromise(queryResponse);
+        	return queryResponse.asPromise();
 
         } catch (ResourceException e) {
         	return e.asPromise();
@@ -853,7 +853,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 case patch:
                     final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
                     ResourceResponse patchResponse = patchResourceById(context, request, resourceId, null, operations);
-                    return newResultPromise(newActionResponse(patchResponse.getContent()));
+                    return newActionResponse(patchResponse.getContent()).asPromise();
                 case triggerSyncCheck:
                     // Sync changes if required, in particular virtual/calculated attribute changes
                     final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId).toString());
@@ -863,7 +863,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     		currentResource.getContent());
                     ResourceResponse updateResponse = updateInstance(context, resourceId, updateRequest).get();
                     logger.debug("Sync of {} complete", readRequest.getResourcePath());
-                    return newResultPromise(Responses.newActionResponse(updateResponse.getContent()));
+                    return Responses.newActionResponse(updateResponse.getContent()).asPromise();
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
@@ -894,7 +894,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     request.getResourcePath(), null, null, Status.SUCCESS);
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
-                    return newResultPromise(newActionResponse(patchAction(context, request).getContent()));
+                    return newActionResponse(patchAction(context, request).getContent()).asPromise();
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }

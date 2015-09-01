@@ -17,7 +17,6 @@
 package org.forgerock.openidm.audit.events.handlers.impl;
 
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
@@ -88,7 +87,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
         ResourceResponse resourceResponse = newResourceResponse(
                 createRequest.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
                 new JsonValue(createRequest.getContent()));
-        return newResultPromise(resourceResponse);
+        return resourceResponse.asPromise();
     }
 
     /**

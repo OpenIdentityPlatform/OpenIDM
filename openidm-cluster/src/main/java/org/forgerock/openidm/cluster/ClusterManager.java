@@ -26,7 +26,6 @@ package org.forgerock.openidm.cluster;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.*;
-import static org.forgerock.util.promise.Promises.*;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -294,7 +293,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     ResourceResponse instanceValue = connectionFactory.getConnection().read(context, readRequest);
                     result = new JsonValue(getInstanceMap(instanceValue.getContent()));
                 }
-                return newResultPromise(newResourceResponse(request.getResourcePath(), null, result));
+                return newResourceResponse(request.getResourcePath(), null, result).asPromise();
             } catch (ResourceException e) {
                 return e.asPromise();
             }

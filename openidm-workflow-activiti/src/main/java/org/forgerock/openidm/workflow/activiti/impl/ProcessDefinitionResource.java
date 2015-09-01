@@ -160,7 +160,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
                         handler.handleResource(r);
                     }
                 }
-                return newResultPromise(newQueryResponse());
+                return newQueryResponse().asPromise();
             } else if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
                 ProcessDefinitionQuery query = processEngine.getRepositoryService().createProcessDefinitionQuery();
                 setProcessDefinitionParams(query, request);
@@ -170,7 +170,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
                     ResourceResponse r = newResourceResponse(processDefinition.getId(), null, new JsonValue(value));
                     handler.handleResource(r);
                 }
-                return newResultPromise(newQueryResponse());
+                return newQueryResponse().asPromise();
             } else {
                 throw new BadRequestException("Unknown query-id");
             }
@@ -189,7 +189,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
             ProcessDefinitionEntity def =
                     (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService())
                             .getDeployedProcessDefinition(resourceId);
-            return newResultPromise(convertInstance(def, request.getFields()));
+            return convertInstance(def, request.getFields()).asPromise();
         } catch (ActivitiObjectNotFoundException ex) {
             return new NotFoundException(ex.getMessage()).asPromise();
         } catch (Exception ex) {

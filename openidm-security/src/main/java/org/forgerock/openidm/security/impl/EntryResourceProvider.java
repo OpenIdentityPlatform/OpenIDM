@@ -25,7 +25,6 @@
 package org.forgerock.openidm.security.impl;
 
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
@@ -77,7 +76,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                     manager.reload();
                     // Save the store to the repo (if clustered)
                     saveStore();
-                    return newResultPromise(newResourceResponse(resourceId, null, request.getContent()));
+                    return newResourceResponse(resourceId, null, request.getContent()).asPromise();
                 }
             } else {
                 throw new BadRequestException("A valid resource ID must be specified in the request");
@@ -97,7 +96,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                 throw new NotFoundException();
             } else {
                 JsonValue result = readEntry(resourceId);
-                return newResultPromise(newResourceResponse(resourceId, null, result));
+                return newResourceResponse(resourceId, null, result).asPromise();
             }
         } catch (ResourceException e) {
             return e.asPromise();
@@ -114,7 +113,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
             manager.reload();
             // Save the store to the repo (if clustered)
             saveStore();
-            return newResultPromise(newResourceResponse(resourceId, null, request.getContent()));
+            return newResourceResponse(resourceId, null, request.getContent()).asPromise();
         } catch (Exception e) {
             return ResourceUtil.adapt(e).asPromise();
         }
@@ -132,7 +131,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                 manager.reload();
                 // Save the store to the repo (if clustered)
                 saveStore();
-                return newResultPromise(newResourceResponse(resourceId, null, new JsonValue(null)));
+                return newResourceResponse(resourceId, null, new JsonValue(null)).asPromise();
             }
         } catch (ResourceException e) {
             return e.asPromise();

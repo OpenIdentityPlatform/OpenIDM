@@ -157,7 +157,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         try {
             final ReadRequest newRequest = copyOfReadRequest(request);
             newRequest.setResourcePath(resourcePath.child(request.getResourcePath()).child(resourceId));
-            return newResultPromise(getConnectionFactory().getConnection().read(new AuditContext(context), newRequest));
+            return getConnectionFactory().getConnection().read(new AuditContext(context), newRequest).asPromise();
         } catch (Exception e) {
             return adapt(e).asPromise();
         }
