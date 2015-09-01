@@ -472,13 +472,13 @@ public class SchedulerService implements RequestHandler {
         } catch (ParseException e) {
         	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (ObjectAlreadyExistsException e) {
-        	return ResourceUtil.adapt(new ConflictException(e.getMessage(), e)).asPromise();
+        	return new ConflictException(e.getMessage(), e).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (JsonException e) {
         	return new BadRequestException("Error creating schedule", e).asPromise();
         } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
+        	return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -495,7 +495,7 @@ public class SchedulerService implements RequestHandler {
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -527,13 +527,13 @@ public class SchedulerService implements RequestHandler {
         } catch (ParseException e) {
         	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (ObjectAlreadyExistsException e) {
-        	return ResourceUtil.adapt(new ConflictException(e.getMessage(), e)).asPromise();
+        	return new ConflictException(e.getMessage(), e).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (JsonException e) {
         	return new BadRequestException("Error updating schedule", e).asPromise();
         } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -557,7 +557,7 @@ public class SchedulerService implements RequestHandler {
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -610,7 +610,7 @@ public class SchedulerService implements RequestHandler {
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -642,7 +642,7 @@ public class SchedulerService implements RequestHandler {
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 

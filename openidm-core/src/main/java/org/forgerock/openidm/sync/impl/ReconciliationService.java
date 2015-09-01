@@ -202,7 +202,7 @@ public class ReconciliationService
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
+        	return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -299,10 +299,9 @@ public class ReconciliationService
                 }
             }
             return newActionResponse(new JsonValue(result)).asPromise();
-        } catch (Exception e) {
-        	return ResourceUtil.adapt(e).asPromise();
-        }
-        finally {
+        } catch (ResourceException e) {
+            return e.asPromise();
+        } finally {
             ObjectSetContext.pop();
         }
     }

@@ -44,6 +44,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
@@ -136,7 +137,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
-            return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -159,7 +160,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
             content.put("aliases", aliasList);
             return newResourceResponse(resourceName, null, content).asPromise();
         } catch (KeyStoreException e) {
-            return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 

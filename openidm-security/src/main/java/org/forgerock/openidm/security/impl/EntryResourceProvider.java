@@ -35,6 +35,7 @@ import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
@@ -84,7 +85,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
-            return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -101,7 +102,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
-            return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -115,7 +116,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
             saveStore();
             return newResourceResponse(resourceId, null, request.getContent()).asPromise();
         } catch (Exception e) {
-            return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 
@@ -136,7 +137,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
-            return ResourceUtil.adapt(e).asPromise();
+            return new InternalServerErrorException(e).asPromise();
         }
     }
     
