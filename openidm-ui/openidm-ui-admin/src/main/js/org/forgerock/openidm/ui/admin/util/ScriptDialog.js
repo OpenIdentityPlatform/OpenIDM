@@ -57,6 +57,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
+                cssClass: "script-large-dialog",
                 onshown : function (dialogRef) {
                     args.element = _this.$el;
                     args.validationCallback = _.bind(function(result){
