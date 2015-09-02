@@ -166,28 +166,6 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         return newExceptionPromise(newNotSupportedException("ACTION not supported on relationship instance"));
     }
 
-    /**
-     * Convert the given incoming request object to repo format.
-     *
-     * This converts _ref fields to secondId and populates first* fields.
-     *
-     * @param firstResourcePath The path of the first object in a relationship instance
-     * @param object A {@link JsonValue} object from a resource response or incoming request to be converted for
-     *               storage in the repo
-     *
-     * @return A new JsonValue containing the converted object in a format accepted by the repo
-     */
-    private JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
-        final JsonValue properties = object.get(FIELD_PROPERTIES);
-
-        return json(object(
-                field(REPO_FIELD_FIRST_ID, firstResourcePath),
-                field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
-                field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE)),
-                field(REPO_FIELD_PROPERTIES, properties)
-        ));
-    }
-
     /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
@@ -329,5 +307,33 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
                     " or request paremeter " + PARAM_FIRST_ID + "but none were found.");
         }
 
+    }
+
+    /**
+     * Convert the given incoming request object to repo format.
+     *
+     * This converts _ref fields to secondId and populates first* fields.
+     *
+     * @param firstResourcePath The path of the first object in a relationship instance
+     * @param object A {@link JsonValue} object from a resource response or incoming request to be converted for
+     *               storage in the repo
+     *
+     * @return A new JsonValue containing the converted object in a format accepted by the repo
+     */
+    private JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
+        final JsonValue properties = object.get(FIELD_PROPERTIES);
+
+        if (properties != null) {
+            // Remove "soft" fields that were placed in properties for the ResourceResponse
+            properties.remove("_id");
+            properties.remove("_rev");
+        }
+
+        return json(object(
+                field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
+                field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
+                field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE)),
+                field(REPO_FIELD_PROPERTIES, properties)
+        ));
     }
 }
