@@ -244,11 +244,13 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
      *
      * @return The firstId parameter from either a URI variable or the request
      */
-    private static final String firstId(final Context context, final Request request) {
+    private final String firstId(final Context context, final Request request) {
         final String uriFirstId =
                 context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
 
-        return uriFirstId != null ? uriFirstId : request.getAdditionalParameter(URI_PARAM_FIRST_ID);
+        final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(URI_PARAM_FIRST_ID);
+
+        return resourcePath.child(firstId).toString();
     }
 
     /** {@inheritDoc} */
