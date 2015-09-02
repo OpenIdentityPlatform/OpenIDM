@@ -129,6 +129,9 @@
   width:550px;
 }
 
+.popover-info {
+  overflow:hidden;
+}
 /*
   Selectize styles
 */
@@ -246,13 +249,6 @@ table.placeholder {
 */
 .subnav .nav-subnav a i {
   margin-right: 10px;
-}
-
-/*
-  Popover
-*/
-.popover-info {
-  overflow:hidden;
 }
 
 /*
@@ -752,6 +748,75 @@ Dialog Catch
 
 }
 
+/*
+  Inline JSONEditor styles
+*/
+.list-table .list-group {
+  .compactJSON,
+  .compactJSON div {
+    display: inline;
+  }
+
+  .compactJSON {
+    div[data-schemapath="root"]>label {
+      display: none !important;
+    }
+
+    div[data-schemapath] {
+      margin-left: 5px;
+    }
+
+    .form-control {
+      display: inline;
+      width: auto;
+    }
+
+    select {
+      height: 35px !important;
+    }
+
+    .btn-group {
+      float: right;
+    }
+
+    .well {
+      background-color: transparent;
+    }
+
+    h3 {
+      display: none;
+    }
+
+    div[data-schematype="object"]>h3 {
+      display: inline;
+      margin: 0;
+    }
+
+    div[data-schematype="object"]>h3>div>div {
+      top: 40px !important;
+    }
+
+    div[data-schematype="object"] {
+      div.checkbox {
+        display: block;
+      }
+    }
+
+    div[data-schematype="object"]>div,
+    div[data-schematype="array"]>div {
+      border: none !important;
+    }
+
+    div[data-schematype="object"]>div>div,
+    div[data-schematype="array"]>div>div>div {
+      display: block;
+    }
+
+    div[data-schemapath="root"]>select {
+      margin-bottom: 5px !important;
+    }
+  }
+}
 /*
   Table Styles
 */
