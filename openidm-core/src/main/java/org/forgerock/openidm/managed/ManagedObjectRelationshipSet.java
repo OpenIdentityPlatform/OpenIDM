@@ -24,6 +24,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.UriRouterContext;
@@ -31,6 +32,7 @@ import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
@@ -169,16 +171,17 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
      *
      * This converts _ref fields to secondId and populates first* fields.
      *
-     * @param firstId The firstId of this relation
-     * @param object A {@link JsonValue} object from a resource response or incoming request
+     * @param firstResourcePath The path of the first object in a relationship instance
+     * @param object A {@link JsonValue} object from a resource response or incoming request to be converted for
+     *               storage in the repo
      *
-     * @return A new JsonValue containing the converted object in repo format
+     * @return A new JsonValue containing the converted object in a format accepted by the repo
      */
-    private JsonValue convertToRepoObject(final String firstId, final JsonValue object) {
+    private JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
         final JsonValue properties = object.get(FIELD_PROPERTIES);
 
         return json(object(
-                field(REPO_FIELD_FIRST_ID, firstId),
+                field(REPO_FIELD_FIRST_ID, firstResourcePath),
                 field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
                 field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE)),
                 field(REPO_FIELD_PROPERTIES, properties)
@@ -188,11 +191,11 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
-        final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
-        createRequest.setResourcePath(REPO_RESOURCE_PATH);
-        createRequest.setContent(convertToRepoObject(firstId(context, request), request.getContent()));
-
         try {
+            final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
+            createRequest.setResourcePath(REPO_RESOURCE_PATH);
+            createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
+
             return connectionFactory.getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
@@ -236,38 +239,18 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         return newExceptionPromise(newNotSupportedException("PATCH currently not supported on relationships"));
     }
 
-    /**
-     * Returns the firstId if present in the uri template or falls back to a request parameter.
-     *
-     * @param context Context containing a {@link UriRouterContext} to check for template variables
-     * @param request Request containing a fall-back firstId parameter
-     *
-     * @return The firstId parameter from either a URI variable or the request
-     */
-    private final String firstId(final Context context, final Request request) {
-        final String uriFirstId =
-                context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
-
-        final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(URI_PARAM_FIRST_ID);
-
-        return resourcePath.child(firstId).toString();
-    }
-
     /** {@inheritDoc} */
     // GET /managed/user/{firstId}/{firstPropertyName}
     @Override
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
-        final String firstId = firstId(context, request);
-
-        final QueryRequest _request = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-
-        _request.setQueryFilter(QueryFilter.and(
-                QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(firstId)),
-                QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName.toString())
-        ));
-
         try {
-            return connectionFactory.getConnection().queryAsync(context, _request, new QueryResourceHandler() {
+            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
+
+            queryRequest.setQueryFilter(QueryFilter.and(
+                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
+                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
+            ));
+            return connectionFactory.getConnection().queryAsync(context, queryRequest, new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
                     return handler.handleResource(FORMAT_RESPONSE_NO_EXCEPTION.apply(resource));
@@ -294,7 +277,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String resourceId, final UpdateRequest request) {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
-            final JsonValue newValue = convertToRepoObject(firstId(context, request), request.getContent());
+            final JsonValue newValue = convertToRepoObject(firstResourcePath(context, request), request.getContent());
 
             // current resource in the db
             final Promise<ResourceResponse, ResourceException> promisedOldResult = connectionFactory.getConnection().readAsync(context, readRequest);
@@ -318,5 +301,33 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
+    }
+
+    /**
+     * Returns the path of the first resource in this relationship using the firstId parameter
+     * from either the URI or the Request. If firstId is not found in the URI context then
+     * the request parameter is used.
+     *
+     * @param context Context containing a {@link UriRouterContext} to check for template variables
+     * @param request Request containing a fall-back firstId parameter
+     *
+     * @see #resourcePath
+     *
+     * @return The resource path of the first resource as a child of resourcePath
+     */
+    private final ResourcePath firstResourcePath(final Context context, final Request request)
+            throws BadRequestException {
+        final String uriFirstId =
+                context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
+
+        final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(PARAM_FIRST_ID);
+
+        if (StringUtils.isNotBlank(firstId)) {
+            return resourcePath.child(firstId);
+        } else {
+            throw new BadRequestException("Required either URI parameter " + URI_PARAM_FIRST_ID +
+                    " or request paremeter " + PARAM_FIRST_ID + "but none were found.");
+        }
+
     }
 }
