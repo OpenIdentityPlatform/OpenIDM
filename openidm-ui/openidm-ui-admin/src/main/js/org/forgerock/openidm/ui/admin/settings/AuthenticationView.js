@@ -130,16 +130,16 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
 
                 this.parentRender(_.bind(function() {
                     // Gets the JSON schema for the JSONEditor, the JSON is treated as a handlebars template for string translation
-                    _.chain(this.model.module_types)
+                    $.when.apply($, _.chain(this.model.module_types)
                         .keys()
-                        .sortBy(function(key) {return key;})
-                        .each(function(moduleName) {
+                        .sortBy(function(key) { return key; })
+                        .map(function(moduleName) {
                             this.$el.find("#group-copy .moduleType").append("<option value='" + moduleName + "'>" + moduleName +  "</option>");
 
-                            $.ajax({
-                                url: "templates/admin/settings/authentication/" + moduleName + ".json",
-                                type: "GET",
-                                success: _.bind(function(jsonTemplate) {
+                            return $.ajax({
+                                url: "templates/admin/settings/authentication/" + moduleName + ".hbs",
+                                type: "GET"
+                            }).done(_.bind(function(jsonTemplate) {
                                     jsonTemplate = Handlebars.compile(jsonTemplate)();
                                     jsonTemplate = $.parseJSON(jsonTemplate);
 
@@ -160,31 +160,32 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
 
                                     this.model.module_types[moduleName] = jsonTemplate;
                                 }, this)
+                            );
+                        }, this)
+                        .value())
+                    .then(_.bind(function () {
+                        this.$el.find(".authenticationModules .group-body")
+                            .accordion({
+                                header: "> div > .list-header",
+                                collapsible: true,
+                                icons: false,
+                                event: false,
+                                active: false
+                            })
+                            .sortable({
+                                axis: "y",
+                                handle: ".list-header",
+                                stop: function(event, ui) {
+                                    // IE doesn't register the blur when sorting
+                                    // so trigger focusout handlers to remove .ui-state-focus
+                                    ui.item.children(".list-header").triggerHandler("focusout");
+
+                                    // Refresh accordion to handle new order
+                                    $(this).accordion("refresh");
+                                }
                             });
-                        }, this);
-
-
-                    this.$el.find(".authenticationModules .group-body")
-                        .accordion({
-                            header: "> div > .list-header",
-                            collapsible: true,
-                            icons: false,
-                            event: false,
-                            active: false
-                        })
-                        .sortable({
-                            axis: "y",
-                            handle: ".list-header",
-                            stop: function(event, ui) {
-                                // IE doesn't register the blur when sorting
-                                // so trigger focusout handlers to remove .ui-state-focus
-                                ui.item.children(".list-header").triggerHandler("focusout");
-
-                                // Refresh accordion to handle new order
-                                $(this).accordion("refresh");
-                            }
-                        });
-                    this.loadDefaults();
+                        this.loadDefaults();
+                    }, this));
                 }, this));
             }, this));
         },
