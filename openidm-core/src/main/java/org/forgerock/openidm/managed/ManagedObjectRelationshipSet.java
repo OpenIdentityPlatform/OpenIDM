@@ -61,7 +61,7 @@ import java.util.Map;
  */
 public class ManagedObjectRelationshipSet implements CollectionResourceProvider {
     /** Used for accessing the repo */
-    private ConnectionFactory connectionFactory;
+    final private ConnectionFactory connectionFactory;
 
     /** Path to this resource in the repo */
     private static final ResourcePath REPO_RESOURCE_PATH = new ResourcePath("repo", "relationships");
@@ -71,7 +71,6 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 
     /** The property representing this relationship */
     private final JsonPointer propertyName;
-
 
     /** The name of the firstId field in the repo */
     private static final String REPO_FIELD_FIRST_ID = "firstId";
@@ -170,9 +169,9 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, String resourceId, final DeleteRequest _request) {
-        final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(_request);
-        deleteRequest.setResourcePath(REPO_RESOURCE_PATH.child(_request.getResourcePath()));
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, String resourceId, final DeleteRequest request) {
+        final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
+        deleteRequest.setResourcePath(REPO_RESOURCE_PATH.child(request.getResourcePath()));
 
         try {
             if (deleteRequest.getRevision() == null) {
@@ -205,7 +204,6 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     }
 
     /** {@inheritDoc} */
-    // GET /managed/user/{firstId}/{firstPropertyName}
     @Override
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
         try {
@@ -284,16 +282,14 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
             throws BadRequestException {
         final String uriFirstId =
                 context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
-
         final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(PARAM_FIRST_ID);
 
         if (StringUtils.isNotBlank(firstId)) {
             return resourcePath.child(firstId);
         } else {
             throw new BadRequestException("Required either URI parameter " + URI_PARAM_FIRST_ID +
-                    " or request paremeter " + PARAM_FIRST_ID + "but none were found.");
+                    " or request paremeter " + PARAM_FIRST_ID + " but none were found.");
         }
-
     }
 
     /**

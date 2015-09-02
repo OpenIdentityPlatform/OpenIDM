@@ -455,7 +455,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     		JsonValue oldValue, JsonValue newValue)
             throws ResourceException {
 
-        // FIXME - need to detect changes to relationships
         if (newValue.asMap().equals(oldValue.asMap())) { // object hasn't changed
             return newResourceResponse(resourceId, rev, null);
         }
@@ -721,9 +720,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 // Delete if we're not told to keep this id
                 if (!relationsToKeep.contains(id)) {
                     final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
-                    final Promise<ResourceResponse, ResourceException> response = relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest);
-
-                    promises.add(response);
+                    promises.add(relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest));
                 }
             }
         } else {
