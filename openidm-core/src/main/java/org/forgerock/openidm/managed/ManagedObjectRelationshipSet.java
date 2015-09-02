@@ -141,19 +141,6 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
         this.propertyName = propertyName;
     }
 
-//    /**
-//     * Fetch relationship for the given resource
-//     * @param resource
-//     * @param resourceId
-//     * @param key
-//     * @return
-//     */
-//    public JsonValue getRelations(ResourceName resource, String resourceId, String key) {
-//        final QueryRequest request = Requests.newQueryRequest(REPO_PREFIX);
-//        final QueryResult result = connectionFactory.getConnection().queryAsync(null, request, null).get()
-//
-//    }
-
     /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
