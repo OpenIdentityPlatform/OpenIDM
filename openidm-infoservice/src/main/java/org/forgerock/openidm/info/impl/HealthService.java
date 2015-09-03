@@ -83,14 +83,6 @@ import org.slf4j.LoggerFactory;
 @Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
         description = "OpenIDM Health Service", immediate = true)
 @Service
-/*
- * @References({ @Reference(referenceInterface = ClusterManagementService.class,
- * cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy =
- * ReferencePolicy.DYNAMIC, bind = "bindClusterManagementService", unbind =
- * "unbindClusterManagementService"
- *//*
-    * , updated = "updatedClusterManagementService"
-    *//* ) }) */
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service"),
@@ -121,44 +113,70 @@ public class HealthService
     private ServiceListener svcListener;
     private BundleListener bundleListener;
 
+    /**
+     * The Cluster Management Service
+     */
     private ClusterManagementService cluster = null;
 
-    private ScheduledExecutorService scheduledExecutor = Executors
-            .newSingleThreadScheduledExecutor();
+    /**
+     * An {@link ScheduledExecutorService} used to schedule a task to check the state of OpenIDM
+     */
+    private ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    // Whether we consider the underlying framework as started
+    /** 
+     * A boolean indicating if we consider the underlying framework as started
+     */
     private volatile boolean frameworkStarted = false;
-    // Flag to help in processing state during start-up.
-    // For clients to query application state, use the state detail instead
+
+    /** 
+     * Flag to help in processing state during start-up. For clients to querying application state, 
+     * use the state detail instead
+     */
     private volatile boolean appStarting = true;
-    // Whether the cluster management thread is up in the "running" state
+    
+    /**
+     * A boolean indicating if the cluster management thread is up in the "running" state
+     */
     private volatile boolean clusterUp = false;
-    // Whether the cluster management service is enabled
+    
+    /**
+     * A boolean indicating if the cluster management service is enabled
+     */
     private volatile boolean clusterEnabled = true;
 
-    private volatile StateDetail stateDetail = new StateDetail(AppState.STARTING,
-            "OpenIDM starting");
+    /**
+     * The current state of OpenIDM
+     */
+    private volatile StateDetail stateDetail = new StateDetail(AppState.STARTING, "OpenIDM starting");
 
     /**
-     * Bundles and bundle fragments required to be started or resolved
-     * respectively for the system to consider itself READY. Required bundles
-     * may be expressed as a regex, for example:
+     * Bundles and bundle fragments required to be started or resolved respectively for the system to 
+     * consider itself READY. Required bundles may be expressed as a regex, for example:
      * 
      * "org.forgerock.openidm.repo-(orientdb|jdbc)"
      */
     private List<String> requiredBundles = new ArrayList<String>();
 
-    /* @formatter:off */
+    /**
+     * An array default bundles and bundle fragments required to be started or resolved respectively 
+     * for the system to consider itself READY. 
+     */
     private final String[] defaultRequiredBundles = new String[] {
         //ICF Bundles
         "org.forgerock.openicf.framework.connector-framework",
         "org.forgerock.openicf.framework.connector-framework-internal",
+        "org.forgerock.openicf.framework.connector-framework-protobuf",
+        "org.forgerock.openicf.framework.connector-framework-rpc",
+        "org.forgerock.openicf.framework.connector-framework-server",
+        "org.forgerock.openicf.framework.icfl-over-slf4j",
 
         // ForgeRock Commons Bundles
+        "org.forgerock.commons.forgerock-audit-core",
         "org.forgerock.commons.forgerock-util",
         "org.forgerock.commons.forgerock-jaspi-runtime",
         "org.forgerock.commons.forgerock-auth-filter-common",
         "org.forgerock.commons.forgerock-jaspi-.*-module",
+        "org.forgerock.commons.guava.forgerock-guava-.*",
         "org.forgerock.commons.i18n-core",
         "org.forgerock.commons.i18n-slf4j",
         "org.forgerock.commons.json-crypto",
@@ -168,6 +186,9 @@ public class HealthService
         "org.forgerock.commons.json-web-token",
         "org.forgerock.commons.script-common",
         "org.forgerock.commons.script-javascript",
+        "org.forgerock.commons.script-groovy",
+        "org.forgerock.http.chf-http-core",
+        "org.forgerock.http.chf-http-servlet",
         
         // OpenIDM Bundles
         "org.forgerock.openidm.api-servlet",
@@ -181,9 +202,11 @@ public class HealthService
         "org.forgerock.openidm.enhanced-config",
         "org.forgerock.openidm.external-email",
         "org.forgerock.openidm.external-rest",
+        "org.forgerock.openidm.httpclient-fragment",
         "org.forgerock.openidm.httpcontext",
         "org.forgerock.openidm.infoservice",
         "org.forgerock.openidm.jetty-fragment",
+        "org.forgerock.openidm.maintenance",
         "org.forgerock.openidm.policy",
         "org.forgerock.openidm.provisioner",
         "org.forgerock.openidm.provisioner-openicf",
@@ -204,21 +227,27 @@ public class HealthService
         // 3rd Party Bundles
         "org.ops4j.pax.web.pax-web-jetty-bundle"
     };
-    /* @formatter:on */
 
     /**
-     * Maximum time after framework start for required services to register to
-     * consider the system startup as successful
+     * Maximum time after framework start for required services to register to consider the system 
+     * startup as successful
      */
     private long serviceStartMax = 15000;
+    
     /**
-     * Services required to be registered for the system to consider itself
-     * READY. Required services may be expressed as a regex, for example:
+     * Services required to be registered for the system to consider itself READY. Required services 
+     * may be expressed as a regex, for example:
      * 
      * "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
      */
     private List<String> requiredServices = new ArrayList<String>();
-    /* @formatter:off */
+
+    /**
+     * An array default services required to be registered for the system to consider itself READY. 
+     * Required services may be expressed as a regex, for example:
+     * 
+     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
+     */
     private final String[] defaultRequiredServices = new String[] {
             "org.forgerock.openidm.api-servlet",
             "org.forgerock.openidm.audit",
@@ -230,6 +259,7 @@ public class HealthService
             "org.forgerock.openidm.crypto",
             "org.forgerock.openidm.external.rest",
             "org.forgerock.openidm.internal",
+            "org.forgerock.openidm.maintenance",
             "org.forgerock.openidm.managed",
             "org.forgerock.openidm.policy",            
             "org.forgerock.openidm.provisioner",
@@ -241,8 +271,10 @@ public class HealthService
             "org.forgerock.openidm.security",
             "org.forgerock.openidm.servletfilter.registrator"
     };
-    /* @formatter:on */
 
+    /**
+     * A router used to service requests for system health endpoints such as: os, memory, recon, jdbc.
+     */
     private final Router router = new Router();
     
     @Activate
@@ -598,31 +630,6 @@ public class HealthService
     }
 
     /**
-     * Translate Bundle state int
-     *
-     * @param bundleState
-     *            bundle state int
-     * @return String version of the state
-     */
-    private String stateToString(int bundleState) {
-        switch (bundleState) {
-        case Bundle.ACTIVE:
-            return "ACTIVE";
-        case Bundle.INSTALLED:
-            return "INSTALLED";
-        case Bundle.RESOLVED:
-            return "RESOLVED";
-        case Bundle.STARTING:
-            return "STARTING";
-        case Bundle.STOPPING:
-            return "STOPPING";
-        case Bundle.UNINSTALLED:
-            return "UNINSTALLED";
-        }
-        return "UNKNOWN";
-    }
-
-    /**
      * Parse the comma delimited property into a list
      *
      * @param prop
@@ -712,6 +719,8 @@ public class HealthService
             clusterUp = true;
             checkState();
             break;
+		default:
+			break;
         }
         return true;
     }
