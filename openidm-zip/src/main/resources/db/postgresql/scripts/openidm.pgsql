@@ -231,7 +231,7 @@ CREATE TABLE openidm.auditactivity (
   message TEXT,
   activityobjectid VARCHAR(255),
   status VARCHAR(20),
-  PRIMARY KEY (objectid),
+  PRIMARY KEY (objectid)
 );
 
 CREATE INDEX idx_auditactivity_transactionid ON openidm.auditactivity (transactionid);
