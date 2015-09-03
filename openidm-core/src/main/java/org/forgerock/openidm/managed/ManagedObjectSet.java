@@ -311,7 +311,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      */
     private JsonValue prepareScriptBindings(Context context, Request request, String resourceId,
             JsonValue oldObject, JsonValue newObject) {
-        JsonValue scriptBindings = new JsonValue(new HashMap<String, Object>());
+        JsonValue scriptBindings = json(object());
         scriptBindings.put("context", context);
         scriptBindings.put("request", request);
         scriptBindings.put("oldObject", oldObject.getObject());
