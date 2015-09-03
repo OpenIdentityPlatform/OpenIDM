@@ -43,16 +43,14 @@
 
  <para>
   To ensure availability of the identity management service, you can deploy
-  OpenIDM on multiple instances, in a cluster. In a clustered environment, you
-  would configure each of these instances to point to the same external database.
+  OpenIDM on multiple instances, in a cluster. In a clustered environment, each
+  OpenIDM instance must point to the same external repository.
   The database does not have to be clustered.
  </para>
  <para>
   In a clustered environment, if one OpenIDM instance in a cluster shuts down
   or fails to check in with the cluster management service, a second OpenIDM
-  instance will detect the failure. If the unavailable instance did not
-  complete one or more tasks, one of the available instances attempts to recover
-  and rerun those tasks.
+  instance will detect the failure.
  </para>
  <para>
   For example, if an OpenIDM instance named <literal>instance1</literal> loses
@@ -106,13 +104,9 @@
   <orderedlist>
    <listitem>
     <para>
-     If OpenIDM is running, shut it down in the OSGi console, and remove the
-     Felix cache files in the <filename>openidm/felix-cache</filename>
-     directory:
+     If OpenIDM is running, shut it down using  the OSGi console.
     </para>
-    <screen>-&gt; <userinput>shutdown</userinput>
-...
-$ <userinput>rm -rf felix-cache/*</userinput></screen>
+    <screen>-&gt; <userinput>shutdown</userinput></screen>
    </listitem>
    <listitem>
     <para>
@@ -142,9 +136,9 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    </listitem>
    <listitem>
     <para>
-     If you are using scheduled tasks, configure persistent schedules to fire
-     only once across the cluster. For more information, see the following
-     section on <link xlink:show="new"
+     If you have scheduled tasks, you should configure persistent schedules
+     to start only once across the cluster. For more information, see the
+     following section on <link xlink:show="new"
      xlink:href="integrators-guide#persistent-schedules"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Persisted
      Schedules</citetitle></link>.
@@ -177,7 +171,7 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
       For the second OpenIDM instance, you might specify the following (and so
       on):
      </para>
-     <screen>I'veopenidm.node.id=instance2</screen>
+     <screen>openidm.node.id=instance2</screen>
      <para>
       You can set any value for <literal>openidm.node.id</literal>, as long as
       the value is unique within the cluster. Then the cluster manager can
@@ -203,6 +197,13 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
         the repository, in the following file:
         <filename>security/keystore.jceks</filename>.
        </para>
+       <note>
+        <para>
+         If the <literal>clustered-first</literal> instance of OpenIDM fails,
+         you should replace it in the cluster with one of the other
+         instances of OpenIDM in the cluster.
+        </para>
+       </note>
       </listitem>
       <listitem>
        <para>
@@ -430,7 +431,7 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    </para>
    <listitem>
     <para>
-     Non-persistent (in-memory) jobs fire on each node in the cluster.
+     Non-persistent (in-memory) jobs execute on each node in the cluster.
     </para>
    </listitem>
    <listitem>
@@ -442,7 +443,7 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    <listitem>
     <para>
      Jobs that are configured as persistent but <emphasis>not concurrent</emphasis>
-     fire only on one instance in the cluster. That job will not fire again at the
+     run only on one instance in the cluster. That job will not run again at the
      scheduled time, on any instance in the cluster, until the current job is
      complete.
     </para>
@@ -454,9 +455,9 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
    </listitem>
   </itemizedlist>
   <para>
-   OpenIDM instances in a cluster claim jobs in a random order. If one instance goes
-   down, the cluster manager automatically fails over unstarted jobs that have
-   been claimed by that instance.
+   OpenIDM instances in a cluster claim jobs in a random order. If one instance
+   fails, the cluster manager automatically reassigns unstarted jobs that
+   were claimed by that failed instance.
   </para>
   <para>
    For example, if OpenIDM instance A claims a job but does not start it, and
@@ -492,48 +493,73 @@ $ <userinput>rm -rf felix-cache/*</userinput></screen>
     <filename>conf/</filename> subdirectory.
    </para>
 
-   <para>
-    You can prevent a specific OpenIDM instance from claiming pending jobs, or
-    participating in processing clustered schedules. To do so, go to the
-    specific OpenIDM instance, open its <filename>boot.properties</filename> file
-    and add the following line:
-   </para>
-   <programlisting>
-execute.clustered.schedules=false
-   </programlisting>
+   <section xml:id="revising-cluster-boot">
+    <title>Modify an OpenIDM Instance in a Cluster</title>
 
-   <para>
-    As every OpenIDM instance in a cluster reads its configuration from a
-    single repository, token substitution then defines a specific scheduler
-    configuration for each instance. It does so by setting
-    <literal>"executePersistentSchedules"</literal> to <literal>false</literal>
-    in the scheduler configuration for each instance.
-   </para>
+    <para>
+     You can prevent a specific OpenIDM instance from claiming pending jobs, or
+     participating in processing clustered schedules. To do so, go to the
+     specific OpenIDM instance, open its <filename>boot.properties</filename> file
+     and add the following line:
+    </para>
+    <programlisting>execute.clustered.schedules=false</programlisting>
 
-   <para>
-    The initial scheduler configuration that is loaded into the repository must
-    point to the relevant property in <filename>boot.properties</filename>. So,
-    open the <filename>scheduler.json</filename> file, and set
-    <literal>executePersistentSchedules</literal> as shown:
-   </para>
-   <programlisting>{
-    "executePersistentSchedules" : "&amp;{execute.clustered.schedules}",
+   </section>
+
+   <section xml:id="revising-cluster-scheduler">
+    <title>Modify the OpenIDM Cluster Scheduler</title>
+
+    <para>
+     As every OpenIDM instance in a cluster reads its configuration from a
+     single repository, token substitution then defines a specific scheduler
+     configuration for each instance. It does so by setting
+     <literal>"executePersistentSchedules"</literal> to <literal>false</literal>
+     in the scheduler configuration file for each instance.
+    </para>
+
+    <para>
+     The initial scheduler configuration that is loaded into the repository must
+     point to the relevant property in <filename>boot.properties</filename>. So,
+     open the <filename>scheduler.json</filename> file, and set
+     <literal>executePersistentSchedules</literal> as shown:
+    </para>
+    <programlisting>{
+     "executePersistentSchedules" : "&amp;{execute.clustered.schedules}",
 }</programlisting>
-   <para>
-    You do not want to allow changes to a configuration file to overwrite the
-    global configuration in the repository. To do so, start each instance of
-    OpenIDM and then disable automatic polling for configuration changes. To do
-    so, open the <filename>system.properties</filename> file and uncomment
-    the following line:
-   </para>
+
+    <para>
+     If the failed instance of OpenIDM did not complete a task, the next
+     action depends on the
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#scheduler-configuration-file">
+      <citetitle>Scheduler Configuration</citetitle></link>, specifically the
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+           xlink:href="integrators-guide#misfire-policy">
+      <literal>misfirePolicy</literal></link>.
+    </para>
+   </section>
+
+   <section xml:id="revising-cluster-overwrite">
+    <title>Disable Automating Polling of Configuration Changes</title>
+
+    <para>
+     You may not want to allow changes to a configuration file to overwrite the
+     global configuration in the repository. To do so, start each instance of
+     OpenIDM and then disable automatic polling for configuration changes. To do
+     so, open the <filename>system.properties</filename> file and uncomment
+     the following line:
+    </para>
     <programlisting># openidm.fileinstall.enabled=false</programlisting>
-   <para>
-    For more information, see the following section:
-    <link xlink:show="new"
-          xlink:href="integrators-guide#disabling-auto-config-updates"
-          xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Disabling
-    Automatic Configuration Updates</citetitle></link>.
-   </para>
+    <para>
+     For more information, see the following section:
+     <link xlink:show="new"
+           xlink:href="integrators-guide#disabling-auto-config-updates"
+           xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Disabling
+      Automatic Configuration Updates</citetitle></link>.
+    </para>
+
+   </section>
+
   </section>
 
  </section>
