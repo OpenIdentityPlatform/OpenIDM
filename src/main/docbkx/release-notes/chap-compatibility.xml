@@ -87,7 +87,7 @@
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>Upated REST API</term>
+    <term>Updated REST API</term>
     <listitem>
      <para>
       OpenIDM has migrated to an updated version of the ForgeRock Common REST
@@ -105,7 +105,7 @@
        </para>
        <para>
         Implementations that use a scripted CREST connector must also update
-        their scripts with this changed. For example, note the change to the
+        their scripts with this change. For example, note the change to the
         following line in the <filename>UpdateScript.groovy</filename> script,
         provided in the <literal>scriptedcrest2dj</literal> sample.
        </para>
@@ -117,11 +117,11 @@
         concatenates a 36-character UUID with a 64-bit sequence number. The
         context ID is therefore of variable length (37-56 characters). This will
         impact existing implementations where the <literal>transactionId</literal>
-        are <literal>reconId</literal> are stored in a database column that uses
+        and <literal>reconId</literal> are stored in a database column that uses
         a fixed schema. Corresponding column sizes will need to be increased.
        </para>
        <para>
-        In addition, the <literal>reconID</literal> of a reconciliation
+        In addition, the <literal>reconId</literal> of a reconciliation
         operation is now constructed from the root context ID of the invocation.
        </para>
       </listitem>
