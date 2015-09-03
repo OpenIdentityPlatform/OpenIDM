@@ -48,7 +48,7 @@
                         {
                             "name" : "dashboard.changePassword",
                             "icon" : "fa-lock",
-                            "href" : "index.html#profile/change_security_data/"
+                            "event" : "dialog.EVENT_SHOW_CHANGE_SECURITY_DIALOG"
                         }
                     ]
                 }

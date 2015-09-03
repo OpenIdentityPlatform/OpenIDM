@@ -5,20 +5,20 @@
             <div class="card-container card-container-sm">
                 <div class="card">
                     <div class="card-body">
-                        <a href="{{href}}">
-                            <div class="image circle circle-sm">
-                                <i class="fa {{icon}}"></i>
+                        <a {{#if href}}href="{{href}}"{{else}} href="#"{{/if}} id="{{uid}}">
+                        <div class="image circle circle-sm">
+                            <i class="fa {{icon}}"></i>
+                        </div>
+                        <div class="content">
+                            <div class="main">
+                                <h3 class="name">{{name}}</h3>
                             </div>
-                            <div class="content">
-                                <div class="main">
-                                    <h3 class="name">{{name}}</h3>
-                                </div>
-                            </div>
+                        </div>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-       {{/each}}
+        {{/each}}
     </div>
 </div>
