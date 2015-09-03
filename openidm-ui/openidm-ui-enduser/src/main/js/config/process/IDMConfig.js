@@ -95,6 +95,16 @@ define("config/process/IDMConfig", [
             }
         },
         {
+            startEvent: constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
+            override: true,
+            dependencies: [
+                "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
+            ],
+            processDescription: function (event, ChangeSecurityDataDialog) {
+                ChangeSecurityDataDialog.render(event);
+            }
+        },
+        {
             startEvent: constants.EVENT_USER_UPDATE_POLICY_FAILURE,
             description: "Failure on update of user",
             dependencies: [ ],
