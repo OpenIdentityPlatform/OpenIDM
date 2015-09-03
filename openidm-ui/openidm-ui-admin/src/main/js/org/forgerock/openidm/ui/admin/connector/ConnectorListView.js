@@ -28,6 +28,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
     "jquery",
     "underscore",
     "backbone",
+    "bootstrap",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -38,7 +39,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils"
-], function($, _, Backbone,
+], function($, _, Backbone, bootstrap,
             AdminAbstractView,
             eventManager,
             constants,
@@ -161,15 +162,30 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                     this.$el.find("#connectorGrid").append(connectorGrid.render().el);
 
                     if(this.$el.find(".resource-unavailable").length !== 0) {
-                        this.$el.find(".resource-unavailable").tooltip({
-                            tooltipClass: "resource-error-tooltip"
+                        this.$el.find(".resource-unavailable").popover({
+                            content: function () {
+                                return '<span class="text-danger">' +$(this).attr("data-title") +'</span>';
+                            },
+                            trigger:'hover click',
+                            placement:'top',
+                            container: 'body',
+                            html: 'true',
+                            title: ''
                         });
                     }
 
                     if(this.$el.find(".resource-disabled").length !== 0) {
-                        this.$el.find(".resource-disabled").tooltip({
-                            tooltipClass: "resource-warning-tooltip"
+                        this.$el.find(".resource-disabled").popover({
+                            content: function () {
+                                return '<span class="text-warning">' +$(this).attr("data-title") +'</span>';
+                            },
+                            trigger:'hover click',
+                            placement:'top',
+                            container: 'body',
+                            html: 'true',
+                            title: ''
                         });
+
                     }
 
                     if (callback) {

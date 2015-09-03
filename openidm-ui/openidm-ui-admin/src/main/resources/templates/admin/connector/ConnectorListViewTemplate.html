@@ -77,9 +77,9 @@
                                     <span class="text-success"><i class="fa fa-check"></i> {{t "templates.connector.activeState"}}</span>
                                     {{else}}
                                     {{#if enabled}}
-                                    <span title="{{error}}" class="text-danger"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
+                                    <span data-title="{{error}}" class="text-danger resource-unavailable"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
                                     {{else}}
-                                    <span title="{{error}}" class="text-warning"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
+                                    <span data-title="{{error}}" class="text-warning resource-disabled"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
                                     {{/if}}
                                     {{/if}}
                                 </div>
