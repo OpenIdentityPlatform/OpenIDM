@@ -224,11 +224,11 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
 
                                 $("table.recon-grid", container).find(".newLinkWarning").popover({
                                     content: function () { return $(this).attr("data-original-title");},
-                                    trigger:'hover',
+                                    trigger:'hover click',
                                     placement:'top',
                                     container: 'body',
                                     html: 'true',
-                                    template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+                                    title: ''
                                 });
 
                                 _this.$el.find(".actionButton").prop('disabled',true);

@@ -131,8 +131,9 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
                         },
                         trigger: 'hover click',
                         placement: 'top',
+                        container: 'body',
                         html: 'true',
-                        template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+                        title: ''
                     });
 
                     this.$el.find("#policyPatterns").val(this.model.currentPattern);
