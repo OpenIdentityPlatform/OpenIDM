@@ -997,8 +997,8 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     </listitem>
     <listitem>
      <para>
-      <literal>EXACT</literal> - to return the precise number of query results,
-      with the corresponding performance impact on the query.
+      <literal>EXACT</literal> - to return the precise number of query results.
+      Note that this has a negative impact on query performance.
      </para>
     </listitem>
     <listitem>
