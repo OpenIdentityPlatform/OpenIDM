@@ -19,10 +19,7 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Context;
@@ -37,6 +34,7 @@ import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -143,13 +141,13 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return newExceptionPromise(newNotSupportedException("ACTION not supported on relationship collections"));
+        return new NotSupportedException("ACTION not supported on relationship collections").asPromise();
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return newExceptionPromise(newNotSupportedException("ACTION not supported on relationship instance"));
+        return new NotSupportedException("ACTION not supported on relationship instance").asPromise();
     }
 
     /** {@inheritDoc} */
@@ -162,7 +160,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
 
             return connectionFactory.getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
 
     }
@@ -193,14 +191,14 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
                 return connectionFactory.getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
             }
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return newExceptionPromise(newNotSupportedException("PATCH currently not supported on relationships"));
+        return new NotSupportedException("PATCH currently not supported on relationships").asPromise();
     }
 
     /** {@inheritDoc} */
@@ -220,7 +218,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
                 }
             });
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
     }
 
@@ -231,7 +229,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
             return connectionFactory.getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
     }
 
@@ -252,7 +250,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
                     final String rev = oldResource.getRevision();
 
                     if (newValue.asMap().equals(oldResource.getContent().asMap())) { // resource has not changed
-                        return newResultPromise(newResourceResponse(resourceId, rev, null));
+                        return newResourceResponse(resourceId, rev, null).asPromise();
                     } else {
                         final UpdateRequest updateRequest = Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(resourceId), newValue);
                         updateRequest.setRevision(rev);
@@ -262,7 +260,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
                 }
             });
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
     }
 
