@@ -20,6 +20,8 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Context;
@@ -141,13 +143,13 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return new NotSupportedException("ACTION not supported on relationship collections").asPromise();
+        return notSupportedOnCollection(request).asPromise();
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return new NotSupportedException("ACTION not supported on relationship instance").asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /** {@inheritDoc} */
@@ -198,7 +200,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return new NotSupportedException("PATCH currently not supported on relationships").asPromise();
+        return notSupportedOnInstance(request).asPromise();
     }
 
     /** {@inheritDoc} */

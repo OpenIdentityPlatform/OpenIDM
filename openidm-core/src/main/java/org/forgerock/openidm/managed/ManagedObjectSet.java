@@ -773,7 +773,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             // Split relationships in to to-be-updated (_id present) and to-be-created
 
-            if (fieldValue != null && !fieldValue.isNull()) {
+            if (fieldValue != null && fieldValue.isNotNull()) {
                 // Relation is an array of many relationships
                 if (isArray) {
                     fieldValue.expect(List.class);
