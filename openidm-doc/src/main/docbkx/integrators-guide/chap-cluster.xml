@@ -73,7 +73,7 @@
    <imagedata fileref="images/cluster-config.png" format="PNG" />
   </imageobject>
   <textobject>
-   <para>You can set up clusters with two or more instances of OpenIDM.</para>
+   <para>You can set up a cluster with two or more instances of OpenIDM.</para>
   </textobject>
  </mediaobject>
 
