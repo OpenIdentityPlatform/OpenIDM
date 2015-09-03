@@ -49,11 +49,19 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget", [
                 this.model.menu = args.menu;
                 this.data.cards = args.widget.cards;
 
-                _.each(this.data.cards, function(card){
+                _.each(this.data.cards, function(card) {
                     card.name = $.t(card.name);
-                });
+                    card.uid = card.name.split(" ").join("");
 
-                this.parentRender(_.bind(function(){
+                    if(card.event) {
+                        this.events["click #" + card.uid] = function(e) {
+                            e.preventDefault();
+                            eventManager.sendEvent(card.event);
+                        };
+                    }
+                }, this);
+
+                this.parentRender(_.bind(function() {
                     if(callback) {
                         callback();
                     }

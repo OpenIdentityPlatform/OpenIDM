@@ -96,8 +96,8 @@ define("config/AppConfiguration", [
                     userBar: [
                         {
                             "id": "security_link",
-                            "href": "#profile/change_security_data/",
-                            "i18nKey": "templates.user.UserProfileTemplate.changeSecurityData"
+                            "event" : constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
+                            "i18nKey": "common.user.changePassword"
                         },
                         {
                             "id": "logout_link",
