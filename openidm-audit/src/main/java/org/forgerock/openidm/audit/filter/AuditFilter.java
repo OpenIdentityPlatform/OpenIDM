@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.audit.filter;
 
+import static org.forgerock.http.context.ClientContext.newInternalClientContext;
+
 import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
@@ -32,7 +34,6 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.Filter;
-import org.forgerock.json.resource.InternalContext;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -45,7 +46,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.http.HttpContext;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -178,8 +179,7 @@ public class AuditFilter implements Filter {
     private void logAuditAccessEntry(final Context context, final AuditState state,
             final Promise<? extends Response, ResourceException> promise) {
 
-        if (!context.containsContext(HttpContext.class)
-                || context.containsContext(InternalContext.class)) {
+        if (!ContextUtil.isExternal(context)) {
             // don't log internal requests
             return;
         }
@@ -225,7 +225,7 @@ public class AuditFilter implements Filter {
 
                             //wrap the context in a new internal context since we are using the external connection
                             // factory
-                            connectionFactory.getConnection().create(new InternalContext(context), createRequest);
+                            connectionFactory.getConnection().create(newInternalClientContext(context), createRequest);
                         } catch (ResourceException e) {
                             LOGGER.error("Failed to log audit access entry", e);
                         }
