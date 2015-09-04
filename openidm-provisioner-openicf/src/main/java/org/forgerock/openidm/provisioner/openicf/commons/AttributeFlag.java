@@ -69,6 +69,10 @@ public enum AttributeFlag {
      */
     NOT_RETURNED_BY_DEFAULT("NOT_RETURNED_BY_DEFAULT"),
     /**
+     * Default OpenICF Flag
+     */
+    MULTIVALUED("MULTIVALUED"),
+    /**
      * Custom attribute that is not belong to the resource but the business
      * requires this
      */

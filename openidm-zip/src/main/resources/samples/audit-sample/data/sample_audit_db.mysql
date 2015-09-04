@@ -2,89 +2,141 @@ CREATE DATABASE IF NOT EXISTS `audit` CHARACTER SET utf8 COLLATE utf8_bin;
 USE audit;
 
 -- -----------------------------------------------------
--- Table `audit`.`auditrecon`
+-- Table `auditaccess`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `audit`.`auditrecon` (
+CREATE  TABLE IF NOT EXISTS `auditaccess` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `entrytype` VARCHAR(7) NULL ,
-  `rootactionid` VARCHAR(255) NULL ,
-  `reconid` VARCHAR(56) NULL ,
-  `reconaction` VARCHAR(36) NULL ,
-  `reconciling` VARCHAR(12) NULL ,
-  `sourceobjectid` VARCHAR(511) NULL ,
-  `targetobjectid` VARCHAR(511) NULL ,
-  `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `situation` VARCHAR(24) NULL ,
   `activity` VARCHAR(24) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `message` TEXT NULL ,
-  `actionid` VARCHAR(255) NULL ,
-  `exceptiondetail` TEXT NULL ,
-  `mapping` TEXT NULL ,
-  `messagedetail` MEDIUMTEXT NULL ,
-  `linkqualifier` VARCHAR(255) NULL ,
-  PRIMARY KEY (`objectid`) ) 
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `audit`.`auditactivity`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `audit`.`auditactivity` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(255) NULL ,
-  `parentactionid` VARCHAR(255) NULL ,
-  `activityid` VARCHAR(255) NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `activity` VARCHAR(24) NULL ,
-  `message` TEXT NULL ,
-  `subjectid` VARCHAR(511) NULL ,
-  `subjectrev` VARCHAR(38) NULL ,
-  `requester` TEXT NULL ,
-  `approver` TEXT NULL ,
-  `subjectbefore` MEDIUMTEXT NULL ,
-  `subjectafter` MEDIUMTEXT NULL ,
-  `status` VARCHAR(7) NULL ,
-  `changedfields` VARCHAR(255) NULL ,
-  `passwordchanged` VARCHAR(5) NULL ,
-  PRIMARY KEY (`objectid`) ,
-  INDEX `idx_auditactivity_rootactionid` (`rootactionid` ASC) )
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `audit`.`auditaccess`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `audit`.`auditaccess` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `activity` VARCHAR(24) NULL ,
-  `ip` VARCHAR(40) NULL ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `eventname` VARCHAR(255) ,
+  `server_ip` VARCHAR(40) ,
+  `server_port` VARCHAR(5) ,
+  `client_host` VARCHAR(255) ,
+  `client_ip` VARCHAR(40) ,
+  `client_port` VARCHAR(5) ,
+  `userid` VARCHAR(255) NULL ,
   `principal` TEXT NULL ,
   `roles` VARCHAR(1024) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `userid` VARCHAR(24) NULL ,
-  PRIMARY KEY (`objectid`) )
+  `auth_component` VARCHAR(255) NULL ,
+  `resource_uri` VARCHAR(255) NULL ,
+  `resource_protocol` VARCHAR(10) NULL ,
+  `resource_method` VARCHAR(10) NULL ,
+  `resource_detail` VARCHAR(255) NULL ,
+  `http_method` VARCHAR(10) NULL ,
+  `http_path` VARCHAR(255) NULL ,
+  `http_querystring` VARCHAR(255) NULL ,
+  `http_headers` TEXT ,
+  `status` VARCHAR(20) NULL ,
+  `elapsedtime` VARCHAR(13) NULL ,
+  PRIMARY KEY (`objectid`),
+  INDEX `idx_auditaccess_status` (`status` ASC),
+  INDEX `idx_auditaccess_principal` (`principal`(28) ASC) )
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
--- Table `audit`.`auditsync`
+-- Table `auditauthentication`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `audit`.`auditsync` (
+CREATE TABLE IF NOT EXISTS `auditauthentication` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(255) NULL ,
-  `sourceobjectid` VARCHAR(511) NULL ,
-  `targetobjectid` VARCHAR(511) NULL ,
+  `transactionid` VARCHAR(56) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `userid` VARCHAR(255) NULL ,
+  `eventname` VARCHAR(50) NULL ,
+  `result` VARCHAR(255) NULL ,
+  `principals` TEXT ,
+  `context` TEXT ,
+  `sessionid` VARCHAR(255) ,
+  `entries` TEXT ,
+  PRIMARY KEY (`objectid`)
+)
+  ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `auditactivity`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `auditactivity` (
+  `objectid` VARCHAR(38) NOT NULL ,
   `activity` VARCHAR(24) NULL ,
-  `situation` VARCHAR(24) NULL ,
-  `status` VARCHAR(7) NULL ,
-  `message` TEXT NULL ,
-  `actionid` VARCHAR(255) NULL ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `eventname` VARCHAR(255) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `runas` VARCHAR(255) NULL ,
+  `resource_uri` VARCHAR(255) NULL ,
+  `resource_protocol` VARCHAR(10) NULL ,
+  `resource_method` VARCHAR(10) NULL ,
+  `resource_detail` VARCHAR(255) NULL ,
+  `subjectbefore` MEDIUMTEXT NULL ,
+  `subjectafter` MEDIUMTEXT NULL ,
+  `changedfields` VARCHAR(255) NULL ,
+  `passwordchanged` VARCHAR(5) NULL ,
+  `subjectrev` VARCHAR(255) NULL ,
+  `message` TEXT NULL,
+  `activityobjectid` VARCHAR(255) ,
+  `status` VARCHAR(20) ,
+  PRIMARY KEY (`objectid`) ,
+  INDEX `idx_auditactivity_transactionid` (`transactionid` ASC)
+)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `auditrecon`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `auditrecon` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `eventname` VARCHAR(50) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `activity` VARCHAR(24) NULL ,
   `exceptiondetail` TEXT NULL ,
-  `mapping` TEXT NULL ,
-  `messagedetail` MEDIUMTEXT NULL ,
   `linkqualifier` VARCHAR(255) NULL ,
-  PRIMARY KEY (`objectid`) )
+  `mapping` VARCHAR(511) NULL ,
+  `message` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL ,
+  `situation` VARCHAR(24) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `status` VARCHAR(20) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
+  `reconciling` VARCHAR(12) NULL ,
+  `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
+  `reconaction` VARCHAR(36) NULL ,
+  `entrytype` VARCHAR(7) NULL ,
+  `reconid` VARCHAR(56) NULL ,
+  PRIMARY KEY (`objectid`) ,
+  INDEX `idx_auditrecon_reconid` (`reconid` ASC),
+  INDEX `idx_auditrecon_targetobjectid` (`targetobjectid`(28) ASC),
+  INDEX `idx_auditrecon_sourceobjectid` (`sourceobjectid`(28) ASC),
+  INDEX `idx_auditrecon_activitydate` (`activitydate` ASC),
+  INDEX `idx_auditrecon_mapping` (`mapping`(255) ASC),
+  INDEX `idx_auditrecon_entrytype` (`entrytype` ASC),
+  INDEX `idx_auditrecon_situation` (`situation` ASC),
+  INDEX `idx_auditrecon_status` (`status` ASC) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `auditsync`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `auditsync` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `eventname` VARCHAR(50) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `activity` VARCHAR(24) NULL ,
+  `exceptiondetail` TEXT NULL ,
+  `linkqualifier` VARCHAR(255) NULL ,
+  `mapping` VARCHAR(511) NULL ,
+  `message` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL ,
+  `situation` VARCHAR(24) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `status` VARCHAR(20) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
+  PRIMARY KEY (`objectid`)
+)
 ENGINE = InnoDB;
 
 grant all on audit.* to root@'%' IDENTIFIED BY 'password';
