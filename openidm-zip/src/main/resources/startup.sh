@@ -17,7 +17,10 @@
 #
 
 JAVA_VER=$(java -version 2>&1 | sed 's/java version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
-[ "$JAVA_VER" -ge 17 ] || (echo "Java version 1.7 and higher required" && exit 1)
+if [ "$JAVA_VER" -lt 17 ]; then
+  echo "Java version 1.7 or higher required";
+  exit 1;
+fi
 
 # clean up left over pid files if necessary
 cleanupPidFile() {
