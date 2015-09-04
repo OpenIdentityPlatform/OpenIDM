@@ -213,7 +213,7 @@ public class ObjectClassInfoHelper {
                             + "' value is null");
                 }
                 Attribute a = attributeInfo.build(v.getObject(), cryptoService);
-                if (null != a) {
+                if (null != a && a.getValue() != null && a.getValue().size() > 0) {
                     result.put(attributeInfo.getAttributeInfo().getName(), a);
                 }
             }
@@ -368,7 +368,7 @@ public class ObjectClassInfoHelper {
      * @param source
      * @param cryptoService
      * @return
-     * @throws JsonResourceException if ID value can not be determined from the {@code source}
+     * @throws ResourceException if ID value can not be determined from the {@code source}
      */
     public ConnectorObject build(Class<? extends APIOperation> operation, String name, JsonValue source, CryptoService cryptoService) throws Exception {
         String nameValue = name;
