@@ -627,10 +627,6 @@
     filters that can be applied to each event type.
    </para>
 
-   <para>
-    The following sections
-   </para>
-
   <section xml:id="filtering-by-action">
    <title>Filtering Audit Entries by Action</title>
    <para>
