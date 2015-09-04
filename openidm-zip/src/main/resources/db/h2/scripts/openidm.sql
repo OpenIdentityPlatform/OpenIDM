@@ -195,7 +195,26 @@ CREATE TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `status` VARCHAR(20) NULL ,
   `targetobjectid` VARCHAR(511) NULL ,
   PRIMARY KEY (`objectid`) );
-  
+
+CREATE  TABLE IF NOT EXISTS `openidm`.`auditconfig` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `activitydate` VARCHAR(29) NOT NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `transactionid` VARCHAR(56) NOT NULL ,
+  `eventname` VARCHAR(255) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `runas` VARCHAR(255) NULL ,
+  `resource_uri` VARCHAR(255) NULL ,
+  `resource_protocol` VARCHAR(10) NULL ,
+  `resource_method` VARCHAR(10) NULL ,
+  `resource_detail` VARCHAR(255) NULL ,
+  `before` MEDIUMTEXT NULL ,
+  `after` MEDIUMTEXT NULL ,
+  `changedfields` VARCHAR(255) NULL ,
+  `rev` VARCHAR(255) NULL ,
+  PRIMARY KEY (`objectid`));
+
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditconfig_transactionid` ON  `openidm`.`auditconfig`(`transactionid` ASC);
+
   
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,

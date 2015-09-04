@@ -206,6 +206,29 @@ CREATE TABLE openidm.auditaccess (
   PRIMARY KEY (objectid)
 );
 
+-- -----------------------------------------------------
+-- Table openidm.auditconfig
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.auditconfig (
+  objectid VARCHAR(38) NOT NULL,
+  activitydate VARCHAR(29) NOT NULL,
+  transactionid VARCHAR(56) NOT NULL,
+  eventname VARCHAR(255) DEFAULT NULL,
+  userid VARCHAR(255) DEFAULT NULL,
+  runas VARCHAR(255) DEFAULT NULL,
+  resource_uri VARCHAR(255) DEFAULT NULL,
+  resource_protocol VARCHAR(10) DEFAULT NULL,
+  resource_method VARCHAR(10) DEFAULT NULL,
+  resource_detail VARCHAR(255) DEFAULT NULL,
+  before TEXT,
+  after TEXT,
+  changedfields VARCHAR(255) DEFAULT NULL,
+  rev VARCHAR(255) DEFAULT NULL,
+  PRIMARY KEY (objectid)
+);
+
+CREATE INDEX idx_auditconfig_transactionid ON openidm.auditconfig (transactionid);
 
 -- -----------------------------------------------------
 -- Table openidm.auditactivity

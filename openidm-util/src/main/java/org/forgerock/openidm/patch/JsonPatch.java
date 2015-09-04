@@ -47,7 +47,7 @@ public final class JsonPatch {
     /**
      * Path to the "path" attribute of a patch entry. Required.
      */
-    private static final JsonPointer PATH_PTR = new JsonPointer("/path");
+    public static final JsonPointer PATH_PTR = new JsonPointer("/path");
 
     /**
      * Path to the "from" attribute of a patch entry. Required only for "move" and "copy"

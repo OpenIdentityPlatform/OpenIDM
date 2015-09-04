@@ -23,6 +23,29 @@
  */
 package org.forgerock.openidm.config.manage;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.openidm.config.manage.ConfigObjectService.asConfigQueryFilter;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
@@ -35,6 +58,7 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -48,25 +72,10 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.testng.Assert;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.forgerock.openidm.config.manage.ConfigObjectService.*;
 
 /**
  * Test class for {@link ConfigObjectService}
@@ -81,16 +90,17 @@ public class ConfigObjectServiceTest {
     private String id;
     private Map<String,Object> config;
     private ConfigurationAdmin configAdmin;
+    private EnhancedConfig enhancedConfig;
 
     @SuppressWarnings("unchecked")
 	@BeforeTest
     public void beforeTest() throws Exception {
-        properties = new Hashtable<String, Object>();
+        properties = new Hashtable<>();
         properties.put(ComponentConstants.COMPONENT_NAME, getClass().getName());
 
         // Set root
         URL root = ConfigObjectServiceTest.class.getResource("/");
-        Assert.assertNotNull(root);
+        assertNotNull(root);
         String rootPath = URLDecoder.decode(root.getPath(), "UTF-8");
         System.setProperty(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
 
@@ -114,7 +124,9 @@ public class ConfigObjectServiceTest {
 
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         when(connectionFactory.getConnection()).thenReturn(mock(Connection.class));
-        configObjectService.bindEnhancedConfig(mock(EnhancedConfig.class));
+
+        enhancedConfig = mock(EnhancedConfig.class);
+        configObjectService.bindEnhancedConfig(enhancedConfig);
         configObjectService.bindConnectionFactory(connectionFactory);
 
         configObjectService.activate(context);
@@ -130,6 +142,7 @@ public class ConfigObjectServiceTest {
         when(context.getProperties()).thenReturn(properties);
         configObjectService.deactivate(context);
         configObjectService = null;
+        enhancedConfig = null;
     }
 
     @Test(priority=1)
@@ -189,10 +202,10 @@ public class ConfigObjectServiceTest {
         Assert.assertFalse(configObjectService.isFactoryConfig("b/"));
 
         Assert.assertEquals(configObjectService.getParsedId("c/d"), "c-d");
-        Assert.assertTrue(configObjectService.isFactoryConfig("c/d"));
+        assertTrue(configObjectService.isFactoryConfig("c/d"));
 
         Assert.assertEquals(configObjectService.getParsedId("e/d/"), "e-d");
-        Assert.assertTrue(configObjectService.isFactoryConfig("e/d/"));
+        assertTrue(configObjectService.isFactoryConfig("e/d/"));
 
         Assert.assertEquals(configObjectService.getParsedId(" f "), "_f_");
         Assert.assertFalse(configObjectService.isFactoryConfig(" f "));
@@ -205,34 +218,37 @@ public class ConfigObjectServiceTest {
         config.put("property1", "value1");
         config.put("property2", "value2");
 
-        configObjectService.create(rname, id, config, false);
+        configObjectService.create(rname, id, json(config), false).getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
         Configuration config = configObjectService.findExistingConfiguration(parsedId);
-        Assert.assertNotNull(config);
-        Assert.assertNotNull(config.getProperties());
+        assertNotNull(config);
+        assertNotNull(config.getProperties());
 
         Dictionary properties = config.getProperties();
         EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         JsonValue value = enhancedConfig.getConfiguration(properties, rname.toString(), false);
-        Assert.assertTrue(value.keys().contains("property1"));
+        assertTrue(value.keys().contains("property1"));
         Assert.assertEquals(value.get("property1").asString(), "value1");
     }
 
     @Test(priority=4, expectedExceptions = PreconditionFailedException.class)
     public void testCreateDupeFail() throws Exception {
-        configObjectService.create(rname, id, config, false);
+        configObjectService.create(rname, id, json(config), false).getOrThrow();
         throw new Exception("Duplicate object not detected");
     }
 
     @Test(priority=5)
     public void testCreateDupeOk() throws Exception {
-        configObjectService.create(rname, id, config, true);
+        when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false)))
+                .thenReturn(json(config));
+
+        configObjectService.create(rname, id, json(config), true).getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
         Configuration config = configObjectService.findExistingConfiguration(parsedId);
-        Assert.assertNotNull(config);
-        Assert.assertNotNull(config.getProperties());
+        assertNotNull(config);
+        assertNotNull(config.getProperties());
     }
 
     @SuppressWarnings("rawtypes")
@@ -241,36 +257,42 @@ public class ConfigObjectServiceTest {
         config.put("property1", "newvalue1");
         config.put("property2", "newvalue2");
 
-        configObjectService.update(rname, id, config);
+        when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false)))
+                .thenReturn(json(config));
+
+        configObjectService.update(rname, id, json(config)).getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
         Configuration config = configObjectService.findExistingConfiguration(parsedId);
-        Assert.assertNotNull(config);
-        Assert.assertNotNull(config.getProperties());
+        assertNotNull(config);
+        assertNotNull(config.getProperties());
 
         Dictionary properties = config.getProperties();
         JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         JsonValue value = enhancedConfig.getConfiguration(properties, rname.toString(), false);
-        Assert.assertTrue(value.keys().contains("property1"));
+        assertTrue(value.keys().contains("property1"));
         Assert.assertEquals(value.get("property1").asString(), "newvalue1");
     }
 
     @Test(priority=7)
     public void testQuery() throws Exception {
         configObjectService.handleQuery(mock(Context.class),
-                mock(QueryRequest.class), mock(QueryResourceHandler.class));
+                mock(QueryRequest.class), mock(QueryResourceHandler.class)).getOrThrow();
     }
 
     @Test(priority=8)
     public void testDelete() throws Exception {
-        configObjectService.delete(rname, "0");
+        when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false))).thenReturn(
+                json(object(field(ResourceResponse.FIELD_CONTENT_REVISION, "revX"))));
+
+        configObjectService.delete(rname, "0").getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
         Configuration config = configObjectService.findExistingConfiguration(parsedId);
 
         // "deleting" the object does not remove it from the configAdmin but it does invalidate the config
-        Assert.assertNotNull(config);
-        Assert.assertNull(config.getProperties());
+        assertNotNull(config);
+        assertNull(config.getProperties());
     }
 
     @Test(priority=9, expectedExceptions = NotFoundException.class)
@@ -278,7 +300,7 @@ public class ConfigObjectServiceTest {
         config.put("property1", "newnewvalue1");
         config.put("property2", "newnewvalue2");
 
-        configObjectService.update(rname, id, config);
+        configObjectService.update(rname, id, json(config)).getOrThrow();
     }
 
 

@@ -14,13 +14,13 @@
             "config" : {
                 "logDirectory" : "audit"
             },
-            "events" : [ "access", "activity", "recon", "sync", "authentication" ]
+            "events" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
         },
         {
             "name": "repo",
             "class": "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
             "config": {},
-            "events": [ "access", "activity", "recon", "sync", "authentication" ]
+            "events": [ "access", "activity", "recon", "sync", "authentication", "config" ]
         }
     ],
     "extendedEventTypes" : {
