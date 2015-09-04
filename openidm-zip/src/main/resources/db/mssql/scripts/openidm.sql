@@ -301,6 +301,33 @@ CREATE  TABLE  [openidm].[auditsync]
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditsync, 'COLUMN', activitydate;
 END
 
+-- -----------------------------------------------------
+-- Table `openidm`.`auditconfig`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='auditconfig' and xtype='U')
+  BEGIN
+    CREATE  TABLE [openidm].[auditconfig]
+    (
+      objectid NVARCHAR(38) NOT NULL,
+      activitydate NVARCHAR(29) NOT NULL,
+      transactionid NVARCHAR(56) NOT NULL,
+      eventname NVARCHAR(255) NULL,
+      userid NVARCHAR(255) NULL,
+      runas NVARCHAR(255) NULL,
+      resource_uri NVARCHAR(255) NULL,
+      resource_protocol NVARCHAR(10) NULL,
+      resource_method NVARCHAR(10) NULL,
+      resource_detail NVARCHAR(255) NULL,
+      before NTEXT,
+      after NTEXT,
+      changedfields NVARCHAR(255) NULL,
+      rev NVARCHAR(255) NULL,
+      PRIMARY KEY CLUSTERED (objectid),
+    );
+    CREATE INDEX idx_auditconfig_transactionid ON [openidm].[auditconfig] (transactionid ASC);
+    EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditconfig, 'COLUMN', activitydate;
+  END
+
 
 -- -----------------------------------------------------
 -- Table `openidm`.`auditactivity`

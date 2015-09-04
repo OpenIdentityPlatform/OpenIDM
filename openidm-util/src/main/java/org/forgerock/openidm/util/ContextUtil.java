@@ -31,6 +31,8 @@ import org.forgerock.json.resource.SecurityContext;
  */
 public class ContextUtil {
 
+    public static final String INTERNAL_AUTHENTICATION_ID = "system";
+
     /**
      * {@code ContextUtil} instances should NOT be constructed in standard
      * programming. Instead, the class should be used as
@@ -66,11 +68,11 @@ public class ContextUtil {
         // Ideally, we would have an internal system user that we could point to;
         // point to it now and build it later
         final Map<String, Object> authzid = new HashMap<String, Object>();
-        authzid.put(SecurityContext.AUTHZID_ID, "system");
+        authzid.put(SecurityContext.AUTHZID_ID, INTERNAL_AUTHENTICATION_ID);
         List<String> roles = new ArrayList<String>();
         roles.add("system");
         authzid.put(SecurityContext.AUTHZID_ROLES, roles);
         authzid.put(SecurityContext.AUTHZID_COMPONENT, "internal/user");
-        return newInternalClientContext(new SecurityContext(new RootContext(), "system", authzid));
+        return newInternalClientContext(new SecurityContext(new RootContext(), INTERNAL_AUTHENTICATION_ID, authzid));
     }
 }

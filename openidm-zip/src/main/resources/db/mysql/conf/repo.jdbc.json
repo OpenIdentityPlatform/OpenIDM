@@ -168,6 +168,25 @@
                     "entries" : {"column" : "entries", "type" : "JSON_LIST"}
                 }
             },
+            "audit/config" : {
+                "table" : "auditconfig",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "transactionId" : "transactionid",
+                    "timestamp" : "activitydate",
+                    "eventName" : "eventname",
+                    "authentication/id" : "userid",
+                    "runas" : "runas",
+                    "resourceOperation/uri" : "resource_uri",
+                    "resourceOperation/protocol" : "resource_protocol",
+                    "resourceOperation/operation/method" : "resource_method",
+                    "resourceOperation/operation/detail" : "resource_detail",
+                    "before" : "before",
+                    "after" : "after",
+                    "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"},
+                    "_rev" : "rev"
+                }
+            },
             "audit/activity" : {
                 "table" : "auditactivity",
                 "objectToColumn" : {
