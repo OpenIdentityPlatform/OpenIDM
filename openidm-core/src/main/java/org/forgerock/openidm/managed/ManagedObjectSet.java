@@ -672,7 +672,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @throws ResourceException If an error occured querying the relationships
      */
     private JsonValue fetchRelationships(final Context context, final String resourceId) throws ResourceException {
-        final JsonValue relationships = new JsonValue(new HashMap<String, Object>());
+        final JsonValue relationships = json(object());
 
         for (JsonPointer relationshipField : schema.getRelationshipFields()) {
             relationships.put(relationshipField, fetchRelationship(context, resourceId, relationshipField).getObject());
