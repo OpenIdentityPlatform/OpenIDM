@@ -820,22 +820,6 @@ Dialog Catch
     color: #999;
   }
 
-  .descending .sort-caret {
-    bottom:3px;
-
-    &:before {
-      content:@fa-var-sort-desc;
-    }
-  }
-
-  .ascending .sort-caret {
-    top: 3px;
-
-    &:before {
-      content:@fa-var-sort-asc;
-    }
-  }
-
   .empty {
     width:100%;
     text-align:center;
@@ -865,7 +849,7 @@ Dialog Catch
   }
 
   tbody tr td{
-    padding: 12px 15px;
+    padding: 12px 8px;
   }
 
   thead tr th a:hover {
@@ -875,6 +859,24 @@ Dialog Catch
 
 .backgrid-table thead {
   border-bottom: 2px solid #ddd;
+}
+
+.backgrid-table {
+  .descending .sort-caret {
+    bottom:3px;
+
+    &:before {
+      content:@fa-var-sort-desc;
+    }
+  }
+
+  .ascending .sort-caret {
+    top: 3px;
+
+    &:before {
+      content:@fa-var-sort-asc;
+    }
+  }
 }
 
 /*

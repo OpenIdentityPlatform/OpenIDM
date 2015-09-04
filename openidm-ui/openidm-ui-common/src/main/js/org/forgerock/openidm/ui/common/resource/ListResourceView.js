@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, sessionStorage */
+/*global define */
 
 define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
     "jquery",
@@ -33,28 +33,35 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/common/util/JQGridUtil",
+    "backgrid",
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
-    "jqgrid"
-], function($, _, Handlebars, AbstractView, eventManager, constants, cookieHelper, uiUtils, JQGridUtil, resourceDelegate, messagesManager) {
+    "org/forgerock/commons/ui/common/main/AbstractModel",
+    "org/forgerock/commons/ui/common/main/AbstractCollection",
+    "backgrid-paginator",
+    "backgrid-selectall"
+], function($, 
+        _, 
+        Handlebars, 
+        AbstractView, 
+        eventManager, 
+        constants, 
+        cookieHelper, 
+        uiUtils, 
+        Backgrid, 
+        BackgridUtils, 
+        resourceDelegate, 
+        messagesManager,
+        AbstractModel,
+        AbstractCollection) {
     var ListResourceView = AbstractView.extend({
         template: "templates/admin/resource/ListResourceViewTemplate.html",
-
+        model: {},
         events: {
             "click #reloadGridBtn": "reloadGrid",
             "click #clearFiltersBtn": "clearFilters",
             "click #deleteSelected": "deleteSelected"
-        },
-
-        hasFilters: function(){
-            var search = false;
-            $.each(this.$el.find('.ui-search-toolbar').find('input,select'),function(){
-                if($(this).val().length > 0){
-                    search = true;
-                }
-            });
-            return search;
         },
 
         select: function(event) {
@@ -65,48 +72,14 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             if(event) {
                 event.preventDefault();
             }
-            $(this.grid_id_selector).trigger('reloadGrid');
-        },
-
-        showObject: function(objectId) {
-            var args = this.data.args,
-                routeName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
-
-            args.push(objectId);
-
-            if(objectId) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
-            }
+            this.model.resources.fetch();
         },
 
         clearFilters: function(event){
-            var grid_id = this.grid_id_selector,
-                post_data = sessionStorage.getItem(this.objectNameClean() + "ViewGridParams_preTranslation");
-
-            if(post_data){
-                post_data = JSON.parse(post_data);
+            if (event) {
+                event.preventDefault();
             }
-
             event.preventDefault();
-
-            $(grid_id).jqGrid('setGridParam',{search:false});
-
-            $.extend(post_data, { filters: "" });
-
-            _.each(post_data,function(v,k){
-                if (k === "_search"){
-                    post_data._search = false;
-                }
-                else if ($.inArray(k, ["nd", "sidx", "rows", "sord", "page", "filters"]) < 0) {
-                    try {
-                        delete post_data[k];
-                    } catch (e) { }
-
-                    $("#gs_" + $.jgrid.jqID(k), $(grid_id).get(0).grid.hDiv).val("");
-
-                }
-            });
-
             this.render(this.data.args);
             this.$el.find('#clearFiltersBtn').prop('disabled', true);
         },
@@ -115,19 +88,18 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         },
         getCols: function(){
             var prom = $.Deferred(),
-                setCols;
+                setCols,
+                selectCol = {
+                    name: "",
+                    cell: "select-row",
+                    headerCell: "select-all",
+                    sortable: false,
+                    editable: false
+                };
 
             $.when(resourceDelegate.getSchema(this.data.args)).then(_.bind(function(schema){
                 var cols = [],
                     unorderedCols = [];
-
-                cols.push(
-                        {
-                            "name":"_id",
-                            "hidden": true,
-                            "key": true
-                        }
-                );
 
                 if(schema !== "invalidObject"){
                     this.data.validObject = true;
@@ -143,17 +115,19 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                     setCols(col.properties, colName);
                                 } else {
                                     if(col.searchable || this.isSystemResource){
-                                        //if _id is in the schema properties and is searchable get rid of the default
-                                        //_id col and replace it with a visible one
+                                        //if _id is in the schema properties and is searchable add it
                                         if(colName === "_id") {
-                                            cols.splice(0,1);
 
                                             unorderedCols.push(
                                                     {
                                                         "name":"_id",
                                                         "key": true,
                                                         "label": col.title || colName,
-                                                        "formatter": Handlebars.Utils.escapeExpression
+                                                        "headerCell": BackgridUtils.FilterHeaderCell,
+                                                        "cell": "string",
+                                                        "sortable": true,
+                                                        "editable": false,
+                                                        "sortType": "toggle"
                                                     }
                                             );
                                         } else {
@@ -164,7 +138,11 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                                     {
                                                         "name": colName,
                                                         "label": col.title || colName,
-                                                        "formatter": Handlebars.Utils.escapeExpression
+                                                        "headerCell": BackgridUtils.FilterHeaderCell,
+                                                        "cell": "string",
+                                                        "sortable": true,
+                                                        "editable": false,
+                                                        "sortType": "toggle"
                                                     }
                                             );
                                         }
@@ -187,6 +165,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                             cols.push(col);
                         });
 
+                        cols.unshift(selectCol);
+                        
                         if (cols.length === 1) {
                             prom.resolve(unorderedCols);
                         } else {
@@ -201,14 +181,20 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                         cols.push(
                                                 {
                                                     "name": col,
-                                                    "formatter": Handlebars.Utils.escapeExpression,
-                                                    "hidden": col === "_rev"
+                                                    "label": col,
+                                                    "headerCell": BackgridUtils.FilterHeaderCell,
+                                                    "cell": "string",
+                                                    "sortable": true,
+                                                    "editable": false,
+                                                    "sortType": "toggle"
                                                 }
                                         );
                                     }
                                 });
                             }
-
+                            
+                            cols.unshift(selectCol);
+                            
                             prom.resolve(cols);
                         });
                     }
@@ -220,28 +206,11 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
 
             return prom;
         },
-        getTotal: function(){
-            var prom = $.Deferred();
-
-            $.get(this.getURL() + '?_queryId=query-all-ids').then(
-                function(qry){
-                    prom.resolve(qry);
-                },
-                function(){
-                    prom.resolve({ resultCount: 0 });
-                }
-            );
-
-            return prom;
-        },
         objectNameClean: function() {
             return this.data.objectName.replace("/","_");
         },
-        selectedRows: function() {
-            return this.$el.find(this.grid_id_selector).jqGrid('getGridParam','selarrrow');
-        },
         toggleDeleteSelected: function() {
-            if(this.selectedRows().length === 0) {
+            if(this.data.selectedItems.length === 0) {
                 this.$el.find('#deleteSelected').prop('disabled',true);
             } else {
                 this.$el.find('#deleteSelected').prop('disabled',false);
@@ -252,7 +221,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
 
             uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDeleteSelected",{ objectTitle: this.data.objectName }), _.bind(function(){
                 var promArr = [];
-                _.each(this.selectedRows(), _.bind(function(objectId) {
+                _.each(this.data.selectedItems, _.bind(function(objectId) {
                     promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId, null, _.bind(function() {
                         this.reloadGrid();
                     }, this)));
@@ -274,6 +243,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             this.grid_id_selector = "#" + this.data.grid_id;
             this.isSystemResource = false;
             this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
+            this.data.selectedItems = [];
 
             if (this.data.objectType === "system") {
                 this.isSystemResource = true;
@@ -281,136 +251,108 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 this.data.addLinkHref = "#resource/" + args[0] + "/" + args[1] + "/" + args[2] + "/add/";
             }
 
-            $.when(this.getCols(), this.getTotal()).then(_.bind(function(cols, total){
-                this.data.hasData = false;
-                if(total.resultCount){
-                    this.data.hasData = true;
-                    this.parentRender(function() {
-                        var _this = this,
-                        grid_id = this.grid_id_selector,
-                        pager_id = grid_id + '_pager',
-                        rowNum = sessionStorage.getItem(this.objectNameClean() + "ViewGridRows");
+            this.getCols().then(_.bind(function(cols){
+                this.parentRender(function() {
+                    
+                    this.buildResourceListGrid(cols);
 
-                        JQGridUtil.buildJQGrid(this, this.data.grid_id, {
-                            url: this.getURL(),
-                            width: this.$el.find(".resourcesContainer").width() - 40,
-                            shrinkToFit: cols.length <= 6 || false,
-                            rowList: [10,20,50],
-                            rowNum: (rowNum) ? parseInt(rowNum, 10) : 10,
-                            sortname: (cols[1] && !this.isSystemResource) ? cols[1].name : cols[0].name,
-                            sortorder: 'asc',
-                            colModel: cols,
-                            multiselect: true,
-                            pager: pager_id,
-                            onCellSelect: _.bind(function(rowid,iCol,val,e){
-                                if(iCol !== 0) {
-                                    var posted_data = $(grid_id).jqGrid('getGridParam','postData');
-                                    sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams", JSON.stringify(posted_data));
-
-                                    if(_this.data.posted_data_preTranslation){
-                                        sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams_preTranslation", JSON.stringify(_this.data.posted_data_preTranslation));
-                                    }
-
-                                    _this.showObject(rowid);
-                                }
-                            }, this),
-                            jsonReader : {
-                                repeatitems: false,
-                                root: function(obj){ return obj.result; },
-                                id: "_id",
-                                page: function(obj){ return _this.gridPage || 1; },
-                                total: function(obj){ return Math.ceil(total.resultCount / ((rowNum) ? rowNum : 10)); },
-                                records: function(obj){ return total.resultCount; }
-                            },
-                            loadComplete: _.bind(function(data){
-                               var params = sessionStorage.getItem(_this.objectNameClean() + "ViewGridParams_preTranslation");
-                               if(params){
-                                   params = JSON.parse(params);
-                                   _.each(cols, function(col){
-                                       $('#gs_' + col.name).val(params[col.name]);
-                                   });
-                                   $(grid_id).jqGrid("sortGrid", params.sidx, false, params.sord);
-                                   $('#clearFiltersBtn').prop('disabled', false);
-                               }
-                               if(!this.hasFilters()){
-                                   $('#clearFiltersBtn').prop('disabled', true);
-                               }
-
-
-                               sessionStorage.removeItem(_this.objectNameClean() + "ViewGridParams_preTranslation");
-
-                               sessionStorage.removeItem(_this.objectNameClean() + "ViewGridParams");
-                            }, this),
-                            beforeRequest: function(){
-                                var posted_data = $(grid_id).jqGrid('getGridParam','postData');
-                                if(posted_data._queryFilter) {
-                                    _this.data.posted_data_preTranslation = _.clone(posted_data);
-                                    sessionStorage.setItem(_this.objectNameClean() + "ViewGridParams_preTranslation", JSON.stringify(posted_data));
-                                }
-                                _this.gridPage = posted_data.page;
-                            },
-                            onPaging: function(btn){
-                                if(btn === "records"){
-                                    var rows = $('.ui-pg-selbox').val();
-                                    sessionStorage.setItem(_this.objectNameClean() + "ViewGridRows", rows);
-                                }
-                            },
-                            onSelectRow: _.bind(function() {
-                                this.toggleDeleteSelected();
-                            }, this),
-                            onSelectAll: _.bind(function() {
-                                this.toggleDeleteSelected();
-                            }, this)
-                        },
-                        {
-                            search: true,
-                            searchOperator: "sw",
-                            suppressColumnChooser: true,
-                            storageKey: this.objectNameClean(),
-                            serializeGridData: function(posted_data){
-                                var cachedParams = sessionStorage.getItem(_this.objectNameClean() + "ViewGridParams"),
-                                    omittedFields = ["_pageSize","_pagedResultsOffset","_queryFilter","_sortKeys","page","sord"],
-                                    searchFields = _.omit(posted_data,omittedFields),
-                                    filterArray = [];
-
-                                //convert sortKeys to json pointer
-                                posted_data._sortKeys = posted_data._sortKeys.replace(".","/");
-
-                                if(cachedParams && JSON.parse(cachedParams)._queryFilter){
-                                    return JSON.parse(cachedParams)._queryFilter;
-                                } else {
-                                    if(!_.isEmpty(searchFields)) {
-                                        _.each(posted_data, function(val, key){
-                                            if(_.contains(_.keys(searchFields),key)) {
-                                                //convert the field name to json pointer
-                                                filterArray.push('/' + key.replace(".","/") + ' sw "' + val + '"');
-                                                //remove the old dot notation version
-                                                delete posted_data[key];
-                                            }
-                                        });
-
-                                        return filterArray.join(" AND ");
-                                    } else {
-                                        if(_this.isSystemResource) {
-                                            return "/" + cols[1].name + ' sw ""';
-                                        } else {
-                                            return '/_id sw ""';
-                                        }
-                                    }
-                                }
-                            },
-                            columnChooserOptions: { height: "auto", width: "auto" }
-                        });
-
-                        if(callback) {
-                            callback();
-                        }
-                    });
-                } else {
-                    this.parentRender();
-                }
-
+                    if(callback) {
+                        callback();
+                    }
+                });
             },this));
+        },
+        buildResourceListGrid: function (cols) {
+            var _this = this,
+                grid_id = this.grid_id_selector,
+                url = this.getURL(),
+                pager_id = grid_id + '-paginator',
+                ResourceModel = AbstractModel.extend({ "url": url }),
+                ResourceCollection = AbstractCollection.extend({
+                    url: url,
+                    model: ResourceModel,
+                    state: BackgridUtils.getState(cols[1].name),
+                    queryParams: BackgridUtils.getQueryParams({
+                        _queryFilter: 'true'
+                    })
+                }),
+                resourceGrid,
+                paginator;
+            
+            this.model.resources = new ResourceCollection();
+            
+            resourceGrid = new Backgrid.Grid({
+                className: "backgrid table table-hover",
+                emptyText: $.t("templates.admin.ResourceList.noData"),
+                columns: BackgridUtils.addSmallScreenCell(cols),
+                collection: _this.model.resources,
+                row: BackgridUtils.ClickableRow.extend({
+                    callback: function(e) {
+                        var $target = $(e.target),
+                            args = _this.data.args,
+                            routeName;
+
+                        if ($target.is("input") || $target.is(".select-row-cell")) {
+                            return;
+                        }
+                        routeName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+
+                    args.push(this.model.id);
+
+                    if(this.model.id) {
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
+                    }
+                }
+                })
+            });
+
+            paginator = new Backgrid.Extension.Paginator({
+                collection: this.model.resources,
+                windowSize: 0
+            });
+
+            this.$el.find(grid_id).append(resourceGrid.render().el);
+            this.$el.find(pager_id).append(paginator.render().el);
+            this.bindDefaultHandlers();
+
+            this.model.resources.getFirstPage();
+        },
+
+        onRowSelect: function (model, selected) {
+            if (selected) {
+                if (!_.contains(this.data.selectedItems, model.id)) {
+                    this.data.selectedItems.push(model.id);
+                }
+            } else {
+                this.data.selectedItems = _.without(this.data.selectedItems, model.id);
+            }
+            this.toggleDeleteSelected();
+            
+        },
+
+        bindDefaultHandlers: function () {
+            var _this = this;
+            
+            this.model.resources.on("backgrid:selected", _.bind(function (model, selected) {
+                this.onRowSelect(model, selected);
+            }, this));
+
+            this.model.resources.on("backgrid:sort", BackgridUtils.doubleSortFix);
+            
+            this.model.resources.on("sync", function (collection) {
+                var hasFilters = false;
+                _.each(collection.state.filters, function (filter) {
+                    if (filter.value.length) {
+                        hasFilters = true;
+                    }
+                });
+                
+                if (hasFilters) {
+                    _this.$el.find('#clearFiltersBtn').prop('disabled', false);
+                } else {
+                    _this.$el.find('#clearFiltersBtn').prop('disabled', true);
+                }
+            });
         }
     });
 
