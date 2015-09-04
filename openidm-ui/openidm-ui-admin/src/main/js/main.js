@@ -43,6 +43,7 @@ require.config({
         "backgrid": "libs/backgrid.min-0.3.5-min",
         "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
         "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
+        "backgrid-selectall": "libs/backgrid-select-all-0.3.5-min",
         underscore: "libs/lodash-2.4.1-min",
         js2form: "libs/js2form-2.0",
         form2js: "libs/form2js-2.0",
@@ -88,6 +89,9 @@ require.config({
         },
         "backgrid-paginator": {
             deps: ["backgrid", "backbone.paginator"]
+        },
+        "backgrid-selectall": {
+            deps: ["backgrid"]
         },
         js2form: {
             exports: "js2form"

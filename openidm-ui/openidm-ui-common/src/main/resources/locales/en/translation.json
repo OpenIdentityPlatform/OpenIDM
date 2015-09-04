@@ -1256,6 +1256,7 @@
             "showAllItems" : "Show All Items",
             "error" : "Error",
             "warning" : "Warning",
+            "filter" : "Filter...",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
                 "VALID_NAME_FORMAT": "Must have valid name characters",

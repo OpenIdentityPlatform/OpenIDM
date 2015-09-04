@@ -8,17 +8,15 @@
             <div class="btn-group" role="group" aria-label="add resource">
                 <a href="{{addLinkHref}}" title="{{t "templates.admin.ResourceEdit.new"}} {{pageTitle}}"><button class="btn btn-primary" type="button"><span class="fa fa-plus"></span> {{t "templates.admin.ResourceEdit.new"}} {{pageTitle}}</button></a>
             </div>
-            {{#if hasData}}
-                <div class="btn-group pull-right" role="group" aria-label="delete selected">
-                    <button type="button"  class="btn btn-default"  id="deleteSelected" disabled><span class="fa fa-trash"></span>{{t 'common.form.deleteSelected'}}</button>
-                </div>
-                <div class="btn-group pull-right" role="group" aria-label="clear filters">
-                    <button type="button"  class="btn btn-default"  id="clearFiltersBtn"><span class="fa fa-times"></span>{{t 'common.form.clearFilters'}}</button>
-                </div>
-                <div class="btn-group pull-right" role="group" aria-label="reload grid">
-                   <a href="#"><button type="button"  class="btn btn-default"  id="reloadGridBtn"><span class="fa fa-refresh"></span>{{t 'common.form.reloadGrid'}}</button></a>
-                </div>
-            {{/if}}
+            <div class="btn-group pull-right" role="group" aria-label="delete selected">
+                <button type="button"  class="btn btn-default"  id="deleteSelected" disabled><span class="fa fa-trash"></span>{{t 'common.form.deleteSelected'}}</button>
+            </div>
+            <div class="btn-group pull-right" role="group" aria-label="clear filters">
+                <button type="button"  class="btn btn-default"  id="clearFiltersBtn" disabled><span class="fa fa-times"></span>{{t 'common.form.clearFilters'}}</button>
+            </div>
+            <div class="btn-group pull-right" role="group" aria-label="reload grid">
+               <a href="#"><button type="button"  class="btn btn-default"  id="reloadGridBtn"><span class="fa fa-refresh"></span>{{t 'common.form.reloadGrid'}}</button></a>
+            </div>
         </div>
     {{else}}
         <div class="page-header">
@@ -27,9 +25,9 @@
     {{/if}}
 
     <div class="resourcesContainer panel panel-default">
-        <table id="{{grid_id}}">
-            <tr><td class="noData">{{t "templates.admin.ResourceList.noData"}}</td></tr>
-        </table>
-        <div id="{{grid_id}}_pager"></div>
+        <div class="panel-body">
+	        <div id="{{grid_id}}" class="table-responsive"></div>
+	        <div id="{{grid_id}}-paginator"></div>
+        </div>
     </div>
 </div>

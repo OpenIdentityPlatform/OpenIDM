@@ -25,272 +25,60 @@
 /*global define */
 
 define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
-    "jquery",
     "underscore",
-    "backgrid",
-    "org/forgerock/commons/ui/common/util/DateUtil"
+    "backbone",
+    "org/forgerock/commons/ui/common/util/BackgridUtils"
 
-], function ($, _, Backgrid, DateUtil) {
-    var obj = {};
+], function (_, Backbone, commonBackgridUtils) {
+    var obj = _.extend({}, commonBackgridUtils);
 
-    /**
-     * Makes the provided table sortable, expects a jquery object and a data array corresponding to the reordered table rows.
-     *
-     * @param data
-     * @param callback
-     */
-    obj.sortable = function(data, callback) {
-        if (data.grid && data.rows.length > 0) {
+    obj.queryFilter = function (data) {
+        if(data === undefined) { data = {}; }
 
-            var offset = 0,
-                bottomBounds = 0,
-                topBounds = 0,
-                startIndex = -1,
-                table;
+        var params = [],
+            additionalFilters = data._queryFilter || [],
+            getFilter = (function () {
+                return function (filterName, filterQuery) {
+                        return filterName + "+sw+" + encodeURIComponent('"' + filterQuery + '"');
+                    };
+            }());
 
-            data.grid.nestingSortable({
-                containerSelector: 'table',
-                itemPath: '> tbody',
-                itemSelector: 'tr',
-                placeholder: '<tr class="placeholder"/>',
-                onMousedown: function ($item, _super, event) {
-                    table = $item.closest(this.containerSelector);
-                    topBounds = table.offset().top;
-                    bottomBounds = topBounds + table.height();
-
-                    offset = event.offsetY;
-
-                    startIndex = table.find("tbody tr").index($item);
-
-                    // set a fixed width of all cells so that when dragging, our cells width doesn't collapse
-                    $('td, th', 'table').each(function () {
-                        var cell = $(this);
-                        cell.width(cell.width());
-                    });
-
-                    if (!event.target.nodeName.match(/^(input|select)$/i)) {
-                        event.preventDefault();
-                        return true;
-                    }
-                },
-
-                onDrag: function ($item, position, _super, event) {
-                    if (position.top - offset >= topBounds && position.top - offset <= bottomBounds) {
-                        $item.css("top", position.top - offset);
-                    }
-                },
-
-                onDrop: function ($item, container, _super, event) {
-                    var endIndex = table.find("tbody tr").index($item),
-                        tempCopy;
-
-                    if (startIndex >= 0 && endIndex >= 0) {
-                        tempCopy = data.rows[startIndex];
-                        data.rows.splice(startIndex, 1);
-                        data.rows.splice(endIndex, 0, tempCopy);
-                    }
-
-                    // remove fixed width so that if content/table is resized then
-                    $('td, th', 'table').each(function () {
-                        var cell = $(this);
-                        cell.css('width', '');
-                    });
-
-                    _super($item, container, _super, event);
-
-                    if (callback) {
-                        callback(data.rows);
-                    }
-                }
-            });
-        }
-    };
-
-    obj.formatDate = function(date) {
-        var returnDate = "";
-        if(date) {
-            returnDate = DateUtil.formatDate(date, "MMM dd, yyyy") +
-            " <small class='text-muted'>" +
-            DateUtil.formatDate(date, "h:mm:ss TT") +
-            "</small>";
-        }
-
-        return returnDate;
-    };
-
-    /**
-     * The date cell will search the model attributes for the provided property and format that into a standard date.
-     * @param dateProperty{string}
-     * @returns {*}
-     * @constructor
-     */
-    obj.DateCell = function (dateProperty) {
-        var _this = this;
-        return Backgrid.Cell.extend({
-            render: function () {
-                if (this.model.get(dateProperty)) {
-                    this.$el.html(_this.formatDate(this.model.get(dateProperty)));
-                } else {
-                    this.$el.html("");
-                }
-                return this;
+        _.each(this.state.filters, function (filter) {
+            if (filter.query() !== '') {
+                params.push(getFilter(filter.name, filter.query()));
             }
         });
+        params = params.concat(additionalFilters);
+
+        return params.length === 0 ? true : params.join("+AND+");
+    };
+    
+    obj.getQueryParams = function (data) {
+        data = data || {};
+
+        return {
+            _sortKeys: this.sortKeys,
+            _queryFilter: function () {
+                return obj.queryFilter.call(this, data._queryFilter);
+            },
+            pageSize: "_pageSize",
+            _pagedResultsOffset: this.pagedResultsOffset,
+            _totalPagedResultsPolicy: "ESTIMATE"
+        };
     };
 
-    /**
-     * The button cell allows you to define an array of icons to insert into a single cell.
-     * The icons will be given the class name and will execute the callback on click.
-     *
-     * @param buttons {array}
-     *      EXAMPLE:
-     *       cell: CustomCells.ButtonCell([{
-     *           className: "fa fa-pencil grid-icon",
-     *           callback: function(){alert(this.model.get("createTime"));}
-     *       }, {
-     *           className: "fa fa-plus grid-icon",
-     *           callback: function(){alert(this.model.get("assignee"));}
-     *       }])
-     * @returns {Backgrid.Cell}
-     * @constructor
-     */
-    obj.ButtonCell = function (buttons, renderCallback) {
-        var events = {},
-            html = "";
-
-        _.each(buttons, function(button, index) {
-            if(button.href) {
-                html += ("<a href=\"" +button.href +"\"><i class=\"button-" + index + " " + button.className +  "\"></i></a>");
-            } else {
-                events["click .button-"+index] = button.callback;
-                html += ("<i class=\"button-" + index + " " + button.className +  "\"></i>");
-            }
-        });
-
-        return Backgrid.Cell.extend({
-            events: events,
-
-            render: function () {
-                this.$el.html(html);
-                this.delegateEvents();
-
-                if (renderCallback) {
-                    _.bind(renderCallback, this)();
-                }
-                return this;
-            }
-        });
-    };
-
-    /**
-     * In the case that a grid needs to sort on a property other than the one displayed, use this custom cell.
-     * EXAMPLE: Will sort on "taskName" and display "name"
-     *    {
-     *        label: "Task",
-     *        name: "taskName",
-     *        cell: CustomCells.DisplayNameCell(name),
-     *        sortable: true,
-     *        editable: false
-     *    }
-     * @param displayProperty
-     * @returns {*}
-     * @constructor
-     */
-    obj.DisplayNameCell = function (displayProperty) {
-        return Backgrid.Cell.extend({
-            render: function () {
-                this.$el.text(this.model.get(displayProperty));
-                return this;
-            }
-        });
-    };
-
-    /**
-     * addSmallScreenCell creates a hidden column with a custom "smallScreenCell" that
-     * will be displayed as a replacement for the full grid on small screens. It takes
-     * an array of Backgrid column definitions, loops over them, adds a vertical
-     * representation of how the cell is rendered for the current column to the
-     * smallScreenCell's html, then adds the newly created column definition to the
-     * originally defined grid columns.
-     *
-     * the "hideColumnLabel" param can be passed in to display the cell with no label
-     * for the associated value
-     *
-     * @param cols {array}
-     * @param hideColumnLabels {boolean}
-     * @returns {array}
-     * @constructor
-     *
-     */
-
-    obj.addSmallScreenCell = function (cols, hideColumnLabels) {
-        var smallScreenCell = Backgrid.Cell.extend({
-            className: "smallScreenCell",
-            events: {},
-            render: function () {
-                var html = "",
-                    filteredCols = _.reject(cols, function (c) {
-                        return c.name === "smallScreenCell";
-                    });
-
-                _.each(filteredCols, _.bind(function (col) {
-                    var cellView,
-                        label = "<span class='text-muted'>" + col.label + ":</span> ",
-                        cellWrapper;
-
-                    if (_.isObject(col.cell)) {
-                        cellView = new col.cell({ model: this.model, column: col});
-                        cellView.$el = $("<span>");
-                        cellView.render();
-
-                        if (!_.isEmpty(_.omit(cellView.events, "click"))) {
-                            cellWrapper = $("<p class='pull-right show'></p>");
-
-                            if (cellView.$el.html().length && !hideColumnLabels && col.label) {
-                                cellWrapper.append(label);
-                            }
-
-                            cellWrapper.append(cellView.$el);
-
-                            this.$el.prepend(cellWrapper);
-                        } else {
-                            cellWrapper = $("<p>");
-
-                            if (cellView.$el.html().length && !hideColumnLabels && col.label) {
-                                cellWrapper.append(label);
-                            }
-
-                            cellWrapper.append(cellView.$el);
-
-                            this.$el.append(cellWrapper);
-                        }
-                    } else {
-                        cellWrapper = $("<p>");
-                        if (this.model.get(col.name) && this.model.get(col.name).length && !hideColumnLabels && col.label) {
-                            cellWrapper.append(label);
-                        }
-
-                        cellWrapper.append(this.model.get(col.name));
-
-                        this.$el.append(cellWrapper);
-                    }
-                }, this));
-
-                return this;
-            }
-        }),
-        newCol = {
-            name: "smallScreenCell",
-            editable: false,
-            sortable: false,
-            cell: smallScreenCell
+    obj.getState = function (sortCol, data) {
+        var state = {
+            pageSize: 50,
+            sortKey: sortCol
         };
 
-        cols.push(newCol);
-
-        return cols;
+        if (data && typeof data === 'object') {
+            _.extend(state, data);
+        }
+        return state;
     };
-
+    
     return obj;
 
 });
