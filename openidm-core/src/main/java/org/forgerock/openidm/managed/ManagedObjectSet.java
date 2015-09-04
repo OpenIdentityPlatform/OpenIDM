@@ -689,27 +689,27 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @throws ResourceException
      */
     private void deleteRelationships(final Context context, final String resourceId) throws ResourceException {
-        for (JsonPointer relationField : schema.getRelationshipFields()) {
-            deleteRelationships(context, resourceId, relationField, new HashSet<String>());
+        for (JsonPointer relationshipField : schema.getRelationshipFields()) {
+            deleteRelationships(context, resourceId, relationshipField, new HashSet<String>());
         }
     }
 
     /**
-     * Delete any relationships for the given relationField whose ids are not in relationsToKeep
+     * Delete any relationships for the given relationshipField whose ids are not in relationsToKeep
      *
      * @param context Context of the request
      * @param resourceId Id of resource to remove relationships on
-     * @param relationField Field to delete relationships associated with.
+     * @param relationshipField Field to delete relationships associated with.
      * @param relationsToKeep Set of relation ids that should not be deleted
      *
      * @return A promised list of delete responses
      * @throws ResourceException
      */
     private Promise<List<ResourceResponse>, ResourceException> deleteRelationships(final Context context,
-            final String resourceId, final JsonPointer relationField, final Set<String> relationsToKeep)
+            final String resourceId, final JsonPointer relationshipField, final Set<String> relationsToKeep)
             throws ResourceException {
-        final boolean isArray = schema.getFields().get(relationField).isArray();
-        final JsonValue existingRelationships = fetchRelationship(context, resourceId, relationField);
+        final boolean isArray = schema.getFields().get(relationshipField).isArray();
+        final JsonValue existingRelationships = fetchRelationship(context, resourceId, relationshipField);
 
         final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
 
@@ -720,7 +720,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 // Delete if we're not told to keep this id
                 if (!relationsToKeep.contains(id)) {
                     final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
-                    promises.add(relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest));
+                    promises.add(relationshipSets.get(relationshipField).deleteInstance(context, id, deleteRequest));
                 }
             }
         } else {
@@ -730,7 +730,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 // Delete if we're not told to keep this id
                 if (!relationsToKeep.contains(id)) {
                     final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
-                    final Promise response = relationshipSets.get(relationField).deleteInstance(context, id, deleteRequest);
+                    final Promise response = relationshipSets.get(relationshipField).deleteInstance(context, id, deleteRequest);
 
                     promises.add(response);
                 }
@@ -756,10 +756,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         final Map<JsonPointer, Promise<JsonValue, ResourceException>> persistedRelationships = new HashMap<>();
 
         for (Map.Entry<JsonPointer, ManagedObjectRelationshipSet> entry : relationshipSets.entrySet()) {
-            JsonPointer relationField = entry.getKey();
+            JsonPointer relationshipField = entry.getKey();
             ManagedObjectRelationshipSet relationshipSet = entry.getValue();
-            final boolean isArray = schema.getFields().get(relationField).isArray();
-            final JsonValue fieldValue = value.get(relationField);
+            final boolean isArray = schema.getFields().get(relationshipField).isArray();
+            final JsonValue fieldValue = value.get(relationshipField);
 
             // Set of relation ids for updating (don't delete)
             final Set<String> resourcesToKeep = new HashSet<>();
@@ -801,7 +801,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             }
 
             // Call get() so we block until they are deleted.
-            deleteRelationships(context, resourceId, relationField, resourcesToKeep).getOrThrowUninterruptibly();
+            deleteRelationships(context, resourceId, relationshipField, resourcesToKeep);
 
             // If this relation has no members then we can continue after deleting
             if (fieldValue == null || fieldValue.isNull()) {
@@ -840,7 +840,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                             }
                         });
 
-                persistedRelationships.put(relationField, jsonPromise);
+                persistedRelationships.put(relationshipField, jsonPromise);
             } else {
                 // There will only be one promise in the list since this is not an array
                 final Promise<JsonValue, ResourceException> jsonPromise = promises.get(0).then(new Function<ResourceResponse, JsonValue, ResourceException>() {
@@ -850,7 +850,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     }
                 });
 
-                persistedRelationships.put(relationField, jsonPromise);
+                persistedRelationships.put(relationshipField, jsonPromise);
             }
 
         }
