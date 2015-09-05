@@ -226,19 +226,22 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             			public boolean handleResource(ResourceResponse resource) {
             				if (resource.getId() == null) {
             					// do not add null values to collection
-            					logger.warn("Resource {0} id is null!", resource);
+            					logger.warn("Resource {} id is null!", resource);
             				}
             				else {
             					if (fullEntriesDetected == false && hasFullEntry(resource.getContent(), querySide)) {
             						fullEntriesDetected = true;
             						logger.debug("Detected full entries in query");
             					}
-            					if (fullEntriesDetected) {
+            					String id = caseSensitive
+            							? resource.getId()
+            						    : reconContext.getObjectMapping().getLinkType().normalizeId(resource.getId());
+            					if (ids.add(id) == false) {
+            						logger.warn("Detected duplicate entry id {} in query result; skipping entry. Query: {}", id, query);
+            					} else if (fullEntriesDetected) {
             						objList.add(resource.getContent());
             					}
-            					ids.add(caseSensitive
-            							? resource.getId()
-            						    : reconContext.getObjectMapping().getLinkType().normalizeId(resource.getId()));
+
             				}
             				return true;
             			}
