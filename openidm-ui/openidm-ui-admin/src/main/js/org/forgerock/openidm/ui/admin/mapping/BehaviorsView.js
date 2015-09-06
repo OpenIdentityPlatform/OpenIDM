@@ -69,6 +69,11 @@ define("org/forgerock/openidm/ui/admin/mapping/BehaviorsView", [
             this.data.hideSituational = true;
             this.data.hideRecon = true;
             this.data.hideSingleRecordRecon = mappingUtils.readOnlySituationalPolicy(this.mapping.policies);
+            this.data.borderHide = false;
+
+            if(this.data.hideSingleRecordRecon || !this.getRecon()) {
+                this.data.borderHide = true;
+            }
 
             _.each(SituationalEventScriptsView.model.scripts, function (script) {
                 if (_.has(SituationalEventScriptsView.model, "mapping")) {

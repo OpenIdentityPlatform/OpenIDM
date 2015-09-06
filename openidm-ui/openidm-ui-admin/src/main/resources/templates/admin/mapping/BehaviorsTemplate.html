@@ -35,7 +35,7 @@
         </div>
 
         <!--Reconciliation Script-->
-        <div class="panel panel-default panel-collapse" {{#unless hideSingleRecordRecon}} style="border-bottom:none !important;" {{/unless}}>
+        <div class="panel panel-default panel-collapse" {{#if borderHide}} style="border-bottom:none !important;" {{/if}}>
             <div class="panel-heading" role="tab" id="reconQueryViewHeading">
                 <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#advanced-dataflow" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
                 <h4 class="panel-title">

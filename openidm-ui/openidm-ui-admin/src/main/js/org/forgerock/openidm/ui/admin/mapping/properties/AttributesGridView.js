@@ -386,11 +386,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             this.$el.find(".properties-badge").popover({
                 content: function () { return $(this).find(".tooltip-details").clone().show();},
-                trigger:'hover',
+                trigger:'hover click',
                 placement:'top',
                 container: 'body',
                 html: 'true',
-                template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+                title: ''
             });
 
             this.$el.find("#linkQualifierSelect").change(_.bind(function(event) {
