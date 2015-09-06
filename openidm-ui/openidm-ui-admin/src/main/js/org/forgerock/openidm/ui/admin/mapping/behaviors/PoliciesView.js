@@ -31,7 +31,6 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView",
     "bootstrap-dialog"
@@ -42,7 +41,6 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
     conf,
     constants,
     eventManager,
-    uiUtils,
     ConfigDelegate,
     PoliciesDialogView,
     BootstrapDialog) {

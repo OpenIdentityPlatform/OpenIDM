@@ -35,10 +35,21 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/ScriptList",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function($, _, form2js, JSONEditor, AdminAbstractView, eventManager, validatorsManager, constants, router, ConfigDelegate, uiUtils, ScriptList, ModuleLoader) {
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function($, _,
+            form2js,
+            JSONEditor,
+            AdminAbstractView,
+            eventManager,
+            validatorsManager,
+            constants,
+            router,
+            ConfigDelegate,
+            ScriptList,
+            ModuleLoader,
+            UIUtils) {
 
     var AddEditManagedView = AdminAbstractView.extend({
         template: "templates/admin/managed/AddEditManagedTemplate.html",
@@ -650,7 +661,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             var promises = [];
 
-            uiUtils.jqConfirm($.t("templates.managed.managedDelete"), _.bind(function(){
+            UIUtils.confirmDialog($.t("templates.managed.managedDelete"), "danger", _.bind(function(){
                 _.each(this.data.managedObjects.objects, function(managedObject, index){
                     if(managedObject.name === this.data.currentManagedObject.name) {
                         this.data.managedObjects.objects.splice(index, 1);
@@ -766,7 +777,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
         removeProperty: function(event) {
             event.preventDefault();
 
-            uiUtils.jqConfirm($.t("templates.managed.propertyDelete"), _.bind(function() {
+            UIUtils.confirmDialog($.t("templates.managed.propertyDelete"), "error", _.bind(function() {
                 var clickedEle = event.target,
                     targetIndex;
 
@@ -780,7 +791,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
                 validatorsManager.bindValidators(this.$el.find('#managedPropertyWrapper'));
                 validatorsManager.validateAllFields(this.$el);
-            },this), "310px");
+            },this));
         },
 
         orientRepoChange: function(managedObject) {

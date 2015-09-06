@@ -27,17 +27,27 @@
 define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView", [
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
     "org/forgerock/openidm/ui/admin/role/RoleEntitlementsEditView",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function($, _, AbstractView, eventManager, constants, cookieHelper, uiUtils, resourceDelegate, messagesManager, roleEntitlementsEditView, configDelegate) {
-    var RoleEntitlementsListView = AbstractView.extend({
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function($, _,
+            AdminAbstractView,
+            eventManager,
+            constants,
+            cookieHelper,
+            resourceDelegate,
+            messagesManager,
+            roleEntitlementsEditView,
+            configDelegate,
+            UIUtils) {
+
+    var RoleEntitlementsListView = AdminAbstractView.extend({
         element: "#role-entitlements",
         template: "templates/admin/role/RoleEntitlementsListViewTemplate.html",
         noBaseTemplate: true,
@@ -67,7 +77,7 @@ define("org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView", [
 
             delete this.data.role.assignments[assignmentName];
 
-            uiUtils.jqConfirm($.t("templates.admin.RoleEntitlementsTemplate.deleteEntitlementConfirm",{ assignment: assignmentName }), _.bind(function() {
+            UIUtils.confirmDialog($.t("templates.admin.RoleEntitlementsTemplate.deleteEntitlementConfirm",{ assignment: assignmentName }), "danger", _.bind(function() {
                 this.removeAssignmentsToMap(assignmentName).then(_.bind(function(){
                     resourceDelegate.updateResource(this.data.serviceUrl, this.data.role._id, this.data.role, _.bind(function() {
                         this.data.role._rev++;

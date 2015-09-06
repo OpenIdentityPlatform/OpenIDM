@@ -27,12 +27,15 @@
 define("org/forgerock/openidm/ui/admin/util/ScriptList", [
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/util/ScriptDialog",
     "org/forgerock/commons/ui/common/util/UIUtils"
-], function($, _, AbstractView, ScriptDialog, UIUtils) {
+], function($, _,
+            AdminAbstractView,
+            ScriptDialog,
+            UIUtils) {
     var scriptListInstance = {},
-        ScriptList = AbstractView.extend({
+        ScriptList = AdminAbstractView.extend({
             template: "templates/admin/util/ScriptList.html",
             noBaseTemplate: true,
             events: {
@@ -111,7 +114,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptList", [
             },
 
             removeScript: function(event) {
-                UIUtils.jqConfirm($.t("templates.scriptEditor.deleteMsg"), _.bind(function() {
+                UIUtils.confirmDialog($.t("templates.scriptEditor.deleteMsg"), "danger", _.bind(function() {
                     var selectedEvent = this.$el.find(event.currentTarget).closest(".event-hook").attr("data-script-type"),
                         index = _.indexOf(this.data.addedEvents, selectedEvent);
 
@@ -124,7 +127,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptList", [
                     }
 
                     this.reRender();
-                },this), "290px");
+                },this));
             },
 
             editScriptHook: function(event) {
