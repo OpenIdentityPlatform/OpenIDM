@@ -69,7 +69,13 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/SingleRecordReconciliat
             var reconId = newReconId || this.data.recon._id,
                 doLoad = _.bind(function() {
                     this.parentRender(_.bind(function () {
-                        this.$el.find(".changed").tooltip({ position: { my: "left+5px bottom+15px", at: "left+5px bottom+15px"}});
+                        this.$el.find(".changed").popover({
+                            trigger:'hover click',
+                            placement:'top',
+                            container: 'body',
+                            html: 'true',
+                            title: ''
+                        });
                     }, this));
                 }, this),
                 targetProm = $.Deferred();

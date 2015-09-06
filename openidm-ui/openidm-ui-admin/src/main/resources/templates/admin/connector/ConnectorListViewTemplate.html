@@ -7,6 +7,7 @@
                 </div>
             </h1>
         </div>
+        <p class="section-help">{{t "templates.connector.whatIsAConnector"}}</p>
         <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
             <div class="btn-group pull-left left-group" role="group" aria-label="...">
                 <a href="#connectors/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
@@ -30,12 +31,6 @@
 
 <section>
     <div class="container">
-        <div class="section-header">
-            <div class="help-body">
-                <p>{{t "templates.connector.whatIsAConnector"}}</p>
-            </div>
-        </div>
-
         <div class="tab-content tab-content-transparent">
             <div id="connectorCardContainer" class="tab-pane active">
                 <div class="row">
@@ -77,9 +72,9 @@
                                     <span class="text-success"><i class="fa fa-check"></i> {{t "templates.connector.activeState"}}</span>
                                     {{else}}
                                     {{#if enabled}}
-                                    <span title="{{error}}" class="text-danger"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
+                                    <span data-title="{{error}}" class="text-danger resource-unavailable"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
                                     {{else}}
-                                    <span title="{{error}}" class="text-warning"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
+                                    <span data-title="{{error}}" class="text-warning resource-disabled"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
                                     {{/if}}
                                     {{/if}}
                                 </div>
