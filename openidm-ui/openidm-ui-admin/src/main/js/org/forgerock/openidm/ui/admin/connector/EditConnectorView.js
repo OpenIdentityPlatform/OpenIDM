@@ -43,7 +43,6 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
     "org/forgerock/openidm/ui/admin/util/Scheduler",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/commons/ui/common/util/UIUtils"
-
 ], function($, _, form2js,
             AbstractConnectorView,
             eventManager,
@@ -59,7 +58,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             SchedulerDelegate,
             Scheduler,
             InlineScriptEditor,
-            uiUtils) {
+            UIUtils) {
 
     var AddEditConnectorView = AbstractConnectorView.extend({
         template: "templates/admin/connector/EditConnectorTemplate.html",
@@ -318,7 +317,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
         deleteResource: function(event) {
             event.preventDefault();
 
-            uiUtils.jqConfirm($.t("templates.connector.connectorDelete"), _.bind(function(){
+            UIUtils.confirmDialog($.t("templates.connector.connectorDelete"), "danger", _.bind(function(){
                 ConfigDelegate.deleteEntity(this.data.systemType +"/" +this.data.connectorId).then(function(){
                         ConnectorDelegate.deleteCurrentConnectorsCache();
 
@@ -787,7 +786,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
 
             $(event.target).val(this.currentObjectTypeLoaded);
 
-            uiUtils.jqConfirm($.t('templates.connector.objectTypes.changeConfiguration'), _.bind(function(){
+            UIUtils.jqConfirm($.t('templates.connector.objectTypes.changeConfiguration'), _.bind(function(){
                 if(value === "fullConfig") {
                     this.connectorDetails.configurationProperties.readSchema = true;
 
@@ -817,7 +816,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                 this.currentObjectTypeLoaded = value;
                 $(event.target).val(this.currentObjectTypeLoaded);
 
-            }, this), "330px");
+            }, this));
         }
     });
 

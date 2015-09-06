@@ -31,13 +31,24 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/components/Messages",
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "backgrid",
-    "org/forgerock/openidm/ui/admin/util/BackgridUtils"
-], function($, _, AbstractView, eventManager, router, constants, UIUtils, AbstractModel, messagesManager, AbstractCollection, Backgrid, BackgridUtils) {
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function($, _,
+            AbstractView,
+            eventManager,
+            router,
+            constants,
+            AbstractModel,
+            messagesManager,
+            AbstractCollection,
+            Backgrid,
+            BackgridUtils,
+            UIUtils) {
+
     var ProcessInstanceModel = AbstractModel.extend({ url: "/openidm/workflow/processinstance" }),
         ProcessDefinitionModel = AbstractModel.extend({ url: "/openidm/workflow/processdefinition" }),
         UserModel = AbstractModel.extend({ url: "/openidm/managed/user" }),
@@ -55,7 +66,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
                 e.preventDefault();
             }
 
-            UIUtils.jqConfirm($.t("templates.processInstance.cancelConfirmation"), _.bind(function() {
+            UIUtils.confirmDialog($.t("templates.processInstance.cancelConfirmation"), "danger", _.bind(function() {
                 this.model.destroy({
                     success: function() {
                         messagesManager.messages.addMessage({"message": $.t("templates.processInstance.cancelProcessSuccess")});

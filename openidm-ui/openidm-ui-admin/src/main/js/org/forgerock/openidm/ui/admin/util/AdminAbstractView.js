@@ -28,7 +28,8 @@ define("org/forgerock/openidm/ui/admin/util/AdminAbstractView", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView"
-], function($, _, AbstractView) {
+], function($, _,
+            AbstractView) {
     var AdminAbstractView = AbstractView.extend({
 
         compareObjects: function(property, obj1, obj2) {

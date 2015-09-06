@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             ReconDetailsView,
             tabdrop,
             LinkQualifierUtil,
-            uiUtils) {
+            UIUtils) {
 
     var MappingBaseView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
@@ -104,7 +104,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         deleteMapping: function(event) {
             event.preventDefault();
 
-            uiUtils.jqConfirm($.t("templates.mapping.confirmDeleteMapping", {"mappingName": this.data.mapping.name}), _.bind(function(){
+            UIUtils.confirmDialog($.t("templates.mapping.confirmDeleteMapping", {"mappingName": this.data.mapping.name}), "danger", _.bind(function(){
                 console.log(this.data.syncConfig);
                 console.log(this.data.mapping);
 
@@ -117,7 +117,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
 
                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.mappingListView});
                 }, this));
-            }, this), "550px");
+            }, this));
         },
         runningReconProgress: function(onReady){
             reconDelegate.waitForAll([this.data.recon._id], true, _.bind(function (reconStatus) {

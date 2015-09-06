@@ -31,22 +31,22 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
+    "org/forgerock/commons/ui/common/util/UIUtils",
     "jqueryui"
 ], function($, _,
             AdminAbstractView,
             eventManager,
             configDelegate,
             constants,
-            uiUtils,
             reconDelegate,
             dateUtil,
             syncDelegate,
-            connectorUtils) {
+            connectorUtils,
+            UIUtils) {
 
     var MappingListView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingListTemplate.html",
@@ -169,7 +169,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             var selectedEl = $(event.target).parents(".mapping-config-body"),
                 index = this.$el.find("#mappingConfigHolder .mapping-config-body").index(selectedEl);
 
-            uiUtils.jqConfirm($.t("templates.mapping.confirmDeleteMapping", {"mappingName": this.cleanConfig[index].name}), _.bind(function(){
+            UIUtils.confirmDialog($.t("templates.mapping.confirmDeleteMapping", {"mappingName": this.cleanConfig[index].name}), "danger", _.bind(function(){
                 this.cleanConfig.splice(index, 1);
 
                 configDelegate.updateEntity("sync", {"mappings":this.cleanConfig}).then(_.bind(function() {
@@ -181,7 +181,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
 
                     selectedEl.remove();
                 }, this));
-            }, this), "550px");
+            }, this));
         },
         showSyncStatus: function(){
             _.each(this.data.mappingConfig, function (sync){

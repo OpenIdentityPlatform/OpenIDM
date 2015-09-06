@@ -29,25 +29,25 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
     "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/commons/ui/common/main/Router",
-    "backgrid"
+    "backgrid",
+    "org/forgerock/commons/ui/common/util/UIUtils"
 ], function($, _,
             AdminAbstractView,
             ResourceDelegate,
-            uiUtils,
             AbstractModel,
             AbstractCollection,
             eventManager,
             constants,
             BackgridUtils,
             router,
-            Backgrid) {
+            Backgrid,
+            UIUtils) {
     var ActiveProcessesView = AdminAbstractView.extend({
         template: "templates/admin/workflow/ActiveProcessViewTemplate.html",
         events: {
@@ -130,7 +130,7 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                                     callback: function(event){
                                         event.preventDefault();
 
-                                        uiUtils.jqConfirm($.t("templates.workflows.processes.cancelProcessDialog"), _.bind(function(){
+                                        UIUtils.confirmDialog($.t("templates.workflows.processes.cancelProcessDialog"), "danger", _.bind(function(){
                                             this.model.destroy({
                                                 success: _.bind(function() {
                                                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "cancelActiveProcess");

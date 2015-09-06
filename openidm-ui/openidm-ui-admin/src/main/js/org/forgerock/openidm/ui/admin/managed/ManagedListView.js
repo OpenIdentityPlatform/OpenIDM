@@ -33,22 +33,22 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "backgrid",
-    "org/forgerock/openidm/ui/admin/util/BackgridUtils"
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
+    "org/forgerock/commons/ui/common/util/UIUtils"
 ], function($, _, Backbone,
             AdminAbstractView,
             eventManager,
             constants,
             router,
             ConnectorDelegate,
-            uiUtils,
             connectorUtils,
             ConfigDelegate,
             Backgrid,
-            BackgridUtils) {
+            BackgridUtils,
+            UIUtils) {
     var ManagedListView = AdminAbstractView.extend({
         template: "templates/admin/managed/ManagedListViewTemplate.html",
         events: {
@@ -213,7 +213,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
                 });
             }
 
-            uiUtils.jqConfirm($.t("templates.managed.managedDelete"), _.bind(function(){
+            UIUtils.confirmDialog($.t("templates.managed.managedDelete"), "danger", _.bind(function(){
                 _.each(tempManaged, function(managedObject, index){
                     if(managedObject.name === selectedItem.attr("data-managed-title")) {
                         this.data.currentManagedObjects.splice(index, 1);

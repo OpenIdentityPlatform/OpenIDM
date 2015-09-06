@@ -32,7 +32,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
@@ -47,12 +46,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
+    "org/forgerock/commons/ui/common/util/UIUtils",
     "jquerySortable"
 ], function($, _, Handlebars, Backbone,
             MappingAdminAbstractView,
             eventManager,
             conf,
-            UIUtils,
             constants,
             searchDelegate,
             connectorDelegate,
@@ -66,7 +65,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             AddPropertyMappingDialog,
             EditPropertyMappingDialog,
             Backgrid,
-            BackgridUtils) {
+            BackgridUtils,
+            UIUtils) {
 
     var AttributesGridView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/AttributesGridTemplate.html",
@@ -364,7 +364,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                 callback: function(event){
                                     event.preventDefault();
 
-                                    UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: this.model.attributes.attribute.target}),_.bind(function(){
+                                    UIUtils.confirmDialog($.t("templates.mapping.confirmRemoveProperty",{property: this.model.attributes.attribute.target}), "danger", _.bind(function(){
                                         _this.model.mappingProperties.splice(($(event.target).parents("tr")[0].rowIndex - 1), 1);
 
                                         _this.checkChanges();

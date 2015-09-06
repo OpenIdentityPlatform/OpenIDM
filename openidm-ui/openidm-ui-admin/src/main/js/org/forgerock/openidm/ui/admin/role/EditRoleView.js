@@ -28,16 +28,25 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
     "jquery",
     "underscore",
     "form2js",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
     "org/forgerock/openidm/ui/admin/role/RoleUsersView",
-    "org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView"
-], function($, _, form2js, AbstractView, eventManager, constants, uiUtils, resourceDelegate, messagesManager, roleUsersView, roleEntitlementsListView) {
-    var EditRoleView = AbstractView.extend({
+    "org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function($, _,
+            form2js,
+            AdminAbstractView,
+            eventManager,
+            constants,
+            resourceDelegate,
+            messagesManager,
+            roleUsersView,
+            roleEntitlementsListView,
+            UIUtils) {
+    var EditRoleView = AdminAbstractView.extend({
         template: "templates/admin/role/EditRoleViewTemplate.html",
 
         events: {
@@ -114,7 +123,7 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
                 e.preventDefault();
             }
 
-            uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }), _.bind(function(){
+            UIUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }),  "danger", _.bind(function(){
                 resourceDelegate.deleteResource(this.data.serviceUrl, this.data.role._id, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role.properties.name })});
 
