@@ -124,6 +124,11 @@
         In addition, the <literal>reconId</literal> of a reconciliation
         operation is now constructed from the root context ID of the invocation.
        </para>
+       <para>
+        For details of the updated schema definitions, see the schema definition
+        script for your repository
+        (<filename>/path/to/openidm/db/<replaceable>repo-name</replaceable>/scripts/openidm.sql</filename>).
+       </para>
       </listitem>
       <listitem>
        <para>
@@ -135,14 +140,15 @@
         <emphasis>total results</emphasis>. Any clients that rely on
         <literal>remaining results</literal> must be updated accordingly.
        </para>
+       <!--TODO Add this note if CREST 2 compatibility is implemented for IDM
        <note>
         <para>
          You can still request a count of remaining results, by specifying
          the previous version of the REST API. To do so, pass in the
-         <literal>--header "X-AcceptAPIVersion :1"</literal> header in the
+         <literal>-header "X-AcceptAPIVersion :1"</literal> header in the
          request.
         </para>
-       </note>
+       </note> -->
        <para>
         The updated REST API implementation includes a configurable
         <emphasis>count policy</emphasis>, that can be set per request.
