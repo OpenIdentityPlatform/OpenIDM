@@ -20,7 +20,6 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
-import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 
@@ -69,11 +68,13 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
         super(connectionFactory, resourcePath, propertyName);
     }
 
+    /** {@inheritDoc} */
     @Override
     public RequestHandler asRequestHandler() {
         return Resources.newCollection(this);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> fetchJson(final Context context, final String resourceId) {
         try {
@@ -101,6 +102,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
         }
     }
 
+    /** {@inheritDoc} */
     // create/update relationship references. Update if we have UUIDs
     // delete all relationships not in this array
     @Override
@@ -175,7 +177,14 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
         }
     }
 
-
+    /**
+     * Clear all relationships not present in {@code relationshipsToKeep}.
+     *
+     * @param context The current context.
+     * @param resourceId The resource whose relationships we wish to clear
+     * @param relationshipsToKeep Set of relationship ids that should not be deleted
+     * @return A promised JsonValue array of delete responses
+     */
     private Promise<JsonValue, ResourceException> clearNotIn(final Context context, final String resourceId,
             final Set<String> relationshipsToKeep) {
         return fetchJson(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
@@ -196,7 +205,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
                 return when(promises).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
                     @Override
                     public JsonValue apply(List<ResourceResponse> resourceResponses) throws ResourceException {
-                        final JsonValue result = json(object());
+                        final JsonValue result = json(array());
                         for (ResourceResponse resourceResponse : resourceResponses) {
                             result.add(resourceResponse.getContent());
                         }
@@ -207,6 +216,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
         });
     }
 
+    /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> clear(final Context context, final String resourceId) {
         /*
@@ -239,6 +249,36 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
 
     /** {@inheritDoc} */
     @Override
+    public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
+        return super.createInstance(context, request);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
+        return super.readInstance(context, resourceId, request);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
+        return super.updateInstance(context, resourceId, request);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId, final DeleteRequest request) {
+        return super.deleteInstance(context, resourceId, request);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+        return super.patchInstance(context, resourceId, request);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
         return notSupportedOnCollection(request).asPromise();
     }
@@ -246,59 +286,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
     /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return notSupportedOnInstance(request).asPromise();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
-        try {
-            final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
-            createRequest.setResourcePath(REPO_RESOURCE_PATH);
-            createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
-
-            return connectionFactory.getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId, final DeleteRequest request) {
-        final ResourcePath path = REPO_RESOURCE_PATH.child(resourceId);
-        final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
-        deleteRequest.setResourcePath(path);
-
-        try {
-            if (deleteRequest.getRevision() == null) {
-                /*
-                 * If no revision was supplied we must perform a read to get the latest revision
-                 */
-
-                final ReadRequest readRequest = Requests.newReadRequest(path);
-                final Promise<ResourceResponse, ResourceException> readResult = connectionFactory.getConnection().readAsync(context, readRequest);
-
-                return readResult.thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                    @Override
-                    public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse) throws ResourceException {
-                        deleteRequest.setRevision(resourceResponse.getRevision());
-                        return connectionFactory.getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
-                    }
-                });
-            } else {
-                return connectionFactory.getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
-            }
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return notSupportedOnInstance(request).asPromise();
+        return super.actionInstance(context, resourceId, request);
     }
 
     /** {@inheritDoc} */
@@ -306,12 +294,15 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-
-            queryRequest.setQueryFilter(QueryFilter.and(
+            QueryFilter<JsonPointer> filter = QueryFilter.and(
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName),
-                    request.getQueryFilter()
-            ));
+                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
+
+            if (request.getQueryFilter() != null) {
+                filter.and(request.getQueryFilter());
+            }
+
+            queryRequest.setQueryFilter(filter);
             return connectionFactory.getConnection().queryAsync(context, queryRequest, new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
@@ -322,16 +313,4 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
             return e.asPromise();
         }
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
-        try {
-            final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
-            return connectionFactory.getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-    }
-
 }
