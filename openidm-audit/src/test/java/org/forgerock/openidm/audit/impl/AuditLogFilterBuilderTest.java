@@ -17,6 +17,7 @@
 package org.forgerock.openidm.audit.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.http.context.ClientContext.newInternalClientContext;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -43,7 +44,6 @@ import java.util.ServiceLoader;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.InternalContext;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.script.engine.ScriptEngineFactory;
@@ -431,7 +431,7 @@ public class AuditLogFilterBuilderTest {
                 ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         Context noTrigger = mock(Context.class);
-        Context hasTrigger = new InternalContext(new TriggerContext(noTrigger, "sometrigger"));
+        Context hasTrigger = newInternalClientContext(new TriggerContext(noTrigger, "sometrigger"));
 
         // When
         // When
