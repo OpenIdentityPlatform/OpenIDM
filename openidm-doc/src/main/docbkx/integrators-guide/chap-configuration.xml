@@ -998,7 +998,7 @@ openidm.US.ldap.port=1389</programlisting>
        <programlisting language="javascript">{
         "context": "endpoint/linkedView/*",
         "type" : "text/javascript",
-        "source" : "require('linkedView').fetch(request.resourceName);"
+        "source" : "require('linkedView').fetch(request.resourcePath);"
         }</programlisting>
 
        <para>
@@ -1069,7 +1069,7 @@ endpoint/linkedView</screen>
      <programlisting language="javascript"> if (request.method === "create") {
       return {
       method: "create",
-      resourceName: request.resourceName,
+      resourceName: request.resourcePath,
       newResourceId: request.newResourceId,
       parameters: request.additionalParameters,
       content: request.content,
@@ -1085,7 +1085,7 @@ endpoint/linkedView</screen>
       return [
       [
       method: "query",
-      resourceName: request.resourceName,
+      resourceName: request.resourcePath,
       pagedResultsCookie: request.pagedResultsCookie,
       pagedResultsOffset: request.pagedResultsOffset,
       pageSize: request.pageSize,
@@ -1451,11 +1451,11 @@ x   </programlisting>
              "parent" : {
                "parent" : {
                  "parent" : null,
-                 "contextName" : "root",
+                 "name" : "root",
                  "rootContext" : true,
                  "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
                },
-               "contextName" : "security",
+               "name" : "security",
                "authenticationId" : "openidm-admin",
                "authorizationId" : {
                  "id" : "openidm-admin",
@@ -1479,24 +1479,24 @@ x   </programlisting>
                "_prettyPrint" : [ "true" ]
              },
              "external" : true,
-             "contextName" : "http",
+             "name" : "http",
              "method" : "GET",
              "path" : "https://localhost:8443/openidm/endpoint/echo",
              "rootContext" : false,
              "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
            },
-           "contextName" : "apiInfo",
+           "name" : "apiInfo",
            "apiVersion" : "2.3.1-SNAPSHOT",
            "apiName" : "org.forgerock.commons.json-resource-servlet",
            "rootContext" : false,
            "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
          },
-         "contextName" : "server",
+         "name" : "server",
          "rootContext" : false,
          "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
        },
        "uriTemplateVariables" : { },
-       "contextName" : "router",
+       "name" : "router",
        "matchedUri" : "endpoint/echo",
        "baseUri" : "endpoint/echo",
        "rootContext" : false,

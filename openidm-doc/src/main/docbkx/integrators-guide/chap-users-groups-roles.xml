@@ -1196,9 +1196,7 @@
        {
           "name": "managedUser_systemAdAccounts",
           "source": "managed/user",
-          "sourceCondition": {
-              "effectiveAssignments": "ad"
-          },
+          "sourceCondition": "/source/effectiveAssignments eq \"ad\"",,
           "target": "system/ad/account"
           ...
        }

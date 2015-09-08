@@ -983,58 +983,148 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
    <title>Paging Query Results</title>
    <para>
     The common filter query mechanism supports paged query results for managed
-    and system objects.
+    and system objects. <!--TODO Check whether we do support paging for system objects -->
    </para>
    <para>
-    The following filtered query returns the first two records in an LDAP
-    repository, whose <literal>uid</literal> starts with <literal>b</literal>.
+    The query implementation includes a configurable count policy, that can be
+    set per query. The count policy can be one of the following:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <literal>NONE</literal> - to disable counting entirely for that query.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>EXACT</literal> - to return the precise number of query results.
+      Note that this has a negative impact on query performance.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>ESTIMATE</literal> - to return a best estimate of the number of
+      query results, in the shortest possible time. This number generally
+      correlates with the number of records in the index.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    If no count policy is specified, the policy is assumed to be
+    <literal>NONE</literal>. This prevents the overhead of counting results,
+    unless a result count is specifically required.
+   </para>
+   <para>
+    The following filtered query returns the first three records in the managed
+    user repository, whose last name (<literal>sn</literal>) starts with
+    <literal>A</literal>.
    </para>
    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/system/ldap/account?_queryFilter=uid%20sw%20%22b%22&amp;_pageSize=2"
+ "https://localhost:8443/openidm/managed/user?_queryFilter=sn+sw+'A'&amp;_pageSize=3"
    </userinput>
-<computeroutput>
-{
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 2,
+<computeroutput>{
   "result": [
     {
-      "_id": "uid=bjensen,ou=People,dc=example,dc=com",
-      "sn": "Jensen",
-      "dn": "uid=bjensen,ou=People,dc=example,dc=com",
-      "givenName": "Barbara",
-      "description": "Created for OpenIDM",
-      "cn": "Barbara Jensen",
-      "uid": "bjensen",
-      "ldapGroups": [
-        "cn=openidm2,ou=Groups,dc=example,dc=com"
+      "sn": "Abbate",
+      "displayName": "Abbe Abbate",
+      "description": "This is the description for Abbe Abbate.",
+      "givenName": "Abbe",
+      "mail": "user.9@maildomain.net",
+      "telephoneNumber": "+1 791 584 7150",
+      "userName": "user.9",
+      "accountStatus": "active",
+      "roles": [
+        "openidm-authorized"
       ],
-      "mail": "bjensen@example.com",
-      "telephoneNumber": "1-360-229-7105"
+      "lastPasswordSet": "",
+      "postalCode": "",
+      "stateProvince": "",
+      "passwordAttempts": "0",
+      "lastPasswordAttempt": "Wed Sep 02 2015 14:41:14 GMT+0200 (SAST)",
+      "postalAddress": "",
+      "address2": "",
+      "country": "",
+      "city": "",
+      "effectiveRoles": [
+        "openidm-authorized"
+      ],
+      "effectiveAssignments": [],
+      "_id": "c46edab2-874d-4a2c-8c89-ead86a3fd78f",
+      "_rev": "1"
     },
-    {
-      "_id": "cn=bsmith,ou=People,dc=example,dc=com",
-      "sn": "Smith",
-      "dn": "cn=bsmith,ou=People,dc=example,dc=com",
-      "givenName": "Bill",
-      "description": null,
-      "cn": "bsmith",
-      "uid": "bsmith",
-      "ldapGroups": [],
-      "mail": "bsmith@example.com",
-      "telephoneNumber": "0987362837"
-    }
-  ]
+ ... (two more records)
+  ],
+  "resultCount": 3,
+  "pagedResultsCookie": "3",
+  "totalPagedResultsPolicy": "NONE",
+  "totalPagedResults": -1,
+  "remainingPagedResults": -1
 }</computeroutput>   </screen>
+   <!--TODO Add this section when is OPENIDM-3806 resolved
    <para>
-    Predefined queries also provide some support for paged
-    results, useful, for example, for UI display purposes. Predefined queries
-    must be configured to support paging, in the repository configuration. For
-    example:
+    To specify that either an <literal>EXACT</literal> or <literal>ESTIMATE</literal>
+    result count be applied, add the <literal>"totalPagedResultsPolicy"</literal>
+    to the query.
+   </para>
+   <para>
+    The following query is identical to the previous query but includes a count
+    of the total results in the result set.
+   </para>
+   <informalexample><?dbfo pgwide="1"?>
+   <screen>$ <userinput>curl \
+ -cacert self-signed.crt \
+ -header "X-OpenIDM-Username: openidm-admin" \
+ -header "X-OpenIDM-Password: openidm-admin" \
+ -request GET \
+ "https://localhost:8443/openidm/managed/user?_queryFilter=sn+sw+'A'&amp;_pageSize=3&amp;_totalPagedResultsPolicy=EXACT"
+   </userinput>
+<computeroutput>{
+  "result": [
+    {
+      "sn": "Abbate",
+      "displayName": "Abbe Abbate",
+      "description": "This is the description for Abbe Abbate.",
+      "givenName": "Abbe",
+      "mail": "user.9@maildomain.net",
+      "telephoneNumber": "+1 791 584 7150",
+      "userName": "user.9",
+      "accountStatus": "active",
+      "roles": [
+        "openidm-authorized"
+      ],
+      "lastPasswordSet": "",
+      "postalCode": "",
+      "stateProvince": "",
+      "passwordAttempts": "0",
+      "lastPasswordAttempt": "Wed Sep 02 2015 14:41:14 GMT+0200 (SAST)",
+      "postalAddress": "",
+      "address2": "",
+      "country": "",
+      "city": "",
+      "effectiveRoles": [
+        "openidm-authorized"
+      ],
+      "effectiveAssignments": [],
+      "_id": "c46edab2-874d-4a2c-8c89-ead86a3fd78f",
+      "_rev": "1"
+    },
+ ... (four more records)
+  ],
+  "resultCount": 3,
+  "pagedResultsCookie": "3",
+  "totalPagedResultsPolicy": "EXACT",
+  "totalPagedResults": 125,
+  "remainingPagedResults": -1
+}</computeroutput>   </screen>
+   </informalexample> -->
+   <para>
+    Predefined queries also support paged results, useful, for example, for UI
+    display purposes. Predefined queries must be configured to support paging,
+    in the repository configuration. For example:
    </para>
    <screen>"query-all-ids" : "select _openidm_id from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",</screen>
    <para>
@@ -1049,20 +1139,34 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
   --request GET \
   "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_pageSize=2&amp;_pagedResultsOffset=3"</userinput>
  <computeroutput>{
-   "remainingPagedResults": 2,
-   "pagedResultsCookie": "5",
-   "resultCount": 2,
-   "result": [
-     {
-       "_rev": "0",
-       "_id": "b980999e-aa5c-4655-b2a0-08731b64e0ba"
-     },
-     {
-       "_rev": "0",
-       "_id": "c72b9c00-1e2c-4139-9e7f-fb9fb822db96"
-     }
-   ]
- }</computeroutput>  </screen>
+  "result": [
+    {
+      "_id": "0b7563c1-9fbe-462c-bca2-a90331b22b2e",
+      "_rev": "1"
+    },
+    {
+      "_id": "aeda0741-1bb8-4775-8820-e63f7984a227",
+      "_rev": "1"
+    }
+  ],
+  "resultCount": 2,
+  "pagedResultsCookie": "5",
+  "totalPagedResultsPolicy": "EXACT",
+  "totalPagedResults": 23,
+  "remainingPagedResults": -1
+}</computeroutput>  </screen>
+   <para>
+    Note that the <literal>"totalPagedResultsPolicy"</literal> is
+    <literal>"EXACT"</literal> for this query. To return an exact result count,
+    a corresponding <literal>count</literal> query must be defined in the
+    repository configuration. The following excerpt of the default
+    <filename>repo.orientdb.json</filename> file shows the predefined
+    <literal>query-all-ids</literal> query, and its corresponding
+    <literal>count</literal> query:
+   </para>
+   <informalexample><?dbfo pgwide="1"?>
+<programlisting>"query-all-ids" : "select _openidm_id, @version from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+"query-all-ids-count" : "select count(_openidm_id) AS total from ${unquoted:_resource}",</programlisting></informalexample>
    <variablelist>
     <para>
      The following paging parameters are supported:
@@ -1114,8 +1218,9 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
        result set returned is empty.
       </para>
       <para>
-       Note that the <literal>_remainingPagedResults</literal> parameter is not
-       supported for all queries. Where it is not supported, the returned value
+       Note that the <literal>"totalPagedResults"</literal> and
+       <literal>_remainingPagedResults</literal> parameters are not supported
+       for all queries. Where they are not supported, their returned value
        is always <literal>-1</literal>.
       </para>
      </listitem>
@@ -1136,6 +1241,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)</programlistin
     </varlistentry>
    </variablelist>
   </section>
+
   <section xml:id="sorting-query-results">
    <title>Sorting Query Results</title>
    <para>

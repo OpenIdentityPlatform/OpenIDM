@@ -48,10 +48,11 @@ define("org/forgerock/openidm/ui/admin/util/ReconDetailsView", [
             this.parentRender(_.bind(function () {
                 this.$el.find(".fa-info-circle").popover({
                     content: function () { return $(this).attr("data-title");},
-                    trigger:'hover',
+                    trigger:'hover click',
+                    container: 'body',
                     placement:'top',
                     html: 'true',
-                    template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
+                    title: ''
                 });
 
                 if(callback) {
