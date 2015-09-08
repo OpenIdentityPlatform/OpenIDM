@@ -19,6 +19,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Context;
@@ -26,8 +27,13 @@ import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
@@ -214,6 +220,27 @@ public abstract class RelationshipProvider {
      */
     public abstract Promise<JsonValue, ResourceException> clear(Context context, String resourceId);
 
+    public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
+        try {
+            final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
+            createRequest.setResourcePath(REPO_RESOURCE_PATH);
+            createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
+
+            return connectionFactory.getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
+    }
+
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String relationshipId, ReadRequest request) {
+        try {
+            final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
+            return connectionFactory.getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
+    }
+
     public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String resourceId, final UpdateRequest request) {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
@@ -242,6 +269,44 @@ public abstract class RelationshipProvider {
             return e.asPromise();
         }
     }
+
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId, final DeleteRequest request) {
+        final ResourcePath path = REPO_RESOURCE_PATH.child(resourceId);
+        final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
+        deleteRequest.setResourcePath(path);
+
+        try {
+            if (deleteRequest.getRevision() == null) {
+                /*
+                 * If no revision was supplied we must perform a read to get the latest revision
+                 */
+
+                final ReadRequest readRequest = Requests.newReadRequest(path);
+                final Promise<ResourceResponse, ResourceException> readResult = connectionFactory.getConnection().readAsync(context, readRequest);
+
+                return readResult.thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                    @Override
+                    public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse) throws ResourceException {
+                        deleteRequest.setRevision(resourceResponse.getRevision());
+                        return connectionFactory.getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
+                    }
+                });
+            } else {
+                return connectionFactory.getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
+            }
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
+    }
+
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+        return notSupportedOnInstance(request).asPromise();
+    }
+
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
+        return notSupportedOnInstance(request).asPromise();
+    }
+
 
     /**
      * Returns the path of the first resource in this relationship using the firstId parameter
