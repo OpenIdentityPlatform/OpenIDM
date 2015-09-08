@@ -56,79 +56,16 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractView", [
                 return _.clone(auditDataChanges, true);
             },
 
-            setEvents: function (data, msgContainer) {
-                auditDataChanges.customEventTypes = {};
-                auditDataChanges.extendedEventTypes = {};
-
-                _.each(data, function (event, key) {
-                    if (_.contains(["activity", "authentication", "access"], key)) {
-                        if (!_.has(auditDataChanges, "extendedEventTypes")) {
-                            auditDataChanges.extendedEventTypes = {};
-                        }
-                        auditDataChanges.extendedEventTypes[key] = event;
+            setProperties: function(properties, object) {
+                _.each(properties, function(prop) {
+                    if (_.isEmpty(object[prop]) &&
+                        !_.isNumber(object[prop]) &&
+                        !_.isBoolean(object[prop])) {
+                        delete auditDataChanges[prop];
                     } else {
-                        if (!_.has(auditDataChanges, "customEventTypes")) {
-                            auditDataChanges.customEventTypes = {};
-                        }
-                        auditDataChanges.customEventTypes[key] = event;
+                        auditDataChanges[prop] = object[prop];
                     }
-                });
-
-                if (_.keys(auditDataChanges.customEventTypes).length === 0) {
-                    delete auditDataChanges.customEventTypes;
-                }
-
-                if (_.keys(auditDataChanges.extendedEventTypes).length === 0) {
-                    delete auditDataChanges.extendedEventTypes;
-                }
-
-                if (this.compareObjects("customEventTypes", auditDataChanges, auditData) || this.compareObjects("extendedEventTypes", auditDataChanges, auditData)) {
-                    msgContainer.show();
-                } else {
-                    msgContainer.hide();
-                }
-            },
-
-            setEventHandlers: function (data, msgContainer) {
-                auditDataChanges.auditServiceConfig = data.auditServiceConfig;
-                auditDataChanges.eventHandlers = data.eventHandlers;
-
-                if (_.keys(auditDataChanges.auditServiceConfig).length === 0) {
-                    delete auditDataChanges.auditServiceConfig;
-                }
-
-                if (auditDataChanges.eventHandlers.length === 0) {
-                    delete auditDataChanges.eventHandlers;
-                }
-
-                if (!this.compareObjects("eventHandlers", auditDataChanges, auditData) || !this.compareObjects("auditServiceConfig", auditDataChanges, auditData)) {
-                    msgContainer.show();
-                } else {
-                    msgContainer.hide();
-                }
-            },
-
-            setExceptionFormatter: function (data, msgContainer) {
-                if (_.isNull(data)) {
-                    if (_.has(auditDataChanges, "exceptionFormatter")) {
-                        delete auditDataChanges.exceptionFormatter;
-                    }
-                } else {
-                    auditDataChanges.exceptionFormatter = data;
-                }
-
-                if (this.compareObjects("exceptionFormatter", auditDataChanges, auditData)) {
-                    msgContainer.hide();
-                } else {
-                    msgContainer.show();
-                }
-
-            },
-
-            undo: function(prop) {
-                if (_.has(auditData,prop)) {
-                    auditDataChanges[prop] = _.clone(auditData[prop], true);
-                }
+                }, this);
             },
 
             saveAudit: function(callback) {
