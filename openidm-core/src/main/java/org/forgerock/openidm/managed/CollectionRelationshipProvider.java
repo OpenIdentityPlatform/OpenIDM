@@ -293,7 +293,8 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
     @Override
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
         try {
-            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
+            final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
+            queryRequest.setResourcePath(REPO_RESOURCE_PATH);
             QueryFilter<JsonPointer> filter = QueryFilter.and(
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
