@@ -1003,14 +1003,15 @@
        <listitem>
         <para>
          The <literal>sourceCondition</literal> element enables you to define an
-         additional set of key-value conditions that must be met in order for a
-         source object to be included in a mapping.
+         additional filter that must be met in order for a source object to be
+         included in a mapping.
         </para>
         <para>
-         This condition is declarative, but functions in the same way as a
-         <literal>validSource</literal> script. <literal>sourceCondition</literal>
-         is used principally to specify that a mapping applies only to a
-         particular role or entitlement.
+         This condition functions in the same way as a
+         <literal>validSource</literal> script. Its value can be either a
+         <literal>queryFilter</literal> string, or a script configuration.
+         <literal>sourceCondition</literal> is used principally to specify that
+         a mapping applies only to a particular role or entitlement.
         </para>
         <para>
          For example, the following <literal>sourceCondition</literal> restricts
@@ -1022,24 +1023,22 @@
         {
             "name": "managedUser_systemLdapAccounts",
             "source": "managed/user",
-            "sourceCondition": {
-                "effectiveAssignments": "ldap"
-            },
+            "sourceCondition": "/source/effectiveAssignments eq \"ldap\"",
         ...
         }
     ]
 }</programlisting>
         <para>
-         You can, however, define a declarative
-         <literal>sourceCondition</literal> outside of the entitlements context
-         to restrict the source objects that are candidates for synchronization.
+         You can, however, define a <literal>sourceCondition</literal> filter
+         outside of the entitlements context to restrict the source objects that
+         are candidates for synchronization.
         </para>
        </listitem>
       </varlistentry>
      </variablelist>
 
      <para>
-      During synchronization, your scripts always have access to a
+      During synchronization, your scripts and filters have access to a
       <literal>source</literal> object and a <literal>target</literal> object.
       Examples already shown in this section use <literal>source.<replaceable
       >attributeName</replaceable></literal> to retrieve attributes from the
@@ -1054,6 +1053,10 @@
         "source": "if (source.email != null) {target.mail = source.email;}"
     }
 }</programlisting>
+     <para>
+      In addition, the <literal>sourceCondition</literal> filter has the
+      <literal>"linkQualifier"</literal> variable in its scope.
+     </para>
 
      <para>
       See the <link xlink:href="integrators-guide#appendix-scripting"
@@ -2909,7 +2912,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     available through the connector. For LiveSync, the list contains only
     changed objects. OpenIDM can filter objects out of the list by using the
     script specified in the <literal>validSource</literal> property, or the
-    conditions defined in the <literal>sourceCondition</literal> property.
+    query specified in the <literal>sourceCondition</literal> property.
    </para>
 
    <para>
