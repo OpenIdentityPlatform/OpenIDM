@@ -33,60 +33,38 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditView", [
     "org/forgerock/openidm/ui/admin/settings/audit/ExceptionFormatterView",
     "org/forgerock/commons/ui/common/util/Constants"
 
-], function($, _, AuditAdminAbstractView,
-            AuditEventHandlersView,
-            AuditEventsView,
-            ExceptionFormatterView,
-            constants) {
+], function ($, _, AuditAdminAbstractView,
+             AuditEventHandlersView,
+             AuditEventsView,
+             ExceptionFormatterView,
+             constants) {
 
     var AuditView = AuditAdminAbstractView.extend({
         template: "templates/admin/settings/audit/AuditTemplate.html",
         element: "#auditContainer",
         noBaseTemplate: true,
         events: {
-            "click #submitAudit": "save",
-            "click .undo-events": "undoEvents",
-            "click .undo-exceptions": "undoExceptionFormatter",
-            "click .undo-event-handlers": "undoEventHandlers"
+            "click #submitAudit": "save"
         },
 
         render: function (args, callback) {
             this.data.docHelpUrl = constants.DOC_URL;
 
-            this.retrieveAuditData(_.bind(function(){
-                this.parentRender(this.renderViews);
+            this.retrieveAuditData(_.bind(function () {
+                this.parentRender(function () {
+                    AuditEventHandlersView.render();
+                    AuditEventsView.render();
+                    ExceptionFormatterView.render();
+                });
             }, this));
         },
 
-        renderViews: function() {
-            AuditEventHandlersView.render();
-            AuditEventsView.render();
-            ExceptionFormatterView.render();
-        },
-
-        undoExceptionFormatter: function(e) {
+        save: function (e) {
             e.preventDefault();
-            this.undo("exceptionFormatter");
-            this.renderViews();
-        },
-
-        undoEvents: function(e) {
-            e.preventDefault();
-            this.undo("customEventTypes");
-            this.undo("extendedEventTypes");
-            this.renderViews();
-        },
-
-        undoEventHandlers: function(e) {
-            e.preventDefault();
-            this.undo("eventHandlers");
-            this.undo("auditServiceConfig");
-            this.renderViews();
-        },
-
-        save: function(e) {
-            e.preventDefault();
-            this.saveAudit(this.renderViews);
+            this.saveAudit();
+            AuditEventHandlersView.render({"saved": true});
+            AuditEventsView.render({"saved": true});
+            ExceptionFormatterView.render({ "saved": true });
         }
     });
 

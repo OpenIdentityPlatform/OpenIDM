@@ -37,8 +37,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "bootstrap-dialog",
-    "bootstrap-tabdrop",
-    "jsonEditor"
+    "jsonEditor",
+    "bootstrap-tabdrop"
 
 ], function($, _, AuditAdminAbstractView,
             AuditDelegate,
@@ -48,7 +48,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
             constants,
             validatorsManager,
             BootstrapDialog,
-            tabdrop,
             JSONEditor) {
 
     var AuditEventHandlersDialog = AuditAdminAbstractView.extend({
@@ -69,8 +68,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                 disable_collapse: true,
                 disable_properties: true,
                 no_additional_properties: true,
-                show_errors: "never",
-                formHorizontal: true
+                show_errors: "never"
             });
 
             var _this = this,
