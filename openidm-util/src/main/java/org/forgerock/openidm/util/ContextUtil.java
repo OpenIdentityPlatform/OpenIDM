@@ -15,15 +15,16 @@
  */
 package org.forgerock.openidm.util;
 
+import static org.forgerock.http.context.ClientContext.newInternalClientContext;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.forgerock.http.Context;
+import org.forgerock.http.context.ClientContext;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.json.resource.ClientContext;
-import org.forgerock.json.resource.InternalContext;
 import org.forgerock.json.resource.SecurityContext;
 
 /**
@@ -59,7 +60,7 @@ public class ContextUtil {
      * this context should be used. The AUTHORIZATION module grants full access
      * to this context.
      *
-     * @return a new {@link InternalContext}
+     * @return a new {@link ClientContext}
      */
     public static Context createInternalContext() {
         // Ideally, we would have an internal system user that we could point to;
@@ -70,6 +71,6 @@ public class ContextUtil {
         roles.add("system");
         authzid.put(SecurityContext.AUTHZID_ROLES, roles);
         authzid.put(SecurityContext.AUTHZID_COMPONENT, "internal/user");
-        return new InternalContext(new SecurityContext(new RootContext(), "system", authzid));
+        return newInternalClientContext(new SecurityContext(new RootContext(), "system", authzid));
     }
 }
