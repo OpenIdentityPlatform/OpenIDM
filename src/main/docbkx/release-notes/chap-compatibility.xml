@@ -86,6 +86,82 @@
      </itemizedlist>
     </listitem>
    </varlistentry>
+   <varlistentry>
+    <term>Updated REST API</term>
+    <listitem>
+     <para>
+      OpenIDM has migrated to an updated version of the ForgeRock Common REST
+      API. This update entails the following migration requirements for existing
+      deployments.
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        The <literal>resourceName</literal> object has been renamed to
+        <literal>resourcePath</literal>. Custom scripts that request this object
+        must be updated accordingly, for example
+       <literallayout>request.resourceName</literallayout> must be replaced with
+       <literallayout>request.resourcePath</literallayout>.
+       </para>
+       <para>
+        Implementations that use a scripted CREST connector must also update
+        their scripts with this change. For example, note the change to the
+        following line in the <filename>UpdateScript.groovy</filename> script,
+        provided in the <literal>scriptedcrest2dj</literal> sample.
+       </para>
+<programlisting>UpdateRequest updateRequest = Requests.newUpdateRequest(request.resourcePath, resource.content)</programlisting>
+      </listitem>
+      <listitem>
+       <para>
+        The way in which context IDs are constructed has changed. OpenIDM now
+        concatenates a 36-character UUID with a 64-bit sequence number. The
+        context ID is therefore of variable length (37-56 characters). This will
+        impact existing implementations where the <literal>transactionId</literal>
+        and <literal>reconId</literal> are stored in a database column that uses
+        a fixed schema. Corresponding column sizes will need to be increased.
+       </para>
+       <para>
+        In addition, the <literal>reconId</literal> of a reconciliation
+        operation is now constructed from the root context ID of the invocation.
+       </para>
+       <para>
+        For details of the updated schema definitions, see the schema definition
+        script for your repository
+        (<filename>/path/to/openidm/db/<replaceable>repo-name</replaceable>/scripts/openidm.sql</filename>).
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The paging implementation has changed to improve the performance when
+        counting results. Previously, the default behavior was to return the
+        number of <emphasis>remaining results</emphasis>, which necessitated a
+        time-consuming calculation for every request. In OpenIDM
+        ${docTargetVersion}, the default behavior is to return the
+        <emphasis>total results</emphasis>. Any clients that rely on
+        <literal>remaining results</literal> must be updated accordingly.
+       </para>
+       <!--TODO Add this note if CREST 2 compatibility is implemented for IDM
+       <note>
+        <para>
+         You can still request a count of remaining results, by specifying
+         the previous version of the REST API. To do so, pass in the
+         <literal>-header "X-AcceptAPIVersion :1"</literal> header in the
+         request.
+        </para>
+       </note> -->
+       <para>
+        The updated REST API implementation includes a configurable
+        <emphasis>count policy</emphasis>, that can be set per request.
+       </para>
+      </listitem>
+     </itemizedlist>
+     <para>
+      For more information about the paging implementation in OpenIDM
+      ${docTargetVersion}, see <olink targetdoc="integrators-guide"
+      targetptr="paging-query-results" />.
+     </para>
+    </listitem>
+   </varlistentry>
   </variablelist>
  </section> 
   

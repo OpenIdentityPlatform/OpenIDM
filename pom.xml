@@ -259,7 +259,7 @@
         <!-- START Documentation properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
         <docTargetVersion>${project.version}</docTargetVersion>
-        <frDocPluginVersion>3.0.0</frDocPluginVersion>
+        <frDocPluginVersion>3.1.0-SNAPSHOT</frDocPluginVersion>
         <opendjPasswordPluginVersion>1.0.3</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>1.0.3</adPasswordPluginVersion>
         <openicfBundleVersion>${openicf.framework.version}</openicfBundleVersion>

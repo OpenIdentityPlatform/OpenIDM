@@ -60,7 +60,7 @@
   "oldTarget"        : <replaceable>script object</replaceable>,
   "validSource"      : <replaceable>script object</replaceable>,
   "validTarget"      : <replaceable>script object</replaceable>,
-  "sourceCondition"  : <replaceable>key:value pair</replaceable>,
+  "sourceCondition"  : <replaceable>script object</replaceable> or <replaceable>queryFilter string</replaceable>,
   "correlationQuery" : <replaceable>script object</replaceable>,
   "correlationScript": <replaceable>script object</replaceable>,
   "linkQualifier"    : <replaceable>script object</replaceable>,
@@ -150,12 +150,12 @@
    <varlistentry>
     <term>sourceCondition</term>
     <listitem>
-     <para>key:value pair, optional</para>
+     <para>script object or <literal>queryFilter</literal> string, optional</para>
      <para>
-      A key:value pair that determines if a source object should be included in
-      the mapping. If no <literal>sourceCondition</literal> element (or
-      <literal>validSource</literal> script) is specified, all source objects
-      are included in the mapping.
+      A script or query filter that determines if a source object should be
+      included in the mapping. If no <literal>sourceCondition</literal> element
+      (or <literal>validSource</literal> script) is specified, all source
+      objects are included in the mapping.
      </para>
     </listitem>
    </varlistentry>
