@@ -274,7 +274,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                                 JsonValue after = configAuditState.getAfter();
                                 // Create and send the ClusterEvent for the created configuration
                                 sendClusterEvent(ConfigAction.CREATE, request.getResourcePathObject(),
-                                        request.getNewResourceId(), after.asMap());
+                                        request.getNewResourceId(), after);
 
                                 // Log audit event.
                                 auditLogger.log(configAuditState, request, context, connectionFactory);
@@ -388,15 +388,13 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                                 JsonValue after = configAuditState.getAfter();
 
                                 // Create and send the ClusterEvent for the updated configuration
-                                sendClusterEvent(ConfigAction.UPDATE, request.getResourcePathObject(), null,
-                                        after.asMap());
+                                sendClusterEvent(ConfigAction.UPDATE, request.getResourcePathObject(), null, after);
 
                                 // Log audit event.
                                 auditLogger.log(configAuditState, request, context, connectionFactory);
 
-                                return newResourceResponse(configAuditState.getId(),
-                                        configAuditState.getRevision(), after)
-                                        .asPromise();
+                                return newResourceResponse(configAuditState.getId(), configAuditState.getRevision(),
+                                        after).asPromise();
                             }
                         });
     }
@@ -687,13 +685,13 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * @param id The new resource id (used for create)
      * @param obj The resource object (used for create and update)
      */
-    private void sendClusterEvent(ConfigAction action, ResourcePath name, String id, Map<String, Object> obj) {
+    private void sendClusterEvent(ConfigAction action, ResourcePath name, String id, JsonValue obj) {
         if (clusterManagementService != null && clusterManagementService.isEnabled()) {
             JsonValue details = json(object(
                     field(EVENT_RESOURCE_ACTION, action.toString()),
                     field(EVENT_RESOURCE_PATH, name.toString()),
                     field(EVENT_RESOURCE_ID, id),
-                    field(EVENT_RESOURCE_OBJECT, obj)));
+                    field(EVENT_RESOURCE_OBJECT, obj == null ? null : obj.getObject())));
             ClusterEvent event = new ClusterEvent(
                     ClusterEventType.CUSTOM, 
                     clusterManagementService.getInstanceId(),
