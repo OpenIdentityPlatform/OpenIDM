@@ -63,7 +63,7 @@
    <filename><replaceable>project-dir</replaceable>/conf/audit.json</filename>.
   </para>
   <para>
-   In the Admin UI, you can configure the audit service. Select Configure >
+   You can also configure the audit service in the Admin UI. Select Configure >
    System Preferences and click on the Audit tab. The fields on that form
    correspond to the configuration parameters described in this section.
   </para>
@@ -311,7 +311,7 @@
     "class": "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",
     "config": {
         "resourcePath" : "system/auditdb"
-    },  <!--TODO What additional config params can be applied for a repo config?
+    },  <!--TODO What additional config params can be applied for a router config?
      I think resourcePath is it, at least based on the UI -->
     "events": [
         "access",
@@ -356,7 +356,7 @@
  </section>
 
  <section xml:id="configuring-audit-query-handler">
-  <title>Configuring the Audit Event Query Handler</title>
+  <title>Configuring the Audit Event Handler for Queries</title>
   <para>
    You can select one audit event handler to manage queries on the
    audit logs. The audit query handler can be any one of the event handlers
@@ -379,8 +379,8 @@
     },
 ...</programlisting>
   <para>
-   The <literal>availableAuditEventHandlers</literal> property lists the
-   default audit event handlers available to OpenIDM.
+   The <literal>availableAuditEventHandlers</literal> property provides the
+   array of audit event handlers available to OpenIDM.
   </para>
  </section>
 
@@ -403,8 +403,9 @@
   </para>
   <para>
    You can also go beyond the Commons Audit Service by specifying additional
-   <emphasis>custom</emphasis> events that must be logged, specifically
-   synchronization and reconciliation.
+   <emphasis>custom</emphasis> events that must be logged. As synchronization
+   and reconciliation are unique to OpenIDM, these events are included in the
+   <filename>audit.json</filename> file as custom events.
   </para>
   <para>
    This section describes the default audit events, and shows how the audit
