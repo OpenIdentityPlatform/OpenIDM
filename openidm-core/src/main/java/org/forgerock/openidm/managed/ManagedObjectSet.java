@@ -1263,6 +1263,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                             resourceExpansionMap.get(relationshipField).add(expansionPair.getSecond());
                         }
                     }
+
+                } else if (field.equals(new JsonPointer("*"))) {
+                	fields.remove(field);
+                	fields.add(new JsonPointer(""));
                 }
             }
         }
