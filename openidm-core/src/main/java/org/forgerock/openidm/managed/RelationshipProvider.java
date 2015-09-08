@@ -13,15 +13,12 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
-import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Context;
@@ -29,20 +26,11 @@ import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -51,35 +39,31 @@ import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.query.QueryFilter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Set of relationships for a given managed resource's property
- */
-public class ManagedObjectRelationshipSet implements CollectionResourceProvider {
+public abstract class RelationshipProvider {
     /** Used for accessing the repo */
-    final private ConnectionFactory connectionFactory;
+    protected final ConnectionFactory connectionFactory;
 
     /** Path to this resource in the repo */
-    private static final ResourcePath REPO_RESOURCE_PATH = new ResourcePath("repo", "relationships");
+    protected static final ResourcePath REPO_RESOURCE_PATH = new ResourcePath("repo", "relationships");
 
     /** Name of the source resource these relationships are "edges" of */
-    private final ResourcePath resourcePath;
+    protected final ResourcePath resourcePath;
 
     /** The property representing this relationship */
-    private final JsonPointer propertyName;
+    protected final JsonPointer propertyName;
 
     /** The name of the firstId field in the repo */
-    private static final String REPO_FIELD_FIRST_ID = "firstId";
+    protected static final String REPO_FIELD_FIRST_ID = "firstId";
     /** The name of the firstPropertyName field in the repo */
-    private static final String REPO_FIELD_FIRST_PROPERTY_NAME = "firstPropertyName";
+    protected static final String REPO_FIELD_FIRST_PROPERTY_NAME = "firstPropertyName";
     /** The name of the properties field coming out of the repo service */
-    private static final String REPO_FIELD_PROPERTIES = "properties";
+    protected static final String REPO_FIELD_PROPERTIES = "properties";
     /** The name of the secondId field in the repo */
-    private static final String REPO_FIELD_SECOND_ID = "secondId";
+    protected static final String REPO_FIELD_SECOND_ID = "secondId";
 
     /** The name of the firstId parameter to be used in the uri template */
     public static final String URI_PARAM_FIRST_ID = REPO_FIELD_FIRST_ID;
@@ -93,9 +77,13 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
     public static final JsonPointer FIELD_REFERENCE = SchemaField.FIELD_REFERENCE;
 
     /**
-     * Function to format resources from the repository
+     * Function to format a resource from the repository to that expected by the provider consumer. This
+     * is simply a wrapper of {@link #FORMAT_RESPONSE_NO_EXCEPTION} with a {@link ResourceException}
+     * in the signature to allow for use against {@code Promise<ResourceResponse, ResourceException>}
+     *
+     * @see #FORMAT_RESPONSE_NO_EXCEPTION
      */
-    private static final Function<ResourceResponse, ResourceResponse, ResourceException> FORMAT_RESPONSE =
+    protected static final Function<ResourceResponse, ResourceResponse, ResourceException> FORMAT_RESPONSE =
             new Function<ResourceResponse, ResourceResponse, ResourceException>() {
                 @Override
                 public ResourceResponse apply(ResourceResponse resourceResponse) throws ResourceException {
@@ -103,10 +91,35 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
                 }
             };
 
-    /**
-     * Function to format resources from the repository
+     /**
+     * Function to format a resource from the repository to that expected by the provider consumer. First object
+     * properties are removed and {@code secondId} will be converted to {@code _ref}
+     *
+     * This will convert repo resources in the format of:
+     * <pre>
+     *     {
+     *         "_id": "someId",
+     *         "_rev": "someRev",
+     *         "firstId": "/managed/object/uuid",
+     *         "firstPropertyName": "roles",
+     *         "secondId": "/managed/roles/uuid"
+     *         "properties": { ... }
+     *     }
+     * </pre>
+     *
+     * To a provider response format of:
+     * <pre>
+     *     {
+     *         "_ref": "/managed/roles/uuid"
+     *         "_refProperties": {
+     *             "_id": "someId",
+     *             "_rev": "someRev",
+     *             ...
+     *         }
+     *     }
+     * </pre>
      */
-    private static final Function<ResourceResponse, ResourceResponse, NeverThrowsException> FORMAT_RESPONSE_NO_EXCEPTION =
+    protected static final Function<ResourceResponse, ResourceResponse, NeverThrowsException> FORMAT_RESPONSE_NO_EXCEPTION =
             new Function<ResourceResponse, ResourceResponse, NeverThrowsException>() {
                 @Override
                 public ResourceResponse apply(final ResourceResponse raw) {
@@ -129,114 +142,78 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
             };
 
     /**
+     * Get a new {@link RelationshipProvider} instance associated with the given resource path and field
+     *
+     * @param connectionFactory The connection factory used to access the repository
+     * @param resourcePath Path of the resource to provide relationships for
+     * @param relationshipField Field on the resource representing the provided relationship
+     * @return A new relationship provider instance
+     */
+    public static RelationshipProvider newProvider(final ConnectionFactory connectionFactory,
+            final ResourcePath resourcePath, final SchemaField relationshipField) {
+        if (relationshipField.isArray()) {
+            return new CollectionRelationshipProvider(connectionFactory,
+                    resourcePath, new JsonPointer(relationshipField.getName()));
+        } else {
+            return new SingletonRelationshipProvider(connectionFactory,
+                    resourcePath, new JsonPointer(relationshipField.getName()));
+        }
+    }
+
+    /**
      * Create a new relationship set for the given managed resource
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName Name of property on first object represents the relationship
      */
-    public ManagedObjectRelationshipSet(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, final JsonPointer propertyName) {
+    protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, final JsonPointer propertyName) {
         this.connectionFactory = connectionFactory;
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-        return notSupportedOnCollection(request).asPromise();
-    }
+    /**
+     * Return a {@link RequestHandler} instance representing this provider
+     * @return
+     */
+    public abstract RequestHandler asRequestHandler();
 
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return notSupportedOnInstance(request).asPromise();
-    }
+    /**
+     * Fetch the full relationship representation for this provider as a JsonValue.
+     *
+     * @param context Context of this request
+     * @param resourceId Id of resource to fetch relationships on
+     *
+     * @return A promise containing the full representation of the relationship on the supplied resourceId
+     *         or a ResourceException if an error occurred
+     */
+    public abstract Promise<JsonValue, ResourceException> fetchJson(Context context, String resourceId);
 
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
-        try {
-            final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
-            createRequest.setResourcePath(REPO_RESOURCE_PATH);
-            createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
+    /**
+     * Persist the supplied {@link JsonValue} as the current state of this relationship. This will support updating
+     * any existing relationship (_id is present) and remove any relationship not present in the value from the
+     * repository.
+     *
+     * @param context The context of this request
+     * @param resourceId Id of the resource relation fields in value are to be memebers of
+     * @param value A {@link JsonValue} map of relationship fields and their values
+     *
+     * @return A promise containing a JsonValue of the persisted relationship(s) for the given resourceId or
+     *         ResourceException if an error occurred
+     */
+    public abstract Promise<JsonValue, ResourceException> persistJson(final Context context,
+            final String resourceId, final JsonValue value);
 
-            return connectionFactory.getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
+    /**
+     * Clear any relationship associated with the given resource. This could be used if for example a resource
+     * no longer exists.
+     *
+     * @param context The current context.
+     * @param resourceId The resource whose relationship we wish to clear
+     *
+     */
+    public abstract Promise<JsonValue, ResourceException> clear(Context context, String resourceId);
 
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, String resourceId, final DeleteRequest request) {
-        final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
-        deleteRequest.setResourcePath(REPO_RESOURCE_PATH.child(request.getResourcePath()));
-
-        try {
-            if (deleteRequest.getRevision() == null) {
-                /*
-                 * If no revision was supplied we must perform a read to get the latest revision
-                 */
-
-                final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
-                final Promise<ResourceResponse, ResourceException> readResult = connectionFactory.getConnection().readAsync(context, readRequest);
-
-                return readResult.thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                    @Override
-                    public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse) throws ResourceException {
-                        deleteRequest.setRevision(resourceResponse.getRevision());
-                        return connectionFactory.getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
-                    }
-                });
-            } else {
-                return connectionFactory.getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
-            }
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return notSupportedOnInstance(request).asPromise();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
-        try {
-            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-
-            queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
-            ));
-            return connectionFactory.getConnection().queryAsync(context, queryRequest, new QueryResourceHandler() {
-                @Override
-                public boolean handleResource(ResourceResponse resource) {
-                    return handler.handleResource(FORMAT_RESPONSE_NO_EXCEPTION.apply(resource));
-                }
-            });
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
-        try {
-            final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
-            return connectionFactory.getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String resourceId, final UpdateRequest request) {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
@@ -278,7 +255,7 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
      *
      * @return The resource path of the first resource as a child of resourcePath
      */
-    private final ResourcePath firstResourcePath(final Context context, final Request request)
+    protected final ResourcePath firstResourcePath(final Context context, final Request request)
             throws BadRequestException {
         final String uriFirstId =
                 context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
@@ -302,8 +279,9 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
      *               storage in the repo
      *
      * @return A new JsonValue containing the converted object in a format accepted by the repo
+     * @see #FORMAT_RESPONSE_NO_EXCEPTION
      */
-    private JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
+    protected JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
         final JsonValue properties = object.get(FIELD_PROPERTIES);
 
         if (properties != null) {
@@ -319,4 +297,5 @@ public class ManagedObjectRelationshipSet implements CollectionResourceProvider 
                 field(REPO_FIELD_PROPERTIES, properties)
         ));
     }
+
 }
