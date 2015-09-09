@@ -19,12 +19,14 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -43,6 +45,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -58,6 +61,8 @@ import java.util.Set;
  * A {@link RelationshipProvider} representing a collection (array) of relationships for the given field.
  */
 public class CollectionRelationshipProvider extends RelationshipProvider implements CollectionResourceProvider {
+    private final RequestHandler requestHandler;
+
     /**
      * Create a new relationship set for the given managed resource
      * @param connectionFactory Connection factory used to access the repository
@@ -66,12 +71,16 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, final JsonPointer propertyName) {
         super(connectionFactory, resourcePath, propertyName);
+
+        final Router router = new Router();
+        router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("{firstId}/" + propertyName.leaf()), Resources.newCollection(this));
+        this.requestHandler = router;
     }
 
     /** {@inheritDoc} */
     @Override
     public RequestHandler asRequestHandler() {
-        return Resources.newCollection(this);
+        return requestHandler;
     }
 
     /** {@inheritDoc} */

@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.managed;
 
+import static org.forgerock.json.resource.Resources.newCollection;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
 import java.util.HashSet;
@@ -36,8 +37,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.RouteMatcher;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -132,6 +136,69 @@ public class ManagedObjectService implements RequestHandler {
 
     private final Router managedRouter = new Router();
 
+    /**
+     * RequestHandler to handle requests for both a {@link ManagedObjectSet} and its nested
+     * {@link RelationshipProvider}s.
+     *
+     * Requests to {@code /} and {@code /{id}} will be directed to the object set.
+     * Requests starting with {@code /{id}/{relationshipField}} will be directed to their relationship provider.
+     */
+    private class ManagedObjectSetRequestHandler implements RequestHandler {
+        final ManagedObjectSet objectSet;
+        final RequestHandler objectSetRequestHandler;
+
+        ManagedObjectSetRequestHandler(final ManagedObjectSet objectSet) {
+            this.objectSet = objectSet;
+            this.objectSetRequestHandler = newCollection(objectSet);
+        }
+
+        private RequestHandler requestHandler(final Request request) {
+            final ResourcePath path = request.getResourcePathObject();
+
+            if (path.size() <= 1) { // Either / or /{id}. Use the objectSet
+                return objectSetRequestHandler;
+            } else { // /{id}/{relationshipField}/... use the relationship provider
+                final String relationshipField = path.get(1);
+                return objectSet.getRelationshipProviders().get(new JsonPointer(relationshipField)).asRequestHandler();
+            }
+        }
+
+        @Override
+        public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
+            return requestHandler(request).handleAction(context, request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
+            return requestHandler(request).handleCreate(context, request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
+            return requestHandler(request).handleDelete(context, request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+            return requestHandler(request).handlePatch(context, request);
+        }
+
+        @Override
+        public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request, QueryResourceHandler handler) {
+            return requestHandler(request).handleQuery(context, request, handler);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
+            return requestHandler(request).handleRead(context, request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
+            return requestHandler(request).handleUpdate(context, request);
+        }
+    }
+
 
     /**
      * Activates the component
@@ -142,11 +209,14 @@ public class ManagedObjectService implements RequestHandler {
     protected void activate(ComponentContext context) throws Exception {
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         for (JsonValue value : configuration.get("objects").expect(List.class)) {
-            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, value);
+            final ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, value);
             if (managedRoutes.containsKey(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }
-            managedRoutes.put(objectSet.getName(),managedRouter.addRoute(uriTemplate(objectSet.getTemplate()), objectSet));
+
+            managedRoutes.put(objectSet.getName(),
+                    managedRouter.addRoute(RoutingMode.STARTS_WITH, uriTemplate(objectSet.getTemplate()),
+                            new ManagedObjectSetRequestHandler(objectSet)));
         }
     }
 
@@ -159,22 +229,24 @@ public class ManagedObjectService implements RequestHandler {
     protected void modified(ComponentContext context) throws Exception {
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
 
-        Set<String> tempRoutes = new HashSet<String>();
+        Set<String> routesToKeep = new HashSet<String>();
         for (JsonValue value : configuration.get("objects").expect(List.class)) {
             ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, value);
-            if (tempRoutes.contains(objectSet.getName())) {
+            if (routesToKeep.contains(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }
             RouteMatcher<Request> oldRoute = managedRoutes.get(objectSet.getName());
             if (null != oldRoute) {
                 managedRouter.removeRoute(oldRoute);
             }
-            managedRoutes.put(objectSet.getName(),managedRouter.addRoute(uriTemplate(objectSet.getTemplate()), objectSet));
-            tempRoutes.add(objectSet.getName());
+            managedRoutes.put(objectSet.getName(),
+                    managedRouter.addRoute(RoutingMode.STARTS_WITH, uriTemplate(objectSet.getTemplate()),
+                            new ManagedObjectSetRequestHandler(objectSet)));
+            routesToKeep.add(objectSet.getName());
         }
         for (Map.Entry<String, RouteMatcher<Request>> entry : managedRoutes.entrySet()){
-           //Use ConcurrentMap to avoid ConcurrentModificationException with this iteration
-            if (tempRoutes.contains(entry.getKey())) {
+            //Use ConcurrentMap to avoid ConcurrentModificationException with this iteration
+            if (routesToKeep.contains(entry.getKey())) {
                 continue;
             }
             managedRouter.removeRoute(managedRoutes.remove(entry.getKey()));
