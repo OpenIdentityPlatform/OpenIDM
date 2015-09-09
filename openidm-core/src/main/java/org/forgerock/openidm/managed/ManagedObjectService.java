@@ -158,8 +158,7 @@ public class ManagedObjectService implements RequestHandler {
             if (path.size() <= 1) { // Either / or /{id}. Use the objectSet
                 return objectSetRequestHandler;
             } else { // /{id}/{relationshipField}/... use the relationship provider
-                final String relationshipField = path.get(1);
-                return objectSet.getRelationshipProviders().get(new JsonPointer(relationshipField)).asRequestHandler();
+                return objectSet.getRelationshipProviders().get(new JsonValue(path.get(1))).asRequestHandler();
             }
         }
 
