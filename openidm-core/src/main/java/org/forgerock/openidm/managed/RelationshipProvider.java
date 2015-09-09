@@ -241,9 +241,9 @@ public abstract class RelationshipProvider {
         }
     }
 
-    public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String resourceId, final UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String relationshipId, final UpdateRequest request) {
         try {
-            final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(resourceId));
+            final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
             final JsonValue newValue = convertToRepoObject(firstResourcePath(context, request), request.getContent());
 
             // current resource in the db
@@ -253,13 +253,11 @@ public abstract class RelationshipProvider {
             return promisedOldResult.thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
                 @Override
                 public Promise<ResourceResponse, ResourceException> apply(ResourceResponse oldResource) throws ResourceException {
-                    final String rev = oldResource.getRevision();
-
                     if (newValue.asMap().equals(oldResource.getContent().asMap())) { // resource has not changed
-                        return newResourceResponse(resourceId, rev, null).asPromise();
+                        return newResourceResponse(oldResource.getId(), oldResource.getRevision(), null).asPromise();
                     } else {
-                        final UpdateRequest updateRequest = Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(resourceId), newValue);
-                        updateRequest.setRevision(rev);
+                        final UpdateRequest updateRequest = Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(relationshipId), newValue);
+                        updateRequest.setRevision(request.getRevision());
 
                         return connectionFactory.getConnection().updateAsync(context, updateRequest).then(FORMAT_RESPONSE);
                     }
@@ -270,8 +268,8 @@ public abstract class RelationshipProvider {
         }
     }
 
-    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId, final DeleteRequest request) {
-        final ResourcePath path = REPO_RESOURCE_PATH.child(resourceId);
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String relationshipId, final DeleteRequest request) {
+        final ResourcePath path = REPO_RESOURCE_PATH.child(relationshipId);
         final DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
         deleteRequest.setResourcePath(path);
 
@@ -299,11 +297,11 @@ public abstract class RelationshipProvider {
         }
     }
 
-    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String relationshipId, PatchRequest request) {
         return notSupportedOnInstance(request).asPromise();
     }
 
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String relationshipId, ActionRequest request) {
         return notSupportedOnInstance(request).asPromise();
     }
 
@@ -348,6 +346,8 @@ public abstract class RelationshipProvider {
      */
     protected JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
         final JsonValue properties = object.get(FIELD_PROPERTIES);
+        final String idProperty = properties == null ? null : properties.get("_id").asString();
+        final String revProperty = properties == null ? null : properties.get("_rev").asString();
 
         if (properties != null) {
             // Remove "soft" fields that were placed in properties for the ResourceResponse
@@ -356,10 +356,12 @@ public abstract class RelationshipProvider {
         }
 
         return json(object(
+                field("_id", idProperty),
+                field("_rev", revProperty),
                 field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
                 field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
-                field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE)),
-                field(REPO_FIELD_PROPERTIES, properties)
+                field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE).asString()),
+                field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
         ));
     }
 
