@@ -76,25 +76,31 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
     @Override
     public Promise<JsonValue, ResourceException> fetchJson(Context context, String resourceId) {
         try {
-            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
-            final List<ResourceResponse> relationships = new ArrayList<>();
-
-            queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(resourceId)),
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
-            ));
-
-            connectionFactory.getConnection().query(context, queryRequest, relationships);
-
-            if (relationships.isEmpty()) {
-                return newResultPromise(json(object()));
-            } else {
-                // TODO - check size and throw illegal state if more than one?
-                return newResultPromise(relationships.get(0).getContent());
-            }
+            return newResultPromise(fetch(context, resourceId).getContent());
+        } catch (NotFoundException e) {
+            return newResultPromise(json(null));
         } catch (ResourceException e) {
             return e.asPromise();
+        }
+    }
+
+    private ResourceResponse fetch(Context context, String resourceId) throws NotFoundException, ResourceException {
+        final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
+        queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+        final List<ResourceResponse> relationships = new ArrayList<>();
+
+        queryRequest.setQueryFilter(QueryFilter.and(
+                QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(resourceId)),
+                QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
+        ));
+
+        connectionFactory.getConnection().query(context, queryRequest, relationships);
+
+        if (relationships.isEmpty()) {
+            throw new NotFoundException();
+        } else {
+            // TODO - check size and throw illegal state if more than one?
+            return FORMAT_RESPONSE.apply(relationships.get(0));
         }
     }
 
