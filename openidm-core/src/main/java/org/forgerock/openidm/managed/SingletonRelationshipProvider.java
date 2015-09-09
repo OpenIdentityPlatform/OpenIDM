@@ -15,42 +15,41 @@
  */
 package org.forgerock.openidm.managed;
 
+import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.forgerock.util.query.QueryFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
-    /** The id of this singleton relationship */
-    private String relationshipId = null;
+    private final RequestHandler requestHandler;
 
     /**
      * Create a new relationship set for the given managed resource
@@ -61,12 +60,16 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
      */
     public SingletonRelationshipProvider(ConnectionFactory connectionFactory, ResourcePath resourcePath, JsonPointer propertyName) {
         super(connectionFactory, resourcePath, propertyName);
+
+        final Router router = new Router();
+        router.addRoute(STARTS_WITH, uriTemplate("{firstId}/" + propertyName.leaf()), Resources.newSingleton(this));
+        this.requestHandler = router;
     }
 
     /** {@inheritDoc} */
     @Override
     public RequestHandler asRequestHandler() {
-        return Resources.newSingleton(this);
+        return requestHandler;
     }
 
     /** {@inheritDoc} */
@@ -161,24 +164,53 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
     /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return super.readInstance(context, relationshipId, request);
+        try {
+            return super.readInstance(context, relationshipId(context), request);
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return super.updateInstance(context, relationshipId, request);
+        try {
+            return super.updateInstance(context, relationshipId(context), request);
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return super.patchInstance(context, relationshipId, request);
+        try {
+            return super.patchInstance(context, relationshipId(context), request);
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
-        return super.actionInstance(context, relationshipId, request);
+        try {
+            return super.actionInstance(context, relationshipId(context), request);
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
+    }
+
+    /**
+     * Return the relationship id of the current singleton value.
+     *
+     * @param context The current context
+     * @return The id of the current relationship this singleton represents
+     * @throws ResourceException If the id could not be retrieved
+     */
+    private String relationshipId(Context context) throws ResourceException {
+        final String firstId =
+                context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
+        return fetch(context, firstId).getId();
     }
 }

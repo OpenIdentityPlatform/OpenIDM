@@ -1231,4 +1231,27 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             throw e;
         }
     }
+
+    /**
+     * Get the {@link ResourcePath} associated with this set.
+     * @return The {@link ResourcePath} associated with this object set.
+     */
+    public ResourcePath getPath() {
+        return managedObjectPath;
+    }
+
+    /**
+     * Get the {@link ManagedObjectSchema} associated with this set.
+     * @return The {@link ManagedObjectSchema} associated with this object set.
+     */
+    public ManagedObjectSchema getSchema() {
+        return schema;
+    }
+
+    /**
+     * Get the current map of {@link RelationshipProvider} for each relationship field.
+     */
+    public Map<JsonPointer, RelationshipProvider> getRelationshipProviders() {
+        return relationshipProviders;
+    }
 }
