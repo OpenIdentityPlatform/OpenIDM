@@ -25,6 +25,10 @@
 
 package org.forgerock.openidm.quartz.impl;
 
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILURE;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +39,6 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
@@ -122,7 +125,7 @@ public class SchedulerServiceJob implements Job {
                 scheduledService.execute(scheduledContext, scheduledServiceContext);
                 scheduledService.auditScheduledService(
                         scheduledContext,
-                        createScheduledAuditEvent(scheduledContext, startTime, context, Status.SUCCESS, null));
+                        createSuccessfulScheduledAuditEvent(scheduledContext, startTime, context));
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.",
                         context.getJobDetail().getFullName());
             } catch (Exception ex) {
@@ -131,7 +134,7 @@ public class SchedulerServiceJob implements Job {
                 try {
                     scheduledService.auditScheduledService(
                             scheduledContext,
-                            createScheduledAuditEvent(scheduledContext, startTime, context, Status.FAILURE, ex));
+                            createFailedScheduledAuditEvent(scheduledContext, startTime, context, ex));
                 } catch (ExecutionException exception) {
                     logger.error("Unable to audit scheduled task {}", context.getJobDetail().getFullName(), exception);
                 }
@@ -157,9 +160,22 @@ public class SchedulerServiceJob implements Job {
         return serviceTracker;
     }
 
-    private AuditEvent createScheduledAuditEvent(final Context context, final long startTime,
-                                                 final JobExecutionContext jobContext, final Status status,
-                                                 final Exception e) {
+    private AuditEvent createSuccessfulScheduledAuditEvent(final Context context, final long startTime,
+            final JobExecutionContext jobContext) {
+        final long elapsedTime = System.currentTimeMillis() - startTime;
+        return newBaseAccessAuditEventBuilder(context ,jobContext)
+                .response(SUCCESS, null, elapsedTime, MILLISECONDS).toEvent();
+    }
+
+    private AuditEvent createFailedScheduledAuditEvent(final Context context, final long startTime,
+            final JobExecutionContext jobContext, final Exception e) {
+        final long elapsedTime = System.currentTimeMillis() - startTime;
+        return newBaseAccessAuditEventBuilder(context, jobContext)
+                .responseWithDetail(FAILURE, null, elapsedTime, MILLISECONDS, e.getMessage()).toEvent();
+    }
+
+    private AccessAuditEventBuilder newBaseAccessAuditEventBuilder(final Context context,
+            final JobExecutionContext jobContext) {
         final AccessAuditEventBuilder auditEventBuilder = new AccessAuditEventBuilder();
         auditEventBuilder
                 .authorizationIdFromSecurityContext(context)
@@ -168,15 +184,6 @@ public class SchedulerServiceJob implements Job {
                 .timestamp(System.currentTimeMillis())
                 .authenticationFromSecurityContext(context)
                 .eventName("access");
-
-        final long elapsedTime = System.currentTimeMillis() - startTime;
-
-        if (Status.SUCCESS.equals(status)) {
-            auditEventBuilder.response(Status.SUCCESS.name(), elapsedTime);
-        } else {
-            auditEventBuilder.responseWithMessage(Status.FAILURE.name(), elapsedTime, e.getMessage());
-        }
-
-        return auditEventBuilder.toEvent();
+        return auditEventBuilder;
     }
 }
