@@ -1,0 +1,110 @@
+UI Endpoints for Update Process
+
+1. Get list of update archives in openidm/update:
+
+	READ openidm/update?_action=available
+
+	returns:
+	[
+		{
+			"name" : "OpenIDM-4.5.0.0.zip",
+			"date" : "2016-03-12 15:34:01",
+			"size" : 84372957,
+			"sha1" : "bleeblooblah"
+		}, {
+			...
+		}
+	]
+
+2. Get list of file changes for a given update archive:
+
+	READ openidm/update?_action=preview&archive=OpenIDM-4.5.0.0.zip
+
+	returns:
+	[
+		{
+			"filepath" : "bin/defaults/script/access.js",
+			"changetype" : "UNEXPECTED" (states from FileState.java)
+		}, {
+			...
+		}
+	]
+
+3. Perform update using a given update archive
+
+	CREATE openidm/update
+	{
+		"archive" : "OpenIDM-4.5.0.0.zip"
+	}
+
+	returns:
+	{
+		"id" : "someIDstring",
+		"status" : "IN_PROGRESS",
+		"statusMessage" : "Initializing"
+	}
+
+4. Get status of running update
+
+	READ openidm/update/someIDstring
+
+	returns (while still in progress):
+	{
+		"id" : "someIDstring",
+		"status" : "IN_PROGRESS" et. al.,
+		"statusMessage" : "Doing something"
+	}
+
+	(while in terminal state):
+	{
+		"id" : "someIDstring",
+		"status" : "COMPLETE" | "REVERTED",
+		"statusMessage" : "Something went horribly wrong",
+		"files" : [
+			{
+				"filepath" : "bin/defaults/script/access.js",
+				"changetype" : "UNEXPECTED" (states from FileState.java),
+				"backup" : "bin/defaults/script/access.js.OpenIDM-4.5.0.0"
+			},
+			...
+		]
+	}
+
+	Note that if the final status was unsuccessful and the update was reverted the "backup" attribute will not be present (backups have been removed as part of the revert).
+
+
+Future:
+
+I. Get list of completed updates
+
+	READ openidm/update?_action=history
+
+	returns:
+	[
+		{
+			"archive" : "OpenIDM-4.1.0.0.zip",
+			"date" : "2016-04-01 12:00:00",
+			"result" : "COMPLETED",
+			"id" : "someIDstring"
+		},
+		...
+	]
+
+	The id can be passed to READ openidm/update/someIDstring to fetch the log
+
+
+Other
+
+Updates should be recorded in a CSV along with the update logs, e.g.:
+
+	updatehistory.csv
+		"archive", "date", "result", "id"
+
+	update<id>.csv
+		"filepath", "changetype", "backup"
+
+
+
+Backups should be named after the original file plus a suffix taken from the archive name minus the extension (.zip).  Thus script/access.js backed up as part of an upgrade using OpenIDM-4.3.1.0.zip would be named script/access.js.OpenIDM-4.3.1.0.
+
+
