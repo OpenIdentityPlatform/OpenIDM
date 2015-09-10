@@ -62,7 +62,9 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
         super(connectionFactory, resourcePath, propertyName);
 
         final Router router = new Router();
-        router.addRoute(STARTS_WITH, uriTemplate("{firstId}/" + propertyName.leaf()), Resources.newSingleton(this));
+        router.addRoute(STARTS_WITH,
+                uriTemplate(String.format("{%s}/%s", URI_PARAM_FIRST_ID, propertyName.leaf())),
+                Resources.newSingleton(this));
         this.requestHandler = router;
     }
 
