@@ -268,7 +268,7 @@
                     "http/method" : "http_method",
                     "http/path" : "http_path",
                     "http/queryString" : "http_querystring",
-                    "http/headers" : {"column" : "http_headers", "type" : "JSON_LIST"},
+                    "http/headers" : {"column" : "http_headers", "type" : "JSON_MAP"},
                     "response/status" : "status",
                     "response/elapsedTime" : "elapsedtime"
                 }
