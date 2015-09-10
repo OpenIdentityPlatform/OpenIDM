@@ -1193,7 +1193,7 @@
                 "sourceIgnoredMessage" : "Source not qualified, link not found, correlated target does not exist.",
                 "allGone": "All Gone",
                 "allGoneMessage": "Source object removed, link not found, correlation not possible.",
-                "linkOnlyMessage": "Source possibly not qualified, link found, target object not found.",
+                "linkOnlyMessage": "Link found, target object not found.",
                 "confirmed" : "Confirmed:",
                 "confirmedMessage" : "Link between qualified source and existing target confirmed.",
                 "found" : "Found:",
