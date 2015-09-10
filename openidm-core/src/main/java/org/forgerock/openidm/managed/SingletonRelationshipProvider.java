@@ -86,7 +86,7 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
         }
     }
 
-    private ResourceResponse fetch(Context context, String resourceId) throws NotFoundException, ResourceException {
+    private ResourceResponse fetch(Context context, String resourceId) throws ResourceException {
         final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
         queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
         final List<ResourceResponse> relationships = new ArrayList<>();
