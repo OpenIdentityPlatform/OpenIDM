@@ -1176,7 +1176,7 @@
                 "failure" : "FAILURE",
                 "duration" : "DURATION",
                 "ambiguous" : "Ambiguous:",
-                "ambiguousMessage" : "Source correlates to multiple target objects, without a link.",
+                "ambiguousMessage" : "Source object correlates to multiple target objects, without a link.",
                 "sourceMissing" : "Source missing:",
                 "sourceMissingMessage" : "Valid target found, link found.",
                 "missing" : "Missing (target):",
