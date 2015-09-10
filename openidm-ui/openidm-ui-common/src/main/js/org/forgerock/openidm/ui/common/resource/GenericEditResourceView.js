@@ -199,7 +199,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             } else {
                 if(!this.data.newObject) {
                     _.each(newValue, _.bind(function(val,key) {
-                        if((!this.oldObject[key] && val.length) || (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) {
+                        if((!this.oldObject[key] && val && val.length) || (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) {
                             if(this.data.schema.properties && this.data.schema.properties[key] && this.data.schema.properties[key].title && this.data.schema.properties[key].title.length) {
                                 changedFields.push(this.data.schema.properties[key].title);
                             } else {
