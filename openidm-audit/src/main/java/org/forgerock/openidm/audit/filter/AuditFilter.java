@@ -24,6 +24,9 @@
 
 package org.forgerock.openidm.audit.filter;
 
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILURE;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
 import static org.forgerock.http.context.ClientContext.newInternalClientContext;
 
 import org.forgerock.audit.events.AccessAuditEventBuilder;
@@ -201,8 +204,7 @@ public class AuditFilter implements Filter {
                     public void handleResult(Response result) {
                         long now = System.currentTimeMillis();
                         final long elapsedTime = now - state.actionTime;
-                        accessAuditEventBuilder.response("SUCCESS", elapsedTime)
-                                .timestamp(now);
+                        accessAuditEventBuilder.response(SUCCESS, null, elapsedTime, MILLISECONDS).timestamp(now);
                     }
                 },
                 new ExceptionHandler<ResourceException>() {
@@ -210,9 +212,8 @@ public class AuditFilter implements Filter {
                     public void handleException(ResourceException resourceException) {
                         long now = System.currentTimeMillis();
                         final long elapsedTime = now - state.actionTime;
-                        accessAuditEventBuilder.responseWithMessage(
-                                "FAILURE - " + resourceException.getCode(), elapsedTime, resourceException.getReason())
-                                .timestamp(now);
+                        accessAuditEventBuilder.responseWithDetail(FAILURE, String.valueOf(resourceException.getCode()),
+                                elapsedTime, MILLISECONDS, resourceException.getReason()).timestamp(now);
                     }
                 })
                 .thenAlways(new Runnable() {

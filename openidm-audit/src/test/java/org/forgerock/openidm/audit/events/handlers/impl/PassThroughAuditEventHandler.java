@@ -19,16 +19,12 @@ package org.forgerock.openidm.audit.events.handlers.impl;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.promise.Promise;
@@ -58,64 +54,32 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     }
 
     /**
-     * Perform an action on the audit log.
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
-        return ResourceExceptionsUtil.notSupported(actionRequest).asPromise();
-    }
-
-    /**
-     * Perform an action on the audit log entry.
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
-            ActionRequest actionRequest) {
-        return ResourceExceptionsUtil.notSupported(actionRequest).asPromise();
-    }
-
-    /**
-     * Create a audit log entry.
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest createRequest) {
-        logger.info("Added an entry. Message: " + message);
-
-        ResourceResponse resourceResponse = newResourceResponse(
-                createRequest.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
-                new JsonValue(createRequest.getContent()));
-        return resourceResponse.asPromise();
-    }
-
-    /**
-     * Perform a query on the audit log.
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest queryRequest,
-            QueryResourceHandler queryResourceHandler) {
-        return ResourceExceptionsUtil.notSupported(queryRequest).asPromise();
-    }
-
-    /**
-     * Read from the audit log.
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
-            ReadRequest readRequest) {
-        return ResourceExceptionsUtil.notSupported(readRequest).asPromise();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     public Class<PassThroughAuditEventHandlerConfiguration> getConfigurationClass() {
         return PassThroughAuditEventHandlerConfiguration.class;
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> publishEvent(final Context context,
+            final String auditEventTopic, final JsonValue auditEventContent) {
+        return newResourceResponse(
+                auditEventContent.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
+                null,
+                auditEventContent).asPromise();
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> readEvent(final Context context, final String auditEventTopic,
+            final String auditEventId) {
+        return new NotSupportedException().asPromise();
+    }
+
+    @Override
+    public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String auditEventTopic,
+            final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
+        return new NotSupportedException().asPromise();
     }
 
 }

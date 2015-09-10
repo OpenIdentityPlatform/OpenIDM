@@ -24,6 +24,7 @@
 package org.forgerock.openidm.audit.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
 /**
  * A configuration for router audit event handler.
@@ -35,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *  }
  * </pre>
  */
-public class RouterAuditEventHandlerConfiguration {
+public class RouterAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonProperty(required=true)
     private String resourcePath;
