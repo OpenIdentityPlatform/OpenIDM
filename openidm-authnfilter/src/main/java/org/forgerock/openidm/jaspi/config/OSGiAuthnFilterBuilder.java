@@ -26,6 +26,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.base.Predicate;
@@ -244,7 +245,7 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
         }
         moduleConfig.remove(MODULE_CONFIG_ENABLED);
 
-        ServerAuthModule module;
+        AsyncServerAuthModule module;
         if (moduleConfig.isDefined("name")) {
             module = moduleConfig.get("name").asEnum(IDMAuthModule.class).newInstance(this);
         } else {

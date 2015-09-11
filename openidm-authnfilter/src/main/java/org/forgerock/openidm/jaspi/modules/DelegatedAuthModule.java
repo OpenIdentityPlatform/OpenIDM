@@ -16,47 +16,47 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import static javax.security.auth.message.AuthStatus.*;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.*;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.caf.authentication.framework.AuditTrail;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.*;
 import org.forgerock.util.Reject;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
-import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.Credential;
-
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.BASIC_AUTH_CRED_HELPER;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_AUTH_CRED_HELPER;
 
 /**
  * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
  * to a OpenICF Connector.
  */
-public class DelegatedAuthModule implements ServerAuthModule {
+public class DelegatedAuthModule implements AsyncServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(DelegatedAuthModule.class);
 
@@ -84,8 +84,13 @@ public class DelegatedAuthModule implements ServerAuthModule {
      * {@inheritDoc}
      */
     @Override
-    public final Class[] getSupportedMessageTypes() {
-        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
+    public final Collection<Class<?>> getSupportedMessageTypes() {
+        return Arrays.asList(new Class<?>[]{Request.class, Response.class});
+    }
+
+    @Override
+    public String getModuleId() {
+        return "Delegated";
     }
 
     /**
@@ -94,13 +99,14 @@ public class DelegatedAuthModule implements ServerAuthModule {
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
+     * @param options {@inheritDoc}
      */
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            Map options) throws AuthException {
-
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
+            CallbackHandler handler, Map<String, Object> options) {
         queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
         authenticator = authenticatorFactory.apply(new JsonValue(options));
+        return newResultPromise(null);
     }
 
     /**
@@ -110,16 +116,15 @@ public class DelegatedAuthModule implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException If there is a problem performing the authentication.
      */
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
-            throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
+            Subject clientSubject, Subject serviceSubject) {
 
         logger.debug("DelegatedAuthModule: validateRequest START");
 
         SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo);
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        Request request = messageInfo.getRequest();
 
         try {
             logger.debug("DelegatedAuthModule: Delegating call to remote authentication");
@@ -137,18 +142,20 @@ public class DelegatedAuthModule implements ServerAuthModule {
                 });
 
                 // Auth success will be logged in IDMJaspiModuleWrapper
-                return AuthStatus.SUCCESS;
+                return newResultPromise(SUCCESS);
             } else {
                 logger.debug("DelegatedAuthModule: Authentication failed");
-                return AuthStatus.SEND_FAILURE;
+                return newResultPromise(SEND_FAILURE);
             }
+        } catch (AuthenticationException e) {
+            return newExceptionPromise(e);
         } finally {
             logger.debug("DelegatedAuthModule: validateRequest END");
         }
     }
 
-    private boolean authenticate(Credential credential, MessageInfo messageInfo,
-            SecurityContextMapper securityContextMapper) throws AuthException {
+    private boolean authenticate(Credential credential, MessageInfoContext messageInfo,
+            SecurityContextMapper securityContextMapper) throws AuthenticationException {
 
         if (!credential.isComplete()) {
             logger.debug("Failed authentication, missing or empty headers");
@@ -168,7 +175,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
                     credential.username, credential.password, context);
             final ResourceResponse resource = result.getResource();
             if (resource != null) {
-                final JsonValue messageMap = new JsonValue(messageInfo.getMap());
+                final JsonValue messageMap = new JsonValue(messageInfo.getRequestContextMap());
                 messageMap.put(IDMJaspiModuleWrapper.AUTHENTICATED_RESOURCE,
                         json(object(
                                 field(ResourceResponse.FIELD_CONTENT_ID, resource.getId()),
@@ -179,7 +186,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
             return result.isAuthenticated();
         } catch (ResourceException e) {
             logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
-            messageInfo.getMap().put(AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());
+            messageInfo.getRequestContextMap().put(AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());
             if (e.isServerError()) { // HTTP server-side error
                 throw new AuthenticationException(
                         "Failed delegated authentication of " + credential.username + " on " + queryOnResource, e);
@@ -197,8 +204,9 @@ public class DelegatedAuthModule implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
-        return AuthStatus.SEND_SUCCESS;
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
+            Subject serviceSubject) {
+        return newResultPromise(SEND_SUCCESS);
     }
 
     /**
@@ -206,8 +214,10 @@ public class DelegatedAuthModule implements ServerAuthModule {
      *
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject subject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject subject) {
+        return newResultPromise(null);
     }
 }

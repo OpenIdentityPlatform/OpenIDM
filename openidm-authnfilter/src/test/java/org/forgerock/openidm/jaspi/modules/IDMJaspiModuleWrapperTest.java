@@ -16,10 +16,10 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
-import static org.forgerock.authz.filter.http.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -29,15 +29,19 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
-
+import org.forgerock.services.context.ClientContext;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.util.promise.Promises;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -52,7 +56,7 @@ public class IDMJaspiModuleWrapperTest {
     private OSGiAuthnFilterHelper authnFilterHelper;
     private RoleCalculatorFactory roleCalculatorFactory;
     private AugmentationScriptExecutor scriptExecutor;
-    private ServerAuthModule authModule;
+    private AsyncServerAuthModule authModule;
     private Map options = new HashMap();
 
     @BeforeMethod
@@ -61,7 +65,10 @@ public class IDMJaspiModuleWrapperTest {
             authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
             when(authnFilterHelper.getConnectionFactory()).thenReturn(mock(ConnectionFactory.class));
 
-            authModule = mock(ServerAuthModule.class);
+            authModule = mock(AsyncServerAuthModule.class);
+            when(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                    anyMapOf(String.class, Object.class)))
+                    .thenReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
             roleCalculatorFactory = mock(RoleCalculatorFactory.class);
             when(roleCalculatorFactory.create(anyList(), anyString(), anyString(), anyMap(), Matchers.<MappingRoleCalculator.GroupComparison>anyObject()))
                     .thenReturn(mock(RoleCalculator.class));
@@ -78,28 +85,29 @@ public class IDMJaspiModuleWrapperTest {
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<>();
         Map<String, Object> contextMap = new HashMap<>();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(messageInfo.getResponseMessage()).willReturn(response);
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
-        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
+        given(messageInfo.getRequest()).willReturn(request);
+        given(messageInfo.getResponse()).willReturn(response);
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
+        request.setUri(URI.create("REQUEST_URL"));
+        messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, contextMap);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(AuthStatus.SEND_CONTINUE);
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_CONTINUE));
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -112,28 +120,29 @@ public class IDMJaspiModuleWrapperTest {
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
         Map<String, Object> contextMap = new HashMap<String, Object>();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(messageInfo.getResponseMessage()).willReturn(response);
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
-        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
+        given(messageInfo.getRequest()).willReturn(request);
+        given(messageInfo.getResponse()).willReturn(response);
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
+        request.setUri(URI.create("REQUEST_URL"));
+        messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, contextMap);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(AuthStatus.SEND_SUCCESS);
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -146,28 +155,29 @@ public class IDMJaspiModuleWrapperTest {
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
         Map<String, Object> contextMap = new HashMap<String, Object>();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(messageInfo.getResponseMessage()).willReturn(response);
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
-        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
+        given(messageInfo.getRequest()).willReturn(request);
+        given(messageInfo.getResponse()).willReturn(response);
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
+        request.setUri(URI.create("REQUEST_URL"));
+        messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, contextMap);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(AuthStatus.SEND_FAILURE);
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -180,14 +190,14 @@ public class IDMJaspiModuleWrapperTest {
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<>();
         Map<String, Object> contextMap = new HashMap<>();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
         Principal principalOne = mock(Principal.class);
         Principal principalTwo = mock(Principal.class);
@@ -196,62 +206,63 @@ public class IDMJaspiModuleWrapperTest {
         given(principalTwo.getName()).willReturn("");
         given(principalThree.getName()).willReturn("USERNAME");
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(messageInfo.getResponseMessage()).willReturn(response);
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
-        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
+        given(messageInfo.getRequest()).willReturn(request);
+        given(messageInfo.getResponse()).willReturn(response);
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
+        request.setUri(URI.create("REQUEST_URL"));
+        messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, contextMap);
         clientSubject.getPrincipals().add(principalOne);
         clientSubject.getPrincipals().add(principalTwo);
         clientSubject.getPrincipals().add(principalThree);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(AuthStatus.SUCCESS);
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
-    @Test(expectedExceptions = AuthException.class)
+    @Test(expectedExceptions = AuthenticationException.class)
     public void shouldValidateRequestWhenAuthModuleReturnsSuccessWithNoUsername() throws AuthException {
 
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<>();
         Map<String, Object> contextMap = new HashMap<>();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
         Principal principalOne = mock(Principal.class);
         Principal principalTwo = mock(Principal.class);
         given(principalOne.getName()).willReturn(null);
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(messageInfo.getResponseMessage()).willReturn(response);
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
-        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
-        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
+        given(messageInfo.getRequest()).willReturn(request);
+        given(messageInfo.getResponse()).willReturn(response);
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
+        request.setUri(URI.create("REQUEST_URL"));
+        messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, contextMap);
         clientSubject.getPrincipals().add(principalOne);
         clientSubject.getPrincipals().add(principalTwo);
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
-                .willReturn(AuthStatus.SUCCESS);
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+        wrapper.validateRequest(messageInfo, clientSubject, serviceSubject).getOrThrowUninterruptibly();
 
         //Then
         verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -263,18 +274,18 @@ public class IDMJaspiModuleWrapperTest {
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
         CallbackHandler handler = mock(CallbackHandler.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         Subject serviceSubject = new Subject();
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        given(messageInfo.getRequestMessage()).willReturn(request);
+        Request request = new Request();
+        given(messageInfo.getRequest()).willReturn(request);
 
-        given(authModule.secureResponse(Matchers.<MessageInfo>anyObject(), Matchers.<Subject>anyObject()))
-                .willReturn(AuthStatus.SEND_SUCCESS);
+        given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject).getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
@@ -285,28 +296,28 @@ public class IDMJaspiModuleWrapperTest {
 
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         CallbackHandler handler = mock(CallbackHandler.class);
 
         Map<String, Object> messageInfoMap = mock(Map.class);
         Subject serviceSubject = new Subject();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(authModule.secureResponse(Matchers.<MessageInfo>anyObject(), Matchers.<Subject>anyObject()))
-                .willReturn(AuthStatus.SUCCESS);
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-NoSession")).willReturn("true");
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-NoSession", "true");
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject).getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SUCCESS);
-        verify(messageInfo).getMap();
+        verify(messageInfo).getRequestContextMap();
         verify(messageInfoMap).put("skipSession", true);
     }
 
@@ -315,27 +326,34 @@ public class IDMJaspiModuleWrapperTest {
 
         //Given
         MessagePolicy messagePolicy = mock(MessagePolicy.class);
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mockMessageInfoContext();
         CallbackHandler handler = mock(CallbackHandler.class);
 
         Map<String, Object> messageInfoMap = mock(Map.class);
         Subject serviceSubject = new Subject();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(authModule.secureResponse(Matchers.<MessageInfo>anyObject(), Matchers.<Subject>anyObject()))
-                .willReturn(AuthStatus.SUCCESS);
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-NoSession")).willReturn(null);
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
+                .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-NoSession", null);
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When
         IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
-        AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject).getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SUCCESS);
-        verify(messageInfo, never()).getMap();
+        verify(messageInfo, never()).getRequestContextMap();
+    }
+
+    private MessageInfoContext mockMessageInfoContext() {
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
+        given(messageInfo.asContext(ClientContext.class))
+                .willReturn(ClientContext.newInternalClientContext(new RootContext()));
+        return messageInfo;
     }
 }

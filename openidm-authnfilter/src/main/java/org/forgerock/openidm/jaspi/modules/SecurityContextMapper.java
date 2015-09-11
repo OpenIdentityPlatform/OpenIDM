@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -31,10 +32,10 @@ import java.util.Map;
 
 import javax.security.auth.message.MessageInfo;
 
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.http.SecurityContextFactory;
-
-import static org.forgerock.authz.filter.servlet.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
 
 /**
  * A JsonValue-wrapper to contain the security context information before the SecurityContext proper is built.
@@ -54,12 +55,12 @@ class SecurityContextMapper {
     /** a JsonValue view of the auth context data */
     private final JsonValue authData;
 
-    private SecurityContextMapper(MessageInfo messageInfo) {
-        messageInfoMap = messageInfo.getMap();
-        Map<String, Object> contextMap = (Map<String, Object>) messageInfoMap.get(ATTRIBUTE_AUTHORIZATION_CONTEXT);
+    private SecurityContextMapper(MessageInfoContext messageInfo) {
+        messageInfoMap = messageInfo.getRequestContextMap();
+        Map<String, Object> contextMap = (Map<String, Object>) messageInfoMap.get(ATTRIBUTE_AUTH_CONTEXT);
         if (contextMap == null) {
-            contextMap = new HashMap<String, Object>();
-            messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, contextMap);
+            contextMap = new HashMap<>();
+            messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, contextMap);
         }
         // create the JsonValue auth-data wrapper around the AUTHCID value
         authData = json(object(field(AUTHENTICATION_ID, messageInfoMap.get(SecurityContextFactory.ATTRIBUTE_AUTHCID))));
@@ -73,7 +74,7 @@ class SecurityContextMapper {
      * @param messageInfo The MessageInfo instance.
      * @return A new SecurityContextMapper.
      */
-    static SecurityContextMapper fromMessageInfo(MessageInfo messageInfo) {
+    static SecurityContextMapper fromMessageInfo(MessageInfoContext messageInfo) {
         return new SecurityContextMapper(messageInfo);
 
     }
@@ -99,7 +100,7 @@ class SecurityContextMapper {
      */
     SecurityContextMapper setAuthorizationId(Map<String, Object> authorizationId) {
         authData.put(AUTHORIZATION_ID, authorizationId);
-        messageInfoMap.put(ATTRIBUTE_AUTHORIZATION_CONTEXT, authorizationId);
+        messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, authorizationId);
         return this;
     }
 

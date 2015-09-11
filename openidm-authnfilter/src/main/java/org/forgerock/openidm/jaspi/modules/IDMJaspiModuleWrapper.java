@@ -16,49 +16,50 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
+import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceResponse.*;
+import static org.forgerock.openidm.jaspi.modules.MappingRoleCalculator.GroupComparison;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
+
+import javax.script.ScriptException;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthStatus;
+import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.module.ServerAuthModule;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.services.context.ClientContext;
 import org.forgerock.util.Function;
-
+import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptException;
-import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.HttpServletRequest;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.forgerock.authz.filter.http.api.HttpAuthorizationContext.ATTRIBUTE_AUTHORIZATION_CONTEXT;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
-import static org.forgerock.openidm.jaspi.modules.MappingRoleCalculator.GroupComparison;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
 
 /**
  * A Jaspi ServerAuthModule that is designed to wrap any other Jaspi ServerAuthModule. This module provides
@@ -69,7 +70,7 @@ import static org.forgerock.openidm.servletregistration.ServletRegistration.SERV
  *
  * @since 3.0.0
  */
-public class IDMJaspiModuleWrapper implements ServerAuthModule {
+public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
 
     private static final Logger logger = LoggerFactory.getLogger(IDMJaspiModuleWrapper.class);
 
@@ -99,7 +100,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
     private final RoleCalculatorFactory roleCalculatorFactory;
 
-    private final ServerAuthModule authModule;
+    private final AsyncServerAuthModule authModule;
 
     private JsonValue properties = json(object());
     private String logClientIPHeader = null;
@@ -114,7 +115,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * @param authnFilterHelper An instance of the OSGiAuthnFilterHelper.
      * @param authModule The auth module wrapped by this module.
      */
-    public IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper, ServerAuthModule authModule) {
+    public IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper, AsyncServerAuthModule authModule) {
         this.authnFilterHelper = authnFilterHelper;
         this.authModule = authModule;
         this.roleCalculatorFactory = new RoleCalculatorFactory();
@@ -130,7 +131,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * @param augmentationScriptExecutor An instance of the AugmentationScriptExecutor.
      */
     IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper,
-            ServerAuthModule authModule,
+            AsyncServerAuthModule authModule,
             RoleCalculatorFactory roleCalculatorFactory,
             AugmentationScriptExecutor augmentationScriptExecutor) {
         this.authnFilterHelper = authnFilterHelper;
@@ -145,8 +146,13 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public Class[] getSupportedMessageTypes() {
+    public Collection<Class<?>> getSupportedMessageTypes() {
         return authModule.getSupportedMessageTypes();
+    }
+
+    @Override
+    public String getModuleId() {
+        return "IDMJaspiModuleWrapper";
     }
 
     /**
@@ -169,67 +175,76 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * @param responseMessagePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      * @param options {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void initialize(MessagePolicy requestMessagePolicy, MessagePolicy responseMessagePolicy,
-            CallbackHandler handler, Map options) throws AuthException {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestMessagePolicy,
+            MessagePolicy responseMessagePolicy, CallbackHandler handler, Map<String, Object> options) {
 
         properties = new JsonValue(options);
 //        authModule = authModuleConstructor.construct(properties.get("authModuleClassName").asString());
-        authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options);
-
-        logClientIPHeader = properties.get("clientIPHeader").asString();
-
-        queryOnResource = properties.get(QUERY_ON_RESOURCE).asString();
-
-        String queryId = properties.get(QUERY_ID).asString();
-        String authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
-
-        String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
-        String groupMembership = properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString();
-        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES)
-                .defaultTo(Collections.emptyList())
-                .asList(String.class);
-        Map<String, List<String>> roleMapping = properties.get(GROUP_ROLE_MAPPING)
-                .defaultTo(Collections.emptyMap())
-                .asMapOfList(String.class);
-        MappingRoleCalculator.GroupComparison groupComparison = properties.get(GROUP_COMPARISON_METHOD)
-                .defaultTo(MappingRoleCalculator.GroupComparison.equals.name())
-                .asEnum(MappingRoleCalculator.GroupComparison.class);
-
-        // a function to perform the user detail query on the router
-        queryExecutor =
-                new Function<QueryRequest, ResourceResponse, ResourceException>() {
+        return authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options)
+                .then(new Function<Void, Void, AuthenticationException>() {
                     @Override
-                    public ResourceResponse apply(QueryRequest request) throws ResourceException {
-                        if (request == null) {
-                            return null;
-                        }
-                        final List<ResourceResponse> resources = new ArrayList<>();
-                        authnFilterHelper.getConnectionFactory().getConnection().query(
-                                ContextUtil.createInternalContext(), request, resources);
+                    public Void apply(Void aVoid) throws AuthenticationException {
+                        logClientIPHeader = properties.get("clientIPHeader").asString();
 
-                        if (resources.isEmpty()) {
-                            throw ResourceException.getException(401, "Access denied, no user detail could be retrieved.");
-                        } else if (resources.size() > 1) {
-                            throw ResourceException.getException(401, "Access denied, user detail retrieved was ambiguous.");
+                        queryOnResource = properties.get(QUERY_ON_RESOURCE).asString();
+
+                        String queryId = properties.get(QUERY_ID).asString();
+                        String authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
+
+                        String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
+                        String groupMembership = properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString();
+                        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES)
+                                .defaultTo(Collections.emptyList())
+                                .asList(String.class);
+                        Map<String, List<String>> roleMapping = properties.get(GROUP_ROLE_MAPPING)
+                                .defaultTo(Collections.emptyMap())
+                                .asMapOfList(String.class);
+                        MappingRoleCalculator.GroupComparison groupComparison = properties.get(GROUP_COMPARISON_METHOD)
+                                .defaultTo(MappingRoleCalculator.GroupComparison.equals.name())
+                                .asEnum(MappingRoleCalculator.GroupComparison.class);
+
+                        // a function to perform the user detail query on the router
+                        queryExecutor =
+                                new Function<QueryRequest, ResourceResponse, ResourceException>() {
+                                    @Override
+                                    public ResourceResponse apply(QueryRequest request) throws ResourceException {
+                                        if (request == null) {
+                                            return null;
+                                        }
+                                        final List<ResourceResponse> resources = new ArrayList<>();
+                                        authnFilterHelper.getConnectionFactory().getConnection().query(
+                                                ContextUtil.createInternalContext(), request, resources);
+
+                                        if (resources.isEmpty()) {
+                                            throw ResourceException.getException(401,
+                                                    "Access denied, no user detail could be retrieved.");
+                                        } else if (resources.size() > 1) {
+                                            throw ResourceException.getException(401,
+                                                    "Access denied, user detail retrieved was ambiguous.");
+                                        }
+                                        return resources.get(0);
+                                    }
+                                };
+
+                        queryBuilder = new UserDetailQueryBuilder(queryOnResource)
+                                .useQueryId(queryId)
+                                .withAuthenticationIdProperty(authenticationId);
+
+                        roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership,
+                                roleMapping, groupComparison);
+
+                        JsonValue scriptConfig =  properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
+                        if (!scriptConfig.isNull()) {
+                            augmentScript = getAugmentScript(scriptConfig);
+                            logger.debug("Registered script {}", augmentScript);
                         }
-                        return resources.get(0);
+
+                        return null;
                     }
-                };
-
-        queryBuilder = new UserDetailQueryBuilder(queryOnResource)
-                .useQueryId(queryId)
-                .withAuthenticationIdProperty(authenticationId);
-
-        roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership, roleMapping, groupComparison);
-
-        JsonValue scriptConfig =  properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
-        if (!scriptConfig.isNull()) {
-            augmentScript = getAugmentScript(scriptConfig);
-            logger.debug("Registered script {}", augmentScript);
-        }
+                });
     }
 
     /**
@@ -258,92 +273,99 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
-            throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(final MessageInfoContext messageInfo,
+            final Subject clientSubject, Subject serviceSubject) {
 
         // Add this properties so the AuditLogger knows whether to log the client IP in the header.
         setClientIPAddress(messageInfo);
 
-        final AuthStatus authStatus = authModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        return authModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .then(new Function<AuthStatus, AuthStatus, AuthenticationException>() {
+                    @Override
+                    public AuthStatus apply(AuthStatus authStatus) throws AuthenticationException {
+                        if (!AuthStatus.SUCCESS.equals(authStatus)) {
+                            return authStatus;
+                        }
 
-        if (!AuthStatus.SUCCESS.equals(authStatus)) {
-            return authStatus;
-        }
+                        String principalName = null;
+                        for (Principal principal : clientSubject.getPrincipals()) {
+                            if (principal.getName() != null) {
+                                principalName = principal.getName();
+                                break;
+                            }
+                        }
 
-        String principalName = null;
-        for (Principal principal : clientSubject.getPrincipals()) {
-            if (principal.getName() != null) {
-                principalName = principal.getName();
-                break;
-            }
-        }
+                        if (principalName == null) {
+                            // As per Jaspi spec, the module developer MUST ensure that the client
+                            // subject's principal is set when the module returns SUCCESS.
+                            throw new AuthenticationException(
+                                    "Underlying Server Auth Module has not set the client subject's principal!");
+                        }
 
-        if (principalName == null) {
-            // As per Jaspi spec, the module developer MUST ensure that the client
-            // subject's principal is set when the module returns SUCCESS.
-            throw new AuthenticationException(
-                    "Underlying Server Auth Module has not set the client subject's principal!");
-        }
+                        // user is authenticated; populate security context
 
-        // user is authenticated; populate security context
+                        try {
+                            final ResourceResponse resource = getAuthenticatedResource(principalName, messageInfo);
 
-        try {
-            final ResourceResponse resource = getAuthenticatedResource(principalName, messageInfo);
+                            final SecurityContextMapper securityContextMapper =
+                                    SecurityContextMapper.fromMessageInfo(messageInfo)
+                                            .setAuthenticationId(principalName);
 
-            final SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo)
-                    .setAuthenticationId(principalName);
+                            // Calculate (and set) roles if not already set
+                            if (securityContextMapper.getRoles() == null
+                                    || securityContextMapper.getRoles().isEmpty()) {
+                                roleCalculator.calculateRoles(principalName, securityContextMapper, resource);
+                            }
 
-            // Calculate (and set) roles if not already set
-            if (securityContextMapper.getRoles() == null || securityContextMapper.getRoles().isEmpty()) {
-                roleCalculator.calculateRoles(principalName, securityContextMapper, resource);
-            }
-            
-            // set "resource" (component) if not already set
-            if (securityContextMapper.getResource() == null) {
-                securityContextMapper.setResource(queryOnResource);
-            }
+                            // set "resource" (component) if not already set
+                            if (securityContextMapper.getResource() == null) {
+                                securityContextMapper.setResource(queryOnResource);
+                            }
 
-            // set "user id" (authorization.id) if not already set
-            if (securityContextMapper.getUserId() == null) {
-                if (resource != null) {
-                    // assign authorization id from resource if present
-                    securityContextMapper.setUserId(
-                            resource.getId() != null
-                                    ? resource.getId()
-                                    : resource.getContent().get(FIELD_CONTENT_ID).asString());
-                } else {
-                    // set to principal otherwise
-                    securityContextMapper.setUserId(principalName);
-                }
-            }
+                            // set "user id" (authorization.id) if not already set
+                            if (securityContextMapper.getUserId() == null) {
+                                if (resource != null) {
+                                    // assign authorization id from resource if present
+                                    securityContextMapper.setUserId(
+                                            resource.getId() != null
+                                                    ? resource.getId()
+                                                    : resource.getContent().get(FIELD_CONTENT_ID).asString());
+                                } else {
+                                    // set to principal otherwise
+                                    securityContextMapper.setUserId(principalName);
+                                }
+                            }
 
-            // run the augmentation script, if configured (will no-op if none specified)
-            augmentationScriptExecutor.executeAugmentationScript(augmentScript, properties, securityContextMapper);
+                            // run the augmentation script, if configured (will no-op if none specified)
+                            augmentationScriptExecutor.executeAugmentationScript(augmentScript, properties,
+                                    securityContextMapper);
 
-        } catch (ResourceException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed role calculation for {} on {}.", principalName, queryOnResource, e);
-            }
-            if (e.isServerError()) { // HTTP server-side error; AuthException sadly does not accept cause
-                throw new AuthenticationException("Failed pass-through authentication of " + principalName + " on "
-                        + queryOnResource + ":" + e.getMessage(), e);
-            }
-            // role calculation failed
-            return AuthStatus.SEND_FAILURE;
-        }
+                        } catch (ResourceException e) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Failed role calculation for {} on {}.", principalName, queryOnResource,
+                                        e);
+                            }
+                            if (e.isServerError()) {
+                                throw new AuthenticationException("Failed pass-through authentication of "
+                                        + principalName + " on " + queryOnResource + ":" + e.getMessage(), e);
+                            }
+                            // role calculation failed
+                            return SEND_FAILURE;
+                        }
 
-        return authStatus;
+                        return authStatus;
+                    }
+                });
     }
 
-    private ResourceResponse getAuthenticatedResource(String principalName, MessageInfo messageInfo)
+    private ResourceResponse getAuthenticatedResource(String principalName, MessageInfoContext messageInfo)
             throws ResourceException {
         // see if the resource was stored in the MessageInfo by the Authenticator
-        if (messageInfo.getMap().containsKey(AUTHENTICATED_RESOURCE)) {
-            JsonValue resourceDetail = new JsonValue(messageInfo.getMap().get(AUTHENTICATED_RESOURCE));
+        if (messageInfo.getRequestContextMap().containsKey(AUTHENTICATED_RESOURCE)) {
+            JsonValue resourceDetail = new JsonValue(messageInfo.getRequestContextMap().get(AUTHENTICATED_RESOURCE));
             if (resourceDetail.isMap()) {
                 return Responses.newResourceResponse(resourceDetail.get(FIELD_CONTENT_ID).asString(),
                         resourceDetail.get(FIELD_CONTENT_REVISION).asString(),
@@ -355,22 +377,22 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         return queryExecutor.apply(queryBuilder.forPrincipal(principalName).build());
     }
 
-    private void setClientIPAddress(MessageInfo messageInfo) {
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+    private void setClientIPAddress(MessageInfoContext messageInfo) {
+        Request request = messageInfo.getRequest();
         String ipAddress;
         if (logClientIPHeader == null) {
-            ipAddress = request.getRemoteAddr();
+            ipAddress = messageInfo.asContext(ClientContext.class).getRemoteAddress();
         } else {
-            ipAddress = request.getHeader(logClientIPHeader);
+            ipAddress = request.getHeaders().getFirst(logClientIPHeader);
             if (ipAddress == null) {
-                ipAddress = request.getRemoteAddr();
+                ipAddress = messageInfo.asContext(ClientContext.class).getRemoteAddress();
             }
         }
         getContextMap(messageInfo).put("ipAddress", ipAddress);
     }
 
-    private Map<String, Object> getContextMap(MessageInfo messageInfo) {
-        return (Map<String, Object>) messageInfo.getMap().get(ATTRIBUTE_AUTHORIZATION_CONTEXT);
+    private Map<String, Object> getContextMap(MessageInfoContext messageInfo) {
+        return (Map<String, Object>) messageInfo.getRequestContextMap().get(ATTRIBUTE_AUTH_CONTEXT);
     }
 
     /**
@@ -380,17 +402,17 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
+            Subject serviceSubject) {
 
-        final HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        final String noSession = request.getHeader(NO_SESSION);
+        final Request request = messageInfo.getRequest();
+        final String noSession = request.getHeaders().getFirst(NO_SESSION);
 
         if (Boolean.parseBoolean(noSession)) {
-            messageInfo.getMap().put("skipSession", true);
+            messageInfo.getRequestContextMap().put("skipSession", true);
         }
 
         return authModule.secureResponse(messageInfo, serviceSubject);
@@ -401,11 +423,11 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject clientSubject) throws AuthException {
-        authModule.cleanSubject(messageInfo, clientSubject);
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
+        return authModule.cleanSubject(messageInfo, clientSubject);
     }
 
     /**
@@ -511,7 +533,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      * @since 3.0.0
      */
     static interface CredentialHelper {
-        public Credential getCredential(HttpServletRequest request);
+        public Credential getCredential(Request request);
     }
 
     /** CredentialHelper to get auth header creds from request */
@@ -523,8 +545,9 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         private static final String HEADER_PASSWORD = "X-OpenIDM-Password";
 
         @Override
-        public Credential getCredential(HttpServletRequest request) {
-            return new Credential(request.getHeader(HEADER_USERNAME), request.getHeader(HEADER_PASSWORD));
+        public Credential getCredential(Request request) {
+            return new Credential(request.getHeaders().getFirst(HEADER_USERNAME),
+                    request.getHeaders().getFirst(HEADER_PASSWORD));
         }
     };
 
@@ -535,8 +558,8 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         private static final String AUTHORIZATION_HEADER_BASIC = "Basic";
 
         @Override
-        public Credential getCredential(HttpServletRequest request) {
-            final String authHeader = request.getHeader(HEADER_AUTHORIZATION);
+        public Credential getCredential(Request request) {
+            final String authHeader = request.getHeaders().getFirst(HEADER_AUTHORIZATION);
             if (authHeader != null) {
                 final String[] authValue = authHeader.split("\\s", 2);
                 if (AUTHORIZATION_HEADER_BASIC.equalsIgnoreCase(authValue[0]) && authValue[1] != null) {

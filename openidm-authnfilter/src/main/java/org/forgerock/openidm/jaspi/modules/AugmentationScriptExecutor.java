@@ -54,10 +54,10 @@ class AugmentationScriptExecutor {
      * @param augmentScript The augment script entry.
      * @param properties The properties to be provided to the script.
      * @param securityContextMapper A SecurityContextMapper instance.
-     * @throws AuthException If any problem occurs whilst executing the script.
+     * @throws AuthenticationException If any problem occurs whilst executing the script.
      */
     void executeAugmentationScript(ScriptEntry augmentScript, JsonValue properties,
-            SecurityContextMapper securityContextMapper) throws AuthException {
+            SecurityContextMapper securityContextMapper) throws AuthenticationException {
 
         if (augmentScript == null) {
             return;

@@ -129,10 +129,6 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-runtime</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>authz-framework-api</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.forgerock.commons</groupId>

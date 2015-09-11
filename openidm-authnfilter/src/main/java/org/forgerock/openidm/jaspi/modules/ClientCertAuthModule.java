@@ -16,25 +16,34 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import static javax.security.auth.message.AuthStatus.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.services.context.AttributesContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.ClientContext;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * Authentication Module for authenticating users using a client certificate.
  *
  */
-public class ClientCertAuthModule implements ServerAuthModule {
+public class ClientCertAuthModule implements AsyncServerAuthModule {
 
     /** Logger */
     private final static Logger logger = LoggerFactory.getLogger(ClientCertAuthModule.class);
@@ -56,16 +65,23 @@ public class ClientCertAuthModule implements ServerAuthModule {
     /** a list of authenticationId patterns to match against the subjectDN for "successful auth". */
     private List<String> allowedAuthenticationIdPatterns;
 
+    @Override
+    public String getModuleId() {
+        return "ClientCert";
+    }
+
     /**
      * Initialises the ClientCertAuthModule.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
+     * @param options {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            Map options) {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
+            CallbackHandler handler, Map<String, Object> options) {
 
         final JsonValue properties = new JsonValue(options);
 
@@ -81,14 +97,16 @@ public class ClientCertAuthModule implements ServerAuthModule {
         allowedAuthenticationIdPatterns = properties.get(ALLOWED_AUTHENTICATION_ID_PATTERNS)
                 .defaultTo(new ArrayList<String>())
                 .asList(String.class);
+
+        return newResultPromise(null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final Class[] getSupportedMessageTypes() {
-        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
+    public final Collection<Class<?>> getSupportedMessageTypes() {
+        return Arrays.asList(new Class<?>[]{Request.class, Response.class});
     }
 
     /**
@@ -100,27 +118,28 @@ public class ClientCertAuthModule implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo, Subject clientSubject,
+            Subject serviceSubject) {
 
         SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo);
 
-        HttpServletRequest req = (HttpServletRequest) messageInfo.getRequestMessage();
+        Request req = messageInfo.getRequest();
 
         // if the request's local port is not an allowed client auth port, we cannot proceed with client auth
         if (!allowClientCertOnly(req)) {
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         }
 
-        if (authenticateUsingClientCert(req, securityContextMapper)) {
+        if (authenticateUsingClientCert(messageInfo, req, securityContextMapper)) {
             final String authcid = securityContextMapper.getAuthenticationId();
             clientSubject.getPrincipals().add(new Principal() {
                 public String getName() {
                     return authcid;
                 }
             });
-            return AuthStatus.SUCCESS;
+            return newResultPromise(SUCCESS);
         } else {
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         }
     }
 
@@ -131,8 +150,8 @@ public class ClientCertAuthModule implements ServerAuthModule {
      *
      * @return true if authentication via client certificate only is sufficient.
      */
-    private boolean allowClientCertOnly(ServletRequest request) {
-        return clientAuthOnly.contains(Integer.valueOf(request.getLocalPort()));
+    private boolean allowClientCertOnly(Request request) {
+        return clientAuthOnly.contains(Integer.valueOf(request.getUri().getPort()));
     }
 
     /**
@@ -141,18 +160,22 @@ public class ClientCertAuthModule implements ServerAuthModule {
      * @param request The ServletRequest.
      */
     // This is currently Jetty specific
-    private boolean authenticateUsingClientCert(ServletRequest request, SecurityContextMapper securityContextMapper) {
+    private boolean authenticateUsingClientCert(final Context context, Request request,
+            SecurityContextMapper securityContextMapper) {
 
         logger.debug("Client certificate authentication request");
-        X509Certificate[] certs = getClientCerts(request);
+        X509Certificate[] certs = getClientCerts(context);
 
         if (certs == null || certs.length < 1 || certs[0] == null) {
             return false;
         }
 
-        Principal existingPrincipal = request instanceof HttpServletRequest
-                ? ((HttpServletRequest) request).getUserPrincipal()
-                : null;
+        Principal existingPrincipal = new Principal() {
+            @Override
+            public String getName() {
+                return context.asContext(ClientContext.class).getRemoteUser();
+            }
+        };
         logger.debug("Request {} existing Principal {} has {} certificates", request, existingPrincipal, certs.length);
         for (X509Certificate cert : certs) {
             logger.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
@@ -183,12 +206,13 @@ public class ClientCertAuthModule implements ServerAuthModule {
     /**
      * Gets the client certificates from the request.
      *
-     * @param request The ServletRequest.
+     * @param context The request Context.
      * @return An array of X509Certificates.
      */
     // This is currently Jetty specific
-    private X509Certificate[] getClientCerts(ServletRequest request) {
-        Object checkCerts = request.getAttribute("javax.servlet.request.X509Certificate");
+    private X509Certificate[] getClientCerts(Context context) {
+        Map<String, Object> requestAttributes = context.asContext(AttributesContext.class).getAttributes();
+        Object checkCerts = requestAttributes.get("javax.servlet.request.X509Certificate");
         if (checkCerts instanceof X509Certificate[]) {
             return (X509Certificate[]) checkCerts;
         } else {
@@ -205,8 +229,9 @@ public class ClientCertAuthModule implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
-        return AuthStatus.SEND_SUCCESS;
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
+            Subject serviceSubject) {
+        return newResultPromise(SEND_SUCCESS);
     }
 
     /**
@@ -214,8 +239,10 @@ public class ClientCertAuthModule implements ServerAuthModule {
      *
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject subject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject subject) {
+        return newResultPromise(null);
     }
 }
