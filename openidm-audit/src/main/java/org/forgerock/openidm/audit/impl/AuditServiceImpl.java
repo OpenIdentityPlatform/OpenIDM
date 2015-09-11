@@ -147,6 +147,25 @@ public class AuditServiceImpl implements AuditService {
             EXTENDED_EVENT_TYPES + "/activity/watchedFields");
     private static final String CUSTOM_EVENT_TYPES = "customEventTypes";
 
+    private final JsonValueObjectConverter<AuditLogFilter> fieldJsonValueObjectConverter =
+            new JsonValueObjectConverter<AuditLogFilter>() {
+        @Override
+        public AuditLogFilter apply(JsonValue fieldsConfig) {
+            List<AuditLogFilter> filters = new ArrayList<>();
+            // the glob in the JsonPointer will return a map of matched entry types to field
+            // configurations
+            for (String eventType : fieldsConfig.keys()) {
+                // fieldConfig is something like { "field" : "type", "values" : [
+                // "summary" ] }
+                JsonValue fieldConfig = fieldsConfig.get(eventType);
+                filters.add(newEventTypeFilter(eventType,
+                        newAndCompositeFilter(fieldConfig.asList
+                                (AS_SINGLE_FIELD_VALUES_FILTER))));
+            }
+            return newOrCompositeFilter(filters);
+        }
+    };
+
     private final AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
             /* filter activity events on configured actions to include */
             .add("extendedEventTypes/activity/filter/actions",
@@ -189,22 +208,8 @@ public class AuditServiceImpl implements AuditService {
                         }
                     })
             /* filter events with specific field values for any event type */
-            .add("*/*/filter/fields",
-                    new JsonValueObjectConverter<AuditLogFilter>() {
-                        @Override
-                        public AuditLogFilter apply(JsonValue fieldsConfig) {
-                            List<AuditLogFilter> filters = new ArrayList<>();
-                            // the glob in the JsonPointer will return a map of matched entry types to field
-                            // configurations
-                            for (String eventType : fieldsConfig.keys()) {
-                                // fieldConfig is something like { "field" : "type", "values" : [ "summary" ] }
-                                JsonValue fieldConfig = fieldsConfig.get(eventType);
-                                filters.add(newEventTypeFilter(eventType,
-                                        newAndCompositeFilter(fieldConfig.asList(AS_SINGLE_FIELD_VALUES_FILTER))));
-                            }
-                            return newOrCompositeFilter(filters);
-                        }
-                    });
+            .add("extendedEventTypes/*/filter/fields", fieldJsonValueObjectConverter)
+            .add("customEventTypes/*/filter/fields", fieldJsonValueObjectConverter);
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
