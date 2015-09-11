@@ -242,6 +242,10 @@
                 "logIn" : "Log in",
                 "haveAccoutQuestion" : "Already have an account?",
                 "agreeToTerms" : "I agree to the "
+            },
+            "ChangesPendingTemplate": {
+                "undo": "Undo Changes",
+                "changesPending": "Changes Pending"
             }
         },
         "admin" : {

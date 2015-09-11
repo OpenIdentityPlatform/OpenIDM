@@ -44,13 +44,14 @@ define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
         template: "templates/admin/settings/SettingsTemplate.html",
         events: {},
         render: function(args, callback) {
-            this.parentRender(_.bind(function () {
+            this.parentRender(_.bind(function() {
                 AuthenticationView.render();
                 AuditView.render();
                 SelfServiceView.render();
-                EmailConfigView.render();
+                EmailConfigView.render({}, _.bind(function() {
+                    this.$el.find(".nav-tabs").tabdrop();
+                }, this));
 
-                this.$el.find(".nav-tabs").tabdrop();
             }, this));
         }
     });
