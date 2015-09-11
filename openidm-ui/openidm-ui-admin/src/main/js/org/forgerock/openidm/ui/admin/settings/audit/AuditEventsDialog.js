@@ -34,8 +34,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "bootstrap-dialog",
-    "bootstrap-tabdrop",
     "jsonEditor"
+
 ], function($, _,
             AuditAdminAbstractView,
             uiUtils,
@@ -44,7 +44,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
             constants,
             validatorsManager,
             BootstrapDialog,
-            tabdrop,
             JSONEditor) {
 
     var AuditEventsDialog = AuditAdminAbstractView.extend({
@@ -118,13 +117,16 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
 
             if (this.data.defaults.limitedEdits) {
                 _(JSONEditor.defaults.options).extend({
-                    additionalItems: true,
+                    ajax: false,
+                    disable_array_add: true,
+                    disable_array_delete: true,
                     disable_array_reorder: true,
-                    disable_collapse: true,
+                    disable_collapse: false,
                     disable_edit_json: true,
                     disable_properties: true,
-                    no_additional_properties: false,
                     iconlib: "fontawesome4",
+                    no_additional_properties: false,
+                    object_layout: "normal",
                     required_by_default: true,
                     show_errors: "never",
                     template: "handlebars",
@@ -132,13 +134,16 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
                 });
             } else {
                 _(JSONEditor.defaults.options).extend({
-                    additionalItems: true,
+                    ajax: false,
+                    disable_array_add: false,
+                    disable_array_delete: false,
                     disable_array_reorder: false,
-                    disable_collapse: true,
+                    disable_collapse: false,
                     disable_edit_json: false,
                     disable_properties: false,
                     iconlib: "fontawesome4",
                     no_additional_properties: false,
+                    object_layout: "normal",
                     required_by_default: true,
                     show_errors: "never",
                     template: "handlebars",
