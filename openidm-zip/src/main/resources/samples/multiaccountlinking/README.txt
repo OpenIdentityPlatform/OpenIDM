@@ -23,7 +23,7 @@
   !      Copyright 2015 ForgeRock AS
   !
 TODO: AC, delete section xml:id line and section closing about 10 lines below
-then in the last line sub chapter > chapter
+then in the last line sub article > chapter
 -->
 <chapter xml:id='sample-multiaccount-linking'
          xmlns='http://docbook.org/ns/docbook'
@@ -200,7 +200,7 @@ roles:
 ++++
 
 Do record the `_id` output for the Agent and Customer roles. You will use those
-numbers
+numbers to assign desired roles for each user.
 
 NOTE: While you could use `PUT` to create roles with descriptive names,
 we recommend that you use `POST` to create roles with immutable IDs.
