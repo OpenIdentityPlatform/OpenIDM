@@ -16,30 +16,30 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.caf.authentication.framework.AuditTrail;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.services.context.Context;
-import org.forgerock.openidm.jaspi.auth.Authenticator;
-import org.forgerock.openidm.jaspi.auth.Authenticator.AuthenticatorResult;
-import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
-import org.mockito.Matchers;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.security.auth.Subject;
-import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
+import javax.security.auth.Subject;
+import javax.security.auth.message.AuthException;
+import javax.security.auth.message.AuthStatus;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.caf.authentication.framework.AuditTrail;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.jaspi.auth.Authenticator;
+import org.forgerock.openidm.jaspi.auth.Authenticator.AuthenticatorResult;
+import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.services.context.Context;
+import org.mockito.Matchers;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
 * Test the DelegatedAuthModule.
@@ -66,18 +66,19 @@ public class DelegatedAuthModuleTest {
     public void shouldValidateRequestWhenUsernameHeaderIsNull() throws AuthException {
 
         //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn(null);
-        given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-Username", null);
+        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
 
         //When
-        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verifyZeroInteractions(authenticator);
@@ -89,18 +90,19 @@ public class DelegatedAuthModuleTest {
     public void shouldValidateRequestWhenUsernameHeaderIsEmptyString() throws AuthException {
 
         //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("");
-        given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-Username", "");
+        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
 
         //When
-        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verifyZeroInteractions(authenticator);
@@ -112,18 +114,19 @@ public class DelegatedAuthModuleTest {
     public void shouldValidateRequestWhenPasswordHeaderIsNull() throws AuthException {
 
         //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
-        given(request.getHeader("X-OpenIDM-Password")).willReturn(null);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().putSingle("X-OpenIDM-Password", null);
 
         //When
-        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verifyZeroInteractions(authenticator);
@@ -135,18 +138,19 @@ public class DelegatedAuthModuleTest {
     public void shouldValidateRequestWhenPasswordHeaderIsEmptyString() throws AuthException {
 
         //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
-        given(request.getHeader("X-OpenIDM-Password")).willReturn("");
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().putSingle("X-OpenIDM-Password", "");
 
         //When
-        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         verifyZeroInteractions(authenticator);
@@ -159,19 +163,19 @@ public class DelegatedAuthModuleTest {
     public void shouldValidateRequestWhenAuthenticationSuccessful() throws ResourceException, AuthException {
 
         //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         AuthenticatorResult authResult = mock(AuthenticatorResult.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
         Map<String, Object> auditInfoMap = new HashMap<String, Object>();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
-        given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
         messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 
         given(authResult.isAuthenticated()).willReturn(true);
@@ -179,7 +183,8 @@ public class DelegatedAuthModuleTest {
                 Matchers.<Context>anyObject())).willReturn(authResult);
 
         //When
-        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals("USERNAME", clientSubject.getPrincipals().iterator().next().getName());
@@ -191,19 +196,19 @@ public class DelegatedAuthModuleTest {
     public void shouldValidateRequestWhenAuthenticationFailed() throws ResourceException, AuthException {
 
         //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         AuthenticatorResult authResult = mock(AuthenticatorResult.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         Map<String, Object> messageInfoMap = new HashMap<String, Object>();
         Map<String, Object> auditInfoMap = new HashMap<String, Object>();
 
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
-        given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
+        given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
         messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 
         given(authResult.isAuthenticated()).willReturn(false);
@@ -211,7 +216,8 @@ public class DelegatedAuthModuleTest {
                 Matchers.<Context>anyObject())).willReturn(authResult);
 
         //When
-        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertTrue(clientSubject.getPrincipals().isEmpty());
@@ -222,11 +228,11 @@ public class DelegatedAuthModuleTest {
     public void shouldSecureResponse() throws AuthException {
 
         //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
+        MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         Subject serviceSubject = new Subject();
 
         //When
-        AuthStatus authStatus = module.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = module.secureResponse(messageInfo, serviceSubject).getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
