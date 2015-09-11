@@ -12,7 +12,7 @@
             "name" : "csv",
             "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
             "config" : {
-                "logDirectory" : "audit"
+                "logDirectory" : "&{launcher.working.location}/audit"
             },
             "events" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
         },
