@@ -645,7 +645,7 @@ class Mapping {
                 } else {
                     throw new InternalServerErrorException("Unsupported DB column type " + entry.dbColType);
                 }
-                mappedResult.put(entry.objectColPointer, value);
+                mappedResult.putPermissive(entry.objectColPointer, value);
             }
         }
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
