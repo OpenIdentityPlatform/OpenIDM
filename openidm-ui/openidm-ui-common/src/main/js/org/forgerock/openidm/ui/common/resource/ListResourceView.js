@@ -295,7 +295,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         if ($target.is("input") || $target.is(".select-row-cell")) {
                             return;
                         }
-                        routeName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+                        routeName = (!_this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
 
                     args.push(this.model.id);
 
