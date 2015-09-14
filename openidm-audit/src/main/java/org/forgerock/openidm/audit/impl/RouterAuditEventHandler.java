@@ -114,7 +114,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         try {
             return newResultPromise(getConnectionFactory().getConnection().create(new AuditContext(context),
                     newCreateRequest(
-                            resourcePath.child(request.getResourcePath()),
+                            resourcePath.concat(request.getResourcePathObject()),
                             request.getNewResourceId(),
                             request.getContent())));
         } catch (ClassNotFoundException e) {
@@ -133,7 +133,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         try {
             final ConnectionFactory connectionFactory = getConnectionFactory();
             final QueryRequest newRequest = copyOfQueryRequest(request);
-            newRequest.setResourcePath(resourcePath.child(request.getResourcePath()));
+            newRequest.setResourcePath(resourcePath.concat(request.getResourcePathObject()));
 
             return newResultPromise(
                     connectionFactory.getConnection().query(new AuditContext(context), newRequest,
@@ -158,7 +158,12 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
             ReadRequest request) {
         try {
             final ReadRequest newRequest = copyOfReadRequest(request);
-            newRequest.setResourcePath(resourcePath.child(request.getResourcePath()).child(resourceId));
+            final String safeResourceId = resourceId == null ? "" : resourceId;
+            if (request.getResourcePathObject().leaf().equals(safeResourceId)) {
+                newRequest.setResourcePath(resourcePath.concat(request.getResourcePathObject()));
+            } else {
+                newRequest.setResourcePath(resourcePath.concat(request.getResourcePathObject()).concat(safeResourceId));
+            }
             return getConnectionFactory().getConnection().read(new AuditContext(context), newRequest).asPromise();
         } catch (ClassNotFoundException e) {
             return new InternalServerErrorException(e).asPromise();

@@ -86,18 +86,24 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
                     this.model.externalEmailExists = true;
 
                     this.parentRender(_.bind(function() {
-                        validatorsManager.bindValidators(this.$el.find("#emailConfigForm"));
-                        validatorsManager.validateAllFields(this.$el.find("#emailConfigForm"));
+                        this.setup(callback);
                     }, this));
                 }, this),
                 _.bind(function() {
-                    this.parentRender(_.bind(function() {
-                        validatorsManager.bindValidators(this.$el.find("#emailConfigForm"));
-                        validatorsManager.validateAllFields(this.$el.find("#emailConfigForm"));
-                    }, this));
+                    this.setup(callback);
                 }, this)
 
             );
+        },
+
+        setup: function(callback) {
+            this.parentRender(_.bind(function() {
+                validatorsManager.bindValidators(this.$el.find("#emailConfigForm"));
+                validatorsManager.validateAllFields(this.$el.find("#emailConfigForm"));
+                if (callback) {
+                    callback();
+                }
+            }, this));
         },
 
         toggleUserPass: function(e) {

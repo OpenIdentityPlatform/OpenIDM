@@ -31,8 +31,10 @@ define("org/forgerock/openidm/ui/profile/UserProfileView", [
     "org/forgerock/openidm/ui/util/delegates/CountryStateDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function($, _, commonProfileView, countryStateDelegate, conf, uiUtils, validatorsManager) {
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/components/ChangesPending"
+
+], function($, _, commonProfileView, countryStateDelegate, conf, uiUtils, validatorsManager, ChangesPending) {
 
     var obj = $.extend({}, commonProfileView);
 
@@ -59,6 +61,11 @@ define("org/forgerock/openidm/ui/profile/UserProfileView", [
                             this.changeCountry();
                             this.loadStates();
                         }
+                        this.changesPendingWidget = ChangesPending.watchChanges({
+                            element: this.$el.find(".user-profile-changes-pending"),
+                            watchedObj: { loggedUser: this.getFormData() },
+                            watchedProperties: ["loggedUser"]
+                        });
                     }, self));
                 });
 
@@ -81,12 +88,12 @@ define("org/forgerock/openidm/ui/profile/UserProfileView", [
     obj.changeCountry = function() {
         var country = this.$el.find('select[name="country"]').val(), self = this;
 
-        if(country) {
+        if (country) {
             this.$el.find("select[name='country'] > option:first").text("");
 
-            countryStateDelegate.getAllStatesForCountry(country, function(states) {
-                uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
-                    if(conf.loggedUser.stateProvince) {
+            countryStateDelegate.getAllStatesForCountry(country, function (states) {
+                uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function () {
+                    if (conf.loggedUser.stateProvince) {
                         this.$el.find("select[name='stateProvince'] > option:first").text("");
                         this.$el.find("select[name='stateProvince']").val(conf.loggedUser.stateProvince);
                     }
