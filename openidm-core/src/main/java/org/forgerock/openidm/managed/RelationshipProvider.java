@@ -185,7 +185,7 @@ public abstract class RelationshipProvider {
     public abstract RequestHandler asRequestHandler();
 
     /**
-     * Fetch the full relationship representation for this provider as a JsonValue.
+     * Get the full relationship representation for this provider as a JsonValue.
      *
      * @param context Context of this request
      * @param resourceId Id of resource to fetch relationships on
@@ -193,10 +193,10 @@ public abstract class RelationshipProvider {
      * @return A promise containing the full representation of the relationship on the supplied resourceId
      *         or a ResourceException if an error occurred
      */
-    public abstract Promise<JsonValue, ResourceException> fetchJson(Context context, String resourceId);
+    public abstract Promise<JsonValue, ResourceException> getRelationshipValueForResource(Context context, String resourceId);
 
     /**
-     * Persist the supplied {@link JsonValue} as the current state of this relationship. This will support updating
+     * Set the supplied {@link JsonValue} as the current state of this relationship. This will support updating
      * any existing relationship (_id is present) and remove any relationship not present in the value from the
      * repository.
      *
@@ -207,7 +207,7 @@ public abstract class RelationshipProvider {
      * @return A promise containing a JsonValue of the persisted relationship(s) for the given resourceId or
      *         ResourceException if an error occurred
      */
-    public abstract Promise<JsonValue, ResourceException> persistJson(final Context context,
+    public abstract Promise<JsonValue, ResourceException> setRelationshipValueForResource(final Context context,
             final String resourceId, final JsonValue value);
 
     /**
