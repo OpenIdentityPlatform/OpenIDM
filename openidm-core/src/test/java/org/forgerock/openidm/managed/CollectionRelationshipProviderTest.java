@@ -38,7 +38,7 @@ public class CollectionRelationshipProviderTest {
 //
 //    @Test
 //    public void testReplace() throws ResourceException {
-//        assertThat(provider.fetchJson(null, "testId").getOrThrowUninterruptibly().size()).isZero();
+//        assertThat(provider.getRelationshipValueForResource(null, "testId").getOrThrowUninterruptibly().size()).isZero();
 //
 //    }
 //

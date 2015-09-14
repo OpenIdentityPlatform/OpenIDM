@@ -18,7 +18,6 @@ package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -85,7 +84,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
 
     /** {@inheritDoc} */
     @Override
-    public Promise<JsonValue, ResourceException> fetchJson(final Context context, final String resourceId) {
+    public Promise<JsonValue, ResourceException> getRelationshipValueForResource(final Context context, final String resourceId) {
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest("");
             queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
@@ -115,7 +114,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
     // create/update relationship references. Update if we have UUIDs
     // delete all relationships not in this array
     @Override
-    public Promise<JsonValue, ResourceException> persistJson(Context context, String resourceId, JsonValue value) {
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, JsonValue value) {
         value.expect(List.class);
 
         // Set of relation ids for updating (don't delete)
@@ -196,7 +195,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
      */
     private Promise<JsonValue, ResourceException> clearNotIn(final Context context, final String resourceId,
             final Set<String> relationshipsToKeep) {
-        return fetchJson(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
+        return getRelationshipValueForResource(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
             @Override
             public Promise<JsonValue, ResourceException> apply(JsonValue existingRelationships) throws ResourceException {
                 final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
@@ -232,7 +231,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
          * FIXME - Performance here is terrible. We read every relationship just to get the id to delete.
          *         Need a deleteByQueryFilter() to remove all relationships for a given firstId
          */
-        return fetchJson(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
+        return getRelationshipValueForResource(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
             @Override
             public Promise<JsonValue, ResourceException> apply(JsonValue existing) throws ResourceException {
                 final List<Promise<ResourceResponse, ResourceException>> deleted = new ArrayList<>();

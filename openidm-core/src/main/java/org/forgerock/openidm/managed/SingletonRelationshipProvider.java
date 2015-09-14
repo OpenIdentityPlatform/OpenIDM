@@ -76,7 +76,7 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
 
     /** {@inheritDoc} */
     @Override
-    public Promise<JsonValue, ResourceException> fetchJson(Context context, String resourceId) {
+    public Promise<JsonValue, ResourceException> getRelationshipValueForResource(Context context, String resourceId) {
         try {
             return newResultPromise(fetch(context, resourceId).getContent());
         } catch (NotFoundException e) {
@@ -119,7 +119,7 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
      * @return The persisted instance of {@code value}
      */
     @Override
-    public Promise<JsonValue, ResourceException> persistJson(Context context, String resourceId, JsonValue value) {
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, JsonValue value) {
         if (value != null && value.isNotNull()) {
             try {
                 final JsonValue id = value.get(FIELD_PROPERTIES.child("_id"));
@@ -160,7 +160,7 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> clear(final Context context, final String resourceId) {
-        return fetchJson(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
+        return getRelationshipValueForResource(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
             @Override
             public JsonValue apply(JsonValue jsonValue) throws ResourceException {
                 return deleteInstance(context, jsonValue.get("_id").asString(), Requests.newDeleteRequest(""))
