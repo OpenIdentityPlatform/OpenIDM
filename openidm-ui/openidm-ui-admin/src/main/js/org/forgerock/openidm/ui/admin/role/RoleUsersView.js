@@ -32,30 +32,58 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/openidm/ui/common/util/JQGridUtil",
+    "backgrid",
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
-    "jqgrid"
-], function($, _, Handlebars, AbstractView, eventManager, constants, cookieHelper, JQGridUtil, resourceDelegate, messagesManager) {
+    "org/forgerock/commons/ui/common/main/AbstractModel",
+    "org/forgerock/commons/ui/common/main/AbstractCollection",
+    "backgrid-paginator",
+    "backgrid-selectall"
+], function(
+        $, 
+        _, 
+        Handlebars, 
+        AbstractView, 
+        eventManager, 
+        constants, 
+        cookieHelper, 
+        Backgrid, 
+        BackgridUtils,
+        resourceDelegate, 
+        messagesManager,
+        AbstractModel,
+        AbstractCollection) {
     var RoleUsersView = AbstractView.extend({
         element: "#role-users",
         template: "templates/admin/role/RoleUsersViewTemplate.html",
         noBaseTemplate: true,
+        model: {},
 
         events: {
             "click .actionBtn": "performAction"
         },
 
         reloadGrid: function(event){
-            event.preventDefault();
-            $(this.grid_id_selector).trigger('reloadGrid');
+            if(event) {
+                event.preventDefault();
+            }
+            this.model.users.fetch();
         },
         getURL: function(){
             return "/" + constants.context + "/managed/user";
         },
         getCols: function(){
-            var prom = $.Deferred(),
-                args = _.clone(this.data.args,true);
+            var _this = this,
+                prom = $.Deferred(),
+                args = _.clone(this.data.args,true),
+                selectCol = {
+                    name: "",
+                    cell: "select-row",
+                    headerCell: "select-all",
+                    sortable: false,
+                    editable: false
+                };
 
             args[1] = "user";
 
@@ -68,21 +96,33 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                 cols.push({
                     "name": "hasRole",
                     "label": "Has Role",
-                    "width": 100,
-                    "search": false,
-                    "sortable": false,
-                    "align": "center"
+                    "cell": Backgrid.Cell.extend({
+                        className: "checkMarkCell",
+                        render: function () {
+                            if(_.indexOf(this.model.get("roles"), "managed/role/" + _this.data.roleId) > -1) {
+                                this.$el.html('<i class="fa fa-check"></i>');
+                            } else {
+                                this.$el.html("");
+                            }
+                            return this;
+                        }
+                    }),
+                    sortable: false,
+                    editable: false
                 });
 
                 if(schema){
                     _.each(schema.properties, _.bind(function(col,colName){
-                        if(col.searchable || colName === "roles"){
+                        if(col.searchable){
                             unorderedCols.push(
                                     {
                                         "name": colName,
                                         "label": col.title || colName,
-                                        "formatter": Handlebars.Utils.escapeExpression,
-                                        "hidden": colName === "roles"
+                                        "headerCell": BackgridUtils.FilterHeaderCell,
+                                        "cell": "string",
+                                        "sortable": true,
+                                        "editable": false,
+                                        "sortType": "toggle"
                                     }
                             );
                         }
@@ -95,7 +135,9 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                             cols.push(col);
                         }
                     });
-
+                    
+                    cols.unshift(selectCol);
+                    
                     if (cols.length === 1) {
                         prom.resolve(unorderedCols);
                     } else {
@@ -109,8 +151,12 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
                                     cols.push(
                                             {
                                                 "name": col,
-                                                "formatter": Handlebars.Utils.escapeExpression,
-                                                "hidden": col === "_rev"
+                                                "label": col,
+                                                "headerCell": BackgridUtils.FilterHeaderCell,
+                                                "cell": "string",
+                                                "sortable": true,
+                                                "editable": false,
+                                                "sortType": "toggle"
                                             }
                                     );
                                 }
@@ -124,26 +170,8 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
 
             return prom;
         },
-        getTotal: function(){
-            var prom = $.Deferred();
-
-            //$.get(this.getURL() + '?_queryId=get-users-of-direct-role&role=' + this.data.roleId).then(
-            $.get(this.getURL() + '?_queryId=query-all-ids').then(
-                function(qry){
-                    prom.resolve(qry);
-                },
-                function(){
-                    prom.resolve({ resultCount: 0 });
-                }
-            );
-
-            return prom;
-        },
-        selectedRows: function() {
-            return this.$el.find(this.grid_id_selector).jqGrid('getGridParam','selarrrow');
-        },
         toggleActions: function() {
-            if(this.selectedRows().length === 0) {
+            if(this.data.selectedItems.length === 0) {
                 this.$el.find('.actionBtn').prop('disabled',true);
             } else {
                 this.$el.find('.actionBtn').prop('disabled',false);
@@ -156,24 +184,26 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
 
             e.preventDefault();
 
-            _.each(this.selectedRows(), _.bind(function(objectId) {
-                var rowdata = _.where(this.data.gridData.result,{ _id: objectId })[0],
+            _.each(this.data.selectedItems, _.bind(function(objectId) {
+                var rowdata = _.where(this.model.users.models,{ id: objectId })[0],
                     currentRole = "managed/role/" + this.data.roleId,
-                    hasRole = _.indexOf(rowdata.roles, currentRole) > -1,
+                    roles = rowdata.get("roles"),
+                    hasRole = _.indexOf(roles, currentRole) > -1,
                     doUpdate = false;
 
                 if(action === "remove") {
-                    rowdata.roles = _.reject(rowdata.roles,function(role) { return role === currentRole; });
+                    roles = _.reject(roles,function(role) { return role === currentRole; });
                     doUpdate = hasRole;
                     successMsg = $.t("templates.admin.RoleUsersTemplate.removeSelectedSuccess",{ roleId: this.data.role.properties.name });
                 } else {
-                    rowdata.roles.push(currentRole);
+                    roles.push(currentRole);
                     doUpdate = !hasRole;
                     successMsg = $.t("templates.admin.RoleUsersTemplate.addSelectedSuccess",{ roleId: this.data.role.properties.name });
                 }
 
                 if(doUpdate) {
-                    promArr.push(resourceDelegate.updateResource(this.data.serviceUrl, rowdata._id, rowdata));
+                    rowdata.set("roles",roles);
+                    promArr.push(rowdata.save());
                 }
             },this));
 
@@ -191,81 +221,95 @@ define("org/forgerock/openidm/ui/admin/role/RoleUsersView", [
             this.data.role = role;
             this.data.grid_id = "roleUsersViewTable";
             this.grid_id_selector = "#" + this.data.grid_id;
+            this.data.selectedItems = [];
 
-            $.when(this.getCols(), this.getTotal()).then(_.bind(function(cols, total){
-                this.data.hasData = false;
-                if(total.resultCount){
-                    this.data.hasData = true;
-                    this.parentRender(function() {
-                        var _this = this,
-                        grid_id = this.grid_id_selector,
-                        pager_id = grid_id + '_pager',
-                        rowNum = sessionStorage.getItem(this.data.grid_id + "ViewGridRows");
+            this.getCols().then(_.bind(function(cols){
+                this.parentRender(function() {
+                    
+                    this.buildUserGrid(cols);
 
-                        JQGridUtil.buildJQGrid(this, this.data.grid_id, {
-                            url: this.getURL(),
-                            width: 920,
-                            shrinkToFit: true,
-                            rowList: [10,20,50],
-                            rowNum: (rowNum) ? parseInt(rowNum, 10) : 10,
-                            sortname: (cols[1]) ? cols[1].name : cols[0].name,
-                            sortorder: 'asc',
-                            colModel: cols,
-                            pager: pager_id,
-                            multiselect: true,
-                            jsonReader : {
-                                repeatitems: false,
-                                root: function(obj){ return obj.result; },
-                                id: "_id",
-                                page: function(obj){ return _this.gridPage || 1; },
-                                total: function(obj){ return Math.ceil(total.resultCount / ((rowNum) ? rowNum : 10)); },
-                                records: function(obj){ return total.resultCount; }
-                            },
-                            beforeRequest: function(){
-                                var posted_data = $(grid_id).jqGrid('getGridParam','postData');
-                                _this.gridPage = posted_data.page;
-                            },
-                            onPaging: function(btn){
-                                if(btn === "records"){
-                                    var rows = $('.ui-pg-selbox').val();
-                                    sessionStorage.setItem(_this.data.grid_id + "ViewGridRows", rows);
-                                }
-                            },
-                            afterInsertRow: function(rowid , rowdata, rowelem) {
-                                if(_.indexOf(rowdata.roles, "managed/role/" + _this.data.roleId) > -1) {
-                                    $("#" + rowid +" td:eq(1)").html('<i class="fa fa-check"></i>');
-                                }
-                            },
-                            loadComplete: _.bind(function(data) {
-                                this.data.gridData = data;
-                            }, this),
-                            onSelectRow: _.bind(function() {
-                                this.toggleActions();
-                            }, this),
-                            onSelectAll: _.bind(function() {
-                                this.toggleActions();
-                            }, this)
-                        },
-                        {
-                            search: true,
-                            searchOperator: "sw",
-                            suppressColumnChooser: true,
-                            storageKey: this.data.grid_id,
-                            serializeGridData: function(view, posted_data){
-                                return '_id sw ""';
-                            },
-                            columnChooserOptions: { height: "auto", width: "auto" }
-                        });
-
-                        if(callback) {
-                            callback();
-                        }
-                    });
-                } else {
-                    this.parentRender(callback);
-                }
-
+                    if(callback) {
+                        callback();
+                    }
+                });
             },this));
+        },
+        buildUserGrid: function (cols) {
+            var _this = this,
+                grid_id = this.grid_id_selector,
+                url = this.getURL(),
+                pager_id = grid_id + '-paginator',
+                UserModel = AbstractModel.extend({ "url": url }),
+                UserCollection = AbstractCollection.extend({
+                    url: url,
+                    model: UserModel,
+                    state: BackgridUtils.getState(cols[1].name),
+                    queryParams: BackgridUtils.getQueryParams({
+                        _queryFilter: 'true'
+                    })
+                }),
+                userGrid,
+                paginator;
+            
+            this.model.users = new UserCollection();
+            
+            userGrid = new Backgrid.Grid({
+                className: "backgrid table table-hover",
+                emptyText: $.t("templates.admin.ResourceList.noData"),
+                columns: BackgridUtils.addSmallScreenCell(cols),
+                collection: _this.model.users,
+                row: BackgridUtils.ClickableRow.extend({
+                    callback: function(e) {
+                        var $target = $(e.target),
+                            args = _this.data.args,
+                            routeName;
+
+                        if ($target.is("input") || $target.is(".select-row-cell")) {
+                            return;
+                        }
+                        routeName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+
+                    args.push(this.model.id);
+
+                    if(this.model.id) {
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
+                    }
+                }
+                })
+            });
+
+            paginator = new Backgrid.Extension.Paginator({
+                collection: this.model.users,
+                windowSize: 0
+            });
+
+            this.$el.find(grid_id).append(userGrid.render().el);
+            this.$el.find(pager_id).append(paginator.render().el);
+            this.bindDefaultHandlers();
+
+            this.model.users.getFirstPage();
+        },
+
+        onRowSelect: function (model, selected) {
+            if (selected) {
+                if (!_.contains(this.data.selectedItems, model.id)) {
+                    this.data.selectedItems.push(model.id);
+                }
+            } else {
+                this.data.selectedItems = _.without(this.data.selectedItems, model.id);
+            }
+            this.toggleActions();
+            
+        },
+
+        bindDefaultHandlers: function () {
+            var _this = this;
+            
+            this.model.users.on("backgrid:selected", _.bind(function (model, selected) {
+                this.onRowSelect(model, selected);
+            }, this));
+
+            this.model.users.on("backgrid:sort", BackgridUtils.doubleSortFix);
         }
     });
 
