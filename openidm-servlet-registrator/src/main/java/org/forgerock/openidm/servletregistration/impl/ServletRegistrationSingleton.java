@@ -200,10 +200,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
         // Filter init params, a string to string map
         JsonValue rawInitParams = config.get("initParams");
-        Map<String, String> initParams = null;
-        if (!rawInitParams.isNull()) {
-            initParams = new HashMap<String, String>();
-        }
+        Map<String, String> initParams = new HashMap<>();
         for (String initParamKey : rawInitParams.keys()) {
             initParams.put(initParamKey, rawInitParams.get(initParamKey).asString());
         }
