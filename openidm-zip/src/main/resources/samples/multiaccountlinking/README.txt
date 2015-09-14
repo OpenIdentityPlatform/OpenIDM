@@ -152,8 +152,8 @@ following format:
 <screen> "_id" : "35d0a49d-2571-401f-b429-96c66b23a1c0",</screen>
 ++++
 
-Record the `_id` number for each user. You will use that number to
-assign desired roles for each users.
+Record the `_id` number for each user. You will use those numbers to
+assign desired roles for each user.
 
 [[multiaccount-create-roles]]
 Create New Roles for the Sample
@@ -200,7 +200,7 @@ roles:
 ++++
 
 Do record the `_id` output for the Agent and Customer roles. You will use those
-numbers
+numbers to assign desired roles for each user.
 
 NOTE: While you could use `PUT` to create roles with descriptive names,
 we recommend that you use `POST` to create roles with immutable IDs.
@@ -307,7 +307,7 @@ This is a good moment to take a step back, to see how this sample works, based
 on custom options in the `sync.json` configuration file.
 
 OpenIDM defines mappings between source and target accounts in the
-`sync.json` file. This table allows you to create a link between one source
+`sync.json` file, which allows you to create a link between one source
 entry and multiple target entries using a concept known as a "link qualifier,"
 which enables one-to-many relationships in mappings and policies.
 
@@ -421,7 +421,7 @@ exist on the target system.
 ++++
 
 The structure for the correlation query specifies one of two link qualifiers:
-insured or agent) For each link qualifier, the correlation query
+insured or agent. For each link qualifier, the correlation query
 defines a script that verifies if the subject `dn` belongs in a specific
 container. For this sample, the container (`ou`) may be Customers or
 Contractors.
