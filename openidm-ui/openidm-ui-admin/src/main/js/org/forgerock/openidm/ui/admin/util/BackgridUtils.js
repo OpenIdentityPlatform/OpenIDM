@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
         return {
             _sortKeys: this.sortKeys,
             _queryFilter: function () {
-                return obj.queryFilter.call(this, data._queryFilter);
+                return obj.queryFilter.call(this, { _queryFilter: data._queryFilter });
             },
             pageSize: "_pageSize",
             _pagedResultsOffset: this.pagedResultsOffset,

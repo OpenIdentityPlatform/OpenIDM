@@ -132,7 +132,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                             );
                                         } else {
                                             if(parentProp) {
-                                                colName = parentProp + "." + colName;
+                                                colName = parentProp + "/" + colName;
                                             }
                                             unorderedCols.push(
                                                     {
@@ -273,7 +273,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                     model: ResourceModel,
                     state: BackgridUtils.getState(cols[1].name),
                     queryParams: BackgridUtils.getQueryParams({
-                        _queryFilter: 'true'
+                        _queryFilter: (!this.isSystemResource) ? 'true' : '/' + cols[2].name + ' sw ""'
                     })
                 }),
                 resourceGrid,
@@ -295,7 +295,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         if ($target.is("input") || $target.is(".select-row-cell")) {
                             return;
                         }
-                        routeName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+                        routeName = (!_this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
 
                     args.push(this.model.id);
 
