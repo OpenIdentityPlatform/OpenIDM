@@ -41,7 +41,7 @@ define("config/process/CommonIDMConfig", [
                     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
                 ],
                 processDescription: function(event, router, conf, configurationDelegate) {
-                    if (conf.globalData.userComponent === "repo/internal/user" && _.isString(conf.loggedUser.password) && !ignorePassword) {
+                    if (conf.loggedUser.has("needsResetPassword") && !ignorePassword) {
                         if (typeof configurationDelegate.checkForDifferences === "function") {
                             configurationDelegate.checkForDifferences();
                         }

@@ -6,9 +6,8 @@
         "lang" : "en",
         "passwordResetLink" : "",
         "roles" : {
-            "openidm-admin" : "Administrator",
-            "openidm-authorized" : "User",
-            "openidm-tasks-manager" : "Tasks Manager"
+            "openidm-authorized": "ui-user",
+            "openidm-admin": "ui-admin"
         },
         "siteImages" : [
             "images/passphrase/mail.png",
@@ -43,12 +42,12 @@
                         {
                             "name" : "dashboard.viewProfile",
                             "icon" : "fa-user",
-                            "href" : "index.html#profile/"
+                            "href" : "#profile/details"
                         },
                         {
                             "name" : "dashboard.changePassword",
                             "icon" : "fa-lock",
-                            "event" : "dialog.EVENT_SHOW_CHANGE_SECURITY_DIALOG"
+                            "href" : "#profile/password"
                         }
                     ]
                 }

@@ -34,10 +34,9 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "UserDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/components/popup/PopupCtrl"
-], function($, _, Backbone, moment, workflowManager, eventManager, constants, conf, uiUtils, userDelegate, dateUtil, popupCtrl) {
+], function($, _, Backbone, moment, workflowManager, eventManager, constants, conf, uiUtils, dateUtil, popupCtrl) {
     var TasksMenuView = Backbone.View.extend({
 
         events: {
@@ -147,9 +146,9 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
             this.$el.show();
 
             if(category === "all") {
-                workflowManager.getAllTaskUsingEndpoint(conf.loggedUser._id, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getAllTaskUsingEndpoint(conf.loggedUser.id, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             } else if(category === "assigned") {
-                workflowManager.getMyTaskUsingEndpoint(conf.loggedUser._id, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getMyTaskUsingEndpoint(conf.loggedUser.id, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             }
         },
 
@@ -248,19 +247,19 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
                     for(i = 0; i < task.usersToAssign.users.length; i++) {
                         user = task.usersToAssign.users[i];
 
-                        if($(target).find("option[value='"+ user.username +"']").length === 0 && user.username !== conf.loggedUser.userName) {
+                        if($(target).find("option[value='"+ user.username +"']").length === 0 && user.username !== conf.loggedUser.get("userName")) {
                             $(target).append('<option value="'+ user.username +'">'+ user.displayableName +'</option');
                         }
                     }
                 }
 
-                if(conf.loggedUser.userName === assignedUser) {
+                if(conf.loggedUser.get("userName") === assignedUser) {
                     $(target).val('me');
 
-                    if(conf.loggedUser.givenName) {
-                        $(target).find('option[value=me]').html(conf.loggedUser.givenName + ' ' + conf.loggedUser.familyName);
+                    if(conf.loggedUser.has("givenName")) {
+                        $(target).find('option[value=me]').html(conf.loggedUser.get("givenName") + ' ' + conf.loggedUser.get("sn"));
                     } else {
-                        $(target).find('option[value=me]').html(conf.loggedUser.userName);
+                        $(target).find('option[value=me]').html(conf.loggedUser.get("userName"));
                     }
                 } else if(assignedUser !== "null") {
                     $(target).val(assignedUser);
@@ -294,7 +293,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
             assignee = $(event.target).parent().parent().find("input[name=assignedUser]").val();
 
             if(newAssignee === "me") {
-                newAssignee = conf.loggedUser.userName;
+                newAssignee = conf.loggedUser.get("userName");
             }
 
             if(!assignee) {
@@ -306,7 +305,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
                     $(event.target).parent().parent().find("input[name=assignedUser]").val(newAssignee);
                     eventManager.sendEvent("refreshMyTasksMenu");
                 }, this), function() {
-                    if(assignee === conf.loggedUser.userName) {
+                    if(assignee === conf.loggedUser.get("userName")) {
                         $(event.target).val("me");
                     } else {
                         $(event.target).val(assignee);

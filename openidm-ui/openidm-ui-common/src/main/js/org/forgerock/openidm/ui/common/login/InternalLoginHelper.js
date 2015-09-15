@@ -26,35 +26,27 @@
 
 define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
     "underscore",
-    "AuthnDelegate",
+    "org/forgerock/openidm/ui/common/UserModel",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"
-], function (_, authnDelegate, eventManager, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, amLoginUtils) {
+], function (_, UserModel, eventManager, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, amLoginUtils) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
-        return authnDelegate.login(params.userName, params.password, {
-                "forbidden": {
-                    status: "403"
-                },
-                "unauthorized": {
-                    status: "401",
-                    message: "authenticationFailed"
-                }
-            }).then(function(user) {
-                conf.globalData.userComponent = user.component;
-
-                if (successCallback) {
-                    successCallback(user);
-                }
-
-                return user;
-            }, errorCallback);
+        return UserModel.login(params.userName, params.password).then(successCallback, function (xhr) {
+            var reason = xhr.responseJSON.reason;
+            if (reason === "Unauthorized") {
+                reason = "authenticationFailed";
+            }
+            if (errorCallback) {
+                errorCallback(reason);
+            }
+        });
     };
 
     obj.logout = function (successCallback, errorCallback) {
@@ -71,22 +63,7 @@ define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
     };
 
     obj.getLoggedUser = function(successCallback, errorCallback) {
-        return authnDelegate.getProfile({
-            "forbidden": {
-                status: "403"
-            },
-            "unauthorized": {
-                status: "401"
-            }
-        }).then(function(user) {
-            conf.globalData.userComponent = user.component;
-
-            if (successCallback) {
-                successCallback(user);
-            }
-
-            return user;
-        }, function(e) {
+        return UserModel.getProfile().then(successCallback, function(e) {
             if(e.responseJSON && e.responseJSON.detail && e.responseJSON.detail.failureReasons && e.responseJSON.detail.failureReasons.length){
                 if(_.where(e.responseJSON.detail.failureReasons,{ isAlive: false }).length){
                     conf.globalData.authenticationUnavailable = true;

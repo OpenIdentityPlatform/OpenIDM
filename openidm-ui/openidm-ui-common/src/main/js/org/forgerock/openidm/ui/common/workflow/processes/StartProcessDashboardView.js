@@ -49,7 +49,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboard
             if (args && args[0] && args[0] !== '') {
                 processId = args[0];
             }
-            workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser._id, _.bind(function(processDefinitions) {
+            workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser.id, _.bind(function(processDefinitions) {
                 var i;
                 this.data.processDefinitions = processDefinitions;
 

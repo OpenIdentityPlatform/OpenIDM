@@ -24,7 +24,7 @@
 
 /*global define */
 
-define("org/forgerock/openidm/ui/admin/delegates/InfoDelegate", [
+define("org/forgerock/openidm/ui/common/delegates/InfoDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(constants, AbstractDelegate) {

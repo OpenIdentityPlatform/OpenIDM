@@ -40,7 +40,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/customview/SendNotifi
         prepareData: function(callback) {
              var nTypes, notificationType;
              _.extend(this.data, this.processDefinition);
-             this.data.loggedUser = conf.loggedUser;
+             this.data.loggedUser = conf.loggedUser.toJSON();
 
              nTypes = {};
              for (notificationType in notificationViewHelper.notificationTypes) {

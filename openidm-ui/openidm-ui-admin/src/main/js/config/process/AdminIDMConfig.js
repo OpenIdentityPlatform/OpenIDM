@@ -119,7 +119,7 @@ define("config/process/AdminIDMConfig", [
                 dependencies: [
                     "org/forgerock/commons/ui/common/components/Navigation",
                     "org/forgerock/commons/ui/common/main/Configuration",
-                    "org/forgerock/openidm/ui/admin/components/Footer"
+                    "org/forgerock/openidm/ui/common/components/Footer"
                 ],
                 processDescription: function(event, navigation, conf,footer) {
                     navigation.init();

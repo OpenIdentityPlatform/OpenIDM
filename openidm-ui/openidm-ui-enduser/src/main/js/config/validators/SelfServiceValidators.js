@@ -25,9 +25,8 @@
 /*global define */
 
 define("config/validators/SelfServiceValidators", [
-    "jquery",
-    "UserDelegate"
-], function($, userDelegate) {
+    "jquery"
+], function($) {
     var obj = {
             "required_long": {
                 "name": "Not empty number",

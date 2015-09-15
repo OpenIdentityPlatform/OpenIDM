@@ -27,14 +27,12 @@
 require.config({
     map: {
         "*" : {
-            "UserDelegate": "org/forgerock/openidm/ui/common/util/UserDelegate",
+            "Footer": "org/forgerock/openidm/ui/common/components/Footer",
             "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
-            "AuthnDelegate": "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
             "LoginView": "org/forgerock/openidm/ui/LoginView",
-            "UserProfileView": "org/forgerock/openidm/ui/profile/UserProfileView",
+            "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
             "RegisterView": "org/forgerock/openidm/ui/registration/UserRegistrationView",
-            "ChangeSecurityDataDialog": "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog",
             // TODO: Remove this when there are no longer any references to the "underscore" dependency
             "underscore": "lodash"
         }

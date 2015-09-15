@@ -27,9 +27,8 @@
 require.config({
     map: {
         "*" : {
-            "UserDelegate": "org/forgerock/openidm/ui/common/util/UserDelegate",
+            "Footer": "org/forgerock/openidm/ui/common/components/Footer",
             "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
-            "AuthnDelegate": "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
             "LoginView": "org/forgerock/openidm/ui/admin/login/LoginView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
             // TODO: Remove this when there are no longer any references to the "underscore" dependency

@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,34 +23,27 @@
  */
 
 /*global define */
-
-define("org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegate", [
+define("org/forgerock/openidm/ui/common/components/Footer", [
     "jquery",
-    "underscore",
+    "lodash",
+    "org/forgerock/commons/ui/common/components/Footer",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
-    "org/forgerock/commons/ui/common/components/Navigation"
-], function($, _, conf, commonSiteConfigurationDelegate, nav) {
+    "org/forgerock/openidm/ui/common/delegates/InfoDelegate"
+], function($, _, Footer, Configuration, InfoDelegate) {
+    function isAdmin() {
+        return Configuration.loggedUser.has("roles") && _.indexOf(Configuration.loggedUser.get("roles"), "ui-admin") > -1;
+    }
 
-    var obj = commonSiteConfigurationDelegate;
-
-    obj.adminCheck = false;
-
-    obj.checkForDifferences = function(){
-        if(conf.loggedUser && _.contains(conf.loggedUser.get("roles"),"ui-admin") && !obj.adminCheck){
-            nav.configuration.userBar.unshift({
-                "id": "admin_link",
-                "href": "/admin",
-                "i18nKey": "openidm.admin.label"
+    var Component = Footer.extend({
+        getVersion: function() {
+            return InfoDelegate.getVersion().then(function(data) {
+                return data.productVersion + " (" + $.t("openidm.admin.revision") + ": " + data.productRevision + ")";
             });
-
-            obj.adminCheck = true;
+        },
+        showVersion: function() {
+            return isAdmin();
         }
+    });
 
-        nav.reload();
-        return $.Deferred().resolve();
-    };
-
-
-    return obj;
+    return new Component();
 });
