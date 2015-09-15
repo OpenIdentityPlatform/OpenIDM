@@ -28,9 +28,8 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/customview/ApplicationAcc
     "js2form",
     "org/forgerock/openidm/ui/common/workflow/tasks/AbstractTaskForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
-    "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(js2form, AbstractTaskForm, DateUtil, userDelegate, conf) {
+], function(js2form, AbstractTaskForm, DateUtil, conf) {
     var ApplicationAcceptanceTask = AbstractTaskForm.extend({
         template: "templates/workflow/tasks/customview/ApplicationAcceptanceTemplate.html",
 

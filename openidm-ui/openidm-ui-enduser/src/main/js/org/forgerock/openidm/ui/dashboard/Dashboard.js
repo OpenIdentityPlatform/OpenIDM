@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
             this.data = {};
 
             if (conf.loggedUser) {
-                var roles = conf.loggedUser.roles;
+                var roles = conf.loggedUser.get('roles');
 
                 this.model.dashboard = conf.globalData.dashboard;
 

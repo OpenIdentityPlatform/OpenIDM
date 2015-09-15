@@ -27,57 +27,10 @@
 define("config/process/IDMConfig", [
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function($, _, constants, eventManager) {
     var obj = [
-        {
-            startEvent: constants.EVENT_PROFILE_DELETE_USER_REQUEST,
-            description: "",
-            dependencies: [
-                "UserDelegate",
-                "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/main/Router"
-            ],
-            processDescription: function(event, userDelegate, globalConfiguration, router) {
-                if(event.userId === globalConfiguration.loggedUser._id) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "cannotDeleteYourself");
-                    if(event.errorCallback) { event.errorCallback(); }
-                    return;
-                }
-
-                userDelegate.deleteEntity(event.userId, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleted");
-                    router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
-                }, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleteError");
-                    router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
-                });
-            }
-        },
-        {
-            startEvent: constants.EVENT_USER_LIST_DELETE_USER_REQUEST,
-            description: "",
-            dependencies: [
-                "UserDelegate",
-                "org/forgerock/commons/ui/common/main/Configuration"
-            ],
-            processDescription: function(event, userDelegate, globalConfiguration) {
-                if(event.userId === globalConfiguration.loggedUser._id) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "cannotDeleteYourself");
-                    if(event.errorCallback) { event.errorCallback();}
-                    return;
-                }
-
-                userDelegate.deleteEntity(event.userId, function() {
-                    if(event.successCallback) { event.successCallback(); }
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleted");
-                }, function() {
-                    if(event.errorCallback) { event.errorCallback(); }
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleteError");
-                });
-            }
-        },
         {
             startEvent: constants.EVENT_NOTIFICATION_DELETE_FAILED,
             description: "Error in deleting notification",
@@ -92,16 +45,6 @@ define("config/process/IDMConfig", [
             dependencies: [ ],
             processDescription: function(event) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
-            }
-        },
-        {
-            startEvent: constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
-            override: true,
-            dependencies: [
-                "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
-            ],
-            processDescription: function (event, ChangeSecurityDataDialog) {
-                ChangeSecurityDataDialog.render(event);
             }
         },
         {

@@ -227,6 +227,11 @@
             "enterNewPasswordToChange" : "Please enter a new password below."
         },
         "user" : {
+            "ConfirmPasswordDialogTemplate" : {
+                "title" : "Current Password",
+                "explanation1" : "Changing the following attributes requires re-authentication: ",
+                "explanation2" : "Please confirm your current password to continue."
+            },
             "LoginDialog" : {
                 "refreshOnLogin" : "Reload"
             },
@@ -1352,7 +1357,8 @@
             "username" : "Username",
             "emailAddress" : "Email address",
             "givenName" : "First Name",
-            "familyName" : "Last Name",
+            "sn" : "Last Name",
+            "basicInfo": "Basic Info",
             "changePassword" : "Change password",
             "accountStatus" : "Account status",
             "active" : "Active",
@@ -1376,6 +1382,7 @@
             "OAuth" : "OAuth",
             "createNewUser" : "Create New User",
             "password" : "Password",
+            "currentPassword" : "Current Password",
             "confirmPassword" : "Retype Password",
             "newPassword" : "New password",
             "oldPassword" : "Old password",

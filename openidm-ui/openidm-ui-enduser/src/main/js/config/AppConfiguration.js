@@ -49,7 +49,6 @@ define("config/AppConfiguration", [
                     processConfigurationFiles: [
                         "config/process/IDMConfig",
                         "config/process/CommonIDMConfig",
-                        "config/process/UserConfig",
                         "config/process/CommonConfig"
                     ]
                 }
@@ -95,8 +94,8 @@ define("config/AppConfiguration", [
                     },
                     userBar: [
                         {
-                            "id": "security_link",
-                            "event" : constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
+                            "id": "change_password",
+                            "href": "#profile/password",
                             "i18nKey": "common.user.changePassword"
                         },
                         {
@@ -157,7 +156,6 @@ define("config/AppConfiguration", [
                     validators: { },
                     loader: [
                         {"validators":"config/validators/SelfServiceValidators"},
-                        {"validators":"config/validators/UserValidators"},
                         {"validators":"config/validators/CommonValidators"}
                     ]
                 }

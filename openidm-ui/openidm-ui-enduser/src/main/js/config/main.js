@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
@@ -34,12 +34,10 @@ define("config/main", [
     "./messages/SelfServiceMessages",
     "./messages/UserMessages",
     "./validators/CommonValidators",
-    "./validators/UserValidators",
     "./validators/SelfServiceValidators",
     "./AppConfiguration",
     "./process/CommonIDMConfig",
     "./process/IDMConfig",
     "./process/CommonConfig",
-    "./process/UserConfig",
     "./errorhandlers/CommonErrorHandlers"
 ]);
