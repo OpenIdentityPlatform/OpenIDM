@@ -24,32 +24,30 @@
 
 /*global define */
 
-define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
+define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate",
     "org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget",
-    "org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget",
-    "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget",
-    "org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget"
+    "org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget",
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidget",
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget"
 ], function($, _,
-            AbstractView,
+            AdminAbstractView,
             eventManager,
             constants,
             conf,
-            SystemHealthDelegate,
             MemoryUsageWidget,
-            ReconProcessesWidget,
             CPUUsageWidget,
-            QuickStartWidget,
-            FullHealthWidget) {
+            FullHealthWidget,
+            MappingReconResultsWidget,
+            ResourceListWidget) {
     var dwlInstance = {},
-        DashboardWidgetLoader = AbstractView.extend({
+        DashboardWidgetLoader = AdminAbstractView.extend({
             template: "templates/dashboard/DashboardWidgetLoaderTemplate.html",
             noBaseTemplate: true,
             model: {
@@ -58,45 +56,41 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
             data: {
 
             },
-            events: {
-
-            },
             /*
              Available Widgets:
-                lifeCycleMemoryHeap - Current heap memory
-                lifeCycleMemoryNonHeap - Current none heap memory
-                cpuUsage - Shows current CPU usage of the system
-                systemHealthFull - Load full widget of health information
-                reconUsage - Displays current recons in process. Polls every few seconds with updated information.
-                quickStart - Widget displaying quick start cards to help users get start with core functionality
+             lifeCycleMemoryHeap - Current heap memory
+             lifeCycleMemoryNonHeap - Current none heap memory
+             systemHealthFull - Load full widget of health information
+             reconUsage - Displays current recons in process. Polls every few seconds with updated information.
+             cpuUsage - Shows current CPU usage of the system
+             lastRecon - Widget to display the last recon per mapping
+             barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
+             resourceList - Displays the top 4 resources for connectors, mappings, and managed objects
              */
             render: function(args, callback) {
                 this.element = args.element;
 
                 this.model.widgetList = {
                     lifeCycleMemoryBoth: {
-                        name : $.t("dashboard.memoryUsageBoth"),
-                        icon : "fa-heartbeat"
+                        name : $.t("dashboard.memoryUsageBoth")
                     },
                     lifeCycleMemoryHeap: {
-                        name : $.t("dashboard.memoryUsageHeap"),
-                        icon : "fa-heartbeat"
+                        name : $.t("dashboard.memoryUsageHeap")
                     },
                     lifeCycleMemoryNonHeap: {
-                        name : $.t("dashboard.memoryUsageNonHeap"),
-                        icon : "fa-heartbeat"
+                        name : $.t("dashboard.memoryUsageNonHeap")
                     },
-                    reconUsage: {
-                        name: $.t("dashboard.reconProcesses"),
-                        icon: "fa-eye"
+                    systemHealthFull : {
+                        name : $.t("dashboard.systemHealth")
                     },
                     cpuUsage: {
-                        name: $.t("dashboard.cpuUsage"),
-                        icon : "fa-pie-chart"
+                        name: $.t("dashboard.cpuUsage")
                     },
-                    quickStart: {
-                        name: "Quick Start",
-                        icon: "fa-key"
+                    lastRecon : {
+                        name : $.t("dashboard.lastReconciliation")
+                    },
+                    resourceList : {
+                        name : $.t("dashboard.resources")
                     }
                 };
 
@@ -108,12 +102,8 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
 
                     switch(args.widget.type) {
                         case "lifeCycleMemoryHeap":
-                        case "lifeCycleMemoryBoth":
                         case "lifeCycleMemoryNonHeap":
                             this.model.widget = MemoryUsageWidget.generateWidget(args, callback);
-                            break;
-                        case "reconUsage":
-                            this.model.widget = ReconProcessesWidget.generateWidget(args, callback);
                             break;
                         case "cpuUsage":
                             this.model.widget = CPUUsageWidget.generateWidget(args, callback);
@@ -121,12 +111,11 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
                         case "systemHealthFull":
                             this.model.widget = FullHealthWidget.generateWidget(args, callback);
                             break;
-                        case "quickStart":
-                            this.$el.find(".dropdown-toggle").hide();
-
-                            args.icons = args.widget.icons;
-
-                            this.model.widget = QuickStartWidget.generateWidget(args, callback);
+                        case "lastRecon":
+                            this.model.widget = MappingReconResultsWidget.generateWidget(args, callback);
+                            break;
+                        case "resourceList":
+                            this.model.widget = ResourceListWidget.generateWidget(args, callback);
                             break;
                     }
                 }, this));

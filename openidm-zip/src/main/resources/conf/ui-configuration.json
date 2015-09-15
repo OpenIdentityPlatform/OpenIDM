@@ -53,6 +53,23 @@
                     ]
                 }
             ]
+        },
+        "adminDashboard" : {
+            "widgets" : [
+                {
+                    "type": "lastRecon",
+                    "size": "large",
+                    "barchart": false
+                },
+                {
+                    "type": "systemHealthFull",
+                    "size": "large"
+                },
+                {
+                    "type": "resourceList",
+                    "size": "large"
+                }
+            ]
         }
     }
 }

@@ -40,79 +40,94 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
             template: "templates/dashboard/widget/DashboardSingleWidgetTemplate.html",
             model: {
                 cpuChart: null,
-                chartX: 20,
-                chartY: 40,
-                chartWidth: 460,
-                chartHeight: 310,
-                legendX: 20,
-                legendY: 20,
-                legendWidth: 90,
-                legendHeight: 200,
+                chartX: 0,
+                chartY: 0,
+                chartWidth: "100%",
+                chartHeight: 180,
                 drawTime: 1000,
                 canvasWidth: "100%",
-                canvasHeight: 390
-            },
-            events: {
-
+                canvasHeight: 190,
+                warningThreshold: "60",
+                warningChartColor: "#f0ad4e",
+                dangerThreshold: "85",
+                dangerChartColor: "#a94442",
+                defaultChartColor: "#519387"
             },
             data: {
 
             },
             render: function(args, callback) {
                 this.element = args.element;
-                this.data.widgetType = args.type;
-                this.model.menu = args.menu;
+                this.data.widgetTitle = $.t("dashboard.cpuUsage");
                 this.cpuUsageWidget(callback);
             },
             cpuUsageWidget: function(callback) {
+                $(window).unbind("resize.cpuChart");
+
                 this.parentRender(_.bind(function(){
                     this.model.currentData = [];
+
                     SystemHealthDelegate.getOsHealth().then(_.bind(function(widgetData){
+                        this.$el.find(".dashboard-details").show();
 
-                        if(this.model.menu) {
-                            this.model.menu.find(".refresh").show();
-
-                            this.model.menu.find(".refresh").bind("click", _.bind(function(){
-                                this.refreshPoll();
-                            }, this));
-                        }
-
-                        var svg = dimple.newSvg(this.$el[0], this.model.canvasWidth, this.model.canvasHeight),
+                        var svg = dimple.newSvg(this.$el.find(".widget-chart")[0], this.model.canvasWidth, this.model.canvasHeight),
                             pieChart,
                             cpuData = [
                                 {
-                                    "memory" : widgetData.availableProcessors,
+                                    "memory" : widgetData.availableProcessors - widgetData.systemLoadAverage,
                                     "type" : "Free"
                                 },
                                 {
                                     "memory" : widgetData.systemLoadAverage,
                                     "type" : "Used"
                                 }
-                            ];
+                            ],
+                            percent = Math.round((widgetData.systemLoadAverage / widgetData.availableProcessors) * 100),
+                            color = this.model.defaultChartColor,
+                            percentClass = "text-primary";
 
                         this.model.cpuChart =  new dimple.chart(svg, cpuData);
                         this.model.cpuChart.setBounds(this.model.chartX, this.model.chartY, this.model.chartWidth, this.model.chartHeight);
                         this.model.cpuChart.addMeasureAxis("p", "memory");
 
-                        pieChart = this.model.cpuChart.addSeries("type", dimple.plot.pie);
-                        pieChart.addOrderRule("type");
-                        //pieChart.innerRadius = "50%";
+                        //
+                        if(percent > this.model.dangerThreshold) {
+                            color = this.model.dangerChartColor;
+                            percentClass = "danger";
+                        } else if (percent > this.model.warningThreshold) {
+                            color = this.model.warningChartColor;
+                            percentClass = "warning";
+                        }
 
-                        this.model.cpuChart.addLegend(this.model.legendX, this.model.legendY, this.model.legendWidth, this.model.legendHeight, "left");
+                        this.model.cpuChart.assignColor("Free", "#dddddd", "#f7f7f7");
+                        this.model.cpuChart.assignColor("Used", color, "#f7f7f7");
+
+                        pieChart = this.model.cpuChart.addSeries("type", dimple.plot.pie);
+                        pieChart.addOrderRule("type", true);
+                        pieChart.innerRadius = "85%";
+
+                        pieChart.addEventHandler("mouseover", _.noop);
 
                         this.model.cpuChart.draw();
 
-                        window.onresize = _.bind(function () {
-                            if(this.model.cpuChart) {
-                                this.model.cpuChart.draw(0, true);
-                            }
-                        }, this);
+                        //widget-header
+                        this.$el.find(".widget-header").toggleClass("donut-header", true);
+                        this.$el.find(".widget-header").html('<div class="header">' +'USED' +'</div>'
+                            + '<div class="percent ' +percentClass +'">' +percent +'%</div>');
+
+                        this.$el.find(".widget-header").show();
 
                         if (callback) {
                             callback();
                         }
                     }, this));
                 }, this));
+            },
+
+            resize: function() {
+                if(this.model.cpuChart) {
+                    this.model.cpuChart.draw(0, true);
+                }
             },
 
             cpuUsageLoad: function() {
@@ -132,10 +147,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
                         this.model.cpuChart.draw(this.model.drawTime);
                     }
                 }, this));
-            },
-
-            refreshPoll: function() {
-                this.cpuUsageLoad();
             }
         });
 

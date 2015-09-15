@@ -1,17 +1,51 @@
 {
     "dashboard" : {
         "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
-        "memoryUsageHeap" : "Memory Usage (Heap)",
-        "memoryUsageNonHeap" : "Memory Usage (NonHeap)",
+        "memoryUsageHeap" : "Memory Usage (JVM Heap)",
+        "memoryUsageNonHeap" : "Memory Usage (JVM NonHeap)",
         "reconProcesses" : "Recon Processes",
         "cpuUsage" : "CPU Usage",
+        "resources" : "Resources",
+        "lastReconciliation" : "Last Reconciliation",
+        "systemHealth" : "System Health",
         "loading" : "Loading...",
+        "used" : "USED",
         "dashboard" : "Dashboard",
         "pause" : "Pause",
         "start" : "Start",
         "refresh" : "Refresh",
         "viewProfile" : "View Profile",
-        "changePassword" : "Change Password"
+        "changePassword" : "Change Password",
+        "reconWidget" : {
+            "editMapping" : "Edit Mapping",
+            "success" : "SUCCESS",
+            "failure" : "FAILURE",
+            "duration" : "DURATION",
+            "completion" : "completion",
+            "entries" : "entries",
+            "noReconcileTitle" : "Reconcile Data",
+            "noReconcileMessage" : "Run a reconciliation to synchronize identities in a mapping.",
+            "selectAMapping" : "Select a mapping",
+            "getStartedTitle" : "Get Started!",
+            "getStartedMessage" : "Set up connectors and mappings to synchronize identity data.",
+            "newMapping" : "New Mapping",
+            "newConnector" : "New Connector"
+        },
+        "resourceWidget" : {
+            "viewAll" : "View All",
+            "connectors" : "Connectors",
+            "noConnectorsTitle" : "No connectors have been added.",
+            "noConnectorsMessage" : "Create connections to identity data.",
+            "newConnector" : "New Connector",
+            "mappings" : "Mappings",
+            "noMappingTitle" : "No mappings have been added.",
+            "noMappingMessage" : "Set up a mapping to reconcile identities from a source to a target.",
+            "newMapping" : "New Mapping",
+            "managedObjects" : "Managed Objects",
+            "noManagedObjectTitle" : "No managed objects have been added.",
+            "noManagedObjectMessage" : "Configure data objects to be managed by OpenIDM.",
+            "newManagedObject" : "New Managed Object"
+        }
     },
     "config" : {
         "dates" : {

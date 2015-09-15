@@ -22,49 +22,58 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global define, window */
 
-define("org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget", [
+define("org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function($, _, AbstractView, eventManager, constants, conf) {
+    "org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget"
+], function($, _,
+            AbstractView,
+            MemoryUsageWidget,
+            CPUUsageWidget) {
     var widgetInstance = {},
         Widget = AbstractView.extend({
             noBaseTemplate: true,
-            template: "templates/dashboard/widget/QuickStartWidgetTemplate.html",
-            model: {
-            },
-            events: {
-
-            },
-            data: {
+            template: "templates/dashboard/widget/DashboardTripleWidgetTemplate.html",
+            model : {
 
             },
             render: function(args, callback) {
                 this.element = args.element;
-                this.data.cards = args.widget.cards;
 
-                _.each(this.data.cards, function(card) {
-                    card.name = $.t(card.name);
-                    card.uid = card.name.split(" ").join("");
+                this.parentRender(_.bind(function(){
+                    this.model.cpuWidget = CPUUsageWidget.generateWidget({
+                        element: this.$el.find(".left-chart"),
+                        widget: args.widget
+                    });
 
-                    if(card.event) {
-                        this.events["click #" + card.uid] = function(e) {
-                            e.preventDefault();
-                            eventManager.sendEvent(card.event);
-                        };
-                    }
-                }, this);
+                    this.model.memoryHeapWidget = MemoryUsageWidget.generateWidget({
+                        element: this.$el.find(".center-chart"),
+                        widget: {
+                            type: "lifeCycleMemoryHeap"
+                        }
+                    });
 
-                this.parentRender(_.bind(function() {
+                    this.model.memoryNonHeapWidget = MemoryUsageWidget.generateWidget({
+                        element: this.$el.find(".right-chart"),
+                        widget: {
+                            type: "lifeCycleMemoryNonHeap"
+                        }
+
+                    });
+
                     if(callback) {
                         callback();
                     }
                 }, this));
+            },
+            resize : function() {
+                this.model.cpuWidget.resize();
+                this.model.memoryHeapWidget.resize();
+                this.model.memoryNonHeapWidget.resize();
             }
         });
 

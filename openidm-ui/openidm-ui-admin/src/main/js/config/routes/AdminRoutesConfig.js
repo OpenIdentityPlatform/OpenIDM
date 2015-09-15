@@ -28,6 +28,11 @@ define("config/routes/AdminRoutesConfig", [
 ], function(commonRoutes) {
 
     var obj = {
+        "dashboardView" : {
+            view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
+            role: "ui-admin",
+            url: "dashboard/"
+        },
         "connectorListView" : {
             view: "org/forgerock/openidm/ui/admin/connector/ConnectorListView",
             role: "ui-admin",
@@ -188,7 +193,7 @@ define("config/routes/AdminRoutesConfig", [
         }
     };
 
-    obj.landingPage = obj.connectorListView;
+    obj.landingPage = obj.dashboardView;
     commonRoutes["default"].role = "ui-admin";
     return obj;
 });

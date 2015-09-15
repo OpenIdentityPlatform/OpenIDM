@@ -1,0 +1,26 @@
+<div class="container">
+    <div class="page-header no-border">
+        <h1>{{t "dashboard.dashboard"}}</h1>
+    </div>
+</div>
+<div class="container">
+    <div id="dashboardWidgets" class="row">
+        {{#each dashboard.widgets}}
+            {{#equals size "x-small"}}
+                <div class="widget-holder col-sm-4"></div>
+            {{/equals}}
+
+            {{#equals size "small"}}
+                <div class="widget-holder col-sm-6"></div>
+            {{/equals}}
+
+            {{#equals size "medium"}}
+                <div class="widget-holder col-sm-8"></div>
+            {{/equals}}
+
+            {{#equals size "large"}}
+                <div class="widget-holder col-sm-12"></div>
+            {{/equals}}
+        {{/each}}
+    </div>
+</div>
