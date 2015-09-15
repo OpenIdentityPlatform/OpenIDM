@@ -66,7 +66,8 @@ require.config({
         moment: "libs/moment-2.8.1-min",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min",
-        faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min"
+        faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
+        dimple : "libs/dimple-2.1.2-min"
     },
 
     shim: {
@@ -150,6 +151,10 @@ require.config({
         },
         d3: {
             exports: "d3"
+        },
+        dimple: {
+            exports: "dimple",
+            deps: ["d3"]
         },
         bootstrap: {
             deps: ["jquery"]
