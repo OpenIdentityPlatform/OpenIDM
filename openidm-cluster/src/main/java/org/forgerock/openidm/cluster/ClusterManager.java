@@ -32,6 +32,7 @@ import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -655,8 +656,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      */
     private boolean sendEventToListeners(ClusterEvent event) {
         boolean success = true;
-        Set<String> linsterIds = new HashSet<String>(listeners.keySet());
-        for (String listenerId : linsterIds) {
+        for (String listenerId : Collections.unmodifiableSet(listeners.keySet())) {
             logger.debug("Notifying listener {} of event {} for instance {}", new Object[] {
                 listenerId, event.getType(), instanceId });
             ClusterEventListener listener = listeners.get(listenerId);

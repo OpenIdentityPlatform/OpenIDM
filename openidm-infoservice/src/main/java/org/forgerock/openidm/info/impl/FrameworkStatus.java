@@ -24,9 +24,11 @@ import org.osgi.framework.FrameworkEvent;
 public class FrameworkStatus {
 
 	/**
-     * A framework status instance
+     * A framework status instance holder
      */
-    private static FrameworkStatus instance;
+    private static class InstanceHolder {
+        private static final FrameworkStatus instance = new FrameworkStatus(-1);
+    }
     
     /**
      * An integer representing the framework status.
@@ -35,18 +37,21 @@ public class FrameworkStatus {
     private int frameworkStatus;
 
     /**
+     * Constructor
+     * 
+     * @param frameworkStatus An integer representing the framework status
+     */
+    private FrameworkStatus(int frameworkStatus) {
+        this.frameworkStatus = frameworkStatus;
+    }
+    
+    /**
      * Gets an instance of the framework status.
      *
      * @return a FrameworkStatus instance
      */
     public static synchronized FrameworkStatus getInstance() {
-        if (instance == null) {
-        	// Instantiate the instance and initialize the status to -1 
-        	// indicating that the status has not yet been set.
-            instance = new FrameworkStatus();
-            instance.setFrameworkStatus(-1);
-        }
-        return instance;
+        return InstanceHolder.instance;
     }
     
     /**
