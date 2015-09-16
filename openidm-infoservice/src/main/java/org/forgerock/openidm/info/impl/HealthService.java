@@ -126,7 +126,7 @@ public class HealthService
     /** 
      * A boolean indicating if we consider the underlying framework as started
      */
-    private volatile boolean frameworkStarted = false;
+    private static volatile boolean frameworkStarted = false;
 
     /** 
      * Flag to help in processing state during start-up. For clients to querying application state, 
@@ -143,6 +143,11 @@ public class HealthService
      * A boolean indicating if the cluster management service is enabled
      */
     private volatile boolean clusterEnabled = true;
+    
+    /**
+     * A framework status service used to store the latest framework event status.
+     */
+    private FrameworkStatusService frameworkStatusService = null;
 
     /**
      * The current state of OpenIDM
@@ -285,6 +290,9 @@ public class HealthService
         requiredServices.addAll(Arrays.asList(defaultRequiredServices));
         applyPropertyConfig();
 
+        // Get the framework status service instance
+        frameworkStatusService = FrameworkStatusService.getInstance();
+        
         // Set up tracker
         BundleContext ctx = FrameworkUtil.getBundle(HealthService.class).getBundleContext();
         tracker = initServiceTracker(ctx);
@@ -293,15 +301,19 @@ public class HealthService
         frameworkListener = new FrameworkListener() {
             @Override
             public void frameworkEvent(FrameworkEvent event) {
-                logger.debug("Handle framework event {} {}", event.getType(), event.toString());
+                final int eventType = event.getType();
+                logger.debug("Handle framework event {} {}", eventType, event.toString());
+                
+                // Store the framework event type as the framework status
+                frameworkStatusService.setFrameworkStatus(eventType);
 
-                if (event.getType() == FrameworkEvent.STARTED) {
+                if (eventType == FrameworkEvent.STARTED) {
                     logger.debug("OSGi framework started event.");
                     frameworkStarted = true;
                 }
                 // Start checking status once framework reported started
                 if (frameworkStarted) {
-                    switch (event.getType()) {
+                    switch (eventType) {
                     case FrameworkEvent.PACKAGES_REFRESHED: // fall through
                     case FrameworkEvent.STARTLEVEL_CHANGED: // fall through
                     case FrameworkEvent.WARNING: // fall trough
@@ -312,11 +324,11 @@ public class HealthService
                         checkState();
                     }
                 }
-                if (event.getType() == FrameworkEvent.STARTED) {
+                if (eventType == FrameworkEvent.STARTED) {
                     // IF it's not yet ready, give it up to max service startup
                     // time before reporting failure
                     if (!stateDetail.state.equals(AppState.ACTIVE_READY)) {
-                        scheduleCheckStartup();
+                        scheduleCheckStartup(serviceStartMax);
                     }
                 }
             }
@@ -370,6 +382,16 @@ public class HealthService
         router.addRoute(uriTemplate("recon"), new ReconInfoResourceProvider());
         router.addRoute(uriTemplate("jdbc"), new DatabaseInfoResourceProvider());
 
+        // Check if the framework has already started.  If so, schedule the start up
+        // thread that checks the state of OpenIDM.
+        if (frameworkStatusService.getFrameworkStatus() == FrameworkEvent.STARTED
+        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.PACKAGES_REFRESHED
+        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.STARTLEVEL_CHANGED
+        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.WARNING
+        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.INFO) {
+            scheduleCheckStartup(2000);
+        }
+        
         logger.info("OpenIDM Health Service component is activated.");
     }
 
@@ -412,8 +434,10 @@ public class HealthService
     /**
      * After the timeout period passes past framework start event, check that
      * the required services are present. If not, report startup error
+     * 
+     * @param delay a delay in milliseconds before checking the state.
      */
-    private void scheduleCheckStartup() {
+    private void scheduleCheckStartup(long delay) {
         Runnable command = new Runnable() {
             @Override
             public void run() {
@@ -431,7 +455,7 @@ public class HealthService
         if (scheduledExecutor.isShutdown()) {
             scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         }
-        scheduledExecutor.schedule(command, serviceStartMax, TimeUnit.MILLISECONDS);
+        scheduledExecutor.schedule(command, delay, TimeUnit.MILLISECONDS);
     }
 
     /*
@@ -465,6 +489,9 @@ public class HealthService
             clusterService.register(LISTENER_ID, this);
             clusterEnabled = clusterService.isEnabled();
             cluster = clusterService;
+            if (clusterEnabled && !cluster.isStarted()) {
+                cluster.startClusterManagement();
+            }
         }
     }
 
@@ -553,9 +580,6 @@ public class HealthService
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Required services not all started " + missingServices;
         } else if (clusterEnabled && !clusterUp) {
-            if (cluster != null && !cluster.isStarted()) {
-                cluster.startClusterManagement();
-            }
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "This node can not yet join the cluster";
         } else {
@@ -656,6 +680,10 @@ public class HealthService
         }
         if (bundleListener != null) {
             context.getBundleContext().removeBundleListener(bundleListener);
+        }
+        if (tracker != null) {
+            tracker.close();
+            tracker = null;
         }
 
         // For now we have to rely on this bundle stopping as an indicator
