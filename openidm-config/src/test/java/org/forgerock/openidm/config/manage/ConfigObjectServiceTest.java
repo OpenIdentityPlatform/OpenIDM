@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
