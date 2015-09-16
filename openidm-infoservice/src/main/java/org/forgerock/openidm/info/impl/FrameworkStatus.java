@@ -15,16 +15,18 @@
  */
 package org.forgerock.openidm.info.impl;
 
+import org.osgi.framework.FrameworkEvent;
+
 /**
- * An OSGi Framework Status Service for storing the framework status indicated
+ * A Framework Status class for storing the framework status indicated
  * by the last {@link org.osgi.framework.FrameworkEvent} event published.
  */
-public class FrameworkStatusService {
+public class FrameworkStatus {
 
 	/**
-     * A framework status service instance
+     * A framework status instance
      */
-    private static FrameworkStatusService instance;
+    private static FrameworkStatus instance;
     
     /**
      * An integer representing the framework status.
@@ -33,15 +35,15 @@ public class FrameworkStatusService {
     private int frameworkStatus;
 
     /**
-     * Gets an instance of the framework status service.
+     * Gets an instance of the framework status.
      *
-     * @return a cryptography service newBuilder
+     * @return a FrameworkStatus instance
      */
-    public static synchronized FrameworkStatusService getInstance() {
+    public static synchronized FrameworkStatus getInstance() {
         if (instance == null) {
         	// Instantiate the instance and initialize the status to -1 
         	// indicating that the status has not yet been set.
-            instance = new FrameworkStatusService();
+            instance = new FrameworkStatus();
             instance.setFrameworkStatus(-1);
         }
         return instance;
@@ -63,5 +65,19 @@ public class FrameworkStatusService {
      */
     public void setFrameworkStatus(int frameworkStatus) {
     	this.frameworkStatus = frameworkStatus; 
+    }
+    
+    /**
+     * Returns true if the framework has been started and is any of the following 
+     * states indicating it is ready:  STARTED, PACKAGES_REFRESHED, WARNING, INFO.
+     * 
+     * @return a boolean indicating if the framework is ready.
+     */
+    public boolean isReady() {
+        return frameworkStatus == FrameworkEvent.STARTED
+                || frameworkStatus == FrameworkEvent.PACKAGES_REFRESHED
+                || frameworkStatus == FrameworkEvent.STARTLEVEL_CHANGED
+                || frameworkStatus == FrameworkEvent.WARNING
+                || frameworkStatus == FrameworkEvent.INFO;
     }
 }
