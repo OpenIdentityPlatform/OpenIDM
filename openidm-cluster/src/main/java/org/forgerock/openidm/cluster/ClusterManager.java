@@ -82,7 +82,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(name = ClusterManager.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
-        description = "OpenIDM Policy Service", immediate = true)
+        description = "OpenIDM Cluster Management Service", immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
