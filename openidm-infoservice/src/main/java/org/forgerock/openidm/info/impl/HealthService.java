@@ -145,9 +145,9 @@ public class HealthService
     private volatile boolean clusterEnabled = true;
     
     /**
-     * A framework status service used to store the latest framework event status.
+     * A framework status instance used to store the latest framework event status.
      */
-    private FrameworkStatusService frameworkStatusService = null;
+    private FrameworkStatus frameworkStatus = null;
 
     /**
      * The current state of OpenIDM
@@ -291,7 +291,7 @@ public class HealthService
         applyPropertyConfig();
 
         // Get the framework status service instance
-        frameworkStatusService = FrameworkStatusService.getInstance();
+        frameworkStatus = FrameworkStatus.getInstance();
         
         // Set up tracker
         BundleContext ctx = FrameworkUtil.getBundle(HealthService.class).getBundleContext();
@@ -305,7 +305,7 @@ public class HealthService
                 logger.debug("Handle framework event {} {}", eventType, event.toString());
                 
                 // Store the framework event type as the framework status
-                frameworkStatusService.setFrameworkStatus(eventType);
+                frameworkStatus.setFrameworkStatus(eventType);
 
                 if (eventType == FrameworkEvent.STARTED) {
                     logger.debug("OSGi framework started event.");
@@ -384,11 +384,7 @@ public class HealthService
 
         // Check if the framework has already started.  If so, schedule the start up
         // thread that checks the state of OpenIDM.
-        if (frameworkStatusService.getFrameworkStatus() == FrameworkEvent.STARTED
-        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.PACKAGES_REFRESHED
-        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.STARTLEVEL_CHANGED
-        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.WARNING
-        		|| frameworkStatusService.getFrameworkStatus() == FrameworkEvent.INFO) {
+        if (frameworkStatus.isReady()) {
             scheduleCheckStartup(2000);
         }
         
