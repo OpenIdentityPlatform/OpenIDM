@@ -221,7 +221,6 @@
         <!-- Commons versions -->
         <commons.forgerock-script.version>2.0.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
-        <commons.forgerock-audit.version>0.3.0-SNAPSHOT</commons.forgerock-audit.version>
 
         <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -460,21 +459,6 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>i18n-core</artifactId>
                 <version>${commons.forgerock-i18n.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-core</artifactId>
-                <version>${commons.forgerock-audit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-json</artifactId>
-                <version>${commons.forgerock-audit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-handler-csv</artifactId>
-                <version>${commons.forgerock-audit.version}</version>
             </dependency>
 
             <!-- TODO-crest3 override BOM dependence as CAF2 is not ready -->

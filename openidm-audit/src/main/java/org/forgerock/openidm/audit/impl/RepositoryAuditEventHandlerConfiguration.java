@@ -16,11 +16,13 @@
 
 package org.forgerock.openidm.audit.impl;
 
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
 /**
  * Configuration class for RepositoryAuditEventHandler.
  * @see RepositoryAuditEventHandler
  */
-public class RepositoryAuditEventHandlerConfiguration {
+public class RepositoryAuditEventHandlerConfiguration extends EventHandlerConfiguration {
     private static final String REPO_AUDIT_PATH = "repo/audit";
 
     /**

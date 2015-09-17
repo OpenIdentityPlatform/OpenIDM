@@ -24,24 +24,20 @@
 package org.forgerock.openidm.audit.impl;
 
 import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
-import static org.forgerock.json.resource.Requests.copyOfReadRequest;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
-import static org.forgerock.openidm.util.ResourceUtil.notSupported;
+import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.promise.Promise;
@@ -93,30 +89,20 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
      * {@inheritDoc}
      */
     @Override
-    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
-        return notSupported(actionRequest).asPromise();
+    public Class<RouterAuditEventHandlerConfiguration> getConfigurationClass() {
+        return RouterAuditEventHandlerConfiguration.class;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
-            ActionRequest actionRequest) {
-        return notSupported(actionRequest).asPromise();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
+    public Promise<ResourceResponse, ResourceException> publishEvent(final Context context, final String auditEventTopic,
+            final JsonValue auditEventContent) {
         try {
+            final String auditEventId = auditEventContent.get(ResourceResponse.FIELD_CONTENT_ID).asString();
             return newResultPromise(getConnectionFactory().getConnection().create(new AuditContext(context),
                     newCreateRequest(
-                            resourcePath.concat(request.getResourcePathObject()),
-                            request.getNewResourceId(),
-                            request.getContent())));
+                            resourcePath.concat(auditEventTopic),
+                            auditEventId,
+                            auditEventContent)));
         } catch (ClassNotFoundException e) {
             return new InternalServerErrorException(e).asPromise();
         } catch (ResourceException e) {
@@ -124,16 +110,26 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request,
-            final QueryResourceHandler queryResourceHandler) {
+    public Promise<ResourceResponse, ResourceException> readEvent(final Context context, final String auditEventTopic,
+            final String auditEventId) {
+        try {
+            return newResultPromise(getConnectionFactory().getConnection().read(new AuditContext(context),
+                    newReadRequest(resourcePath.concat(auditEventTopic), auditEventId)));
+        } catch (ClassNotFoundException e) {
+            return new InternalServerErrorException(e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
+    }
+
+    @Override
+    public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String auditEventTopic,
+            final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
         try {
             final ConnectionFactory connectionFactory = getConnectionFactory();
-            final QueryRequest newRequest = copyOfQueryRequest(request);
-            newRequest.setResourcePath(resourcePath.concat(request.getResourcePathObject()));
+            final QueryRequest newRequest = copyOfQueryRequest(queryRequest);
+            newRequest.setResourcePath(resourcePath.concat(queryRequest.getResourcePathObject()));
 
             return newResultPromise(
                     connectionFactory.getConnection().query(new AuditContext(context), newRequest,
@@ -148,36 +144,6 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         } catch (ResourceException e) {
             return e.asPromise();
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
-            ReadRequest request) {
-        try {
-            final ReadRequest newRequest = copyOfReadRequest(request);
-            final String safeResourceId = resourceId == null ? "" : resourceId;
-            if (request.getResourcePathObject().leaf().equals(safeResourceId)) {
-                newRequest.setResourcePath(resourcePath.concat(request.getResourcePathObject()));
-            } else {
-                newRequest.setResourcePath(resourcePath.concat(request.getResourcePathObject()).concat(safeResourceId));
-            }
-            return getConnectionFactory().getConnection().read(new AuditContext(context), newRequest).asPromise();
-        } catch (ClassNotFoundException e) {
-            return new InternalServerErrorException(e).asPromise();
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<RouterAuditEventHandlerConfiguration> getConfigurationClass() {
-        return RouterAuditEventHandlerConfiguration.class;
     }
 
 }

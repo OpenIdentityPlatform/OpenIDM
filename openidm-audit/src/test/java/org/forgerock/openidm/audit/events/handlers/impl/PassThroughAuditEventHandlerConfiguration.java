@@ -16,11 +16,12 @@
 package org.forgerock.openidm.audit.events.handlers.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
 /**
  * A configuration for pass-through audit event handler.
  */
-public class PassThroughAuditEventHandlerConfiguration {
+public class PassThroughAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonProperty("message")
     private String message;
