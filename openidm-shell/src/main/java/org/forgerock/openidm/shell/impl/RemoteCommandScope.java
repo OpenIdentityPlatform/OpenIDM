@@ -41,7 +41,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
-import org.forgerock.http.ResourcePath;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;

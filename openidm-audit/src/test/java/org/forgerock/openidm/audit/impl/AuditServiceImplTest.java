@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
+import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -68,8 +70,10 @@ import org.testng.annotations.Test;
  * Test the audit service.
  */
 public class AuditServiceImplTest {
-
-    //private Collection<Map<String, Object>> memory = new ArrayList<>();
+    public static final String PASS_THROUGH_CONFIG_SCHEMA_JSON_FILE = "/PassThroughConfigSchema.json";
+    public static final String AUDIT_JSON_FILE = "/audit.json";
+    public static final String TEST_AUDIT_TOPIC = "test";
+    public static final String ID = "id";
 
     @Test
     public void testAuditServiceActivation() throws Exception {
@@ -77,7 +81,7 @@ public class AuditServiceImplTest {
         final JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
         final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
         final ScriptEntry scriptEntry = mock(ScriptEntry.class);
-        final JsonValue config = AuditTestUtils.getJson(getResource("/audit.json"));
+        final JsonValue config = AuditTestUtils.getJson(getResource(AUDIT_JSON_FILE));
         final AuditServiceImpl auditService = new AuditServiceImpl();
 
         auditService.bindEnhancedConfig(jsonEnhancedConfig);
@@ -95,7 +99,7 @@ public class AuditServiceImplTest {
     @Test
     public void testAuditServiceCreate() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
         final AuditEvent auditEvent = TestAuditEventBuilder.testAuditEventBuilder()
                 .transactionId("transactionId")
@@ -104,7 +108,7 @@ public class AuditServiceImplTest {
                 .authentication("testuser@forgerock.com")
                 .toEvent();
 
-        final CreateRequest createRequest = Requests.newCreateRequest("test", auditEvent.getValue());
+        final CreateRequest createRequest = Requests.newCreateRequest(TEST_AUDIT_TOPIC, auditEvent.getValue());
 
         //when
         Promise<ResourceResponse, ResourceException> promise = auditService.handleCreate(
@@ -121,9 +125,9 @@ public class AuditServiceImplTest {
     @Test
     public void testAuditServiceRead() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
-        final ReadRequest readRequest = Requests.newReadRequest("test", "id");
+        final ReadRequest readRequest = Requests.newReadRequest(TEST_AUDIT_TOPIC, ID);
 
         //when
         Promise<ResourceResponse, ResourceException> promise = auditService.handleRead(new RootContext(), readRequest);
@@ -138,10 +142,10 @@ public class AuditServiceImplTest {
     @Test
     public void testAuditServiceUpdate() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
         final UpdateRequest updateRequest =
-                Requests.newUpdateRequest("test", "id", new JsonValue(new LinkedHashMap<String, Object>()));
+                Requests.newUpdateRequest(TEST_AUDIT_TOPIC, ID, new JsonValue(new LinkedHashMap<String, Object>()));
 
         //when
         Promise<ResourceResponse, ResourceException> promise = auditService.handleUpdate(
@@ -157,9 +161,9 @@ public class AuditServiceImplTest {
     @Test
     public void testAuditServiceDelete() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
-        final DeleteRequest deleteRequest = Requests.newDeleteRequest("test", "id");
+        final DeleteRequest deleteRequest = Requests.newDeleteRequest(TEST_AUDIT_TOPIC, ID);
 
         //when
         Promise<ResourceResponse, ResourceException> promise = auditService.handleDelete(
@@ -175,10 +179,10 @@ public class AuditServiceImplTest {
     @Test
     public void testAuditServicePatch() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
         final PatchRequest patchRequest =
-                Requests.newPatchRequest("test", "id", PatchOperation.remove(new JsonPointer("/test")));
+                Requests.newPatchRequest(TEST_AUDIT_TOPIC, ID, PatchOperation.remove(new JsonPointer("/test")));
 
         //when
         Promise<ResourceResponse, ResourceException> promise = auditService.handlePatch(
@@ -194,9 +198,9 @@ public class AuditServiceImplTest {
     @Test
     public void testAuditServiceUnknownAction() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
-        final ActionRequest actionRequest = Requests.newActionRequest("test", "id", "unknownAction");
+        final ActionRequest actionRequest = Requests.newActionRequest(TEST_AUDIT_TOPIC, ID, "unknownAction");
 
         //when
         Promise<ActionResponse, ResourceException> promise = auditService.handleAction(new RootContext(),
@@ -212,7 +216,7 @@ public class AuditServiceImplTest {
     public void testActionForChangedFields() throws Exception {
 
         //given - depends on 'mail' being configured as a watched field.
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
         JsonValue testContent = json(
                 object(
                         field("before", object(
@@ -225,7 +229,7 @@ public class AuditServiceImplTest {
                         ))
                 )
         );
-        ActionRequest changedFieldsRequest = Requests.newActionRequest("test", "id", getChangedWatchedFields.name());
+        ActionRequest changedFieldsRequest = Requests.newActionRequest(TEST_AUDIT_TOPIC, ID, getChangedWatchedFields.name());
         changedFieldsRequest.setContent(testContent);
 
         // when
@@ -243,7 +247,7 @@ public class AuditServiceImplTest {
     @Test
     public void testActionForChangedPassword() throws Exception {
         // given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
         JsonValue testContent = json(
                 object(
                         field("before", object(
@@ -255,7 +259,7 @@ public class AuditServiceImplTest {
                 )
         );
 
-        ActionRequest changedPasswordRequest = Requests.newActionRequest("test", "id", getChangedPasswordFields.name());
+        ActionRequest changedPasswordRequest = Requests.newActionRequest(TEST_AUDIT_TOPIC, ID, getChangedPasswordFields.name());
         changedPasswordRequest.setContent(testContent);
 
         //when
@@ -273,9 +277,9 @@ public class AuditServiceImplTest {
     @Test
     public void testAuditServiceQuery() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
-        final QueryRequest queryRequest = Requests.newQueryRequest("test");
+        final QueryRequest queryRequest = Requests.newQueryRequest(TEST_AUDIT_TOPIC);
 
         final QueryResourceHandler queryResultHandler = mock(QueryResourceHandler.class);
 
@@ -293,7 +297,7 @@ public class AuditServiceImplTest {
     @Test
     public void testExceptionFormatter() throws Exception {
         //given
-        AuditServiceImpl auditService = createAuditService("/audit.json");
+        AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
         final AuditEvent auditEvent = TestAuditEventBuilder.testAuditEventBuilder()
                 .transactionId("transactionId")
@@ -303,7 +307,7 @@ public class AuditServiceImplTest {
                 .exception(new Exception("Test Exception"))
                 .toEvent();
 
-        final CreateRequest createRequest = Requests.newCreateRequest("test", auditEvent.getValue());
+        final CreateRequest createRequest = Requests.newCreateRequest(TEST_AUDIT_TOPIC, auditEvent.getValue());
 
         //when
         Promise<ResourceResponse, ResourceException> promise = auditService.handleCreate(
@@ -322,7 +326,7 @@ public class AuditServiceImplTest {
 
     @Test
     public void testAvailableHandlersAction() throws Exception {
-        final AuditServiceImpl auditService = createAuditService("/audit.json");
+        final AuditServiceImpl auditService = createAuditService(AUDIT_JSON_FILE);
 
         //when
         Promise<ActionResponse, ResourceException> promise = auditService.handleAction(
@@ -337,15 +341,10 @@ public class AuditServiceImplTest {
                 .isEqualTo(PassThroughAuditEventHandler.class.getName());
 
         // { "type": "object", "properties": { "message": { "type": "string" } } }
-        final JsonValue expectedConfig = json(object(
-                field("type", "object"),
-                field("id", "/"),
-                field("properties", object(
-                        field("message", object(
-                                field("type", "string")
-                        ))
-                ))
-        ));
+        final JsonValue expectedConfig;
+        try (InputStream in = getClass().getResourceAsStream(PASS_THROUGH_CONFIG_SCHEMA_JSON_FILE)) {
+            expectedConfig = json(Json.readJson(new InputStreamReader(in)));
+        }
         assertThat(result.get(0).get("config").asMap()).isEqualTo(expectedConfig.asMap());
     }
 

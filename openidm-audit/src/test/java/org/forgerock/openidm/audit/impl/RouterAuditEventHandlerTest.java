@@ -95,8 +95,9 @@ public class RouterAuditEventHandlerTest {
                 Responses.newResourceResponse(ResourceResponse.FIELD_ID, ResourceResponse.FIELD_REVISION, content));
 
         //when
-        Promise<ResourceResponse, ResourceException> promise = routerAuditEventHandler.readInstance(new RootContext(),
-                ResourceResponse.FIELD_ID, Requests.newReadRequest("access"));
+        Promise<ResourceResponse, ResourceException> promise = routerAuditEventHandler.readEvent(new RootContext(),
+                "access",
+                ResourceResponse.FIELD_ID);
 
         //then
         assertThat(requestHandler.getRequests().size()).isEqualTo(1);
@@ -124,7 +125,8 @@ public class RouterAuditEventHandlerTest {
 
 
         //when
-        Promise<QueryResponse, ResourceException> promise = routerAuditEventHandler.queryCollection(new RootContext(),
+        Promise<QueryResponse, ResourceException> promise = routerAuditEventHandler.queryEvents(new RootContext(),
+                "access",
                 Requests.newQueryRequest("access").setQueryFilter(QueryFilters.parse("/_id eq \"_id\"")),
                 queryResultHandler);
 
@@ -147,11 +149,14 @@ public class RouterAuditEventHandlerTest {
     @Test
     public void testCreateEntry() throws Exception {
         //given
-        final JsonValue content = json(object(field("somedata", "foo")));
+        final JsonValue content = json(object(
+                field("somedata", "foo"),
+                field(ResourceResponse.FIELD_CONTENT_ID, ResourceResponse.FIELD_ID)
+        ));
 
         //when
-        Promise<ResourceResponse, ResourceException> promise = routerAuditEventHandler.createInstance(
-                new RootContext(), Requests.newCreateRequest("access", ResourceResponse.FIELD_ID, content));
+        Promise<ResourceResponse, ResourceException> promise = routerAuditEventHandler.publishEvent(new RootContext(),
+                "access", content);
 
         //then
         ResourceResponse resource = promise.getOrThrow();

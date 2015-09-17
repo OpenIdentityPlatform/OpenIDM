@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "id": "/",
+  "properties": {
+    "message": {
+      "type": "string"
+    },
+    "bufferingConfig": {
+      "type": "object",
+      "id": "urn:jsonschema:org:forgerock:audit:events:handlers:EventHandlerConfiguration:EventBufferingConfiguration",
+      "description": "The configuration for optional buffering of events.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Indicates if buffering of events is enabled."
+        },
+        "maxTime": {
+          "type": "integer",
+          "description": "The maximum time before the buffer is automatically flushed."
+        },
+        "forceFlushBeforeRead": {
+          "type": "boolean",
+          "description": "Indicates if buffer must be flushed before a read operation is done, in order to ensure the latest events are available."
+        },
+        "maxSize": {
+          "type": "integer",
+          "description": "The maximum size of buffer before the buffer is automatically flushed."
+        }
+      }
+    }
+  }
+}
