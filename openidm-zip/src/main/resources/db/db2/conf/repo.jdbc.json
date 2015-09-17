@@ -97,7 +97,7 @@
             },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
-                "propertiesTable" : "schedobjectproperties",
+                "propertiesTable" : "schedulerobjectproperties",
                 "searchableDefault" : true
             },
             "cluster" : {
