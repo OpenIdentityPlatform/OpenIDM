@@ -13,8 +13,9 @@ DROP DATABASE DOPENIDM;
 CREATE DATABASE   DOPENIDM
 --       STOGROUP   GOPENIDM
 --       BUFFERPOOL BP2
-;
-
+    -- Increase default page size for Activiti
+    PAGESIZE 32 K
+; 
 CONNECT TO DOPENIDM;
 
 -- http://db2-vignettes.blogspot.com/2013/07/a-temporary-table-could-not-be-created.html
