@@ -1,0 +1,17 @@
+{ 
+    "enabled": false, 
+    "persisted": false, 
+    "misfirePolicy": "fireAndProceed", 
+    "schedule": "30 0/1 * * * ?", 
+    "type": "cron", 
+    "invokeService": "org.forgerock.openidm.testService", 
+    "invokeContext": { 
+        "action": "testAction" 
+    }, 
+    "invokeLogLevel": "info", 
+    "timeZone": null, 
+    "startTime": null, 
+    "endTime": null, 
+    "concurrentExecution": false, 
+    "_id": "test1" 
+}

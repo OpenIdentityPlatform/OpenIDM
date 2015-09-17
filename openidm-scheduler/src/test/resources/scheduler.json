@@ -1,0 +1,11 @@
+{
+    "threadPool" : {
+        "threadCount" : "10"
+    },
+    "scheduler" : {
+        "executePersistentSchedules" : "false"
+    },
+    "advancedProperties" : {
+        "org.quartz.jobStore.class" : "org.quartz.simpl.RAMJobStore"
+    }
+}

@@ -96,6 +96,11 @@
 
         <!-- Test Dependencies -->
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -136,7 +141,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.forgerock.openidm.scheduler.impl.Activator</Bundle-Activator>
                         <Private-Package>org.forgerock.openidm.scheduler.impl.*</Private-Package>
                         <Export-Package>
                             org.forgerock.openidm.scheduler;version="${project.version}"

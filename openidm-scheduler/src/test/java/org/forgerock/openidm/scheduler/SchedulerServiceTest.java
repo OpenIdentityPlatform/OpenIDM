@@ -11,86 +11,188 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openidm.scheduler;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertNotNull;
 
+import java.io.InputStream;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.cluster.ClusterManagementService;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
- * Basic unit tests, the main functionality is covered by functional tests
- *
+ * Basic unit tests for the scheduler service
  */
 public class SchedulerServiceTest {
-
-    @BeforeMethod
-    public void beforeMethod() {
+    
+    /**
+     * The Scheduler Service
+     */
+    private SchedulerService schedulerService;
+    
+    /**
+     * The Scheduler configuration
+     */
+    private JsonValue testScheduleConfig;
+    
+    @BeforeClass
+    void setUp() throws Exception {
+        schedulerService = createSchedulerService("/scheduler.json");
+        testScheduleConfig = getConfig("/schedule-test1.json");
+    }
+    
+    /**
+     * Returns a {@link JsonValue} object representing a JSON configuration.
+     * 
+     * @param configName the name of the file containing the configuration
+     * @return a {@link JsonValue} object representing a JSON configuration
+     * @throws Exception
+     */
+    private JsonValue getConfig(final String configName) throws Exception {
+        InputStream configStream = getClass().getResourceAsStream(configName);
+        return new JsonValue(new ObjectMapper().readValue(configStream, LinkedHashMap.class)); 
+    }
+    
+    /**
+     * Creates a {@link SchedulerService} from the passed in configuration file.
+     * 
+     * @param configFile the scheduler's configuration file name
+     * @return a {@link SchedulerService} implementation
+     * @throws Exception
+     */
+    private SchedulerService createSchedulerService(final String configFile) throws Exception {
+        final JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
+        final ClusterManagementService clusterService = mock(ClusterManagementService.class);
+        final SchedulerService schedulerService = new SchedulerService();
+        when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(getConfig(configFile));
+        when(clusterService.getInstanceId()).thenReturn("test-node");
+        // bind services
+        schedulerService.bindEnhancedConfig(jsonEnhancedConfig);
+        schedulerService.clusterManager = clusterService;
+        // Activate the service
+        schedulerService.activate(getMockedContext());
+        return schedulerService;
     }
 
-    ComponentContext getMockedContext(Map enhancedConfig, SchedulerService service) {
-
+    /**
+     * Returns a mocked {@link ComponentContext} instance.
+     * @return a {@link ComponentContext} instance
+     */
+    private ComponentContext getMockedContext() {
         ComponentContext mockedContext = mock(ComponentContext.class);
         BundleContext mockedBundleContext = mock(BundleContext.class);
-
-        Dictionary compContextProperties = new Hashtable();
-
-        EnhancedConfig mockedEnhancedConfig = mock(EnhancedConfig.class);
-        when(mockedEnhancedConfig.getConfiguration(mockedContext)).thenReturn(enhancedConfig);
-        service.bindEnhancedConfig(mockedEnhancedConfig);
-
+        Dictionary<String, String> compContextProperties = new Hashtable<String, String>();
+        //compContextProperties.put("config.factory-pid", null);
         when(mockedContext.getProperties()).thenReturn(compContextProperties);
         when(mockedContext.getBundleContext()).thenReturn(mockedBundleContext);
-
         return mockedContext;
     }
-
+    
     @Test
-    public void configParsingTest() throws ResourceException {
-        // Check valid configuration succeeds
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put(SchedulerService.SCHEDULE_TYPE, SchedulerService.SCHEDULE_TYPE_CRON);
-        config.put(SchedulerService.SCHEDULE_START_TIME, "2011-05-03T10:00:00");
-        config.put(SchedulerService.SCHEDULE_END_TIME, "2011-05-03T15:59:59");
-        config.put(SchedulerService.SCHEDULE_CRON_SCHEDULE, "0 30 10-13 ? * WED,FRI");
-        config.put(SchedulerService.SCHEDULE_TIME_ZONE, "America/Los_Angeles");
-        config.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, "active-sync");
-        config.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, "system-x");
+    public void testAuditServiceCreate() throws Exception {
+        //given
+        final CreateRequest createRequest = Requests.newCreateRequest("scheduler", "test1", testScheduleConfig);
 
-        ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(config));
+        //when
+        Promise<ResourceResponse, ResourceException> promise = schedulerService.handleCreate(new RootContext(), createRequest);
 
-        // mimimize trying to these impl details, basic sanity check on one
-        assertNotNull(scheduleConfig.getStartTime());
+        //then
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .succeeded();
+        ResourceResponse resourceResponse = promise.getOrThrow();
+        assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
     }
+    
+    @Test
+    public void testReadSchedule() throws Exception {
+        //given
+        final ReadRequest readRequest = Requests.newReadRequest("test1");
 
-    @Test(enabled = false, expectedExceptions = ResourceException.class)
-    public void invalidConfigParsingTest() throws ResourceException {
-        // Check invalid configuration fails
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put(SchedulerService.SCHEDULE_TYPE, SchedulerService.SCHEDULE_TYPE_CRON);
-        config.put(SchedulerService.SCHEDULE_START_TIME, "2011-05-03T10:00:00");
-        config.put(SchedulerService.SCHEDULE_END_TIME, "2011-05-03T15:59:59");
-        config.put(SchedulerService.SCHEDULE_CRON_SCHEDULE, "0 30 10-13 ? * WED,FRI");
-        config.put(SchedulerService.SCHEDULE_TIME_ZONE, "America/Los_Angeles");
-        // test missing config.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, "active-sync");
-        config.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, "system-x");
+        //when
+        Promise<ResourceResponse, ResourceException> promise = schedulerService.handleRead(new RootContext(), readRequest);
 
-        ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(config));
-
+        //then
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .succeeded();
+        ResourceResponse resourceResponse = promise.getOrThrow();
+        assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
     }
+    
+    @Test
+    public void testPauseJobsAction() throws Exception {
+        //given
+        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerService.ACTION_PAUSE_JOBS);
+
+        //when
+        Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
+
+        //then
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .succeeded();
+        ActionResponse resourceResponse = promise.getOrThrow();
+        assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
+    }
+    
+    @Test
+    public void testResumeJobsAction() throws Exception {
+        //given
+        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerService.ACTION_RESUME_JOBS);
+
+        //when
+        Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
+
+        //then
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .succeeded();
+        ActionResponse resourceResponse = promise.getOrThrow();
+        assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
+    }
+    
+    @Test
+    public void testListCurrentlyExecutingJobsAction() throws Exception {
+        //given
+        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerService.ACTION_LIST_CURRENTLY_EXECUTING_JOBS);
+
+        //when
+        Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
+
+        //then
+        AssertJPromiseAssert.assertThat(promise)
+                .isNotNull()
+                .succeeded();
+        ActionResponse resourceResponse = promise.getOrThrow();
+        assertThat(resourceResponse.getJsonContent().asList().size()).isEqualTo(0);
+    }
+    
+    
 }
