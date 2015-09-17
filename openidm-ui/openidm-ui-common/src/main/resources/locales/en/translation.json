@@ -629,8 +629,8 @@
                 }
             },
             "events": {
-                "title": "Audit Events",
-                "desc": "Configure available events to log, or add a custom event definition.",
+                "title": "Audit Events to Watch",
+                "desc": "Configured events are written through the Audit Event Handler.",
                 "addCustom": "Add a Custom Event",
                 "default": "Default",
                 "custom": "Custom",
