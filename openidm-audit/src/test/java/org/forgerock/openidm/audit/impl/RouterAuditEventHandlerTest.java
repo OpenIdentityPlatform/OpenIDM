@@ -25,7 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.forgerock.audit.DependencyProviderBase;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;

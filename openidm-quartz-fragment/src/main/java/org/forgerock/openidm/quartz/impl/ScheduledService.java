@@ -27,7 +27,7 @@ package org.forgerock.openidm.quartz.impl;
 import java.util.Map;
 
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * OSGi services wanting to be schedulable via the Scheduler service must

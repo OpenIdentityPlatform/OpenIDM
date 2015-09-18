@@ -19,7 +19,7 @@ package org.forgerock.openidm.security.impl;
 import static org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert.assertThat;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;

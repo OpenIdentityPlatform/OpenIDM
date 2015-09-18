@@ -25,7 +25,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 
 

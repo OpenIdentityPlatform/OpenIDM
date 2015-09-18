@@ -24,7 +24,7 @@
 
 package org.forgerock.openidm.audit.util;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;

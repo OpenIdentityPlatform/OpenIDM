@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;

@@ -24,7 +24,7 @@
 
 package org.forgerock.openidm.router;
 
-import org.forgerock.http.routing.RouteMatcher;
+import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Router;

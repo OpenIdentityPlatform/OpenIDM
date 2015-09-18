@@ -17,7 +17,7 @@ package org.forgerock.openidm.managed;
 
 import javax.script.ScriptException;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;

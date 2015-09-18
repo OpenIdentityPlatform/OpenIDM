@@ -24,7 +24,7 @@
 
 package org.forgerock.openidm.router.impl;
 
-import static org.forgerock.http.context.ClientContext.newInternalClientContext;
+import static org.forgerock.services.context.ClientContext.newInternalClientContext;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -35,7 +35,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;

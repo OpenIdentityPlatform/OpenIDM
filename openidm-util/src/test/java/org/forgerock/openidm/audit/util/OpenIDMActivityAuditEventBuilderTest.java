@@ -19,7 +19,7 @@ package org.forgerock.openidm.audit.util;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;

@@ -29,7 +29,7 @@
  *
  */
 (function () {
-    var userId = context.security.authorizationId.id, res, ret, params, notification;
+    var userId = context.security.authorization.id, res, ret, params, notification;
 
     if (request.method === "read") {
         res = {};

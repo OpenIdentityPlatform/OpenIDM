@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;

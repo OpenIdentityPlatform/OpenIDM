@@ -17,8 +17,8 @@ package org.forgerock.openidm.sync;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.AbstractContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.AbstractContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 

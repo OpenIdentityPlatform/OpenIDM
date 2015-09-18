@@ -23,7 +23,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
