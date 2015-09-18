@@ -156,8 +156,6 @@ public class MaintenanceService implements RequestHandler {
      */
     protected ScrService scrService;
 
-    private final UpgradeManager upgradeManager = new UpgradeManager();
-
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -179,27 +177,12 @@ public class MaintenanceService implements RequestHandler {
     private enum Action {
         status,
         enable,
-        disable,
-        upgradereport,
-        diff,
-        upgrade
+        disable
     }
     
     protected void setMaintenanceModeComponents(String[] components) {
         this.maintenanceModeComponents = components;
     }
-
-
-    private final Runnable DISABLE_MAINTENANCE_MODE = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                disableMaintenanceMode();
-            } catch (ResourceException e) {
-                logger.error("Couldn't leave maintenance mode after upgrade report", e);
-            }
-        }
-    };
 
     /**
      * Maintenance action support
@@ -216,69 +199,11 @@ public class MaintenanceService implements RequestHandler {
                 case disable:
                     disableMaintenanceMode();
                     return handleMaintenanceStatus();
-                case upgradereport:
-                    // FIXME Q: Should we go into maintenance mode for the upgrade report?
-                    enableMaintenanceMode();
-                    return upgradereport(request.getAdditionalParameters())
-                            .thenFinally(DISABLE_MAINTENANCE_MODE);
-                case diff:
-                    // FIXME Q: Should we go into maintenance mode for the upgradereport?
-                    enableMaintenanceMode();
-                    return diff(request.getAdditionalParameters())
-                            .thenFinally(DISABLE_MAINTENANCE_MODE);
-                case upgrade:
-                    enableMaintenanceMode();
-                    return upgrade(request.getAdditionalParameters())
-                            .thenFinally(DISABLE_MAINTENANCE_MODE);
                 default:
                     return new NotSupportedException(request.getAction() + " is not supported").asPromise();
             }
         } catch (ResourceException e) {
             return new InternalServerErrorException("Error processing Action request", e).asPromise();
-        }
-    }
-
-    private Promise<ActionResponse, ResourceException> upgradereport(Map<String, String> parameters) {
-        try {
-            return newActionResponse(
-                    upgradeManager.report(
-                            new URL(parameters.get("url")),
-                            Paths.get(IdentityServer.getInstance().getServerRoot())))
-                    .asPromise();
-        } catch (MalformedURLException e) {
-            return new BadRequestException("Passed in url is invalid " + e.getMessage(), e).asPromise();
-        } catch (UpgradeException e) {
-            return new InternalServerErrorException(e.getMessage(), e).asPromise();
-        }
-    }
-
-    private Promise<ActionResponse, ResourceException> diff(Map<String, String> parameters) {
-        try {
-            return newActionResponse(
-                    upgradeManager.diff(
-                            new URL(parameters.get("url")),
-                                Paths.get(IdentityServer.getInstance().getServerRoot()),
-                                parameters.get("file")))
-                    .asPromise();
-        } catch (MalformedURLException e) {
-            return new BadRequestException("Passed in url is invalid " + e.getMessage(), e).asPromise();
-        } catch (UpgradeException e) {
-            return new InternalServerErrorException(e.getMessage(), e).asPromise();
-        }
-    }
-
-    private Promise<ActionResponse, ResourceException> upgrade(Map<String, String> parameters) {
-        try {
-            return newActionResponse(
-                    upgradeManager.upgrade(
-                            new URL(parameters.get("url")),
-                            Paths.get(IdentityServer.getInstance().getServerRoot()),
-                            Boolean.valueOf(parameters.get("keep"))))
-                    .asPromise();
-        } catch (MalformedURLException e) {
-            return new BadRequestException("Passed in url is invalid " + e.getMessage(), e).asPromise();
-        } catch (UpgradeException e) {
-            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
