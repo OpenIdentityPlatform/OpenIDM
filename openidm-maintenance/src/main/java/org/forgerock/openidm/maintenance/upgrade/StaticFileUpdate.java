@@ -39,7 +39,8 @@ import org.forgerock.util.Function;
  */
 class StaticFileUpdate {
 
-    static final String IDM_SUFFIX = ".idm-";
+    static final String NEW_SUFFIX = ".new-";
+    static final String OLD_SUFFIX = ".old-";
 
     private final FileStateChecker fileStateChecker;
     private final Path root;
@@ -73,15 +74,17 @@ class StaticFileUpdate {
 
     /**
      * Replaces this static file with the new one from the archive.  If the file has been changed, copy it to
-     * <em>&lt;filepath&gt;-.idm-old</em>.  Supports copying fresh file for one that is missing.
+     * <em>&lt;filepath&gt;-.old-version</em>.  Supports copying fresh file for one that is missing.
      *
      * @param path the path to replace/copy
      * @throws IOException
      */
-    void replace(final Path path) throws IOException {
+    Path replace(final Path path) throws IOException {
+        Path destination = null;
         if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
+            destination = root.resolve(path.toString() + OLD_SUFFIX + currentVersion.toString());
             Files.move(root.resolve(path),
-                    root.resolve(path.toString() + IDM_SUFFIX + currentVersion.toString()),
+                    destination,
                     StandardCopyOption.REPLACE_EXISTING);
         }
         archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
@@ -91,25 +94,28 @@ class StaticFileUpdate {
                 return null;
             }
         });
+        return destination;
     }
 
     /**
-     * Keep the static file that already exists.  Install the new file as <em>&lt;filepath&gt;-.idm-new</em>.
+     * Keep the static file that already exists.  Install the new file as <em>&lt;filepath&gt;-.new-version</em>.
      *
      * @param path the path to keep/copy
      * @throws IOException
      */
-    void keep(final Path path) throws IOException {
+    Path keep(final Path path) throws IOException {
         if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
+            final Path destination = root.resolve(path.toString() + NEW_SUFFIX + upgradedVersion.toString());
             archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
                 @Override
                 public Void apply(InputStream inputStream) throws IOException {
                     Files.copy(inputStream,
-                            root.resolve(path.toString() + IDM_SUFFIX + upgradedVersion.toString()),
+                            destination,
                             StandardCopyOption.REPLACE_EXISTING);
                     return null;
                 }
             });
+            return destination;
         } else {
             throw new IOException("No such file " + path.toString() + " to keep!");
         }

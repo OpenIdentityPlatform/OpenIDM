@@ -23,13 +23,8 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
-import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -39,11 +34,15 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -54,6 +53,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
@@ -87,6 +87,10 @@ public class UpdateService implements RequestHandler {
     private static final String ARCHIVE_NAME = "archive";
 
     private final UpgradeManager upgradeManager = new UpgradeManager();
+
+    /** The connection factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    private ConnectionFactory connectionFactory;
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -137,10 +141,9 @@ public class UpdateService implements RequestHandler {
                 return new BadRequestException("Archive name not specified.").asPromise();
             }
             return newActionResponse(upgradeManager.report(
-                    Paths.get(IdentityServer.getInstance().getServerRoot() + "/bin/update/" +
+                    Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
                             parameters.get(ARCHIVE_NAME)),
-                    Paths.get(IdentityServer.getInstance().getServerRoot()),
-                    IdentityServer.getInstance().getProjectLocation().toPath())).asPromise();
+                    IdentityServer.getInstance().getInstallLocation().toPath())).asPromise();
         } catch (UpgradeException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
@@ -151,11 +154,21 @@ public class UpdateService implements RequestHandler {
             if (!parameters.containsKey(ARCHIVE_NAME)) {
                 return new BadRequestException("Archive name not specified.").asPromise();
             }
+
+            try {
+                ActionResponse response = connectionFactory.getConnection().action(new RootContext(),
+                        Requests.newActionRequest("/maintenance", "status"));
+                if (!response.getJsonContent().get("maintenanceEnabled").asBoolean().equals(Boolean.TRUE)) {
+                    throw new UpgradeException("Must be in maintenance mode prior to installing an update.");
+                }
+            } catch (ResourceException e) {
+                throw new UpgradeException("Unable to check maintenance mode status.", e);
+            }
+
             return newActionResponse(upgradeManager.upgrade(
-                    Paths.get(IdentityServer.getInstance().getServerRoot() + "/bin/update/" +
+                    Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
                             parameters.get(ARCHIVE_NAME)),
-                    Paths.get(IdentityServer.getInstance().getServerRoot()),
-                    IdentityServer.getInstance().getProjectLocation().toPath(),
+                    IdentityServer.getInstance().getInstallLocation().toPath(),
                     false)).asPromise();
         } catch (UpgradeException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();

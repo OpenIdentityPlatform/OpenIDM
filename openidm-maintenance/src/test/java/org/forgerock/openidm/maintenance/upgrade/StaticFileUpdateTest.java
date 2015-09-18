@@ -43,9 +43,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.NEW_SUFFIX;
+import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.OLD_SUFFIX;
 import static org.mockito.Mockito.*;
 import static org.testng.AssertJUnit.assertFalse;
-import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.IDM_SUFFIX;
 
 /**
  * Tests updating static files.
@@ -59,11 +60,11 @@ public class StaticFileUpdateTest {
     private static final byte[] newBytes = "newcontent".getBytes();
 
     private Path getOldVersionPath(Path file) {
-        return Paths.get(file + IDM_SUFFIX + oldVersion.toString());
+        return Paths.get(file + OLD_SUFFIX + oldVersion.toString());
     }
 
     private Path getNewVersionPath(Path file) {
-        return Paths.get(file + IDM_SUFFIX + newVersion.toString());
+        return Paths.get(file + NEW_SUFFIX + newVersion.toString());
     }
 
     private Path tempPath;
