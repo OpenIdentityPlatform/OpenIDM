@@ -98,7 +98,8 @@
                 "mappingSaveSuccess": "Mapping successfully updated",
                 "newMappingAdded": "New mapping successfully created",
                 "mappingDeleted": "Mapping successfully deleted",
-                "mappingEvalError" : "Error in script evaluation process"
+                "mappingEvalError" : "Error in script evaluation process",
+                "mappingMessage" : "Defines a source and target for reconciliation"
             },
             "SyncMessages" : {
                 "policySaveSuccessful" : "The situational policy has been saved.",
@@ -394,7 +395,7 @@
             "managedObjectName" : "Managed Object Name",
             "managedObjectIcon" : "Managed Object Icon",
             "managedProperties" : "Managed Properties",
-            "managedPropertyMessage" : "If you have specific managed object properties add them below. Not all properties need to be added, only those with special functionality.",
+            "managedPropertyMessage" : "Add managed object properties related to security or virtual roles.",
             "addProperty" : "Add Property",
             "encrypted" : "Encrypted",
             "private" : "Private",
