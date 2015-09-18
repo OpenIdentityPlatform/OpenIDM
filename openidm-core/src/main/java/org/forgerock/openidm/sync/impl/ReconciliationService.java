@@ -179,7 +179,7 @@ public class ReconciliationService
                             Requests.newQueryRequest(AUDIT_RECON).setQueryFilter(
                                     and(
                                             equalTo(new JsonPointer(ReconAuditEventBuilder.RECON_ID), localId),
-                                            equalTo(new JsonPointer(ReconAuditEventBuilder.RECON_ID), SUMMARY)
+                                            equalTo(new JsonPointer(ReconAuditEventBuilder.ENTRY_TYPE), SUMMARY)
                                     )
                             ),
                             queryResult);
@@ -190,7 +190,8 @@ public class ReconciliationService
                     	return new NotFoundException("Reconciliation with id " + localId + " not found." ).asPromise();
                     } else {
                         for (ResourceResponse resource : queryResult) {
-                        	response = newResourceResponse(localId, null, resource.getContent().get("messageDetail").expect(Map.class));
+                        	response = newResourceResponse(localId, null, 
+                                        resource.getContent().get(ReconAuditEventBuilder.MESSAGE_DETAIL).expect(Map.class));
                         	break;
                         }
                     }
