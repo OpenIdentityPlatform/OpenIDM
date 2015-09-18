@@ -25,10 +25,10 @@
 package org.forgerock.openidm.servlet.internal;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.http.HttpContextFactory;
 import org.forgerock.json.resource.http.SecurityContextFactory;
@@ -89,11 +89,11 @@ public class IDMSecurityContextFactory implements HttpContextFactory {
 
     private boolean isSecurityContextPopulated(SecurityContext context) {
         try {
-            final JsonValue authorziationId = new JsonValue(context.getAuthorizationId());
+            final JsonValue authorization = new JsonValue(context.getAuthorization());
             return !StringUtils.isEmpty(context.getAuthenticationId())
-                    && !StringUtils.isEmpty(authorziationId.get(SecurityContext.AUTHZID_ID).asString())
-                    && !StringUtils.isEmpty(authorziationId.get(SecurityContext.AUTHZID_COMPONENT).asString())
-                    && authorziationId.get(SecurityContext.AUTHZID_ROLES).isList();
+                    && !StringUtils.isEmpty(authorization.get(SecurityContext.AUTHZID_ID).asString())
+                    && !StringUtils.isEmpty(authorization.get(SecurityContext.AUTHZID_COMPONENT).asString())
+                    && authorization.get(SecurityContext.AUTHZID_ROLES).isList();
         } catch (NullPointerException e) {
             return false;
         }

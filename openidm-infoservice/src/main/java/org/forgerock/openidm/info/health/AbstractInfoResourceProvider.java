@@ -17,7 +17,7 @@
 package org.forgerock.openidm.info.health;
 
 import org.forgerock.json.resource.*;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**

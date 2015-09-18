@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.ConfigAuditEventBuilder;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -31,7 +31,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.patch.JsonPatch;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;

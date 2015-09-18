@@ -26,7 +26,7 @@
  * global security - map of security context details as have been determined thus far
  *
  *      {
- *          "authorizationId": {
+ *          "authorization": {
  *              "id": "jsmith",
  *              "component": "passthrough",
  *              "roles": [ "openidm-authorized" ]
@@ -95,12 +95,12 @@
             };        
         }
 
-        security.authorizationId = {
+        security.authorization = {
             "id": managedUser._id,
             "component": "managed/user",
             "roles": managedUser.roles ?
-                         _.uniq(security.authorizationId.roles.concat(managedUser.roles)) : 
-                         security.authorizationId.roles
+                         _.uniq(security.authorization.roles.concat(managedUser.roles)) : 
+                         security.authorization.roles
         };
 
     }

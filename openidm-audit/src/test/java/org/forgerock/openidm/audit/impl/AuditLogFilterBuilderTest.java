@@ -17,7 +17,7 @@
 package org.forgerock.openidm.audit.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.http.context.ClientContext.newInternalClientContext;
+import static org.forgerock.services.context.ClientContext.newInternalClientContext;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;

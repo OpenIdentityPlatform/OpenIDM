@@ -19,9 +19,9 @@ package org.forgerock.openidm.jaspi.modules;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.SecurityContext.AUTHZID_COMPONENT;
-import static org.forgerock.json.resource.SecurityContext.AUTHZID_ID;
-import static org.forgerock.json.resource.SecurityContext.AUTHZID_ROLES;
+import static org.forgerock.services.context.SecurityContext.AUTHZID_COMPONENT;
+import static org.forgerock.services.context.SecurityContext.AUTHZID_ID;
+import static org.forgerock.services.context.SecurityContext.AUTHZID_ROLES;
 
 import java.util.ArrayList;
 import java.util.Collections;

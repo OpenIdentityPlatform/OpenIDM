@@ -23,8 +23,8 @@
  */
 package org.forgerock.openidm.audit.impl;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.AbstractContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.AbstractContext;
 import org.forgerock.json.JsonValue;
 
 /**

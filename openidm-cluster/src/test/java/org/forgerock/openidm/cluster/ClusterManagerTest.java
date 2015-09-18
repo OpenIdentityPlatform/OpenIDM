@@ -7,7 +7,7 @@ import static org.forgerock.json.JsonValue.object;
 import java.io.IOException;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;

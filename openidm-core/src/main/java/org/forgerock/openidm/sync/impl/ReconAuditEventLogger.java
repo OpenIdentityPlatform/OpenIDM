@@ -17,7 +17,7 @@ package org.forgerock.openidm.sync.impl;
 
 import java.util.List;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * A recon audit log entry representation.  Contains additional fields

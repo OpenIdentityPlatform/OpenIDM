@@ -2,7 +2,7 @@ package org.forgerock.openidm.script;
 
 import javax.script.Bindings;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
