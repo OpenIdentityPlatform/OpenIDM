@@ -761,8 +761,12 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 properties.put("user", user);
                 properties.put("password", password);
             }
-            properties.put(CONFIG_KERBEROS_PRINCIPAL, kerberosServerPrincipal);
-            properties.put(CONFIG_SECURITY_MECHANISM, securityMechanism);
+            if (StringUtils.isNotBlank(kerberosServerPrincipal)) {
+                properties.put(CONFIG_KERBEROS_PRINCIPAL, kerberosServerPrincipal);
+            }
+            if (StringUtils.isNotBlank(securityMechanism)) {
+                properties.put(CONFIG_SECURITY_MECHANISM, securityMechanism);
+            }
             return DriverManager.getConnection(dbUrl, properties);
         }
     }
