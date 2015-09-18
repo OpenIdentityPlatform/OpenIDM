@@ -31,6 +31,7 @@ import static org.forgerock.json.JsonValue.object;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,9 +46,14 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarInputStream;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -71,6 +77,16 @@ public class UpgradeManager {
     private static final Path BUNDLE_PATH = Paths.get("bundle");
     private static final Path CONF_PATH = Paths.get("conf");
     private static final String JSON_EXT = ".json";
+    private static final Path ARCHIVE_PATH = Paths.get("bin/update");
+
+    // Archive manifest keys
+    private static final String PROP_PRODUCT = "product";
+    private static final String PROP_VERSION = "version";
+    private static final String PROP_UPGRADESPRODUCT = "upgradesProduct";
+    private static final String PROP_UPGRADESVERSION = "upgradesVersion";
+    private static final String PROP_DESCRIPTION = "description";
+    private static final String PROP_RESOURCE = "resource";
+    private static final String PROP_RESTARTREQUIRED = "restartRequired";
 
     static <R, E extends Exception> R withInputStreamForPath(Path path, Function<InputStream, R, E> function)
             throws E, IOException {
@@ -183,7 +199,18 @@ public class UpgradeManager {
         R invoke(Archive archive, FileStateChecker fileStateChecker) throws UpgradeException;
     }
 
-    private <R> R usingArchive(final URL url, final Path installDir, final UpgradeAction<R> upgradeAction)
+    /**
+     * Invoke an {@link UpgradeAction} using an archive at a given URL.  Use {@code installDir} as the location
+     * of the currently-installed OpenIDM.
+     *
+     * @param archiveFile the {@link Path} to a ZIP archive containing a new version of OpenIDM
+     * @param installDir the {@link Path} of the currently-installed OpenIDM
+     * @param upgradeAction the upgrade action to perform
+     * @param <R> The return type of the action
+     * @return the result of the upgrade action
+     * @throws UpgradeException on failure to perform the upgrade action
+     */
+    private <R> R usingArchive(final Path archiveFile, final Path installDir, final UpgradeAction<R> upgradeAction)
             throws UpgradeException {
 
         return withTempDirectory("openidm-upgrade-",
@@ -191,12 +218,7 @@ public class UpgradeManager {
                     @Override
                     public R apply(Path tempUnzipDir) throws UpgradeException {
                         try {
-                            final ZipArchive archive = new ZipArchive(
-                                    url.getProtocol().startsWith("file")
-                                            ? Paths.get(url.toURI())
-                                            : readZipFile(url),
-                                    tempUnzipDir);
-
+                            final ZipArchive archive = new ZipArchive(archiveFile, tempUnzipDir);
                             final ChecksumFile checksumFile = new ChecksumFile(installDir.resolve(CHECKSUMS_FILE));
                             final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
 
@@ -211,36 +233,35 @@ public class UpgradeManager {
     /**
      * Provide a report of which files have been changed since they were installed.
      *
-     * @param url the URL of the new distribution
+     * @param archiveFile the {@link Path} to a ZIP archive containing a new version of OpenIDM
      * @param installDir the base directory where OpenIDM is installed
      * @return a json response listed changed files by state
      * @throws UpgradeException
      */
-    public JsonValue report(final URL url, final Path installDir)
+    public JsonValue report(final Path archiveFile, final Path installDir, final Path projectDir)
             throws UpgradeException {
 
-        return usingArchive(url, installDir,
+        return usingArchive(archiveFile, installDir,
                 new UpgradeAction<JsonValue>() {
                     @Override
                     public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker)
                             throws UpgradeException {
 
-                        final JsonValue result = json(object());
-                        for (FileState state : FileState.values()) {
-                            result.put(state.toString(), array());
-                        }
-
+                        final List<Object> result = array();
                         for (Path path : archive.getFiles()) {
                             try {
                                 FileState state = fileStateChecker.getCurrentFileState(path);
                                 if (!FileState.UNCHANGED.equals(state)) {
-                                    result.get(state.toString()).add(path.toString());
+                                    result.add(object(
+                                            field("filePath", path.toString()),
+                                            field("fileState", state.toString())
+                                    ));
                                 }
                             } catch (IOException e) {
                                 throw new UpgradeException("Unable to determine file state for " + path.toString(), e);
                             }
                         }
-                        return result;
+                        return json(result);
                     }
                 });
     }
@@ -248,15 +269,15 @@ public class UpgradeManager {
     /**
      * Return the diff of a single file to show what changes will be made if we overwrite the existing file.
      *
-     * @param url the URL of the new distribution
+     * @param archiveFile the {@link Path} to a ZIP archive containing a new version of OpenIDM
      * @param installDir the base directory where OpenIDM is installed
      * @param filename the file to diff
      * @return a json response showing the current file, the new file, and the diff
      * @throws UpgradeException on failure to perform diff
      */
-    public JsonValue diff(final URL url, final Path installDir, final String filename) throws UpgradeException {
+    public JsonValue diff(final Path archiveFile, final Path installDir, final String filename) throws UpgradeException {
 
-        return usingArchive(url, installDir,
+        return usingArchive(archiveFile, installDir,
                 new UpgradeAction<JsonValue>() {
                     // Helper function for get the file content
                     private Function<InputStream, List<String>, IOException> inputStreamToLines =
@@ -302,16 +323,16 @@ public class UpgradeManager {
     /**
      * Perform the upgrade... TODO work-in-progress...
      *
-     * @param url the URL of the new distribution
+     * @param archiveFile the {@link Path} to a ZIP archive containing a new version of OpenIDM
      * @param installDir the base directory where OpenIDM is installed
      * @param keep whether to keep the files (replace if false)
      * @return a json response with the report of what was done to each file
      * @throws UpgradeException on failure to perform upgrade
      */
-    public JsonValue upgrade(final URL url, final Path installDir, final boolean keep)
+    public JsonValue upgrade(final Path archiveFile, final Path installDir, final Path projectDir, final boolean keep)
         throws UpgradeException {
 
-        return usingArchive(url, installDir,
+        return usingArchive(archiveFile, installDir,
                 new UpgradeAction<JsonValue>() {
                     @Override
                     public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpgradeException {
@@ -322,22 +343,25 @@ public class UpgradeManager {
                         final JsonValue result = json(object());
                         for (final Path path : archive.getFiles()) {
                             try {
-                            if (path.startsWith(BUNDLE_PATH)) {
-                                // do bundle upgrade
-                                result.put(path.toString(), "skipped");
-                            } else if (path.startsWith(CONF_PATH) && path.getFileName().toString().endsWith(JSON_EXT)) {
-                                // a json config in the default project - ignore it - OPENIDM-3235
-                                result.put(path.toString(), "skipped");
-                            } else {
-                                // normal static file; update it
-                                if (keep) {
-                                    staticFileUpdate.keep(path);
-                                    result.put(path.toString(), "kept");
+                                if (path.startsWith(BUNDLE_PATH)) {
+                                    // do bundle upgrade
+                                    result.put(path.toString(), "skipped");
+                                } else if (path.startsWith(CONF_PATH) && path.getFileName().toString().endsWith(JSON_EXT)) {
+                                    // a json config in the default project - ignore it - OPENIDM-3235
+                                    result.put(path.toString(), "skipped");
+                                // TODO
+                                //} else if matches PATCH_PATH {
+                                //        patch something
                                 } else {
-                                    staticFileUpdate.replace(path);
-                                    result.put(path.toString(), "replaced");
+                                    // normal static file; update it
+                                    if (keep) {
+                                        staticFileUpdate.keep(path);
+                                        result.put(path.toString(), "kept");
+                                    } else {
+                                        staticFileUpdate.replace(path);
+                                        result.put(path.toString(), "replaced");
+                                    }
                                 }
-                            }
                             } catch (IOException e) {
                                 throw new UpgradeException("Unable to upgrade " + path.toString(), e);
                             }
@@ -345,6 +369,76 @@ public class UpgradeManager {
                         return result;
                     }
                 });
+    }
+
+    public JsonValue listAvailableUpdates() throws UpgradeException {
+        List<Object> updates = array();
+        Path tmp = Paths.get("tmp");
+
+        ChecksumFile cksum;
+        try {
+            cksum = new ChecksumFile(Paths.get(".").resolve(CHECKSUMS_FILE));
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new UpgradeException("Failed to load checksum file from archive.", e);
+        } catch (NullPointerException e) {
+            throw new UpgradeException("Archive directory does not exist?", e);
+        }
+
+        for (File file : ARCHIVE_PATH.toFile().listFiles()) {
+            if (file.getName().endsWith(".zip")) {
+                try {
+                    Properties prop = readProperties();
+                    if ("OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT))) {
+                        // TODO also check version compatibility?
+                        updates.add(object(
+                                field("archive", file.getName()),
+                                field("fileSize", file.length()),
+                                field("fileDate", file.lastModified()),
+                                field("checksum", cksum.getCurrentDigest(file.toPath())),
+                                field("version", prop.getProperty(PROP_PRODUCT) + " v" +
+                                        prop.getProperty(PROP_VERSION)),
+                                field("description", prop.getProperty(PROP_DESCRIPTION)),
+                                field("resource", prop.getProperty(PROP_RESOURCE))
+                        ));
+                    }
+                } catch (NullPointerException | IOException e) {
+                    // skip file, it does not contain a manifest or digest could not be calculated
+                }
+            }
+        }
+
+        return new JsonValue(updates);
+    }
+
+    private Properties readProperties() throws UpgradeException {
+        Properties prop = new Properties();
+        InputStream inp = null;
+        try {
+            inp = new FileInputStream("package.properties");
+            prop.load(inp);
+            return prop;
+        } catch (IOException e) {
+            throw new UpgradeException("Unable to load package properties.", e);
+        } finally {
+            if (inp != null) {
+                try {
+                    inp.close();
+                } catch (IOException e) {
+                    logger.debug("Failed to close package.properties", e);
+                }
+            }
+        }
+    }
+
+    private Attributes readManifest(File jarFile) throws UpgradeException {
+        try {
+            JarInputStream jar = new JarInputStream(new FileInputStream(jarFile));
+            return jar.getManifest().getMainAttributes();
+        } catch (FileNotFoundException e) {
+            throw new UpgradeException("File " + jarFile.getName() + " does not exist.", e);
+        } catch (IOException e) {
+            throw new UpgradeException("Error while reading from " + jarFile.getName(), e);
+        }
     }
 
     /**
@@ -373,16 +467,14 @@ public class UpgradeManager {
         try {
             fos = new FileOutputStream(targetFile);
         } catch (FileNotFoundException ex) {
-            throw new UpgradeException("Error in getting the specified file to "
-                    + targetFile, ex);
+            throw new UpgradeException("Error in getting the specified file to " + targetFile, ex);
         }
 
         try {
             fos.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
             System.out.println("Downloaded to " + targetFile);
         } catch (IOException ex) {
-            throw new UpgradeException("Failed to get the specified file "
-                    + url + " to: " + targetFile, ex);
+            throw new UpgradeException("Failed to get the specified file " + url + " to: " + targetFile, ex);
         }
 
         return targetFile.toPath();

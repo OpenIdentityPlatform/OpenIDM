@@ -1,0 +1,155 @@
+UI Endpoints for Update Process
+
+1. Get list of update archives in openidm/update:
+
+	ACTION openidm/maintenance/update?_action=available
+
+	returns:
+	[
+        {
+            "archive" : "OpenIDM-4.5.0.zip",
+            "fileSize" : 84372957,
+            "fileDate" : "2015-12-31T23:59:59",
+            "version" : "OpenIDM v4.5.0",
+            "checksum" : "bleeblooblah",
+            "description" : "Full product installation",
+            "resource" : "<url for online docs>"
+        }, {
+            ...
+        }
+	]
+
+2. Get list of file changes for a given update archive:
+
+	ACTION openidm/maintenance/update?_action=preview
+	{
+		"archive" : "OpenIDM-4.5.0.zip"
+	}
+
+	returns:
+	[
+		{
+			"filePath" : "bin/defaults/script/access.js",
+			"fileState" : "UNEXPECTED" (states from FileState.java, see below)
+		}, {
+			...
+		}
+	]
+
+3. Perform update using a given update archive
+
+	ACTION openidm/maintenance/update?_action=update
+	{
+		"archive" : "OpenIDM-4.5.0.zip"
+	}
+
+	returns:
+	{
+		"_id" : "someIDstring",
+		"status" : "IN_PROGRESS" (see below for possible states),
+		"statusMessage" : "Initializing",
+		"completedTasks" : 0,
+		"totalTasks" : 350,
+		"startDate" : "2016-04-01 12:00:00",
+		"user" : "openidm-admin"
+	}
+
+4. Get status of running update
+
+	READ openidm/repo/update/someIDstring
+
+	returns (while still in progress):
+	{
+		"_id" : "someIDstring",
+		"status" : "IN_PROGRESS",
+		"statusMessage" : "Doing something",
+		"completedTasks" : 150,
+		"totalTasks" : 350,
+		"startDate" : "2016-04-01 12:00:00",
+		"user" : "openidm-admin"
+	}
+
+	(while in terminal state):
+	{
+		"_id" : "someIDstring",
+		"status" : "COMPLETE" | "REVERTED",
+		"statusMessage" : "Something went horribly wrong",
+		"completedTasks" : 15,
+		"totalTasks" : 350,
+		"startDate" : "2016-04-01 12:00:00",
+		"endDate" : "2016-04-01 13:00:00",
+		"user" : "openidm-admin",
+		"nodeId" : "node3",
+		"files" : [
+			{
+				"filePath" : "bin/defaults/script/access.js",
+				"fileState" : "UNEXPECTED" (states from FileState.java),
+				"backup" : "bin/defaults/script/access.js.<update id>"
+			},
+			...
+		]
+	}
+
+	Note that if the final status was unsuccessful and the update was reverted the "backup" attribute will not be
+	present (backups have been removed as part of the revert).
+
+5. Get list of updates
+
+	QUERY openidm/repo/update?_queryFilter=_id+pr
+
+	returns:
+	[
+		{
+			"archive" : "OpenIDM-4.1.0.zip",
+			"_id" : "someIDstring",
+			"status" : "COMPLETED",
+    		"statusMessage" : "Rainbows and unicorns",
+    		"completedTasks" : 350,
+	    	"totalTasks" : 350,
+    		"startDate" : "2016-04-01 12:00:00",
+    		"endDate" : "2016-04-01 13:00:00",
+    		"user" : "openidm-admin",
+    		"nodeId" : "node1"
+		},
+		...
+	]
+
+	The id can be passed to READ openidm/repo/update/someIDstring to fetch the log if terminal or just status
+	otherwise.
+
+
+FileState States:
+
+    These states are described from the perspective of the existing installation, not that of the update archive.
+
+    /** The file exists on disk but not in the list of known files for the original distribution. */
+    UNEXPECTED,
+    /** The file does not exist on disk nor in the list of known files for the original distribution. */
+    NONEXISTENT,
+    /** The file should exist but does not. */
+    DELETED,
+    /** The file on disk has been changed since the original deployment in a read-only directory. */
+    DIFFERS,
+    /** The file on disk has been changed in a user-modifiable directory. */
+    PRESERVED,
+    /** The file is unchanged from the original distribution. */
+    UNCHANGED
+
+Update Stati:
+
+    IN_PROGRESS     Update hasstarted but not yet completed
+    COMPLETE        Update has completed
+    FAILED          Update failed but has not yet reverted
+    REVERTED        Update failed and was reverted
+
+    Note that it is possible an update could remain in IN_PROGRESS or FAILED state forever if the thread/process
+    died before the update could reach COMPLETE or REVERTED, the two "terminal states".  Updates are not reentrant
+    at this time.
+
+
+Other
+
+Backups should be named after the original file plus the update id as a suffix. Thus script/access.js backed up as
+part of an update assign the id "123foo" named script/access.js.123foo.
+
+Requests for update history against repo/update can use queryFilter to filter the history results.
