@@ -23,7 +23,9 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.NEVER_FILTER;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.TYPE_ACTIVITY;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
@@ -81,7 +83,7 @@ public class AuditLogFilterBuilderTest {
                     new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) {
-                            return newActivityActionFilter(actions);
+                            return newActionFilter(TYPE_ACTIVITY, actions);
                         }
                     })
             .add("eventTypes/activity/filter/triggers",
@@ -90,7 +92,7 @@ public class AuditLogFilterBuilderTest {
                         public AuditLogFilter apply(JsonValue triggers) {
                             List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
                             for (String trigger : triggers.keys()) {
-                                filters.add(newActivityActionFilter(triggers.get(trigger), trigger));
+                                filters.add(newActionFilter(TYPE_ACTIVITY, triggers.get(trigger), trigger));
                             }
                             return newOrCompositeFilter(filters);
                         }
@@ -514,7 +516,7 @@ public class AuditLogFilterBuilderTest {
                                 try {
                                     return newScriptedFilter(scriptRegistry.takeScript(scriptConfig));
                                 } catch (ScriptException e) {
-                                    return AuditLogFilters.NEVER;
+                                    return NEVER_FILTER;
                                 }
                             }
                         })
