@@ -629,7 +629,7 @@
                 }
             },
             "events": {
-                "title": "Audit Events to Configure",
+                "title": "Audit Event Configuration",
                 "desc": "Configured events are written through one or more Audit Event Handlers.",
                 "addCustom": "Add a Custom Event",
                 "default": "Default",
