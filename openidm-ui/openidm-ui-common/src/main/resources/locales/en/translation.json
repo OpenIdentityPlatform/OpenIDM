@@ -616,11 +616,11 @@
         "audit": {
             "eventHandlers": {
                 "title": "Audit Event Handlers",
-                "desc": "Configure existing events, or add a custom event",
+                "desc": "Select and customize Audit Event Handlers",
                 "name": "Name",
                 "type": "Type",
                 "auditEvents": "Audit Events",
-                "useForQueries": "Manage queries with",
+                "useForQueries": "Use for queries",
                 "addOption": "Add an event handler...",
                 "addButton": "Add Event Handler",
                 "dialog": {
@@ -629,8 +629,8 @@
                 }
             },
             "events": {
-                "title": "Audit Events to Watch",
-                "desc": "Configured events are written through the Audit Event Handler.",
+                "title": "Audit Events to Configure",
+                "desc": "Configured events are written through one or more Audit Event Handlers.",
                 "addCustom": "Add a Custom Event",
                 "default": "Default",
                 "custom": "Custom",
