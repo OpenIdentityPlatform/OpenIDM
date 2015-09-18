@@ -94,13 +94,17 @@ public class ConfigAuditEventLogger {
         if (null == before && null == after) {
             return new String[0];
         }
-
+        // Default to empty json when they are null.
         if (null != before && null == after) {
             after = json(object());
         } else if (before == null) {
             before = json(object());
         }
-
+        // Config objects require id only for repo storage and not on the filesystem.
+        // As far as reporting changes to a config, it is not relevant to be reported as changes.
+        after.remove("_id");
+        before.remove("_id");
+        // Now find the changed fields.
         List<String> changedFields = new ArrayList<>();
         for (JsonValue change : JsonPatch.diff(before, after)) {
             changedFields.add(change.get(JsonPatch.PATH_PTR).asString());
