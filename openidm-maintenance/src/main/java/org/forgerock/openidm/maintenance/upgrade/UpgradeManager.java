@@ -77,6 +77,7 @@ public class UpgradeManager {
     private static final Path BUNDLE_PATH = Paths.get("bundle");
     private static final Path CONF_PATH = Paths.get("conf");
     private static final String JSON_EXT = ".json";
+    private static final String PATCH_EXT = ".patch";
     private static final Path ARCHIVE_PATH = Paths.get("bin/update");
 
     // Archive manifest keys
@@ -238,7 +239,7 @@ public class UpgradeManager {
      * @return a json response listed changed files by state
      * @throws UpgradeException
      */
-    public JsonValue report(final Path archiveFile, final Path installDir, final Path projectDir)
+    public JsonValue report(final Path archiveFile, final Path installDir)
             throws UpgradeException {
 
         return usingArchive(archiveFile, installDir,
@@ -261,6 +262,7 @@ public class UpgradeManager {
                                 throw new UpgradeException("Unable to determine file state for " + path.toString(), e);
                             }
                         }
+
                         return json(result);
                     }
                 });
@@ -321,7 +323,7 @@ public class UpgradeManager {
     }
 
     /**
-     * Perform the upgrade... TODO work-in-progress...
+     * Perform the upgrade.
      *
      * @param archiveFile the {@link Path} to a ZIP archive containing a new version of OpenIDM
      * @param installDir the base directory where OpenIDM is installed
@@ -329,36 +331,40 @@ public class UpgradeManager {
      * @return a json response with the report of what was done to each file
      * @throws UpgradeException on failure to perform upgrade
      */
-    public JsonValue upgrade(final Path archiveFile, final Path installDir, final Path projectDir, final boolean keep)
+    public JsonValue upgrade(final Path archiveFile, final Path installDir, final boolean keep)
         throws UpgradeException {
 
         return usingArchive(archiveFile, installDir,
                 new UpgradeAction<JsonValue>() {
                     @Override
-                    public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpgradeException {
+                    public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker)
+                            throws UpgradeException {
                         final StaticFileUpdate staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
-                                archive, new ProductVersion(ServerConstants.getVersion(), ServerConstants.getRevision()));
+                                archive, new ProductVersion(ServerConstants.getVersion(),
+                                ServerConstants.getRevision()));
 
                         // perform upgrade
                         final JsonValue result = json(object());
                         for (final Path path : archive.getFiles()) {
                             try {
                                 if (path.startsWith(BUNDLE_PATH)) {
-                                    // do bundle upgrade
+                                    // TODO do bundle upgrade
+                                    result.put(path.toString(), "installed");
+                                } else if (path.startsWith(CONF_PATH) &&
+                                        path.getFileName().toString().endsWith(JSON_EXT)) {
+                                    // a json config in the default project - ignore it
                                     result.put(path.toString(), "skipped");
-                                } else if (path.startsWith(CONF_PATH) && path.getFileName().toString().endsWith(JSON_EXT)) {
-                                    // a json config in the default project - ignore it - OPENIDM-3235
-                                    result.put(path.toString(), "skipped");
-                                // TODO
-                                //} else if matches PATCH_PATH {
-                                //        patch something
+                                } else if (path.startsWith(CONF_PATH) &&
+                                        path.getFileName().toString().endsWith(PATCH_EXT)) {
+                                    // TODO patch config in repo
+                                    result.put(path.toString(), "patched");
                                 } else {
                                     // normal static file; update it
                                     if (keep) {
-                                        staticFileUpdate.keep(path);
+                                        Path stockFile = staticFileUpdate.keep(path);
                                         result.put(path.toString(), "kept");
                                     } else {
-                                        staticFileUpdate.replace(path);
+                                        Path backupFile = staticFileUpdate.replace(path);
                                         result.put(path.toString(), "replaced");
                                     }
                                 }
@@ -371,11 +377,16 @@ public class UpgradeManager {
                 });
     }
 
+    /**
+     * List the applicable update archives found in the update directory.
+     *
+     * @return a json list of objects describing each applicable update archive.
+     * @throws UpgradeException on failure to generate archive list.
+     */
     public JsonValue listAvailableUpdates() throws UpgradeException {
-        List<Object> updates = array();
-        Path tmp = Paths.get("tmp");
+        JsonValue updates = json(array());
 
-        ChecksumFile cksum;
+        final ChecksumFile cksum;
         try {
             cksum = new ChecksumFile(Paths.get(".").resolve(CHECKSUMS_FILE));
         } catch (IOException | NoSuchAlgorithmException e) {
@@ -407,26 +418,16 @@ public class UpgradeManager {
             }
         }
 
-        return new JsonValue(updates);
+        return updates;
     }
 
     private Properties readProperties() throws UpgradeException {
         Properties prop = new Properties();
-        InputStream inp = null;
-        try {
-            inp = new FileInputStream("package.properties");
+        try(InputStream inp = new FileInputStream("package.properties")) {
             prop.load(inp);
             return prop;
         } catch (IOException e) {
             throw new UpgradeException("Unable to load package properties.", e);
-        } finally {
-            if (inp != null) {
-                try {
-                    inp.close();
-                } catch (IOException e) {
-                    logger.debug("Failed to close package.properties", e);
-                }
-            }
         }
     }
 
