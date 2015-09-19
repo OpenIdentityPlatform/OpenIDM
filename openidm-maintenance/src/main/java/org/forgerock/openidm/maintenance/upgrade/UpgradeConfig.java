@@ -26,14 +26,13 @@ package org.forgerock.openidm.maintenance.upgrade;
 
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 
 /**
  * Config object patching utility.
@@ -51,8 +50,7 @@ public class UpgradeConfig {
      * @param patch a JsonPatch to be applied to the named config resource.
      * @throws UpgradeException
      */
-    public void patchConfig(ServerContext context, String resourceName, JsonValue patch) throws UpgradeException {
-        Resource configObject;
+    public void patchConfig(Context context, String resourceName, JsonValue patch) throws UpgradeException {
         try {
             PatchRequest request = Requests.newPatchRequest(resourceName);
             for (PatchOperation op : PatchOperation.valueOfList(patch)) {
