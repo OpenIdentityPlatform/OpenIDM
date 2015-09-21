@@ -604,6 +604,44 @@ END
 
 
 -- -----------------------------------------------------
+-- Table `openidm`.`updates`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='updates' and xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[updates] (
+  id NUMERIC(19,0) NOT NULL IDENTITY ,
+  status NVARCHAR(64) NOT NULL ,
+  statusMessage NVARCHAR(256) NOT NULL ,
+  completedTasks NUMERIC(19,0) ,
+  totalTasks NUMERIC(19,0) ,
+  startDate NVARCHAR(29) NOT NULL ,
+  endDate NVARCHAR(29) ,
+  userName NVARCHAR(256) NOT NULL ,
+  nodeId NVARCHAR(64) ,
+  PRIMARY KEY CLUSTERED (id)
+);
+EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', updates, 'COLUMN', startDate;
+EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', updates, 'COLUMN', endDate;
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`updatefile`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='updatefile' and xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[updatefile] (
+  updateId NUMERIC(19,0) NOT NULL ,
+  filePath NTEXT NOT NULL ,
+  fileState NVARCHAR(64) NOT NULL ,
+  backupFile NTEXT ,
+  stockFile NTEXT
+);
+CREATE INDEX fk_updatefileupdateid_updatesid ON [openidm].[updatefile] (updateId ASC);
+END
+
+
+-- -----------------------------------------------------
 -- Data for table `openidm`.`internaluser`
 -- -----------------------------------------------------
 IF (NOT EXISTS (SELECT objectid FROM openidm.internaluser WHERE objectid = N'openidm-admin'))
