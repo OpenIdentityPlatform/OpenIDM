@@ -615,8 +615,8 @@
         },
         "audit": {
             "eventHandlers": {
-                "title": "Audit Event Handlers",
-                "desc": "Select and customize Audit Event Handlers",
+                "title": "Event Handlers",
+                "desc": "Select and customize Event Handlers",
                 "name": "Name",
                 "type": "Type",
                 "auditEvents": "Audit Events",
@@ -629,8 +629,8 @@
                 }
             },
             "events": {
-                "title": "Audit Event Configuration",
-                "desc": "Configured events are written through one or more Audit Event Handlers.",
+                "title": "Event Categories",
+                "desc": "Configured events are written through one or more Event Handlers.",
                 "addCustom": "Add a Custom Event",
                 "default": "Default",
                 "custom": "Custom",
