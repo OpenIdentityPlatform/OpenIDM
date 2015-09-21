@@ -22,8 +22,6 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -39,8 +37,10 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -204,6 +204,8 @@ public abstract class RelationshipProvider {
      * @param resourceId Id of the resource relation fields in value are to be memebers of
      * @param value A {@link JsonValue} map of relationship fields and their values
      *
+     * @throws NullPointerException If the supplied value is null
+     *
      * @return A promise containing a JsonValue of the persisted relationship(s) for the given resourceId or
      *         ResourceException if an error occurred
      */
@@ -246,23 +248,23 @@ public abstract class RelationshipProvider {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
             final JsonValue newValue = convertToRepoObject(firstResourcePath(context, request), request.getContent());
 
-            // current resource in the db
-            final Promise<ResourceResponse, ResourceException> promisedOldResult = connectionFactory.getConnection().readAsync(context, readRequest);
+            return connectionFactory.getConnection()
+                    // current resource in the db
+                    .readAsync(context, readRequest)
+                    // update once we have the current record
+                    .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                        @Override
+                        public Promise<ResourceResponse, ResourceException> apply(ResourceResponse oldResource) throws ResourceException {
+                            if (newValue.asMap().equals(oldResource.getContent().asMap())) { // resource has not changed
+                                return newResourceResponse(oldResource.getId(), oldResource.getRevision(), null).asPromise();
+                            } else {
+                                final UpdateRequest updateRequest = Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(relationshipId), newValue);
+                                updateRequest.setRevision(request.getRevision());
 
-            // update once we have the current record
-            return promisedOldResult.thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                @Override
-                public Promise<ResourceResponse, ResourceException> apply(ResourceResponse oldResource) throws ResourceException {
-                    if (newValue.asMap().equals(oldResource.getContent().asMap())) { // resource has not changed
-                        return newResourceResponse(oldResource.getId(), oldResource.getRevision(), null).asPromise();
-                    } else {
-                        final UpdateRequest updateRequest = Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(relationshipId), newValue);
-                        updateRequest.setRevision(request.getRevision());
-
-                        return connectionFactory.getConnection().updateAsync(context, updateRequest).then(FORMAT_RESPONSE);
-                    }
-                }
-            });
+                                return connectionFactory.getConnection().updateAsync(context, updateRequest).then(FORMAT_RESPONSE);
+                            }
+                        }
+                    });
         } catch (ResourceException e) {
             return e.asPromise();
         }

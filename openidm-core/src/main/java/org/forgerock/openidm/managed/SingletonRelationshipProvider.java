@@ -20,8 +20,6 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -36,11 +34,14 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
@@ -48,7 +49,7 @@ import org.forgerock.util.query.QueryFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
+class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
     private final RequestHandler requestHandler;
 
     /**
@@ -77,32 +78,35 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(Context context, String resourceId) {
-        try {
-            return newResultPromise(fetch(context, resourceId).getContent());
-        } catch (NotFoundException e) {
-            return newResultPromise(json(null));
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
+        return fetch(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue, ResourceException>() {
+            @Override
+            public Promise<JsonValue, ResourceException> apply(ResourceResponse value) throws ResourceException {
+                return newResultPromise(value.getContent());
+            }
+        });
     }
 
-    private ResourceResponse fetch(Context context, String resourceId) throws ResourceException {
-        final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-        queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
-        final List<ResourceResponse> relationships = new ArrayList<>();
+    private Promise<ResourceResponse, ResourceException> fetch(Context context, String resourceId) {
+        try {
+            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
+            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+            final List<ResourceResponse> relationships = new ArrayList<>();
 
-        queryRequest.setQueryFilter(QueryFilter.and(
-                QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(resourceId)),
-                QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
-        ));
+            queryRequest.setQueryFilter(QueryFilter.and(
+                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(resourceId)),
+                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
+            ));
 
-        connectionFactory.getConnection().query(context, queryRequest, relationships);
+            connectionFactory.getConnection().query(context, queryRequest, relationships);
 
-        if (relationships.isEmpty()) {
-            throw new NotFoundException();
-        } else {
-            // TODO - check size and throw illegal state if more than one?
-            return FORMAT_RESPONSE.apply(relationships.get(0));
+            if (relationships.isEmpty()) {
+                return new NotFoundException().asPromise();
+            } else {
+                // TODO - check size and throw illegal state if more than one?
+                return newResultPromise(FORMAT_RESPONSE.apply(relationships.get(0)));
+            }
+        } catch (ResourceException e) {
+            return e.asPromise();
         }
     }
 
@@ -120,7 +124,7 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
      */
     @Override
     public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, JsonValue value) {
-        if (value != null && value.isNotNull()) {
+        if (value.isNotNull()) {
             try {
                 final JsonValue id = value.get(FIELD_PROPERTIES.child("_id"));
 
@@ -171,42 +175,46 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        try {
-            return super.readInstance(context, relationshipId(context), request);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
+    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final ReadRequest request) {
+        return relationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
+            @Override
+            public Promise<ResourceResponse, ResourceException> apply(String relationshipId) throws ResourceException {
+                return readInstance(context, relationshipId, request);
+            }
+        });
     }
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        try {
-            return super.updateInstance(context, relationshipId(context), request);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
+    public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final UpdateRequest request) {
+        return relationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
+            @Override
+            public Promise<ResourceResponse, ResourceException> apply(String relationshipId) throws ResourceException {
+                return updateInstance(context, relationshipId, request);
+            }
+        });
     }
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        try {
-            return super.patchInstance(context, relationshipId(context), request);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
+    public Promise<ResourceResponse, ResourceException> patchInstance(final Context context, final PatchRequest request) {
+        return relationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
+            @Override
+            public Promise<ResourceResponse, ResourceException> apply(String relationshipId) throws ResourceException {
+                return patchInstance(context, relationshipId, request);
+            }
+        });
     }
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
-        try {
-            return super.actionInstance(context, relationshipId(context), request);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
+    public Promise<ActionResponse, ResourceException> actionInstance(final Context context, final ActionRequest request) {
+        return relationshipId(context).thenAsync(new AsyncFunction<String, ActionResponse, ResourceException>() {
+            @Override
+            public Promise<ActionResponse, ResourceException> apply(String relationshipId) throws ResourceException {
+                return actionInstance(context, relationshipId, request);
+            }
+        });
     }
 
     /**
@@ -214,11 +222,17 @@ public class SingletonRelationshipProvider extends RelationshipProvider implemen
      *
      * @param context The current context
      * @return The id of the current relationship this singleton represents
-     * @throws ResourceException If the id could not be retrieved
      */
-    private String relationshipId(Context context) throws ResourceException {
+    private Promise<String, ResourceException> relationshipId(Context context) {
         final String firstId =
                 context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
-        return fetch(context, firstId).getId();
+
+        return fetch(context, firstId)
+                .then(new Function<ResourceResponse, String, ResourceException>() {
+                    @Override
+                    public String apply(ResourceResponse value) throws ResourceException {
+                        return value.getId();
+                    }
+                });
     }
 }

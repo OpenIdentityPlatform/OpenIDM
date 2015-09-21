@@ -23,8 +23,6 @@ import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -42,10 +40,12 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
@@ -59,7 +59,7 @@ import java.util.Set;
 /**
  * A {@link RelationshipProvider} representing a collection (array) of relationships for the given field.
  */
-public class CollectionRelationshipProvider extends RelationshipProvider implements CollectionResourceProvider {
+class CollectionRelationshipProvider extends RelationshipProvider implements CollectionResourceProvider {
     private final RequestHandler requestHandler;
 
     /**
@@ -130,7 +130,7 @@ public class CollectionRelationshipProvider extends RelationshipProvider impleme
         final JsonValue results = json(array());
 
         try {
-            if (value != null && value.isNotNull()) {
+            if (value.isNotNull()) {
                 // Split relationships in to to-be-updated (_id present) and to-be-created
                 for (JsonValue relationship : value) {
                     final JsonValue id =
