@@ -929,6 +929,58 @@ ON DELETE CASCADE
 ENABLE
 ;
 
+-- DROP TABLE updates CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table updates ...
+CREATE TABLE updates (
+  id NUMBER(24,0) NOT NULL,
+  status VARCHAR2(64 CHAR) NOT NULL,
+  statusMessage VARCHAR2(256 CHAR),
+  completedTasks NUMBER(24,0),
+  totalTasks NUMBER(24,0),
+  startDate VARCHAR2(29) NOT NULL,
+  endDate VARCHAR2(29),
+  userName VARCHAR2(256) NOT NULL,
+  nodeId VARCHAR2(64)
+);
+
+PROMPT Creating Primary Key Constraint PRIMARY_14 on table updates ...
+ALTER TABLE updates
+ADD CONSTRAINT PRIMARY_14 PRIMARY KEY
+(
+  id
+)
+ENABLE
+;
+
+
+-- DROP TABLE updatefile CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table updatefile ...
+CREATE TABLE updatefile (
+  updateId NUMBER(24,0) NOT NULL,
+  filePath CLOB,
+  fileState VARCHAR2(64) NOT NULL,
+  backupFile CLOB,
+  stockFile CLOB
+);
+
+PROMPT Creating Foreign Key Constraint fk_updatefileupdateid on table updatefile...
+ALTER TABLE updatefile
+ADD CONSTRAINT fk_updatefileupdateid FOREIGN KEY
+(
+  updateId
+)
+REFERENCES updates
+(
+  id
+)
+ON DELETE CASCADE
+ENABLE
+;
+
 
 CREATE OR REPLACE TRIGGER genericobjects_id_TRG BEFORE INSERT ON genericobjects
 FOR EACH ROW

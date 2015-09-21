@@ -353,6 +353,16 @@
             },
             "audit_sync" : {},
             "audit_config" : {},
+            "updates" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "update_file" : {},
             "_studio_bookmark" : {}
         }
     },
