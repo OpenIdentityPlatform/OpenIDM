@@ -45,7 +45,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/IndividualRecordValid
 
         render: function() {
             this.parentRender(function () {
-                this.init();
+                this.init({hasWorkFlow: false});
             });
         }
     });
