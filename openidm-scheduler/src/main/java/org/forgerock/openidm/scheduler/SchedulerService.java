@@ -122,11 +122,6 @@ public class SchedulerService implements RequestHandler {
     public final static String SCHEDULE_PERSISTED = "persisted";
     public final static String SCHEDULE_MISFIRE_POLICY = "misfirePolicy";
     public final static String SCHEDULE_CONCURRENT_EXECUTION = "concurrentExecution";
-    
-    public final static String ACTION_CREATE = "create";
-    public final static String ACTION_LIST_CURRENTLY_EXECUTING_JOBS = "listCurrentlyExecutingJobs";
-    public final static String ACTION_PAUSE_JOBS = "pauseJobs";
-    public final static String ACTION_RESUME_JOBS = "resumeJobs"; 
 
     // Valid configuration values
     public final static String SCHEDULE_TYPE_CRON = "cron";
@@ -145,6 +140,16 @@ public class SchedulerService implements RequestHandler {
     final static String GROUP_NAME = "scheduler-service-group";
 
     final static String CONFIG = "schedule.config";
+    
+    /**
+     * Supported actions on the scheduer service.
+     */
+    private enum SchedulerAction { 
+        create,
+        listCurrentlyExecutingJobs,
+        pauseJobs,
+        resumeJobs
+    };
 
     private static Scheduler inMemoryScheduler;
     private static Scheduler persistentScheduler = null;
@@ -629,7 +634,8 @@ public class SchedulerService implements RequestHandler {
             Map<String, String> params = request.getAdditionalParameters();
             String action = request.getAction();
 
-            if (ACTION_CREATE.equals(action)) {
+            switch (request.getActionAsEnum(SchedulerAction.class)) {
+            case create:
                 String id = UUID.randomUUID().toString();
                 params.put("_id", id);
                 if (jobExists(id)) {
@@ -638,8 +644,8 @@ public class SchedulerService implements RequestHandler {
                 CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(params));
                 ResourceResponse response = handleCreate(context, createRequest).getOrThrow();
                 return newActionResponse(response.getContent()).asPromise();
-            } else if (ACTION_LIST_CURRENTLY_EXECUTING_JOBS.equals(action)) {
-            	JsonValue currentlyExecutingJobs = json(array());
+            case listCurrentlyExecutingJobs:
+                JsonValue currentlyExecutingJobs = json(array());
                 List<?> jobs = persistentScheduler.getCurrentlyExecutingJobs();
                 for (Object job : jobs) {
                     JsonValue config = parseStringified((String)((JobExecutionContext)job).getJobDetail().getJobDataMap().get(CONFIG));
@@ -650,16 +656,16 @@ public class SchedulerService implements RequestHandler {
                     JsonValue config = parseStringified((String)((JobExecutionContext)job).getJobDetail().getJobDataMap().get(CONFIG));
                     currentlyExecutingJobs.add(new ScheduleConfig(config).getConfig().getObject());
                 }
-            	return newActionResponse(currentlyExecutingJobs).asPromise();
-            } else if (ACTION_PAUSE_JOBS.equals(action)) {
+                return newActionResponse(currentlyExecutingJobs).asPromise();
+            case pauseJobs:
                 persistentScheduler.pauseAll();
                 inMemoryScheduler.pauseAll();
                 return newActionResponse(json(object(field("success",true)))).asPromise();
-            } else if (ACTION_RESUME_JOBS.equals(action)) {
+            case resumeJobs:
                 persistentScheduler.resumeAll();
                 inMemoryScheduler.resumeAll();
                 return newActionResponse(json(object(field("success",true)))).asPromise();
-            } else {
+            default:
                 throw new BadRequestException("Unknown action: " + action);
             }
         } catch (JsonException e) {
@@ -741,7 +747,7 @@ public class SchedulerService implements RequestHandler {
         }
         JobDetail job = scheduler.getJobDetail(scheduleName, GROUP_NAME);
         JobDataMap dataMap = job.getJobDataMap();
-        JsonValue resultMap = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG))).getConfig();
+        JsonValue resultMap = new ScheduleConfig(parseStringified((String) dataMap.get(CONFIG))).getConfig();
         resultMap.put("_id", scheduleName);
         return resultMap;
     }
