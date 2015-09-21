@@ -37,7 +37,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.json.resource.Router;
 import org.forgerock.http.routing.RoutingMode;
 import org.osgi.framework.Bundle;

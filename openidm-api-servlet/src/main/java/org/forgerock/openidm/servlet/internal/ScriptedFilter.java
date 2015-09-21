@@ -19,7 +19,7 @@ package org.forgerock.openidm.servlet.internal;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;

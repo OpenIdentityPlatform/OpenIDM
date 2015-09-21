@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;

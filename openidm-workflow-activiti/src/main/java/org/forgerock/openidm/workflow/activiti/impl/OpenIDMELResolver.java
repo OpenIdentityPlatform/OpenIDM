@@ -63,7 +63,7 @@ public class OpenIDMELResolver extends ELResolver {
         String key = (String) property;
         try {
             JsonValue openidmContext = (JsonValue) elContext.getELResolver().getValue(elContext, null, ActivitiConstants.OPENIDM_CONTEXT);
-            org.forgerock.http.Context context = new ActivitiContext(openidmContext, classLoader);
+            org.forgerock.services.context.Context context = new ActivitiContext(openidmContext, classLoader);
             ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", "groovy"));
             if (script == null) {
                 scriptJson.put("source", "");

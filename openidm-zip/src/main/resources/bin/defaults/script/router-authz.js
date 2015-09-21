@@ -162,8 +162,8 @@ function isUserCandidateForTask(taskInstanceId) {
     }
 
     roles = "";
-    for (i = 0; i < context.security.authorizationId.roles.length; i++) {
-        role = context.security.authorizationId.roles[i];
+    for (i = 0; i < context.security.authorization.roles.length; i++) {
+        role = context.security.authorization.roles[i];
         if (i === 0) {
             roles = role;
         } else {
@@ -193,7 +193,7 @@ function canUpdateTask() {
 function isProcessOnUsersList(processFilter) {
     var processesForUserQueryParams = {
             "_queryId": "query-processes-for-user",
-            "userId": context.security.authorizationId.id
+            "userId": context.security.authorization.id
         },
         processesForUser = openidm.query("endpoint/getprocessesforuser", processesForUserQueryParams),
         isProcessOneOfUserProcesses = false,
@@ -242,8 +242,8 @@ function checkIfUIIsEnabled(param) {
 }
 
 function ownDataOnly() {
-    var userId = context.security.authorizationId.id,
-        component = context.security.authorizationId.component;
+    var userId = context.security.authorization.id,
+        component = context.security.authorization.component;
 
     // in the case of a literal read on themselves
     return (request.resourcePath === component + "/" + userId);
@@ -395,7 +395,7 @@ function allow() {
         return true;
     }
 
-    roles = context.security.authorizationId.roles;
+    roles = context.security.authorization.roles;
     action = "";
     if (request.action) {
         action = request.action;

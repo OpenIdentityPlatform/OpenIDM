@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;

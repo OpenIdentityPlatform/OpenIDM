@@ -139,8 +139,8 @@ policyImpl = (function (){
     // internal-use utility function
     var checkExceptRoles = function (exceptRoles) {
             var i, j, roles, role;
-            if (context.security.authorizationId !== null) {
-                roles = context.security.authorizationId.roles;
+            if (context.security.authorization !== null) {
+                roles = context.security.authorization.roles;
                 if (exceptRoles) {
                     for (i = 0; i < exceptRoles.length; i++) {
                         role = exceptRoles[i];

@@ -33,7 +33,7 @@ define([ ], function () {
             [
                 200, 
                 { },
-                "{\"authorizationId\":{\"id\":\"openidm-admin\",\"component\":\"repo/internal/user\",\"roles\":[\"openidm-admin\",\"openidm-authorized\"]},\"parent\":{\"id\":\"f4ffdaa2-6cb1-47cb-a359-e0959086bd61\",\"parent\":null,\"class\":\"org.forgerock.json.resource.RootContext\"},\"class\":\"org.forgerock.json.resource.SecurityContext\",\"authenticationId\":\"openidm-admin\"}"
+                "{\"authorization\":{\"id\":\"openidm-admin\",\"component\":\"repo/internal/user\",\"roles\":[\"openidm-admin\",\"openidm-authorized\"]},\"parent\":{\"id\":\"f4ffdaa2-6cb1-47cb-a359-e0959086bd61\",\"parent\":null,\"class\":\"org.forgerock.json.resource.RootContext\"},\"class\":\"org.forgerock.json.resource.SecurityContext\",\"authenticationId\":\"openidm-admin\"}"
             ]
         );
     

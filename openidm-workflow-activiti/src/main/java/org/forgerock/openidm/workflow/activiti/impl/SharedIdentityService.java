@@ -31,7 +31,7 @@ import java.util.List;
 
 import org.activiti.engine.identity.NativeGroupQuery;
 import org.activiti.engine.identity.NativeUserQuery;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.*;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.util.ContextUtil;

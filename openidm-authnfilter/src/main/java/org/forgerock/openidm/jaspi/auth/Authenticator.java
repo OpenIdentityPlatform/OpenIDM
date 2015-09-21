@@ -17,7 +17,7 @@ package org.forgerock.openidm.jaspi.auth;
 
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * Authenticates a user given a username and password combination.

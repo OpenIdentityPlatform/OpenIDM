@@ -27,10 +27,10 @@ package org.forgerock.openidm.audit.filter;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILURE;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
-import static org.forgerock.http.context.ClientContext.newInternalClientContext;
+import static org.forgerock.services.context.ClientContext.newInternalClientContext;
 
 import org.forgerock.audit.events.AccessAuditEventBuilder;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;

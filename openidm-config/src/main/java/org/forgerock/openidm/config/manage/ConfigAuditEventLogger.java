@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.ConfigAuditEventBuilder;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -31,7 +31,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.patch.JsonPatch;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
@@ -48,6 +48,7 @@ public class ConfigAuditEventLogger {
 
     public static final String CONFIG_AUDIT_EVENT_NAME = "CONFIG";
     public static final String AUDIT_CONFIG_REST_PATH = "audit/config";
+    public static final String ROOT_ID_PATH = "/" + ResourceResponse.FIELD_CONTENT_ID;
 
     /**
      * Calls buildAuditEvent() and invokes the request to the audit path.
@@ -94,16 +95,22 @@ public class ConfigAuditEventLogger {
         if (null == before && null == after) {
             return new String[0];
         }
-
-        if (null != before && null == after) {
+        // Default to empty json when they are null.
+        if (after == null) {
             after = json(object());
-        } else if (before == null) {
+        }
+        if (before == null) {
             before = json(object());
         }
-
+        // Now find the changed fields.
         List<String> changedFields = new ArrayList<>();
         for (JsonValue change : JsonPatch.diff(before, after)) {
-            changedFields.add(change.get(JsonPatch.PATH_PTR).asString());
+            String diff = change.get(JsonPatch.PATH_PTR).asString();
+            // Config objects require id only for repo storage and not on the filesystem.
+            // As far as reporting changes to a config, it is not relevant to be reported as changes.
+            if (!ROOT_ID_PATH.equals(diff)) {
+                changedFields.add(diff);
+            }
         }
         return changedFields.toArray(new String[changedFields.size()]);
     }

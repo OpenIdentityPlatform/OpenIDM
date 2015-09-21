@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.script.ScriptException;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
