@@ -380,10 +380,7 @@
                     "type" : "object",
                     "required" : false,
                     "nativeName" : "messagedetail",
-                    "nativeType" : "object",
-                    "flags" : [
-                        "MULTIVALUED"
-                    ]
+                    "nativeType" : "object"
                 },
                 "situation" : {
                     "type" : "string",
@@ -492,7 +489,7 @@
                 "linkQualifier" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName": "linkqualifier",
+                    "nativeName" : "linkqualifier",
                     "nativeType" : "string"
                 },
                 "mapping" : {
@@ -511,10 +508,7 @@
                     "type" : "object",
                     "required" : false,
                     "nativeName" : "messagedetail",
-                    "nativeType" : "object",
-                    "flags" : [
-                        "MULTIVALUED"
-                    ]
+                    "nativeType" : "object"
                 },
                 "situation" : {
                     "type" : "string",
