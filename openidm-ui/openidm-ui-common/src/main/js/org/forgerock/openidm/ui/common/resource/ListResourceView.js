@@ -219,7 +219,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         deleteSelected: function(e) {
             e.preventDefault();
 
-            uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDeleteSelected",{ objectTitle: this.data.objectName }), _.bind(function(){
+            uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDeleteSelected" ,{ objectTitle: this.data.objectName }),  "danger", _.bind(function(){
                 var promArr = [];
                 _.each(this.data.selectedItems, _.bind(function(objectId) {
                     promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId, null, _.bind(function() {
