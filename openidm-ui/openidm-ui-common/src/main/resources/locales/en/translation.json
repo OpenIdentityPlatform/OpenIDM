@@ -629,7 +629,7 @@
                 }
             },
             "events": {
-                "title": "Event Categories",
+                "title": "Event Topics",
                 "desc": "Configured events are written through one or more Event Handlers.",
                 "addCustom": "Add a Custom Event",
                 "default": "Default",
