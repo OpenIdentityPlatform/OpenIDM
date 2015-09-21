@@ -142,9 +142,9 @@ public class SchedulerService implements RequestHandler {
     final static String CONFIG = "schedule.config";
     
     /**
-     * Supported actions on the scheduer service.
+     * Supported actions on the scheduler service.
      */
-    private enum SchedulerAction { 
+    protected enum SchedulerAction { 
         create,
         listCurrentlyExecutingJobs,
         pauseJobs,

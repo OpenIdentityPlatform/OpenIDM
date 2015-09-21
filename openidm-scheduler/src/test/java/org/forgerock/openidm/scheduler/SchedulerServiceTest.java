@@ -25,7 +25,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -36,6 +36,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.scheduler.SchedulerService.SchedulerAction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.osgi.framework.BundleContext;
@@ -115,7 +116,7 @@ public class SchedulerServiceTest {
     }
     
     @Test
-    public void testAuditServiceCreate() throws Exception {
+    public void testCreateSchedule() throws Exception {
         //given
         final CreateRequest createRequest = Requests.newCreateRequest("scheduler", "test1", testScheduleConfig);
 
@@ -149,7 +150,7 @@ public class SchedulerServiceTest {
     @Test
     public void testPauseJobsAction() throws Exception {
         //given
-        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerService.ACTION_PAUSE_JOBS);
+        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerAction.pauseJobs.toString());
 
         //when
         Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
@@ -165,7 +166,7 @@ public class SchedulerServiceTest {
     @Test
     public void testResumeJobsAction() throws Exception {
         //given
-        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerService.ACTION_RESUME_JOBS);
+        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerAction.resumeJobs.toString());
 
         //when
         Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
@@ -181,7 +182,7 @@ public class SchedulerServiceTest {
     @Test
     public void testListCurrentlyExecutingJobsAction() throws Exception {
         //given
-        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerService.ACTION_LIST_CURRENTLY_EXECUTING_JOBS);
+        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerAction.listCurrentlyExecutingJobs.toString());
 
         //when
         Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
