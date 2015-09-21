@@ -27,9 +27,12 @@ package org.forgerock.openidm.util;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.jar.Attributes;
+import java.util.jar.JarInputStream;
 
 /**
  * The FileUtil class contains common methods to read text files.
@@ -110,5 +113,10 @@ public final class FileUtil {
             }
         }
 
+    }
+
+    public static Attributes readManifest(File jarFile) throws FileNotFoundException, IOException {
+        JarInputStream jar = new JarInputStream(new FileInputStream(jarFile));
+        return jar.getManifest().getMainAttributes();
     }
 }
