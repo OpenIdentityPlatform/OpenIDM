@@ -43,7 +43,7 @@
             "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
             "for-userName" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${uid}",
             
-            "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username} and accountStatus = 'active'",
+            "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${username} and accountStatus = 'active'",
             "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
             
             "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
