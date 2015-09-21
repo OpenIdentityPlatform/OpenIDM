@@ -68,6 +68,7 @@ public class LocalCommandScope extends CustomCommandScope {
         Map<String, String> help = new HashMap<String, String>();
         help.put("validate", getLongHeader("validate"));
         help.put("encrypt", getLongHeader("encrypt"));
+        help.put("securehash", getLongHeader("securehash"));
         help.put("keytool", getLongHeader("keytool"));
         return help;
     }
@@ -257,6 +258,51 @@ public class LocalCommandScope extends CustomCommandScope {
             String alias =
                     IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default");
             JsonValue secure = cryptoSvc.encrypt(value, cipher, alias);
+
+            StringWriter wr = new StringWriter();
+            mapper.writerWithDefaultPrettyPrinter().writeValue(wr, secure.getObject());
+            session.getConsole().println("-----BEGIN ENCRYPTED VALUE-----");
+            session.getConsole().println(wr.toString());
+            session.getConsole().println("------END ENCRYPTED VALUE------");
+        } catch (JsonCryptoException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Hashes the input string with a randomly generated salt.
+     *
+     * @param session command session
+     * @param isString whether the input is a string
+     */
+    @Descriptor("Hash the input string.")
+    public void securehash(CommandSession session,
+            @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
+            @Parameter(names = { "-a", "--algorithm" }, absentValue = "SHA-256") String algorithm) {
+        session.getConsole().append("Enter the ").append(isString ? "String" : "Json").println(" value");
+        securehash(session, isString, algorithm, loadFromConsole(session));
+    }
+
+    /**
+     * Hashes the input string with a randomly generated salt.
+     *
+     * @param session command session,
+     * @param isString whether the input is a string
+     * @param name the name of the string to encrypt
+     */
+    @Descriptor("Hash the input string.")
+    public void securehash(CommandSession session,
+            @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
+            @Parameter(names = { "-a", "--algorithm" }, absentValue = "SHA-256") String algorithm,
+            @Descriptor("source string to encrypt") String name) {
+        try {
+            CryptoServiceImpl cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
+            cryptoSvc.activate(null);
+
+            JsonValue value = new JsonValue(isString ? name : mapper.readValue(name, Object.class));
+            JsonValue secure = cryptoSvc.hash(value, algorithm);
 
             StringWriter wr = new StringWriter();
             mapper.writerWithDefaultPrettyPrinter().writeValue(wr, secure.getObject());
