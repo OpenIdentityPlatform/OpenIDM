@@ -18,7 +18,10 @@ package org.forgerock.openidm.jaspi.auth;
 
 import org.eclipse.jetty.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.security.Password;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
@@ -89,18 +92,26 @@ public class ResourceQueryAuthenticator implements Authenticator {
         Reject.ifNull(context, "Router context was null");
 
         final ResourceResponse resource = getResource(username, context);
-        final UserInfo userInfo = getRepoUserInfo(username, resource);
-
-        if (userInfo == null) {
-             // getResource already logged why
-            return AuthenticatorResult.FAILED;
-        } else if (userInfo.checkCredential(password)) {
-            logger.debug("Authentication succeeded for {}", username);
-            return AuthenticatorResult.authenticationSuccess(resource);
+        if (resource != null && cryptoService.isHashed(resource.getContent().get(userCredentialProperty))) {
+            try {
+                if (cryptoService.matches(password, resource.getContent().get(userCredentialProperty))) {
+                    return AuthenticatorResult.authenticationSuccess(resource);
+                }
+            } catch (JsonCryptoException jce) {
+                throw new InternalServerErrorException(jce.getMessage(), jce);
+            }
         } else {
-            logger.debug("Authentication failed for {} due to invalid credentials", username);
-            return AuthenticatorResult.FAILED;
+            final UserInfo userInfo = getRepoUserInfo(username, resource);
+            if (userInfo == null) {
+                // getResource already logged why
+                return AuthenticatorResult.FAILED;
+            } else if (userInfo.checkCredential(password)) {
+                logger.debug("Authentication succeeded for {}", username);
+                return AuthenticatorResult.authenticationSuccess(resource);
+            }
         }
+        logger.debug("Authentication failed for {} due to invalid credentials", username);
+        return AuthenticatorResult.FAILED;
     }
 
     private ResourceResponse getResource(String username, Context context) throws ResourceException {
