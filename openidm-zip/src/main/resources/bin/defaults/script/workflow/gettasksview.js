@@ -62,8 +62,8 @@ if (request.method !== "query") {
             
             if (!usersWhoCanBeAssignedToTask[taskId]) {
                 
-                for(i = 0; i < context.security.authorizationId.roles.length; i++) {
-                    if(context.security.authorizationId.roles[i] === 'openidm-tasks-manager') {
+                for(i = 0; i < context.security.authorization.roles.length; i++) {
+                    if(context.security.authorization.roles[i] === 'openidm-tasks-manager') {
                         isTaskManager = true;
                         break;
                     }

@@ -8,7 +8,7 @@ define([ ],function () {
             [
                 200,
                 {},
-                "{\"authorizationId\":{\"id\":\"openidm-admin\",\"component\":\"repo/internal/user\",\"ipAddress\":\"0:0:0:0:0:0:0:1\",\"roles\":[\"openidm-admin\",\"openidm-authorized\"]},\"parent\":{\"id\":\"fcedcc88-c362-4d73-b18b-0a5d5d875a5c\",\"parent\":null,\"class\":\"org.forgerock.json.resource.RootContext\"},\"class\":\"org.forgerock.json.resource.SecurityContext\",\"authenticationId\":\"openidm-admin\"}"
+                "{\"authorization\":{\"id\":\"openidm-admin\",\"component\":\"repo/internal/user\",\"ipAddress\":\"0:0:0:0:0:0:0:1\",\"roles\":[\"openidm-admin\",\"openidm-authorized\"]},\"parent\":{\"id\":\"fcedcc88-c362-4d73-b18b-0a5d5d875a5c\",\"parent\":null,\"class\":\"org.forgerock.json.resource.RootContext\"},\"class\":\"org.forgerock.json.resource.SecurityContext\",\"authenticationId\":\"openidm-admin\"}"
             ]
         );
 

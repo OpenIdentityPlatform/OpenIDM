@@ -17,7 +17,7 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
 import java.util.Map;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * A retry failure handler which retries infinitely.

@@ -18,7 +18,7 @@
  * global security - map of security context details as have been determined thus far
  *
  *      {
- *          "authorizationId": {
+ *          "authorization": {
  *              "id": "jsmith",
  *              "component": "managed/user",
  *              "roles": [ "openidm-authorized" ]

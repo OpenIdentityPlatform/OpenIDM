@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * A sync audit log entry representation.

@@ -34,8 +34,8 @@ import java.util.List;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
-import org.forgerock.http.Context;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;

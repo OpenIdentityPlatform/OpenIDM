@@ -43,7 +43,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;

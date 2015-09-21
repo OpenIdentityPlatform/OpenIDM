@@ -208,14 +208,14 @@ var httpAccessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "query",
             "actions"   : "*",
-            "customAuthz" : "request.additionalParameters.userId === context.security.authorizationId.id"
+            "customAuthz" : "request.additionalParameters.userId === context.security.authorization.id"
         },
         {
             "pattern"   : "endpoint/gettasksview",
             "roles"     : "openidm-authorized",
             "methods"   : "query",
             "actions"   : "*",
-            "customAuthz" : "request.additionalParameters.userId === context.security.authorizationId.id"
+            "customAuthz" : "request.additionalParameters.userId === context.security.authorization.id"
         },
         {
             "pattern"   : "workflow/taskinstance/*",

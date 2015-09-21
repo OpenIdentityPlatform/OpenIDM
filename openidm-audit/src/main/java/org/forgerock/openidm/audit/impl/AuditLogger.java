@@ -25,7 +25,7 @@ package org.forgerock.openidm.audit.impl;
 
 import java.util.Map;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.NotFoundException;

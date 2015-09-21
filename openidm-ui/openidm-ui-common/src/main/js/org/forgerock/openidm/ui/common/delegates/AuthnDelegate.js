@@ -78,11 +78,11 @@ define("org/forgerock/openidm/ui/common/delegates/AuthnDelegate", [
             var i, data;
 
             data = {
-                id : rawData.authorizationId.id,
+                id : rawData.authorization.id,
                 username : rawData.authenticationId,
                 uid : rawData.authenticationId,
-                roles: rawData.authorizationId.roles,
-                component: rawData.authorizationId.component
+                roles: rawData.authorization.roles,
+                component: rawData.authorization.component
             };
 
             // previously roles were sometimes stored as a CSV - convert those into a proper array

@@ -30,7 +30,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;

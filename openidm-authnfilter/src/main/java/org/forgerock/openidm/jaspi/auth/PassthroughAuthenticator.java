@@ -21,7 +21,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * Contains logic to perform authentication by passing the request through to be authenticated against a OpenICF

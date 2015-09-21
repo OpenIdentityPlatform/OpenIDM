@@ -24,6 +24,17 @@
         }
     ],
     "extendedEventTypes" : {
+        "config": {
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
+            }
+        },
         "activity": {
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",

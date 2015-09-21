@@ -54,7 +54,7 @@ public class OpenIDMResolverFactory implements ResolverFactory {
         ScriptTaskActivityBehavior behaviour;
         String language = "groovy";
         Map<String, String> scriptJson = new HashMap<String, String>(3);
-        org.forgerock.http.Context context;
+        org.forgerock.services.context.Context context;
         ScriptEntry script;
 
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);

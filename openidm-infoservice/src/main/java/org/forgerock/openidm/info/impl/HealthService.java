@@ -46,7 +46,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;

@@ -7,7 +7,7 @@
  * global context.security - map of security context details as have been determined thus far
  *
  *      {
- *          "authorizationId": {
+ *          "authorization": {
  *              "id": "jsmith",
  *              "component": "passthrough",
  *              "roles": [ "openidm-authorized" ]

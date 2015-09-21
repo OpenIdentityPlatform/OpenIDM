@@ -35,7 +35,7 @@ import java.util.Map;
 
 import javax.script.Bindings;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.script.Script;

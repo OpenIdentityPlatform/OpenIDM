@@ -15,8 +15,8 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.AbstractContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.AbstractContext;
 import org.forgerock.json.JsonValue;
 
 /**

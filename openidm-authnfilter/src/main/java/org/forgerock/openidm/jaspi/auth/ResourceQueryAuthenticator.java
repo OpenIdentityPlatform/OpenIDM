@@ -23,7 +23,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.util.Reject;
 import org.slf4j.Logger;

@@ -32,7 +32,7 @@ import java.util.concurrent.Callable;
 
 import javax.script.ScriptException;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.CreateRequest;
@@ -44,7 +44,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
