@@ -52,6 +52,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
 
@@ -399,7 +400,7 @@ public class UpgradeManager {
         for (File file : ARCHIVE_PATH.toFile().listFiles()) {
             if (file.getName().endsWith(".zip")) {
                 try {
-                    Properties prop = readProperties();
+                    Properties prop = readProperties(file);
                     if ("OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT))) {
                         // TODO also check version compatibility?
                         updates.add(object(
@@ -413,7 +414,7 @@ public class UpgradeManager {
                                 field("resource", prop.getProperty(PROP_RESOURCE))
                         ));
                     }
-                } catch (NullPointerException | IOException e) {
+                } catch (Exception e) {
                     // skip file, it does not contain a manifest or digest could not be calculated
                 }
             }
@@ -422,12 +423,19 @@ public class UpgradeManager {
         return updates;
     }
 
-    private Properties readProperties() throws UpgradeException {
+    private Properties readProperties(File file) throws UpgradeException {
         Properties prop = new Properties();
-        try(InputStream inp = new FileInputStream("package.properties")) {
-            prop.load(inp);
-            return prop;
-        } catch (IOException e) {
+        try {
+            ZipFile zip = new ZipFile(file);
+            Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
+            zip.extractFile("openidm/package.properties", tmpDir.toString());
+            try (InputStream inp = new FileInputStream(tmpDir.toString() + "/openidm/package.properties")) {
+                prop.load(inp);
+                return prop;
+            } catch (IOException e) {
+                throw new UpgradeException("Unable to load package properties.", e);
+            }
+        } catch (IOException | ZipException e) {
             throw new UpgradeException("Unable to load package properties.", e);
         }
     }
