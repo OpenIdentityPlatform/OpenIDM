@@ -102,7 +102,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             if (relationships.isEmpty()) {
                 return new NotFoundException().asPromise();
             } else {
-                // TODO - check size and throw illegal state if more than one?
+                // TODO OPENIDM-4094 - check size and throw illegal state if more than one?
                 return newResultPromise(FORMAT_RESPONSE.apply(relationships.get(0)));
             }
         } catch (ResourceException e) {
