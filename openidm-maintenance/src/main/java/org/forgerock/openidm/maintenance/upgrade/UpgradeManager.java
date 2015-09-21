@@ -62,6 +62,7 @@ import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.util.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -433,8 +434,7 @@ public class UpgradeManager {
 
     private Attributes readManifest(File jarFile) throws UpgradeException {
         try {
-            JarInputStream jar = new JarInputStream(new FileInputStream(jarFile));
-            return jar.getManifest().getMainAttributes();
+            return FileUtil.readManifest(jarFile);
         } catch (FileNotFoundException e) {
             throw new UpgradeException("File " + jarFile.getName() + " does not exist.", e);
         } catch (IOException e) {
