@@ -160,6 +160,7 @@
                 "table" : "auditconfig",
                 "objectToColumn" : {
                     "_id" : "objectid",
+                    "_rev" : "rev",
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
@@ -171,8 +172,7 @@
                     "resourceOperation/operation/detail" : "resource_detail",
                     "before" : "before",
                     "after" : "after",
-                    "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"},
-                    "_rev" : "rev"
+                    "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"}
                 }
             },
             "audit/activity" : {
