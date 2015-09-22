@@ -46,7 +46,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget", [
             },
             render: function(args, callback) {
                 this.element = args.element;
-                this.model.menu = args.menu;
                 this.data.cards = args.widget.cards;
 
                 _.each(this.data.cards, function(card) {
