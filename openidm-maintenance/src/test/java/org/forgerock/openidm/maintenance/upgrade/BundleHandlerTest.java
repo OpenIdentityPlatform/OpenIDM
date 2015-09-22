@@ -1,6 +1,7 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 import org.forgerock.commons.launcher.OSGiFrameworkService;
+import org.forgerock.openidm.util.FileUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.FrameworkWiring;
@@ -11,7 +12,9 @@ import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -36,6 +39,8 @@ public class BundleHandlerTest {
 
     // Path to the helloworld bundle jar
     private Path bundlePath;
+
+    private static final String ARCHIVE_EXTENSION = ".test.bak";
 
     private Map<String, Bundle> installedBundles = new HashMap<String, Bundle>();
 
@@ -83,8 +88,8 @@ public class BundleHandlerTest {
         assertNotNull(service.getSystemBundle());
         context = service.getSystemBundle().getBundleContext();
         setInstalledBundles(context);
-        bundleHandler = new BundleHandler(context);
-        bundlePath =  Paths.get(service.getProjectURI().toString(), "bundle/HelloWorld-1.0-SNAPSHOT.jar");
+        bundleHandler = new BundleHandler(context, ARCHIVE_EXTENSION);
+        bundlePath = Paths.get(service.getProjectURI().resolve("bundle/HelloWorld-1.0-SNAPSHOT.jar"));
     }
 
     @AfterClass
@@ -106,7 +111,7 @@ public class BundleHandlerTest {
     private Bundle installBundle(Path path) throws Exception {
         bundleHandler.installBundle(path);
         updateInstalledBundles(context);
-        return installedBundles.get(path.toString());
+        return installedBundles.get(path.toUri().toString());
     }
 
     private void startBundle(Bundle bundle) throws Exception {
@@ -159,7 +164,7 @@ public class BundleHandlerTest {
         frameworkWiring.refreshBundles(bundlesToRefresh);
 
         // assert that the bundle is in uninstalled state
-        bundle = installedBundles.get(bundlePath.toString());
+        bundle = installedBundles.get(bundlePath.toUri().toString());
         assertEquals(bundle.getState(), Bundle.UNINSTALLED);
 
         // at the "system" level remove the bundle from the bundles/directory now
@@ -168,7 +173,7 @@ public class BundleHandlerTest {
     @Test
     public void testInstallBundle() throws Exception {
         // create bundle info for installing
-        Bundle bundle = installedBundles.get(bundlePath.toString());
+        Bundle bundle = installedBundles.get(bundlePath);
 
         // check that the bundle does not exist already in the framework
         assertNull(bundle);
@@ -194,28 +199,52 @@ public class BundleHandlerTest {
         assertEquals(bundle.getState(), Bundle.ACTIVE);
 
     }
+
+    /**
+     * This test updates a bundle that has the same version as
+     * the previous but contains a different class implementation.
+     */
     @Test
     public void testUpdateBundle() throws Exception {
+        Path backupFile = null;
+        try {
+            // Start API
+            testStartBundle();
 
-        Path bundlePathV2  = Paths.get(service.getProjectURI().toString(), "bundle/HelloWorld-2.0.jar");
+            // install bundle
+            Path bundlePathV1 =
+                    Paths.get(service.getProjectURI().resolve("bundle/HelloImplementation-1.0-SNAPSHOT.jar"));
+            Bundle bundle = installBundle(bundlePathV1);
 
-        Bundle bundle2 = installedBundles.get(bundlePathV2.toString());
+            // start the bundle
+            startBundle(bundle);
 
-        // check that the bundle does not exist already in the framework
-        assertNull(bundle2);
+            // assert that the bundle is now started in the Active state
+            assertEquals(bundle.getState(), Bundle.ACTIVE);
 
-        // install the bundle
-        bundle2 = installBundle(bundlePathV2);
+            String bundle1Version = FileUtil.readManifest(bundlePathV1.toFile()).getValue("Bundle-Version");
+            assertEquals(bundle1Version, bundle.getVersion().toString());
 
-        // start new bundle
-        startBundle(bundle2);
+            Path bundlePathV2  =
+                    Paths.get(service.getProjectURI().resolve("bundle/updated/HelloImplementation-1.0-SNAPSHOT.jar"));
 
-        // update bundle
-        bundleHandler.updateBundle(bundle2);
+            bundleHandler.upgradeBundle(bundlePathV2, "HelloImplementation");
 
-        // refresh all bundles that would need the new import from bundle2
-        FrameworkWiring frameworkWiring = service.getSystemBundle().adapt(FrameworkWiring.class);
-        frameworkWiring.refreshBundles(null);
+            // assert that the old file has been backed up with archive extension
+            backupFile = Paths.get(new URI(bundlePathV1.toUri().toString().concat(ARCHIVE_EXTENSION)));
+            assertNotNull(backupFile);
 
+            // update bundle
+            bundleHandler.updateBundle(bundle);
+
+            // refresh all bundles that would need the new import from bundle2
+            FrameworkWiring frameworkWiring = service.getSystemBundle().adapt(FrameworkWiring.class);
+            frameworkWiring.refreshBundles(null);
+        } finally {
+            // cleanup this test
+            if (backupFile != null) {
+                Files.delete(backupFile);
+            }
+        }
     }
 }

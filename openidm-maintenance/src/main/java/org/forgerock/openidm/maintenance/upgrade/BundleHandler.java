@@ -1,33 +1,34 @@
 /*
- * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock Inc. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions copyright [year] [name of copyright owner]"
+ * Copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Designed to use the systemBundle from the OSGI framework to handle
@@ -35,10 +36,117 @@ import java.nio.file.Path;
  */
 public class BundleHandler {
 
-    private BundleContext context;
+    private final static Logger logger = LoggerFactory.getLogger(BundleHandler.class);
 
-    public BundleHandler(BundleContext context) {
+    private BundleContext context;
+    private final String archiveExtension;
+
+    public BundleHandler(BundleContext context, final String archiveExtension) {
         this.context = context;
+        this.archiveExtension = archiveExtension;
+    }
+
+    /**
+     * Upgrades a Bundle by removing the old Bundle if it is installed
+     * and replacing it with the new. If the new Bundle has not been
+     * installed in the framework it will install it.
+     *
+     * @param newBundle Bundle to install in the Felix framework.
+     * @param symbolicName is the key used to look up installed bundles
+     *                     in the Felix framework.
+     */
+    public void upgradeBundle(Path newBundle, String symbolicName) throws UpgradeException {
+        // check to see if the bundle is installed in the list of bundles
+        List<Bundle> installedBundles = getBundles(symbolicName);
+        if (!installedBundles.isEmpty()) {
+            // replace the current bundle with the new bundle in the directory
+            replaceBundle(installedBundles, newBundle);
+        } else {
+            // install new bundle
+            installBundle(newBundle);
+        }
+    }
+
+    /**
+     * Returns the absolute path to the installed bundle
+     * which does not include the file protocol.
+     *
+     * @param bundle Location where the Bundle is installed.
+     * @return Path to location where Bundle is located.
+     */
+    private Path getBundlePath(Bundle bundle) throws UpgradeException {
+        try {
+            return Paths.get(new URI(bundle.getLocation()).getPath());
+        } catch (URISyntaxException e) {
+            throw new UpgradeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Modifies a current installed bundle that has the same symbolicName as the
+     * new Bundle to be installed with a archive extension. Keeping it in the
+     * same directory for back up. It will then copy the new Bundle into the same
+     * directory as the old Bundle.
+     *
+     * For example: Replacing oldBundle.jar with newBundle.jar
+     *          /Users/tmp/
+     *                    oldBundle.jar
+     *                    oldBundle.jar.bak
+     *                    newBundle.jar
+     *
+     * @param installedBundles bundles installed with the same symbolic name.
+     * @param newBundlePath URI to the new @{Bundle}
+     * @throws UpgradeException if anything goes wrong with copying or deleting the files.
+     */
+    private void replaceBundle(List<Bundle> installedBundles, Path newBundlePath) throws UpgradeException {
+        try {
+            Path oldBundlePath = getBundlePath(installedBundles.get(0));
+            for (Bundle b : installedBundles) {
+                Path path = getBundlePath(b);
+                Files.move(path, concatArchiveExtension(path));
+                // TODO log move
+            }
+            Files.copy(newBundlePath, oldBundlePath.getParent().resolve(newBundlePath.getFileName()));
+        } catch (IOException e) {
+            throw new UpgradeException("Cannot replace file " + newBundlePath.toString(), e);
+        }
+
+    }
+
+    /**
+     * Appends the archive extension to the file Path.
+     *
+     * @param path file path to current installed Bundle.
+     * @return Path with appended archive extension.
+     * @throws UpgradeException if getting the we cannot
+     *         retrieve the Path
+     */
+    private Path concatArchiveExtension(Path path) throws UpgradeException {
+        try {
+            return Paths.get(new URI(path.toUri().toString().concat(archiveExtension)));
+        } catch (URISyntaxException e) {
+            throw new UpgradeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Retrieves a list of installed bundles with the same
+     * symbolicName from the felix framework. It is possible
+     * to have multiple versions that have the same symbolic
+     * name.
+     *
+     * @param symbolicName is used as a key to retrieve that bundle
+     * @return @{Bundle} associated with that symbolicName
+     */
+    private List<Bundle> getBundles(final String symbolicName) {
+        List<Bundle> bundle = new ArrayList<>();
+        for (Bundle b : context.getBundles()) {
+            if (symbolicName.equalsIgnoreCase(b.getSymbolicName())) {
+                logger.debug("Found bundle {} version : {}", symbolicName, b.getVersion());
+                bundle.add(b);
+            }
+        }
+        return bundle;
     }
 
     /**
@@ -87,9 +195,9 @@ public class BundleHandler {
      */
     public void installBundle(Path path) throws UpgradeException {
         try {
-            context.installBundle(path.toString());
+            context.installBundle(path.toUri().toString());
         } catch (BundleException e) {
-            throw new UpgradeException("Cannot install bundle " + path.toString(), e);
+            throw new UpgradeException("Cannot install bundle " + path.toUri().toString(), e);
         }
 
     }
