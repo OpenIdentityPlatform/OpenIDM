@@ -21,8 +21,9 @@ import org.forgerock.jaspi.modules.iwa.IWAModule;
 import org.forgerock.jaspi.modules.openid.OpenIdConnectModule;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.jaspi.modules.session.openam.OpenAMSessionModule;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 
 /**
  * Enum that represents all the core IDM Authentication modules.
@@ -30,98 +31,76 @@ import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 public enum IDMAuthModule {
 
     /** JWT Session Auth Module. */
-    JWT_SESSION(JwtSessionModule.class) {
+    JWT_SESSION {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
             return new JwtSessionModule();
         }
     },
     /** OpenAM Session Auth Module. */
-    OPENAM_SESSION(OpenAMSessionModule.class) {
+    OPENAM_SESSION {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
             return new OpenAMSessionModule();
         }
     },
     /** Client-cert Auth Module. */
-    CLIENT_CERT(ClientCertAuthModule.class) {
+    CLIENT_CERT {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
             return new ClientCertAuthModule();
         }
     },
     /** Delegated auth module using an {@link org.forgerock.openidm.jaspi.auth.Authenticator} */
-    DELEGATED(DelegatedAuthModule.class) {
+    DELEGATED {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
-            return new DelegatedAuthModule(authnFilterHelper,
-                    new AuthenticatorFactory(
-                            authnFilterHelper.getConnectionFactory(),
-                            authnFilterHelper.getCryptoService()));
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
+            return new DelegatedAuthModule(
+                    new AuthenticatorFactory(connectionFactory, cryptoService));
         }
     },
     /** Managed User Auth Module. */
-    MANAGED_USER(DelegatedAuthModule.class) {
+    MANAGED_USER {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
-            return DELEGATED.newInstance(authnFilterHelper);
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
+            return DELEGATED.newInstance(connectionFactory, cryptoService);
         }
     },
     /** Internal User Auth Module. */
-    INTERNAL_USER(DelegatedAuthModule.class) {
+    INTERNAL_USER {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
-            return DELEGATED.newInstance(authnFilterHelper);
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
+            return DELEGATED.newInstance(connectionFactory, cryptoService);
         }
     },
     /** Static User Auth Module. */
-    STATIC_USER(DelegatedAuthModule.class) {
+    STATIC_USER {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
-            return DELEGATED.newInstance(authnFilterHelper);
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
+            return DELEGATED.newInstance(connectionFactory, cryptoService);
         }
     },
     /** Passthrough to OpenICF connector Auth Module. */
-    PASSTHROUGH(DelegatedAuthModule.class) {
+    PASSTHROUGH {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
-            return DELEGATED.newInstance(authnFilterHelper);
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
+            return DELEGATED.newInstance(connectionFactory, cryptoService);
         }
     },
     /** IWA Auth Module. */
-    IWA(IWAModule.class) {
+    IWA {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
             return new IWAModule();
         }
     },
     /** OpenID Connect Auth Module. */
-    OPENID_CONNECT(OpenIdConnectModule.class) {
+    OPENID_CONNECT {
         @Override
-        public AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper) {
+        public AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService) {
             return new OpenIdConnectModule();
         }
     };
 
-    private Class<? extends AsyncServerAuthModule> clazz;
-
-    /**
-     * Constructs a new IDMAuthModule.
-     *
-     * @param clazz The corresponding class of the authentication module.
-     */
-    private IDMAuthModule(Class<? extends AsyncServerAuthModule> clazz) {
-        this.clazz = clazz;
-    }
-
-    /**
-     * Gets the corresponding class of the authentication module.
-     *
-     * @return The authentication modules class.
-     */
-    public Class<? extends AsyncServerAuthModule> getAuthModuleClass() {
-        return clazz;
-    }
-
-    public abstract AsyncServerAuthModule newInstance(OSGiAuthnFilterHelper authnFilterHelper);
+    public abstract AsyncServerAuthModule newInstance(ConnectionFactory connectionFactory, CryptoService cryptoService);
 }

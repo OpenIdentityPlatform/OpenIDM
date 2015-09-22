@@ -20,7 +20,6 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -30,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
-import javax.security.auth.message.AuthException;
 import java.util.HashMap;
 
 /**
@@ -41,12 +39,6 @@ import java.util.HashMap;
 class AugmentationScriptExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(AugmentationScriptExecutor.class);
-
-    private final OSGiAuthnFilterHelper authnFilterHelper;
-
-    AugmentationScriptExecutor(OSGiAuthnFilterHelper authnFilterHelper) {
-        this.authnFilterHelper = authnFilterHelper;
-    }
 
     /**
      * Executes the specified augmentation script with the given properties and SecurityContextMapper.
@@ -83,15 +75,12 @@ class AugmentationScriptExecutor {
             JsonValue updatedSecurityContext = new JsonValue(script.eval());
 
             // if security context is updated; update the SecurityContextMapper backing store
-            if (updatedSecurityContext != null) {
-                if (!updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).isNull()) {
-                    securityContextMapper.setAuthenticationId(updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).asString());
-                }
-                if (!updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).isNull()) {
-                    securityContextMapper.setAuthorizationId((updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).asMap()));
-                }
+            if (!updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).isNull()) {
+                securityContextMapper.setAuthenticationId(updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).asString());
             }
-
+            if (!updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).isNull()) {
+                securityContextMapper.setAuthorizationId((updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).asMap()));
+            }
         } catch (ScriptThrownException e) {
             final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
             logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);

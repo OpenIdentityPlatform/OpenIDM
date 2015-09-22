@@ -87,6 +87,7 @@ public class ServletComponent implements EventHandler {
     /** Setup logging for the {@link ServletComponent}. */
     private final static Logger logger = LoggerFactory.getLogger(ServletComponent.class);
 
+    /** The (external) ConnectionFactory */
     @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.router)")
     protected ConnectionFactory connectionFactory;
 

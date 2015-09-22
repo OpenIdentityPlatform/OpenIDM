@@ -14,12 +14,13 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.config;
+package org.forgerock.openidm.jaspi.auth;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
 import org.forgerock.caf.authentication.framework.AuditApi;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -38,10 +39,10 @@ public class JaspiAuditApi implements AuditApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JaspiAuditApi.class);
 
-    private final OSGiAuthnFilterHelper authnFilterHelper;
+    private final ConnectionFactory connectionFactory;
 
-    JaspiAuditApi(OSGiAuthnFilterHelper authnFilterHelper) {
-        this.authnFilterHelper = authnFilterHelper;
+    JaspiAuditApi(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     /**
@@ -71,7 +72,7 @@ public class JaspiAuditApi implements AuditApi {
         try {
             final CreateRequest createRequest = Requests.newCreateRequest("audit/authentication", auditEvent.getValue());
             final Context context = ContextUtil.createInternalContext();
-            authnFilterHelper.getConnectionFactory().getConnection().create(context, createRequest);
+            connectionFactory.getConnection().create(context, createRequest);
         } catch (ResourceException e) {
             LOGGER.warn("Failed to log entry for {}", username, e);
         }

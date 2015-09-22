@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.config;
+package org.forgerock.openidm.jaspi.auth;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.array;
@@ -30,10 +30,9 @@ import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.openidm.jaspi.auth.JaspiAuditApi;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.services.context.RootContext;
-import org.forgerock.openidm.router.RouteService;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
@@ -43,13 +42,11 @@ public class JaspiAuditApiTest {
     public void testAudit() throws Exception {
 
         //given
-        final OSGiAuthnFilterHelper osgiAuthnFilterHelper = mock(OSGiAuthnFilterHelper.class);
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         final Connection connection = mock(Connection.class);
         final ArgumentCaptor<CreateRequest> createRequestArgumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
-        final JaspiAuditApi jaspiAuditApi = new JaspiAuditApi(osgiAuthnFilterHelper);
+        final JaspiAuditApi jaspiAuditApi = new JaspiAuditApi(connectionFactory);
 
-        when(osgiAuthnFilterHelper.getConnectionFactory()).thenReturn(connectionFactory);
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), createRequestArgumentCaptor.capture()))
                 .thenReturn(newResourceResponse("id", "rev", null));

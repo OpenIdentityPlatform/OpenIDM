@@ -1,4 +1,19 @@
-package org.forgerock.openidm.jaspi.config;
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015 ForgeRock AS.
+ */
+package org.forgerock.openidm.jaspi.auth;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -15,7 +30,9 @@ import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 
 /**
- * Created by brmiller on 8/19/15.
+ * A CHF {@link Filter} to wrap the {@link org.forgerock.caf.authentication.framework.AuthenticationFilter},
+ * so that config changes may swap out the CAF AuthenticationFilter without disturbing the CHF
+ * {@link org.forgerock.json.resource.FilterChain}.
  */
 @Component(name = AuthFilterWrapper.PID, policy = ConfigurationPolicy.IGNORE,
         configurationFactory = false, immediate = true)
@@ -23,6 +40,7 @@ import org.osgi.service.component.ComponentContext;
 public class AuthFilterWrapper implements Filter {
     public static final String PID = "org.forgerock.openidm.jaspi.config";
 
+    /** Null Object Filter to forward request on when authentication filter is not configured. */
     static final Filter PASSTHROUGH_FILTER = new Filter() {
         @Override
         public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {

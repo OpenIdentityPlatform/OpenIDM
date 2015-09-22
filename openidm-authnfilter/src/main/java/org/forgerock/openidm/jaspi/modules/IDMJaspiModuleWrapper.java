@@ -29,7 +29,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,14 +45,16 @@ import org.forgerock.http.protocol.Request;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
@@ -92,7 +93,9 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
     /** Key in Messages Map for the cached resource detail */
     public static final String AUTHENTICATED_RESOURCE = "org.forgerock.openidm.authentication.resource";
 
-    private final OSGiAuthnFilterHelper authnFilterHelper;
+    private final ConnectionFactory connectionFactory;
+    private final CryptoService cryptoService;
+    private final ScriptRegistry scriptRegistry;
     private final AugmentationScriptExecutor augmentationScriptExecutor;
 
     /** an security context augmentation script, if configured */
@@ -112,30 +115,37 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
     /**
      * Constructs a new instance of the IDMJaspiModuleWrapper.
      *
-     * @param authnFilterHelper An instance of the OSGiAuthnFilterHelper.
      * @param authModule The auth module wrapped by this module.
+     * @param connectionFactory
+     * @param cryptoService
+     * @param scriptRegistry
      */
-    public IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper, AsyncServerAuthModule authModule) {
-        this.authnFilterHelper = authnFilterHelper;
+    public IDMJaspiModuleWrapper(AsyncServerAuthModule authModule,
+            ConnectionFactory connectionFactory, CryptoService cryptoService, ScriptRegistry scriptRegistry) {
         this.authModule = authModule;
+        this.connectionFactory = connectionFactory;
+        this.cryptoService = cryptoService;
+        this.scriptRegistry = scriptRegistry;
         this.roleCalculatorFactory = new RoleCalculatorFactory();
-        this.augmentationScriptExecutor = new AugmentationScriptExecutor(authnFilterHelper);
+        this.augmentationScriptExecutor = new AugmentationScriptExecutor();
     }
 
     /**
      * Constructs a new instance of the IDMJaspiModuleWrapper with the provided parameters, for test use.
      *
-     * @param authnFilterHelper An instance of the OSGiAuthnFilterHelper.
      * @param authModule The auth module wrapped by this module.
      * @param roleCalculatorFactory An instance of the RoleCalculatorFactory.
      * @param augmentationScriptExecutor An instance of the AugmentationScriptExecutor.
      */
-    IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper,
+    IDMJaspiModuleWrapper(
             AsyncServerAuthModule authModule,
+            ConnectionFactory connectionFactory, CryptoService cryptoService, ScriptRegistry scriptRegistry,
             RoleCalculatorFactory roleCalculatorFactory,
             AugmentationScriptExecutor augmentationScriptExecutor) {
-        this.authnFilterHelper = authnFilterHelper;
         this.authModule = authModule;
+        this.connectionFactory = connectionFactory;
+        this.cryptoService = cryptoService;
+        this.scriptRegistry = scriptRegistry;
         this.roleCalculatorFactory = roleCalculatorFactory;
         this.augmentationScriptExecutor = augmentationScriptExecutor;
     }
@@ -182,6 +192,7 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
             MessagePolicy responseMessagePolicy, CallbackHandler handler, Map<String, Object> options) {
 
         properties = new JsonValue(options);
+// FIXME resurrect instantiation-by-classname or remove this
 //        authModule = authModuleConstructor.construct(properties.get("authModuleClassName").asString());
         return authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options)
                 .then(new Function<Void, Void, AuthenticationException>() {
@@ -215,7 +226,7 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
                                             return null;
                                         }
                                         final List<ResourceResponse> resources = new ArrayList<>();
-                                        authnFilterHelper.getConnectionFactory().getConnection().query(
+                                        connectionFactory.getConnection().query(
                                                 ContextUtil.createInternalContext(), request, resources);
 
                                         if (resources.isEmpty()) {
@@ -256,7 +267,7 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
      */
     ScriptEntry getAugmentScript(JsonValue scriptConfig) throws AuthenticationException {
         try {
-            return authnFilterHelper.getScriptRegistry().takeScript(scriptConfig);
+            return scriptRegistry.takeScript(scriptConfig);
         } catch (ScriptException e) {
             logger.error("{} when attempting to register script {}", e.toString(), scriptConfig, e);
             throw new AuthenticationException(e.toString(), e);
@@ -431,32 +442,6 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
     }
 
     /**
-     * Constructs Server Auth Modules from a given class name, using the mandatory no-arg constructor.
-     *
-     * @since 3.0.0
-     */
-    static class AuthModuleConstructor {
-
-        /**
-         * Creates an instance of a Server Auth Module for the specified class name.
-         * <br/>
-         * Uses the spec mandated no-arg constructor.
-         *
-         * @param authModuleClassName The ServerAuthModule class name.
-         * @return The ServerAuthModule instance.
-         * @throws AuthenticationException If there is any problem creating the ServerAuthModule instance.
-         */
-        ServerAuthModule construct(String authModuleClassName) throws AuthenticationException {
-             try {
-                 return Class.forName(authModuleClassName).asSubclass(ServerAuthModule.class).newInstance();
-             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                 logger.error("Failed to construct Auth Module instance", e);
-                 throw new AuthenticationException("Failed to construct Auth Module instance", e);
-             }
-        }
-    }
-
-    /**
      * QueryRequest Builder class for querying the user object detail.
      * <p>
      * If queryId is provided, build() will set additional parameters for the authenticationId
@@ -532,8 +517,8 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
      *
      * @since 3.0.0
      */
-    static interface CredentialHelper {
-        public Credential getCredential(Request request);
+    interface CredentialHelper {
+        Credential getCredential(Request request);
     }
 
     /** CredentialHelper to get auth header creds from request */

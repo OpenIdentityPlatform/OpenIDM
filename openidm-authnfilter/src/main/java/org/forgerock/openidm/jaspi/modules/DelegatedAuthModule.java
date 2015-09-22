@@ -45,8 +45,6 @@ import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
-import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.*;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
@@ -60,23 +58,19 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(DelegatedAuthModule.class);
 
-    private final OSGiAuthnFilterHelper authnFilterHelper;
     private final AuthenticatorFactory authenticatorFactory;
 
-    private String queryOnResource;
-    private Authenticator authenticator;
+    private String queryOnResource = "";
+    private JsonValue options = new JsonValue(null);
 
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      *
-     * @param authnFilterHelper
      * @param authenticatorFactory
      */
-    public DelegatedAuthModule(OSGiAuthnFilterHelper authnFilterHelper, AuthenticatorFactory authenticatorFactory) {
-        Reject.ifNull(authnFilterHelper, "AuthnFilterHelper cannot be null");
+    public DelegatedAuthModule(AuthenticatorFactory authenticatorFactory) {
         Reject.ifNull(authenticatorFactory, "AuthenticationFactory cannot be null");
-        this.authnFilterHelper = authnFilterHelper;
         this.authenticatorFactory = authenticatorFactory;
     }
 
@@ -104,8 +98,8 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
     @Override
     public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler handler, Map<String, Object> options) {
+        this.options = new JsonValue(options);
         queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
-        authenticator = authenticatorFactory.apply(new JsonValue(options));
         return newResultPromise(null);
     }
 
@@ -171,7 +165,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
                     new RootContext(),
                     securityContextMapper.getAuthenticationId(),
                     securityContextMapper.getAuthorizationId());
-            Authenticator.AuthenticatorResult result = authenticator.authenticate(
+            Authenticator.AuthenticatorResult result = authenticatorFactory.apply(options).authenticate(
                     credential.username, credential.password, context);
             final ResourceResponse resource = result.getResource();
             if (resource != null) {
