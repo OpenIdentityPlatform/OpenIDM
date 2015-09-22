@@ -41,8 +41,16 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget", [
             model : {
 
             },
+            events: {
+                "click .refresh-health-info": "refreshHealth"
+            },
             render: function(args, callback) {
                 this.element = args.element;
+
+                this.data.icons = [{
+                    "icon" : "fa-refresh",
+                    "iconClass": "refresh-health-info"
+                }];
 
                 this.parentRender(_.bind(function(){
                     this.model.cpuWidget = CPUUsageWidget.generateWidget({
@@ -62,7 +70,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget", [
                         widget: {
                             type: "lifeCycleMemoryNonHeap"
                         }
-
                     });
 
                     if(callback) {
@@ -74,6 +81,11 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget", [
                 this.model.cpuWidget.resize();
                 this.model.memoryHeapWidget.resize();
                 this.model.memoryNonHeapWidget.resize();
+            },
+            refreshHealth: function() {
+                this.model.cpuWidget.refresh();
+                this.model.memoryHeapWidget.refresh();
+                this.model.memoryNonHeapWidget.refresh();
             }
         });
 
