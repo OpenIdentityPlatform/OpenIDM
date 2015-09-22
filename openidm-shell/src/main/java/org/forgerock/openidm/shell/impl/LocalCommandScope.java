@@ -68,7 +68,7 @@ public class LocalCommandScope extends CustomCommandScope {
         Map<String, String> help = new HashMap<String, String>();
         help.put("validate", getLongHeader("validate"));
         help.put("encrypt", getLongHeader("encrypt"));
-        help.put("securehash", getLongHeader("securehash"));
+        help.put("secureHash", getLongHeader("secureHash"));
         help.put("keytool", getLongHeader("keytool"));
         return help;
     }
@@ -278,11 +278,11 @@ public class LocalCommandScope extends CustomCommandScope {
      * @param isString whether the input is a string
      */
     @Descriptor("Hash the input string.")
-    public void securehash(CommandSession session,
+    public void secureHash(CommandSession session,
             @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
             @Parameter(names = { "-a", "--algorithm" }, absentValue = "SHA-256") String algorithm) {
         session.getConsole().append("Enter the ").append(isString ? "String" : "Json").println(" value");
-        securehash(session, isString, algorithm, loadFromConsole(session));
+        secureHash(session, isString, algorithm, loadFromConsole(session));
     }
 
     /**
@@ -293,7 +293,7 @@ public class LocalCommandScope extends CustomCommandScope {
      * @param stringValue the value of the string to hash
      */
     @Descriptor("Hash the input string.")
-    public void securehash(CommandSession session,
+    public void secureHash(CommandSession session,
             @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
             @Parameter(names = { "-a", "--algorithm" }, absentValue = "SHA-256") String algorithm,
             @Descriptor("source string to hash") String stringValue) {
